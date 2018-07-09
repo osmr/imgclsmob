@@ -515,6 +515,17 @@ def train(batch_size,
     assert (start_epoch >= 1)
     if start_epoch > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch))
+        err_top1_val, err_top5_val = test(
+            acc_top1=acc_top1,
+            acc_top5=acc_top5,
+            net=net,
+            val_data=val_data,
+            batch_fn=batch_fn,
+            use_rec=use_rec,
+            dtype=dtype,
+            ctx=ctx)
+        logging.info('[Epoch {}] validation: err-top1={:.3f}\terr-top5={:.3f}'.format(
+            start_epoch - 1, err_top1_val, err_top5_val))
 
     gtic = time.time()
     for epoch in range(start_epoch - 1, num_epochs):

@@ -1,3 +1,28 @@
+# PyCharm ###
+.idea
+.idea/*
+
+# Visual Studio ###
+Release
+Release/*
+Debug
+Debug/*
+.vs
+.vs/*
+*.VC.db
+*.sdf
+*.suo
+*.opendb
+*.psess
+*.vsp
+*.vspx
+*.sln
+*.pyproj
+x64
+
+# R ###
+.Rhistory
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

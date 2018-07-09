@@ -1,0 +1,2 @@
+#!/bin/bash
+CUDA_VISIBLE_DEVICES="3" python train.py --num-gpus=1 --use-rec --model=resnet18_v2 --save-dir=../imgclsmob_data/resnet18_v2_a --batch-size=320 -j=32 --num-epochs=120 --lr=0.4 --lr-mode=cosine --wd=0.0001 --warmup-epochs=5

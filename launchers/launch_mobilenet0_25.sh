@@ -1,0 +1,2 @@
+#!/bin/bash
+CUDA_VISIBLE_DEVICES="3" python train.py --num-gpus=1 --use-rec --model=mobilenet0.25 --save-dir=../imgclsmob_data/mobilenet0_25_a --batch-size=704 -j=32 --num-epochs=120 --lr=0.4 --lr-mode=cosine --wd=0.0001 --warmup-epochs=2

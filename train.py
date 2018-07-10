@@ -16,6 +16,7 @@ from gluoncv.utils import makedirs, LRScheduler
 from gluoncv import utils as gutils
 
 from env_stats import get_env_stats
+from models.shufflenet import shufflenet1_0_g1
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model for image classification',
@@ -332,6 +333,20 @@ def get_data_loader(data_dir,
 
     return train_data, val_data, batch_fn
 
+
+def _get_model(name, **kwargs):
+    try:
+        net = get_model(name, **kwargs)
+        return net
+    except ValueError as e:
+        upstream_supported = str(e)
+    name = name.lower()
+    if name == "shufflenet1_0_g1":
+        return shufflenet1_0_g1(**kwargs)
+    else:
+        raise ValueError('{}'.format(upstream_supported))
+
+
 def prepare_model(model_name,
                   classes,
                   use_pretrained,
@@ -353,7 +368,7 @@ def prepare_model(model_name,
     if last_gamma:
         kwargs['last_gamma'] = True
 
-    net = get_model(model_name, **kwargs)
+    net = _get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
@@ -622,6 +637,18 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
+    classes = 1000
+    net = prepare_model(
+        model_name=args.model,
+        classes=classes,
+        use_pretrained=args.use_pretrained,
+        pretrained_model_file_path=args.resume.strip(),
+        batch_norm=args.batch_norm,
+        use_se=args.use_se,
+        last_gamma=args.last_gamma,
+        dtype=args.dtype,
+        ctx=ctx)
+
     if args.use_rec:
         train_data, val_data, batch_fn = get_data_rec(
             rec_train=args.rec_train,
@@ -635,18 +662,6 @@ def main():
             data_dir=args.data_dir,
             batch_size=batch_size,
             num_workers=args.num_workers)
-
-    classes = 1000
-    net = prepare_model(
-        model_name=args.model,
-        classes=classes,
-        use_pretrained=args.use_pretrained,
-        pretrained_model_file_path=args.resume.strip(),
-        batch_norm=args.batch_norm,
-        use_se=args.use_se,
-        last_gamma=args.last_gamma,
-        dtype=args.dtype,
-        ctx=ctx)
 
     num_training_samples = 1281167
     trainer, lr_scheduler = prepare_trainer(

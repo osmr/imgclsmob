@@ -189,6 +189,16 @@ def parse_args():
         type=int,
         default=-1,
         help='Random seed to be fixed')
+    parser.add_argument(
+        '--log-packages',
+        type=str,
+        default='mxnet',
+        help='list of python packages for logging')
+    parser.add_argument(
+        '--log-pip-packages',
+        type=str,
+        default='mxnet-cu92, gluoncv',
+        help='list of pip packages for logging')
     args = parser.parse_args()
     return args
 
@@ -604,7 +614,9 @@ def main():
     prepare_logger(log_file_path=os.path.join(args.save_dir, args.logging_file_name))
     logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
     logging.info("Script arguments:\n{}".format(args))
-    logging.info("Env_stats:\n{}".format(get_env_stats()))
+    logging.info("Env_stats:\n{}".format(get_env_stats(
+        packages=args.log_packages.replace(' ', '').split(','),
+        pip_packages=args.log_pip_packages.replace(' ', '').split(','))))
 
     ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,

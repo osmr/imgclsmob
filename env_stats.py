@@ -2,11 +2,9 @@ import os, sys
 import subprocess
 import json
 
-PACKAGES = ['mxnet']
-PACKAGES_PIP = ['mxnet-cu92', 'gluoncv']
 
-
-def get_pip_versions(package_list, python_version=''):
+def get_pip_versions(package_list,
+                     python_version=''):
     """
     Get packages information by using 'pip show' command.
     
@@ -18,8 +16,9 @@ def get_pip_versions(package_list, python_version=''):
     module_versions = {}
     for module in package_list:
         try:
-            out_bytes = subprocess.check_output(['pip{0}'.format(python_version),
-                                                 'show', module])
+            out_bytes = subprocess.check_output([
+                'pip{0}'.format(python_version),
+                'show', module])
             out_text = out_bytes.decode('utf-8').strip()
         except subprocess.CalledProcessError:
             out_text = None
@@ -46,47 +45,58 @@ def get_package_versions(package_list):
     return module_versions
 
 
-def get_pyenv_info(package_list, package_list_pip):
+def get_pyenv_info(packages,
+                   pip_packages,
+                   python_ver,
+                   pwd,
+                   git):
     """
     Get all available information about Python environment: packages
     information, Python version, current path, git revision
     
-    :param package_list: list of package names to inspect only __version__
+    :param packages: list of package names to inspect only __version__
     attributes.
-    :param package_list_pip: list of package names to inspect by 'pip show'.
+    :param pip_packages: list of package names to inspect by 'pip show'.
     :return: dictionary attribute: version_info
     """
 
-    # get current path
-    pyenv_info = {'pwd': os.path.dirname(os.path.realpath(__file__))}
-    # get python version
+    pyenv_info = {}
+
     python_version = sys.version_info[0]
-    try:
-        pyenv_info["python"] = "{0}.{1}.{2}".format(*sys.version_info[0:3])
-    except:
-        pyenv_info["python"] = "unknown"
-    
+
     # get versions from __version__ string
-    modules_versions = get_package_versions(package_list)
+    modules_versions = get_package_versions(packages)
     pyenv_info.update(modules_versions)
     
     # get versions from pip
-    modules_versions_pip = get_pip_versions(package_list_pip, python_version)
+    modules_versions_pip = get_pip_versions(pip_packages, python_version)
     pyenv_info.update(modules_versions_pip)
-    
-    # get git revision of the code
-    try:
-        out_bytes = subprocess.check_output(
-            ['cd {0}; git log -n 1'.format(pyenv_info['pwd'])], shell=True)
-        out_text = out_bytes.decode('utf-8')
-    except:
-        out_text = 'unknown'
-    pyenv_info["git"] = out_text.strip()
+
+    if python_ver:
+        # set python version
+        try:
+            pyenv_info["python"] = "{0}.{1}.{2}".format(*sys.version_info[0:3])
+        except:
+            pyenv_info["python"] = "unknown"
+
+    if pwd:
+        # set current path
+        pyenv_info['pwd'] = os.path.dirname(os.path.realpath(__file__))
+
+    if git:
+        # set git revision of the code
+        try:
+            out_bytes = subprocess.check_output(
+                ['cd {0}; git log -n 1'.format(pyenv_info['pwd'])], shell=True)
+            out_text = out_bytes.decode('utf-8')
+        except:
+            out_text = 'unknown'
+        pyenv_info["git"] = out_text.strip()
     
     return pyenv_info
 
 
-def prettyprint_dict2str(d):
+def pretty_print_dict2str(d):
     """
     Pretty print of dictionary d to json-formated string.
     """
@@ -94,12 +104,16 @@ def prettyprint_dict2str(d):
     return out_text
 
 
-def get_env_stats():
+def get_env_stats(packages,
+                  pip_packages,
+                  python_ver=True,
+                  pwd=True,
+                  git=True):
     """
     Get env statistics.
     """
-    package_versions = get_pyenv_info(PACKAGES, PACKAGES_PIP)
-    return prettyprint_dict2str(package_versions)
+    package_versions = get_pyenv_info(packages, pip_packages, python_ver, pwd, git)
+    return pretty_print_dict2str(package_versions)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,9 @@ from gluoncv.utils import makedirs, LRScheduler
 from gluoncv import utils as gutils
 
 from env_stats import get_env_stats
+from train_log_param_saver import TrainLogParamSaver
 from models.shufflenet import shufflenet1_0_g1
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model for image classification',
@@ -203,6 +205,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+
 def prepare_logger(log_file_path):
     logging.basicConfig()
     logger = logging.getLogger()
@@ -214,17 +217,20 @@ def prepare_logger(log_file_path):
     logger.addHandler(fh)
     return logger
 
+
 def init_rand(seed):
     if seed <= 0:
         seed = np.random.randint(10000)
     gutils.random.seed(seed)
     return seed
 
+
 def prepare_mx_context(num_gpus,
                        batch_size):
     ctx = [mx.gpu(i) for i in range(num_gpus)] if num_gpus > 0 else [mx.cpu()]
     batch_size *= max(1, num_gpus)
     return ctx, batch_size
+
 
 def get_data_rec(rec_train,
                  rec_train_idx,
@@ -288,6 +294,7 @@ def get_data_rec(rec_train,
         std_b               = std_rgb[2],
     )
     return train_data, val_data, batch_fn
+
 
 def get_data_loader(data_dir,
                     batch_size,
@@ -431,27 +438,6 @@ def prepare_trainer(net,
     return trainer, lr_scheduler
 
 
-def prepare_save_dir(save_dir_path,
-                     save_interval):
-    if save_dir_path and save_interval:
-        save_dir_path_ = save_dir_path
-        save_interval_ = save_interval
-        makedirs(save_dir_path)
-        best_map_log_file_path = os.path.join(save_dir_path, 'best_map.log')
-        if not os.path.exists(best_map_log_file_path):
-            with open(best_map_log_file_path, 'a') as f:
-                f.write('{}\t{}'.format('epoch', 'err_top5_val'))
-        score_log_file_path = os.path.join(save_dir_path, 'score.log')
-        if not os.path.exists(score_log_file_path):
-            with open(score_log_file_path, 'a') as f:
-                f.write('{}\t{}\t{}\t{}\t{}\t{}'.format(
-                    'Attempt', 'Epoch', 'Val.Top1', 'Train.Top1','Val.Top5', 'Train.Loss'))
-
-    else:
-        save_dir_path_ = ''
-        save_interval_ = 0
-    return save_dir_path_, save_interval_
-
 def calc_net_weight_count(net):
     net_params = net.collect_params()
     weight_count = 0
@@ -461,33 +447,11 @@ def calc_net_weight_count(net):
         weight_count += np.prod(param.shape)
     return weight_count
 
-def save_params(net,
-                best_val_err_map,
-                curr_val_err,
-                epoch,
-                num_epochs,
-                save_interval,
-                save_dir_path,
-                model_name,
-                err_top1_val,
-                err_top1_train,
-                err_top5_val,
-                train_loss):
-    if not save_interval or not save_dir_path:
-        return
-    if (epoch % save_interval == 0) or (epoch == num_epochs):
-        net.save_parameters(
-            os.path.join(
-                save_dir_path,
-                'imagenet_{}_{:04d}_{:.4f}.params'.format(model_name, epoch, curr_val_err)))
-    if curr_val_err < best_val_err_map[0]:
-        best_val_err_map[0] = curr_val_err
-        net.save_parameters(os.path.join(save_dir_path, 'best.params'))
-        with open(os.path.join(save_dir_path, 'best_map.log'), 'a') as f:
-            f.write('\n{:04d}\t{:.4f}'.format(epoch, curr_val_err))
-    with open(os.path.join(save_dir_path, 'score.log'), 'a') as f:
-        f.write('\n{}\t{}\t{:.4f}\t{:.4f}\t{:.4f}\t{:.4f}'.format(
-            1, epoch, err_top1_val, err_top1_train, err_top5_val, train_loss))
+
+def save_params(file_path,
+                net):
+    net.save_parameters(file_path)
+
 
 def test(acc_top1,
          acc_top5,
@@ -510,6 +474,7 @@ def test(acc_top1,
     _, top5 = acc_top5.get()
     return (1-top1, 1-top5)
 
+
 def train(batch_size,
           num_epochs,
           start_epoch,
@@ -521,11 +486,10 @@ def train(batch_size,
           net,
           trainer,
           lr_scheduler,
-          save_dir_path,
-          save_interval,
-          model_name,
+          lp_saver,
           log_interval,
           ctx):
+
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
@@ -606,22 +570,15 @@ def train(batch_size,
         logging.info('[Epoch {}] validation: err-top1={:.3f}\terr-top5={:.3f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
 
-        save_params(
-            net=net,
-            best_val_err_map=best_val_err_map,
-            curr_val_err=err_top5_val,
+        lp_saver_kwargs = {'net': net}
+        lp_saver.epoch_test_end_callback(
             epoch=(epoch + 1),
-            num_epochs=num_epochs,
-            save_interval=save_interval,
-            save_dir_path=save_dir_path,
-            model_name=model_name,
-            err_top1_val=err_top1_val,
-            err_top1_train=err_top1_train,
-            err_top5_val=err_top5_val,
-            train_loss=train_loss)
+            params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
+            **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.3f} sec; best-err-top5: {:.3f}'.format(
         time.time() - gtic, best_val_err_map[0]))
+
 
 def main():
     args = parse_args()
@@ -680,9 +637,27 @@ def main():
         num_training_samples=num_training_samples,
         dtype=args.dtype)
 
-    save_dir_path, save_interval = prepare_save_dir(
-        save_dir_path=args.save_dir,
-        save_interval=args.save_interval)
+    if args.save_dir and args.save_interval:
+        lp_saver = TrainLogParamSaver(
+            checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
+            last_checkpoint_file_name_suffix="last",
+            best_checkpoint_file_name_suffix=None,
+            last_checkpoint_dir_path=args.save_dir,
+            best_checkpoint_dir_path=None,
+            last_checkpoint_file_count=2,
+            best_checkpoint_file_count=2,
+            checkpoint_file_save_callback=save_params,
+            save_interval=args.save_interval,
+            num_epochs=args.num_epochs,
+            param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
+            acc_ind=2,
+            #bigger=[True],
+            #mask=None,
+            score_log_file_path=os.path.join(args.save_dir, 'score.log'),
+            score_log_attempt_value=1,
+            best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
+    else:
+        lp_saver = None
 
     train(
         batch_size=batch_size,
@@ -696,11 +671,10 @@ def main():
         net=net,
         trainer=trainer,
         lr_scheduler=lr_scheduler,
-        save_dir_path=save_dir_path,
-        save_interval=save_interval,
-        model_name=args.model,
+        lp_saver=lp_saver,
         log_interval=args.log_interval,
         ctx=ctx)
+
 
 if __name__ == '__main__':
     main()

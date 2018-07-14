@@ -131,7 +131,7 @@ class TrainLogParamSaver(object):
             self.best_map_log_file_exist = (os.path.exists(best_map_log_file_path) and
                                             os.path.getsize(best_map_log_file_path) > 0)
             self.best_map_log_file = open(best_map_log_file_path, "a")
-            if not self.best_map_log_file:
+            if not self.best_map_log_file_exist:
                 titles = ["Epoch", self.param_names[self.acc_ind]]
                 self.best_map_log_file.write("\t".join(titles))
                 self.best_map_log_file.flush()

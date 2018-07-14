@@ -176,6 +176,10 @@ def shufflenet1_0_g2(**kwargs):
     return get_shufflenet(1.0, 2, **kwargs)
 
 
+def shufflenet1_0_g3(**kwargs):
+    return get_shufflenet(1.0, 3, **kwargs)
+
+
 def shufflenet1_0_g4(**kwargs):
     return get_shufflenet(1.0, 4, **kwargs)
 
@@ -192,6 +196,10 @@ def shufflenet0_5_g2(**kwargs):
     return get_shufflenet(0.5, 2, **kwargs)
 
 
+def shufflenet0_5_g3(**kwargs):
+    return get_shufflenet(0.5, 3, **kwargs)
+
+
 def shufflenet0_5_g4(**kwargs):
     return get_shufflenet(0.5, 4, **kwargs)
 
@@ -206,6 +214,10 @@ def shufflenet0_25_g1(**kwargs):
 
 def shufflenet0_25_g2(**kwargs):
     return get_shufflenet(0.25, 2, **kwargs)
+
+
+def shufflenet0_25_g3(**kwargs):
+    return get_shufflenet(0.25, 3, **kwargs)
 
 
 def shufflenet0_25_g4(**kwargs):

@@ -11,14 +11,12 @@ from mxnet.gluon import nn, HybridBlock
 class MobileNet(HybridBlock):
 
     def __init__(self,
-                 scale=1.0,
+                 channels,
+                 strides,
                  classes=1000,
                  **kwargs):
         super(MobileNet, self).__init__(**kwargs)
         input_channels = 3
-        strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
-        channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
-        channels = (np.array(channels) * scale).astype(np.int)
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -86,7 +84,20 @@ def get_mobilenet(scale,
                   pretrained=False,
                   ctx=cpu(),
                   **kwargs):
-    return MobileNet(scale, **kwargs)
+    channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
+    strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
+    channels = (np.array(channels) * scale).astype(np.int)
+    return MobileNet(channels, strides, **kwargs)
+
+
+def get_fd_mobilenet(scale,
+                     pretrained=False,
+                     ctx=cpu(),
+                     **kwargs):
+    channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 1024]
+    strides = [2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1]
+    channels = (np.array(channels) * scale).astype(np.int)
+    return MobileNet(channels, strides, **kwargs)
 
 
 def mobilenet1_0(**kwargs):
@@ -103,3 +114,19 @@ def mobilenet0_5(**kwargs):
 
 def mobilenet0_25(**kwargs):
     return get_mobilenet(0.25, **kwargs)
+
+
+def fd_mobilenet1_0(**kwargs):
+    return get_fd_mobilenet(1.0, **kwargs)
+
+
+def fd_mobilenet0_75(**kwargs):
+    return get_fd_mobilenet(0.75, **kwargs)
+
+
+def fd_mobilenet0_5(**kwargs):
+    return get_fd_mobilenet(0.5, **kwargs)
+
+
+def fd_mobilenet0_25(**kwargs):
+    return get_fd_mobilenet(0.25, **kwargs)

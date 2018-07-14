@@ -17,7 +17,9 @@ from gluoncv import utils as gutils
 
 from env_stats import get_env_stats
 from train_log_param_saver import TrainLogParamSaver
-from models.shufflenet import shufflenet1_0_g1
+
+from models.shufflenet import *
+from models.mobilenet import *
 
 
 def parse_args():
@@ -342,17 +344,37 @@ def get_data_loader(data_dir,
 
 
 def _get_model(name, **kwargs):
+    models = {
+        'mobilenet1_0': mobilenet1_0,
+        'mobilenet0_75': mobilenet0_75,
+        'mobilenet0_5': mobilenet0_5,
+        'mobilenet0_25': mobilenet0_25,
+        'shufflenet1_0_g1': shufflenet1_0_g1,
+        'shufflenet1_0_g2': shufflenet1_0_g2,
+        'shufflenet1_0_g3': shufflenet1_0_g3,
+        'shufflenet1_0_g4': shufflenet1_0_g4,
+        'shufflenet1_0_g8': shufflenet1_0_g8,
+        'shufflenet0_5_g1': shufflenet0_5_g1,
+        'shufflenet0_5_g2': shufflenet0_5_g2,
+        'shufflenet0_5_g3': shufflenet0_5_g3,
+        'shufflenet0_5_g4': shufflenet0_5_g4,
+        'shufflenet0_5_g8': shufflenet0_5_g8,
+        'shufflenet0_25_g1': shufflenet0_25_g1,
+        'shufflenet0_25_g2': shufflenet0_25_g2,
+        'shufflenet0_25_g3': shufflenet0_25_g3,
+        'shufflenet0_25_g4': shufflenet0_25_g4,
+        'shufflenet0_25_g8': shufflenet0_25_g8,
+        }
     try:
         net = get_model(name, **kwargs)
         return net
     except ValueError as e:
         upstream_supported = str(e)
     name = name.lower()
-    if name == "shufflenet1_0_g1":
-        return shufflenet1_0_g1(**kwargs)
-    else:
-        raise ValueError('{}'.format(upstream_supported))
-
+    if name not in models:
+        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(models.keys()))))
+    net = models[name](**kwargs)
+    return net
 
 def prepare_model(model_name,
                   classes,

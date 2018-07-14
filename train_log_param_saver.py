@@ -69,7 +69,8 @@ class TrainLogParamSaver(object):
         if best_checkpoint_dir_path is None:
             best_checkpoint_dir_path = last_checkpoint_dir_path
             assert ((last_checkpoint_file_name_suffix != best_checkpoint_file_name_suffix) and
-                    (not ((last_checkpoint_file_name_suffix is None) and (best_checkpoint_file_name_suffix is None))))
+                    (not ((last_checkpoint_file_name_suffix is None) and
+                          (best_checkpoint_file_name_suffix is None))))
         else:
             assert (last_checkpoint_dir_path != best_checkpoint_dir_path)
             if not os.path.exists(best_checkpoint_dir_path):
@@ -119,6 +120,7 @@ class TrainLogParamSaver(object):
             self.score_log_file = open(score_log_file_path, "a")
             titles = ["Attempt", "Epoch"] + self.param_names
             self.score_log_file.write("\t".join(titles))
+            self.score_log_file.flush()
         else:
             self.score_log_file = None
 
@@ -130,6 +132,7 @@ class TrainLogParamSaver(object):
             self.best_map_log_file = open(best_map_log_file_path, "a")
             titles = ["Epoch", self.param_names[self.acc_ind]]
             self.best_map_log_file.write("\t".join(titles))
+            self.best_map_log_file.flush()
         else:
             self.best_map_log_file = None
 

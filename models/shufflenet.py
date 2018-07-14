@@ -28,47 +28,69 @@ class ShuffleBottleneck(HybridBlock):
                  in_channels,
                  out_channels,
                  groups,
-                 stride,
-                 first):
+                 downsample,
+                 ignore_group):
         super(ShuffleBottleneck, self).__init__()
-        self.stride = stride
+        self.downsample = downsample
         mid_channels = out_channels // 4
 
+        if downsample:
+            out_channels -= in_channels
+
         with self.name_scope():
-            self.conv1 = nn.Conv2D(
-                channels=mid_channels,
-                kernel_size=1,
-                groups=(1 if first else groups),
-                use_bias=False,
-                in_channels=in_channels)
+            self.conv1 = self._group_conv(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                groups=(1 if ignore_group else groups))
             self.bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.shuffle = ChannelShuffle(groups=(1 if first else groups))
-            self.conv2 = nn.Conv2D(
+            self.shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
+            self.conv2 = self._depthwise_conv(
                 channels=mid_channels,
-                kernel_size=3,
-                strides=(2 if self.stride else 1),
-                padding=1,
-                groups=mid_channels,
-                use_bias=False,
-                in_channels=mid_channels)
+                strides=(2 if self.downsample else 1))
             self.bn2 = nn.BatchNorm(in_channels=mid_channels)
-            self.conv3 = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=1,
-                groups=groups,
-                use_bias=False,
-                in_channels=mid_channels)
+            self.conv3 = self._group_conv(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                groups=groups)
             self.bn3 = nn.BatchNorm(in_channels=out_channels)
-            self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
-            self.activ = nn.Activation('relu')
+            if downsample:
+                self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
+
+    @staticmethod
+    def _group_conv(in_channels,
+                    out_channels,
+                    groups):
+        return nn.Conv2D(
+            channels=out_channels,
+            kernel_size=1,
+            groups=groups,
+            use_bias=False,
+            in_channels=in_channels)
+
+    @staticmethod
+    def _depthwise_conv(channels,
+                        strides):
+        return nn.Conv2D(
+            channels=channels,
+            kernel_size=3,
+            strides=strides,
+            padding=1,
+            groups=channels,
+            use_bias=False,
+            in_channels=channels)
 
     def hybrid_forward(self, F, x):
-        res = self.avgpool(x) if self.stride else x
-        out = self.activ(self.bn1(self.conv1(x)))
+        res = x
+        out = F.relu(self.bn1(self.conv1(x)))
         out = self.shuffle(out)
-        out = self.activ(self.bn2(self.conv2(out)))
-        out = self.activ(self.bn3(self.conv3(out)))
-        out = self.activ(F.concat((out, res), dim=1)) if self.stride else self.activ(F.elemwise_add(out, res))
+        out = self.bn2(self.conv2(out))
+        out = self.bn3(self.conv3(out))
+        if self.downsample:
+            res = self.avgpool(res)
+            out = F.concat((out, res), dim=1)
+        else:
+            out += res
+        out = F.relu(out)
         return out
 
 
@@ -80,46 +102,42 @@ class ShuffleNet(HybridBlock):
                  classes=1000,
                  **kwargs):
         super(ShuffleNet, self).__init__(**kwargs)
-        num_blocks = [4, 8, 4]
+        stage_num_blocks = [4, 8, 4]
+        input_channels = 3
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(nn.Conv2D(
                 channels=stage_out_channels[0],
-                kernel_size=1,
+                kernel_size=3,
+                strides=2,
+                padding=1,
                 use_bias=False,
-                in_channels=3))
+                in_channels=input_channels))
             self.features.add(nn.BatchNorm(in_channels=stage_out_channels[0]))
             self.features.add(nn.Activation('relu'))
+            self.features.add(nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1))
 
-            self.features.add(self._make_stage(
-                stage_out_channels[0], stage_out_channels[1], num_blocks[0], groups, True))
-            self.features.add(self._make_stage(
-                stage_out_channels[1], stage_out_channels[2], num_blocks[1], groups, False))
-            self.features.add(self._make_stage(
-                stage_out_channels[2], stage_out_channels[3], num_blocks[2], groups, False))
+            for i in range(len(stage_num_blocks)):
+                stage = nn.HybridSequential(prefix='')
+                in_channels_i = stage_out_channels[i]
+                out_channels_i = stage_out_channels[i + 1]
+                for j in range(stage_num_blocks[i]):
+                    stage.add(ShuffleBottleneck(
+                        in_channels=(in_channels_i if j == 0 else out_channels_i),
+                        out_channels=out_channels_i,
+                        groups=groups,
+                        downsample=(j == 0),
+                        ignore_group=(i == 0 and j == 0)))
+                self.features.add(stage)
 
-            self.features.add(nn.AvgPool2D(pool_size=4))
+            self.features.add(nn.AvgPool2D(pool_size=7))
             self.features.add(nn.Flatten())
 
-            self.output = nn.Dense(classes)
-
-    def _make_stage(self,
-                    in_channels,
-                    out_channels,
-                    num_blocks,
-                    groups,
-                    first):
-        out = nn.HybridSequential(prefix='')
-        for i in range(num_blocks):
-            out.add(ShuffleBottleneck(
-                in_channels=in_channels,
-                out_channels=(out_channels - in_channels if i == 0 else out_channels),
-                groups=groups,
-                stride=(i == 0),
-                first=first))
-            in_channels = out_channels
-        return out
+            self.output = nn.Dense(units=classes)
 
     def hybrid_forward(self, F, x):
         x = self.features(x)

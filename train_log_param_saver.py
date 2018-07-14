@@ -118,9 +118,10 @@ class TrainLogParamSaver(object):
             self.score_log_file_exist = (os.path.exists(score_log_file_path) and
                                          os.path.getsize(score_log_file_path) > 0)
             self.score_log_file = open(score_log_file_path, "a")
-            titles = ["Attempt", "Epoch"] + self.param_names
-            self.score_log_file.write("\t".join(titles))
-            self.score_log_file.flush()
+            if not self.score_log_file_exist:
+                titles = ["Attempt", "Epoch"] + self.param_names
+                self.score_log_file.write("\t".join(titles))
+                self.score_log_file.flush()
         else:
             self.score_log_file = None
 
@@ -130,9 +131,10 @@ class TrainLogParamSaver(object):
             self.best_map_log_file_exist = (os.path.exists(best_map_log_file_path) and
                                             os.path.getsize(best_map_log_file_path) > 0)
             self.best_map_log_file = open(best_map_log_file_path, "a")
-            titles = ["Epoch", self.param_names[self.acc_ind]]
-            self.best_map_log_file.write("\t".join(titles))
-            self.best_map_log_file.flush()
+            if not self.best_map_log_file:
+                titles = ["Epoch", self.param_names[self.acc_ind]]
+                self.best_map_log_file.write("\t".join(titles))
+                self.best_map_log_file.flush()
         else:
             self.best_map_log_file = None
 

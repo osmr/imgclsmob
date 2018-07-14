@@ -16,13 +16,10 @@ class ChannelShuffle(HybridBlock):
         self.groups = groups
 
     def hybrid_forward(self, F, x):
-        N, C, H, W = x.size()
-        G = self.groups
-        assert(C % G == 0)
-        return x.reshape((N, G, C//G, H, W)).swapaxes(1, 2).reshape((N, C, H, W))
+        return x.reshape((0, -4, self.groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
 
 
-class ShuffleBottleneck(HybridBlock):
+class ShuffleUnit(HybridBlock):
 
     def __init__(self,
                  in_channels,
@@ -30,7 +27,7 @@ class ShuffleBottleneck(HybridBlock):
                  groups,
                  downsample,
                  ignore_group):
-        super(ShuffleBottleneck, self).__init__()
+        super(ShuffleUnit, self).__init__()
         self.downsample = downsample
         mid_channels = out_channels // 4
 
@@ -55,6 +52,7 @@ class ShuffleBottleneck(HybridBlock):
             self.bn3 = nn.BatchNorm(in_channels=out_channels)
             if downsample:
                 self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
+            self.activ = nn.Activation('relu')
 
     @staticmethod
     def _group_conv(in_channels,
@@ -81,16 +79,16 @@ class ShuffleBottleneck(HybridBlock):
 
     def hybrid_forward(self, F, x):
         res = x
-        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.activ(self.bn1(self.conv1(x)))
         out = self.shuffle(out)
         out = self.bn2(self.conv2(out))
         out = self.bn3(self.conv3(out))
         if self.downsample:
             res = self.avgpool(res)
-            out = F.concat((out, res), dim=1)
+            out = F.concat(out, res, dim=1)
         else:
-            out += res
-        out = F.relu(out)
+            out = out + res
+        out = self.activ(out)
         return out
 
 
@@ -126,7 +124,7 @@ class ShuffleNet(HybridBlock):
                 in_channels_i = stage_out_channels[i]
                 out_channels_i = stage_out_channels[i + 1]
                 for j in range(stage_num_blocks[i]):
-                    stage.add(ShuffleBottleneck(
+                    stage.add(ShuffleUnit(
                         in_channels=(in_channels_i if j == 0 else out_channels_i),
                         out_channels=out_channels_i,
                         groups=groups,
@@ -177,3 +175,42 @@ def shufflenet1_0_g1(**kwargs):
 def shufflenet1_0_g2(**kwargs):
     return get_shufflenet(1.0, 2, **kwargs)
 
+
+def shufflenet1_0_g4(**kwargs):
+    return get_shufflenet(1.0, 4, **kwargs)
+
+
+def shufflenet1_0_g8(**kwargs):
+    return get_shufflenet(1.0, 8, **kwargs)
+
+
+def shufflenet0_5_g1(**kwargs):
+    return get_shufflenet(0.5, 1, **kwargs)
+
+
+def shufflenet0_5_g2(**kwargs):
+    return get_shufflenet(0.5, 2, **kwargs)
+
+
+def shufflenet0_5_g4(**kwargs):
+    return get_shufflenet(0.5, 4, **kwargs)
+
+
+def shufflenet0_5_g8(**kwargs):
+    return get_shufflenet(0.5, 8, **kwargs)
+
+
+def shufflenet0_25_g1(**kwargs):
+    return get_shufflenet(0.25, 1, **kwargs)
+
+
+def shufflenet0_25_g2(**kwargs):
+    return get_shufflenet(0.25, 2, **kwargs)
+
+
+def shufflenet0_25_g4(**kwargs):
+    return get_shufflenet(0.25, 4, **kwargs)
+
+
+def shufflenet0_25_g8(**kwargs):
+    return get_shufflenet(0.25, 8, **kwargs)

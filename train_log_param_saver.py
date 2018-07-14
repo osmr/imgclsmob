@@ -216,7 +216,7 @@ class TrainLogParamSaver(object):
 
     @staticmethod
     def _get_checkpoint_params_file_path(checkpoint_file_path_prefix, epoch, acc):
-        return "{0}_{1:04d}_{:.4f}.params".format(checkpoint_file_path_prefix, epoch, acc)
+        return "{}_{:04d}_{:.4f}.params".format(checkpoint_file_path_prefix, epoch, acc)
 
     def _get_last_checkpoint_params_file_path(self, epoch, acc):
         return self._get_checkpoint_params_file_path(self.last_checkpoints_prefix, epoch, acc)

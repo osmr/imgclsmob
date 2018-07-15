@@ -74,6 +74,12 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved parameters if not None')
+    parser.add_argument(
+        '-e',
+        '--evaluate',
+        dest='evaluate',
+        action='store_true',
+        help='only evaluate model on validation set')
 
     parser.add_argument(
         '--num-gpus',
@@ -479,14 +485,14 @@ def save_params(file_path,
     net.save_parameters(file_path)
 
 
-def test(acc_top1,
-         acc_top5,
-         net,
-         val_data,
-         batch_fn,
-         use_rec,
-         dtype,
-         ctx):
+def validate(acc_top1,
+             acc_top5,
+             net,
+             val_data,
+             batch_fn,
+             use_rec,
+             dtype,
+             ctx):
     if use_rec:
         val_data.reset()
     acc_top1.reset()
@@ -498,7 +504,32 @@ def test(acc_top1,
         acc_top5.update(label, outputs)
     _, top1 = acc_top1.get()
     _, top5 = acc_top5.get()
-    return (1-top1, 1-top5)
+    return 1-top1, 1-top5
+
+
+def test(net,
+         val_data,
+         batch_fn,
+         use_rec,
+         dtype,
+         ctx):
+    acc_top1 = mx.metric.Accuracy()
+    acc_top5 = mx.metric.TopKAccuracy(5)
+
+    tic = time.time()
+    err_top1_val, err_top5_val = validate(
+        acc_top1=acc_top1,
+        acc_top5=acc_top5,
+        net=net,
+        val_data=val_data,
+        batch_fn=batch_fn,
+        use_rec=use_rec,
+        dtype=dtype,
+        ctx=ctx)
+    logging.info('Test: err-top1={:.3f}\terr-top5={:.3f}'.format(
+        err_top1_val, err_top5_val))
+    logging.info('Time cost: {:.3f} sec'.format(
+        time.time() - tic))
 
 
 def train(batch_size,
@@ -528,7 +559,7 @@ def train(batch_size,
     assert (start_epoch >= 1)
     if start_epoch > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch))
-        err_top1_val, err_top5_val = test(
+        err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1,
             acc_top5=acc_top5,
             net=net,
@@ -577,7 +608,7 @@ def train(batch_size,
         train_loss /= (i + 1)
         throughput = int(batch_size * (i + 1) /(time.time() - tic))
 
-        err_top1_val, err_top5_val = test(
+        err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1,
             acc_top5=acc_top5,
             net=net,
@@ -686,21 +717,30 @@ def main():
     else:
         lp_saver = None
 
-    train(
-        batch_size=batch_size,
-        num_epochs=args.num_epochs,
-        start_epoch=args.start_epoch,
-        train_data=train_data,
-        val_data=val_data,
-        batch_fn=batch_fn,
-        use_rec=args.use_rec,
-        dtype=args.dtype,
-        net=net,
-        trainer=trainer,
-        lr_scheduler=lr_scheduler,
-        lp_saver=lp_saver,
-        log_interval=args.log_interval,
-        ctx=ctx)
+    if args.evaluate:
+        test(
+            net=net,
+            val_data=val_data,
+            batch_fn=batch_fn,
+            use_rec=args.use_rec,
+            dtype=args.dtype,
+            ctx=ctx)
+    else:
+        train(
+            batch_size=batch_size,
+            num_epochs=args.num_epochs,
+            start_epoch=args.start_epoch,
+            train_data=train_data,
+            val_data=val_data,
+            batch_fn=batch_fn,
+            use_rec=args.use_rec,
+            dtype=args.dtype,
+            net=net,
+            trainer=trainer,
+            lr_scheduler=lr_scheduler,
+            lp_saver=lp_saver,
+            log_interval=args.log_interval,
+            ctx=ctx)
 
 
 if __name__ == '__main__':

@@ -18,8 +18,9 @@ from gluoncv import utils as gutils
 from env_stats import get_env_stats
 from train_log_param_saver import TrainLogParamSaver
 
-from models.shufflenet import *
 from models.mobilenet import *
+from models.shufflenet import *
+from models.menet import *
 
 
 def parse_args():
@@ -380,6 +381,7 @@ def _get_model(name, **kwargs):
         'shufflenet0_25_g3': shufflenet0_25_g3,
         'shufflenet0_25_g4': shufflenet0_25_g4,
         'shufflenet0_25_g8': shufflenet0_25_g8,
+        'menet108_8x1_g3': menet108_8x1_g3,
         }
     try:
         net = get_model(name, **kwargs)

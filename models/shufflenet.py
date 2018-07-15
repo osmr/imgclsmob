@@ -8,6 +8,29 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+def depthwise_conv3x3(channels,
+                      strides):
+    return nn.Conv2D(
+        channels=channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=channels,
+        use_bias=False,
+        in_channels=channels)
+
+
+def group_conv1x1(in_channels,
+                  out_channels,
+                  groups):
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=1,
+        groups=groups,
+        use_bias=False,
+        in_channels=in_channels)
+
+
 class ChannelShuffle(HybridBlock):
 
     def __init__(self,
@@ -17,6 +40,35 @@ class ChannelShuffle(HybridBlock):
 
     def hybrid_forward(self, F, x):
         return x.reshape((0, -4, self.groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+
+
+class ShuffleInitBlock(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(ShuffleInitBlock, self).__init__()
+        with self.name_scope():
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=3,
+                strides=2,
+                padding=1,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.activ = nn.Activation('relu')
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.activ(x)
+        x = self.pool(x)
+        return x
 
 
 class ShuffleUnit(HybridBlock):
@@ -35,59 +87,36 @@ class ShuffleUnit(HybridBlock):
             out_channels -= in_channels
 
         with self.name_scope():
-            self.conv1 = self._group_conv(
+            self.compress_conv1 = group_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
-            self.bn1 = nn.BatchNorm(in_channels=mid_channels)
+            self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
             self.shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
-            self.conv2 = self._depthwise_conv(
+            self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
-            self.bn2 = nn.BatchNorm(in_channels=mid_channels)
-            self.conv3 = self._group_conv(
+            self.dw_bn2 = nn.BatchNorm(in_channels=mid_channels)
+            self.expand_conv3 = group_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups)
-            self.bn3 = nn.BatchNorm(in_channels=out_channels)
+            self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
             if downsample:
                 self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
             self.activ = nn.Activation('relu')
 
-    @staticmethod
-    def _group_conv(in_channels,
-                    out_channels,
-                    groups):
-        return nn.Conv2D(
-            channels=out_channels,
-            kernel_size=1,
-            groups=groups,
-            use_bias=False,
-            in_channels=in_channels)
-
-    @staticmethod
-    def _depthwise_conv(channels,
-                        strides):
-        return nn.Conv2D(
-            channels=channels,
-            kernel_size=3,
-            strides=strides,
-            padding=1,
-            groups=channels,
-            use_bias=False,
-            in_channels=channels)
-
     def hybrid_forward(self, F, x):
-        res = x
-        out = self.activ(self.bn1(self.conv1(x)))
+        identity = x
+        out = self.activ(self.compress_bn1(self.compress_conv1(x)))
         out = self.shuffle(out)
-        out = self.bn2(self.conv2(out))
-        out = self.bn3(self.conv3(out))
+        out = self.dw_bn2(self.dw_conv2(out))
+        out = self.expand_bn3(self.expand_conv3(out))
         if self.downsample:
-            res = self.avgpool(res)
-            out = F.concat(out, res, dim=1)
+            identity = self.avgpool(identity)
+            out = F.concat(out, identity, dim=1)
         else:
-            out = out + res
+            out = out + identity
         out = self.activ(out)
         return out
 
@@ -105,19 +134,9 @@ class ShuffleNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(nn.Conv2D(
-                channels=stage_out_channels[0],
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                use_bias=False,
-                in_channels=input_channels))
-            self.features.add(nn.BatchNorm(in_channels=stage_out_channels[0]))
-            self.features.add(nn.Activation('relu'))
-            self.features.add(nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1))
+            self.features.add(ShuffleInitBlock(
+                in_channels=input_channels,
+                out_channels=stage_out_channels[0]))
 
             for i in range(len(stage_num_blocks)):
                 stage = nn.HybridSequential(prefix='')

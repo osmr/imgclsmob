@@ -1,6 +1,8 @@
 """
-    MobileNet, implemented in Gluon.
-    Original paper: 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'
+    MobileNet & FD-MobileNet.
+    Original papers: 
+    - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'
+    - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'
 """
 
 import numpy as np

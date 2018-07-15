@@ -524,8 +524,6 @@ def train(batch_size,
 
     L = gluon.loss.SoftmaxCrossEntropyLoss()
 
-    best_val_err_map = [1.0]
-
     assert (type(start_epoch) == int)
     assert (start_epoch >= 1)
     if start_epoch > 1:
@@ -591,19 +589,22 @@ def train(batch_size,
 
         logging.info('[Epoch {}] training: err-top1={:.3f}\tloss={:.3f}'.format(
             epoch + 1, err_top1_train, train_loss))
-        logging.info('[Epoch {}] speed: {:.3f} samples/sec\ttime cost: {:.3f}'.format(
+        logging.info('[Epoch {}] speed: {:.3f} samples/sec\ttime cost: {:.3f} sec'.format(
             epoch + 1, throughput, time.time()-tic))
         logging.info('[Epoch {}] validation: err-top1={:.3f}\terr-top5={:.3f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
 
-        lp_saver_kwargs = {'net': net}
-        lp_saver.epoch_test_end_callback(
-            epoch=(epoch + 1),
-            params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
-            **lp_saver_kwargs)
+        if lp_saver is not None:
+            lp_saver_kwargs = {'net': net}
+            lp_saver.epoch_test_end_callback(
+                epoch=(epoch + 1),
+                params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
+                **lp_saver_kwargs)
 
-    logging.info('Total time cost: {:.3f} sec; best-err-top5: {:.3f}'.format(
-        time.time() - gtic, best_val_err_map[0]))
+    logging.info('Total time cost: {:.3f} sec'.format(time.time() - gtic))
+    if lp_saver is not None:
+        logging.info('Best err-top5: {:.3f} at {} epoch'.format(
+            lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
 def main():

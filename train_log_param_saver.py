@@ -138,12 +138,8 @@ class TrainLogParamSaver(object):
         else:
             self.best_map_log_file = None
 
-        #self.last_checkpoint_epochs = []
-        #self.best_eval_metric_epochs = []
-        #self.best_eval_metric_values = []
-        #self.last_score_values = None
-
         self.best_eval_metric_value = None
+        self.best_eval_metric_epoch = None
         self.last_checkpoint_params_file_paths = []
         self.best_checkpoint_params_file_paths = []
 
@@ -178,6 +174,7 @@ class TrainLogParamSaver(object):
 
             if (self.best_eval_metric_value is None) or (curr_acc < self.best_eval_metric_value):
                 self.best_eval_metric_value = curr_acc
+                self.best_eval_metric_epoch = epoch
                 best_checkpoint_params_file_path = self._get_best_checkpoint_params_file_path(epoch, curr_acc)
 
                 if last_checkpoint_params_file_path is not None:

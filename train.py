@@ -80,6 +80,12 @@ def parse_args():
         dest='evaluate',
         action='store_true',
         help='only evaluate model on validation set')
+    parser.add_argument(
+        '-mx',
+        '--mxnet',
+        dest='convert_to_mxnet',
+        action='store_true',
+        help='only convert model into MXnet format')
 
     parser.add_argument(
         '--num-gpus',
@@ -652,6 +658,9 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
+    if args.convert_to_mxnet:
+        batch_size = 1
+
     classes = 1000
     net = prepare_model(
         model_name=args.model,
@@ -717,7 +726,14 @@ def main():
     else:
         lp_saver = None
 
-    if args.evaluate:
+    if args.convert_to_mxnet:
+        assert args.save_dir and os.path.exists(args.save_dir)
+        assert (args.use_pretrained or args.resume.strip())
+        x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
+        net.forward(x)
+        net.export(os.path.join(args.save_dir, 'imagenet_{}'.format(args.model)))
+    elif args.evaluate:
+        assert (args.use_pretrained or args.resume.strip())
         test(
             net=net,
             val_data=val_data,

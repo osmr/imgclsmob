@@ -46,12 +46,13 @@ class MEModule(HybridBlock):
             out_channels -= in_channels
 
         with self.name_scope():
+            # residual branch
             self.compress_conv1 = group_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
             self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
+            self.c_shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
@@ -65,37 +66,38 @@ class MEModule(HybridBlock):
                 self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
             self.activ = nn.Activation('relu')
 
-            self.s_merge = conv1x1(
+            # fusion branch
+            self.s_merge_conv = conv1x1(
                 in_channels=mid_channels,
                 out_channels=side_channels)
-            self.s_bn_merge = nn.BatchNorm(in_channels=side_channels)
+            self.s_merge_bn = nn.BatchNorm(in_channels=side_channels)
             self.s_conv = conv3x3(
                 in_channels=side_channels,
                 out_channels=side_channels,
                 strides=(2 if self.downsample else 1))
-            self.s_bn_conv = nn.BatchNorm(in_channels=side_channels)
-            self.s_evolve = conv1x1(
+            self.s_conv_bn = nn.BatchNorm(in_channels=side_channels)
+            self.s_evolve_conv = conv1x1(
                 in_channels=side_channels,
                 out_channels=mid_channels)
-            self.s_bn_evolve = nn.BatchNorm(in_channels=mid_channels)
+            self.s_evolve_bn = nn.BatchNorm(in_channels=mid_channels)
 
     def hybrid_forward(self, F, x):
         identity = x
         # pointwise group convolution 1
         x = self.activ(self.compress_bn1(self.compress_conv1(x)))
-        x = self.shuffle(x)
+        x = self.c_shuffle(x)
         # merging
-        y = self.s_merge(x)
-        y = self.s_bn_merge(y)
+        y = self.s_merge_conv(x)
+        y = self.s_merge_bn(y)
         y = self.activ(y)
         # depthwise convolution (bottleneck)
         x = self.dw_bn2(self.dw_conv2(x))
         # evolution
         y = self.s_conv(y)
-        y = self.s_bn_conv(y)
+        y = self.s_conv_bn(y)
         y = self.activ(y)
-        y = self.s_evolve(y)
-        y = self.s_bn_evolve(y)
+        y = self.s_evolve_conv(y)
+        y = self.s_evolve_bn(y)
         y = F.sigmoid(y)
         x = x * y
         # pointwise group convolution 2
@@ -152,10 +154,10 @@ class MENet(HybridBlock):
         return x
 
 
-def get_menet(scale,
-              first_block_channels,
+def get_menet(first_block_channels,
               side_channels,
               groups,
+              pretrained=False,
               ctx=cpu(),
               **kwargs):
     if first_block_channels == 108:

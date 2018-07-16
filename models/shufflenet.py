@@ -31,15 +31,22 @@ def group_conv1x1(in_channels,
         in_channels=in_channels)
 
 
+def channel_shuffle(x,
+                    groups):
+    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+
+
 class ChannelShuffle(HybridBlock):
 
     def __init__(self,
                  groups):
         super(ChannelShuffle, self).__init__()
         self.groups = groups
+        # with self.name_scope():
+        #     pass
 
     def hybrid_forward(self, F, x):
-        return x.reshape((0, -4, self.groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+        return channel_shuffle(x, self.groups)
 
 
 class ShuffleInitBlock(HybridBlock):
@@ -92,7 +99,7 @@ class ShuffleUnit(HybridBlock):
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
             self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
+            self.c_shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
@@ -109,7 +116,7 @@ class ShuffleUnit(HybridBlock):
     def hybrid_forward(self, F, x):
         identity = x
         out = self.activ(self.compress_bn1(self.compress_conv1(x)))
-        out = self.shuffle(out)
+        out = self.c_shuffle(out)
         out = self.dw_bn2(self.dw_conv2(out))
         out = self.expand_bn3(self.expand_conv3(out))
         if self.downsample:

@@ -10,7 +10,7 @@ from mxnet.gluon import nn, HybridBlock
 class FireConv(HybridBlock):
 
     def __init__(self,
-                 #in_channels,
+                 in_channels,
                  out_channels,
                  kernel_size,
                  padding,
@@ -20,8 +20,8 @@ class FireConv(HybridBlock):
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
-                padding=padding)#,
-                #in_channels=in_channels)
+                padding=padding,
+                in_channels=in_channels)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
@@ -33,7 +33,7 @@ class FireConv(HybridBlock):
 class FireUnit(HybridBlock):
 
     def __init__(self,
-                 #in_channels,
+                 in_channels,
                  squeeze_channels,
                  expand1x1_channels,
                  expand3x3_channels,
@@ -41,17 +41,17 @@ class FireUnit(HybridBlock):
         super(FireUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.squeeze = FireConv(
-                #in_channels=in_channels,
+                in_channels=in_channels,
                 out_channels=squeeze_channels,
                 kernel_size=1,
                 padding=0)
             self.expand1x1 = FireConv(
-                #in_channels=squeeze_channels,
+                in_channels=squeeze_channels,
                 out_channels=expand1x1_channels,
                 kernel_size=1,
                 padding=0)
             self.expand3x3 = FireConv(
-                #in_channels=squeeze_channels,
+                in_channels=squeeze_channels,
                 out_channels=expand3x3_channels,
                 kernel_size=3,
                 padding=1)
@@ -85,19 +85,19 @@ class SqueezeInitBlock(HybridBlock):
                 strides=2,
                 in_channels=in_channels)
             self.activ = nn.Activation('relu')
-            self.pool = squeeze_pool()
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
         x = self.activ(x)
-        x = self.pool(x)
         return x
 
 
 class SqueezeNet(HybridBlock):
 
     def __init__(self,
-                 version,
+                 first_out_channels,
+                 first_kernel_size,
+                 pool_stages,
                  classes=1000,
                  **kwargs):
         super(SqueezeNet, self).__init__(**kwargs)
@@ -105,40 +105,27 @@ class SqueezeNet(HybridBlock):
         stage_squeeze_channels = [16, 32, 48, 64]
         stage_expand_channels = [64, 128, 192, 256]
 
-        assert version in ['1.0', '1.1'], ("Unsupported SqueezeNet version {version}:"
-                                           "1.0 or 1.1 expected".format(version=version))
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            if version == '1.0':
-                self.features.add(SqueezeInitBlock(
-                    in_channels=input_channels,
-                    out_channels=96,
-                    kernel_size=7))
-                self.features.add(FireUnit(16, 64, 64))
-                self.features.add(FireUnit(16, 64, 64))
-                self.features.add(FireUnit(32, 128, 128))
-                self.features.add(nn.MaxPool2D(pool_size=3, strides=2, ceil_mode=True))
-                self.features.add(FireUnit(32, 128, 128))
-                self.features.add(FireUnit(48, 192, 192))
-                self.features.add(FireUnit(48, 192, 192))
-                self.features.add(FireUnit(64, 256, 256))
-                self.features.add(nn.MaxPool2D(pool_size=3, strides=2, ceil_mode=True))
-                self.features.add(FireUnit(64, 256, 256))
-            else:
-                self.features.add(SqueezeInitBlock(
-                    in_channels=input_channels,
-                    out_channels=64,
-                    kernel_size=3))
-                self.features.add(FireUnit(16, 64, 64))
-                self.features.add(FireUnit(16, 64, 64))
-                self.features.add(nn.MaxPool2D(pool_size=3, strides=2, ceil_mode=True))
-                self.features.add(FireUnit(32, 128, 128))
-                self.features.add(FireUnit(32, 128, 128))
-                self.features.add(nn.MaxPool2D(pool_size=3, strides=2, ceil_mode=True))
-                self.features.add(FireUnit(48, 192, 192))
-                self.features.add(FireUnit(48, 192, 192))
-                self.features.add(FireUnit(64, 256, 256))
-                self.features.add(FireUnit(64, 256, 256))
+            self.features.add(SqueezeInitBlock(
+                in_channels=input_channels,
+                out_channels=first_out_channels,
+                kernel_size=first_kernel_size))
+            k = 0
+            pool_ind = 0
+            for i in range(len(stage_squeeze_channels)):
+                for j in range(2):
+                    if (pool_ind < len(pool_stages) - 1) and (k == pool_stages[pool_ind]):
+                        self.features.add(squeeze_pool())
+                        pool_ind += 1
+                    in_channels = first_out_channels if (i == 0 and j == 0) else \
+                        (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
+                    self.features.add(FireUnit(
+                        in_channels=in_channels,
+                        squeeze_channels=stage_squeeze_channels[i],
+                        expand1x1_channels=stage_expand_channels[i],
+                        expand3x3_channels=stage_expand_channels[i]))
+                    k += 1
             self.features.add(nn.Dropout(0.5))
 
             self.output = nn.HybridSequential(prefix='')
@@ -153,16 +140,32 @@ class SqueezeNet(HybridBlock):
         return x
 
 
-def get_squeezenet1_0(pretrained=False,
+def get_squeezenet(version,
+                      pretrained=False,
                       ctx=cpu(),
                       **kwargs):
-    return SqueezeNet('1.0', **kwargs)
+    if version == '1.0':
+        first_out_channels = 96
+        first_kernel_size = 7
+        pool_stages = [0, 3, 7]
+    elif version == '1.1':
+        first_out_channels = 64
+        first_kernel_size = 3
+        pool_stages = [0, 2, 4]
+    else:
+        raise ValueError("Unsupported SqueezeNet version {}: 1.0 or 1.1 expected".format(version))
+
+    return SqueezeNet(
+        first_out_channels=first_out_channels,
+        first_kernel_size=first_kernel_size,
+        pool_stages=pool_stages,
+        **kwargs)
 
 
 def squeezenet1_0(**kwargs):
-    return get_squeezenet1_0(**kwargs)
+    return get_squeezenet('1.0', **kwargs)
 
 
-# def squeezenet1_1(**kwargs):
-#     return get_squeezenet1_1(**kwargs)
+def squeezenet1_1(**kwargs):
+    return get_squeezenet('1.1', **kwargs)
 

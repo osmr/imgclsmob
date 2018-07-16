@@ -21,6 +21,7 @@ from train_log_param_saver import TrainLogParamSaver
 from models.mobilenet import *
 from models.shufflenet import *
 from models.menet import *
+from models.squeezenet import *
 
 
 def parse_args():
@@ -358,6 +359,8 @@ def get_data_loader(data_dir,
 
 def _get_model(name, **kwargs):
     models = {
+        'squeezenet1_0': squeezenet1_0,
+        'squeezenet1_1': squeezenet1_1,
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,
         'mobilenet0_5': mobilenet0_5,

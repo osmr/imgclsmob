@@ -430,6 +430,10 @@ def prepare_model(model_name,
         static_shape=True)
 
     net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+    # for param in net.collect_params().values():
+    #     if param._data is not None:
+    #         continue
+    #     param.initialize(ctx=ctx)
 
     return net
 
@@ -607,7 +611,7 @@ def train(batch_size,
                 _, top1 = acc_top1.get()
                 err_top1_train = 1.0 - top1
                 speed = batch_size * log_interval / (time.time() - btic)
-                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.4f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
+                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
                     epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
                 btic = time.time()
 
@@ -628,7 +632,7 @@ def train(batch_size,
 
         logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
             epoch + 1, err_top1_train, train_loss))
-        logging.info('[Epoch {}] speed: {:.4f} samples/sec\ttime cost: {:.4f} sec'.format(
+        logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
             epoch + 1, throughput, time.time()-tic))
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
@@ -640,7 +644,7 @@ def train(batch_size,
                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
                 **lp_saver_kwargs)
 
-    logging.info('Total time cost: {:.4f} sec'.format(time.time() - gtic))
+    logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
     if lp_saver is not None:
         logging.info('Best err-top5: {:.4f} at {} epoch'.format(
             lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))

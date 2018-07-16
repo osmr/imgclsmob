@@ -534,9 +534,9 @@ def test(net,
         use_rec=use_rec,
         dtype=dtype,
         ctx=ctx)
-    logging.info('Test: err-top1={:.3f}\terr-top5={:.3f}'.format(
+    logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
         err_top1_val, err_top5_val))
-    logging.info('Time cost: {:.3f} sec'.format(
+    logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
 
@@ -576,7 +576,7 @@ def train(batch_size,
             use_rec=use_rec,
             dtype=dtype,
             ctx=ctx)
-        logging.info('[Epoch {}] validation: err-top1={:.3f}\terr-top5={:.3f}'.format(
+        logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             start_epoch - 1, err_top1_val, err_top5_val))
 
     gtic = time.time()
@@ -607,7 +607,7 @@ def train(batch_size,
                 _, top1 = acc_top1.get()
                 err_top1_train = 1.0 - top1
                 speed = batch_size * log_interval / (time.time() - btic)
-                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.3f} samples/sec\ttop1-err={:.3f}\tlr={:.3f}'.format(
+                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.4f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
                     epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
                 btic = time.time()
 
@@ -626,11 +626,11 @@ def train(batch_size,
             dtype=dtype,
             ctx=ctx)
 
-        logging.info('[Epoch {}] training: err-top1={:.3f}\tloss={:.3f}'.format(
+        logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
             epoch + 1, err_top1_train, train_loss))
-        logging.info('[Epoch {}] speed: {:.3f} samples/sec\ttime cost: {:.3f} sec'.format(
+        logging.info('[Epoch {}] speed: {:.4f} samples/sec\ttime cost: {:.4f} sec'.format(
             epoch + 1, throughput, time.time()-tic))
-        logging.info('[Epoch {}] validation: err-top1={:.3f}\terr-top5={:.3f}'.format(
+        logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
 
         if lp_saver is not None:
@@ -640,9 +640,9 @@ def train(batch_size,
                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
                 **lp_saver_kwargs)
 
-    logging.info('Total time cost: {:.3f} sec'.format(time.time() - gtic))
+    logging.info('Total time cost: {:.4f} sec'.format(time.time() - gtic))
     if lp_saver is not None:
-        logging.info('Best err-top5: {:.3f} at {} epoch'.format(
+        logging.info('Best err-top5: {:.4f} at {} epoch'.format(
             lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
@@ -689,45 +689,6 @@ def main():
             batch_size=batch_size,
             num_workers=args.num_workers)
 
-    num_training_samples = 1281167
-    trainer, lr_scheduler = prepare_trainer(
-        net=net,
-        optimizer_name=args.optimizer_name,
-        wd=args.wd,
-        momentum=args.momentum,
-        lr_mode=args.lr_mode,
-        lr=args.lr,
-        lr_decay_period=args.lr_decay_period,
-        lr_decay_epoch=args.lr_decay_epoch,
-        lr_decay=args.lr_decay,
-        warmup_epochs=args.warmup_epochs,
-        batch_size=batch_size,
-        num_epochs=args.num_epochs,
-        num_training_samples=num_training_samples,
-        dtype=args.dtype)
-
-    if args.save_dir and args.save_interval:
-        lp_saver = TrainLogParamSaver(
-            checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
-            last_checkpoint_file_name_suffix="last",
-            best_checkpoint_file_name_suffix=None,
-            last_checkpoint_dir_path=args.save_dir,
-            best_checkpoint_dir_path=None,
-            last_checkpoint_file_count=2,
-            best_checkpoint_file_count=2,
-            checkpoint_file_save_callback=save_params,
-            save_interval=args.save_interval,
-            num_epochs=args.num_epochs,
-            param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
-            acc_ind=2,
-            #bigger=[True],
-            #mask=None,
-            score_log_file_path=os.path.join(args.save_dir, 'score.log'),
-            score_log_attempt_value=1,
-            best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
-    else:
-        lp_saver = None
-
     if args.convert_to_mxnet:
         assert args.save_dir and os.path.exists(args.save_dir)
         assert (args.use_pretrained or args.resume.strip())
@@ -744,6 +705,45 @@ def main():
             dtype=args.dtype,
             ctx=ctx)
     else:
+        num_training_samples = 1281167
+        trainer, lr_scheduler = prepare_trainer(
+            net=net,
+            optimizer_name=args.optimizer_name,
+            wd=args.wd,
+            momentum=args.momentum,
+            lr_mode=args.lr_mode,
+            lr=args.lr,
+            lr_decay_period=args.lr_decay_period,
+            lr_decay_epoch=args.lr_decay_epoch,
+            lr_decay=args.lr_decay,
+            warmup_epochs=args.warmup_epochs,
+            batch_size=batch_size,
+            num_epochs=args.num_epochs,
+            num_training_samples=num_training_samples,
+            dtype=args.dtype)
+
+        if args.save_dir and args.save_interval:
+            lp_saver = TrainLogParamSaver(
+                checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
+                last_checkpoint_file_name_suffix="last",
+                best_checkpoint_file_name_suffix=None,
+                last_checkpoint_dir_path=args.save_dir,
+                best_checkpoint_dir_path=None,
+                last_checkpoint_file_count=2,
+                best_checkpoint_file_count=2,
+                checkpoint_file_save_callback=save_params,
+                save_interval=args.save_interval,
+                num_epochs=args.num_epochs,
+                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
+                acc_ind=2,
+                # bigger=[True],
+                # mask=None,
+                score_log_file_path=os.path.join(args.save_dir, 'score.log'),
+                score_log_attempt_value=1,
+                best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
+        else:
+            lp_saver = None
+
         train(
             batch_size=batch_size,
             num_epochs=args.num_epochs,

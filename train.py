@@ -540,7 +540,7 @@ def test(net,
         ctx=ctx)
     logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
         err_top1_val, err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
+    logging.info('Time cost: {:.2f} sec'.format(
         time.time() - tic))
 
 

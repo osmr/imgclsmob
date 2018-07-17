@@ -190,7 +190,7 @@ def parse_args():
     parser.add_argument(
         '--save-interval',
         type=int,
-        default=10,
+        default=4,
         help='saving parameters epoch interval, best model will always be saved')
     parser.add_argument(
         '--save-dir',

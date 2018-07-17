@@ -3,7 +3,6 @@ import time
 import logging
 import os
 import sys
-import numpy as np
 
 import mxnet as mx
 from mxnet import gluon
@@ -12,7 +11,7 @@ from mxnet.gluon.data.vision import transforms
 
 from gluoncv.data import imagenet
 from gluoncv.model_zoo import get_model
-from gluoncv.utils import makedirs, LRScheduler
+from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
 from env_stats import get_env_stats
@@ -554,20 +553,77 @@ def test(net,
         time.time() - tic))
 
 
-def train(batch_size,
-          num_epochs,
-          start_epoch,
-          train_data,
-          val_data,
-          batch_fn,
-          use_rec,
-          dtype,
-          net,
-          trainer,
-          lr_scheduler,
-          lp_saver,
-          log_interval,
-          ctx):
+def train_epoch(epoch,
+                acc_top1,
+                net,
+                train_data,
+                batch_fn,
+                use_rec,
+                dtype,
+                ctx,
+                L,
+                trainer,
+                lr_scheduler,
+                batch_size,
+                log_interval):
+
+    tic = time.time()
+    if use_rec:
+        train_data.reset()
+    acc_top1.reset()
+    train_loss = 0.0
+
+    btic = time.time()
+    for i, batch in enumerate(train_data):
+        data, label = batch_fn(batch, ctx)
+        with ag.record():
+            outputs = [net(X.astype(dtype, copy=False)) for X in data]
+            loss = [L(yhat, y) for yhat, y in zip(outputs, label)]
+        for l in loss:
+            l.backward()
+        lr_scheduler.update(i, epoch)
+        trainer.step(batch_size)
+
+        if epoch == 0 and i == 0:
+            weight_count = calc_net_weight_count(net)
+            logging.info('Model: {} trainable parameters'.format(weight_count))
+        train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
+        acc_top1.update(label, outputs)
+        if log_interval and not (i + 1) % log_interval:
+            _, top1 = acc_top1.get()
+            err_top1_train = 1.0 - top1
+            speed = batch_size * log_interval / (time.time() - btic)
+            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
+                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+            btic = time.time()
+
+    _, top1 = acc_top1.get()
+    err_top1_train = 1.0 - top1
+    train_loss /= (i + 1)
+    throughput = int(batch_size * (i + 1) / (time.time() - tic))
+
+    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
+        epoch + 1, err_top1_train, train_loss))
+    logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
+        epoch + 1, throughput, time.time() - tic))
+
+    return err_top1_train, train_loss
+
+
+def train_net(batch_size,
+              num_epochs,
+              start_epoch1,
+              train_data,
+              val_data,
+              batch_fn,
+              use_rec,
+              dtype,
+              net,
+              trainer,
+              lr_scheduler,
+              lp_saver,
+              log_interval,
+              ctx):
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
@@ -577,10 +633,10 @@ def train(batch_size,
 
     L = gluon.loss.SoftmaxCrossEntropyLoss()
 
-    assert (type(start_epoch) == int)
-    assert (start_epoch >= 1)
-    if start_epoch > 1:
-        logging.info('Start training from [Epoch {}]'.format(start_epoch))
+    assert (type(start_epoch1) == int)
+    assert (start_epoch1 >= 1)
+    if start_epoch1 > 1:
+        logging.info('Start training from [Epoch {}]'.format(start_epoch1))
         err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1,
             acc_top5=acc_top5,
@@ -591,44 +647,24 @@ def train(batch_size,
             dtype=dtype,
             ctx=ctx)
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
-            start_epoch - 1, err_top1_val, err_top5_val))
+            start_epoch1 - 1, err_top1_val, err_top5_val))
 
     gtic = time.time()
-    for epoch in range(start_epoch - 1, num_epochs):
-        tic = time.time()
-        if use_rec:
-            train_data.reset()
-        acc_top1.reset()
-        train_loss = 0.0
-        btic = time.time()
-
-        for i, batch in enumerate(train_data):
-            data, label = batch_fn(batch, ctx)
-            with ag.record():
-                outputs = [net(X.astype(dtype, copy=False)) for X in data]
-                loss = [L(yhat, y) for yhat, y in zip(outputs, label)]
-            for l in loss:
-                l.backward()
-            lr_scheduler.update(i, epoch)
-            trainer.step(batch_size)
-
-            if epoch == 0 and i == 0:
-                weight_count = calc_net_weight_count(net)
-                logging.info('Model: {} trainable parameters'.format(weight_count))
-            train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
-            acc_top1.update(label, outputs)
-            if log_interval and not (i + 1) % log_interval:
-                _, top1 = acc_top1.get()
-                err_top1_train = 1.0 - top1
-                speed = batch_size * log_interval / (time.time() - btic)
-                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
-                    epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
-                btic = time.time()
-
-        _, top1 = acc_top1.get()
-        err_top1_train = 1.0 - top1
-        train_loss /= (i + 1)
-        throughput = int(batch_size * (i + 1) /(time.time() - tic))
+    for epoch in range(start_epoch1 - 1, num_epochs):
+        err_top1_train, train_loss = train_epoch(
+            epoch,
+            acc_top1,
+            net,
+            train_data,
+            batch_fn,
+            use_rec,
+            dtype,
+            ctx,
+            L,
+            trainer,
+            lr_scheduler,
+            batch_size,
+            log_interval)
 
         err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1,
@@ -640,17 +676,13 @@ def train(batch_size,
             dtype=dtype,
             ctx=ctx)
 
-        logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
-            epoch + 1, err_top1_train, train_loss))
-        logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
-            epoch + 1, throughput, time.time()-tic))
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
 
         if lp_saver is not None:
             lp_saver_kwargs = {'net': net}
             lp_saver.epoch_test_end_callback(
-                epoch=(epoch + 1),
+                epoch1=(epoch + 1),
                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
                 **lp_saver_kwargs)
 
@@ -762,10 +794,10 @@ def main():
         else:
             lp_saver = None
 
-        train(
+        train_net(
             batch_size=batch_size,
             num_epochs=args.num_epochs,
-            start_epoch=args.start_epoch,
+            start_epoch1=args.start_epoch,
             train_data=train_data,
             val_data=val_data,
             batch_fn=batch_fn,

@@ -141,9 +141,9 @@ class SqueezeNet(HybridBlock):
 
 
 def get_squeezenet(version,
-                      pretrained=False,
-                      ctx=cpu(),
-                      **kwargs):
+                   pretrained=False,
+                   ctx=cpu(),
+                   **kwargs):
     if version == '1.0':
         first_out_channels = 96
         first_kernel_size = 7
@@ -154,6 +154,9 @@ def get_squeezenet(version,
         pool_stages = [0, 2, 4]
     else:
         raise ValueError("Unsupported SqueezeNet version {}: 1.0 or 1.1 expected".format(version))
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
 
     return SqueezeNet(
         first_out_channels=first_out_channels,

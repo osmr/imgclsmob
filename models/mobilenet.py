@@ -110,6 +110,10 @@ def get_mobilenet(scale,
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
     strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
     channels = (np.array(channels) * scale).astype(np.int)
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
+
     return MobileNet(channels, strides, **kwargs)
 
 
@@ -120,6 +124,10 @@ def get_fd_mobilenet(scale,
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 1024]
     strides = [2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1]
     channels = (np.array(channels) * scale).astype(np.int)
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
+
     return MobileNet(channels, strides, **kwargs)
 
 

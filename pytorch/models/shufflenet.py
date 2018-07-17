@@ -39,8 +39,7 @@ def channel_shuffle(x,
         groups (int): groups to be split
     """
     batch, channels, height, width = x.size()
-    if channels % groups != 0:
-        raise ValueError('Tensor channels cannot be divided by `groups`.')
+    #assert (channels % groups == 0)
     channels_per_group = channels // groups
     x = x.view(batch, groups, channels_per_group, height, width)
     x = torch.transpose(x, 1, 2).contiguous()
@@ -51,8 +50,10 @@ def channel_shuffle(x,
 class ChannelShuffle(nn.Module):
 
     def __init__(self,
+                 channels,
                  groups):
         super(ChannelShuffle, self).__init__()
+        assert (channels % groups == 0)
         self.groups = groups
         # with self.name_scope():
         #     pass
@@ -111,7 +112,9 @@ class ShuffleUnit(nn.Module):
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
             self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
-            self.c_shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
+            self.c_shuffle = ChannelShuffle(
+                channels=mid_channels,
+                groups=(1 if ignore_group else groups))
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 stride=(2 if self.downsample else 1))
@@ -183,7 +186,9 @@ class ShuffleNet(nn.Module):
 
 
 def get_shufflenet(scale,
-                   groups):
+                   groups,
+                   pretrained=False,
+                   **kwargs):
     if groups == 1:
         stage_out_channels = [24, 144, 288, 576]
     elif groups == 2:
@@ -195,69 +200,74 @@ def get_shufflenet(scale,
     elif groups == 8:
         stage_out_channels = [24, 384, 768, 1536]
     else:
-        raise Exception()
+        raise ValueError("The {} of groups is not supported".format(groups))
     stage_out_channels = (np.array(stage_out_channels) * scale).astype(np.int)
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
+
     net = ShuffleNet(
         groups=groups,
-        stage_out_channels=stage_out_channels)
+        stage_out_channels=stage_out_channels,
+        **kwargs)
     return net
 
 
 def shufflenet1_0_g1(**kwargs):
-    return get_shufflenet(1.0, 1)
+    return get_shufflenet(1.0, 1, **kwargs)
 
 
 def shufflenet1_0_g2(**kwargs):
-    return get_shufflenet(1.0, 2)
+    return get_shufflenet(1.0, 2, **kwargs)
 
 
 def shufflenet1_0_g3(**kwargs):
-    return get_shufflenet(1.0, 3)
+    return get_shufflenet(1.0, 3, **kwargs)
 
 
 def shufflenet1_0_g4(**kwargs):
-    return get_shufflenet(1.0, 4)
+    return get_shufflenet(1.0, 4, **kwargs)
 
 
 def shufflenet1_0_g8(**kwargs):
-    return get_shufflenet(1.0, 8)
+    return get_shufflenet(1.0, 8, **kwargs)
 
 
 def shufflenet0_5_g1(**kwargs):
-    return get_shufflenet(0.5, 1)
+    return get_shufflenet(0.5, 1, **kwargs)
 
 
 def shufflenet0_5_g2(**kwargs):
-    return get_shufflenet(0.5, 2)
+    return get_shufflenet(0.5, 2, **kwargs)
 
 
 def shufflenet0_5_g3(**kwargs):
-    return get_shufflenet(0.5, 3)
+    return get_shufflenet(0.5, 3, **kwargs)
 
 
 def shufflenet0_5_g4(**kwargs):
-    return get_shufflenet(0.5, 4)
+    return get_shufflenet(0.5, 4, **kwargs)
 
 
 def shufflenet0_5_g8(**kwargs):
-    return get_shufflenet(0.5, 8)
+    return get_shufflenet(0.5, 8, **kwargs)
 
 
 def shufflenet0_25_g1(**kwargs):
-    return get_shufflenet(0.25, 1)
+    return get_shufflenet(0.25, 1, **kwargs)
 
 
 def shufflenet0_25_g2(**kwargs):
-    return get_shufflenet(0.25, 2)
+    return get_shufflenet(0.25, 2, **kwargs)
 
 
 def shufflenet0_25_g3(**kwargs):
-    return get_shufflenet(0.25, 3)
+    return get_shufflenet(0.25, 3, **kwargs)
 
 
 def shufflenet0_25_g4(**kwargs):
-    return get_shufflenet(0.25, 4)
+    return get_shufflenet(0.25, 4, **kwargs)
 
 
 def shufflenet0_25_g8(**kwargs):
-    return get_shufflenet(0.25, 8)
+    return get_shufflenet(0.25, 8, **kwargs)

@@ -39,8 +39,10 @@ def channel_shuffle(x,
 class ChannelShuffle(HybridBlock):
 
     def __init__(self,
+                 channels,
                  groups):
         super(ChannelShuffle, self).__init__()
+        assert (channels % groups == 0)
         self.groups = groups
         # with self.name_scope():
         #     pass
@@ -99,7 +101,9 @@ class ShuffleUnit(HybridBlock):
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
             self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.c_shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
+            self.c_shuffle = ChannelShuffle(
+                channels=mid_channels,
+                groups=(1 if ignore_group else groups))
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
@@ -185,8 +189,12 @@ def get_shufflenet(scale,
     elif groups == 8:
         stage_out_channels = [24, 384, 768, 1536]
     else:
-        raise Exception()
+        raise ValueError("The {} of groups is not supported".format(groups))
     stage_out_channels = (np.array(stage_out_channels) * scale).astype(np.int)
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
+
     net = ShuffleNet(
         groups=groups,
         stage_out_channels=stage_out_channels,

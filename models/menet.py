@@ -177,7 +177,11 @@ def get_menet(first_block_channels,
     elif first_block_channels == 456:
         block_channels = [48, 456, 912, 1824]
     else:
-        raise Exception()
+        raise ValueError("The {} of `first_block_channels` is not supported".format(first_block_channels))
+
+    if pretrained:
+        raise ValueError("Pretrained model is not supported")
+
     net = MENet(
         block_channels=block_channels,
         side_channels=side_channels,

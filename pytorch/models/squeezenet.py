@@ -101,7 +101,7 @@ class SqueezeNet(nn.Module):
         stage_expand_channels = [64, 128, 192, 256]
 
         self.features = nn.Sequential()
-        self.features.add(SqueezeInitBlock(
+        self.features.add_module("init_block", SqueezeInitBlock(
             in_channels=input_channels,
             out_channels=first_out_channels,
             kernel_size=first_kernel_size))
@@ -110,27 +110,25 @@ class SqueezeNet(nn.Module):
         for i in range(len(stage_squeeze_channels)):
             for j in range(2):
                 if (pool_ind < len(pool_stages) - 1) and (k == pool_stages[pool_ind]):
-                    self.features.add(squeeze_pool())
+                    self.features.add_module("pool_{}".format(pool_ind + 1), squeeze_pool())
                     pool_ind += 1
                 in_channels = first_out_channels if (i == 0 and j == 0) else \
                     (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
-                self.features.add(FireUnit(
+                self.features.add_module("fire_{}".format(k + 1), FireUnit(
                     in_channels=in_channels,
                     squeeze_channels=stage_squeeze_channels[i],
                     expand1x1_channels=stage_expand_channels[i],
                     expand3x3_channels=stage_expand_channels[i]))
                 k += 1
-        self.features.add(nn.Dropout(p=0.5))
+        self.features.add_module('dropout', nn.Dropout(p=0.5))
 
         self.output = nn.Sequential()
-        self.output.add_module(
-            name='final_conv',
-            module=nn.Conv2d(
+        self.output.add_module('final_conv', nn.Conv2d(
                 in_channels=(2 * stage_expand_channels[-1]),
                 out_channels=num_classes,
                 kernel_size=1))
-        self.output.add(nn.ReLU(inplace=True))
-        self.output.add(nn.AvgPool2d(kernel_size=13))
+        self.output.add_module('final_activ', nn.ReLU(inplace=True))
+        self.output.add_module('final_pool', nn.AvgPool2d(kernel_size=13))
 
         self._init_params()
 

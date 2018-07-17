@@ -75,18 +75,18 @@ class MobileNet(nn.Module):
         input_channels = 3
 
         self.features = nn.Sequential()
-        self.features.add(ConvBlock(
+        self.features.add_module("init_block", ConvBlock(
             in_channels=input_channels,
             out_channels=channels[0],
             kernel_size=3,
             stride=2,
             padding=1))
         for i in range(len(strides)):
-            self.features.add(DwsConvBlock(
+            self.features.add_module("block_{}".format(i + 1), DwsConvBlock(
                 in_channels=channels[i],
                 out_channels=channels[i + 1],
                 stride=strides[i]))
-        self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features.add_module('final_pool', nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
             in_features=channels[-1],

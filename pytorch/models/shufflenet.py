@@ -152,7 +152,7 @@ class ShuffleNet(nn.Module):
         input_channels = 3
 
         self.features = nn.Sequential()
-        self.features.add(ShuffleInitBlock(
+        self.features.add_module("init_block", ShuffleInitBlock(
             in_channels=input_channels,
             out_channels=stage_out_channels[0]))
 
@@ -161,15 +161,15 @@ class ShuffleNet(nn.Module):
             in_channels_i = stage_out_channels[i]
             out_channels_i = stage_out_channels[i + 1]
             for j in range(stage_num_blocks[i]):
-                stage.add(ShuffleUnit(
+                stage.add_module("unit_{}".format(j + 1), ShuffleUnit(
                     in_channels=(in_channels_i if j == 0 else out_channels_i),
                     out_channels=out_channels_i,
                     groups=groups,
                     downsample=(j == 0),
                     ignore_group=(i == 0 and j == 0)))
-            self.features.add(stage)
+            self.features.add_module("stage_{}".format(i + 1), stage)
 
-        self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features.add_module('final_pool', nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
             in_features=stage_out_channels[-1],

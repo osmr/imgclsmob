@@ -126,7 +126,7 @@ class MENet(nn.Module):
         input_channels = 3
 
         self.features = nn.Sequential()
-        self.features.add(ShuffleInitBlock(
+        self.features.add_module("init_block", ShuffleInitBlock(
             in_channels=input_channels,
             out_channels=block_channels[0]))
 
@@ -135,16 +135,16 @@ class MENet(nn.Module):
             in_channels_i = block_channels[i]
             out_channels_i = block_channels[i + 1]
             for j in range(block_channels[i]):
-                stage.add(MEModule(
+                stage.add_module("unit_{}".format(j + 1), MEModule(
                     in_channels=(in_channels_i if j == 0 else out_channels_i),
                     out_channels=out_channels_i,
                     side_channels=side_channels,
                     groups=groups,
                     downsample=(j == 0),
                     ignore_group=(i == 0 and j == 0)))
-            self.features.add(stage)
+            self.features.add_module("stage_{}".format(i + 1), stage)
 
-        self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features.add_module(nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
             in_features=block_channels[-1],

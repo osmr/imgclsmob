@@ -240,8 +240,8 @@ def shufflenet0_5_g4(**kwargs):
     return get_shufflenet(0.5, 4, **kwargs)
 
 
-def shufflenet0_5_g8(**kwargs):
-    return get_shufflenet(0.5, 8, **kwargs)
+# def shufflenet0_5_g8(**kwargs):
+#     return get_shufflenet(0.5, 8, **kwargs)
 
 
 def shufflenet0_25_g1(**kwargs):

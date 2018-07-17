@@ -387,7 +387,7 @@ def _get_model(name, **kwargs):
         'shufflenet0_5_g2': shufflenet0_5_g2,
         'shufflenet0_5_g3': shufflenet0_5_g3,
         'shufflenet0_5_g4': shufflenet0_5_g4,
-        'shufflenet0_5_g8': shufflenet0_5_g8,
+        #'shufflenet0_5_g8': shufflenet0_5_g8,
         'shufflenet0_25_g1': shufflenet0_25_g1,
         'shufflenet0_25_g2': shufflenet0_25_g2,
         'shufflenet0_25_g3': shufflenet0_25_g3,

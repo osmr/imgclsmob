@@ -16,13 +16,12 @@ class FireConv(nn.Module):
                  kernel_size,
                  padding):
         super(FireConv, self).__init__()
-        with self.name_scope():
-            self.conv = nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                padding=padding)
-            self.activ = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            padding=padding)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -38,22 +37,21 @@ class FireUnit(nn.Module):
                  expand1x1_channels,
                  expand3x3_channels):
         super(FireUnit, self).__init__()
-        with self.name_scope():
-            self.squeeze = FireConv(
-                in_channels=in_channels,
-                out_channels=squeeze_channels,
-                kernel_size=1,
-                padding=0)
-            self.expand1x1 = FireConv(
-                in_channels=squeeze_channels,
-                out_channels=expand1x1_channels,
-                kernel_size=1,
-                padding=0)
-            self.expand3x3 = FireConv(
-                in_channels=squeeze_channels,
-                out_channels=expand3x3_channels,
-                kernel_size=3,
-                padding=1)
+        self.squeeze = FireConv(
+            in_channels=in_channels,
+            out_channels=squeeze_channels,
+            kernel_size=1,
+            padding=0)
+        self.expand1x1 = FireConv(
+            in_channels=squeeze_channels,
+            out_channels=expand1x1_channels,
+            kernel_size=1,
+            padding=0)
+        self.expand3x3 = FireConv(
+            in_channels=squeeze_channels,
+            out_channels=expand3x3_channels,
+            kernel_size=3,
+            padding=1)
 
     def forward(self, x):
         x = self.squeeze(x)
@@ -77,13 +75,12 @@ class SqueezeInitBlock(nn.Module):
                  out_channels,
                  kernel_size):
         super(SqueezeInitBlock, self).__init__()
-        with self.name_scope():
-            self.conv = nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=2)
-            self.activ = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=2)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -97,46 +94,45 @@ class SqueezeNet(nn.Module):
                  first_out_channels,
                  first_kernel_size,
                  pool_stages,
-                 classes=1000):
+                 num_classes=1000):
         super(SqueezeNet, self).__init__()
         input_channels = 3
         stage_squeeze_channels = [16, 32, 48, 64]
         stage_expand_channels = [64, 128, 192, 256]
 
-        with self.name_scope():
-            self.features = nn.Sequential()
-            self.features.add(SqueezeInitBlock(
-                in_channels=input_channels,
-                out_channels=first_out_channels,
-                kernel_size=first_kernel_size))
-            k = 0
-            pool_ind = 0
-            for i in range(len(stage_squeeze_channels)):
-                for j in range(2):
-                    if (pool_ind < len(pool_stages) - 1) and (k == pool_stages[pool_ind]):
-                        self.features.add(squeeze_pool())
-                        pool_ind += 1
-                    in_channels = first_out_channels if (i == 0 and j == 0) else \
-                        (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
-                    self.features.add(FireUnit(
-                        in_channels=in_channels,
-                        squeeze_channels=stage_squeeze_channels[i],
-                        expand1x1_channels=stage_expand_channels[i],
-                        expand3x3_channels=stage_expand_channels[i]))
-                    k += 1
-            self.features.add(nn.Dropout(p=0.5))
+        self.features = nn.Sequential()
+        self.features.add(SqueezeInitBlock(
+            in_channels=input_channels,
+            out_channels=first_out_channels,
+            kernel_size=first_kernel_size))
+        k = 0
+        pool_ind = 0
+        for i in range(len(stage_squeeze_channels)):
+            for j in range(2):
+                if (pool_ind < len(pool_stages) - 1) and (k == pool_stages[pool_ind]):
+                    self.features.add(squeeze_pool())
+                    pool_ind += 1
+                in_channels = first_out_channels if (i == 0 and j == 0) else \
+                    (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
+                self.features.add(FireUnit(
+                    in_channels=in_channels,
+                    squeeze_channels=stage_squeeze_channels[i],
+                    expand1x1_channels=stage_expand_channels[i],
+                    expand3x3_channels=stage_expand_channels[i]))
+                k += 1
+        self.features.add(nn.Dropout(p=0.5))
 
-            self.output = nn.Sequential()
-            self.output.add_module(
-                name='final_conv',
-                module=nn.Conv2d(
-                    in_channels=(2 * stage_expand_channels[-1]),
-                    out_channels=classes,
-                    kernel_size=1))
-            self.output.add(nn.ReLU(inplace=True))
-            self.output.add(nn.AvgPool2d(kernel_size=13))
+        self.output = nn.Sequential()
+        self.output.add_module(
+            name='final_conv',
+            module=nn.Conv2d(
+                in_channels=(2 * stage_expand_channels[-1]),
+                out_channels=num_classes,
+                kernel_size=1))
+        self.output.add(nn.ReLU(inplace=True))
+        self.output.add(nn.AvgPool2d(kernel_size=13))
 
-            self._init_params()
+        self._init_params()
 
     def _init_params(self):
         for name, module in self.named_modules():

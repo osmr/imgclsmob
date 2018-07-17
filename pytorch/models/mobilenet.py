@@ -21,17 +21,16 @@ class ConvBlock(nn.Module):
                  groups=1):
         super(ConvBlock, self).__init__()
 
-        with self.name_scope():
-            self.conv = nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding,
-                groups=groups,
-                bias=False)
-            self.bn = nn.BatchNorm2d(num_features=out_channels)
-            self.activ = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            groups=groups,
+            bias=False)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -48,18 +47,17 @@ class DwsConvBlock(nn.Module):
                  stride):
         super(DwsConvBlock, self).__init__()
 
-        with self.name_scope():
-            self.dw_conv = ConvBlock(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-                groups=in_channels)
-            self.pw_conv = ConvBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1)
+        self.dw_conv = ConvBlock(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            groups=in_channels)
+        self.pw_conv = ConvBlock(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1)
 
     def forward(self, x):
         x = self.dw_conv(x)
@@ -72,30 +70,29 @@ class MobileNet(nn.Module):
     def __init__(self,
                  channels,
                  strides,
-                 classes=1000):
+                 num_classes=1000):
         super(MobileNet, self).__init__()
         input_channels = 3
 
-        with self.name_scope():
-            self.features = nn.Sequential()
-            self.features.add(ConvBlock(
-                in_channels=input_channels,
-                out_channels=channels[0],
-                kernel_size=3,
-                stride=2,
-                padding=1))
-            for i in range(len(strides)):
-                self.features.add(DwsConvBlock(
-                    in_channels=channels[i],
-                    out_channels=channels[i+1],
-                    stride=strides[i]))
-            self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features = nn.Sequential()
+        self.features.add(ConvBlock(
+            in_channels=input_channels,
+            out_channels=channels[0],
+            kernel_size=3,
+            stride=2,
+            padding=1))
+        for i in range(len(strides)):
+            self.features.add(DwsConvBlock(
+                in_channels=channels[i],
+                out_channels=channels[i + 1],
+                stride=strides[i]))
+        self.features.add(nn.AvgPool2d(kernel_size=7))
 
-            self.output = nn.Linear(
-                in_features=channels[-1],
-                out_features=classes)
+        self.output = nn.Linear(
+            in_features=channels[-1],
+            out_features=num_classes)
 
-            self._init_params()
+        self._init_params()
 
     def _init_params(self):
         for name, module in self.named_modules():

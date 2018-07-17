@@ -56,8 +56,6 @@ class ChannelShuffle(nn.Module):
         super(ChannelShuffle, self).__init__()
         assert (channels % groups == 0)
         self.groups = groups
-        # with self.name_scope():
-        #     pass
 
     def forward(self, x):
         return channel_shuffle(x, self.groups)
@@ -69,20 +67,20 @@ class ShuffleInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
-        with self.name_scope():
-            self.conv = nn.Conv2d(
-                in_channels = in_channels,
-                out_channels=out_channels,
-                kernel_size=3,
-                stride=2,
-                padding=1,
-                bias=False)
-            self.bn = nn.BatchNorm2d(num_features=out_channels)
-            self.activ = nn.ReLU(inplace=True)
-            self.pool = nn.MaxPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=1)
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=3,
+            stride=2,
+            padding=1,
+            bias=False)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        self.activ = nn.ReLU(inplace=True)
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
 
     def forward(self, x):
         x = self.conv(x)
@@ -107,27 +105,26 @@ class ShuffleUnit(nn.Module):
         if downsample:
             out_channels -= in_channels
 
-        with self.name_scope():
-            self.compress_conv1 = group_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
-            self.c_shuffle = ChannelShuffle(
-                channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.dw_conv2 = depthwise_conv3x3(
-                channels=mid_channels,
-                stride=(2 if self.downsample else 1))
-            self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
-            self.expand_conv3 = group_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                groups=groups)
-            self.expand_bn3 = nn.BatchNorm2d(num_features=out_channels)
-            if downsample:
-                self.avgpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
-            self.activ = nn.ReLU(inplace=True)
+        self.compress_conv1 = group_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            groups=(1 if ignore_group else groups))
+        self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
+        self.c_shuffle = ChannelShuffle(
+            channels=mid_channels,
+            groups=(1 if ignore_group else groups))
+        self.dw_conv2 = depthwise_conv3x3(
+            channels=mid_channels,
+            stride=(2 if self.downsample else 1))
+        self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
+        self.expand_conv3 = group_conv1x1(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            groups=groups)
+        self.expand_bn3 = nn.BatchNorm2d(num_features=out_channels)
+        if downsample:
+            self.avgpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         identity = x
@@ -149,37 +146,36 @@ class ShuffleNet(nn.Module):
     def __init__(self,
                  groups,
                  stage_out_channels,
-                 classes=1000):
+                 num_classes=1000):
         super(ShuffleNet, self).__init__()
         stage_num_blocks = [4, 8, 4]
         input_channels = 3
 
-        with self.name_scope():
-            self.features = nn.Sequential()
-            self.features.add(ShuffleInitBlock(
-                in_channels=input_channels,
-                out_channels=stage_out_channels[0]))
+        self.features = nn.Sequential()
+        self.features.add(ShuffleInitBlock(
+            in_channels=input_channels,
+            out_channels=stage_out_channels[0]))
 
-            for i in range(len(stage_num_blocks)):
-                stage = nn.Sequential()
-                in_channels_i = stage_out_channels[i]
-                out_channels_i = stage_out_channels[i + 1]
-                for j in range(stage_num_blocks[i]):
-                    stage.add(ShuffleUnit(
-                        in_channels=(in_channels_i if j == 0 else out_channels_i),
-                        out_channels=out_channels_i,
-                        groups=groups,
-                        downsample=(j == 0),
-                        ignore_group=(i == 0 and j == 0)))
-                self.features.add(stage)
+        for i in range(len(stage_num_blocks)):
+            stage = nn.Sequential()
+            in_channels_i = stage_out_channels[i]
+            out_channels_i = stage_out_channels[i + 1]
+            for j in range(stage_num_blocks[i]):
+                stage.add(ShuffleUnit(
+                    in_channels=(in_channels_i if j == 0 else out_channels_i),
+                    out_channels=out_channels_i,
+                    groups=groups,
+                    downsample=(j == 0),
+                    ignore_group=(i == 0 and j == 0)))
+            self.features.add(stage)
 
-            self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features.add(nn.AvgPool2d(kernel_size=7))
 
-            self.output = nn.Linear(
-                in_features=stage_out_channels[-1],
-                out_features=classes)
+        self.output = nn.Linear(
+            in_features=stage_out_channels[-1],
+            out_features=num_classes)
 
-            self._init_params()
+        self._init_params()
 
     def _init_params(self):
         for name, module in self.named_modules():
@@ -259,8 +255,8 @@ def shufflenet0_5_g4(**kwargs):
     return get_shufflenet(0.5, 4, **kwargs)
 
 
-def shufflenet0_5_g8(**kwargs):
-    return get_shufflenet(0.5, 8, **kwargs)
+# def shufflenet0_5_g8(**kwargs):
+#     return get_shufflenet(0.5, 8, **kwargs)
 
 
 def shufflenet0_25_g1(**kwargs):

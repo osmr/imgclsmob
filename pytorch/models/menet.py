@@ -47,41 +47,42 @@ class MEModule(nn.Module):
         if downsample:
             out_channels -= in_channels
 
-        with self.name_scope():
-            # residual branch
-            self.compress_conv1 = group_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
-            self.c_shuffle = ChannelShuffle(groups=(1 if ignore_group else groups))
-            self.dw_conv2 = depthwise_conv3x3(
-                channels=mid_channels,
-                stride=(2 if self.downsample else 1))
-            self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
-            self.expand_conv3 = group_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                groups=groups)
-            self.expand_bn3 = nn.BatchNorm2d(num_features=out_channels)
-            if downsample:
-                self.avgpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
-            self.activ = nn.ReLU(inplace=True)
+        # residual branch
+        self.compress_conv1 = group_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            groups=(1 if ignore_group else groups))
+        self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
+        self.c_shuffle = ChannelShuffle(
+            channels=mid_channels,
+            groups=(1 if ignore_group else groups))
+        self.dw_conv2 = depthwise_conv3x3(
+            channels=mid_channels,
+            stride=(2 if self.downsample else 1))
+        self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
+        self.expand_conv3 = group_conv1x1(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            groups=groups)
+        self.expand_bn3 = nn.BatchNorm2d(num_features=out_channels)
+        if downsample:
+            self.avgpool = nn.AvgPool2d(kernel_size=3, stride=2, padding=1)
+        self.activ = nn.ReLU(inplace=True)
 
-            # fusion branch
-            self.s_merge_conv = conv1x1(
-                in_channels=mid_channels,
-                out_channels=side_channels)
-            self.s_merge_bn = nn.BatchNorm2d(num_features=side_channels)
-            self.s_conv = conv3x3(
-                in_channels=side_channels,
-                out_channels=side_channels,
-                stride=(2 if self.downsample else 1))
-            self.s_conv_bn = nn.BatchNorm2d(num_features=side_channels)
-            self.s_evolve_conv = conv1x1(
-                in_channels=side_channels,
-                out_channels=mid_channels)
-            self.s_evolve_bn = nn.BatchNorm2d(num_features=mid_channels)
+        # fusion branch
+        self.s_merge_conv = conv1x1(
+            in_channels=mid_channels,
+            out_channels=side_channels)
+        self.s_merge_bn = nn.BatchNorm2d(num_features=side_channels)
+        self.s_conv = conv3x3(
+            in_channels=side_channels,
+            out_channels=side_channels,
+            stride=(2 if self.downsample else 1))
+        self.s_conv_bn = nn.BatchNorm2d(num_features=side_channels)
+        self.s_evolve_conv = conv1x1(
+            in_channels=side_channels,
+            out_channels=mid_channels)
+        self.s_evolve_bn = nn.BatchNorm2d(num_features=mid_channels)
 
     def forward(self, x):
         identity = x
@@ -120,37 +121,36 @@ class MENet(nn.Module):
                  block_channels,
                  side_channels,
                  groups,
-                 classes=1000):
+                 num_classes=1000):
         super(MENet, self).__init__()
         input_channels = 3
 
-        with self.name_scope():
-            self.features = nn.Sequential()
-            self.features.add(ShuffleInitBlock(
-                in_channels=input_channels,
-                out_channels=block_channels[0]))
+        self.features = nn.Sequential()
+        self.features.add(ShuffleInitBlock(
+            in_channels=input_channels,
+            out_channels=block_channels[0]))
 
-            for i in range(len(block_channels) - 1):
-                stage = nn.Sequential()
-                in_channels_i = block_channels[i]
-                out_channels_i = block_channels[i + 1]
-                for j in range(block_channels[i]):
-                    stage.add(MEModule(
-                        in_channels=(in_channels_i if j == 0 else out_channels_i),
-                        out_channels=out_channels_i,
-                        side_channels=side_channels,
-                        groups=groups,
-                        downsample=(j == 0),
-                        ignore_group=(i == 0 and j == 0)))
-                self.features.add(stage)
+        for i in range(len(block_channels) - 1):
+            stage = nn.Sequential()
+            in_channels_i = block_channels[i]
+            out_channels_i = block_channels[i + 1]
+            for j in range(block_channels[i]):
+                stage.add(MEModule(
+                    in_channels=(in_channels_i if j == 0 else out_channels_i),
+                    out_channels=out_channels_i,
+                    side_channels=side_channels,
+                    groups=groups,
+                    downsample=(j == 0),
+                    ignore_group=(i == 0 and j == 0)))
+            self.features.add(stage)
 
-            self.features.add(nn.AvgPool2d(kernel_size=7))
+        self.features.add(nn.AvgPool2d(kernel_size=7))
 
-            self.output = nn.Linear(
-                in_features=block_channels[-1],
-                out_features=classes)
+        self.output = nn.Linear(
+            in_features=block_channels[-1],
+            out_features=num_classes)
 
-            self._init_params()
+        self._init_params()
 
     def _init_params(self):
         for name, module in self.named_modules():

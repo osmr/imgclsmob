@@ -217,7 +217,6 @@ def prepare_pt_context(num_gpus,
 def get_data_loader(data_dir,
                     batch_size,
                     num_workers):
-    valdir = os.path.join(data_dir, 'val')
     normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225])
@@ -243,7 +242,7 @@ def get_data_loader(data_dir,
 
     val_loader = torch.utils.data.DataLoader(
         dataset=datasets.ImageFolder(
-            root=valdir,
+            root=os.path.join(data_dir, 'val'),
             transform=transforms.Compose([
                 transforms.Resize(256),
                 transforms.CenterCrop(224),
@@ -279,7 +278,7 @@ def _get_model(name, **kwargs):
         'shufflenet0_5_g2': shufflenet0_5_g2,
         'shufflenet0_5_g3': shufflenet0_5_g3,
         'shufflenet0_5_g4': shufflenet0_5_g4,
-        'shufflenet0_5_g8': shufflenet0_5_g8,
+        #'shufflenet0_5_g8': shufflenet0_5_g8,
         'shufflenet0_25_g1': shufflenet0_25_g1,
         'shufflenet0_25_g2': shufflenet0_25_g2,
         'shufflenet0_25_g3': shufflenet0_25_g3,
@@ -290,11 +289,11 @@ def _get_model(name, **kwargs):
     try:
         net = models.__dict__[name](**kwargs)
         return net
-    except ValueError as e:
+    except KeyError as e:
         upstream_supported = str(e)
     name = name.lower()
-    if name not in models:
-        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(models.keys()))))
+    if name not in slk_models:
+        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(slk_models.keys()))))
     net = slk_models[name](**kwargs)
     return net
 
@@ -305,7 +304,7 @@ def prepare_model(model_name,
                   pretrained_model_file_path,
                   use_cuda):
     kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
+              'num_classes': classes}
 
     net = _get_model(model_name, **kwargs)
 
@@ -362,6 +361,9 @@ def prepare_trainer(net,
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch']
         best_prec1 = checkpoint['best_prec1']
+    else:
+        start_epoch = None
+        best_prec1 = None
 
     cudnn.benchmark = True
 
@@ -371,12 +373,11 @@ def prepare_trainer(net,
 
 
 def calc_net_weight_count(net):
-    net_params = net.collect_params()
+    net.train()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
-    for param in net_params.values():
-        if param.shape is None:
-            continue
-        weight_count += np.prod(param.shape)
+    for param in net_params:
+        weight_count += np.prod(param.size())
     return weight_count
 
 
@@ -487,9 +488,6 @@ def train_epoch(epoch,
         loss.backward()
         optimizer.step()
 
-        if epoch == 0 and i == 0:
-            weight_count = calc_net_weight_count(net)
-            logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
         prec1 = accuracy(output, target, topk=(1, ))
         acc_top1.update(prec1[0], input.size(0))
@@ -546,6 +544,9 @@ def train_net(batch_size,
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             start_epoch1 - 1, err_top1_val, err_top5_val))
 
+    weight_count = calc_net_weight_count(net)
+    logging.info('Model: {} trainable parameters'.format(weight_count))
+
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
         err_top1_train, train_loss = train_epoch(
@@ -599,9 +600,6 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    if args.convert_to_mxnet:
-        batch_size = 1
-
     classes = 1000
     net = prepare_model(
         model_name=args.model,
@@ -638,7 +636,8 @@ def main():
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
             pretrained_model_file_path=args.resume.strip())
-        args.start_epoch = start_epoch
+        if start_epoch is not None:
+            args.start_epoch = start_epoch
 
         if args.save_dir and args.save_interval:
             lp_saver = TrainLogParamSaver(

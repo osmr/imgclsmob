@@ -229,8 +229,13 @@ def prepare_logger(log_file_path):
     log_dir_path = os.path.dirname(log_file_path)
     if log_dir_path and not os.path.exists(log_dir_path):
         os.makedirs(log_dir_path)
+        log_file_exist = False
+    else:
+        log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
     fh = logging.FileHandler(log_file_path)
     logger.addHandler(fh)
+    if log_file_exist:
+        logging.info('--------------------------------')
     return logger
 
 
@@ -701,7 +706,9 @@ def main():
         assert (args.use_pretrained or args.resume.strip())
         x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
         net.forward(x)
-        net.export(os.path.join(args.save_dir, 'imagenet_{}'.format(args.model)))
+        export_checkpoint_file_path_prefix = os.path.join(args.save_dir, 'imagenet_{}'.format(args.model))
+        net.export(export_checkpoint_file_path_prefix)
+        logging.info('Convert model to MXNet format: {}'.format(export_checkpoint_file_path_prefix))
     elif args.evaluate:
         assert (args.use_pretrained or args.resume.strip())
         test(

@@ -1,2 +1,4 @@
 mxnet
 gluoncv
+torch
+torchvision

@@ -3,58 +3,33 @@ import time
 import logging
 import os
 import sys
+import warnings
+import random
+import numpy as np
 
-import mxnet as mx
-from mxnet import gluon
-from mxnet import autograd as ag
-from mxnet.gluon.data.vision import transforms
+import torch.backends.cudnn as cudnn
+import torch.utils.data
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+import torchvision.models as models
 
-from gluoncv.data import imagenet
-from gluoncv.model_zoo import get_model
-from gluoncv.utils import LRScheduler
-from gluoncv import utils as gutils
+from common.env_stats import get_env_stats
+from common.train_log_param_saver import TrainLogParamSaver
 
-from env_stats import get_env_stats
-from train_log_param_saver import TrainLogParamSaver
-
-from models.mobilenet import *
-from models.shufflenet import *
-from models.menet import *
-from models.squeezenet import *
+from pytorch.models.mobilenet import *
+from pytorch.models.shufflenet import *
+from pytorch.models.menet import *
+from pytorch.models.squeezenet import *
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train a model for image classification',
+    parser = argparse.ArgumentParser(description='Train a model for image classification (PyTorch)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--data-dir',
         type=str,
         default='../imgclsmob_data/imagenet',
         help='training and validation pictures to use.')
-    parser.add_argument(
-        '--rec-train',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/train.rec',
-        help='the training data')
-    parser.add_argument(
-        '--rec-train-idx',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/train.idx',
-        help='the index of training data')
-    parser.add_argument(
-        '--rec-val',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/val.rec',
-        help='the validation data')
-    parser.add_argument(
-        '--rec-val-idx',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/val.idx',
-        help='the index of validation data')
-    parser.add_argument(
-        '--use-rec',
-        action='store_true',
-        help='use image record iter for data input. default is false.')
 
     parser.add_argument(
         '--model',
@@ -66,11 +41,6 @@ def parse_args():
         action='store_true',
         help='enable using pretrained model from gluon.')
     parser.add_argument(
-        '--dtype',
-        type=str,
-        default='float32',
-        help='data type for training. default is float32')
-    parser.add_argument(
         '--resume',
         type=str,
         default='',
@@ -81,12 +51,6 @@ def parse_args():
         dest='evaluate',
         action='store_true',
         help='only evaluate model on validation set')
-    parser.add_argument(
-        '-mx',
-        '--mxnet',
-        dest='convert_to_mxnet',
-        action='store_true',
-        help='only convert model into MXnet format')
 
     parser.add_argument(
         '--num-gpus',
@@ -169,19 +133,6 @@ def parse_args():
         help='weight decay rate. default is 0.0001.')
 
     parser.add_argument(
-        '--last-gamma',
-        action='store_true',
-        help='whether to initialize the gamma of the last BN layer in each bottleneck to zero')
-    parser.add_argument(
-        '--use_se',
-        action='store_true',
-        help='use SE layers or not in resnext. default is false.')
-    parser.add_argument(
-        '--batch-norm',
-        action='store_true',
-        help='enable batch normalization or not in vgg. default is false.')
-
-    parser.add_argument(
         '--log-interval',
         type=int,
         default=50,
@@ -210,12 +161,12 @@ def parse_args():
     parser.add_argument(
         '--log-packages',
         type=str,
-        default='mxnet',
+        default='torch, torchvision',
         help='list of python packages for logging')
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='mxnet-cu92, gluoncv',
+        default='',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args
@@ -243,128 +194,72 @@ def prepare_logger(log_dir_path,
 def init_rand(seed):
     if seed <= 0:
         seed = np.random.randint(10000)
-    gutils.random.seed(seed)
+    else:
+        cudnn.deterministic = True
+        warnings.warn('You have chosen to seed training. '
+                      'This will turn on the CUDNN deterministic setting, '
+                      'which can slow down your training considerably! '
+                      'You may see unexpected behavior when restarting '
+                      'from checkpoints.')
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
     return seed
 
 
-def prepare_mx_context(num_gpus,
+def prepare_pt_context(num_gpus,
                        batch_size):
-    ctx = [mx.gpu(i) for i in range(num_gpus)] if num_gpus > 0 else [mx.cpu()]
+    use_cuda = (num_gpus > 0)
     batch_size *= max(1, num_gpus)
-    return ctx, batch_size
-
-
-def get_data_rec(rec_train,
-                 rec_train_idx,
-                 rec_val,
-                 rec_val_idx,
-                 batch_size,
-                 num_workers):
-    rec_train = os.path.expanduser(rec_train)
-    rec_train_idx = os.path.expanduser(rec_train_idx)
-    rec_val = os.path.expanduser(rec_val)
-    rec_val_idx = os.path.expanduser(rec_val_idx)
-    jitter_param = 0.4
-    lighting_param = 0.1
-    mean_rgb = [123.68, 116.779, 103.939]
-    std_rgb = [58.393, 57.12, 57.375]
-
-    def batch_fn(batch, ctx):
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-        return data, label
-
-    train_data = mx.io.ImageRecordIter(
-        path_imgrec         = rec_train,
-        path_imgidx         = rec_train_idx,
-        preprocess_threads  = num_workers,
-        shuffle             = True,
-        batch_size          = batch_size,
-
-        data_shape          = (3, 224, 224),
-        mean_r              = mean_rgb[0],
-        mean_g              = mean_rgb[1],
-        mean_b              = mean_rgb[2],
-        std_r               = std_rgb[0],
-        std_g               = std_rgb[1],
-        std_b               = std_rgb[2],
-        rand_mirror         = True,
-        random_resized_crop = True,
-        max_aspect_ratio    = 4. / 3.,
-        min_aspect_ratio    = 3. / 4.,
-        max_random_area     = 1,
-        min_random_area     = 0.08,
-        brightness          = jitter_param,
-        saturation          = jitter_param,
-        contrast            = jitter_param,
-        pca_noise           = lighting_param,
-    )
-    val_data = mx.io.ImageRecordIter(
-        path_imgrec         = rec_val,
-        path_imgidx         = rec_val_idx,
-        preprocess_threads  = num_workers,
-        shuffle             = False,
-        batch_size          = batch_size,
-
-        resize              = 256,
-        data_shape          = (3, 224, 224),
-        mean_r              = mean_rgb[0],
-        mean_g              = mean_rgb[1],
-        mean_b              = mean_rgb[2],
-        std_r               = std_rgb[0],
-        std_g               = std_rgb[1],
-        std_b               = std_rgb[2],
-    )
-    return train_data, val_data, batch_fn
+    return use_cuda, batch_size
 
 
 def get_data_loader(data_dir,
                     batch_size,
                     num_workers):
-    normalize = transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    valdir = os.path.join(data_dir, 'val')
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225])
     jitter_param = 0.4
-    lighting_param = 0.1
 
-    def batch_fn(batch, ctx):
-        data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-        return data, label
-
-    transform_train = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomFlipLeftRight(),
-        transforms.RandomColorJitter(
-            brightness=jitter_param,
-            contrast=jitter_param,
-            saturation=jitter_param),
-        transforms.RandomLighting(lighting_param),
-        transforms.ToTensor(),
-        normalize
-    ])
-    transform_test = transforms.Compose([
-        transforms.Resize(256, keep_ratio=True),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize
-    ])
-
-    train_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=True).transform_first(transform_train),
+    train_loader = torch.utils.data.DataLoader(
+        dataset=datasets.ImageFolder(
+            root=os.path.join(data_dir, 'train'),
+            transform=transforms.Compose([
+                transforms.RandomResizedCrop(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ColorJitter(
+                    brightness=jitter_param,
+                    contrast=jitter_param,
+                    saturation=jitter_param),
+                transforms.ToTensor(),
+                normalize,
+            ])),
         batch_size=batch_size,
         shuffle=True,
-        last_batch='discard',
-        num_workers=num_workers)
-    val_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=False).transform_first(transform_test),
+        num_workers=num_workers,
+        pin_memory=True)
+
+    val_loader = torch.utils.data.DataLoader(
+        dataset=datasets.ImageFolder(
+            root=valdir,
+            transform=transforms.Compose([
+                transforms.Resize(256),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                normalize,
+            ])),
         batch_size=batch_size,
         shuffle=False,
-        num_workers=num_workers)
+        num_workers=num_workers,
+        pin_memory=True)
 
-    return train_data, val_data, batch_fn
+    return train_loader, val_loader
 
 
 def _get_model(name, **kwargs):
-    models = {
+    slk_models = {
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
         'mobilenet1_0': mobilenet1_0,
@@ -393,56 +288,40 @@ def _get_model(name, **kwargs):
         'menet108_8x1_g3': menet108_8x1_g3,
         }
     try:
-        net = get_model(name, **kwargs)
+        net = models.__dict__[name](**kwargs)
         return net
     except ValueError as e:
         upstream_supported = str(e)
     name = name.lower()
     if name not in models:
         raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(models.keys()))))
-    net = models[name](**kwargs)
+    net = slk_models[name](**kwargs)
     return net
+
 
 def prepare_model(model_name,
                   classes,
                   use_pretrained,
                   pretrained_model_file_path,
-                  batch_norm,
-                  use_se,
-                  last_gamma,
-                  dtype,
-                  ctx):
-    kwargs = {'ctx': ctx,
-              'pretrained': use_pretrained,
+                  use_cuda):
+    kwargs = {'pretrained': use_pretrained,
               'classes': classes}
-
-    if model_name.startswith('vgg'):
-        kwargs['batch_norm'] = batch_norm
-    elif model_name.startswith('resnext'):
-        kwargs['use_se'] = use_se
-
-    if last_gamma:
-        kwargs['last_gamma'] = True
 
     net = _get_model(model_name, **kwargs)
 
+    if model_name.startswith('alexnet') or model_name.startswith('vgg'):
+        net.features = torch.nn.DataParallel(net.features)
+    else:
+        net = torch.nn.DataParallel(net)
+
+    if use_cuda:
+        net = net.cuda()
+
     if pretrained_model_file_path:
+        assert (os.path.isfile(pretrained_model_file_path))
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        net.load_parameters(
-            filename=pretrained_model_file_path,
-            ctx=ctx)
-
-    net.cast(dtype)
-
-    net.hybridize(
-        static_alloc=True,
-        static_shape=True)
-
-    net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-    # for param in net.collect_params().values():
-    #     if param._data is not None:
-    #         continue
-    #     param.initialize(ctx=ctx)
+        checkpoint = torch.load(pretrained_model_file_path)
+        net.load_state_dict(checkpoint['state_dict'])
 
     return net
 
@@ -460,35 +339,35 @@ def prepare_trainer(net,
                     batch_size,
                     num_epochs,
                     num_training_samples,
-                    dtype):
+                    pretrained_model_file_path):
 
-    if lr_decay_period > 0:
-        lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
+    if optimizer_name == 'sgd':
+        optimizer = torch.optim.SGD(
+            params=net.parameters(),
+            lr=lr,
+            momentum=momentum,
+            weight_decay=wd)
+    elif optimizer_name == 'nag':
+        optimizer = torch.optim.SGD(
+            params=net.parameters(),
+            lr=lr,
+            momentum=momentum,
+            weight_decay=wd,
+            nesterov=True)
     else:
-        lr_decay_epoch = [int(i) for i in lr_decay_epoch.split(',')]
-    num_batches = num_training_samples // batch_size
-    lr_scheduler = LRScheduler(
-        mode=lr_mode,
-        baselr=lr,
-        niters=num_batches,
-        nepochs=num_epochs,
-        step=lr_decay_epoch,
-        step_factor=lr_decay,
-        power=2,
-        warmup_epochs=warmup_epochs)
+        raise Exception()
 
-    optimizer_params = {'wd': wd,
-                        'momentum': momentum,
-                        'lr_scheduler': lr_scheduler}
-    if dtype != 'float32':
-        optimizer_params['multi_precision'] = True
+    if pretrained_model_file_path:
+        checkpoint = torch.load(pretrained_model_file_path)
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        start_epoch = checkpoint['epoch']
+        best_prec1 = checkpoint['best_prec1']
 
-    trainer = gluon.Trainer(
-        params=net.collect_params(),
-        optimizer=optimizer_name,
-        optimizer_params=optimizer_params)
+    cudnn.benchmark = True
 
-    return trainer, lr_scheduler
+    lr_scheduler = None
+
+    return optimizer, lr_scheduler, start_epoch, best_prec1
 
 
 def calc_net_weight_count(net):
@@ -506,36 +385,67 @@ def save_params(file_path,
     net.save_parameters(file_path)
 
 
+class AverageMeter(object):
+    """Computes and stores the average and current value"""
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        self.val = val
+        self.sum += val * n
+        self.count += n
+        self.avg = self.sum / self.count
+
+
+def accuracy(output, target, topk=(1,)):
+    """Computes the precision@k for the specified values of k"""
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+
 def validate(acc_top1,
              acc_top5,
              net,
              val_data,
-             batch_fn,
-             use_rec,
-             dtype,
-             ctx):
-    if use_rec:
-        val_data.reset()
+             use_cuda):
+    net.eval()
     acc_top1.reset()
     acc_top5.reset()
-    for batch in val_data:
-        data, label = batch_fn(batch, ctx)
-        outputs = [net(X.astype(dtype, copy=False)) for X in data]
-        acc_top1.update(label, outputs)
-        acc_top5.update(label, outputs)
-    _, top1 = acc_top1.get()
-    _, top5 = acc_top5.get()
+    with torch.no_grad():
+        for input, target in val_data:
+            if use_cuda:
+                target = target.cuda(non_blocking=True)
+            output = net(input)
+            prec1, prec5 = accuracy(output, target, topk=(1, 5))
+            acc_top1.update(prec1[0], input.size(0))
+            acc_top5.update(prec5[0], input.size(0))
+    top1 = acc_top1.avg
+    top5 = acc_top5.avg
     return 1-top1, 1-top5
 
 
 def test(net,
          val_data,
-         batch_fn,
-         use_rec,
-         dtype,
-         ctx):
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
+         use_cuda):
+    acc_top1 = AverageMeter()
+    acc_top5 = AverageMeter()
 
     tic = time.time()
     err_top1_val, err_top5_val = validate(
@@ -543,10 +453,7 @@ def test(net,
         acc_top5=acc_top5,
         net=net,
         val_data=val_data,
-        batch_fn=batch_fn,
-        use_rec=use_rec,
-        dtype=dtype,
-        ctx=ctx)
+        use_cuda=use_cuda)
     logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
         err_top1_val, err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
@@ -557,47 +464,45 @@ def train_epoch(epoch,
                 acc_top1,
                 net,
                 train_data,
-                batch_fn,
-                use_rec,
-                dtype,
-                ctx,
+                use_cuda,
                 L,
-                trainer,
+                optimizer,
                 lr_scheduler,
                 batch_size,
                 log_interval):
 
     tic = time.time()
-    if use_rec:
-        train_data.reset()
+    net.train()
     acc_top1.reset()
     train_loss = 0.0
 
     btic = time.time()
-    for i, batch in enumerate(train_data):
-        data, label = batch_fn(batch, ctx)
-        with ag.record():
-            outputs = [net(X.astype(dtype, copy=False)) for X in data]
-            loss = [L(yhat, y) for yhat, y in zip(outputs, label)]
-        for l in loss:
-            l.backward()
-        lr_scheduler.update(i, epoch)
-        trainer.step(batch_size)
+    for i, (input, target) in enumerate(train_data):
+        if use_cuda:
+            input = input.cuda(non_blocking=True)
+            target = target.cuda(non_blocking=True)
+        output = net(input)
+        loss = L(output, target)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
         if epoch == 0 and i == 0:
             weight_count = calc_net_weight_count(net)
             logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
-        acc_top1.update(label, outputs)
+        prec1 = accuracy(output, target, topk=(1, ))
+        acc_top1.update(prec1[0], input.size(0))
+
         if log_interval and not (i + 1) % log_interval:
             _, top1 = acc_top1.get()
             err_top1_train = 1.0 - top1
             speed = batch_size * log_interval / (time.time() - btic)
             logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
-                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+                epoch + 1, i, speed, err_top1_train, optimizer.learning_rate))
             btic = time.time()
 
-    _, top1 = acc_top1.get()
+    top1 = acc_top1.avg
     err_top1_train = 1.0 - top1
     train_loss /= (i + 1)
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
@@ -615,23 +520,16 @@ def train_net(batch_size,
               start_epoch1,
               train_data,
               val_data,
-              batch_fn,
-              use_rec,
-              dtype,
               net,
-              trainer,
+              optimizer,
               lr_scheduler,
               lp_saver,
               log_interval,
-              ctx):
+              use_cuda):
+    acc_top1 = AverageMeter()
+    acc_top5 = AverageMeter()
 
-    if isinstance(ctx, mx.Context):
-        ctx = [ctx]
-
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
-
-    L = gluon.loss.SoftmaxCrossEntropyLoss()
+    L = nn.CrossEntropyLoss().cuda()
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
@@ -642,10 +540,7 @@ def train_net(batch_size,
             acc_top5=acc_top5,
             net=net,
             val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=use_rec,
-            dtype=dtype,
-            ctx=ctx)
+            use_cuda=use_cuda)
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             start_epoch1 - 1, err_top1_val, err_top5_val))
 
@@ -656,12 +551,9 @@ def train_net(batch_size,
             acc_top1,
             net,
             train_data,
-            batch_fn,
-            use_rec,
-            dtype,
-            ctx,
+            use_cuda,
             L,
-            trainer,
+            optimizer,
             lr_scheduler,
             batch_size,
             log_interval)
@@ -671,10 +563,7 @@ def train_net(batch_size,
             acc_top5=acc_top5,
             net=net,
             val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=use_rec,
-            dtype=dtype,
-            ctx=ctx)
+            use_cuda=use_cuda)
 
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             epoch + 1, err_top1_val, err_top5_val))
@@ -704,7 +593,7 @@ def main():
         packages=args.log_packages.replace(' ', '').split(','),
         pip_packages=args.log_pip_packages.replace(' ', '').split(','))))
 
-    ctx, batch_size = prepare_mx_context(
+    use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
@@ -717,46 +606,22 @@ def main():
         classes=classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        batch_norm=args.batch_norm,
-        use_se=args.use_se,
-        last_gamma=args.last_gamma,
-        dtype=args.dtype,
-        ctx=ctx)
+        use_cuda=use_cuda)
 
-    if args.use_rec:
-        train_data, val_data, batch_fn = get_data_rec(
-            rec_train=args.rec_train,
-            rec_train_idx=args.rec_train_idx,
-            rec_val=args.rec_val,
-            rec_val_idx=args.rec_val_idx,
-            batch_size=batch_size,
-            num_workers=args.num_workers)
-    else:
-        train_data, val_data, batch_fn = get_data_loader(
-            data_dir=args.data_dir,
-            batch_size=batch_size,
-            num_workers=args.num_workers)
+    train_data, val_data = get_data_loader(
+        data_dir=args.data_dir,
+        batch_size=batch_size,
+        num_workers=args.num_workers)
 
-    if args.convert_to_mxnet:
-        assert args.save_dir and os.path.exists(args.save_dir)
-        assert (args.use_pretrained or args.resume.strip())
-        x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
-        net.forward(x)
-        export_checkpoint_file_path_prefix = os.path.join(args.save_dir, 'imagenet_{}'.format(args.model))
-        net.export(export_checkpoint_file_path_prefix)
-        logging.info('Convert model to MXNet format: {}'.format(export_checkpoint_file_path_prefix))
-    elif args.evaluate:
+    if args.evaluate:
         assert (args.use_pretrained or args.resume.strip())
         test(
             net=net,
             val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=args.use_rec,
-            dtype=args.dtype,
-            ctx=ctx)
+            use_cuda=use_cuda)
     else:
         num_training_samples = 1281167
-        trainer, lr_scheduler = prepare_trainer(
+        optimizer, lr_scheduler, start_epoch, best_prec1 = prepare_trainer(
             net=net,
             optimizer_name=args.optimizer_name,
             wd=args.wd,
@@ -770,7 +635,8 @@ def main():
             batch_size=batch_size,
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
-            dtype=args.dtype)
+            pretrained_model_file_path=args.resume.strip())
+        args.start_epoch = start_epoch
 
         if args.save_dir and args.save_interval:
             lp_saver = TrainLogParamSaver(
@@ -800,15 +666,12 @@ def main():
             start_epoch1=args.start_epoch,
             train_data=train_data,
             val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=args.use_rec,
-            dtype=args.dtype,
             net=net,
-            trainer=trainer,
+            optimizer=optimizer,
             lr_scheduler=lr_scheduler,
             lp_saver=lp_saver,
             log_interval=args.log_interval,
-            ctx=ctx)
+            use_cuda=use_cuda)
 
 
 if __name__ == '__main__':

@@ -195,8 +195,8 @@ def parse_args():
     parser.add_argument(
         '--save-dir',
         type=str,
-        default='params',
-        help='directory of saved models')
+        default='',
+        help='directory of saved models and log-files')
     parser.add_argument(
         '--logging-file-name',
         type=str,
@@ -222,20 +222,22 @@ def parse_args():
     return args
 
 
-def prepare_logger(log_file_path):
+def prepare_logger(log_dir_path,
+                   logging_file_name):
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    log_dir_path = os.path.dirname(log_file_path)
-    if log_dir_path and not os.path.exists(log_dir_path):
-        os.makedirs(log_dir_path)
-        log_file_exist = False
-    else:
-        log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
-    fh = logging.FileHandler(log_file_path)
-    logger.addHandler(fh)
-    if log_file_exist:
-        logging.info('--------------------------------')
+    if log_dir_path is not None and log_dir_path:
+        log_file_path = os.path.join(log_dir_path, logging_file_name)
+        if not os.path.exists(log_dir_path):
+            os.makedirs(log_dir_path)
+            log_file_exist = False
+        else:
+            log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
+        fh = logging.FileHandler(log_file_path)
+        logger.addHandler(fh)
+        if log_file_exist:
+            logging.info('--------------------------------')
     return logger
 
 
@@ -661,7 +663,9 @@ def train(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    prepare_logger(log_file_path=os.path.join(args.save_dir, args.logging_file_name))
+    prepare_logger(
+        log_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name)
     logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
     logging.info("Script arguments:\n{}".format(args))
     logging.info("Env_stats:\n{}".format(get_env_stats(

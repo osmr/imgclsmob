@@ -6,6 +6,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 
 
 def depthwise_conv3x3(channels,
@@ -58,7 +59,7 @@ class ChannelShuffle(nn.Module):
         # with self.name_scope():
         #     pass
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         return channel_shuffle(x, self.groups)
 
 
@@ -177,6 +178,15 @@ class ShuffleNet(nn.Module):
             self.output = nn.Linear(
                 in_features=stage_out_channels[-1],
                 out_features=classes)
+
+            self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

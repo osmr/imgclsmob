@@ -6,56 +6,54 @@
 """
 
 import numpy as np
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import torch.nn as nn
+import torch.nn.init as init
 
 
-class ConvBlock(HybridBlock):
+class ConvBlock(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 strides=1,
+                 stride=1,
                  padding=0,
-                 groups=1,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
+                 groups=1):
+        super(ConvBlock, self).__init__()
 
         with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
+            self.conv = nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
                 kernel_size=kernel_size,
-                strides=strides,
+                stride=stride,
                 padding=padding,
                 groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
+                bias=False)
+            self.bn = nn.BatchNorm2d(num_features=out_channels)
+            self.activ = nn.ReLU(inplace=True)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.conv(x)
         x = self.bn(x)
         x = self.activ(x)
         return x
 
 
-class DwsConvBlock(HybridBlock):
+class DwsConvBlock(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
-                 **kwargs):
-        super(DwsConvBlock, self).__init__(**kwargs)
+                 stride):
+        super(DwsConvBlock, self).__init__()
 
         with self.name_scope():
             self.dw_conv = ConvBlock(
                 in_channels=in_channels,
                 out_channels=in_channels,
                 kernel_size=3,
-                strides=strides,
+                stride=stride,
                 padding=1,
                 groups=in_channels)
             self.pw_conv = ConvBlock(
@@ -63,51 +61,64 @@ class DwsConvBlock(HybridBlock):
                 out_channels=out_channels,
                 kernel_size=1)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.dw_conv(x)
         x = self.pw_conv(x)
         return x
 
 
-class MobileNet(HybridBlock):
+class MobileNet(nn.Module):
 
     def __init__(self,
                  channels,
                  strides,
-                 classes=1000,
-                 **kwargs):
-        super(MobileNet, self).__init__(**kwargs)
+                 classes=1000):
+        super(MobileNet, self).__init__()
         input_channels = 3
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.Sequential()
             self.features.add(ConvBlock(
                 in_channels=input_channels,
                 out_channels=channels[0],
                 kernel_size=3,
-                strides=2,
+                stride=2,
                 padding=1))
             for i in range(len(strides)):
                 self.features.add(DwsConvBlock(
                     in_channels=channels[i],
                     out_channels=channels[i+1],
-                    strides=strides[i]))
-            self.features.add(nn.AvgPool2D(pool_size=7))
-            self.features.add(nn.Flatten())
+                    stride=strides[i]))
+            self.features.add(nn.AvgPool2d(kernel_size=7))
 
-            self.output = nn.Dense(
-                units=classes,
-                in_units=channels[-1])
+            self.output = nn.Linear(
+                in_features=channels[-1],
+                out_features=classes)
 
-    def hybrid_forward(self, F, x):
+            self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if 'dw_conv' in name:
+                init.kaiming_normal(module.weight, mode='fan_in')
+            elif name == 'conv_0' or 'pw_conv' in name:
+                init.kaiming_normal(module.weight, mode='fan_out')
+            elif 'bn' in name:
+                init.constant(module.weight, 1)
+                init.constant(module.bias, 0)
+            elif 'output' in name:
+                init.kaiming_normal(module.weight, mode='fan_out')
+                init.constant(module.bias, 0)
+
+    def forward(self, x):
         x = self.features(x)
+        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
 def get_mobilenet(scale,
                   pretrained=False,
-                  ctx=cpu(),
                   **kwargs):
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
     strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
@@ -121,7 +132,6 @@ def get_mobilenet(scale,
 
 def get_fd_mobilenet(scale,
                      pretrained=False,
-                     ctx=cpu(),
                      **kwargs):
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 1024]
     strides = [2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1]

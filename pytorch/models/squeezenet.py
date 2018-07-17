@@ -127,22 +127,26 @@ class SqueezeNet(nn.Module):
             self.features.add(nn.Dropout(p=0.5))
 
             self.output = nn.Sequential()
-            final_conv = nn.Conv2d(
-                in_channels=(2 * stage_expand_channels[-1]),
-                out_channels=classes,
-                kernel_size=1)
-            self.output.add(final_conv)
+            self.output.add_module(
+                name='final_conv',
+                module=nn.Conv2d(
+                    in_channels=(2 * stage_expand_channels[-1]),
+                    out_channels=classes,
+                    kernel_size=1))
             self.output.add(nn.ReLU(inplace=True))
             self.output.add(nn.AvgPool2d(kernel_size=13))
 
-            for m in self.modules():
-                if isinstance(m, nn.Conv2d):
-                    if m is final_conv:
-                        init.normal_(m.weight, mean=0.0, std=0.01)
-                    else:
-                        init.kaiming_uniform_(m.weight)
-                    if m.bias is not None:
-                        init.constant_(m.bias, 0)
+            self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                if 'final_conv' in name:
+                    init.normal_(module.weight, mean=0.0, std=0.01)
+                else:
+                    init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

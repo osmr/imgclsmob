@@ -165,7 +165,9 @@ class ShuffleNet(HybridBlock):
             self.features.add(nn.AvgPool2D(pool_size=7))
             self.features.add(nn.Flatten())
 
-            self.output = nn.Dense(units=classes)
+            self.output = nn.Dense(
+                units=classes,
+                in_units=stage_out_channels[-1])
 
     def hybrid_forward(self, F, x):
         x = self.features(x)

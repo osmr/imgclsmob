@@ -529,7 +529,9 @@ def train_net(batch_size,
     acc_top1 = AverageMeter()
     acc_top5 = AverageMeter()
 
-    L = nn.CrossEntropyLoss().cuda()
+    L = nn.CrossEntropyLoss()
+    if use_cuda:
+        L = L.cuda()
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)

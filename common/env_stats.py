@@ -69,8 +69,9 @@ def get_pyenv_info(packages,
     pyenv_info.update(modules_versions)
     
     # get versions from pip
-    modules_versions_pip = get_pip_versions(pip_packages, python_version)
-    pyenv_info.update(modules_versions_pip)
+    if type(pip_packages) == list and len(pip_packages) > 0 and pip_packages[0]:
+        modules_versions_pip = get_pip_versions(pip_packages, python_version)
+        pyenv_info.update(modules_versions_pip)
 
     if python_ver:
         # set python version

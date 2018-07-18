@@ -391,16 +391,14 @@ def prepare_trainer(net,
         checkpoint = torch.load(pretrained_model_file_path)
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch']
-        best_prec1 = checkpoint['best_prec1']
     else:
         start_epoch = None
-        best_prec1 = None
 
     cudnn.benchmark = True
 
     lr_scheduler = None
 
-    return optimizer, lr_scheduler, start_epoch, best_prec1
+    return optimizer, lr_scheduler, start_epoch
 
 
 def calc_net_weight_count(net):
@@ -521,19 +519,19 @@ def train_epoch(epoch,
         loss.backward()
         optimizer.step()
 
-        train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
+        train_loss += loss.item()
         prec1 = accuracy(output, target, topk=(1, ))
         acc_top1.update(prec1[0], input.size(0))
 
         if log_interval and not (i + 1) % log_interval:
-            _, top1 = acc_top1.get()
+            top1 = acc_top1.avg.item()
             err_top1_train = 1.0 - top1
             speed = batch_size * log_interval / (time.time() - btic)
             logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
-                epoch + 1, i, speed, err_top1_train, optimizer.learning_rate))
+                epoch + 1, i, speed, err_top1_train, optimizer.param_groups[0]['lr']))
             btic = time.time()
 
-    top1 = acc_top1.avg
+    top1 = acc_top1.avg.item()
     err_top1_train = 1.0 - top1
     train_loss /= (i + 1)
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
@@ -659,7 +657,7 @@ def main():
             use_cuda=use_cuda)
     else:
         num_training_samples = 1281167
-        optimizer, lr_scheduler, start_epoch, best_prec1 = prepare_trainer(
+        optimizer, lr_scheduler, start_epoch = prepare_trainer(
             net=net,
             optimizer_name=args.optimizer_name,
             wd=args.wd,
@@ -674,8 +672,8 @@ def main():
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
             pretrained_model_file_path=args.resume.strip())
-        if start_epoch is not None:
-            args.start_epoch = start_epoch
+        # if start_epoch is not None:
+        #     args.start_epoch = start_epoch
 
         if args.save_dir and args.save_interval:
             lp_saver = TrainLogParamSaver(

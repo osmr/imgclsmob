@@ -187,6 +187,7 @@ class TrainLogParamSaver(object):
                     for ext in self.checkpoint_file_exts:
                         last_checkpoint_params_file_path = last_checkpoint_params_file_stem + ext
                         best_checkpoint_params_file_path = best_checkpoint_params_file_stem + ext
+                        assert (os.path.exists(last_checkpoint_params_file_path))
                         shutil.copy(
                             src=last_checkpoint_params_file_path,
                             dst=best_checkpoint_params_file_path)

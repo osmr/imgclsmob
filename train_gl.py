@@ -501,6 +501,7 @@ def prepare_trainer(net,
         optimizer_params=optimizer_params)
 
     if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
+        logging.info('Loading trainer states: {}'.format(state_file_path))
         trainer.load_states(state_file_path)
 
     return trainer, lr_scheduler

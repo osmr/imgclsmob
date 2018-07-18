@@ -54,7 +54,9 @@ class ChannelShuffle(nn.Module):
                  channels,
                  groups):
         super(ChannelShuffle, self).__init__()
-        assert (channels % groups == 0)
+        #assert (channels % groups == 0)
+        if channels % groups != 0:
+            raise ValueError('channels must be divisible by groups')
         self.groups = groups
 
     def forward(self, x):
@@ -154,12 +156,12 @@ class ShuffleNet(nn.Module):
         self.features = nn.Sequential()
         self.features.add_module("init_block", ShuffleInitBlock(
             in_channels=input_channels,
-            out_channels=stage_out_channels[0]))
+            out_channels=int(stage_out_channels[0])))
 
         for i in range(len(stage_num_blocks)):
             stage = nn.Sequential()
-            in_channels_i = stage_out_channels[i]
-            out_channels_i = stage_out_channels[i + 1]
+            in_channels_i = int(stage_out_channels[i])
+            out_channels_i = int(stage_out_channels[i + 1])
             for j in range(stage_num_blocks[i]):
                 stage.add_module("unit_{}".format(j + 1), ShuffleUnit(
                     in_channels=(in_channels_i if j == 0 else out_channels_i),
@@ -172,7 +174,7 @@ class ShuffleNet(nn.Module):
         self.features.add_module('final_pool', nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
-            in_features=stage_out_channels[-1],
+            in_features=int(stage_out_channels[-1]),
             out_features=num_classes)
 
         self._init_params()
@@ -243,16 +245,16 @@ def shufflenet0_5_g1(**kwargs):
     return get_shufflenet(0.5, 1, **kwargs)
 
 
-def shufflenet0_5_g2(**kwargs):
-    return get_shufflenet(0.5, 2, **kwargs)
+# def shufflenet0_5_g2(**kwargs):
+#     return get_shufflenet(0.5, 2, **kwargs)
 
 
 def shufflenet0_5_g3(**kwargs):
     return get_shufflenet(0.5, 3, **kwargs)
 
 
-def shufflenet0_5_g4(**kwargs):
-    return get_shufflenet(0.5, 4, **kwargs)
+# def shufflenet0_5_g4(**kwargs):
+#     return get_shufflenet(0.5, 4, **kwargs)
 
 
 # def shufflenet0_5_g8(**kwargs):
@@ -263,17 +265,18 @@ def shufflenet0_25_g1(**kwargs):
     return get_shufflenet(0.25, 1, **kwargs)
 
 
-def shufflenet0_25_g2(**kwargs):
-    return get_shufflenet(0.25, 2, **kwargs)
+# def shufflenet0_25_g2(**kwargs):
+#     return get_shufflenet(0.25, 2, **kwargs)
 
 
 def shufflenet0_25_g3(**kwargs):
     return get_shufflenet(0.25, 3, **kwargs)
 
 
-def shufflenet0_25_g4(**kwargs):
-    return get_shufflenet(0.25, 4, **kwargs)
+# def shufflenet0_25_g4(**kwargs):
+#     return get_shufflenet(0.25, 4, **kwargs)
 
 
-def shufflenet0_25_g8(**kwargs):
-    return get_shufflenet(0.25, 8, **kwargs)
+# def shufflenet0_25_g8(**kwargs):
+#     return get_shufflenet(0.25, 8, **kwargs)
+

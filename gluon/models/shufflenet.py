@@ -228,16 +228,16 @@ def shufflenet0_5_g1(**kwargs):
     return get_shufflenet(0.5, 1, **kwargs)
 
 
-def shufflenet0_5_g2(**kwargs):
-    return get_shufflenet(0.5, 2, **kwargs)
+# def shufflenet0_5_g2(**kwargs):
+#     return get_shufflenet(0.5, 2, **kwargs)
 
 
 def shufflenet0_5_g3(**kwargs):
     return get_shufflenet(0.5, 3, **kwargs)
 
 
-def shufflenet0_5_g4(**kwargs):
-    return get_shufflenet(0.5, 4, **kwargs)
+# def shufflenet0_5_g4(**kwargs):
+#     return get_shufflenet(0.5, 4, **kwargs)
 
 
 # def shufflenet0_5_g8(**kwargs):
@@ -248,17 +248,18 @@ def shufflenet0_25_g1(**kwargs):
     return get_shufflenet(0.25, 1, **kwargs)
 
 
-def shufflenet0_25_g2(**kwargs):
-    return get_shufflenet(0.25, 2, **kwargs)
+# def shufflenet0_25_g2(**kwargs):
+#     return get_shufflenet(0.25, 2, **kwargs)
 
 
 def shufflenet0_25_g3(**kwargs):
     return get_shufflenet(0.25, 3, **kwargs)
 
 
-def shufflenet0_25_g4(**kwargs):
-    return get_shufflenet(0.25, 4, **kwargs)
+# def shufflenet0_25_g4(**kwargs):
+#     return get_shufflenet(0.25, 4, **kwargs)
 
 
-def shufflenet0_25_g8(**kwargs):
-    return get_shufflenet(0.25, 8, **kwargs)
+# def shufflenet0_25_g8(**kwargs):
+#     return get_shufflenet(0.25, 8, **kwargs)
+

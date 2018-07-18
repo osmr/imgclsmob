@@ -144,7 +144,7 @@ class MENet(nn.Module):
                     ignore_group=(i == 0 and j == 0)))
             self.features.add_module("stage_{}".format(i + 1), stage)
 
-        self.features.add_module(nn.AvgPool2d(kernel_size=7))
+        self.features.add_module('final_pool', nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
             in_features=block_channels[-1],

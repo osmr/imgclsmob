@@ -77,35 +77,35 @@ class MobileNet(nn.Module):
         self.features = nn.Sequential()
         self.features.add_module("init_block", ConvBlock(
             in_channels=input_channels,
-            out_channels=channels[0],
+            out_channels=int(channels[0]),
             kernel_size=3,
             stride=2,
             padding=1))
         for i in range(len(strides)):
             self.features.add_module("block_{}".format(i + 1), DwsConvBlock(
-                in_channels=channels[i],
-                out_channels=channels[i + 1],
-                stride=strides[i]))
+                in_channels=int(channels[i]),
+                out_channels=int(channels[i + 1]),
+                stride=int(strides[i])))
         self.features.add_module('final_pool', nn.AvgPool2d(kernel_size=7))
 
         self.output = nn.Linear(
-            in_features=channels[-1],
+            in_features=int(channels[-1]),
             out_features=num_classes)
 
         self._init_params()
 
     def _init_params(self):
         for name, module in self.named_modules():
-            if 'dw_conv' in name:
-                init.kaiming_normal(module.weight, mode='fan_in')
-            elif name == 'conv_0' or 'pw_conv' in name:
-                init.kaiming_normal(module.weight, mode='fan_out')
+            if 'dw_conv.conv' in name:
+                init.kaiming_normal_(module.weight, mode='fan_in')
+            elif name == 'init_block.conv' or 'pw_conv.conv' in name:
+                init.kaiming_normal_(module.weight, mode='fan_out')
             elif 'bn' in name:
-                init.constant(module.weight, 1)
-                init.constant(module.bias, 0)
+                init.constant_(module.weight, 1)
+                init.constant_(module.bias, 0)
             elif 'output' in name:
-                init.kaiming_normal(module.weight, mode='fan_out')
-                init.constant(module.bias, 0)
+                init.kaiming_normal_(module.weight, mode='fan_out')
+                init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)
@@ -119,7 +119,7 @@ def get_mobilenet(scale,
                   **kwargs):
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
     strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
-    channels = (np.array(channels) * scale).astype(np.int)
+    channels = (np.array(channels) * scale).astype(np.int32)
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -132,7 +132,7 @@ def get_fd_mobilenet(scale,
                      **kwargs):
     channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 1024]
     strides = [2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1]
-    channels = (np.array(channels) * scale).astype(np.int)
+    channels = (np.array(channels) * scale).astype(np.int32)
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")

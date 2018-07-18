@@ -77,6 +77,11 @@ def parse_args():
         default='',
         help='resume from previously saved parameters if not None')
     parser.add_argument(
+        '--resume-state',
+        type=str,
+        default='',
+        help='resume from previously saved optimizer state if not None')
+    parser.add_argument(
         '-e',
         '--evaluate',
         dest='evaluate',
@@ -384,15 +389,9 @@ def _get_model(name, **kwargs):
         'shufflenet1_0_g4': shufflenet1_0_g4,
         'shufflenet1_0_g8': shufflenet1_0_g8,
         'shufflenet0_5_g1': shufflenet0_5_g1,
-        #'shufflenet0_5_g2': shufflenet0_5_g2,
         'shufflenet0_5_g3': shufflenet0_5_g3,
-        #'shufflenet0_5_g4': shufflenet0_5_g4,
-        #'shufflenet0_5_g8': shufflenet0_5_g8,
         'shufflenet0_25_g1': shufflenet0_25_g1,
-        #'shufflenet0_25_g2': shufflenet0_25_g2,
         'shufflenet0_25_g3': shufflenet0_25_g3,
-        #'shufflenet0_25_g4': shufflenet0_25_g4,
-        #'shufflenet0_25_g8': shufflenet0_25_g8,
         'menet108_8x1_g3': menet108_8x1_g3,
         'menet128_8x1_g4': menet128_8x1_g4,
         'menet160_8x1_g8': menet160_8x1_g8,
@@ -412,6 +411,7 @@ def _get_model(name, **kwargs):
         raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(models.keys()))))
     net = models[name](**kwargs)
     return net
+
 
 def prepare_model(model_name,
                   classes,
@@ -471,7 +471,8 @@ def prepare_trainer(net,
                     batch_size,
                     num_epochs,
                     num_training_samples,
-                    dtype):
+                    dtype,
+                    state_file_path=None):
 
     if lr_decay_period > 0:
         lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
@@ -499,6 +500,9 @@ def prepare_trainer(net,
         optimizer=optimizer_name,
         optimizer_params=optimizer_params)
 
+    if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
+        trainer.load_states(state_file_path)
+
     return trainer, lr_scheduler
 
 
@@ -512,9 +516,11 @@ def calc_net_weight_count(net):
     return weight_count
 
 
-def save_params(file_path,
-                net):
-    net.save_parameters(file_path)
+def save_params(file_stem,
+                net,
+                trainer):
+    net.save_parameters(file_stem + '.params')
+    trainer.save_states(file_stem + '.states')
 
 
 def validate(acc_top1,
@@ -691,7 +697,7 @@ def train_net(batch_size,
             epoch + 1, err_top1_val, err_top5_val))
 
         if lp_saver is not None:
-            lp_saver_kwargs = {'net': net}
+            lp_saver_kwargs = {'net': net, 'trainer': trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
@@ -781,7 +787,8 @@ def main():
             batch_size=batch_size,
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
-            dtype=args.dtype)
+            dtype=args.dtype,
+            state_file_path=args.resume_state)
 
         if args.save_dir and args.save_interval:
             lp_saver = TrainLogParamSaver(
@@ -793,6 +800,7 @@ def main():
                 last_checkpoint_file_count=2,
                 best_checkpoint_file_count=2,
                 checkpoint_file_save_callback=save_params,
+                checkpoint_file_exts=['.params', '.states'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
                 param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],

@@ -412,9 +412,11 @@ def calc_net_weight_count(net):
     return weight_count
 
 
-def save_params(file_path,
-                net):
-    net.save_parameters(file_path)
+def save_params(file_stem,
+                state):
+    torch.save(
+        obj=state,
+        f=(file_stem + '.params'))
 
 
 class AverageMeter(object):
@@ -603,7 +605,12 @@ def train_net(batch_size,
             epoch + 1, err_top1_val, err_top5_val))
 
         if lp_saver is not None:
-            lp_saver_kwargs = {'net': net}
+            state = {
+                'epoch': epoch + 1,
+                'state_dict': net.state_dict(),
+                'optimizer': optimizer.state_dict(),
+            }
+            lp_saver_kwargs = {'state': state}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss],

@@ -21,6 +21,10 @@ from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
 from pytorch.models.squeezenet import *
 
+from pytorch.models.others.MobileNet import *
+from pytorch.models.others.ShuffleNet import *
+from pytorch.models.others.MENet import *
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model for image classification (PyTorch)',
@@ -259,6 +263,25 @@ def get_data_loader(data_dir,
 
 def _get_model(name, **kwargs):
     slk_models = {
+        'oth_mobilenet1_0': oth_mobilenet1_0,
+        'oth_mobilenet0_75': oth_mobilenet0_75,
+        'oth_mobilenet0_5': oth_mobilenet0_5,
+        'oth_mobilenet0_25': oth_mobilenet0_25,
+        'oth_fd_mobilenet1_0': oth_fd_mobilenet1_0,
+        'oth_fd_mobilenet0_75': oth_fd_mobilenet0_75,
+        'oth_fd_mobilenet0_5': oth_fd_mobilenet0_5,
+        'oth_fd_mobilenet0_25': oth_fd_mobilenet0_25,
+        'oth_shufflenet1_0_g1': oth_shufflenet1_0_g1,
+        'oth_shufflenet1_0_g8': oth_shufflenet1_0_g8,
+        'oth_menet108_8x1_g3': oth_menet108_8x1_g3,
+        'oth_menet128_8x1_g4': oth_menet128_8x1_g4,
+        'oth_menet160_8x1_g8': oth_menet160_8x1_g8,
+        'oth_menet228_12x1_g3': oth_menet228_12x1_g3,
+        'oth_menet256_12x1_g4': oth_menet256_12x1_g4,
+        'oth_menet348_12x1_g3': oth_menet348_12x1_g3,
+        'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
+        'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
+
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
         'mobilenet1_0': mobilenet1_0,
@@ -284,8 +307,16 @@ def _get_model(name, **kwargs):
         'shufflenet0_25_g3': shufflenet0_25_g3,
         # 'shufflenet0_25_g4': shufflenet0_25_g4,
         # 'shufflenet0_25_g8': shufflenet0_25_g8,
+
         'menet108_8x1_g3': menet108_8x1_g3,
-        }
+        'menet128_8x1_g4': menet128_8x1_g4,
+        'menet160_8x1_g8': menet160_8x1_g8,
+        'menet228_12x1_g3': menet228_12x1_g3,
+        'menet256_12x1_g4': menet256_12x1_g4,
+        'menet348_12x1_g3': menet348_12x1_g3,
+        'menet352_12x1_g8': menet352_12x1_g8,
+        'menet456_24x1_g3': menet456_24x1_g3,
+    }
     try:
         net = models.__dict__[name](**kwargs)
         return net

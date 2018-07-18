@@ -124,6 +124,7 @@ class MENet(HybridBlock):
                  **kwargs):
         super(MENet, self).__init__(**kwargs)
         input_channels = 3
+        block_layers = [4, 8, 4]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -135,7 +136,7 @@ class MENet(HybridBlock):
                 stage = nn.HybridSequential(prefix='')
                 in_channels_i = block_channels[i]
                 out_channels_i = block_channels[i + 1]
-                for j in range(block_channels[i]):
+                for j in range(block_layers[i]):
                     stage.add(MEModule(
                         in_channels=(in_channels_i if j == 0 else out_channels_i),
                         out_channels=out_channels_i,
@@ -196,4 +197,32 @@ def get_menet(first_block_channels,
 
 def menet108_8x1_g3(**kwargs):
     return get_menet(108, 8, 3, **kwargs)
+
+
+def menet128_8x1_g4(**kwargs):
+    return get_menet(128, 8, 4, **kwargs)
+
+
+def menet160_8x1_g8(**kwargs):
+    return get_menet(160, 8, 8, **kwargs)
+
+
+def menet228_12x1_g3(**kwargs):
+    return get_menet(228, 12, 3, **kwargs)
+
+
+def menet256_12x1_g4(**kwargs):
+    return get_menet(256, 12, 4, **kwargs)
+
+
+def menet348_12x1_g3(**kwargs):
+    return get_menet(348, 12, 3, **kwargs)
+
+
+def menet352_12x1_g8(**kwargs):
+    return get_menet(352, 12, 8, **kwargs)
+
+
+def menet456_24x1_g3(**kwargs):
+    return get_menet(456, 24, 3, **kwargs)
 

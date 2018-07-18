@@ -394,7 +394,14 @@ def _get_model(name, **kwargs):
         #'shufflenet0_25_g4': shufflenet0_25_g4,
         #'shufflenet0_25_g8': shufflenet0_25_g8,
         'menet108_8x1_g3': menet108_8x1_g3,
-        }
+        'menet128_8x1_g4': menet128_8x1_g4,
+        'menet160_8x1_g8': menet160_8x1_g8,
+        'menet228_12x1_g3': menet228_12x1_g3,
+        'menet256_12x1_g4': menet256_12x1_g4,
+        'menet348_12x1_g3': menet348_12x1_g3,
+        'menet352_12x1_g8': menet352_12x1_g8,
+        'menet456_24x1_g3': menet456_24x1_g3,
+    }
     try:
         net = get_model(name, **kwargs)
         return net

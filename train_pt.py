@@ -371,21 +371,16 @@ def prepare_trainer(net,
                     num_training_samples,
                     pretrained_model_file_path):
 
-    if optimizer_name == 'sgd':
-        optimizer = torch.optim.SGD(
-            params=net.parameters(),
-            lr=lr,
-            momentum=momentum,
-            weight_decay=wd)
-    elif optimizer_name == 'nag':
+    optimizer_name = optimizer_name.lower()
+    if (optimizer_name == 'sgd') or (optimizer_name == 'nag'):
         optimizer = torch.optim.SGD(
             params=net.parameters(),
             lr=lr,
             momentum=momentum,
             weight_decay=wd,
-            nesterov=True)
+            nesterov=(optimizer_name == 'nag'))
     else:
-        raise Exception()
+        raise ValueError("Usupported optimizer: {}".format(optimizer_name))
 
     if pretrained_model_file_path:
         checkpoint = torch.load(pretrained_model_file_path)
@@ -396,7 +391,30 @@ def prepare_trainer(net,
 
     cudnn.benchmark = True
 
-    lr_scheduler = None
+    lr_mode = lr_mode.lower()
+    if lr_decay_period > 0:
+        lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
+    else:
+        lr_decay_epoch = [int(i) for i in lr_decay_epoch.split(',')]
+    if (lr_mode == 'step') and (lr_decay_period != 0):
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(
+            optimizer=optimizer,
+            step_size=lr_decay_period,
+            gamma=lr_decay,
+            last_epoch=-1)
+    elif (lr_mode == 'multistep') or ((lr_mode == 'step') and (lr_decay_period == 0)):
+        lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
+            optimizer=optimizer,
+            milestones=lr_decay_epoch,
+            gamma=lr_decay,
+            last_epoch=-1)
+    elif lr_mode == 'cosine':
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer=optimizer,
+            T_max=num_epochs,
+            last_epoch=(num_epochs - 1))
+    else:
+        raise ValueError("Usupported lr_scheduler: {}".format(lr_mode))
 
     return optimizer, lr_scheduler, start_epoch
 
@@ -499,7 +517,7 @@ def train_epoch(epoch,
                 use_cuda,
                 L,
                 optimizer,
-                lr_scheduler,
+                #lr_scheduler,
                 batch_size,
                 log_interval):
 
@@ -580,6 +598,8 @@ def train_net(batch_size,
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
+        lr_scheduler.step()
+
         err_top1_train, train_loss = train_epoch(
             epoch,
             acc_top1,
@@ -588,7 +608,7 @@ def train_net(batch_size,
             use_cuda,
             L,
             optimizer,
-            lr_scheduler,
+            #lr_scheduler,
             batch_size,
             log_interval)
 

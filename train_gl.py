@@ -449,11 +449,13 @@ def prepare_model(model_name,
         static_alloc=True,
         static_shape=True)
 
-    net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-    # for param in net.collect_params().values():
-    #     if param._data is not None:
-    #         continue
-    #     param.initialize(ctx=ctx)
+    if pretrained_model_file_path or use_pretrained:
+        for param in net.collect_params().values():
+            if param._data is not None:
+                continue
+            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+    else:
+        net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
     return net
 

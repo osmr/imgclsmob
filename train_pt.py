@@ -192,7 +192,7 @@ def prepare_logger(log_dir_path,
         logger.addHandler(fh)
         if log_file_exist:
             logging.info('--------------------------------')
-    return logger
+    return logger, log_file_exist
 
 
 def init_rand(seed):
@@ -426,7 +426,7 @@ def save_params(file_stem,
                 state):
     torch.save(
         obj=state,
-        f=(file_stem + '.params'))
+        f=(file_stem + '.pth'))
 
 
 class AverageMeter(object):
@@ -487,7 +487,8 @@ def validate(acc_top1,
 
 def test(net,
          val_data,
-         use_cuda):
+         use_cuda,
+         calc_weight_count=False):
     acc_top1 = AverageMeter()
     acc_top5 = AverageMeter()
 
@@ -498,6 +499,9 @@ def test(net,
         net=net,
         val_data=val_data,
         use_cuda=use_cuda)
+    if calc_weight_count:
+        weight_count = calc_net_weight_count(net)
+        logging.info('Model: {} trainable parameters'.format(weight_count))
     logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
         err_top1_val, err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
@@ -637,7 +641,7 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    prepare_logger(
+    _, log_file_exist = prepare_logger(
         log_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name)
     logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
@@ -668,7 +672,8 @@ def main():
         test(
             net=net,
             val_data=val_data,
-            use_cuda=use_cuda)
+            use_cuda=use_cuda,
+            calc_weight_count=(not log_file_exist))
     else:
         num_training_samples = 1281167
         optimizer, lr_scheduler, start_epoch = prepare_trainer(
@@ -699,6 +704,7 @@ def main():
                 last_checkpoint_file_count=2,
                 best_checkpoint_file_count=2,
                 checkpoint_file_save_callback=save_params,
+                checkpoint_file_exts=['.pth'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
                 param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],

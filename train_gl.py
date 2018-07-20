@@ -243,7 +243,7 @@ def prepare_logger(log_dir_path,
         logger.addHandler(fh)
         if log_file_exist:
             logging.info('--------------------------------')
-    return logger
+    return logger, log_file_exist
 
 
 def init_rand(seed):
@@ -554,7 +554,8 @@ def test(net,
          batch_fn,
          use_rec,
          dtype,
-         ctx):
+         ctx,
+         calc_weight_count=False):
     acc_top1 = mx.metric.Accuracy()
     acc_top5 = mx.metric.TopKAccuracy(5)
 
@@ -568,6 +569,9 @@ def test(net,
         use_rec=use_rec,
         dtype=dtype,
         ctx=ctx)
+    if calc_weight_count:
+        weight_count = calc_net_weight_count(net)
+        logging.info('Model: {} trainable parameters'.format(weight_count))
     logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
         err_top1_val, err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
@@ -716,7 +720,7 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    prepare_logger(
+    _, log_file_exist = prepare_logger(
         log_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name)
     logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
@@ -774,7 +778,8 @@ def main():
             batch_fn=batch_fn,
             use_rec=args.use_rec,
             dtype=args.dtype,
-            ctx=ctx)
+            ctx=ctx,
+            calc_weight_count=(not log_file_exist))
     else:
         num_training_samples = 1281167
         trainer, lr_scheduler = prepare_trainer(

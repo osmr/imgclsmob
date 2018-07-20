@@ -50,6 +50,11 @@ def parse_args():
         default='',
         help='resume from previously saved parameters if not None')
     parser.add_argument(
+        '--resume-state',
+        type=str,
+        default='',
+        help='resume from previously saved optimizer state if not None')
+    parser.add_argument(
         '-e',
         '--evaluate',
         dest='evaluate',
@@ -333,6 +338,15 @@ def prepare_model(model_name,
 
     net = _get_model(model_name, **kwargs)
 
+    if pretrained_model_file_path:
+        assert (os.path.isfile(pretrained_model_file_path))
+        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        checkpoint = torch.load(pretrained_model_file_path)
+        if type(checkpoint) == dict:
+            net.load_state_dict(checkpoint['state_dict'])
+        else:
+            net.load_state_dict(checkpoint)
+
     if model_name.startswith('alexnet') or model_name.startswith('vgg'):
         net.features = torch.nn.DataParallel(net.features)
     else:
@@ -340,12 +354,6 @@ def prepare_model(model_name,
 
     if use_cuda:
         net = net.cuda()
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        checkpoint = torch.load(pretrained_model_file_path)
-        net.load_state_dict(checkpoint['state_dict'])
 
     return net
 
@@ -363,7 +371,7 @@ def prepare_trainer(net,
                     batch_size,
                     num_epochs,
                     num_training_samples,
-                    pretrained_model_file_path):
+                    state_file_path):
 
     optimizer_name = optimizer_name.lower()
     if (optimizer_name == 'sgd') or (optimizer_name == 'nag'):
@@ -376,10 +384,13 @@ def prepare_trainer(net,
     else:
         raise ValueError("Usupported optimizer: {}".format(optimizer_name))
 
-    if pretrained_model_file_path:
-        checkpoint = torch.load(pretrained_model_file_path)
-        optimizer.load_state_dict(checkpoint['optimizer'])
-        start_epoch = checkpoint['epoch']
+    if state_file_path:
+        checkpoint = torch.load(state_file_path)
+        if type(checkpoint) == dict:
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            start_epoch = checkpoint['epoch']
+        else:
+            start_epoch = None
     else:
         start_epoch = None
 
@@ -425,8 +436,11 @@ def calc_net_weight_count(net):
 def save_params(file_stem,
                 state):
     torch.save(
-        obj=state,
+        obj=state['state_dict'],
         f=(file_stem + '.pth'))
+    torch.save(
+        obj=state,
+        f=(file_stem + '.states'))
 
 
 class AverageMeter(object):
@@ -460,7 +474,7 @@ def accuracy(output, target, topk=(1,)):
         res = []
         for k in topk:
             correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(100.0 / batch_size))
+            res.append(correct_k.mul_(1.0 / batch_size))
         return res
 
 
@@ -480,8 +494,8 @@ def validate(acc_top1,
             prec1, prec5 = accuracy(output, target, topk=(1, 5))
             acc_top1.update(prec1[0], input.size(0))
             acc_top5.update(prec5[0], input.size(0))
-    top1 = acc_top1.avg
-    top5 = acc_top5.avg
+    top1 = acc_top1.avg.item()
+    top5 = acc_top5.avg.item()
     return 1-top1, 1-top5
 
 
@@ -690,7 +704,7 @@ def main():
             batch_size=batch_size,
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
-            pretrained_model_file_path=args.resume.strip())
+            state_file_path=args.resume_state)
         # if start_epoch is not None:
         #     args.start_epoch = start_epoch
 
@@ -704,7 +718,7 @@ def main():
                 last_checkpoint_file_count=2,
                 best_checkpoint_file_count=2,
                 checkpoint_file_save_callback=save_params,
-                checkpoint_file_exts=['.pth'],
+                checkpoint_file_exts=['.pth', '.states'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
                 param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],

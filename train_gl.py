@@ -132,17 +132,17 @@ def parse_args():
         '--lr',
         type=float,
         default=0.1,
-        help='learning rate. default is 0.1.')
+        help='learning rate. default is 0.1')
     parser.add_argument(
         '--lr-mode',
         type=str,
         default='step',
-        help='learning rate scheduler mode. options are step, poly and cosine.')
+        help='learning rate scheduler mode. options are step, poly and cosine')
     parser.add_argument(
         '--lr-decay',
         type=float,
         default=0.1,
-        help='decay rate of learning rate. default is 0.1.')
+        help='decay rate of learning rate. default is 0.1')
     parser.add_argument(
         '--lr-decay-period',
         type=int,
@@ -181,11 +181,20 @@ def parse_args():
     parser.add_argument(
         '--use_se',
         action='store_true',
-        help='use SE layers or not in resnext. default is false.')
+        help='use SE layers or not in resnext. default is false')
     parser.add_argument(
         '--batch-norm',
         action='store_true',
-        help='enable batch normalization or not in vgg. default is false.')
+        help='enable batch normalization or not in vgg. default is false')
+    parser.add_argument(
+        '--mixup',
+        action='store_true',
+        help='use mixup strategy')
+    parser.add_argument(
+        '--mixup-epoch-tail',
+        type=int,
+        default=20,
+        help='number of epochs without mixup at the end of training')
 
     parser.add_argument(
         '--log-interval',
@@ -578,32 +587,59 @@ def test(net,
         time.time() - tic))
 
 
+def label_transform(label, classes):
+    ind = label.astype(np.int)
+    res = mx.nd.zeros((ind.shape[0], classes), ctx=label.context)
+    res[mx.nd.arange(ind.shape[0], ctx=label.context), ind] = 1
+    return res
+
+
 def train_epoch(epoch,
-                acc_top1,
                 net,
+                train_metric,
                 train_data,
                 batch_fn,
                 use_rec,
                 dtype,
                 ctx,
-                L,
+                loss_func,
                 trainer,
                 lr_scheduler,
                 batch_size,
-                log_interval):
+                log_interval,
+                mixup,
+                mixup_epoch_tail,
+                num_classes,
+                num_epochs):
 
     tic = time.time()
     if use_rec:
         train_data.reset()
-    acc_top1.reset()
+    train_metric.reset()
     train_loss = 0.0
 
     btic = time.time()
     for i, batch in enumerate(train_data):
         data, label = batch_fn(batch, ctx)
+
+        if mixup:
+            if epoch < num_epochs - mixup_epoch_tail:
+                alpha = 1
+                lam = np.random.beta(alpha, alpha)
+                data = [lam * X + (1 - lam) * X[::-1] for X in data]
+                label_1 = label
+                label = []
+                for Y in label_1:
+                    y1 = label_transform(Y, num_classes)
+                    y2 = label_transform(Y[::-1], num_classes)
+                    label.append(lam * y1 + (1 - lam) * y2)
+            else:
+                for k in range(len(label)):
+                    label[k] = label_transform(label[k], num_classes)
+
         with ag.record():
             outputs = [net(X.astype(dtype, copy=False)) for X in data]
-            loss = [L(yhat, y) for yhat, y in zip(outputs, label)]
+            loss = [loss_func(yhat, y) for yhat, y in zip(outputs, label)]
         for l in loss:
             l.backward()
         lr_scheduler.update(i, epoch)
@@ -613,16 +649,21 @@ def train_epoch(epoch,
             weight_count = calc_net_weight_count(net)
             logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
-        acc_top1.update(label, outputs)
+        train_metric.update(label, outputs)
         if log_interval and not (i + 1) % log_interval:
-            _, top1 = acc_top1.get()
-            err_top1_train = 1.0 - top1
             speed = batch_size * log_interval / (time.time() - btic)
-            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
-                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+            if not mixup:
+                _, top1 = train_metric.get()
+                err_top1_train = 1.0 - top1
+                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
+                    epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+            else:
+                _, rmse = train_metric.get()
+                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\trmse={:.4f}\tlr={:.4f}'.format(
+                    epoch + 1, i, speed, rmse, trainer.learning_rate))
             btic = time.time()
 
-    _, top1 = acc_top1.get()
+    _, top1 = train_metric.get()
     err_top1_train = 1.0 - top1
     train_loss /= (i + 1)
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
@@ -648,23 +689,31 @@ def train_net(batch_size,
               lr_scheduler,
               lp_saver,
               log_interval,
+              mixup,
+              mixup_epoch_tail,
+              num_classes,
               ctx):
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
+    acc_top1_val = mx.metric.Accuracy()
+    acc_top5_val = mx.metric.TopKAccuracy(5)
 
-    L = gluon.loss.SoftmaxCrossEntropyLoss()
+    if not mixup:
+        train_metric = mx.metric.Accuracy()
+        loss_func = gluon.loss.SoftmaxCrossEntropyLoss()
+    else:
+        train_metric = mx.metric.RMSE()
+        loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=False)
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch1))
         err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1,
-            acc_top5=acc_top5,
+            acc_top1=acc_top1_val,
+            acc_top5=acc_top5_val,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -677,23 +726,27 @@ def train_net(batch_size,
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
         err_top1_train, train_loss = train_epoch(
-            epoch,
-            acc_top1,
-            net,
-            train_data,
-            batch_fn,
-            use_rec,
-            dtype,
-            ctx,
-            L,
-            trainer,
-            lr_scheduler,
-            batch_size,
-            log_interval)
+            epoch=epoch,
+            net=net,
+            train_metric=train_metric,
+            train_data=train_data,
+            batch_fn=batch_fn,
+            use_rec=use_rec,
+            dtype=dtype,
+            ctx=ctx,
+            loss_func=loss_func,
+            trainer=trainer,
+            lr_scheduler=lr_scheduler,
+            batch_size=batch_size,
+            log_interval=log_interval,
+            mixup=mixup,
+            mixup_epoch_tail=mixup_epoch_tail,
+            num_classes=num_classes,
+            num_epochs=num_epochs)
 
         err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1,
-            acc_top5=acc_top5,
+            acc_top1=acc_top1_val,
+            acc_top5=acc_top5_val,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -736,10 +789,10 @@ def main():
     if args.convert_to_mxnet:
         batch_size = 1
 
-    classes = 1000
+    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=classes,
+        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         batch_norm=args.batch_norm,
@@ -836,6 +889,9 @@ def main():
             lr_scheduler=lr_scheduler,
             lp_saver=lp_saver,
             log_interval=args.log_interval,
+            mixup=args.mixup,
+            mixup_epoch_tail=args.mixup_epoch_tail,
+            num_classes=num_classes,
             ctx=ctx)
 
 

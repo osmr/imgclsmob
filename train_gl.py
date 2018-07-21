@@ -663,17 +663,24 @@ def train_epoch(epoch,
                     epoch + 1, i, speed, rmse, trainer.learning_rate))
             btic = time.time()
 
-    _, top1 = train_metric.get()
-    err_top1_train = 1.0 - top1
+    if not mixup:
+        _, top1 = train_metric.get()
+        err_top1_train = 1.0 - top1
+        train_metric_value = err_top1_train
+        logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
+            epoch + 1, err_top1_train, train_loss))
+    else:
+        _, rmse = train_metric.get()
+        train_metric_value = rmse
+        logging.info('[Epoch {}] training: rmse={:.4f}\tloss={:.4f}'.format(
+            epoch + 1, rmse, train_loss))
+
     train_loss /= (i + 1)
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
-
-    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
-        epoch + 1, err_top1_train, train_loss))
     logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
         epoch + 1, throughput, time.time() - tic))
 
-    return err_top1_train, train_loss
+    return train_metric_value, train_loss
 
 
 def train_net(batch_size,
@@ -725,7 +732,7 @@ def train_net(batch_size,
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        err_top1_train, train_loss = train_epoch(
+        train_metric_value, train_loss = train_epoch(
             epoch=epoch,
             net=net,
             train_metric=train_metric,
@@ -761,7 +768,7 @@ def train_net(batch_size,
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
+                params=[err_top1_val, train_metric_value, err_top5_val, train_loss],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
@@ -853,6 +860,9 @@ def main():
             state_file_path=args.resume_state)
 
         if args.save_dir and args.save_interval:
+            param_names =\
+                ['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'] if not args.mixup else\
+                ['Val.Top1', 'Train.RMSE', 'Val.Top5', 'Train.Loss']
             lp_saver = TrainLogParamSaver(
                 checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
                 last_checkpoint_file_name_suffix="last",
@@ -865,7 +875,7 @@ def main():
                 checkpoint_file_exts=['.params', '.states'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
-                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
+                param_names=param_names,
                 acc_ind=2,
                 # bigger=[True],
                 # mask=None,

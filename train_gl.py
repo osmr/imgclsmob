@@ -390,6 +390,8 @@ def _get_model(name, **kwargs):
     models = {
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
+        'squeezeresnet1_0': squeezeresnet1_0,
+        'squeezeresnet1_1': squeezeresnet1_1,
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,
         'mobilenet0_5': mobilenet0_5,

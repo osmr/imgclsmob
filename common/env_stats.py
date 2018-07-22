@@ -20,7 +20,7 @@ def get_pip_versions(package_list,
                 'pip{0}'.format(python_version),
                 'show', module])
             out_text = out_bytes.decode('utf-8').strip()
-        except subprocess.CalledProcessError:
+        except (subprocess.CalledProcessError, OSError):
             out_text = None
         module_versions[module] = out_text
     

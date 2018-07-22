@@ -109,7 +109,7 @@ class SqueezeNet(nn.Module):
         pool_ind = 0
         for i in range(len(stage_squeeze_channels)):
             for j in range(2):
-                if (pool_ind < len(pool_stages) - 1) and (k == pool_stages[pool_ind]):
+                if (pool_ind < len(pool_stages)) and (k == pool_stages[pool_ind]):
                     self.features.add_module("pool_{}".format(pool_ind + 1), squeeze_pool())
                     pool_ind += 1
                 in_channels = first_out_channels if (i == 0 and j == 0) else \

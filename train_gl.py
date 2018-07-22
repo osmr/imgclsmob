@@ -649,7 +649,11 @@ def train_epoch(epoch,
             weight_count = calc_net_weight_count(net)
             logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
+
+        if mixup:
+            outputs = [mx.nd.SoftmaxActivation(out) for out in outputs]
         train_metric.update(label, outputs)
+
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             if not mixup:

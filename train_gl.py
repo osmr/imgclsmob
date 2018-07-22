@@ -667,6 +667,11 @@ def train_epoch(epoch,
                     epoch + 1, i, speed, rmse, trainer.learning_rate))
             btic = time.time()
 
+    throughput = int(batch_size * (i + 1) / (time.time() - tic))
+    logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
+        epoch + 1, throughput, time.time() - tic))
+
+    train_loss /= (i + 1)
     if not mixup:
         _, top1 = train_metric.get()
         err_top1_train = 1.0 - top1
@@ -678,11 +683,6 @@ def train_epoch(epoch,
         train_metric_value = rmse
         logging.info('[Epoch {}] training: rmse={:.4f}\tloss={:.4f}'.format(
             epoch + 1, rmse, train_loss))
-
-    train_loss /= (i + 1)
-    throughput = int(batch_size * (i + 1) / (time.time() - tic))
-    logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
-        epoch + 1, throughput, time.time() - tic))
 
     return train_metric_value, train_loss
 

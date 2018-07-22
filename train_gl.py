@@ -3,7 +3,7 @@ import time
 import logging
 import os
 import sys
-import numpy as np
+#import numpy as np
 
 import mxnet as mx
 from mxnet import gluon
@@ -110,12 +110,12 @@ def parse_args():
     parser.add_argument(
         '--batch-size',
         type=int,
-        default=32,
+        default=512,
         help='training batch size per device (CPU/GPU).')
     parser.add_argument(
         '--num-epochs',
         type=int,
-        default=3,
+        default=120,
         help='number of training epochs.')
     parser.add_argument(
         '--start-epoch',
@@ -136,7 +136,7 @@ def parse_args():
     parser.add_argument(
         '--lr-mode',
         type=str,
-        default='step',
+        default='cosine',
         help='learning rate scheduler mode. options are step, poly and cosine')
     parser.add_argument(
         '--lr-decay',
@@ -154,20 +154,25 @@ def parse_args():
         default='40,60',
         help='epoches at which learning rate decays. default is 40,60.')
     parser.add_argument(
-        '--warmup-lr',
+        '--target-lr',
         type=float,
-        default=0.0,
-        help='starting warmup learning rate. default is 0.0.')
+        default=1e-8,
+        help='ending learning rate; default is 1e-8')
     parser.add_argument(
         '--warmup-epochs',
         type=int,
         default=0,
         help='number of warmup epochs.')
     parser.add_argument(
+        '--warmup-lr',
+        type=float,
+        default=1e-8,
+        help='starting warmup learning rate; default is 1e-8')
+    parser.add_argument(
         '--momentum',
         type=float,
         default=0.9,
-        help='momentum value for optimizer, default is 0.9.')
+        help='momentum value for optimizer; default is 0.9')
     parser.add_argument(
         '--wd',
         type=float,
@@ -241,6 +246,7 @@ def prepare_logger(log_dir_path,
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
+    log_file_exist = False
     if log_dir_path is not None and log_dir_path:
         log_file_path = os.path.join(log_dir_path, logging_file_name)
         if not os.path.exists(log_dir_path):
@@ -478,7 +484,9 @@ def prepare_trainer(net,
                     lr_decay_period,
                     lr_decay_epoch,
                     lr_decay,
+                    target_lr,
                     warmup_epochs,
+                    warmup_lr,
                     batch_size,
                     num_epochs,
                     num_training_samples,
@@ -497,8 +505,10 @@ def prepare_trainer(net,
         nepochs=num_epochs,
         step=lr_decay_epoch,
         step_factor=lr_decay,
+        targetlr=target_lr,
         power=2,
-        warmup_epochs=warmup_epochs)
+        warmup_epochs=warmup_epochs,
+        warmup_lr=warmup_lr)
 
     optimizer_params = {'wd': wd,
                         'momentum': momentum,
@@ -744,7 +754,7 @@ def train_net(batch_size,
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
+                params=[err_top1_val, err_top1_train, err_top5_val, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
@@ -828,7 +838,9 @@ def main():
             lr_decay_period=args.lr_decay_period,
             lr_decay_epoch=args.lr_decay_epoch,
             lr_decay=args.lr_decay,
+            target_lr=args.target_lr,
             warmup_epochs=args.warmup_epochs,
+            warmup_lr=args.warmup_lr,
             batch_size=batch_size,
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,
@@ -848,7 +860,7 @@ def main():
                 checkpoint_file_exts=['.params', '.states'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
-                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
+                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
                 acc_ind=2,
                 # bigger=[True],
                 # mask=None,

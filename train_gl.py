@@ -549,10 +549,10 @@ def validate(acc_top1,
     acc_top1.reset()
     acc_top5.reset()
     for batch in val_data:
-        data, label = batch_fn(batch, ctx)
-        outputs = [net(X.astype(dtype, copy=False)) for X in data]
-        acc_top1.update(label, outputs)
-        acc_top5.update(label, outputs)
+        data_list, labels_list = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        acc_top1.update(labels_list, outputs_list)
+        acc_top5.update(labels_list, outputs_list)
     _, top1 = acc_top1.get()
     _, top5 = acc_top5.get()
     return 1-top1, 1-top5
@@ -587,16 +587,9 @@ def test(net,
         time.time() - tic))
 
 
-def label_transform(label, classes):
-    ind = label.astype(np.int)
-    res = mx.nd.zeros((ind.shape[0], classes), ctx=label.context)
-    res[mx.nd.arange(ind.shape[0], ctx=label.context), ind] = 1
-    return res
-
-
 def train_epoch(epoch,
                 net,
-                train_metric,
+                acc_top1_train,
                 train_data,
                 batch_fn,
                 use_rec,
@@ -612,79 +605,62 @@ def train_epoch(epoch,
                 num_classes,
                 num_epochs):
 
+    labels_list_inds = None
     tic = time.time()
     if use_rec:
         train_data.reset()
-    train_metric.reset()
+    acc_top1_train.reset()
     train_loss = 0.0
 
     btic = time.time()
     for i, batch in enumerate(train_data):
-        data, label = batch_fn(batch, ctx)
+        data_list, labels_list = batch_fn(batch, ctx)
 
         if mixup:
+            labels_list_inds = labels_list
+            labels_list = [mx.nd.one_hot(Y, depth=num_classes) for Y in labels_list]
             if epoch < num_epochs - mixup_epoch_tail:
                 alpha = 1
                 lam = np.random.beta(alpha, alpha)
-                data = [lam * X + (1 - lam) * X[::-1] for X in data]
-                label_1 = label
-                label = []
-                for Y in label_1:
-                    y1 = label_transform(Y, num_classes)
-                    y2 = label_transform(Y[::-1], num_classes)
-                    label.append(lam * y1 + (1 - lam) * y2)
-            else:
-                for k in range(len(label)):
-                    label[k] = label_transform(label[k], num_classes)
+                data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
+                labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
 
         with ag.record():
-            outputs = [net(X.astype(dtype, copy=False)) for X in data]
-            loss = [loss_func(yhat, y) for yhat, y in zip(outputs, label)]
-        for l in loss:
-            l.backward()
+            outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+            loss_list = [loss_func(yhat, y) for yhat, y in zip(outputs_list, labels_list)]
+        for loss in loss_list:
+            loss.backward()
         lr_scheduler.update(i, epoch)
         trainer.step(batch_size)
 
         if epoch == 0 and i == 0:
             weight_count = calc_net_weight_count(net)
             logging.info('Model: {} trainable parameters'.format(weight_count))
-        train_loss += sum([l.mean().asscalar() for l in loss]) / len(loss)
+        train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
-        if mixup:
-            outputs = [mx.nd.SoftmaxActivation(out) for out in outputs]
-        train_metric.update(label, outputs)
+        acc_top1_train.update(
+            labels=(labels_list if not mixup else labels_list_inds),
+            preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
-            if not mixup:
-                _, top1 = train_metric.get()
-                err_top1_train = 1.0 - top1
-                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
-                    epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
-            else:
-                _, rmse = train_metric.get()
-                logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\trmse={:.4f}\tlr={:.4f}'.format(
-                    epoch + 1, i, speed, rmse, trainer.learning_rate))
             btic = time.time()
+            _, top1 = acc_top1_train.get()
+            err_top1_train = 1.0 - top1
+            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
+                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
 
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
     logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
-    if not mixup:
-        _, top1 = train_metric.get()
-        err_top1_train = 1.0 - top1
-        train_metric_value = err_top1_train
-        logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
-            epoch + 1, err_top1_train, train_loss))
-    else:
-        _, rmse = train_metric.get()
-        train_metric_value = rmse
-        logging.info('[Epoch {}] training: rmse={:.4f}\tloss={:.4f}'.format(
-            epoch + 1, rmse, train_loss))
+    _, top1 = acc_top1_train.get()
+    err_top1_train = 1.0 - top1
+    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss_list={:.4f}'.format(
+        epoch + 1, err_top1_train, train_loss))
 
-    return train_metric_value, train_loss
+    return err_top1_train, train_loss
 
 
 def train_net(batch_size,
@@ -710,13 +686,9 @@ def train_net(batch_size,
 
     acc_top1_val = mx.metric.Accuracy()
     acc_top5_val = mx.metric.TopKAccuracy(5)
+    acc_top1_train = mx.metric.Accuracy()
 
-    if not mixup:
-        train_metric = mx.metric.Accuracy()
-        loss_func = gluon.loss.SoftmaxCrossEntropyLoss()
-    else:
-        train_metric = mx.metric.RMSE()
-        loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=False)
+    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not mixup))
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
@@ -736,10 +708,10 @@ def train_net(batch_size,
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        train_metric_value, train_loss = train_epoch(
+        err_top1_train, train_loss = train_epoch(
             epoch=epoch,
             net=net,
-            train_metric=train_metric,
+            acc_top1_train=acc_top1_train,
             train_data=train_data,
             batch_fn=batch_fn,
             use_rec=use_rec,
@@ -772,7 +744,7 @@ def train_net(batch_size,
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, train_metric_value, err_top5_val, train_loss],
+                params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
@@ -864,9 +836,6 @@ def main():
             state_file_path=args.resume_state)
 
         if args.save_dir and args.save_interval:
-            param_names =\
-                ['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'] if not args.mixup else\
-                ['Val.Top1', 'Train.RMSE', 'Val.Top5', 'Train.Loss']
             lp_saver = TrainLogParamSaver(
                 checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
                 last_checkpoint_file_name_suffix="last",
@@ -879,7 +848,7 @@ def main():
                 checkpoint_file_exts=['.params', '.states'],
                 save_interval=args.save_interval,
                 num_epochs=args.num_epochs,
-                param_names=param_names,
+                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
                 acc_ind=2,
                 # bigger=[True],
                 # mask=None,

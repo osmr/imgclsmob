@@ -669,7 +669,7 @@ def train_epoch(epoch,
     train_loss /= (i + 1)
     _, top1 = acc_top1_train.get()
     err_top1_train = 1.0 - top1
-    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss_list={:.4f}'.format(
+    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
         epoch + 1, err_top1_train, train_loss))
 
     return err_top1_train, train_loss

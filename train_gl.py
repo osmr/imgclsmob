@@ -18,10 +18,11 @@ from gluoncv import utils as gutils
 from common.env_stats import get_env_stats
 from common.train_log_param_saver import TrainLogParamSaver
 
+from gluon.models.squeezenet import *
+from gluon.models.squeezenext import *
 from gluon.models.mobilenet import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
-from gluon.models.squeezenet import *
 
 
 def parse_args():
@@ -392,6 +393,14 @@ def _get_model(name, **kwargs):
         'squeezenet1_1': squeezenet1_1,
         'squeezeresnet1_0': squeezeresnet1_0,
         'squeezeresnet1_1': squeezeresnet1_1,
+
+        'sqnxt23_1_0': sqnxt23_1_0,
+        'sqnxt23_1_5': sqnxt23_1_5,
+        'sqnxt23_2_0': sqnxt23_2_0,
+        'sqnxt23v5_1_0': sqnxt23v5_1_0,
+        'sqnxt23v5_1_5': sqnxt23v5_1_5,
+        'sqnxt23v5_2_0': sqnxt23v5_2_0,
+
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,
         'mobilenet0_5': mobilenet0_5,

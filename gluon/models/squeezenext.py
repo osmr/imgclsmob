@@ -159,40 +159,55 @@ class SqueezeNext(HybridBlock):
         return x
 
 
-def get_squeezenext(width_x,
-                    blocks,
+def get_squeezenext(arch_type,
+                    scale,
                     pretrained=False,
                     ctx=cpu(),
                     **kwargs):
+    if arch_type == '23':
+        blocks = [6, 6, 8, 1]
+    elif arch_type == '23v5':
+        blocks = [2, 4, 14, 1]
+    else:
+        raise ValueError("Unsupported SqueezeNet architecture type {}".format(arch_type))
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNext(
-        width_x=width_x,
+        width_x=scale,
         blocks=blocks,
         **kwargs)
 
 
 def sqnxt23_1_0(**kwargs):
-    return get_squeezenext(1.0, [6, 6, 8, 1], **kwargs)
+    return get_squeezenext('23', 1.0, **kwargs)
+
+
+def sqnxt23_1_5(**kwargs):
+    return get_squeezenext('23', 1.5, **kwargs)
 
 
 def sqnxt23_2_0(**kwargs):
-    return get_squeezenext(2.0, [6, 6, 8, 1], **kwargs)
+    return get_squeezenext('23', 2.0, **kwargs)
 
 
 def sqnxt23v5_1_0(**kwargs):
-    return get_squeezenext(1.0, [2, 4, 14, 1], **kwargs)
+    return get_squeezenext('23v5', 1.0, **kwargs)
+
+
+def sqnxt23v5_1_5(**kwargs):
+    return get_squeezenext('23v5', 1.5, **kwargs)
 
 
 def sqnxt23v5_2_0(**kwargs):
-    return get_squeezenext(2.0, [2, 4, 14, 1], **kwargs)
+    return get_squeezenext('23v5', 2.0, **kwargs)
 
 
 if __name__ == "__main__":
     import numpy as np
     import mxnet as mx
-    net = sqnxt23_1_0()
+    net = sqnxt23_1_5()
     net.initialize(ctx=mx.gpu(0))
     input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
     output = net(input)

@@ -1057,10 +1057,16 @@ if __name__ == "__main__":
     import numpy as np
     import mxnet as mx
     net = nasnet_a_mobile()
+    # net = nn.Conv2D(
+    #     channels=3,
+    #     kernel_size=3,
+    #     groups=3,
+    #     use_bias=False)
     net.initialize(ctx=mx.gpu(0))
     input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
     output = net(input)
-    print("output={}".format(output))
+    #print("output={}".format(output))
+    print("net={}".format(net))
 
     net_params = net.collect_params()
     weight_count = 0

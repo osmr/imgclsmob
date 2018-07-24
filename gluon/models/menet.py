@@ -227,3 +227,22 @@ def menet352_12x1_g8(**kwargs):
 def menet456_24x1_g3(**kwargs):
     return get_menet(456, 24, 3, **kwargs)
 
+
+if __name__ == "__main__":
+    import numpy as np
+    import mxnet as mx
+    net = menet228_12x1_g3()
+    net.initialize(ctx=mx.gpu(0))
+    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
+    output = net(input)
+    #print("output={}".format(output))
+    #print("net={}".format(net))
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    print("weight_count={}".format(weight_count))
+

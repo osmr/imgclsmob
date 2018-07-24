@@ -544,7 +544,7 @@ def calc_net_weight_count(net):
     net_params = net.collect_params()
     weight_count = 0
     for param in net_params.values():
-        if param.shape is None:
+        if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
     return weight_count

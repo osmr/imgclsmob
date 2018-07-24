@@ -205,3 +205,22 @@ def squeezeresnet1_0(**kwargs):
 def squeezeresnet1_1(**kwargs):
     return get_squeezenet(version='1.1', residual=True, **kwargs)
 
+
+if __name__ == "__main__":
+    import numpy as np
+    import mxnet as mx
+    net = squeezenet1_0()
+    net.initialize(ctx=mx.gpu(0))
+    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
+    output = net(input)
+    #print("output={}".format(output))
+    #print("net={}".format(net))
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    print("weight_count={}".format(weight_count))
+

@@ -662,20 +662,13 @@ def nasnetamobile(num_classes=1001, pretrained='imagenet'):
 if __name__ == "__main__":
 
     net = NASNetAMobile(num_classes=1000)
-    # net = nn.Conv2d(
-    #     in_channels=3,
-    #     out_channels=3,
-    #     kernel_size=3,
-    #     groups=3,
-    #     bias=False)
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)
     #print(output.size())
-    print("net={}".format(net))
+    #print("net={}".format(net))
 
     net.train()
-    #net_params = filter(lambda p: p.requires_grad, net.parameters())
-    net_params = net.parameters()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())

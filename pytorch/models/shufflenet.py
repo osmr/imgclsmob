@@ -280,3 +280,21 @@ def shufflenet0_25_g3(**kwargs):
 # def shufflenet0_25_g8(**kwargs):
 #     return get_shufflenet(0.25, 8, **kwargs)
 
+
+if __name__ == "__main__":
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+    net = shufflenet0_5_g3(num_classes=1000)
+    input = Variable(torch.randn(1, 3, 224, 224))
+    output = net(input)
+    #print(output.size())
+    #print("net={}".format(net))
+
+    net.train()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    print("weight_count={}".format(weight_count))
+

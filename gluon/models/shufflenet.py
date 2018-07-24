@@ -40,8 +40,9 @@ class ChannelShuffle(HybridBlock):
 
     def __init__(self,
                  channels,
-                 groups):
-        super(ChannelShuffle, self).__init__()
+                 groups,
+                 **kwargs):
+        super(ChannelShuffle, self).__init__(**kwargs)
         assert (channels % groups == 0)
         self.groups = groups
         # with self.name_scope():
@@ -55,8 +56,9 @@ class ShuffleInitBlock(HybridBlock):
 
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(ShuffleInitBlock, self).__init__()
+                 out_channels,
+                 **kwargs):
+        super(ShuffleInitBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -87,8 +89,9 @@ class ShuffleUnit(HybridBlock):
                  out_channels,
                  groups,
                  downsample,
-                 ignore_group):
-        super(ShuffleUnit, self).__init__()
+                 ignore_group,
+                 **kwargs):
+        super(ShuffleUnit, self).__init__(**kwargs)
         self.downsample = downsample
         mid_channels = out_channels // 4
 

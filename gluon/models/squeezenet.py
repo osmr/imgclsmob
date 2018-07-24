@@ -82,8 +82,9 @@ class SqueezeInitBlock(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size):
-        super(SqueezeInitBlock, self).__init__()
+                 kernel_size,
+                 **kwargs):
+        super(SqueezeInitBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,

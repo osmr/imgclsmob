@@ -37,8 +37,9 @@ class MEModule(HybridBlock):
                  side_channels,
                  groups,
                  downsample,
-                 ignore_group):
-        super(MEModule, self).__init__()
+                 ignore_group,
+                 **kwargs):
+        super(MEModule, self).__init__(**kwargs)
         self.downsample = downsample
         mid_channels = out_channels // 4
 

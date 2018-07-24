@@ -283,7 +283,7 @@ class CellStem0(HybridBlock):
                 kernel_size=7,
                 strides=2,
                 padding=3,
-                bias=False)
+                use_bias=False)
 
             self.comb_iter_1_left = nn.MaxPool2D(
                 pool_size=3,
@@ -295,7 +295,7 @@ class CellStem0(HybridBlock):
                 kernel_size=7,
                 strides=2,
                 padding=3,
-                bias=False)
+                use_bias=False)
 
             self.comb_iter_2_left = nn.AvgPool2D(
                 pool_size=3,
@@ -307,7 +307,7 @@ class CellStem0(HybridBlock):
                 kernel_size=5,
                 strides=2,
                 padding=2,
-                bias=False)
+                use_bias=False)
 
             self.comb_iter_3_right = nn.AvgPool2D(
                 pool_size=3,
@@ -547,7 +547,7 @@ class FirstCell(HybridBlock):
                 strides=1,
                 padding=1)
 
-            self.comb_iter_2_left = AvgPoolPad(
+            self.comb_iter_2_left = nn.AvgPool2D(
                 pool_size=3,
                 strides=1,
                 padding=1,
@@ -610,30 +610,78 @@ class FirstCell(HybridBlock):
 
 class NormalCell(HybridBlock):
 
-    def __init__(self, in_channels_left, out_channels_left, in_channels_right, out_channels_right):
-        super(NormalCell, self).__init__()
-        self.conv_prev_1x1 = nn.HybridSequential()
-        self.conv_prev_1x1.add(nn.Activation(activation='relu'))
-        self.conv_prev_1x1.add(nn.Conv2D(channels=out_channels_left, kernel_size=1, strides=1, use_bias=False))
-        self.conv_prev_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+    def __init__(self,
+                 in_channels_left,
+                 out_channels_left,
+                 in_channels_right,
+                 out_channels_right,
+                 **kwargs):
+        super(NormalCell, self).__init__(**kwargs)
 
-        self.conv_1x1 = nn.HybridSequential()
-        self.conv_1x1.add(nn.Activation(activation='relu'))
-        self.conv_1x1.add(nn.Conv2D(channels=out_channels_right, kernel_size=1, strides=1, use_bias=False))
-        self.conv_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+        with self.name_scope():
+            self.conv_prev_1x1 = ConvBlock(
+                in_channels=in_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.comb_iter_0_left = BranchSeparables(out_channels_right, out_channels_right, 5, 1, 2, use_bias=False)
-        self.comb_iter_0_right = BranchSeparables(out_channels_left, out_channels_left, 3, 1, 1, use_bias=False)
+            self.conv_1x1 = ConvBlock(
+                in_channels=in_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.comb_iter_1_left = BranchSeparables(out_channels_left, out_channels_left, 5, 1, 2, use_bias=False)
-        self.comb_iter_1_right = BranchSeparables(out_channels_left, out_channels_left, 3, 1, 1, use_bias=False)
+            self.comb_iter_0_left = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=5,
+                strides=1,
+                padding=2)
+            self.comb_iter_0_right = BranchSeparables(
+                in_channels=out_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=3,
+                strides=1,
+                padding=1)
 
-        self.comb_iter_2_left = nn.AvgPool2D(3, strides=1, padding=1)
+            self.comb_iter_1_left = BranchSeparables(
+                in_channels=out_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=5,
+                strides=1,
+                padding=2)
+            self.comb_iter_1_right = BranchSeparables(
+                in_channels=out_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=3,
+                strides=1,
+                padding=1)
 
-        self.comb_iter_3_left = nn.AvgPool2D(3, strides=1, padding=1)
-        self.comb_iter_3_right = nn.AvgPool2D(3, strides=1, padding=1)
+            self.comb_iter_2_left = nn.AvgPool2D(
+                pool_size=3,
+                strides=1,
+                padding=1,
+                count_include_pad=False)
 
-        self.comb_iter_4_left = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, use_bias=False)
+            self.comb_iter_3_left = nn.AvgPool2D(
+                pool_size=3,
+                strides=1,
+                padding=1,
+                count_include_pad=False)
+            self.comb_iter_3_right = nn.AvgPool2D(
+                pool_size=3,
+                strides=1,
+                padding=1,
+                count_include_pad=False)
+
+            self.comb_iter_4_left = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=3,
+                strides=1,
+                padding=1)
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
@@ -663,31 +711,71 @@ class NormalCell(HybridBlock):
 
 class ReductionCell0(HybridBlock):
 
-    def __init__(self, in_channels_left, out_channels_left, in_channels_right, out_channels_right):
-        super(ReductionCell0, self).__init__()
-        self.conv_prev_1x1 = nn.HybridSequential()
-        self.conv_prev_1x1.add(nn.Activation(activation='relu'))
-        self.conv_prev_1x1.add(nn.Conv2D(channels=out_channels_left, kernel_size=1, strides=1, use_bias=False))
-        self.conv_prev_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+    def __init__(self,
+                 in_channels_left,
+                 out_channels_left,
+                 in_channels_right,
+                 out_channels_right,
+                 **kwargs):
+        super(ReductionCell0, self).__init__(**kwargs)
 
-        self.conv_1x1 = nn.HybridSequential()
-        self.conv_1x1.add(nn.Activation(activation='relu'))
-        self.conv_1x1.add(nn.Conv2D(channels=out_channels_right, kernel_size=1, strides=1, use_bias=False))
-        self.conv_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+        with self.name_scope():
+            self.conv_prev_1x1 = ConvBlock(
+                in_channels=in_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.comb_iter_0_left = BranchSeparablesReduction(out_channels_right, out_channels_right, 5, 2, 2, use_bias=False)
-        self.comb_iter_0_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 7, 2, 3, use_bias=False)
+            self.conv_1x1 = ConvBlock(
+                in_channels=in_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 7, 2, 3, use_bias=False)
+            self.comb_iter_0_left = BranchSeparablesReduction(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=5,
+                strides=2,
+                padding=2)
+            self.comb_iter_0_right = BranchSeparablesReduction(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=7,
+                strides=2,
+                padding=3)
 
-        self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 5, 2, 2, use_bias=False)
+            self.comb_iter_1_left = MaxPoolPad()
+            self.comb_iter_1_right = BranchSeparablesReduction(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=7,
+                strides=2,
+                padding=3)
 
-        self.comb_iter_3_right = nn.AvgPool2D(3, strides=1, padding=1)
+            self.comb_iter_2_left = AvgPoolPad()
+            self.comb_iter_2_right = BranchSeparablesReduction(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=5,
+                strides=2,
+                padding=2)
 
-        self.comb_iter_4_left = BranchSeparablesReduction(out_channels_right, out_channels_right, 3, 1, 1, use_bias=False)
-        self.comb_iter_4_right = MaxPoolPad()
+            self.comb_iter_3_right = nn.AvgPool2D(
+                pool_size=3,
+                strides=1,
+                padding=1,
+                count_include_pad=False)
+
+            self.comb_iter_4_left = BranchSeparablesReduction(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=3,
+                strides=1,
+                padding=1)
+            self.comb_iter_4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
@@ -722,36 +810,67 @@ class ReductionCell1(HybridBlock):
                  in_channels_left,
                  out_channels_left,
                  in_channels_right,
-                 out_channels_right):
+                 out_channels_right,
+                 **kwargs):
+        super(ReductionCell1, self).__init__(**kwargs)
 
-        super(ReductionCell1, self).__init__()
-        self.conv_prev_1x1 = nn.HybridSequential()
-        self.conv_prev_1x1.add(nn.Activation(activation='relu'))
-        self.conv_prev_1x1.add(nn.Conv2D(
-            channels=out_channels_left,
-            kernel_size=1,
-            strides=1,
-            use_bias=False))
-        self.conv_prev_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+        with self.name_scope():
+            self.conv_prev_1x1 = ConvBlock(
+                in_channels=in_channels_left,
+                out_channels=out_channels_left,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.conv_1x1 = nn.HybridSequential()
-        self.conv_1x1.add(nn.Activation(activation='relu'))
-        self.conv_1x1.add(nn.Conv2D(channels=out_channels_right, kernel_size=1, strides=1, use_bias=False))
-        self.conv_1x1.add(nn.BatchNorm(epsilon=0.001, momentum=0.1))
+            self.conv_1x1 = ConvBlock(
+                in_channels=in_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=1,
+                strides=1,
+                use_bias=False)
 
-        self.comb_iter_0_left = BranchSeparables(out_channels_right, out_channels_right, 5, 2, 2, use_bias=False)
-        self.comb_iter_0_right = BranchSeparables(out_channels_right, out_channels_right, 7, 2, 3, use_bias=False)
+            self.comb_iter_0_left = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=5,
+                strides=2,
+                padding=2)
+            self.comb_iter_0_right = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=7,
+                strides=2,
+                padding=3)
 
-        self.comb_iter_1_left = nn.MaxPool2D(3, strides=2, padding=1)
-        self.comb_iter_1_right = BranchSeparables(out_channels_right, out_channels_right, 7, 2, 3, use_bias=False)
+            self.comb_iter_1_left = MaxPoolPad()
+            self.comb_iter_1_right = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=7,
+                strides=2,
+                padding=3)
 
-        self.comb_iter_2_left = nn.AvgPool2D(3, strides=2, padding=1)
-        self.comb_iter_2_right = BranchSeparables(out_channels_right, out_channels_right, 5, 2, 2, use_bias=False)
+            self.comb_iter_2_left = AvgPoolPad()
+            self.comb_iter_2_right = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=5,
+                strides=2,
+                padding=2)
 
-        self.comb_iter_3_right = nn.AvgPool2D(3, strides=1, padding=1)
+            self.comb_iter_3_right = nn.AvgPool2D(
+                pool_size=3,
+                strides=1,
+                padding=1,
+                count_include_pad=False)
 
-        self.comb_iter_4_left = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, use_bias=False)
-        self.comb_iter_4_right = nn.MaxPool2D(3, strides=2, padding=1)
+            self.comb_iter_4_left = BranchSeparables(
+                in_channels=out_channels_right,
+                out_channels=out_channels_right,
+                kernel_size=3,
+                strides=1,
+                padding=1)
+            self.comb_iter_4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
@@ -784,8 +903,10 @@ class NASNetInitBlock(HybridBlock):
 
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(NASNetInitBlock, self).__init__()
+                 out_channels,
+                 **kwargs):
+        super(NASNetInitBlock, self).__init__(**kwargs)
+
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -812,62 +933,65 @@ class NASNet(HybridBlock):
                  penultimate_filters,
                  classes=1000,
                  **kwargs):
-
         super(NASNet, self).__init__(**kwargs)
+
         input_channels = 3
         stem_filters = 32
         filters = penultimate_filters // 24
+        filters_multiplier = 2
 
-        self.conv0 = NASNetInitBlock(
-            in_channels=input_channels,
-            out_channels=stem_filters)
+        with self.name_scope():
+            self.conv0 = NASNetInitBlock(
+                in_channels=input_channels,
+                out_channels=stem_filters)
 
-        self.cell_stem_0 = CellStem0()
-        self.cell_stem_1 = CellStem1()
+            self.cell_stem_0 = CellStem0(
+                stem_filters=stem_filters,
+                num_filters=filters // (filters_multiplier ** 2))
+            self.cell_stem_1 = CellStem1(
+                stem_filters=stem_filters,
+                num_filters=filters // filters_multiplier)
 
-        self.cell_stem_0 = CellStem0(self.stem_filters, num_filters=filters // (filters_multiplier ** 2))
-        self.cell_stem_1 = CellStem1(self.stem_filters, num_filters=filters // filters_multiplier)
+            self.cell_0 = FirstCell(in_channels_left=filters, out_channels_left=filters//2,  # 1, 0.5
+                                    in_channels_right=2*filters, out_channels_right=filters)  # 2, 1
+            self.cell_1 = NormalCell(in_channels_left=2*filters, out_channels_left=filters,  # 2, 1
+                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
+            self.cell_2 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
+                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
+            self.cell_3 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
+                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
 
-        self.cell_0 = FirstCell(in_channels_left=filters, out_channels_left=filters//2,  # 1, 0.5
-                                in_channels_right=2*filters, out_channels_right=filters)  # 2, 1
-        self.cell_1 = NormalCell(in_channels_left=2*filters, out_channels_left=filters,  # 2, 1
-                                 in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
-        self.cell_2 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                 in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
-        self.cell_3 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                 in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
+            self.reduction_cell_0 = ReductionCell0(in_channels_left=6*filters, out_channels_left=2*filters,  # 6, 2
+                                                   in_channels_right=6*filters, out_channels_right=2*filters)  # 6, 2
 
-        self.reduction_cell_0 = ReductionCell0(in_channels_left=6*filters, out_channels_left=2*filters,  # 6, 2
-                                               in_channels_right=6*filters, out_channels_right=2*filters)  # 6, 2
+            self.cell_6 = FirstCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
+                                    in_channels_right=8*filters, out_channels_right=2*filters)  # 8, 2
+            self.cell_7 = NormalCell(in_channels_left=8*filters, out_channels_left=2*filters,  # 8, 2
+                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
+            self.cell_8 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
+                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
+            self.cell_9 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
+                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
 
-        self.cell_6 = FirstCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                in_channels_right=8*filters, out_channels_right=2*filters)  # 8, 2
-        self.cell_7 = NormalCell(in_channels_left=8*filters, out_channels_left=2*filters,  # 8, 2
-                                 in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
-        self.cell_8 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                 in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
-        self.cell_9 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                 in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
+            self.reduction_cell_1 = ReductionCell1(in_channels_left=12*filters, out_channels_left=4*filters,  # 12, 4
+                                                   in_channels_right=12*filters, out_channels_right=4*filters)  # 12, 4
 
-        self.reduction_cell_1 = ReductionCell1(in_channels_left=12*filters, out_channels_left=4*filters,  # 12, 4
-                                               in_channels_right=12*filters, out_channels_right=4*filters)  # 12, 4
+            self.cell_12 = FirstCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
+                                     in_channels_right=16*filters, out_channels_right=4*filters)  # 16, 4
+            self.cell_13 = NormalCell(in_channels_left=16*filters, out_channels_left=4*filters,  # 16, 4
+                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
+            self.cell_14 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
+                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
+            self.cell_15 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
+                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
 
-        self.cell_12 = FirstCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                 in_channels_right=16*filters, out_channels_right=4*filters)  # 16, 4
-        self.cell_13 = NormalCell(in_channels_left=16*filters, out_channels_left=4*filters,  # 16, 4
-                                  in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-        self.cell_14 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
-                                  in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-        self.cell_15 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
-                                  in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-
-        self.activ = nn.Activation(activation='relu')
-        self.avg_pool = nn.AvgPool2D(pool_size=7, strides=1, padding=0)
-        self.flatten = nn.Flatten()
-        self.dropout = nn.Dropout(rate=0.5)
-        self.output = nn.Dense(
-            units=classes,
-            in_units=penultimate_filters)
+            self.activ = nn.Activation(activation='relu')
+            self.avg_pool = nn.AvgPool2D(pool_size=7, strides=1, padding=0)
+            self.flatten = nn.Flatten()
+            self.dropout = nn.Dropout(rate=0.5)
+            self.output = nn.Dense(
+                units=classes,
+                in_units=penultimate_filters)
 
     def features(self, x):
         x_conv0 = self.conv0(x)
@@ -927,4 +1051,22 @@ def get_nasnet(cell_repeats,
 
 def nasnet_a_mobile(**kwargs):
     return get_nasnet(4, 1056, **kwargs)
+
+
+if __name__ == "__main__":
+    import numpy as np
+    import mxnet as mx
+    net = nasnet_a_mobile()
+    net.initialize(ctx=mx.gpu(0))
+    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
+    output = net(input)
+    print("output={}".format(output))
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if param.shape is None:
+            continue
+        weight_count += np.prod(param.shape)
+    print("weight_count={}".format(weight_count))
 

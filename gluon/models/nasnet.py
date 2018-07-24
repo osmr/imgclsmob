@@ -154,7 +154,7 @@ class BranchSeparables(HybridBlock):
                 use_bias=use_bias,
                 specific=specific,
                 z_padding=z_padding)
-            self.dws_conv_block2 = DwsConv(
+            self.dws_conv_block2 = DwsConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
@@ -188,7 +188,7 @@ class BranchSeparablesStem(HybridBlock):
                 strides=strides,
                 padding=padding,
                 use_bias=use_bias)
-            self.dws_conv_block2 = DwsConv(
+            self.dws_conv_block2 = DwsConvBlock(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
@@ -1058,11 +1058,12 @@ if __name__ == "__main__":
     import mxnet as mx
     net = nasnet_a_mobile()
 
-    net = net.conv0
+    net = net
 
-    net.initialize(ctx=mx.gpu(0))
-    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
-    output = net(input)
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
+    #input = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    #output = net(input)
     #print("output={}".format(output))
     #print("net={}".format(net))
 

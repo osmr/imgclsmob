@@ -662,6 +662,9 @@ def nasnetamobile(num_classes=1001, pretrained='imagenet'):
 if __name__ == "__main__":
 
     net = NASNetAMobile(num_classes=1000)
+
+    net = net.conv0
+
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)
     #print(output.size())

@@ -1057,6 +1057,9 @@ if __name__ == "__main__":
     import numpy as np
     import mxnet as mx
     net = nasnet_a_mobile()
+
+    net = net.conv0
+
     net.initialize(ctx=mx.gpu(0))
     input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
     output = net(input)

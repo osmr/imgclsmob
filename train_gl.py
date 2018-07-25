@@ -23,6 +23,7 @@ from gluon.models.squeezenext import *
 from gluon.models.mobilenet import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
+from gluon.models.nasnet import *
 
 
 def parse_args():
@@ -400,6 +401,8 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_1_0': sqnxt23v5_1_0,
         'sqnxt23v5_1_5': sqnxt23v5_1_5,
         'sqnxt23v5_2_0': sqnxt23v5_2_0,
+
+        'nasnet_a_mobile': nasnet_a_mobile,
 
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,

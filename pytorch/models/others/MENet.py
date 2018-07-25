@@ -154,6 +154,7 @@ class MENet(nn.Module):
         x = self.pool(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
+        print(tuple(x.size()))
         return x
 
 
@@ -205,3 +206,22 @@ def oth_menet456_24x1_g3(**kwargs):
     return menet({"block_channels": [456, 912, 1824], "block_layers": [3, 7, 3], "init_c": 48,
                   "side_channels": [24, 24, 24], "groups": 3})
 
+
+if __name__ == "__main__":
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    net = oth_menet108_8x1_g3(num_classes=1000)
+
+    input = Variable(torch.randn(1, 3, 224, 224))
+    output = net(input)
+    #print(output.size())
+    #print("net={}".format(net))
+
+    net.eval()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    #print("weight_count={}".format(weight_count))

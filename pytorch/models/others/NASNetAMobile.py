@@ -663,17 +663,15 @@ if __name__ == "__main__":
 
     net = NASNetAMobile(num_classes=1000)
 
-    net = net
-
-    #input = Variable(torch.randn(1, 3, 224, 224))
-    #output = net(input)
+    input = Variable(torch.randn(1, 3, 224, 224))
+    output = net(input)
     #print(output.size())
     #print("net={}".format(net))
 
-    net.train()
+    net.eval()
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())
-    print("weight_count={}".format(weight_count))
+    #print("weight_count={}".format(weight_count))
 

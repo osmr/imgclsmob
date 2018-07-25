@@ -8,6 +8,9 @@ from mxnet.gluon import nn, HybridBlock
 from .shufflenet import ShuffleInitBlock, ChannelShuffle, depthwise_conv3x3, group_conv1x1
 
 
+TESTING = False
+
+
 def conv1x1(in_channels,
             out_channels):
     return nn.Conv2D(
@@ -155,8 +158,15 @@ class MENet(HybridBlock):
                 in_units=block_channels[-1])
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+        assert ((not TESTING) or self.features[0:1](x).shape == (1, 12, 56, 56))
+        assert ((not TESTING) or self.features[0:2](x).shape == (1, 108, 28, 28))
+
         x = self.features(x)
+        #assert ((not TESTING) or x.shape == (1, 432, 7, 7))
         x = self.output(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
 
@@ -228,15 +238,17 @@ def menet456_24x1_g3(**kwargs):
     return get_menet(456, 24, 3, **kwargs)
 
 
-if __name__ == "__main__":
+def _test():
     import numpy as np
     import mxnet as mx
-    net = menet228_12x1_g3()
-    net.initialize(ctx=mx.gpu(0))
-    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
-    output = net(input)
-    #print("output={}".format(output))
-    #print("net={}".format(net))
+
+    global TESTING
+    TESTING = True
+
+    net = menet108_8x1_g3()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
 
     net_params = net.collect_params()
     weight_count = 0
@@ -244,5 +256,13 @@ if __name__ == "__main__":
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    print("weight_count={}".format(weight_count))
+    assert (weight_count == 654516)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

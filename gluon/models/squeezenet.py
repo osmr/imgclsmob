@@ -7,6 +7,9 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+TESTING = False
+
+
 class FireConv(HybridBlock):
 
     def __init__(self,
@@ -153,8 +156,13 @@ class SqueezeNet(HybridBlock):
             self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+
         x = self.features(x)
+        assert ((not TESTING) or x.shape == (1, 512, 13, 13))
         x = self.output(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
 
@@ -206,15 +214,17 @@ def squeezeresnet1_1(**kwargs):
     return get_squeezenet(version='1.1', residual=True, **kwargs)
 
 
-if __name__ == "__main__":
+def _test():
     import numpy as np
     import mxnet as mx
+
+    global TESTING
+    TESTING = True
+
     net = squeezenet1_0()
-    net.initialize(ctx=mx.gpu(0))
-    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
-    output = net(input)
-    #print("output={}".format(output))
-    #print("net={}".format(net))
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
 
     net_params = net.collect_params()
     weight_count = 0
@@ -222,5 +232,13 @@ if __name__ == "__main__":
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    print("weight_count={}".format(weight_count))
+    assert (weight_count == 1248424)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

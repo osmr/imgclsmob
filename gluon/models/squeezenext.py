@@ -7,6 +7,9 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+TESTING = False
+
+
 class SqnxtConv(HybridBlock):
 
     def __init__(self,
@@ -204,20 +207,31 @@ def sqnxt23v5_2_0(**kwargs):
     return get_squeezenext('23v5', 2.0, **kwargs)
 
 
-if __name__ == "__main__":
+def _test():
     import numpy as np
     import mxnet as mx
-    net = sqnxt23_1_5()
-    net.initialize(ctx=mx.gpu(0))
-    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
-    output = net(input)
-    print("output={}".format(output))
+
+    global TESTING
+    TESTING = True
+
+    net = sqnxt23_1_0()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
 
     net_params = net.collect_params()
     weight_count = 0
     for param in net_params.values():
-        if param.shape is None:
+        if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    print("weight_count={}".format(weight_count))
+    #assert (weight_count == 654516)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

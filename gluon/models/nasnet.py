@@ -8,6 +8,9 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+TESTING = False
+
+
 def process_with_padding(x,
                          F,
                          process=(lambda x: x),
@@ -327,6 +330,8 @@ class CellStem0(HybridBlock):
                 padding=1)
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 32, 111, 111))
+
         x1 = self.conv_1x1(x)
 
         x_comb_iter_0_left = self.comb_iter_0_left(x1)
@@ -455,6 +460,9 @@ class CellStem1(HybridBlock):
             self.comb_iter_4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x_conv0, x_stem_0):
+        assert ((not TESTING) or x_conv0.shape == (1, 32, 111, 111))
+        assert ((not TESTING) or x_stem_0.shape == (1, 44, 56, 56))
+
         x_left = self.conv_1x1(x_stem_0)
 
         x_relu = self.relu(x_conv0)
@@ -572,6 +580,9 @@ class FirstCell(HybridBlock):
                 padding=1)
 
     def hybrid_forward(self, F, x, x_prev):
+        assert ((not TESTING) or x.shape == (1, 88, 28, 28) or x.shape == (1, 352, 14, 14) or x.shape == (1, 704, 7, 7))
+        assert ((not TESTING) or x_prev.shape == (1, 44, 56, 56) or x_prev.shape == (1, 264, 28, 28) or x_prev.shape == (1, 528, 14, 14))
+
         x_relu = self.relu(x_prev)
 
         # path 1
@@ -778,6 +789,9 @@ class ReductionCell0(HybridBlock):
             self.comb_iter_4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
+        assert ((not TESTING) or x.shape == (1, 264, 28, 28))
+        assert ((not TESTING) or x_prev.shape == (1, 264, 28, 28))
+
         x_left = self.conv_prev_1x1(x_prev)
         x_right = self.conv_1x1(x)
 
@@ -873,6 +887,9 @@ class ReductionCell1(HybridBlock):
             self.comb_iter_4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
+        assert ((not TESTING) or x.shape == (1, 528, 14, 14))
+        assert ((not TESTING) or x_prev.shape == (1, 528, 14, 14))
+
         x_left = self.conv_prev_1x1(x_prev)
         x_right = self.conv_1x1(x)
 
@@ -994,42 +1011,75 @@ class NASNet(HybridBlock):
                 in_units=penultimate_filters)
 
     def features(self, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+
         x_conv0 = self.conv0(x)
+        assert ((not TESTING) or x_conv0.shape == (1, 32, 111, 111))
         x_stem_0 = self.cell_stem_0(x_conv0)
+        assert ((not TESTING) or x_stem_0.shape == (1, 44, 56, 56))
         x_stem_1 = self.cell_stem_1(x_conv0, x_stem_0)
+        assert ((not TESTING) or x_stem_1.shape == (1, 88, 28, 28))
 
         x_cell_0 = self.cell_0(x_stem_1, x_stem_0)
+        assert ((not TESTING) or x_cell_0.shape == (1, 264, 28, 28))
         x_cell_1 = self.cell_1(x_cell_0, x_stem_1)
+        assert ((not TESTING) or x_cell_1.shape == (1, 264, 28, 28))
         x_cell_2 = self.cell_2(x_cell_1, x_cell_0)
+        assert ((not TESTING) or x_cell_2.shape == (1, 264, 28, 28))
         x_cell_3 = self.cell_3(x_cell_2, x_cell_1)
+        assert ((not TESTING) or x_cell_3.shape == (1, 264, 28, 28))
 
         x_reduction_cell_0 = self.reduction_cell_0(x_cell_3, x_cell_2)
+        assert ((not TESTING) or x_reduction_cell_0.shape == (1, 352, 14, 14))
 
         x_cell_6 = self.cell_6(x_reduction_cell_0, x_cell_3)
+        assert ((not TESTING) or x_cell_6.shape == (1, 528, 14, 14))
         x_cell_7 = self.cell_7(x_cell_6, x_reduction_cell_0)
+        assert ((not TESTING) or x_cell_7.shape == (1, 528, 14, 14))
         x_cell_8 = self.cell_8(x_cell_7, x_cell_6)
+        assert ((not TESTING) or x_cell_8.shape == (1, 528, 14, 14))
         x_cell_9 = self.cell_9(x_cell_8, x_cell_7)
+        assert ((not TESTING) or x_cell_9.shape == (1, 528, 14, 14))
 
         x_reduction_cell_1 = self.reduction_cell_1(x_cell_9, x_cell_8)
+        assert ((not TESTING) or x_reduction_cell_1.shape == (1, 704, 7, 7))
 
         x_cell_12 = self.cell_12(x_reduction_cell_1, x_cell_9)
+        assert ((not TESTING) or x_cell_12.shape == (1, 1056, 7, 7))
         x_cell_13 = self.cell_13(x_cell_12, x_reduction_cell_1)
+        assert ((not TESTING) or x_cell_13.shape == (1, 1056, 7, 7))
         x_cell_14 = self.cell_14(x_cell_13, x_cell_12)
+        assert ((not TESTING) or x_cell_14.shape == (1, 1056, 7, 7))
         x_cell_15 = self.cell_15(x_cell_14, x_cell_13)
+        assert ((not TESTING) or x_cell_15.shape == (1, 1056, 7, 7))
 
         return x_cell_15
 
     def classifier(self, x):
+        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
+
         x = self.activ(x)
+        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
         x = self.avg_pool(x)
+        assert ((not TESTING) or x.shape == (1, 1056, 1, 1))
         x = self.flatten(x)
+        assert ((not TESTING) or x.shape == (1, 1056))
         x = self.dropout(x)
+        assert ((not TESTING) or x.shape == (1, 1056))
         x = self.output(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+
         x = self.features(x)
+        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
+
         x = self.classifier(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
 
@@ -1053,26 +1103,31 @@ def nasnet_a_mobile(**kwargs):
     return get_nasnet(4, 1056, **kwargs)
 
 
-if __name__ == "__main__":
+def _test():
     import numpy as np
     import mxnet as mx
-    net = nasnet_a_mobile()
 
-    net = net
+    global TESTING
+    TESTING = True
+
+    net = nasnet_a_mobile()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
-    #input = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    #output = net(input)
-    #print("output={}".format(output))
-    #print("net={}".format(net))
 
     net_params = net.collect_params()
     weight_count = 0
     for param in net_params.values():
         if (param.shape is None) or (not param._differentiable):
-        #if (param.shape is None) or (param.grad_req == 'null'):
             continue
         weight_count += np.prod(param.shape)
-    print("weight_count={}".format(weight_count))
+    assert (weight_count == 5289978)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

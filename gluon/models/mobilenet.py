@@ -10,6 +10,9 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+TESTING = False
+
+
 class ConvBlock(HybridBlock):
 
     def __init__(self,
@@ -100,8 +103,13 @@ class MobileNet(HybridBlock):
                 in_units=channels[-1])
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+
         x = self.features(x)
+        assert ((not TESTING) or x.shape == (1, 1024))
         x = self.output(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
 
@@ -165,15 +173,17 @@ def fd_mobilenet0_25(**kwargs):
     return get_fd_mobilenet(0.25, **kwargs)
 
 
-if __name__ == "__main__":
+def _test():
     import numpy as np
     import mxnet as mx
-    net = fd_mobilenet0_5()
-    net.initialize(ctx=mx.gpu(0))
-    input = mx.nd.zeros((1, 3, 224, 224), ctx=mx.gpu(0))
-    output = net(input)
-    #print("output={}".format(output))
-    #print("net={}".format(net))
+
+    global TESTING
+    TESTING = True
+
+    net = mobilenet1_0()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
 
     net_params = net.collect_params()
     weight_count = 0
@@ -181,5 +191,13 @@ if __name__ == "__main__":
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    print("weight_count={}".format(weight_count))
+    assert (weight_count == 4231976)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

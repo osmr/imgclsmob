@@ -5,115 +5,29 @@
 
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .shufflenet import ShuffleInitBlock, ChannelShuffle, depthwise_conv3x3, group_conv1x1
 
 
-TESTING = False
-
-
-def conv1x1(in_channels,
-            out_channels):
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        use_bias=False,
-        in_channels=in_channels)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            strides):
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        use_bias=False,
-        in_channels=in_channels)
-
-
-class MEModule(HybridBlock):
+class DarkConv(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 side_channels,
-                 groups,
-                 downsample,
-                 ignore_group,
+                 kernel_size,
+                 padding,
                  **kwargs):
-        super(MEModule, self).__init__(**kwargs)
-        self.downsample = downsample
-        mid_channels = out_channels // 4
-
-        if downsample:
-            out_channels -= in_channels
-
+        super(DarkConv, self).__init__(**kwargs)
         with self.name_scope():
-            # residual branch
-            self.compress_conv1 = group_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.c_shuffle = ChannelShuffle(
-                channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.dw_conv2 = depthwise_conv3x3(
-                channels=mid_channels,
-                strides=(2 if self.downsample else 1))
-            self.dw_bn2 = nn.BatchNorm(in_channels=mid_channels)
-            self.expand_conv3 = group_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                groups=groups)
-            self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
-            if downsample:
-                self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
-            self.activ = nn.Activation('relu')
-
-            # fusion branch
-            self.s_merge_conv = conv1x1(
-                in_channels=mid_channels,
-                out_channels=side_channels)
-            self.s_merge_bn = nn.BatchNorm(in_channels=side_channels)
-            self.s_conv = conv3x3(
-                in_channels=side_channels,
-                out_channels=side_channels,
-                strides=(2 if self.downsample else 1))
-            self.s_conv_bn = nn.BatchNorm(in_channels=side_channels)
-            self.s_evolve_conv = conv1x1(
-                in_channels=side_channels,
-                out_channels=mid_channels)
-            self.s_evolve_bn = nn.BatchNorm(in_channels=mid_channels)
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.activ = nn.LeakyReLU(alpha=0.1)
 
     def hybrid_forward(self, F, x):
-        identity = x
-        # pointwise group convolution 1
-        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
-        x = self.c_shuffle(x)
-        # merging
-        y = self.s_merge_conv(x)
-        y = self.s_merge_bn(y)
-        y = self.activ(y)
-        # depthwise convolution (bottleneck)
-        x = self.dw_bn2(self.dw_conv2(x))
-        # evolution
-        y = self.s_conv(y)
-        y = self.s_conv_bn(y)
-        y = self.activ(y)
-        y = self.s_evolve_conv(y)
-        y = self.s_evolve_bn(y)
-        y = F.sigmoid(y)
-        x = x * y
-        # pointwise group convolution 2
-        x = self.expand_bn3(self.expand_conv3(x))
-        # identity branch
-        if self.downsample:
-            identity = self.avgpool(identity)
-            x = F.concat(x, identity, dim=1)
-        else:
-            x = x + identity
+        x = self.conv(x)
+        x = self.bn(x)
         x = self.activ(x)
         return x
 
@@ -121,55 +35,50 @@ class MEModule(HybridBlock):
 class DarkNet(HybridBlock):
 
     def __init__(self,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(DarkNet, self).__init__(**kwargs)
-        input_channels = 3
-        block_layers = [4, 8, 4]
+        lavels_per_stage = [1, 1, 3, 3, 5, 5]
+        pool_per_stage = [1, 1, 1, 1, 1, 0]
+        channels = [in_channels, 32, 64, 128, 64, 128, 256, 128, 256, 512, 256, 512, 256, 512, 1024, 512, 1024, 512, 1024]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(ShuffleInitBlock(
-                in_channels=input_channels,
-                out_channels=block_channels[0]))
 
-            for i in range(len(block_channels) - 1):
+            k = 0
+            for i in range(len(lavels_per_stage)):
                 stage = nn.HybridSequential(prefix='')
-                in_channels_i = block_channels[i]
-                out_channels_i = block_channels[i + 1]
-                for j in range(block_layers[i]):
-                    stage.add(MEModule(
-                        in_channels=(in_channels_i if j == 0 else out_channels_i),
-                        out_channels=out_channels_i,
-                        side_channels=side_channels,
-                        groups=groups,
-                        downsample=(j == 0),
-                        ignore_group=(i == 0 and j == 0)))
+                for j in range(lavels_per_stage[i]):
+                    stage.add(DarkConv(
+                        in_channels=channels[k],
+                        out_channels=channels[k + 1],
+                        kernel_size=3 if (j % 2 == 0) else 1,
+                        padding=1 if (j % 2 == 0) else 0))
+                    k += 1
+                if pool_per_stage[i] == 1:
+                    stage.add(nn.MaxPool2D(
+                        pool_size=2,
+                        strides=2))
                 self.features.add(stage)
 
-            self.features.add(nn.AvgPool2D(pool_size=7))
-            self.features.add(nn.Flatten())
-
-            self.output = nn.Dense(
-                units=classes,
-                in_units=block_channels[-1])
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Conv2D(
+                channels=classes,
+                kernel_size=1,
+                in_channels=channels[-1]))
+            self.output.add(nn.AvgPool2D(pool_size=7))
+            self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-        assert ((not TESTING) or self.features[0:1](x).shape == (1, 12, 56, 56))
-        assert ((not TESTING) or self.features[0:2](x).shape == (1, 108, 28, 28))
-
         x = self.features(x)
-        #assert ((not TESTING) or x.shape == (1, 432, 7, 7))
         x = self.output(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
         return x
 
 
-def get_darknet(pretrained=False,
-                ctx=cpu(),
-                **kwargs):
+def get_darknet19(pretrained=False,
+                  ctx=cpu(),
+                  **kwargs):
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
@@ -177,6 +86,35 @@ def get_darknet(pretrained=False,
     return net
 
 
-def darknet(**kwargs):
-    return get_darknet(**kwargs)
+def darknet19(**kwargs):
+    return get_darknet19(**kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    global TESTING
+    TESTING = True
+
+    net = get_darknet19()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    #assert (weight_count == 1597096)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 

@@ -404,6 +404,9 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_2_0': sqnxt23v5_2_0,
 
         'nasnet_a_mobile': nasnet_a_mobile,
+
+        'darknet_ref': darknet_ref,
+        'darknet_tiny': darknet_tiny,
         'darknet19': darknet19,
 
         'mobilenet1_0': mobilenet1_0,

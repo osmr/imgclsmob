@@ -948,18 +948,18 @@ class NASNet(HybridBlock):
     def __init__(self,
                  cell_repeats,
                  penultimate_filters,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(NASNet, self).__init__(**kwargs)
 
-        input_channels = 3
         stem_filters = 32
         filters = penultimate_filters // 24
         filters_multiplier = 2
 
         with self.name_scope():
             self.conv0 = NASNetInitBlock(
-                in_channels=input_channels,
+                in_channels=in_channels,
                 out_channels=stem_filters)
 
             self.cell_stem_0 = CellStem0(

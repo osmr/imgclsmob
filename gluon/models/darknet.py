@@ -1,6 +1,6 @@
 """
-    MENet, implemented in Gluon.
-    Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications'
+    DarkNet, implemented in Gluon.
+    Original paper: 'Darknet: Open source neural networks in c'
 """
 
 from mxnet import cpu
@@ -118,22 +118,19 @@ class MEModule(HybridBlock):
         return x
 
 
-class MENet(HybridBlock):
+class DarkNet(HybridBlock):
 
     def __init__(self,
-                 block_channels,
-                 side_channels,
-                 groups,
-                 in_channels=3,
                  classes=1000,
                  **kwargs):
-        super(MENet, self).__init__(**kwargs)
+        super(DarkNet, self).__init__(**kwargs)
+        input_channels = 3
         block_layers = [4, 8, 4]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ShuffleInitBlock(
-                in_channels=in_channels,
+                in_channels=input_channels,
                 out_channels=block_channels[0]))
 
             for i in range(len(block_channels) - 1):
@@ -170,99 +167,16 @@ class MENet(HybridBlock):
         return x
 
 
-def get_menet(first_block_channels,
-              side_channels,
-              groups,
-              pretrained=False,
-              ctx=cpu(),
-              **kwargs):
-    if first_block_channels == 108:
-        block_channels = [12, 108, 216, 432]
-    elif first_block_channels == 128:
-        block_channels = [12, 128, 256, 512]
-    elif first_block_channels == 160:
-        block_channels = [16, 160, 320, 640]
-    elif first_block_channels == 228:
-        block_channels = [24, 228, 456, 912]
-    elif first_block_channels == 256:
-        block_channels = [24, 256, 512, 1024]
-    elif first_block_channels == 348:
-        block_channels = [24, 348, 696, 1392]
-    elif first_block_channels == 352:
-        block_channels = [24, 352, 704, 1408]
-    elif first_block_channels == 456:
-        block_channels = [48, 456, 912, 1824]
-    else:
-        raise ValueError("The {} of `first_block_channels` is not supported".format(first_block_channels))
-
+def get_darknet(pretrained=False,
+                ctx=cpu(),
+                **kwargs):
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = MENet(
-        block_channels=block_channels,
-        side_channels=side_channels,
-        groups=groups,
-        **kwargs)
+    net = DarkNet(**kwargs)
     return net
 
 
-def menet108_8x1_g3(**kwargs):
-    return get_menet(108, 8, 3, **kwargs)
-
-
-def menet128_8x1_g4(**kwargs):
-    return get_menet(128, 8, 4, **kwargs)
-
-
-def menet160_8x1_g8(**kwargs):
-    return get_menet(160, 8, 8, **kwargs)
-
-
-def menet228_12x1_g3(**kwargs):
-    return get_menet(228, 12, 3, **kwargs)
-
-
-def menet256_12x1_g4(**kwargs):
-    return get_menet(256, 12, 4, **kwargs)
-
-
-def menet348_12x1_g3(**kwargs):
-    return get_menet(348, 12, 3, **kwargs)
-
-
-def menet352_12x1_g8(**kwargs):
-    return get_menet(352, 12, 8, **kwargs)
-
-
-def menet456_24x1_g3(**kwargs):
-    return get_menet(456, 24, 3, **kwargs)
-
-
-def _test():
-    import numpy as np
-    import mxnet as mx
-
-    global TESTING
-    TESTING = True
-
-    net = menet108_8x1_g3()
-
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
-
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (weight_count == 654516)
-
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
-
-
-if __name__ == "__main__":
-    _test()
+def darknet(**kwargs):
+    return get_darknet(**kwargs)
 

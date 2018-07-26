@@ -112,19 +112,19 @@ class SqueezeNext(HybridBlock):
     def __init__(self,
                  width_x,
                  blocks,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(SqueezeNext, self).__init__(**kwargs)
-        input_channels = 3
-        in_channels = 64
+        base_in_channels = 64
         out_channels_per_stage = [32, 64, 128, 256]
         strides_per_stage = [1, 2, 2, 2]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(SqnxtConv(
-                in_channels=input_channels,
-                out_channels=int(width_x * in_channels),
+                in_channels=in_channels,
+                out_channels=int(width_x * base_in_channels),
                 kernel_size=7,
                 strides=2,
                 padding=1))
@@ -137,15 +137,15 @@ class SqueezeNext(HybridBlock):
                 strides_i = [strides_per_stage[i]] + [1] * (blocks[i] - 1)
                 for j in range(len(strides_i)):
                     stage.add(SqnxtBlock(
-                        in_channels=int(width_x * in_channels),
+                        in_channels=int(width_x * base_in_channels),
                         out_channels=int(width_x * out_channels_per_stage[i]),
                         strides=strides_i[j]))
                     if j == 0:
-                        in_channels = out_channels_per_stage[i]
+                        base_in_channels = out_channels_per_stage[i]
                 self.features.add(stage)
 
             self.features.add(SqnxtConv(
-                in_channels=int(width_x * in_channels),
+                in_channels=int(width_x * base_in_channels),
                 out_channels=int(width_x * 128),
                 kernel_size=1,
                 strides=1))

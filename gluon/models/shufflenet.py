@@ -143,16 +143,16 @@ class ShuffleNet(HybridBlock):
     def __init__(self,
                  groups,
                  stage_out_channels,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(ShuffleNet, self).__init__(**kwargs)
         stage_num_blocks = [4, 8, 4]
-        input_channels = 3
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ShuffleInitBlock(
-                in_channels=input_channels,
+                in_channels=in_channels,
                 out_channels=stage_out_channels[0]))
 
             for i in range(len(stage_num_blocks)):

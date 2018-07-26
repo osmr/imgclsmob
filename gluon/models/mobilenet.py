@@ -77,15 +77,15 @@ class MobileNet(HybridBlock):
     def __init__(self,
                  channels,
                  strides,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(MobileNet, self).__init__(**kwargs)
-        input_channels = 3
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ConvBlock(
-                in_channels=input_channels,
+                in_channels=in_channels,
                 out_channels=channels[0],
                 kernel_size=3,
                 strides=2,

@@ -109,17 +109,17 @@ class SqueezeNet(HybridBlock):
                  first_kernel_size,
                  pool_stages,
                  residual_stages,
+                 in_channels=3,
                  classes=1000,
                  **kwargs):
         super(SqueezeNet, self).__init__(**kwargs)
-        input_channels = 3
         stage_squeeze_channels = [16, 32, 48, 64]
         stage_expand_channels = [64, 128, 192, 256]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(SqueezeInitBlock(
-                in_channels=input_channels,
+                in_channels=in_channels,
                 out_channels=first_out_channels,
                 kernel_size=first_kernel_size))
             k = 0
@@ -135,10 +135,10 @@ class SqueezeNet(HybridBlock):
                         res_ind += 1
                     else:
                         residual = False
-                    in_channels = first_out_channels if (i == 0 and j == 0) else \
+                    in_channels_ij = first_out_channels if (i == 0 and j == 0) else \
                         (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
                     self.features.add(FireUnit(
-                        in_channels=in_channels,
+                        in_channels=in_channels_ij,
                         squeeze_channels=stage_squeeze_channels[i],
                         expand1x1_channels=stage_expand_channels[i],
                         expand3x3_channels=stage_expand_channels[i],

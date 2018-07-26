@@ -24,6 +24,7 @@ from gluon.models.mobilenet import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
 from gluon.models.nasnet import *
+from gluon.models.darknet import *
 
 
 def parse_args():
@@ -403,6 +404,7 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_2_0': sqnxt23v5_2_0,
 
         'nasnet_a_mobile': nasnet_a_mobile,
+        'darknet19': darknet19,
 
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,

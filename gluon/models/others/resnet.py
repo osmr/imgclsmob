@@ -29,9 +29,8 @@ __all__ = ['ResNetV1', 'ResNetV2',
 
 import os
 
-from ....context import cpu
-from ...block import HybridBlock
-from ... import nn
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 
 # Helpers
 def _conv3x3(channels, stride, in_channels):
@@ -539,3 +538,29 @@ def resnet152_v2(**kwargs):
         Location for keeping the model parameters.
     """
     return get_resnet(2, 152, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    net = resnet18_v1()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    pass
+
+
+if __name__ == "__main__":
+    _test()
+

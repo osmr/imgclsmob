@@ -7,21 +7,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-class PreResActivation(HybridBlock):
-
-    def __init__(self,
-                 in_channels,
-                 **kwargs):
-        super(PreResActivation, self).__init__(**kwargs)
-        self.bn = nn.BatchNorm(in_channels=in_channels)
-        self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
 class PreResConv(HybridBlock):
 
     def __init__(self,
@@ -33,7 +18,8 @@ class PreResConv(HybridBlock):
                  **kwargs):
         super(PreResConv, self).__init__(**kwargs)
         with self.name_scope():
-            self.pre_activ = PreResActivation(in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=in_channels)
+            self.activ = nn.Activation('relu')
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -43,9 +29,11 @@ class PreResConv(HybridBlock):
                 in_channels=in_channels)
 
     def hybrid_forward(self, F, x):
-        x = self.pre_activ(x)
+        x = self.bn(x)
+        x = self.activ(x)
+        x_pre_activ = x
         x = self.conv(x)
-        return x
+        return x, x_pre_activ
 
 
 def conv1x1(in_channels,
@@ -56,18 +44,6 @@ def conv1x1(in_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
-        use_bias=False,
-        in_channels=in_channels)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            strides):
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
         use_bias=False,
         in_channels=in_channels)
 
@@ -104,7 +80,7 @@ class PreResBlock(HybridBlock):
         super(PreResBlock, self).__init__(**kwargs)
 
         with self.name_scope():
-            self.conv1 = conv3x3(
+            self.conv1 = preres_conv3x3(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides)
@@ -114,9 +90,9 @@ class PreResBlock(HybridBlock):
                 strides=1)
 
     def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        return x
+        x, x_pre_activ = self.conv1(x)
+        x, _ = self.conv2(x)
+        return x, x_pre_activ
 
 
 class PreResBottleneck(HybridBlock):
@@ -131,7 +107,7 @@ class PreResBottleneck(HybridBlock):
         mid_channels = out_channels // 4
 
         with self.name_scope():
-            self.conv1 = conv1x1(
+            self.conv1 = preres_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1))
@@ -145,10 +121,10 @@ class PreResBottleneck(HybridBlock):
                 strides=1)
 
     def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        return x
+        x, x_pre_activ = self.conv1(x)
+        x, _ = self.conv2(x)
+        x, _ = self.conv3(x)
+        return x, x_pre_activ
 
 
 class PreResUnit(HybridBlock):
@@ -164,7 +140,6 @@ class PreResUnit(HybridBlock):
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
-            self.pre_activ = PreResActivation(in_channels=in_channels)
             if bottleneck:
                 self.body = PreResBottleneck(
                     in_channels=in_channels,
@@ -184,10 +159,9 @@ class PreResUnit(HybridBlock):
 
     def hybrid_forward(self, F, x):
         identity = x
-        x = self.pre_activ(x)
+        x, x_pre_activ = self.body(x)
         if self.resize_identity:
-            identity = self.resize_conv(x)
-        x = self.body(x)
+            identity = self.resize_conv(x_pre_activ)
         x = x + identity
         return x
 
@@ -207,7 +181,8 @@ class PreResInitBlock(HybridBlock):
                 padding=3,
                 use_bias=False,
                 in_channels=in_channels)
-            self.pre_activ = PreResActivation(in_channels=out_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.activ = nn.Activation('relu')
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -215,7 +190,8 @@ class PreResInitBlock(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
-        x = self.pre_activ(x)
+        x = self.bn(x)
+        x = self.activ(x)
         x = self.pool(x)
         return x
 
@@ -253,7 +229,8 @@ class PreResNet(HybridBlock):
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(PreResActivation(in_channels=channels[-1]))
+            self.features.add(nn.BatchNorm(in_channels=channels[-1]))
+            self.features.add(nn.Activation('relu'))
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.AvgPool2D(pool_size=7))

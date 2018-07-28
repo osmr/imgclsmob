@@ -18,6 +18,8 @@ from gluoncv import utils as gutils
 from common.env_stats import get_env_stats
 from common.train_log_param_saver import TrainLogParamSaver
 
+from gluon.models.resnet import *
+from gluon.models.preresnet import *
 from gluon.models.squeezenet import *
 from gluon.models.squeezenext import *
 from gluon.models.mobilenet import *
@@ -391,6 +393,9 @@ def get_data_loader(data_dir,
 
 def _get_model(name, **kwargs):
     models = {
+        'resnet18': resnet18,
+        'preresnet18': preresnet18,
+
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
         'squeezeresnet1_0': squeezeresnet1_0,

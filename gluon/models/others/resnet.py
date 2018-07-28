@@ -544,7 +544,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    net = resnet18_v1()
+    net = resnet18_v2()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)

@@ -12,11 +12,12 @@ from mxnet.gluon.data.vision import transforms
 
 from gluoncv.data import imagenet
 from gluoncv.model_zoo import get_model
-from gluoncv.utils import LRScheduler
+#from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
 from common.env_stats import get_env_stats
 from common.train_log_param_saver import TrainLogParamSaver
+from gluon.lr_scheduler import LRScheduler
 
 from gluon.models.resnet import *
 from gluon.models.preresnet import *
@@ -164,6 +165,11 @@ def parse_args():
         default=1e-8,
         help='ending learning rate; default is 1e-8')
     parser.add_argument(
+        '--poly-power',
+        type=float,
+        default=2,
+        help='power value for poly LR scheduler')
+    parser.add_argument(
         '--warmup-epochs',
         type=int,
         default=0,
@@ -173,6 +179,11 @@ def parse_args():
         type=float,
         default=1e-8,
         help='starting warmup learning rate; default is 1e-8')
+    parser.add_argument(
+        '--warmup-mode',
+        type=str,
+        default='linear',
+        help='learning rate scheduler warmup mode. options are linear, poly and constant')
     parser.add_argument(
         '--momentum',
         type=float,
@@ -509,8 +520,10 @@ def prepare_trainer(net,
                     lr_decay_epoch,
                     lr_decay,
                     target_lr,
+                    poly_power,
                     warmup_epochs,
                     warmup_lr,
+                    warmup_mode,
                     batch_size,
                     num_epochs,
                     num_training_samples,
@@ -524,15 +537,16 @@ def prepare_trainer(net,
     num_batches = num_training_samples // batch_size
     lr_scheduler = LRScheduler(
         mode=lr_mode,
-        baselr=lr,
-        niters=num_batches,
-        nepochs=num_epochs,
+        base_lr=lr,
+        n_iters=num_batches,
+        n_epochs=num_epochs,
         step=lr_decay_epoch,
         step_factor=lr_decay,
-        targetlr=target_lr,
-        power=2,
+        target_lr=target_lr,
+        power=poly_power,
         warmup_epochs=warmup_epochs,
-        warmup_lr=warmup_lr)
+        warmup_lr=warmup_lr,
+        warmup_mode=warmup_mode)
 
     optimizer_params = {'wd': wd,
                         'momentum': momentum,
@@ -863,8 +877,10 @@ def main():
             lr_decay_epoch=args.lr_decay_epoch,
             lr_decay=args.lr_decay,
             target_lr=args.target_lr,
+            poly_power=args.poly_power,
             warmup_epochs=args.warmup_epochs,
             warmup_lr=args.warmup_lr,
+            warmup_mode=args.warmup_mode,
             batch_size=batch_size,
             num_epochs=args.num_epochs,
             num_training_samples=num_training_samples,

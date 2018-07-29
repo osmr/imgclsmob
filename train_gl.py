@@ -21,6 +21,7 @@ from gluon.lr_scheduler import LRScheduler
 
 from gluon.models.resnet import *
 from gluon.models.preresnet import *
+
 from gluon.models.squeezenet import *
 from gluon.models.squeezenext import *
 from gluon.models.mobilenet import *
@@ -405,7 +406,22 @@ def get_data_loader(data_dir,
 def _get_model(name, **kwargs):
     models = {
         'resnet18': resnet18,
+        'resnet34': resnet34,
+        'resnet50': resnet50,
+        'resnet50b': resnet50b,
+        'resnet101': resnet101,
+        'resnet101b': resnet101b,
+        'resnet152': resnet152,
+        'resnet152b': resnet152b,
+
         'preresnet18': preresnet18,
+        'preresnet34': preresnet34,
+        'preresnet50': preresnet50,
+        'preresnet50b': preresnet50b,
+        'preresnet101': preresnet101,
+        'preresnet101b': preresnet101b,
+        'preresnet152': preresnet152,
+        'preresnet152b': preresnet152b,
 
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,

@@ -1,6 +1,6 @@
 """
-    ResNet, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition'
+    PreResNet, implemented in Gluon.
+    Original paper: 'Identity Mappings in Deep Residual Networks'
 """
 
 from mxnet import cpu
@@ -245,9 +245,11 @@ class PreResNet(HybridBlock):
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(PreResActivation(in_channels=channels[-1]))
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.AvgPool2D(pool_size=7))
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

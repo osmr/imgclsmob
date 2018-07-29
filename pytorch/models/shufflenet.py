@@ -1,5 +1,5 @@
 """
-    ShuffleNet, implemented in Gluon.
+    ShuffleNet, implemented in PyTorch.
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices'
 """
 

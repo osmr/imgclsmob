@@ -1,5 +1,5 @@
 """
-    MENet, implemented in Gluon.
+    MENet, implemented in PyTorch.
     Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications'
 """
 

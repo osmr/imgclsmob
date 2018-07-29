@@ -16,6 +16,9 @@ import torchvision.models as models
 from common.env_stats import get_env_stats
 from common.train_log_param_saver import TrainLogParamSaver
 
+from pytorch.models.resnet import *
+from pytorch.models.preresnet import *
+
 from pytorch.models.mobilenet import *
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
@@ -268,6 +271,24 @@ def get_data_loader(data_dir,
 
 def _get_model(name, **kwargs):
     slk_models = {
+        'resnet18': resnet18,
+        'resnet34': resnet34,
+        'resnet50': resnet50,
+        'resnet50b': resnet50b,
+        'resnet101': resnet101,
+        'resnet101b': resnet101b,
+        'resnet152': resnet152,
+        'resnet152b': resnet152b,
+
+        'preresnet18': preresnet18,
+        'preresnet34': preresnet34,
+        'preresnet50': preresnet50,
+        'preresnet50b': preresnet50b,
+        'preresnet101': preresnet101,
+        'preresnet101b': preresnet101b,
+        'preresnet152': preresnet152,
+        'preresnet152b': preresnet152b,
+
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,
         'oth_mobilenet0_5': oth_mobilenet0_5,

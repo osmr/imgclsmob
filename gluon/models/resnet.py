@@ -19,6 +19,7 @@ class ResConv(HybridBlock):
                  **kwargs):
         super(ResConv, self).__init__(**kwargs)
         self.activate = activate
+
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -228,9 +229,11 @@ class ResNet(HybridBlock):
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.AvgPool2D(pool_size=7))
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

@@ -544,7 +544,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    net = resnet18_v2()
+    net = resnet152_v2()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -558,6 +558,8 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
+
+    print(weight_count)
     pass
 
 

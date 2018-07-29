@@ -78,7 +78,6 @@ class PreResBlock(HybridBlock):
                  strides,
                  **kwargs):
         super(PreResBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.conv1 = preres_conv3x3(
                 in_channels=in_channels,
@@ -152,7 +151,7 @@ class PreResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides)
             if self.resize_identity:
-                self.resize_conv = conv1x1(
+                self.identity_conv = conv1x1(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides)
@@ -161,7 +160,7 @@ class PreResUnit(HybridBlock):
         identity = x
         x, x_pre_activ = self.body(x)
         if self.resize_identity:
-            identity = self.resize_conv(x_pre_activ)
+            identity = self.identity_conv(x_pre_activ)
         x = x + identity
         return x
 
@@ -193,6 +192,22 @@ class PreResInitBlock(HybridBlock):
         x = self.bn(x)
         x = self.activ(x)
         x = self.pool(x)
+        return x
+
+
+class PreResActivation(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 **kwargs):
+        super(PreResActivation, self).__init__(**kwargs)
+        with self.name_scope():
+            self.bn = nn.BatchNorm(in_channels=in_channels)
+            self.activ = nn.Activation('relu')
+
+    def hybrid_forward(self, F, x):
+        x = self.bn(x)
+        x = self.activ(x)
         return x
 
 
@@ -229,8 +244,7 @@ class PreResNet(HybridBlock):
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(nn.BatchNorm(in_channels=channels[-1]))
-            self.features.add(nn.Activation('relu'))
+            self.features.add(PreResActivation(in_channels=channels[-1]))
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.AvgPool2D(pool_size=7))
@@ -254,6 +268,41 @@ def get_preresnet(version,
         channels = [64, 64, 128, 256, 512]
         bottleneck = False
         conv1_stride = True
+    elif version == '34':
+        layers = [3, 4, 6, 3]
+        channels = [64, 64, 128, 256, 512]
+        bottleneck = False
+        conv1_stride = True
+    elif version == '50':
+        layers = [3, 4, 6, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '50b':
+        layers = [3, 4, 6, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
+    elif version == '101':
+        layers = [3, 4, 23, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '101b':
+        layers = [3, 4, 23, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
+    elif version == '152':
+        layers = [3, 8, 36, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '152b':
+        layers = [3, 8, 36, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
 
@@ -273,6 +322,34 @@ def preresnet18(**kwargs):
     return get_preresnet('18', **kwargs)
 
 
+def preresnet34(**kwargs):
+    return get_preresnet('34', **kwargs)
+
+
+def preresnet50(**kwargs):
+    return get_preresnet('50', **kwargs)
+
+
+def preresnet50b(**kwargs):
+    return get_preresnet('50b', **kwargs)
+
+
+def preresnet101(**kwargs):
+    return get_preresnet('101', **kwargs)
+
+
+def preresnet101b(**kwargs):
+    return get_preresnet('101b', **kwargs)
+
+
+def preresnet152(**kwargs):
+    return get_preresnet('152', **kwargs)
+
+
+def preresnet152b(**kwargs):
+    return get_preresnet('152b', **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -280,7 +357,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = preresnet18()
+    net = preresnet152b()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -291,9 +368,11 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    assert (weight_count == 11687848)
-    #assert (weight_count == 1042104)
-    #assert (weight_count == 20842376)
+    #assert (weight_count == 11687848)  # resnet18_v2
+    #assert (weight_count == 21796008)  # resnet34_v2
+    #assert (weight_count == 25549480)  # resnet50_v2
+    #assert (weight_count == 44541608)  # resnet101_v2
+    assert (weight_count == 60185256)  # resnet152_v2
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

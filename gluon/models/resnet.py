@@ -73,7 +73,6 @@ class ResBlock(HybridBlock):
                  strides,
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.conv1 = res_conv3x3(
                 in_channels=in_channels,
@@ -152,7 +151,7 @@ class ResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides)
             if self.resize_identity:
-                self.resize_conv = res_conv1x1(
+                self.identity_conv = res_conv1x1(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
@@ -161,7 +160,7 @@ class ResUnit(HybridBlock):
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
-            identity = self.resize_conv(x)
+            identity = self.identity_conv(x)
         else:
             identity = x
         x = self.body(x)
@@ -252,6 +251,41 @@ def get_resnet(version,
         channels = [64, 64, 128, 256, 512]
         bottleneck = False
         conv1_stride = True
+    elif version == '34':
+        layers = [3, 4, 6, 3]
+        channels = [64, 64, 128, 256, 512]
+        bottleneck = False
+        conv1_stride = True
+    elif version == '50':
+        layers = [3, 4, 6, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '50b':
+        layers = [3, 4, 6, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
+    elif version == '101':
+        layers = [3, 4, 23, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '101b':
+        layers = [3, 4, 23, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
+    elif version == '152':
+        layers = [3, 8, 36, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = True
+    elif version == '152b':
+        layers = [3, 8, 36, 3]
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
+        conv1_stride = False
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
 
@@ -271,6 +305,34 @@ def resnet18(**kwargs):
     return get_resnet('18', **kwargs)
 
 
+def resnet34(**kwargs):
+    return get_resnet('34', **kwargs)
+
+
+def resnet50(**kwargs):
+    return get_resnet('50', **kwargs)
+
+
+def resnet50b(**kwargs):
+    return get_resnet('50b', **kwargs)
+
+
+def resnet101(**kwargs):
+    return get_resnet('101', **kwargs)
+
+
+def resnet101b(**kwargs):
+    return get_resnet('101b', **kwargs)
+
+
+def resnet152(**kwargs):
+    return get_resnet('152', **kwargs)
+
+
+def resnet152b(**kwargs):
+    return get_resnet('152b', **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -278,7 +340,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = resnet18()
+    net = resnet152b()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -289,9 +351,11 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    assert (weight_count == 11689512)
-    #assert (weight_count == 1042104)
-    #assert (weight_count == 20842376)
+    #assert (weight_count == 11689512)  # resnet18_v1
+    #assert (weight_count == 21797672)  # resnet34_v1
+    #assert (weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+    #assert (weight_count == 44549160)  # resnet101_v1b
+    assert (weight_count == 60192808)  # resnet152_v1b
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

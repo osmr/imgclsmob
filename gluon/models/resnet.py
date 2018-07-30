@@ -15,6 +15,7 @@ class ResConv(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
+                 bn_use_global_stats,
                  activate,
                  **kwargs):
         super(ResConv, self).__init__(**kwargs)
@@ -28,7 +29,9 @@ class ResConv(HybridBlock):
                 padding=padding,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
             if self.activate:
                 self.activ = nn.Activation('relu')
 
@@ -43,6 +46,7 @@ class ResConv(HybridBlock):
 def res_conv1x1(in_channels,
                 out_channels,
                 strides,
+                bn_use_global_stats,
                 activate):
     return ResConv(
         in_channels=in_channels,
@@ -50,12 +54,14 @@ def res_conv1x1(in_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
+        bn_use_global_stats=bn_use_global_stats,
         activate=activate)
 
 
 def res_conv3x3(in_channels,
                 out_channels,
                 strides,
+                bn_use_global_stats,
                 activate):
     return ResConv(
         in_channels=in_channels,
@@ -63,6 +69,7 @@ def res_conv3x3(in_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
+        bn_use_global_stats=bn_use_global_stats,
         activate=activate)
 
 
@@ -72,6 +79,7 @@ class ResBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -79,11 +87,13 @@ class ResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv2 = res_conv3x3(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=1,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -98,6 +108,7 @@ class ResBottleneck(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  conv1_stride,
                  **kwargs):
         super(ResBottleneck, self).__init__(**kwargs)
@@ -108,16 +119,19 @@ class ResBottleneck(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv2 = res_conv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv3 = res_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=1,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -133,8 +147,9 @@ class ResUnit(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  bottleneck,
-                 conv1_stride=True,
+                 conv1_stride,
                  **kwargs):
         super(ResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
@@ -145,17 +160,20 @@ class ResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
                     conv1_stride=conv1_stride)
             else:
                 self.body = ResBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides)
+                    strides=strides,
+                    bn_use_global_stats=bn_use_global_stats)
             if self.resize_identity:
                 self.identity_conv = res_conv1x1(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
                     activate=False)
             self.activ = nn.Activation('relu')
 
@@ -175,6 +193,7 @@ class ResInitBlock(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_use_global_stats,
                  **kwargs):
         super(ResInitBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -184,6 +203,7 @@ class ResInitBlock(HybridBlock):
                 kernel_size=7,
                 strides=2,
                 padding=3,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
@@ -203,6 +223,7 @@ class ResNet(HybridBlock):
                  channels,
                  bottleneck,
                  conv1_stride,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -213,7 +234,8 @@ class ResNet(HybridBlock):
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
-                out_channels=channels[0]))
+                out_channels=channels[0],
+                bn_use_global_stats=bn_use_global_stats))
             for i, layers_per_stage in enumerate(layers):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
@@ -225,6 +247,7 @@ class ResNet(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
+                            bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
@@ -249,46 +272,33 @@ def get_resnet(version,
                pretrained=False,
                ctx=cpu(),
                **kwargs):
-    if version == '18':
+    if version.endswith("b"):
+        conv1_stride = False
+        pure_version = version[:-1]
+    else:
+        conv1_stride = True
+        pure_version = version
+
+    if not pure_version.isdigit():
+        raise ValueError("Unsupported ResNet version {}".format(version))
+
+    blocks = int(pure_version)
+    if blocks == 18:
         layers = [2, 2, 2, 2]
-        depth = 18
-        conv1_stride = True
-    elif version == '34':
+    elif blocks == 34:
         layers = [3, 4, 6, 3]
-        depth = 34
-        conv1_stride = True
-    elif version == '50':
+    elif blocks == 50:
         layers = [3, 4, 6, 3]
-        depth = 50
-        conv1_stride = True
-    elif version == '50b':
-        layers = [3, 4, 6, 3]
-        depth = 50
-        conv1_stride = False
-    elif version == '101':
+    elif blocks == 101:
         layers = [3, 4, 23, 3]
-        depth = 101
-        conv1_stride = True
-    elif version == '101b':
-        layers = [3, 4, 23, 3]
-        depth = 101
-        conv1_stride = False
-    elif version == '152':
+    elif blocks == 152:
         layers = [3, 8, 36, 3]
-        depth = 152
-        conv1_stride = True
-    elif version == '152b':
-        layers = [3, 8, 36, 3]
-        depth = 152
-        conv1_stride = False
-    elif version == '200':
+    elif blocks == 200:
         layers = [3, 24, 36, 3]
-        depth = 200
-        conv1_stride = True
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
 
-    if depth < 50:
+    if blocks < 50:
         channels = [64, 64, 128, 256, 512]
         bottleneck = False
     else:
@@ -339,6 +349,14 @@ def resnet152b(**kwargs):
     return get_resnet('152b', **kwargs)
 
 
+def resnet200(**kwargs):
+    return get_resnet('200', **kwargs)
+
+
+def resnet200b(**kwargs):
+    return get_resnet('200b', **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -346,7 +364,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = resnet152b()
+    net = resnet18()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -357,11 +375,11 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 11689512)  # resnet18_v1
+    assert (weight_count == 11689512)  # resnet18_v1
     #assert (weight_count == 21797672)  # resnet34_v1
     #assert (weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
     #assert (weight_count == 44549160)  # resnet101_v1b
-    assert (weight_count == 60192808)  # resnet152_v1b
+    #assert (weight_count == 60192808)  # resnet152_v1b
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

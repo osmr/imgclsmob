@@ -257,48 +257,38 @@ class PreResNet(nn.Module):
 def get_preresnet(version,
                   pretrained=False,
                   **kwargs):
-    if version == '18':
-        layers = [2, 2, 2, 2]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
-        conv1_stride = True
-    elif version == '34':
-        layers = [3, 4, 6, 3]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
-        conv1_stride = True
-    elif version == '50':
-        layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '50b':
-        layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+    if version.endswith("b"):
         conv1_stride = False
-    elif version == '101':
-        layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '101b':
-        layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = False
-    elif version == '152':
-        layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '152b':
-        layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = False
+        pure_version = version[:-1]
     else:
-        raise ValueError("Unsupported ResNet version {}".format(version))
+        conv1_stride = True
+        pure_version = version
+
+    if not pure_version.isdigit():
+        raise ValueError("Unsupported PreResNet version {}".format(version))
+
+    blocks = int(pure_version)
+    if blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif blocks == 34:
+        layers = [3, 4, 6, 3]
+    elif blocks == 50:
+        layers = [3, 4, 6, 3]
+    elif blocks == 101:
+        layers = [3, 4, 23, 3]
+    elif blocks == 152:
+        layers = [3, 8, 36, 3]
+    elif blocks == 200:
+        layers = [3, 24, 36, 3]
+    else:
+        raise ValueError("Unsupported PreResNet version {}".format(version))
+
+    if blocks < 50:
+        channels = [64, 64, 128, 256, 512]
+        bottleneck = False
+    else:
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -342,6 +332,14 @@ def preresnet152(**kwargs):
 
 def preresnet152b(**kwargs):
     return get_preresnet('152b', **kwargs)
+
+
+def preresnet200(**kwargs):
+    return get_preresnet('200', **kwargs)
+
+
+def preresnet200b(**kwargs):
+    return get_preresnet('200b', **kwargs)
 
 
 def _test():

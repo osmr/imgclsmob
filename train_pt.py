@@ -279,6 +279,8 @@ def _get_model(name, **kwargs):
         'resnet101b': resnet101b,
         'resnet152': resnet152,
         'resnet152b': resnet152b,
+        'resnet200': resnet200,
+        'resnet200b': resnet200b,
 
         'preresnet18': preresnet18,
         'preresnet34': preresnet34,
@@ -288,6 +290,8 @@ def _get_model(name, **kwargs):
         'preresnet101b': preresnet101b,
         'preresnet152': preresnet152,
         'preresnet152b': preresnet152b,
+        'preresnet200': preresnet200,
+        'preresnet200b': preresnet200b,
 
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,

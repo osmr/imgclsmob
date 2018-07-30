@@ -15,10 +15,13 @@ class PreResConv(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
+                 bn_use_global_stats,
                  **kwargs):
         super(PreResConv, self).__init__(**kwargs)
         with self.name_scope():
-            self.bn = nn.BatchNorm(in_channels=in_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=in_channels,
+                use_global_stats=bn_use_global_stats)
             self.activ = nn.Activation('relu')
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -50,24 +53,28 @@ def conv1x1(in_channels,
 
 def preres_conv1x1(in_channels,
                    out_channels,
-                   strides):
+                   strides,
+                   bn_use_global_stats):
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         strides=strides,
-        padding=0)
+        padding=0,
+        bn_use_global_stats=bn_use_global_stats)
 
 
 def preres_conv3x3(in_channels,
                    out_channels,
-                   strides):
+                   strides,
+                   bn_use_global_stats):
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         strides=strides,
-        padding=1)
+        padding=1,
+        bn_use_global_stats=bn_use_global_stats)
 
 
 class PreResBlock(HybridBlock):
@@ -76,17 +83,20 @@ class PreResBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  **kwargs):
         super(PreResBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv1 = preres_conv3x3(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                strides=strides)
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = preres_conv3x3(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                strides=1)
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
         x, x_pre_activ = self.conv1(x)
@@ -100,6 +110,7 @@ class PreResBottleneck(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  conv1_stride,
                  **kwargs):
         super(PreResBottleneck, self).__init__(**kwargs)
@@ -109,15 +120,18 @@ class PreResBottleneck(HybridBlock):
             self.conv1 = preres_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                strides=(strides if conv1_stride else 1))
+                strides=(strides if conv1_stride else 1),
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = preres_conv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                strides=(1 if conv1_stride else strides))
+                strides=(1 if conv1_stride else strides),
+                bn_use_global_stats=bn_use_global_stats)
             self.conv3 = preres_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                strides=1)
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
         x, x_pre_activ = self.conv1(x)
@@ -132,6 +146,7 @@ class PreResUnit(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  bottleneck,
                  conv1_stride=True,
                  **kwargs):
@@ -144,12 +159,14 @@ class PreResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
                     conv1_stride=conv1_stride)
             else:
                 self.body = PreResBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides)
+                    strides=strides,
+                    bn_use_global_stats=bn_use_global_stats)
             if self.resize_identity:
                 self.identity_conv = conv1x1(
                     in_channels=in_channels,
@@ -170,6 +187,7 @@ class PreResInitBlock(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_use_global_stats,
                  **kwargs):
         super(PreResInitBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -180,7 +198,9 @@ class PreResInitBlock(HybridBlock):
                 padding=3,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
             self.activ = nn.Activation('relu')
             self.pool = nn.MaxPool2D(
                 pool_size=3,
@@ -199,10 +219,13 @@ class PreResActivation(HybridBlock):
 
     def __init__(self,
                  in_channels,
+                 bn_use_global_stats,
                  **kwargs):
         super(PreResActivation, self).__init__(**kwargs)
         with self.name_scope():
-            self.bn = nn.BatchNorm(in_channels=in_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=in_channels,
+                use_global_stats=bn_use_global_stats)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
@@ -218,6 +241,7 @@ class PreResNet(HybridBlock):
                  channels,
                  bottleneck,
                  conv1_stride,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -228,7 +252,8 @@ class PreResNet(HybridBlock):
             self.features = nn.HybridSequential(prefix='')
             self.features.add(PreResInitBlock(
                 in_channels=in_channels,
-                out_channels=channels[0]))
+                out_channels=channels[0],
+                bn_use_global_stats=bn_use_global_stats))
             for i, layers_per_stage in enumerate(layers):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
@@ -240,11 +265,14 @@ class PreResNet(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
+                            bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(PreResActivation(in_channels=channels[-1]))
+            self.features.add(PreResActivation(
+                in_channels=channels[-1],
+                bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))
@@ -265,48 +293,38 @@ def get_preresnet(version,
                   pretrained=False,
                   ctx=cpu(),
                   **kwargs):
-    if version == '18':
-        layers = [2, 2, 2, 2]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
-        conv1_stride = True
-    elif version == '34':
-        layers = [3, 4, 6, 3]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
-        conv1_stride = True
-    elif version == '50':
-        layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '50b':
-        layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+    if version.endswith("b"):
         conv1_stride = False
-    elif version == '101':
-        layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '101b':
-        layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = False
-    elif version == '152':
-        layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = True
-    elif version == '152b':
-        layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
-        conv1_stride = False
+        pure_version = version[:-1]
     else:
-        raise ValueError("Unsupported ResNet version {}".format(version))
+        conv1_stride = True
+        pure_version = version
+
+    if not pure_version.isdigit():
+        raise ValueError("Unsupported PreResNet version {}".format(version))
+
+    blocks = int(pure_version)
+    if blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif blocks == 34:
+        layers = [3, 4, 6, 3]
+    elif blocks == 50:
+        layers = [3, 4, 6, 3]
+    elif blocks == 101:
+        layers = [3, 4, 23, 3]
+    elif blocks == 152:
+        layers = [3, 8, 36, 3]
+    elif blocks == 200:
+        layers = [3, 24, 36, 3]
+    else:
+        raise ValueError("Unsupported PreResNet version {}".format(version))
+
+    if blocks < 50:
+        channels = [64, 64, 128, 256, 512]
+        bottleneck = False
+    else:
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -352,6 +370,14 @@ def preresnet152b(**kwargs):
     return get_preresnet('152b', **kwargs)
 
 
+def preresnet200(**kwargs):
+    return get_preresnet('200', **kwargs)
+
+
+def preresnet200b(**kwargs):
+    return get_preresnet('200b', **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -359,7 +385,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = preresnet152b()
+    net = preresnet18()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -370,11 +396,11 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 11687848)  # resnet18_v2
+    assert (weight_count == 11687848)  # resnet18_v2
     #assert (weight_count == 21796008)  # resnet34_v2
     #assert (weight_count == 25549480)  # resnet50_v2
     #assert (weight_count == 44541608)  # resnet101_v2
-    assert (weight_count == 60185256)  # resnet152_v2
+    #assert (weight_count == 60185256)  # resnet152_v2
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

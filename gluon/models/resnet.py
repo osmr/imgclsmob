@@ -251,46 +251,49 @@ def get_resnet(version,
                **kwargs):
     if version == '18':
         layers = [2, 2, 2, 2]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
+        depth = 18
         conv1_stride = True
     elif version == '34':
         layers = [3, 4, 6, 3]
-        channels = [64, 64, 128, 256, 512]
-        bottleneck = False
+        depth = 34
         conv1_stride = True
     elif version == '50':
         layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 50
         conv1_stride = True
     elif version == '50b':
         layers = [3, 4, 6, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 50
         conv1_stride = False
     elif version == '101':
         layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 101
         conv1_stride = True
     elif version == '101b':
         layers = [3, 4, 23, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 101
         conv1_stride = False
     elif version == '152':
         layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 152
         conv1_stride = True
     elif version == '152b':
         layers = [3, 8, 36, 3]
-        channels = [64, 256, 512, 1024, 2048]
-        bottleneck = True
+        depth = 152
         conv1_stride = False
+    elif version == '200':
+        layers = [3, 24, 36, 3]
+        depth = 200
+        conv1_stride = True
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
+
+    if depth < 50:
+        channels = [64, 64, 128, 256, 512]
+        bottleneck = False
+    else:
+        channels = [64, 256, 512, 1024, 2048]
+        bottleneck = True
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")

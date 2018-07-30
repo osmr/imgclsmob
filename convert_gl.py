@@ -15,6 +15,7 @@ from gluoncv.model_zoo import get_model
 from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
+from preresnet1 import *
 from gluon.models.resnet import *
 from gluon.models.preresnet import *
 from gluon.models.squeezenet import *
@@ -57,6 +58,7 @@ def _get_model(name, **kwargs):
     models = {
         'resnet18': resnet18,
         'preresnet18': preresnet18,
+        'preresnet18_': preresnet18_,
 
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
@@ -193,7 +195,8 @@ def main():
     src_param_keys = list(src_params.keys())
     dst_param_keys = list(dst_params.keys())
     for i, dst_key in enumerate(dst_param_keys):
-        dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
+        #dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
+        dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)
     dst_net.save_parameters(args.dst_params)
 
 

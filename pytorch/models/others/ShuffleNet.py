@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-from common import channel_shuffle
+from .common import channel_shuffle
 
 __all__ = [
     'shufflenet_group_1',

@@ -568,7 +568,8 @@ def prepare_trainer(net,
         warmup_lr=warmup_lr,
         warmup_mode=warmup_mode)
 
-    optimizer_params = {'wd': wd,
+    optimizer_params = {'learning_rate': lr,
+                        'wd': wd,
                         'momentum': momentum,
                         'lr_scheduler': lr_scheduler}
     if dtype != 'float32':

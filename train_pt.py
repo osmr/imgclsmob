@@ -28,6 +28,8 @@ from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *
 from pytorch.models.others.MENet import *
 
+from pytorch.model_stats import measure_model
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a model for image classification (PyTorch)',
@@ -700,6 +702,9 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
+
+    n_flops, n_params = measure_model(net, 224, 224)
+    logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(n_params, n_params / 1e6, n_flops, n_flops / 1e6))
 
     train_data, val_data = get_data_loader(
         data_dir=args.data_dir,

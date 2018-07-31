@@ -250,11 +250,11 @@ def main():
     src_param_keys = list(src_params.keys())
     dst_param_keys = list(dst_params.keys())
 
-
-    assert (len(src_param_keys) == len(dst_param_keys) + 4)
+    #assert (len(src_param_keys) == len(dst_param_keys) + 4)  # preresnet
+    assert (len(src_param_keys) == len(dst_param_keys))  # resnet (v1b)
     for i, dst_key in enumerate(dst_param_keys):
-        dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
-        #dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)
+        #dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)  # preresnet
+        dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)  # resnet (v1b)
     dst_net.save_parameters(args.dst_params)
 
     logging.info('Convert model {} into model {}'.format(args.src_model, args.dst_model))

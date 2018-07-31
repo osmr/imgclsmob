@@ -249,6 +249,9 @@ def main():
     dst_params = dst_net._collect_params_with_prefix()
     src_param_keys = list(src_params.keys())
     dst_param_keys = list(dst_params.keys())
+
+
+    assert (len(src_param_keys) == len(dst_param_keys) + 4)
     for i, dst_key in enumerate(dst_param_keys):
         dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
         #dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)

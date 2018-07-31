@@ -49,14 +49,64 @@ def parse_args():
         type=str,
         default='',
         help='destination model parameter file path')
+
+    parser.add_argument(
+        '--save-dir',
+        type=str,
+        default='',
+        help='directory of saved models and log-files')
+    parser.add_argument(
+        '--logging-file-name',
+        type=str,
+        default='train.log',
+        help='filename of training log')
     args = parser.parse_args()
     return args
+
+
+def prepare_logger(log_dir_path,
+                   logging_file_name):
+    logging.basicConfig()
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    log_file_exist = False
+    if log_dir_path is not None and log_dir_path:
+        log_file_path = os.path.join(log_dir_path, logging_file_name)
+        if not os.path.exists(log_dir_path):
+            os.makedirs(log_dir_path)
+            log_file_exist = False
+        else:
+            log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
+        fh = logging.FileHandler(log_file_path)
+        logger.addHandler(fh)
+        if log_file_exist:
+            logging.info('--------------------------------')
+    return logger, log_file_exist
 
 
 def _get_model(name, **kwargs):
     models = {
         'resnet18': resnet18,
+        'resnet34': resnet34,
+        'resnet50': resnet50,
+        'resnet50b': resnet50b,
+        'resnet101': resnet101,
+        'resnet101b': resnet101b,
+        'resnet152': resnet152,
+        'resnet152b': resnet152b,
+        'resnet200': resnet200,
+        'resnet200b': resnet200b,
+
         'preresnet18': preresnet18,
+        'preresnet34': preresnet34,
+        'preresnet50': preresnet50,
+        'preresnet50b': preresnet50b,
+        'preresnet101': preresnet101,
+        'preresnet101b': preresnet101b,
+        'preresnet152': preresnet152,
+        'preresnet152b': preresnet152b,
+        'preresnet200': preresnet200,
+        'preresnet200b': preresnet200b,
 
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
@@ -163,6 +213,13 @@ def prepare_model(model_name,
 
 def main():
     args = parse_args()
+
+    _, log_file_exist = prepare_logger(
+        log_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name)
+    logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
+    logging.info("Script arguments:\n{}".format(args))
+
     ctx = mx.cpu()
     num_classes = 1000
 
@@ -193,9 +250,11 @@ def main():
     src_param_keys = list(src_params.keys())
     dst_param_keys = list(dst_params.keys())
     for i, dst_key in enumerate(dst_param_keys):
-        #dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
-        dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)
+        dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)
+        #dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)
     dst_net.save_parameters(args.dst_params)
+
+    logging.info('Convert model {} into model {}'.format(args.src_model, args.dst_model))
 
 
 if __name__ == '__main__':

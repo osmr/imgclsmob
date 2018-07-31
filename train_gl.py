@@ -12,7 +12,7 @@ from mxnet.gluon.data.vision import transforms
 
 from gluoncv.data import imagenet
 from gluoncv.model_zoo import get_model
-#from gluoncv.utils import LRScheduler
+from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
 from common.env_stats import get_env_stats

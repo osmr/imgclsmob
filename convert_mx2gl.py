@@ -3,6 +3,7 @@ import time
 import logging
 import os
 import sys
+import re
 import numpy as np
 
 import mxnet as mx
@@ -184,6 +185,8 @@ def prepare_model_gl(model_name,
 
     net.cast(dtype)
 
+    net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+
     return net
 
 
@@ -204,38 +207,62 @@ def main():
         ctx=ctx)
 
     dst_net = prepare_model_gl(
-        model_name=args.src_model,
+        model_name=args.dst_model,
         classes=num_classes,
         use_pretrained=False,
         dtype=np.float32,
         ctx=ctx)
 
     src_param_keys = list(src_arg_params.keys())
-    src_param_keys.sort()
-
-    import re
-    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
-                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
 
     dst_params = dst_net._collect_params_with_prefix()
     dst_param_keys = list(dst_params.keys())
-    for i, dst_key in enumerate(dst_param_keys):
-        #dst_params[dst_key] = 1
-        dst_key_split = dst_key.split('.')
-        if dst_key_split[0] == 'features':
-            pass
-        else:
-            raise Exception()
 
-        pass
+    dst_params['features.0.bn.beta']._load_init(src_arg_params['bn0_beta'], ctx)
+    dst_params['features.0.bn.gamma']._load_init(src_arg_params['bn0_gamma'], ctx)
+    dst_params['features.5.bn.beta']._load_init(src_arg_params['bn1_beta'], ctx)
+    dst_params['features.5.bn.gamma']._load_init(src_arg_params['bn1_gamma'], ctx)
+    dst_params['output.1.bias']._load_init(src_arg_params['fc1_bias'], ctx)
+    dst_params['output.1.weight']._load_init(src_arg_params['fc1_weight'], ctx)
+    dst_params['features.0.conv.weight']._load_init(src_arg_params['conv0_weight'], ctx)
 
+    src_param_keys = [key for key in src_param_keys if (key.startswith("stage"))]
+
+    dst_param_keys = [key for key in dst_param_keys if (not key.endswith("running_mean") and
+                                                        not key.endswith("running_var") and
+                                                        key.startswith("features") and
+                                                        not key.startswith("features.0") and
+                                                        not key.startswith("features.5"))]
+
+    #src_param_keys = [key.replace('stage', 'features.') for key in src_param_keys]
+    #src_param_keys = [key.replace('_', '.') for key in src_param_keys]
+
+    src_param_keys = [key.replace('_conv1_', '.conv1.conv.') for key in src_param_keys]
+    src_param_keys = [key.replace('_conv2_', '.conv2.conv.') for key in src_param_keys]
+    src_param_keys = [key.replace('_conv3_', '.conv3.conv.') for key in src_param_keys]
+    src_param_keys = [key.replace('_bn1_', '.conv1.bn.') for key in src_param_keys]
+    src_param_keys = [key.replace('_bn2_', '.conv2.bn.') for key in src_param_keys]
+    src_param_keys = [key.replace('_bn3_', '.conv3.bn.') for key in src_param_keys]
+
+    src_param_keys.sort()
+    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys.sort()
+    dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    src_param_keys = [key.replace('.conv1.conv.', '_conv1_') for key in src_param_keys]
+    src_param_keys = [key.replace('.conv2.conv.', '_conv2_') for key in src_param_keys]
+    src_param_keys = [key.replace('.conv3.conv.', '_conv3_') for key in src_param_keys]
+    src_param_keys = [key.replace('.conv1.bn.', '_bn1_') for key in src_param_keys]
+    src_param_keys = [key.replace('.conv2.bn.', '_bn2_') for key in src_param_keys]
+    src_param_keys = [key.replace('.conv3.bn.', '_bn3_') for key in src_param_keys]
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-        dst_params[dst_key] = torch.from_numpy(src_params[src_param_keys[i]]._data[0].asnumpy())
+        dst_params[dst_key]._load_init(src_arg_params[src_key], ctx)
 
-    torch.save(
-        obj=dst_params,
-        f=args.dst_params)
+    dst_net.save_parameters(args.dst_params)
 
     logging.info('Convert mx-model {} into gl-model {}'.format(args.src_model, args.dst_model))
 

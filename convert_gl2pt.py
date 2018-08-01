@@ -10,7 +10,7 @@ import torch
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Convert models (Gluon)',
+    parser = argparse.ArgumentParser(description='Convert models (from Gluon to PyTorch)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--src-model',

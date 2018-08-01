@@ -185,7 +185,7 @@ def prepare_model_gl(model_name,
 
     net.cast(dtype)
 
-    net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+    #net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
     return net
 
@@ -261,6 +261,12 @@ def main():
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         dst_params[dst_key]._load_init(src_arg_params[src_key], ctx)
+
+    for param in dst_net.collect_params().values():
+        if param._data is not None:
+            continue
+        print('param={}'.format(param))
+        param.initialize(ctx=ctx)
 
     dst_net.save_parameters(args.dst_params)
 

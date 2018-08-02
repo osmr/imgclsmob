@@ -71,6 +71,7 @@ def _get_model_gl(name, **kwargs):
     from gluoncv.model_zoo import get_model
     import gluon.models.resnet as gl_resnet
     import gluon.models.preresnet as gl_preresnet
+    import gluon.models.squeezenet as gl_squeezenet
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -95,7 +96,11 @@ def _get_model_gl(name, **kwargs):
         'preresnet200': gl_preresnet.preresnet200,
         'preresnet200b': gl_preresnet.preresnet200b,
 
-        #
+        'squeezenet_v1_0': gl_squeezenet.squeezenet_v1_0,
+        'squeezenet_v1_1': gl_squeezenet.squeezenet_v1_1,
+        'squeezeresnet_v1_0': gl_squeezenet.squeezeresnet_v1_0,
+        'squeezeresnet_v1_1': gl_squeezenet.squeezeresnet_v1_1,
+
         # 'squeezenet1_0': squeezenet1_0,
         # 'squeezenet1_1': squeezenet1_1,
         # 'squeezeresnet1_0': squeezeresnet1_0,
@@ -156,6 +161,7 @@ def _get_model_pt(name, **kwargs):
     import torchvision.models as models
     import pytorch.models.preresnet as pt_preresnet
     import pytorch.models.resnet as pt_resnet
+    import pytorch.models.squeezenet as pt_squeezenet
 
     slk_models = {
         'resnet18': pt_resnet.resnet18,
@@ -179,6 +185,11 @@ def _get_model_pt(name, **kwargs):
         'preresnet152b': pt_preresnet.preresnet152b,
         'preresnet200': pt_preresnet.preresnet200,
         'preresnet200b': pt_preresnet.preresnet200b,
+
+        'squeezenet_v1_0': pt_squeezenet.squeezenet_v1_0,
+        'squeezenet_v1_1': pt_squeezenet.squeezenet_v1_1,
+        'squeezeresnet_v1_0': pt_squeezenet.squeezeresnet_v1_0,
+        'squeezeresnet_v1_1': pt_squeezenet.squeezeresnet_v1_1,
 
         # 'oth_mobilenet1_0': oth_mobilenet1_0,
         # 'oth_mobilenet0_75': oth_mobilenet0_75,

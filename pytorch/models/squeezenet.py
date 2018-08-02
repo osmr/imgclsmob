@@ -120,7 +120,7 @@ class SqueezeNet(nn.Module):
                     squeeze_channels=squeeze_channels,
                     expand1x1_channels=expand_channels,
                     expand3x3_channels=expand_channels,
-                    residual=(residual and residuals[i][j] == 1)))
+                    residual=((residuals is not None) and (residuals[i][j] == 1))))
                 in_channels = out_channels
                 self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('dropout', nn.Dropout(p=0.5))

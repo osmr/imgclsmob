@@ -25,8 +25,6 @@ from gluon.models.menet import *
 from gluon.models.nasnet import *
 from gluon.models.darknet import *
 
-from gluon.models.squeezenet1 import *
-
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert models (Gluon)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -113,9 +111,6 @@ def _get_model(name, **kwargs):
         'squeezenet_v1_1': squeezenet_v1_1,
         'squeezeresnet_v1_0': squeezeresnet_v1_0,
         'squeezeresnet_v1_1': squeezeresnet_v1_1,
-
-        'squeezenet1_0a': squeezenet1_0a,
-        'squeezeresnet1_1a': squeezeresnet1_1a,
 
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,

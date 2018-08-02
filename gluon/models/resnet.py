@@ -310,13 +310,12 @@ def get_resnet(version,
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = ResNet(
+    return ResNet(
         layers=layers,
         channels=channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
-    return net
 
 
 def resnet10(**kwargs):

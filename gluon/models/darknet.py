@@ -68,7 +68,7 @@ def dark_convYxY(in_channels,
 class DarkNet(HybridBlock):
 
     def __init__(self,
-                 num_channels,
+                 channels,
                  odd_pointwise,
                  avg_pool_size,
                  cls_activ,
@@ -79,18 +79,17 @@ class DarkNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-
-            for i in range(len(num_channels)):
+            for i in range(len(channels)):
                 stage = nn.HybridSequential(prefix='')
-                num_channels_per_stage_i = num_channels[i]
-                for j in range(len(num_channels_per_stage_i)):
-                    out_channels = num_channels_per_stage_i[j]
+                channels_per_stage = channels[i]
+                for j in range(len(channels_per_stage)):
+                    out_channels = channels_per_stage[j]
                     stage.add(dark_convYxY(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        pointwise=(len(num_channels_per_stage_i) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
+                        pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
                     in_channels = out_channels
-                if i != len(num_channels) - 1:
+                if i != len(channels) - 1:
                     stage.add(nn.MaxPool2D(
                         pool_size=2,
                         strides=2))
@@ -117,17 +116,17 @@ def get_darknet(version,
                 ctx=cpu(),
                 **kwargs):
     if version == 'ref':
-        num_channels = [[16], [32], [64], [128], [256], [512], [1024]]
+        channels = [[16], [32], [64], [128], [256], [512], [1024]]
         odd_pointwise = False
         avg_pool_size = 3
         cls_activ = True
     elif version == 'tiny':
-        num_channels = [[16], [32], [16, 128, 16, 128], [32, 256, 32, 256], [64, 512, 64, 512, 128]]
+        channels = [[16], [32], [16, 128, 16, 128], [32, 256, 32, 256], [64, 512, 64, 512, 128]]
         odd_pointwise = True
         avg_pool_size = 14
         cls_activ = False
     elif version == '19':
-        num_channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512], [1024, 512, 1024, 512, 1024]]
+        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512], [1024, 512, 1024, 512, 1024]]
         odd_pointwise = False
         avg_pool_size = 7
         cls_activ = False
@@ -137,13 +136,12 @@ def get_darknet(version,
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = DarkNet(
-        num_channels=num_channels,
+    return DarkNet(
+        channels=channels,
         odd_pointwise=odd_pointwise,
         avg_pool_size=avg_pool_size,
         cls_activ=cls_activ,
         **kwargs)
-    return net
 
 
 def darknet_ref(**kwargs):

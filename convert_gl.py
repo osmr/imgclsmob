@@ -25,6 +25,7 @@ from gluon.models.menet import *
 from gluon.models.nasnet import *
 from gluon.models.darknet import *
 
+from gluon.models.squeezenet1 import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert models (Gluon)',
@@ -107,6 +108,8 @@ def _get_model(name, **kwargs):
         'preresnet152b': preresnet152b,
         'preresnet200': preresnet200,
         'preresnet200b': preresnet200b,
+
+        'squeezenet1_0A': squeezenet1_0A,
 
         'squeezenet1_0': squeezenet1_0,
         'squeezenet1_1': squeezenet1_1,
@@ -250,8 +253,7 @@ def main():
     src_param_keys = list(src_params.keys())
     dst_param_keys = list(dst_params.keys())
 
-    # resnet (v1)
-    src_param_keys = [key for key in src_param_keys if (key.endswith("output.bias") or not key.endswith(".bias"))]
+    #src_param_keys = [key for key in src_param_keys if (key.endswith("output.bias") or not key.endswith(".bias"))] # resnet (v1)
 
     #assert (len(src_param_keys) == len(dst_param_keys) + 4)  # preresnet
     assert (len(src_param_keys) == len(dst_param_keys))  # resnet (v1b)

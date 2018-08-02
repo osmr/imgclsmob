@@ -35,8 +35,11 @@ class FireUnit(nn.Module):
                  in_channels,
                  squeeze_channels,
                  expand1x1_channels,
-                 expand3x3_channels):
+                 expand3x3_channels,
+                 residual):
         super(FireUnit, self).__init__()
+        self.residual = residual
+
         self.squeeze = FireConv(
             in_channels=in_channels,
             out_channels=squeeze_channels,
@@ -54,18 +57,15 @@ class FireUnit(nn.Module):
             padding=1)
 
     def forward(self, x):
+        if self.residual:
+            identity = x
         x = self.squeeze(x)
         y1 = self.expand1x1(x)
         y2 = self.expand3x3(x)
         out = torch.cat((y1, y2), dim=1)
+        if self.residual:
+            out = out + identity
         return out
-
-
-def squeeze_pool():
-    return nn.MaxPool2d(
-        kernel_size=3,
-        stride=2,
-        ceil_mode=True)
 
 
 class SqueezeInitBlock(nn.Module):
@@ -91,44 +91,50 @@ class SqueezeInitBlock(nn.Module):
 class SqueezeNet(nn.Module):
 
     def __init__(self,
-                 first_out_channels,
-                 first_kernel_size,
-                 pool_stages,
+                 init_block_kernel_size,
+                 init_block_channels,
+                 residual,
+                 in_channels=3,
                  num_classes=1000):
         super(SqueezeNet, self).__init__()
-        input_channels = 3
-        stage_squeeze_channels = [16, 32, 48, 64]
-        stage_expand_channels = [64, 128, 192, 256]
+        channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
+        residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", SqueezeInitBlock(
-            in_channels=input_channels,
-            out_channels=first_out_channels,
-            kernel_size=first_kernel_size))
-        k = 0
-        pool_ind = 0
-        for i in range(len(stage_squeeze_channels)):
-            for j in range(2):
-                if (pool_ind < len(pool_stages)) and (k == pool_stages[pool_ind]):
-                    self.features.add_module("pool_{}".format(pool_ind + 1), squeeze_pool())
-                    pool_ind += 1
-                in_channels = first_out_channels if (i == 0 and j == 0) else \
-                    (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
-                self.features.add_module("fire_{}".format(k + 1), FireUnit(
+            in_channels=in_channels,
+            out_channels=init_block_channels,
+            kernel_size=init_block_kernel_size))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
+                kernel_size=3,
+                stride=2,
+                ceil_mode=True))
+            for j in range(len(channels_per_stage)):
+                out_channels = channels_per_stage[j]
+                expand_channels = out_channels // 2
+                squeeze_channels = out_channels // 8
+                stage.add_module("fire{}".format(j + 1), FireUnit(
                     in_channels=in_channels,
-                    squeeze_channels=stage_squeeze_channels[i],
-                    expand1x1_channels=stage_expand_channels[i],
-                    expand3x3_channels=stage_expand_channels[i]))
-                k += 1
+                    squeeze_channels=squeeze_channels,
+                    expand1x1_channels=expand_channels,
+                    expand3x3_channels=expand_channels,
+                    residual=(residual and residuals[i][j] == 1)))
+                in_channels = out_channels
+                self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('dropout', nn.Dropout(p=0.5))
 
         self.output = nn.Sequential()
         self.output.add_module('final_conv', nn.Conv2d(
-                in_channels=(2 * stage_expand_channels[-1]),
+                in_channels=in_channels,
                 out_channels=num_classes,
                 kernel_size=1))
         self.output.add_module('final_activ', nn.ReLU(inplace=True))
-        self.output.add_module('final_pool', nn.AvgPool2d(kernel_size=13))
+        self.output.add_module('final_pool', nn.AvgPool2d(
+            kernel_size=13,
+            stride=1))
 
         self._init_params()
 
@@ -150,50 +156,69 @@ class SqueezeNet(nn.Module):
 
 
 def get_squeezenet(version,
+                   residual=False,
                    pretrained=False,
                    **kwargs):
     if version == '1.0':
-        first_out_channels = 96
-        first_kernel_size = 7
-        pool_stages = [0, 3, 7]
+        init_block_kernel_size = 7
+        init_block_channels = 96
     elif version == '1.1':
-        first_out_channels = 64
-        first_kernel_size = 3
-        pool_stages = [0, 2, 4]
+        init_block_kernel_size = 3
+        init_block_channels = 64
     else:
-        raise ValueError("Unsupported SqueezeNet version {}: 1.0 or 1.1 expected".format(version))
+        raise ValueError("Unsupported SqueezeNet version {}".format(version))
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNet(
-        first_out_channels=first_out_channels,
-        first_kernel_size=first_kernel_size,
-        pool_stages=pool_stages,
+        init_block_kernel_size=init_block_kernel_size,
+        init_block_channels=init_block_channels,
+        residual=residual,
         **kwargs)
 
 
 def squeezenet1_0(**kwargs):
-    return get_squeezenet('1.0', **kwargs)
+    return get_squeezenet('1.0', residual=False, **kwargs)
 
 
 def squeezenet1_1(**kwargs):
-    return get_squeezenet('1.1', **kwargs)
+    return get_squeezenet('1.1', residual=False, **kwargs)
 
 
-if __name__ == "__main__":
+def squeezeresnet1_0(**kwargs):
+    return get_squeezenet(version='1.0', residual=True, **kwargs)
+
+
+def squeezeresnet1_1(**kwargs):
+    return get_squeezenet(version='1.1', residual=True, **kwargs)
+
+
+def _test():
     import numpy as np
     from torch.autograd import Variable
-    net = squeezenet1_0(num_classes=1000)
-    input = Variable(torch.randn(1, 3, 224, 224))
-    output = net(input)
-    #print(output.size())
-    #print("net={}".format(net))
+
+    global TESTING
+    TESTING = True
+
+    net = squeezeresnet1_1()
 
     net.train()
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())
-    print("weight_count={}".format(weight_count))
+    #assert (weight_count == 1248424)  # squeezenet1_0
+    #assert (weight_count == 1235496)  # squeezenet1_1
+    #assert (weight_count == 1248424)  # squeezeresnet1_0
+    assert (weight_count == 1235496)  # squeezeresnet1_1
+
+    x = Variable(torch.randn(1, 3, 224, 224))
+    y = net(x)
+    assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
+
 

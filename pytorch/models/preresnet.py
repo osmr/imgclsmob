@@ -215,9 +215,9 @@ class PreResNet(nn.Module):
         self.features.add_module("init_block", PreResInitBlock(
             in_channels=in_channels,
             out_channels=channels[0]))
+        in_channels = channels[0]
         for i, layers_per_stage in enumerate(layers):
             stage = nn.Sequential()
-            in_channels = channels[i]
             out_channels = channels[i + 1]
             for j in range(layers_per_stage):
                 stride = 1 if (i == 0) or (j != 0) else 2

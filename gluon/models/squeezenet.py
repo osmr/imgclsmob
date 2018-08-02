@@ -44,6 +44,7 @@ class FireUnit(HybridBlock):
                  **kwargs):
         super(FireUnit, self).__init__(**kwargs)
         self.residual = residual
+
         with self.name_scope():
             self.squeeze = FireConv(
                 in_channels=in_channels,
@@ -73,13 +74,6 @@ class FireUnit(HybridBlock):
         return out
 
 
-def squeeze_pool():
-    return nn.MaxPool2D(
-        pool_size=3,
-        strides=2,
-        ceil_mode=True)
-
-
 class SqueezeInitBlock(HybridBlock):
 
     def __init__(self,
@@ -105,54 +99,53 @@ class SqueezeInitBlock(HybridBlock):
 class SqueezeNet(HybridBlock):
 
     def __init__(self,
-                 first_out_channels,
-                 first_kernel_size,
-                 pool_stages,
-                 residual_stages,
+                 init_block_kernel_size,
+                 init_block_channels,
+                 residual,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(SqueezeNet, self).__init__(**kwargs)
-        stage_squeeze_channels = [16, 32, 48, 64]
-        stage_expand_channels = [64, 128, 192, 256]
+        channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
+        residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(SqueezeInitBlock(
                 in_channels=in_channels,
-                out_channels=first_out_channels,
-                kernel_size=first_kernel_size))
-            k = 0
-            pool_ind = 0
-            res_ind = 0
-            for i in range(len(stage_squeeze_channels)):
-                for j in range(2):
-                    if (pool_ind < len(pool_stages)) and (k == pool_stages[pool_ind]):
-                        self.features.add(squeeze_pool())
-                        pool_ind += 1
-                    if (res_ind < len(residual_stages)) and (k == residual_stages[res_ind]):
-                        residual = True
-                        res_ind += 1
-                    else:
-                        residual = False
-                    in_channels_ij = first_out_channels if (i == 0 and j == 0) else \
-                        (2 * stage_expand_channels[i - 1] if j == 0 else 2 * stage_expand_channels[i])
-                    self.features.add(FireUnit(
-                        in_channels=in_channels_ij,
-                        squeeze_channels=stage_squeeze_channels[i],
-                        expand1x1_channels=stage_expand_channels[i],
-                        expand3x3_channels=stage_expand_channels[i],
-                        residual=residual))
-                    k += 1
+                out_channels=init_block_channels,
+                kernel_size=init_block_kernel_size))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    stage.add(nn.MaxPool2D(
+                        pool_size=3,
+                        strides=2,
+                        ceil_mode=True))
+                    for j in range(len(channels_per_stage)):
+                        out_channels = channels_per_stage[j]
+                        expand_channels = out_channels // 2
+                        squeeze_channels = out_channels // 8
+                        stage.add(FireUnit(
+                            in_channels=in_channels,
+                            squeeze_channels=squeeze_channels,
+                            expand1x1_channels=expand_channels,
+                            expand3x3_channels=expand_channels,
+                            residual=(residual and residuals[i][j] == 1)))
+                        in_channels = out_channels
+                self.features.add(stage)
             self.features.add(nn.Dropout(rate=0.5))
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.Conv2D(
                 channels=classes,
                 kernel_size=1,
-                in_channels=(2 * stage_expand_channels[-1])))
+                in_channels=in_channels))
             self.output.add(nn.Activation('relu'))
-            self.output.add(nn.AvgPool2D(pool_size=13))
+            self.output.add(nn.AvgPool2D(
+                pool_size=13,
+                strides=1))
             self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
@@ -172,29 +165,21 @@ def get_squeezenet(version,
                    ctx=cpu(),
                    **kwargs):
     if version == '1.0':
-        first_out_channels = 96
-        first_kernel_size = 7
-        pool_stages = [0, 3, 7]
+        init_block_kernel_size = 7
+        init_block_channels = 96
     elif version == '1.1':
-        first_out_channels = 64
-        first_kernel_size = 3
-        pool_stages = [0, 2, 4]
+        init_block_kernel_size = 3
+        init_block_channels = 64
     else:
-        raise ValueError("Unsupported SqueezeNet version {}: 1.0 or 1.1 expected".format(version))
-
-    if residual:
-        residual_stages = [1, 3, 5, 7]
-    else:
-        residual_stages = []
+        raise ValueError("Unsupported SqueezeNet version {}".format(version))
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNet(
-        first_out_channels=first_out_channels,
-        first_kernel_size=first_kernel_size,
-        pool_stages=pool_stages,
-        residual_stages=residual_stages,
+        init_block_kernel_size=init_block_kernel_size,
+        init_block_channels=init_block_channels,
+        residual=residual,
         **kwargs)
 
 
@@ -221,7 +206,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = squeezenet1_0()
+    net = squeezeresnet1_1()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -232,7 +217,10 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    assert (weight_count == 1248424)
+    #assert (weight_count == 1248424)  # squeezenet1_0
+    #assert (weight_count == 1235496)  # squeezenet1_1
+    #assert (weight_count == 1248424)  # squeezeresnet1_0
+    assert (weight_count == 1235496)  # squeezeresnet1_1
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

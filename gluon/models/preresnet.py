@@ -254,10 +254,10 @@ class PreResNet(HybridBlock):
                 in_channels=in_channels,
                 out_channels=channels[0],
                 bn_use_global_stats=bn_use_global_stats))
+            in_channels = channels[0]
             for i, layers_per_stage in enumerate(layers):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
-                    in_channels = channels[i]
                     out_channels = channels[i + 1]
                     for j in range(layers_per_stage):
                         strides = 1 if (i == 0) or (j != 0) else 2

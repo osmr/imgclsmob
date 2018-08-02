@@ -174,7 +174,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    net = squeezenet1_0()
+    net = squeezenet1_1()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)

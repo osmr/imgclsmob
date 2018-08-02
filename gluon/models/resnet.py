@@ -236,10 +236,10 @@ class ResNet(HybridBlock):
                 in_channels=in_channels,
                 out_channels=channels[0],
                 bn_use_global_stats=bn_use_global_stats))
+            in_channels = channels[0]
             for i, layers_per_stage in enumerate(layers):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
-                    in_channels = channels[i]
                     out_channels = channels[i + 1]
                     for j in range(layers_per_stage):
                         strides = 1 if (i == 0) or (j != 0) else 2
@@ -370,7 +370,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = resnet10()
+    net = resnet50()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -383,7 +383,7 @@ def _test():
         weight_count += np.prod(param.shape)
     #assert (weight_count == 11689512)  # resnet18_v1
     #assert (weight_count == 21797672)  # resnet34_v1
-    #assert (weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+    assert (weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
     #assert (weight_count == 44549160)  # resnet101_v1b
     #assert (weight_count == 60192808)  # resnet152_v1b
 

@@ -295,6 +295,11 @@ def _get_model(name, **kwargs):
         'preresnet200': preresnet200,
         'preresnet200b': preresnet200b,
 
+        'squeezenet_v1_0': squeezenet_v1_0,
+        'squeezenet_v1_1': squeezenet_v1_1,
+        'squeezeresnet_v1_0': squeezeresnet_v1_0,
+        'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,
         'oth_mobilenet0_5': oth_mobilenet0_5,
@@ -314,8 +319,6 @@ def _get_model(name, **kwargs):
         'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
         'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
 
-        'slk_squeezenet1_0': squeezenet1_0,
-        'slk_squeezenet1_1': squeezenet1_1,
         'mobilenet1_0': mobilenet1_0,
         'mobilenet0_75': mobilenet0_75,
         'mobilenet0_5': mobilenet0_5,

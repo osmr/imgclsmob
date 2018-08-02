@@ -99,15 +99,14 @@ class SqueezeInitBlock(HybridBlock):
 class SqueezeNet(HybridBlock):
 
     def __init__(self,
+                 channels,
+                 residuals,
                  init_block_kernel_size,
                  init_block_channels,
-                 residual,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(SqueezeNet, self).__init__(**kwargs)
-        channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
-        residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -132,7 +131,7 @@ class SqueezeNet(HybridBlock):
                             squeeze_channels=squeeze_channels,
                             expand1x1_channels=expand_channels,
                             expand3x3_channels=expand_channels,
-                            residual=(residual and residuals[i][j] == 1)))
+                            residual=((residuals is not None) and (residuals[i][j] == 1))))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.Dropout(rate=0.5))
@@ -165,37 +164,45 @@ def get_squeezenet(version,
                    ctx=cpu(),
                    **kwargs):
     if version == '1.0':
+        channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
+        residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
         init_block_kernel_size = 7
         init_block_channels = 96
     elif version == '1.1':
+        channels = [[128, 128], [256, 256], [384, 384, 512, 512]]
+        residuals = [[0, 1], [0, 1], [0, 1, 0, 1]]
         init_block_kernel_size = 3
         init_block_channels = 64
     else:
         raise ValueError("Unsupported SqueezeNet version {}".format(version))
 
+    if not residual:
+        residuals = None
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNet(
+        channels=channels,
+        residuals=residuals,
         init_block_kernel_size=init_block_kernel_size,
         init_block_channels=init_block_channels,
-        residual=residual,
         **kwargs)
 
 
-def squeezenet1_0(**kwargs):
+def squeezenet_v1_0(**kwargs):
     return get_squeezenet(version='1.0', residual=False, **kwargs)
 
 
-def squeezenet1_1(**kwargs):
+def squeezenet_v1_1(**kwargs):
     return get_squeezenet(version='1.1', residual=False, **kwargs)
 
 
-def squeezeresnet1_0(**kwargs):
+def squeezeresnet_v1_0(**kwargs):
     return get_squeezenet(version='1.0', residual=True, **kwargs)
 
 
-def squeezeresnet1_1(**kwargs):
+def squeezeresnet_v1_1(**kwargs):
     return get_squeezenet(version='1.1', residual=True, **kwargs)
 
 
@@ -206,7 +213,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = squeezeresnet1_1()
+    net = squeezeresnet_v1_1()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -217,10 +224,10 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 1248424)  # squeezenet1_0
-    #assert (weight_count == 1235496)  # squeezenet1_1
-    #assert (weight_count == 1248424)  # squeezeresnet1_0
-    assert (weight_count == 1235496)  # squeezeresnet1_1
+    #assert (weight_count == 1248424)  # squeezenet_v1_0
+    #assert (weight_count == 1235496)  # squeezenet_v1_1
+    #assert (weight_count == 1248424)  # squeezeresnet_v1_0
+    assert (weight_count == 1235496)  # squeezeresnet_v1_1
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

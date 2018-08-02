@@ -283,7 +283,9 @@ def get_resnet(version,
         raise ValueError("Unsupported ResNet version {}".format(version))
 
     blocks = int(pure_version)
-    if blocks == 18:
+    if blocks == 10:
+        layers = [1, 1, 1, 1]
+    elif blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -315,6 +317,10 @@ def get_resnet(version,
         conv1_stride=conv1_stride,
         **kwargs)
     return net
+
+
+def resnet10(**kwargs):
+    return get_resnet('10', **kwargs)
 
 
 def resnet18(**kwargs):
@@ -364,7 +370,7 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = resnet18()
+    net = resnet10()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -375,7 +381,7 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    assert (weight_count == 11689512)  # resnet18_v1
+    #assert (weight_count == 11689512)  # resnet18_v1
     #assert (weight_count == 21797672)  # resnet34_v1
     #assert (weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
     #assert (weight_count == 44549160)  # resnet101_v1b

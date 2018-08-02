@@ -109,12 +109,13 @@ def _get_model(name, **kwargs):
         'preresnet200': preresnet200,
         'preresnet200b': preresnet200b,
 
-        'squeezenet1_0A': squeezenet1_0A,
+        'squeezenet_v1_0': squeezenet_v1_0,
+        'squeezenet_v1_1': squeezenet_v1_1,
+        'squeezeresnet_v1_0': squeezeresnet_v1_0,
+        'squeezeresnet_v1_1': squeezeresnet_v1_1,
 
-        'squeezenet1_0': squeezenet_v1_0,
-        'squeezenet1_1': squeezenet_v1_1,
-        'squeezeresnet1_0': squeezeresnet_v1_0,
-        'squeezeresnet1_1': squeezeresnet_v1_1,
+        'squeezenet1_0a': squeezenet1_0a,
+        'squeezeresnet1_1a': squeezeresnet1_1a,
 
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,

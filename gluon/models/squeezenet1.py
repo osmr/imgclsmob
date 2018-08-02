@@ -198,19 +198,19 @@ def get_squeezenet(version,
         **kwargs)
 
 
-def squeezenet1_0A(**kwargs):
+def squeezenet1_0a(**kwargs):
     return get_squeezenet(version='1.0', residual=False, **kwargs)
 
 
-def squeezenet1_1A(**kwargs):
+def squeezenet1_1a(**kwargs):
     return get_squeezenet(version='1.1', residual=False, **kwargs)
 
 
-def squeezeresnet1_0A(**kwargs):
+def squeezeresnet1_0a(**kwargs):
     return get_squeezenet(version='1.0', residual=True, **kwargs)
 
 
-def squeezeresnet1_1A(**kwargs):
+def squeezeresnet1_1a(**kwargs):
     return get_squeezenet(version='1.1', residual=True, **kwargs)
 
 

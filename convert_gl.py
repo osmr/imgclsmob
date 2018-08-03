@@ -25,8 +25,6 @@ from gluon.models.menet import *
 from gluon.models.nasnet import *
 from gluon.models.darknet import *
 
-from gluon.models.darknet1 import *
-
 def parse_args():
     parser = argparse.ArgumentParser(description='Convert models (Gluon)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -117,10 +115,6 @@ def _get_model(name, **kwargs):
         'darknet_ref': darknet_ref,
         'darknet_tiny': darknet_tiny,
         'darknet19': darknet19,
-
-        'darknet_ref1': darknet_ref1,
-        'darknet_tiny1': darknet_tiny1,
-        'darknet191': darknet191,
 
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,

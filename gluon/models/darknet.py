@@ -79,20 +79,19 @@ class DarkNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            for i in range(len(channels)):
-                stage = nn.HybridSequential(prefix='')
-                channels_per_stage = channels[i]
-                for j in range(len(channels_per_stage)):
-                    out_channels = channels_per_stage[j]
-                    stage.add(dark_convYxY(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
-                    in_channels = out_channels
-                if i != len(channels) - 1:
-                    stage.add(nn.MaxPool2D(
-                        pool_size=2,
-                        strides=2))
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        stage.add(dark_convYxY(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
+                        in_channels = out_channels
+                    if i != len(channels) - 1:
+                        stage.add(nn.MaxPool2D(
+                            pool_size=2,
+                            strides=2))
                 self.features.add(stage)
 
             self.output = nn.HybridSequential(prefix='')
@@ -102,7 +101,9 @@ class DarkNet(HybridBlock):
                 in_channels=in_channels))
             if cls_activ:
                 self.output.add(nn.LeakyReLU(alpha=0.1))
-            self.output.add(nn.AvgPool2D(pool_size=avg_pool_size))
+            self.output.add(nn.AvgPool2D(
+                pool_size=avg_pool_size,
+                strides=1))
             self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
@@ -163,7 +164,8 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = darknet_tiny()
+    model = darknet_tiny
+    net = model()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -174,9 +176,9 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 7319416)
-    #assert (weight_count == 1042104)
-    #assert (weight_count == 20842376)
+    assert (model != darknet_ref or weight_count == 7319416)
+    assert (model != darknet_tiny or weight_count == 1042104)
+    assert (model != darknet19 or weight_count == 20842376)
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

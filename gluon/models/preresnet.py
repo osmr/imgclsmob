@@ -329,13 +329,12 @@ def get_preresnet(version,
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = PreResNet(
+    return PreResNet(
         layers=layers,
         channels=channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
-    return net
 
 
 def preresnet18(**kwargs):
@@ -385,7 +384,8 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = preresnet18()
+    model = preresnet152b
+    net = model()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -396,11 +396,14 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    assert (weight_count == 11687848)  # resnet18_v2
-    #assert (weight_count == 21796008)  # resnet34_v2
-    #assert (weight_count == 25549480)  # resnet50_v2
-    #assert (weight_count == 44541608)  # resnet101_v2
-    #assert (weight_count == 60185256)  # resnet152_v2
+    assert (model != preresnet18 or weight_count == 11687848)  # resnet18_v2
+    assert (model != preresnet34 or weight_count == 21796008)  # resnet34_v2
+    assert (model != preresnet50 or weight_count == 25549480)  # resnet50_v2
+    assert (model != preresnet50b or weight_count == 25549480)  # resnet50_v2
+    assert (model != preresnet101 or weight_count == 44541608)  # resnet101_v2
+    assert (model != preresnet101b or weight_count == 44541608)  # resnet101_v2
+    assert (model != preresnet152 or weight_count == 60185256)  # resnet152_v2
+    assert (model != preresnet152b or weight_count == 60185256)  # resnet152_v2
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

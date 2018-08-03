@@ -122,8 +122,7 @@ class SqueezeNet(HybridBlock):
                         pool_size=3,
                         strides=2,
                         ceil_mode=True))
-                    for j in range(len(channels_per_stage)):
-                        out_channels = channels_per_stage[j]
+                    for j, out_channels in enumerate(channels_per_stage):
                         expand_channels = out_channels // 2
                         squeeze_channels = out_channels // 8
                         stage.add(FireUnit(
@@ -213,7 +212,8 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = squeezeresnet_v1_1()
+    model = squeezenet_v1_0
+    net = model()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -224,10 +224,10 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 1248424)  # squeezenet_v1_0
-    #assert (weight_count == 1235496)  # squeezenet_v1_1
-    #assert (weight_count == 1248424)  # squeezeresnet_v1_0
-    assert (weight_count == 1235496)  # squeezeresnet_v1_1
+    assert (model != squeezenet_v1_0 or weight_count == 1248424)
+    assert (model != squeezenet_v1_1 or weight_count == 1235496)
+    assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+    assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

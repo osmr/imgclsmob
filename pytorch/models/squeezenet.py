@@ -111,8 +111,7 @@ class SqueezeNet(nn.Module):
                 kernel_size=3,
                 stride=2,
                 ceil_mode=True))
-            for j in range(len(channels_per_stage)):
-                out_channels = channels_per_stage[j]
+            for j, out_channels in enumerate(channels_per_stage):
                 expand_channels = out_channels // 2
                 squeeze_channels = out_channels // 8
                 stage.add_module("fire{}".format(j + 1), FireUnit(
@@ -208,17 +207,18 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = squeezeresnet_v1_1()
+    model = squeezeresnet_v1_0
+    net = model()
 
     net.train()
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())
-    #assert (weight_count == 1248424)  # squeezenet_v1_0
-    #assert (weight_count == 1235496)  # squeezenet_v1_1
-    #assert (weight_count == 1248424)  # squeezeresnet_v1_0
-    assert (weight_count == 1235496)  # squeezeresnet_v1_1
+    assert (model != squeezenet_v1_0 or weight_count == 1248424)
+    assert (model != squeezenet_v1_1 or weight_count == 1235496)
+    assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+    assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
     x = Variable(torch.randn(1, 3, 224, 224))
     y = net(x)

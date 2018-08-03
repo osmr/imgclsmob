@@ -214,7 +214,8 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = sqnxt23_1_0()
+    model = sqnxt23_1_0
+    net = model()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)
@@ -225,7 +226,11 @@ def _test():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    #assert (weight_count == 654516)
+    #assert (model != squeezenet_v1_0 or weight_count == 1248424)
+    #assert (model != squeezenet_v1_1 or weight_count == 1235496)
+    #assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+    #assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
+    # assert (weight_count == 654516)
 
     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
     y = net(x)

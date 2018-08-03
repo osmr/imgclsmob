@@ -100,3 +100,34 @@ def SqNxt_23_2x(num_classes):
 def SqNxt_23_2x_v5(num_classes):
     return SqueezeNext(2.0, [2, 4, 14, 1], num_classes)
 
+
+def _test():
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    global TESTING
+    TESTING = True
+
+    model = SqNxt_23_1x
+    net = model()
+
+    net.train()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    #assert (model != squeezenet_v1_0 or weight_count == 1248424)
+    #assert (model != squeezenet_v1_1 or weight_count == 1235496)
+    #assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+    #assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
+
+    x = Variable(torch.randn(1, 3, 224, 224))
+    y = net(x)
+    assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
+
+

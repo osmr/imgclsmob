@@ -42,7 +42,7 @@ def measure_layer(layer, x):
                 layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['ReLU']:
+    elif type_name in ['ReLU', 'LeakyReLU']:
         delta_ops = x.numel()
         delta_params = get_layer_param(layer)
 

@@ -72,6 +72,7 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.resnet as gl_resnet
     import gluon.models.preresnet as gl_preresnet
     import gluon.models.squeezenet as gl_squeezenet
+    import gluon.models.darknet as gl_darknet
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -101,6 +102,10 @@ def _get_model_gl(name, **kwargs):
         'squeezeresnet_v1_0': gl_squeezenet.squeezeresnet_v1_0,
         'squeezeresnet_v1_1': gl_squeezenet.squeezeresnet_v1_1,
 
+        'darknet_ref': gl_darknet.darknet_ref,
+        'darknet_tiny': gl_darknet.darknet_tiny,
+        'darknet19': gl_darknet.darknet19,
+
         # 'squeezenet1_0': squeezenet1_0,
         # 'squeezenet1_1': squeezenet1_1,
         # 'squeezeresnet1_0': squeezeresnet1_0,
@@ -114,10 +119,6 @@ def _get_model_gl(name, **kwargs):
         # 'sqnxt23v5_2_0': sqnxt23v5_2_0,
         #
         # 'nasnet_a_mobile': nasnet_a_mobile,
-        #
-        # 'darknet_ref': darknet_ref,
-        # 'darknet_tiny': darknet_tiny,
-        # 'darknet19': darknet19,
         #
         # 'mobilenet1_0': mobilenet1_0,
         # 'mobilenet0_75': mobilenet0_75,
@@ -162,6 +163,7 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.preresnet as pt_preresnet
     import pytorch.models.resnet as pt_resnet
     import pytorch.models.squeezenet as pt_squeezenet
+    import pytorch.models.darknet as pt_darknet
 
     slk_models = {
         'resnet18': pt_resnet.resnet18,
@@ -190,6 +192,10 @@ def _get_model_pt(name, **kwargs):
         'squeezenet_v1_1': pt_squeezenet.squeezenet_v1_1,
         'squeezeresnet_v1_0': pt_squeezenet.squeezeresnet_v1_0,
         'squeezeresnet_v1_1': pt_squeezenet.squeezeresnet_v1_1,
+
+        'darknet_ref': pt_darknet.darknet_ref,
+        'darknet_tiny': pt_darknet.darknet_tiny,
+        'darknet19': pt_darknet.darknet19,
 
         # 'oth_mobilenet1_0': oth_mobilenet1_0,
         # 'oth_mobilenet0_75': oth_mobilenet0_75,

@@ -18,11 +18,12 @@ from common.train_log_param_saver import TrainLogParamSaver
 
 from pytorch.models.resnet import *
 from pytorch.models.preresnet import *
+from pytorch.models.squeezenet import *
+from pytorch.models.darknet import *
 
 from pytorch.models.mobilenet import *
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
-from pytorch.models.squeezenet import *
 
 from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *
@@ -299,6 +300,10 @@ def _get_model(name, **kwargs):
         'squeezenet_v1_1': squeezenet_v1_1,
         'squeezeresnet_v1_0': squeezeresnet_v1_0,
         'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+        'darknet_ref': darknet_ref,
+        'darknet_tiny': darknet_tiny,
+        'darknet19': darknet19,
 
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,

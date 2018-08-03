@@ -406,6 +406,10 @@ def get_data_loader(data_dir,
 def _get_model(name, **kwargs):
     models = {
         'resnet10': resnet10,
+        'resnet12': resnet12,
+        'resnet14': resnet14,
+        'resnet16': resnet16,
+
         'resnet18': resnet18,
         'resnet34': resnet34,
         'resnet50': resnet50,

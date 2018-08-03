@@ -285,6 +285,12 @@ def get_resnet(version,
     blocks = int(pure_version)
     if blocks == 10:
         layers = [1, 1, 1, 1]
+    elif blocks == 12:
+        layers = [2, 1, 1, 1]
+    elif blocks == 14:
+        layers = [2, 2, 1, 1]
+    elif blocks == 16:
+        layers = [2, 2, 2, 1]
     elif blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
@@ -320,6 +326,18 @@ def get_resnet(version,
 
 def resnet10(**kwargs):
     return get_resnet('10', **kwargs)
+
+
+def resnet12(**kwargs):
+    return get_resnet('12', **kwargs)
+
+
+def resnet14(**kwargs):
+    return get_resnet('14', **kwargs)
+
+
+def resnet16(**kwargs):
+    return get_resnet('16', **kwargs)
 
 
 def resnet18(**kwargs):

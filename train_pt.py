@@ -20,8 +20,8 @@ from pytorch.models.resnet import *
 from pytorch.models.preresnet import *
 from pytorch.models.squeezenet import *
 from pytorch.models.darknet import *
-
 from pytorch.models.mobilenet import *
+
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
 
@@ -310,6 +310,15 @@ def _get_model(name, **kwargs):
         'darknet_tiny': darknet_tiny,
         'darknet19': darknet19,
 
+        'mobilenet_w1': mobilenet_w1,
+        'mobilenet_w3d4': mobilenet_w3d4,
+        'mobilenet_wd2': mobilenet_wd2,
+        'mobilenet_wd4': mobilenet_wd4,
+        'fdmobilenet_w1': fdmobilenet_w1,
+        'fdmobilenet_w3d4': fdmobilenet_w3d4,
+        'fdmobilenet_wd2': fdmobilenet_wd2,
+        'fdmobilenet_wd4': fdmobilenet_wd4,
+
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,
         'oth_mobilenet0_5': oth_mobilenet0_5,
@@ -329,14 +338,6 @@ def _get_model(name, **kwargs):
         'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
         'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
 
-        'mobilenet1_0': mobilenet1_0,
-        'mobilenet0_75': mobilenet0_75,
-        'mobilenet0_5': mobilenet0_5,
-        'mobilenet0_25': mobilenet0_25,
-        'fd_mobilenet1_0': fd_mobilenet1_0,
-        'fd_mobilenet0_75': fd_mobilenet0_75,
-        'fd_mobilenet0_5': fd_mobilenet0_5,
-        'fd_mobilenet0_25': fd_mobilenet0_25,
         'shufflenet1_0_g1': shufflenet1_0_g1,
         'shufflenet1_0_g2': shufflenet1_0_g2,
         'shufflenet1_0_g3': shufflenet1_0_g3,

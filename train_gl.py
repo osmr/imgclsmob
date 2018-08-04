@@ -23,9 +23,9 @@ from gluon.models.resnet import *
 from gluon.models.preresnet import *
 from gluon.models.squeezenet import *
 from gluon.models.darknet import *
+from gluon.models.mobilenet import *
 
 from gluon.models.squeezenext import *
-from gluon.models.mobilenet import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
 from gluon.models.nasnet import *
@@ -446,6 +446,15 @@ def _get_model(name, **kwargs):
         'darknet_tiny': darknet_tiny,
         'darknet19': darknet19,
 
+        'mobilenet_w1': mobilenet_w1,
+        'mobilenet_w3d4': mobilenet_w3d4,
+        'mobilenet_wd2': mobilenet_wd2,
+        'mobilenet_wd4': mobilenet_wd4,
+        'fdmobilenet_w1': fdmobilenet_w1,
+        'fdmobilenet_w3d4': fdmobilenet_w3d4,
+        'fdmobilenet_wd2': fdmobilenet_wd2,
+        'fdmobilenet_wd4': fdmobilenet_wd4,
+
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,
         'sqnxt23_2_0': sqnxt23_2_0,
@@ -455,14 +464,6 @@ def _get_model(name, **kwargs):
 
         'nasnet_a_mobile': nasnet_a_mobile,
 
-        'mobilenet1_0': mobilenet1_0,
-        'mobilenet0_75': mobilenet0_75,
-        'mobilenet0_5': mobilenet0_5,
-        'mobilenet0_25': mobilenet0_25,
-        'fd_mobilenet1_0': fd_mobilenet1_0,
-        'fd_mobilenet0_75': fd_mobilenet0_75,
-        'fd_mobilenet0_5': fd_mobilenet0_5,
-        'fd_mobilenet0_25': fd_mobilenet0_25,
         'shufflenet1_0_g1': shufflenet1_0_g1,
         'shufflenet1_0_g2': shufflenet1_0_g2,
         'shufflenet1_0_g3': shufflenet1_0_g3,

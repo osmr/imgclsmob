@@ -5,7 +5,6 @@
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'
 """
 
-import numpy as np
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -24,7 +23,6 @@ class ConvBlock(HybridBlock):
                  groups=1,
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -52,7 +50,6 @@ class DwsConvBlock(HybridBlock):
                  strides,
                  **kwargs):
         super(DwsConvBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.dw_conv = ConvBlock(
                 in_channels=in_channels,
@@ -76,7 +73,7 @@ class MobileNet(HybridBlock):
 
     def __init__(self,
                  channels,
-                 strides,
+                 first_stage_stride,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -84,93 +81,101 @@ class MobileNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
+            init_block_channels = channels[0][0]
             self.features.add(ConvBlock(
                 in_channels=in_channels,
-                out_channels=channels[0],
+                out_channels=init_block_channels,
                 kernel_size=3,
                 strides=2,
                 padding=1))
-            for i in range(len(strides)):
-                self.features.add(DwsConvBlock(
-                    in_channels=channels[i],
-                    out_channels=channels[i+1],
-                    strides=strides[i]))
-            self.features.add(nn.AvgPool2D(pool_size=7))
-            self.features.add(nn.Flatten())
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels[1:]):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
+                        stage.add(DwsConvBlock(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            strides=strides))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-            self.output = nn.Dense(
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
                 units=classes,
-                in_units=channels[-1])
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         assert ((not TESTING) or x.shape == (1, 3, 224, 224))
 
         x = self.features(x)
-        assert ((not TESTING) or x.shape == (1, 1024))
+        assert ((not TESTING) or (x.shape[0] == 1) or (x.shape[2:] == (1, 1)))
         x = self.output(x)
         assert ((not TESTING) or x.shape == (1, 1000))
 
         return x
 
 
-def get_mobilenet(scale,
+def get_mobilenet(version,
+                  width_scale,
                   pretrained=False,
                   ctx=cpu(),
                   **kwargs):
-    channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 512, 1024, 1024]
-    strides = [1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1]
-    channels = (np.array(channels) * scale).astype(np.int)
+    if version == 'orig':
+        channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 512], [1024, 1024]]
+        first_stage_stride = False
+    elif version == 'fd':
+        channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 1024]]
+        first_stage_stride = True
+    else:
+        raise ValueError("Unsupported MobileNet version {}".format(version))
+
+    channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    return MobileNet(channels, strides, **kwargs)
+    return MobileNet(
+        channels=channels,
+        first_stage_stride=first_stage_stride,
+        **kwargs)
 
 
-def get_fd_mobilenet(scale,
-                     pretrained=False,
-                     ctx=cpu(),
-                     **kwargs):
-    channels = [32, 64, 128, 128, 256, 256, 512, 512, 512, 512, 512, 1024]
-    strides = [2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1]
-    channels = (np.array(channels) * scale).astype(np.int)
-
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return MobileNet(channels, strides, **kwargs)
+def mobilenet_w1(**kwargs):
+    return get_mobilenet('orig', 1.0, **kwargs)
 
 
-def mobilenet1_0(**kwargs):
-    return get_mobilenet(1.0, **kwargs)
+def mobilenet_w3d4(**kwargs):
+    return get_mobilenet('orig', 0.75, **kwargs)
 
 
-def mobilenet0_75(**kwargs):
-    return get_mobilenet(0.75, **kwargs)
+def mobilenet_wd2(**kwargs):
+    return get_mobilenet('orig', 0.5, **kwargs)
 
 
-def mobilenet0_5(**kwargs):
-    return get_mobilenet(0.5, **kwargs)
+def mobilenet_wd4(**kwargs):
+    return get_mobilenet('orig', 0.25, **kwargs)
 
 
-def mobilenet0_25(**kwargs):
-    return get_mobilenet(0.25, **kwargs)
+def fdmobilenet_w1(**kwargs):
+    return get_mobilenet('fd', 1.0, **kwargs)
 
 
-def fd_mobilenet1_0(**kwargs):
-    return get_fd_mobilenet(1.0, **kwargs)
+def fdmobilenet_w3d4(**kwargs):
+    return get_mobilenet('fd', 0.75, **kwargs)
 
 
-def fd_mobilenet0_75(**kwargs):
-    return get_fd_mobilenet(0.75, **kwargs)
+def fdmobilenet_wd2(**kwargs):
+    return get_mobilenet('fd', 0.5, **kwargs)
 
 
-def fd_mobilenet0_5(**kwargs):
-    return get_fd_mobilenet(0.5, **kwargs)
-
-
-def fd_mobilenet0_25(**kwargs):
-    return get_fd_mobilenet(0.25, **kwargs)
+def fdmobilenet_wd4(**kwargs):
+    return get_mobilenet('fd', 0.25, **kwargs)
 
 
 def _test():
@@ -180,22 +185,42 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = mobilenet1_0()
+    models = [
+        mobilenet_w1,
+        mobilenet_w3d4,
+        mobilenet_wd2,
+        mobilenet_wd4,
+        fdmobilenet_w1,
+        fdmobilenet_w3d4,
+        fdmobilenet_wd2,
+        fdmobilenet_wd4,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (weight_count == 4231976)
+        net = model()
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        assert (model != mobilenet_w1 or weight_count == 4231976)
+        assert (model != mobilenet_w3d4 or weight_count == 2585560)
+        assert (model != mobilenet_wd2 or weight_count == 1331592)
+        assert (model != mobilenet_wd4 or weight_count == 470072)
+        assert (model != fdmobilenet_w1 or weight_count == 2901288)
+        assert (model != fdmobilenet_w3d4 or weight_count == 1833304)
+        assert (model != fdmobilenet_wd2 or weight_count == 993928)
+        assert (model != fdmobilenet_wd4 or weight_count == 383160)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

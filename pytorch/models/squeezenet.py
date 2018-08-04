@@ -207,22 +207,30 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = squeezeresnet_v1_0
-    net = model()
+    models = [
+        squeezenet_v1_0,
+        squeezenet_v1_1,
+        squeezeresnet_v1_0,
+        squeezeresnet_v1_1,
+    ]
 
-    net.train()
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    assert (model != squeezenet_v1_0 or weight_count == 1248424)
-    assert (model != squeezenet_v1_1 or weight_count == 1235496)
-    assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
-    assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
+    for model in models:
 
-    x = Variable(torch.randn(1, 3, 224, 224))
-    y = net(x)
-    assert (tuple(y.size()) == (1, 1000))
+        net = model()
+
+        net.train()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        assert (model != squeezenet_v1_0 or weight_count == 1248424)
+        assert (model != squeezenet_v1_1 or weight_count == 1235496)
+        assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+        assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -214,27 +214,32 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = sqnxt23_1_0
-    net = model()
+    models = [
+        sqnxt23_1_0,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    #assert (model != squeezenet_v1_0 or weight_count == 1248424)
-    #assert (model != squeezenet_v1_1 or weight_count == 1235496)
-    #assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
-    #assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
-    # assert (weight_count == 654516)
+        net = model()
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        #assert (model != squeezenet_v1_0 or weight_count == 1248424)
+        #assert (model != squeezenet_v1_1 or weight_count == 1235496)
+        #assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+        #assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
+        # assert (weight_count == 654516)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

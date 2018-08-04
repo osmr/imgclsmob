@@ -164,25 +164,32 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = darknet_tiny
-    net = model()
+    models = [
+        darknet_ref,
+        darknet_tiny,
+        darknet19,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (model != darknet_ref or weight_count == 7319416)
-    assert (model != darknet_tiny or weight_count == 1042104)
-    assert (model != darknet19 or weight_count == 20842376)
+        net = model()
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        assert (model != darknet_ref or weight_count == 7319416)
+        assert (model != darknet_tiny or weight_count == 1042104)
+        assert (model != darknet19 or weight_count == 20842376)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

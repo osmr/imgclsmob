@@ -175,21 +175,28 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = darknet_tiny
-    net = model()
+    models = [
+        darknet_ref,
+        darknet_tiny,
+        darknet19,
+    ]
 
-    net.train()
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    assert (model != darknet_ref or weight_count == 7319416)
-    assert (model != darknet_tiny or weight_count == 1042104)
-    assert (model != darknet19 or weight_count == 20842376)
+    for model in models:
 
-    x = Variable(torch.randn(1, 3, 224, 224))
-    y = net(x)
-    assert (tuple(y.size()) == (1, 1000))
+        net = model()
+
+        net.train()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        assert (model != darknet_ref or weight_count == 7319416)
+        assert (model != darknet_tiny or weight_count == 1042104)
+        assert (model != darknet19 or weight_count == 20842376)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

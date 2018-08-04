@@ -387,30 +387,42 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = resnet152b
-    net = model()
+    models = [
+        resnet18,
+        resnet34,
+        resnet50,
+        resnet50b,
+        resnet101,
+        resnet101b,
+        resnet152,
+        resnet152b,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
-    assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
-    assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-    assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-    assert (model != resnet101 or weight_count == 44549160)  # resnet101_v1b
-    assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
-    assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
-    assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+        net = model()
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
+        assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
+        assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+        assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+        assert (model != resnet101 or weight_count == 44549160)  # resnet101_v1b
+        assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
+        assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
+        assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

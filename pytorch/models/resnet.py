@@ -335,26 +335,38 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = resnet34
-    net = model()
+    models = [
+        resnet18,
+        resnet34,
+        resnet50,
+        resnet50b,
+        resnet101,
+        resnet101b,
+        resnet152,
+        resnet152b,
+    ]
 
-    net.train()
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
-    assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
-    assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-    assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-    assert (model != resnet101 or weight_count == 44549160)  # resnet101_v1b
-    assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
-    assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
-    assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+    for model in models:
 
-    x = Variable(torch.randn(1, 3, 224, 224))
-    y = net(x)
-    assert (tuple(y.size()) == (1, 1000))
+        net = model()
+
+        net.train()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
+        assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
+        assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+        assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
+        assert (model != resnet101 or weight_count == 44549160)  # resnet101_v1b
+        assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
+        assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
+        assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

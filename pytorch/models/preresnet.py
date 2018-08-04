@@ -349,26 +349,38 @@ def _test():
     global TESTING
     TESTING = True
 
-    model = preresnet101b
-    net = model()
+    models = [
+        preresnet18,
+        preresnet34,
+        preresnet50,
+        preresnet50b,
+        preresnet101,
+        preresnet101b,
+        preresnet152,
+        preresnet152b,
+    ]
 
-    net.train()
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    assert (model != preresnet18 or weight_count == 11687848)  # resnet18_v2
-    assert (model != preresnet34 or weight_count == 21796008)  # resnet34_v2
-    assert (model != preresnet50 or weight_count == 25549480)  # resnet50_v2
-    assert (model != preresnet50b or weight_count == 25549480)  # resnet50_v2
-    assert (model != preresnet101 or weight_count == 44541608)  # resnet101_v2
-    assert (model != preresnet101b or weight_count == 44541608)  # resnet101_v2
-    assert (model != preresnet152 or weight_count == 60185256)  # resnet152_v2
-    assert (model != preresnet152b or weight_count == 60185256)  # resnet152_v2
+    for model in models:
 
-    x = Variable(torch.randn(1, 3, 224, 224))
-    y = net(x)
-    assert (tuple(y.size()) == (1, 1000))
+        net = model()
+
+        net.train()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        assert (model != preresnet18 or weight_count == 11687848)  # resnet18_v2
+        assert (model != preresnet34 or weight_count == 21796008)  # resnet34_v2
+        assert (model != preresnet50 or weight_count == 25549480)  # resnet50_v2
+        assert (model != preresnet50b or weight_count == 25549480)  # resnet50_v2
+        assert (model != preresnet101 or weight_count == 44541608)  # resnet101_v2
+        assert (model != preresnet101b or weight_count == 44541608)  # resnet101_v2
+        assert (model != preresnet152 or weight_count == 60185256)  # resnet152_v2
+        assert (model != preresnet152b or weight_count == 60185256)  # resnet152_v2
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

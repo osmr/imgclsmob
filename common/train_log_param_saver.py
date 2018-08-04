@@ -204,7 +204,7 @@ class TrainLogParamSaver(object):
                     del self.best_checkpoint_params_file_stems[0]
 
                 if self.best_map_log_file is not None:
-                    self.best_map_log_file.write('\n{:02d}\n{:04d}\t{:.4f}'.format(
+                    self.best_map_log_file.write('\n{:02d}\t{:04d}\t{:.4f}'.format(
                         self.score_log_attempt_value, epoch1, curr_acc))
                     self.best_map_log_file.flush()
         if self.score_log_file is not None:

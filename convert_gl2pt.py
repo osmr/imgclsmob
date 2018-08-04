@@ -73,6 +73,7 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.preresnet as gl_preresnet
     import gluon.models.squeezenet as gl_squeezenet
     import gluon.models.darknet as gl_darknet
+    import gluon.models.mobilenet as gl_mobilenet
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -105,6 +106,15 @@ def _get_model_gl(name, **kwargs):
         'darknet_ref': gl_darknet.darknet_ref,
         'darknet_tiny': gl_darknet.darknet_tiny,
         'darknet19': gl_darknet.darknet19,
+
+        'mobilenet_w1': gl_mobilenet.mobilenet_w1,
+        'mobilenet_w3d4': gl_mobilenet.mobilenet_w3d4,
+        'mobilenet_wd2': gl_mobilenet.mobilenet_wd2,
+        'mobilenet_wd4': gl_mobilenet.mobilenet_wd4,
+        'fdmobilenet_w1': gl_mobilenet.fdmobilenet_w1,
+        'fdmobilenet_w3d4': gl_mobilenet.fdmobilenet_w3d4,
+        'fdmobilenet_wd2': gl_mobilenet.fdmobilenet_wd2,
+        'fdmobilenet_wd4': gl_mobilenet.fdmobilenet_wd4,
 
         # 'squeezenet1_0': squeezenet1_0,
         # 'squeezenet1_1': squeezenet1_1,
@@ -164,6 +174,7 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.resnet as pt_resnet
     import pytorch.models.squeezenet as pt_squeezenet
     import pytorch.models.darknet as pt_darknet
+    import pytorch.models.mobilenet as pt_mobilenet
 
     slk_models = {
         'resnet18': pt_resnet.resnet18,
@@ -196,6 +207,15 @@ def _get_model_pt(name, **kwargs):
         'darknet_ref': pt_darknet.darknet_ref,
         'darknet_tiny': pt_darknet.darknet_tiny,
         'darknet19': pt_darknet.darknet19,
+
+        'mobilenet_w1': pt_mobilenet.mobilenet_w1,
+        'mobilenet_w3d4': pt_mobilenet.mobilenet_w3d4,
+        'mobilenet_wd2': pt_mobilenet.mobilenet_wd2,
+        'mobilenet_wd4': pt_mobilenet.mobilenet_wd4,
+        'fdmobilenet_w1': pt_mobilenet.fdmobilenet_w1,
+        'fdmobilenet_w3d4': pt_mobilenet.fdmobilenet_w3d4,
+        'fdmobilenet_wd2': pt_mobilenet.fdmobilenet_wd2,
+        'fdmobilenet_wd4': pt_mobilenet.fdmobilenet_wd4,
 
         # 'oth_mobilenet1_0': oth_mobilenet1_0,
         # 'oth_mobilenet0_75': oth_mobilenet0_75,

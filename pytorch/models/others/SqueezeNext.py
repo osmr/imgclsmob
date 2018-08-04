@@ -110,7 +110,7 @@ def _test():
     TESTING = True
 
     model = SqNxt_23_1x
-    net = model()
+    net = model(100)
 
     net.train()
     net_params = filter(lambda p: p.requires_grad, net.parameters())

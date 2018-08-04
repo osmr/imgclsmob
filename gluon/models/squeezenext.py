@@ -47,13 +47,13 @@ class SqnxtBlock(HybridBlock):
         super(SqnxtBlock, self).__init__(**kwargs)
         if strides == 2:
             reduction_den = 1
-            self.reduce = True
+            self.resize_identity = True
         elif in_channels > out_channels:
             reduction_den = 4
-            self.reduce = True
+            self.resize_identity = True
         else:
             reduction_den = 2
-            self.reduce = False
+            self.resize_identity = False
 
         with self.name_scope():
             self.conv1 = SqnxtConv(
@@ -84,8 +84,8 @@ class SqnxtBlock(HybridBlock):
                 kernel_size=1,
                 strides=1)
 
-            if self.reduce:
-                self.shortcut = SqnxtConv(
+            if self.resize_identity:
+                self.identity_conv = SqnxtConv(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=1,
@@ -93,16 +93,17 @@ class SqnxtBlock(HybridBlock):
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
-        identity = x
+        if self.resize_identity:
+            identity = self.identity_conv(x)
+        else:
+            identity = x
+        identity = self.activ(identity)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
         x = self.conv5(x)
-        if self.reduce:
-            x = x + self.shortcut(identity)
-        else:
-            x = x + self.activ(identity)
+        x = x + identity
         x = self.activ(x)
         return x
 
@@ -110,8 +111,8 @@ class SqnxtBlock(HybridBlock):
 class SqueezeNext(HybridBlock):
 
     def __init__(self,
-                 width_x,
-                 blocks,
+                 layers,
+                 width_scale,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -124,7 +125,7 @@ class SqueezeNext(HybridBlock):
             self.features = nn.HybridSequential(prefix='')
             self.features.add(SqnxtConv(
                 in_channels=in_channels,
-                out_channels=int(width_x * base_in_channels),
+                out_channels=int(width_scale * base_in_channels),
                 kernel_size=7,
                 strides=2,
                 padding=1))
@@ -132,29 +133,32 @@ class SqueezeNext(HybridBlock):
                 pool_size=3,
                 strides=2,
                 ceil_mode=True))
-            for i in range(len(blocks)):
+            for i, layers_per_stage in enumerate(layers):
                 stage = nn.HybridSequential(prefix='')
-                strides_i = [strides_per_stage[i]] + [1] * (blocks[i] - 1)
+                strides_i = [strides_per_stage[i]] + [1] * (layers_per_stage - 1)
                 for j in range(len(strides_i)):
                     stage.add(SqnxtBlock(
-                        in_channels=int(width_x * base_in_channels),
-                        out_channels=int(width_x * out_channels_per_stage[i]),
+                        in_channels=int(width_scale * base_in_channels),
+                        out_channels=int(width_scale * out_channels_per_stage[i]),
                         strides=strides_i[j]))
                     if j == 0:
                         base_in_channels = out_channels_per_stage[i]
                 self.features.add(stage)
 
             self.features.add(SqnxtConv(
-                in_channels=int(width_x * base_in_channels),
-                out_channels=int(width_x * 128),
+                in_channels=int(width_scale * base_in_channels),
+                out_channels=int(width_scale * 128),
                 kernel_size=1,
                 strides=1))
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
+
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.AvgPool2D(pool_size=7))
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
-                in_units=int(width_x * 128)))
+                in_units=int(width_scale * 128)))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -162,24 +166,24 @@ class SqueezeNext(HybridBlock):
         return x
 
 
-def get_squeezenext(arch_type,
-                    scale,
+def get_squeezenext(version,
+                    width_scale,
                     pretrained=False,
                     ctx=cpu(),
                     **kwargs):
-    if arch_type == '23':
-        blocks = [6, 6, 8, 1]
-    elif arch_type == '23v5':
-        blocks = [2, 4, 14, 1]
+    if version == '23':
+        layers = [6, 6, 8, 1]
+    elif version == '23v5':
+        layers = [2, 4, 14, 1]
     else:
-        raise ValueError("Unsupported SqueezeNet architecture type {}".format(arch_type))
+        raise ValueError("Unsupported SqueezeNet version {}".format(version))
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNext(
-        width_x=scale,
-        blocks=blocks,
+        layers=layers,
+        width_scale=width_scale,
         **kwargs)
 
 

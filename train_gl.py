@@ -129,6 +129,11 @@ def parse_args():
         type=int,
         default=1,
         help='starting epoch for resuming, default is 1 for new training')
+    parser.add_argument(
+        '--attempt',
+        type=int,
+        default=1,
+        help='current number of training')
 
     parser.add_argument(
         '--optimizer-name',
@@ -931,7 +936,7 @@ def main():
                 # bigger=[True],
                 # mask=None,
                 score_log_file_path=os.path.join(args.save_dir, 'score.log'),
-                score_log_attempt_value=1,
+                score_log_attempt_value=args.attempt,
                 best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
         else:
             lp_saver = None

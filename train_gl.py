@@ -414,6 +414,8 @@ def _get_model(name, **kwargs):
         'resnet12': resnet12,
         'resnet14': resnet14,
         'resnet16': resnet16,
+        'resnet18_w3d4': resnet18_w3d4,
+        'resnet18_wd2': resnet18_wd2,
         'resnet18_wd4': resnet18_wd4,
 
         'resnet18': resnet18,
@@ -731,7 +733,7 @@ def train_epoch(epoch,
             btic = time.time()
             _, top1 = acc_top1_train.get()
             err_top1_train = 1.0 - top1
-            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}'.format(
+            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.5f}'.format(
                 epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
 
     throughput = int(batch_size * (i + 1) / (time.time() - tic))

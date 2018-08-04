@@ -363,6 +363,14 @@ def resnet18(**kwargs):
     return get_resnet('18', **kwargs)
 
 
+def resnet18_w3d4(**kwargs):
+    return get_resnet('18_w3d4', **kwargs)
+
+
+def resnet18_wd2(**kwargs):
+    return get_resnet('18_wd2', **kwargs)
+
+
 def resnet18_wd4(**kwargs):
     return get_resnet('18_wd4', **kwargs)
 

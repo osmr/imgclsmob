@@ -147,7 +147,7 @@ def get_mobilenet(version,
 
 
 def mobilenet_w1(**kwargs):
-    return get_mobilenet('orig', 1.0, **kwargs)
+    return get_mobilenet('orig', 1, **kwargs)
 
 
 def mobilenet_w3d4(**kwargs):
@@ -163,7 +163,7 @@ def mobilenet_wd4(**kwargs):
 
 
 def fdmobilenet_w1(**kwargs):
-    return get_mobilenet('fd', 1.0, **kwargs)
+    return get_mobilenet('fd', 1, **kwargs)
 
 
 def fdmobilenet_w3d4(**kwargs):

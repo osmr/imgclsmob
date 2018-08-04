@@ -414,6 +414,7 @@ def _get_model(name, **kwargs):
         'resnet12': resnet12,
         'resnet14': resnet14,
         'resnet16': resnet16,
+        'resnet18_wd4': resnet18_wd4,
 
         'resnet18': resnet18,
         'resnet34': resnet34,

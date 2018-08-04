@@ -272,6 +272,22 @@ def get_resnet(version,
                pretrained=False,
                ctx=cpu(),
                **kwargs):
+    version_split = version.split("_")
+    if len(version_split) > 1:
+        if version_split[1] == "w1":
+            width_scale = 1
+        elif version_split[1] == "w3d4":
+            width_scale = 0.75
+        elif version_split[1] == "wd2":
+            width_scale = 0.5
+        elif version_split[1] == "wd4":
+            width_scale = 0.25
+        else:
+            raise ValueError("Unsupported ResNet version {}".format(version))
+        version = version_split[0]
+    else:
+        width_scale = 1
+
     if version.endswith("b"):
         conv1_stride = False
         pure_version = version[:-1]
@@ -313,6 +329,9 @@ def get_resnet(version,
         channels = [64, 256, 512, 1024, 2048]
         bottleneck = True
 
+    if width_scale != 1:
+        channels = [int(ci * width_scale) for ci in channels]
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
@@ -342,6 +361,10 @@ def resnet16(**kwargs):
 
 def resnet18(**kwargs):
     return get_resnet('18', **kwargs)
+
+
+def resnet18_wd4(**kwargs):
+    return get_resnet('18_wd4', **kwargs)
 
 
 def resnet34(**kwargs):
@@ -389,6 +412,7 @@ def _test():
 
     models = [
         resnet18,
+        resnet18_wd4,
         resnet34,
         resnet50,
         resnet50b,

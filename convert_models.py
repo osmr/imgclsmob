@@ -86,6 +86,9 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.darknet as gl_darknet
     import gluon.models.mobilenet as gl_mobilenet
     import gluon.models.mobilenetv2 as gl_mobilenetv2
+    import gluon.models.shufflenet as gl_shufflenet
+
+    import gluon.models.shufflenet1 as gl_shufflenet1
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -134,6 +137,21 @@ def _get_model_gl(name, **kwargs):
         'mobilenetv2_wd2': gl_mobilenetv2.mobilenetv2_wd2,
         'mobilenetv2_wd4': gl_mobilenetv2.mobilenetv2_wd4,
 
+        'shufflenet1_0_g1': gl_shufflenet1.shufflenet1_0_g1,
+        'shufflenet0_25_g3': gl_shufflenet1.shufflenet0_25_g3,
+
+        'shufflenet_g1_w1': gl_shufflenet.shufflenet_g1_w1,
+        'shufflenet_g2_w1': gl_shufflenet.shufflenet_g2_w1,
+        'shufflenet_g3_w1': gl_shufflenet.shufflenet_g3_w1,
+        'shufflenet_g4_w1': gl_shufflenet.shufflenet_g4_w1,
+        'shufflenet_g8_w1': gl_shufflenet.shufflenet_g8_w1,
+        'shufflenet_g1_w3d4': gl_shufflenet.shufflenet_g1_w3d4,
+        'shufflenet_g3_w3d4': gl_shufflenet.shufflenet_g3_w3d4,
+        'shufflenet_g1_wd2': gl_shufflenet.shufflenet_g1_wd2,
+        'shufflenet_g3_wd2': gl_shufflenet.shufflenet_g3_wd2,
+        'shufflenet_g1_wd4': gl_shufflenet.shufflenet_g1_wd4,
+        'shufflenet_g3_wd4': gl_shufflenet.shufflenet_g3_wd4,
+
     }
     try:
         net = get_model(name, **kwargs)
@@ -155,6 +173,7 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.darknet as pt_darknet
     import pytorch.models.mobilenet as pt_mobilenet
     import pytorch.models.mobilenetv2 as pt_mobilenetv2
+    import pytorch.models.shufflenet as pt_shufflenet
 
     import pytorch.models.others.MobileNet as pt_oth_mobilenet
 
@@ -204,6 +223,18 @@ def _get_model_pt(name, **kwargs):
         'mobilenetv2_w3d4': pt_mobilenetv2.mobilenetv2_w3d4,
         'mobilenetv2_wd2': pt_mobilenetv2.mobilenetv2_wd2,
         'mobilenetv2_wd4': pt_mobilenetv2.mobilenetv2_wd4,
+
+        'shufflenet_g1_w1': pt_shufflenet.shufflenet_g1_w1,
+        'shufflenet_g2_w1': pt_shufflenet.shufflenet_g2_w1,
+        'shufflenet_g3_w1': pt_shufflenet.shufflenet_g3_w1,
+        'shufflenet_g4_w1': pt_shufflenet.shufflenet_g4_w1,
+        'shufflenet_g8_w1': pt_shufflenet.shufflenet_g8_w1,
+        'shufflenet_g1_w3d4': pt_shufflenet.shufflenet_g1_w3d4,
+        'shufflenet_g3_w3d4': pt_shufflenet.shufflenet_g3_w3d4,
+        'shufflenet_g1_wd2': pt_shufflenet.shufflenet_g1_wd2,
+        'shufflenet_g3_wd2': pt_shufflenet.shufflenet_g3_wd2,
+        'shufflenet_g1_wd4': pt_shufflenet.shufflenet_g1_wd4,
+        'shufflenet_g3_wd4': pt_shufflenet.shufflenet_g3_wd4,
 
         'oth_fd_mobilenet1_0': pt_oth_mobilenet.oth_fd_mobilenet1_0,
         'oth_fd_mobilenet0_75': pt_oth_mobilenet.oth_fd_mobilenet0_75,

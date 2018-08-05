@@ -21,6 +21,7 @@ from pytorch.models.preresnet import *
 from pytorch.models.squeezenet import *
 from pytorch.models.darknet import *
 from pytorch.models.mobilenet import *
+from pytorch.models.mobilenetv2 import *
 
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
@@ -314,10 +315,16 @@ def _get_model(name, **kwargs):
         'mobilenet_w3d4': mobilenet_w3d4,
         'mobilenet_wd2': mobilenet_wd2,
         'mobilenet_wd4': mobilenet_wd4,
+
         'fdmobilenet_w1': fdmobilenet_w1,
         'fdmobilenet_w3d4': fdmobilenet_w3d4,
         'fdmobilenet_wd2': fdmobilenet_wd2,
         'fdmobilenet_wd4': fdmobilenet_wd4,
+
+        'mobilenetv2_w1': mobilenetv2_w1,
+        'mobilenetv2_w3d4': mobilenetv2_w3d4,
+        'mobilenetv2_wd2': mobilenetv2_wd2,
+        'mobilenetv2_wd4': mobilenetv2_wd4,
 
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,

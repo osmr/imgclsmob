@@ -1,5 +1,5 @@
 """
-    MobileNet & FD-MobileNet.
+    MobileNet & FD-MobileNet, implemented in PyTorch.
     Original papers: 
     - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'

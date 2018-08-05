@@ -85,6 +85,7 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.squeezenet as gl_squeezenet
     import gluon.models.darknet as gl_darknet
     import gluon.models.mobilenet as gl_mobilenet
+    import gluon.models.mobilenetv2 as gl_mobilenetv2
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -122,10 +123,17 @@ def _get_model_gl(name, **kwargs):
         'mobilenet_w3d4': gl_mobilenet.mobilenet_w3d4,
         'mobilenet_wd2': gl_mobilenet.mobilenet_wd2,
         'mobilenet_wd4': gl_mobilenet.mobilenet_wd4,
+
         'fdmobilenet_w1': gl_mobilenet.fdmobilenet_w1,
         'fdmobilenet_w3d4': gl_mobilenet.fdmobilenet_w3d4,
         'fdmobilenet_wd2': gl_mobilenet.fdmobilenet_wd2,
         'fdmobilenet_wd4': gl_mobilenet.fdmobilenet_wd4,
+
+        'mobilenetv2_w1': gl_mobilenetv2.mobilenetv2_w1,
+        'mobilenetv2_w3d4': gl_mobilenetv2.mobilenetv2_w3d4,
+        'mobilenetv2_wd2': gl_mobilenetv2.mobilenetv2_wd2,
+        'mobilenetv2_wd4': gl_mobilenetv2.mobilenetv2_wd4,
+
     }
     try:
         net = get_model(name, **kwargs)
@@ -146,6 +154,7 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.squeezenet as pt_squeezenet
     import pytorch.models.darknet as pt_darknet
     import pytorch.models.mobilenet as pt_mobilenet
+    import pytorch.models.mobilenetv2 as pt_mobilenetv2
 
     import pytorch.models.others.MobileNet as pt_oth_mobilenet
 
@@ -185,10 +194,16 @@ def _get_model_pt(name, **kwargs):
         'mobilenet_w3d4': pt_mobilenet.mobilenet_w3d4,
         'mobilenet_wd2': pt_mobilenet.mobilenet_wd2,
         'mobilenet_wd4': pt_mobilenet.mobilenet_wd4,
+
         'fdmobilenet_w1': pt_mobilenet.fdmobilenet_w1,
         'fdmobilenet_w3d4': pt_mobilenet.fdmobilenet_w3d4,
         'fdmobilenet_wd2': pt_mobilenet.fdmobilenet_wd2,
         'fdmobilenet_wd4': pt_mobilenet.fdmobilenet_wd4,
+
+        'mobilenetv2_w1': pt_mobilenetv2.mobilenetv2_w1,
+        'mobilenetv2_w3d4': pt_mobilenetv2.mobilenetv2_w3d4,
+        'mobilenetv2_wd2': pt_mobilenetv2.mobilenetv2_wd2,
+        'mobilenetv2_wd4': pt_mobilenetv2.mobilenetv2_wd4,
 
         'oth_fd_mobilenet1_0': pt_oth_mobilenet.oth_fd_mobilenet1_0,
         'oth_fd_mobilenet0_75': pt_oth_mobilenet.oth_fd_mobilenet0_75,

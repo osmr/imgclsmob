@@ -103,6 +103,7 @@ class MobileNet(nn.Module):
 
         self._init_params()
 
+
     def _init_params(self):
         for name, module in self.named_modules():
             if 'dw_conv.conv' in name:

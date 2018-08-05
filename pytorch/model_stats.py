@@ -42,7 +42,11 @@ def measure_layer(layer, x):
                 layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['ReLU', 'LeakyReLU', 'ReLU6']:
+    elif type_name in ['ChannelShuffle']:  # NB: Fake!
+        delta_ops = x.numel()
+        delta_params = get_layer_param(layer)
+
+    elif type_name in ['ReLU', 'LeakyReLU', 'ReLU6']:  # NB: Maybe bake!
         delta_ops = x.numel()
         delta_params = get_layer_param(layer)
 

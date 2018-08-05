@@ -377,7 +377,8 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    net = mobilenet0_25()
+    #net = mobilenet0_25()
+    net = mobilenet_v2_0_25()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)

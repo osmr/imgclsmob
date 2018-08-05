@@ -24,6 +24,7 @@ from gluon.models.preresnet import *
 from gluon.models.squeezenet import *
 from gluon.models.darknet import *
 from gluon.models.mobilenet import *
+from gluon.models.mobilenetv2 import *
 
 from gluon.models.squeezenext import *
 from gluon.models.shufflenet import *
@@ -453,10 +454,16 @@ def _get_model(name, **kwargs):
         'mobilenet_w3d4': mobilenet_w3d4,
         'mobilenet_wd2': mobilenet_wd2,
         'mobilenet_wd4': mobilenet_wd4,
+
         'fdmobilenet_w1': fdmobilenet_w1,
         'fdmobilenet_w3d4': fdmobilenet_w3d4,
         'fdmobilenet_wd2': fdmobilenet_wd2,
         'fdmobilenet_wd4': fdmobilenet_wd4,
+
+        'mobilenetv2_w1': mobilenetv2_w1,
+        'mobilenetv2_w3d4': mobilenetv2_w3d4,
+        'mobilenetv2_wd2': mobilenetv2_wd2,
+        'mobilenetv2_wd4': mobilenetv2_wd4,
 
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,

@@ -5,10 +5,51 @@
 
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .shufflenet import ShuffleInitBlock, ChannelShuffle, depthwise_conv3x3, group_conv1x1
 
 
 TESTING = False
+
+
+def depthwise_conv3x3(channels,
+                      strides):
+    return nn.Conv2D(
+        channels=channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=channels,
+        use_bias=False,
+        in_channels=channels)
+
+
+def group_conv1x1(in_channels,
+                  out_channels,
+                  groups):
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=1,
+        groups=groups,
+        use_bias=False,
+        in_channels=in_channels)
+
+
+def channel_shuffle(x,
+                    groups):
+    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+
+
+class ChannelShuffle(HybridBlock):
+
+    def __init__(self,
+                 channels,
+                 groups,
+                 **kwargs):
+        super(ChannelShuffle, self).__init__(**kwargs)
+        assert (channels % groups == 0)
+        self.groups = groups
+
+    def hybrid_forward(self, F, x):
+        return channel_shuffle(x, self.groups)
 
 
 def conv1x1(in_channels,
@@ -115,6 +156,36 @@ class MEModule(HybridBlock):
         else:
             x = x + identity
         x = self.activ(x)
+        return x
+
+
+class ShuffleInitBlock(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 **kwargs):
+        super(ShuffleInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=3,
+                strides=2,
+                padding=1,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.activ = nn.Activation('relu')
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.activ(x)
+        x = self.pool(x)
         return x
 
 

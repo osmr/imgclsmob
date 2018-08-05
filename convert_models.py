@@ -11,7 +11,7 @@ from common.env_stats import get_env_stats
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch)',
+    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/MXNet)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--src-fwk',
@@ -322,6 +322,24 @@ def prepare_model_pt(model_name,
     return net
 
 
+def prepare_model_mx(pretrained_model_file_path,
+                     ctx):
+
+    # net = mx.mod.Module.load(
+    #     prefix=pretrained_model_file_path,
+    #     epoch=0,
+    #     context=[ctx],
+    #     label_names=[])
+    # net.bind(
+    #     data_shapes=[('data', (1, 3, 224, 224))],
+    #     label_shapes=None,
+    #     for_training=False)
+
+    sym, arg_params, aux_params = mx.model.load_checkpoint(pretrained_model_file_path, 0)
+
+    return sym, arg_params, aux_params
+
+
 def main():
     args = parse_args()
 
@@ -370,6 +388,11 @@ def main():
         src_param_keys = list(src_params.keys())
         if args.dst_fwk != "pytorch":
             src_param_keys = [key for key in src_param_keys if not key.endswith("num_batches_tracked")]
+    elif args.src_fwk == "mxnet":
+        src_sym, src_arg_params, src_aux_params = prepare_model_mx(
+            pretrained_model_file_path=args.src_params,
+            ctx=ctx)
+        src_param_keys = list(src_arg_params.keys())
     else:
         raise ValueError("Unsupported src fwk: {}".format(args.src_fwk))
 
@@ -423,6 +446,59 @@ def main():
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             dst_params[dst_key]._load_init(mx.nd.array(src_params[src_param_keys[i]].numpy(), ctx), ctx)
+        dst_net.save_parameters(args.dst_params)
+    elif args.src_fwk == "mxnet" and args.dst_fwk == "gluon":
+
+        dst_params['features.0.bn.beta']._load_init(src_arg_params['bn0_beta'], ctx)
+        dst_params['features.0.bn.gamma']._load_init(src_arg_params['bn0_gamma'], ctx)
+        dst_params['features.5.bn.beta']._load_init(src_arg_params['bn1_beta'], ctx)
+        dst_params['features.5.bn.gamma']._load_init(src_arg_params['bn1_gamma'], ctx)
+        dst_params['output.1.bias']._load_init(src_arg_params['fc1_bias'], ctx)
+        dst_params['output.1.weight']._load_init(src_arg_params['fc1_weight'], ctx)
+        dst_params['features.0.conv.weight']._load_init(src_arg_params['conv0_weight'], ctx)
+
+        src_param_keys = [key for key in src_param_keys if (key.startswith("stage"))]
+
+        dst_param_keys = [key for key in dst_param_keys if (not key.endswith("running_mean") and
+                                                            not key.endswith("running_var") and
+                                                            key.startswith("features") and
+                                                            not key.startswith("features.0") and
+                                                            not key.startswith("features.5"))]
+
+        # src_param_keys = [key.replace('stage', 'features.') for key in src_param_keys]
+        # src_param_keys = [key.replace('_', '.') for key in src_param_keys]
+
+        src_param_keys = [key.replace('_conv1_', '.conv1.conv.') for key in src_param_keys]
+        src_param_keys = [key.replace('_conv2_', '.conv2.conv.') for key in src_param_keys]
+        src_param_keys = [key.replace('_conv3_', '.conv3.conv.') for key in src_param_keys]
+        src_param_keys = [key.replace('_bn1_', '.conv1.bn.') for key in src_param_keys]
+        src_param_keys = [key.replace('_bn2_', '.conv2.bn.') for key in src_param_keys]
+        src_param_keys = [key.replace('_bn3_', '.conv3.bn.') for key in src_param_keys]
+
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        dst_param_keys.sort()
+        dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        src_param_keys = [key.replace('.conv1.conv.', '_conv1_') for key in src_param_keys]
+        src_param_keys = [key.replace('.conv2.conv.', '_conv2_') for key in src_param_keys]
+        src_param_keys = [key.replace('.conv3.conv.', '_conv3_') for key in src_param_keys]
+        src_param_keys = [key.replace('.conv1.bn.', '_bn1_') for key in src_param_keys]
+        src_param_keys = [key.replace('.conv2.bn.', '_bn2_') for key in src_param_keys]
+        src_param_keys = [key.replace('.conv3.bn.', '_bn3_') for key in src_param_keys]
+
+        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            dst_params[dst_key]._load_init(src_arg_params[src_key], ctx)
+
+        for param in dst_net.collect_params().values():
+            if param._data is not None:
+                continue
+            print('param={}'.format(param))
+            param.initialize(ctx=ctx)
+
         dst_net.save_parameters(args.dst_params)
 
     logging.info('Convert {}-model {} into {}-model {}'.format(

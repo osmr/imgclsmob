@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-from .common import channel_shuffle
+from common import channel_shuffle
 
 __all__ = [
     'shufflenet_group_1',
@@ -174,8 +174,17 @@ def oth_shufflenet1_0_g8(**kwargs):
     return shufflenet_group_8({"init_mul": 1, 'width_mul': 1})
 
 
+def oth_shufflenet0_5_g1(**kwargs):
+    return shufflenet_group_1({"init_mul": 0.5, 'width_mul': 0.5})
+
+
 def oth_shufflenet0_5_g3(**kwargs):
     return shufflenet_group_3({"init_mul": 0.5, 'width_mul': 0.5})
+
+
+def oth_shufflenet0_75_g2(**kwargs):
+    return shufflenet_group_2({"init_mul": 0.75, 'width_mul': 0.75})
+
 
 
 if __name__ == "__main__":
@@ -183,7 +192,7 @@ if __name__ == "__main__":
     import torch
     from torch.autograd import Variable
 
-    net = oth_shufflenet1_0_g2(num_classes=1000)
+    net = oth_shufflenet0_75_g2(num_classes=1000)
 
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)

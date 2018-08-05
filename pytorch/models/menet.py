@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from .shufflenet import ShuffleInitBlock, ChannelShuffle, depthwise_conv3x3, group_conv1x1
+from .shufflenet1 import ShuffleInitBlock, ChannelShuffle, depthwise_conv3x3, group_conv1x1
 
 
 def conv1x1(in_channels,

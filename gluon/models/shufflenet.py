@@ -3,7 +3,6 @@
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices'
 """
 
-import numpy as np
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -48,41 +47,9 @@ class ChannelShuffle(HybridBlock):
         super(ChannelShuffle, self).__init__(**kwargs)
         assert (channels % groups == 0)
         self.groups = groups
-        # with self.name_scope():
-        #     pass
 
     def hybrid_forward(self, F, x):
         return channel_shuffle(x, self.groups)
-
-
-class ShuffleInitBlock(HybridBlock):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 **kwargs):
-        super(ShuffleInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.pool(x)
-        return x
 
 
 class ShuffleUnit(HybridBlock):
@@ -120,159 +87,183 @@ class ShuffleUnit(HybridBlock):
                 groups=groups)
             self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
             if downsample:
-                self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
+                self.avgpool = nn.AvgPool2D(
+                    pool_size=3,
+                    strides=2,
+                    padding=1)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
         identity = x
-        out = self.activ(self.compress_bn1(self.compress_conv1(x)))
-        out = self.c_shuffle(out)
-        out = self.dw_bn2(self.dw_conv2(out))
-        out = self.expand_bn3(self.expand_conv3(out))
+        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
+        x = self.c_shuffle(x)
+        x = self.dw_bn2(self.dw_conv2(x))
+        x = self.expand_bn3(self.expand_conv3(x))
         if self.downsample:
             identity = self.avgpool(identity)
-            out = F.concat(out, identity, dim=1)
+            x = F.concat(x, identity, dim=1)
         else:
-            out = out + identity
-        out = self.activ(out)
-        return out
+            x = x + identity
+        x = self.activ(x)
+        return x
+
+
+class ShuffleInitBlock(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 **kwargs):
+        super(ShuffleInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=3,
+                strides=2,
+                padding=1,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.activ = nn.Activation('relu')
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.activ(x)
+        x = self.pool(x)
+        return x
 
 
 class ShuffleNet(HybridBlock):
 
     def __init__(self,
+                 channels,
+                 init_block_channels,
                  groups,
-                 stage_out_channels,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(ShuffleNet, self).__init__(**kwargs)
-        stage_num_blocks = [4, 8, 4]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ShuffleInitBlock(
                 in_channels=in_channels,
-                out_channels=stage_out_channels[0]))
-
-            for i in range(len(stage_num_blocks)):
-                stage = nn.HybridSequential(prefix='')
-                in_channels_i = stage_out_channels[i]
-                out_channels_i = stage_out_channels[i + 1]
-                for j in range(stage_num_blocks[i]):
-                    stage.add(ShuffleUnit(
-                        in_channels=(in_channels_i if j == 0 else out_channels_i),
-                        out_channels=out_channels_i,
-                        groups=groups,
-                        downsample=(j == 0),
-                        ignore_group=(i == 0 and j == 0)))
+                out_channels=init_block_channels))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        downsample = (j == 0)
+                        ignore_group = (i == 0) and (j == 0)
+                        stage.add(ShuffleUnit(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            groups=groups,
+                            downsample=downsample,
+                            ignore_group=ignore_group))
+                        in_channels = out_channels
                 self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-            self.features.add(nn.AvgPool2D(pool_size=7))
-            self.features.add(nn.Flatten())
-
-            self.output = nn.Dense(
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
                 units=classes,
-                in_units=stage_out_channels[-1])
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-
         x = self.features(x)
-        assert ((not TESTING) or x.shape == (1, 800))
         x = self.output(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
         return x
 
 
-def get_shufflenet(scale,
-                   groups,
+def get_shufflenet(groups,
+                   width_scale,
                    pretrained=False,
                    ctx=cpu(),
                    **kwargs):
+    init_block_channels = 24
+    layers = [4, 8, 4]
+
     if groups == 1:
-        stage_out_channels = [24, 144, 288, 576]
+        channels_per_layers = [144, 288, 576]
     elif groups == 2:
-        stage_out_channels = [24, 200, 400, 800]
+        channels_per_layers = [200, 400, 800]
     elif groups == 3:
-        stage_out_channels = [24, 240, 480, 960]
+        channels_per_layers = [240, 480, 960]
     elif groups == 4:
-        stage_out_channels = [24, 272, 544, 1088]
+        channels_per_layers = [272, 544, 1088]
     elif groups == 8:
-        stage_out_channels = [24, 384, 768, 1536]
+        channels_per_layers = [384, 768, 1536]
     else:
         raise ValueError("The {} of groups is not supported".format(groups))
-    stage_out_channels = (np.array(stage_out_channels) * scale).astype(np.int)
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+
+    if width_scale != 1:
+        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+        init_block_channels = int(init_block_channels * width_scale)
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = ShuffleNet(
+    return ShuffleNet(
+        channels=channels,
+        init_block_channels=init_block_channels,
         groups=groups,
-        stage_out_channels=stage_out_channels,
         **kwargs)
-    return net
 
 
-def shufflenet1_0_g1(**kwargs):
-    return get_shufflenet(1.0, 1, **kwargs)
+def shufflenet_g1_w1(**kwargs):
+    return get_shufflenet(1, 1.0, **kwargs)
 
 
-def shufflenet1_0_g2(**kwargs):
-    return get_shufflenet(1.0, 2, **kwargs)
+def shufflenet_g2_w1(**kwargs):
+    return get_shufflenet(2, 1.0, **kwargs)
 
 
-def shufflenet1_0_g3(**kwargs):
-    return get_shufflenet(1.0, 3, **kwargs)
+def shufflenet_g3_w1(**kwargs):
+    return get_shufflenet(3, 1.0, **kwargs)
 
 
-def shufflenet1_0_g4(**kwargs):
-    return get_shufflenet(1.0, 4, **kwargs)
+def shufflenet_g4_w1(**kwargs):
+    return get_shufflenet(4, 1.0, **kwargs)
 
 
-def shufflenet1_0_g8(**kwargs):
-    return get_shufflenet(1.0, 8, **kwargs)
+def shufflenet_g8_w1(**kwargs):
+    return get_shufflenet(8, 1.0, **kwargs)
 
 
-def shufflenet0_5_g1(**kwargs):
-    return get_shufflenet(0.5, 1, **kwargs)
+def shufflenet_g1_w3d4(**kwargs):
+    return get_shufflenet(1, 0.75, **kwargs)
 
 
-# def shufflenet0_5_g2(**kwargs):
-#     return get_shufflenet(0.5, 2, **kwargs)
+def shufflenet_g3_w3d4(**kwargs):
+    return get_shufflenet(3, 0.75, **kwargs)
 
 
-def shufflenet0_5_g3(**kwargs):
-    return get_shufflenet(0.5, 3, **kwargs)
+def shufflenet_g1_wd2(**kwargs):
+    return get_shufflenet(1, 0.5, **kwargs)
 
 
-# def shufflenet0_5_g4(**kwargs):
-#     return get_shufflenet(0.5, 4, **kwargs)
+def shufflenet_g3_wd2(**kwargs):
+    return get_shufflenet(3, 0.5, **kwargs)
 
 
-# def shufflenet0_5_g8(**kwargs):
-#     return get_shufflenet(0.5, 8, **kwargs)
+def shufflenet_g1_wd4(**kwargs):
+    return get_shufflenet(1, 0.25, **kwargs)
 
 
-def shufflenet0_25_g1(**kwargs):
-    return get_shufflenet(0.25, 1, **kwargs)
-
-
-# def shufflenet0_25_g2(**kwargs):
-#     return get_shufflenet(0.25, 2, **kwargs)
-
-
-def shufflenet0_25_g3(**kwargs):
-    return get_shufflenet(0.25, 3, **kwargs)
-
-
-# def shufflenet0_25_g4(**kwargs):
-#     return get_shufflenet(0.25, 4, **kwargs)
-
-
-# def shufflenet0_25_g8(**kwargs):
-#     return get_shufflenet(0.25, 8, **kwargs)
+def shufflenet_g3_wd4(**kwargs):
+    return get_shufflenet(3, 0.25, **kwargs)
 
 
 def _test():
@@ -282,22 +273,48 @@ def _test():
     global TESTING
     TESTING = True
 
-    net = shufflenet1_0_g2()
+    models = [
+        shufflenet_g1_w1,
+        shufflenet_g2_w1,
+        shufflenet_g3_w1,
+        shufflenet_g4_w1,
+        shufflenet_g8_w1,
+        shufflenet_g1_w3d4,
+        shufflenet_g3_w3d4,
+        shufflenet_g1_wd2,
+        shufflenet_g3_wd2,
+        shufflenet_g1_wd4,
+        shufflenet_g3_wd4,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (weight_count == 1733848)
+        net = model()
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        assert (model != shufflenet_g1_w1 or weight_count == 1531936)
+        assert (model != shufflenet_g2_w1 or weight_count == 1733848)
+        assert (model != shufflenet_g3_w1 or weight_count == 1865728)
+        assert (model != shufflenet_g4_w1 or weight_count == 1968344)
+        assert (model != shufflenet_g8_w1 or weight_count == 2434768)
+        assert (model != shufflenet_g1_w3d4 or weight_count == 975214)
+        assert (model != shufflenet_g3_w3d4 or weight_count == 1238266)
+        assert (model != shufflenet_g1_wd2 or weight_count == 534484)
+        assert (model != shufflenet_g3_wd2 or weight_count == 718324)
+        assert (model != shufflenet_g1_wd4 or weight_count == 209746)
+        assert (model != shufflenet_g3_wd4 or weight_count == 305902)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

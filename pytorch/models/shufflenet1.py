@@ -221,7 +221,7 @@ def get_shufflenet(scale,
     return net
 
 
-def shufflenet1_0_g1(**kwargs):
+def shufflenet_g1_w1(**kwargs):
     return get_shufflenet(1.0, 1, **kwargs)
 
 

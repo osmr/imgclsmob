@@ -23,7 +23,7 @@ from pytorch.models.darknet import *
 from pytorch.models.mobilenet import *
 from pytorch.models.mobilenetv2 import *
 
-from pytorch.models.shufflenet import *
+from pytorch.models.shufflenet1 import *
 from pytorch.models.menet import *
 
 from pytorch.models.others.MobileNet import *
@@ -345,7 +345,7 @@ def _get_model(name, **kwargs):
         'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
         'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
 
-        'shufflenet1_0_g1': shufflenet1_0_g1,
+        'shufflenet1_0_g1': shufflenet_g1_w1,
         'shufflenet1_0_g2': shufflenet1_0_g2,
         'shufflenet1_0_g3': shufflenet1_0_g3,
         'shufflenet1_0_g4': shufflenet1_0_g4,

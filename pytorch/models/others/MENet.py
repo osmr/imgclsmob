@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from collections import OrderedDict
-from .common import channel_shuffle
+from common import channel_shuffle
 
 __all__ = [
     'menet',
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     import torch
     from torch.autograd import Variable
 
-    net = oth_menet108_8x1_g3(num_classes=1000)
+    net = oth_menet456_24x1_g3(num_classes=1000)
 
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)
@@ -224,4 +224,4 @@ if __name__ == "__main__":
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())
-    #print("weight_count={}".format(weight_count))
+    print("weight_count={}".format(weight_count))

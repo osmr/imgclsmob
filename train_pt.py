@@ -24,7 +24,7 @@ from pytorch.models.mobilenet import *
 from pytorch.models.mobilenetv2 import *
 from pytorch.models.shufflenet import *
 
-from pytorch.models.menet import *
+from pytorch.models.menet1 import *
 
 from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *

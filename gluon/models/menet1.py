@@ -192,95 +192,85 @@ class ShuffleInitBlock(HybridBlock):
 class MENet(HybridBlock):
 
     def __init__(self,
-                 channels,
-                 init_block_channels,
+                 block_channels,
                  side_channels,
                  groups,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(MENet, self).__init__(**kwargs)
+        block_layers = [4, 8, 4]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ShuffleInitBlock(
                 in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        downsample = (j == 0)
-                        ignore_group = (i == 0) and (j == 0)
-                        stage.add(MEModule(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            side_channels=side_channels,
-                            groups=groups,
-                            downsample=downsample,
-                            ignore_group=ignore_group))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+                out_channels=block_channels[0]))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
+            for i in range(len(block_channels) - 1):
+                stage = nn.HybridSequential(prefix='')
+                in_channels_i = block_channels[i]
+                out_channels_i = block_channels[i + 1]
+                for j in range(block_layers[i]):
+                    stage.add(MEModule(
+                        in_channels=(in_channels_i if j == 0 else out_channels_i),
+                        out_channels=out_channels_i,
+                        side_channels=side_channels,
+                        groups=groups,
+                        downsample=(j == 0),
+                        ignore_group=(i == 0 and j == 0)))
+                self.features.add(stage)
+
+            self.features.add(nn.AvgPool2D(pool_size=7))
+            self.features.add(nn.Flatten())
+
+            self.output = nn.Dense(
                 units=classes,
-                in_units=in_channels))
+                in_units=block_channels[-1])
 
     def hybrid_forward(self, F, x):
+        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
+        assert ((not TESTING) or self.features[0:1](x).shape == (1, 12, 56, 56))
+        assert ((not TESTING) or self.features[0:2](x).shape == (1, 108, 28, 28))
+
         x = self.features(x)
+        #assert ((not TESTING) or x.shape == (1, 432, 7, 7))
         x = self.output(x)
+        assert ((not TESTING) or x.shape == (1, 1000))
+
         return x
 
 
-def get_menet(first_stage_channels,
+def get_menet(first_block_channels,
               side_channels,
               groups,
               pretrained=False,
               ctx=cpu(),
               **kwargs):
-    layers = [4, 8, 4]
-
-    if first_stage_channels == 108:
-        init_block_channels = 12
-        channels_per_layers = [108, 216, 432]
-    elif first_stage_channels == 128:
-        init_block_channels = 12
-        channels_per_layers = [128, 256, 512]
-    elif first_stage_channels == 160:
-        init_block_channels = 16
-        channels_per_layers = [160, 320, 640]
-    elif first_stage_channels == 228:
-        init_block_channels = 24
-        channels_per_layers = [228, 456, 912]
-    elif first_stage_channels == 256:
-        init_block_channels = 24
-        channels_per_layers = [256, 512, 1024]
-    elif first_stage_channels == 348:
-        init_block_channels = 24
-        channels_per_layers = [348, 696, 1392]
-    elif first_stage_channels == 352:
-        init_block_channels = 24
-        channels_per_layers = [352, 704, 1408]
-    elif first_stage_channels == 456:
-        init_block_channels = 48
-        channels_per_layers = [456, 912, 1824]
+    if first_block_channels == 108:
+        block_channels = [12, 108, 216, 432]
+    elif first_block_channels == 128:
+        block_channels = [12, 128, 256, 512]
+    elif first_block_channels == 160:
+        block_channels = [16, 160, 320, 640]
+    elif first_block_channels == 228:
+        block_channels = [24, 228, 456, 912]
+    elif first_block_channels == 256:
+        block_channels = [24, 256, 512, 1024]
+    elif first_block_channels == 348:
+        block_channels = [24, 348, 696, 1392]
+    elif first_block_channels == 352:
+        block_channels = [24, 352, 704, 1408]
+    elif first_block_channels == 456:
+        block_channels = [48, 456, 912, 1824]
     else:
-        raise ValueError("The {} of `first_stage_channels` is not supported".format(first_stage_channels))
-
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+        raise ValueError("The {} of `first_block_channels` is not supported".format(first_block_channels))
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     net = MENet(
-        channels=channels,
-        init_block_channels=init_block_channels,
+        block_channels=block_channels,
         side_channels=side_channels,
         groups=groups,
         **kwargs)
@@ -326,42 +316,22 @@ def _test():
     global TESTING
     TESTING = True
 
-    models = [
-        menet108_8x1_g3,
-        menet128_8x1_g4,
-        menet160_8x1_g8,
-        menet228_12x1_g3,
-        menet256_12x1_g4,
-        menet348_12x1_g3,
-        menet352_12x1_g8,
-        menet456_24x1_g3,
-    ]
+    net = menet108_8x1_g3()
 
-    for model in models:
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
 
-        net = model()
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    assert (weight_count == 654516)
 
-        ctx = mx.cpu()
-        net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
-        assert (model != menet108_8x1_g3 or weight_count == 654516)
-        assert (model != menet128_8x1_g4 or weight_count == 750796)
-        assert (model != menet160_8x1_g8 or weight_count == 850120)
-        assert (model != menet228_12x1_g3 or weight_count == 1806568)
-        assert (model != menet256_12x1_g4 or weight_count == 1888240)
-        assert (model != menet348_12x1_g3 or weight_count == 3368128)
-        assert (model != menet352_12x1_g8 or weight_count == 2272872)
-        assert (model != menet456_24x1_g3 or weight_count == 5304784)
-
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-        y = net(x)
-        assert (y.shape == (1, 1000))
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import subprocess
 import json
 
@@ -87,8 +88,11 @@ def get_pyenv_info(packages,
     if git:
         # set git revision of the code
         try:
-            out_bytes = subprocess.check_output(
-                ['cd {0}; git log -n 1'.format(pyenv_info['pwd'])], shell=True)
+            if os.name == 'nt':
+                command = 'cmd /V /C "cd {} && git log -n 1"'.format(pyenv_info['pwd'])
+            else:
+                command = ['cd {}; git log -n 1'.format(pyenv_info['pwd'])]
+            out_bytes = subprocess.check_output(command, shell=True)
             out_text = out_bytes.decode('utf-8')
         except:
             out_text = 'unknown'

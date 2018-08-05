@@ -381,7 +381,7 @@ def main():
             f=args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            dst_params[dst_key]._load_init(src_params[src_param_keys[i]].numpy(), ctx)
+            dst_params[dst_key]._load_init(mx.nd.array(src_params[src_param_keys[i]].numpy(), ctx), ctx)
         dst_net.save_parameters(args.dst_params)
 
     logging.info('Convert {}-model {} into {}-model {}'.format(

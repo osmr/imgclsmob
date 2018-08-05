@@ -88,8 +88,6 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.mobilenetv2 as gl_mobilenetv2
     import gluon.models.shufflenet as gl_shufflenet
 
-    import gluon.models.shufflenet1 as gl_shufflenet1
-
     models = {
         'resnet18': gl_resnet.resnet18,
         'resnet34': gl_resnet.resnet34,
@@ -136,9 +134,6 @@ def _get_model_gl(name, **kwargs):
         'mobilenetv2_w3d4': gl_mobilenetv2.mobilenetv2_w3d4,
         'mobilenetv2_wd2': gl_mobilenetv2.mobilenetv2_wd2,
         'mobilenetv2_wd4': gl_mobilenetv2.mobilenetv2_wd4,
-
-        'shufflenet1_0_g1': gl_shufflenet1.shufflenet1_0_g1,
-        'shufflenet0_25_g3': gl_shufflenet1.shufflenet0_25_g3,
 
         'shufflenet_g1_w1': gl_shufflenet.shufflenet_g1_w1,
         'shufflenet_g2_w1': gl_shufflenet.shufflenet_g2_w1,

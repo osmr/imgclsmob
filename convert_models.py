@@ -87,6 +87,8 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.mobilenet as gl_mobilenet
     import gluon.models.mobilenetv2 as gl_mobilenetv2
     import gluon.models.shufflenet as gl_shufflenet
+    import gluon.models.menet as gl_menet
+    import gluon.models.menet1 as gl_meneta
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -147,6 +149,18 @@ def _get_model_gl(name, **kwargs):
         'shufflenet_g1_wd4': gl_shufflenet.shufflenet_g1_wd4,
         'shufflenet_g3_wd4': gl_shufflenet.shufflenet_g3_wd4,
 
+        'menet108_8x1_g3': gl_menet.menet108_8x1_g3,
+        'menet128_8x1_g4': gl_menet.menet128_8x1_g4,
+        'menet160_8x1_g8': gl_menet.menet160_8x1_g8,
+        'menet228_12x1_g3': gl_menet.menet228_12x1_g3,
+        'menet256_12x1_g4': gl_menet.menet256_12x1_g4,
+        'menet348_12x1_g3': gl_menet.menet348_12x1_g3,
+        'menet352_12x1_g8': gl_menet.menet352_12x1_g8,
+        'menet456_24x1_g3': gl_menet.menet456_24x1_g3,
+
+        'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
+        'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
+        'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
     }
     try:
         net = get_model(name, **kwargs)
@@ -169,8 +183,10 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.mobilenet as pt_mobilenet
     import pytorch.models.mobilenetv2 as pt_mobilenetv2
     import pytorch.models.shufflenet as pt_shufflenet
+    import pytorch.models.menet as pt_menet
 
     import pytorch.models.others.MobileNet as pt_oth_mobilenet
+    import pytorch.models.others.MENet as pt_oth_menet
 
     slk_models = {
         'resnet18': pt_resnet.resnet18,
@@ -231,10 +247,28 @@ def _get_model_pt(name, **kwargs):
         'shufflenet_g1_wd4': pt_shufflenet.shufflenet_g1_wd4,
         'shufflenet_g3_wd4': pt_shufflenet.shufflenet_g3_wd4,
 
+        'menet108_8x1_g3': pt_menet.menet108_8x1_g3,
+        'menet128_8x1_g4': pt_menet.menet128_8x1_g4,
+        'menet160_8x1_g8': pt_menet.menet160_8x1_g8,
+        'menet228_12x1_g3': pt_menet.menet228_12x1_g3,
+        'menet256_12x1_g4': pt_menet.menet256_12x1_g4,
+        'menet348_12x1_g3': pt_menet.menet348_12x1_g3,
+        'menet352_12x1_g8': pt_menet.menet352_12x1_g8,
+        'menet456_24x1_g3': pt_menet.menet456_24x1_g3,
+
         'oth_fd_mobilenet1_0': pt_oth_mobilenet.oth_fd_mobilenet1_0,
         'oth_fd_mobilenet0_75': pt_oth_mobilenet.oth_fd_mobilenet0_75,
         'oth_fd_mobilenet0_5': pt_oth_mobilenet.oth_fd_mobilenet0_5,
         'oth_fd_mobilenet0_25': pt_oth_mobilenet.oth_fd_mobilenet0_25,
+
+        'oth_menet108_8x1_g3': pt_oth_menet.oth_menet108_8x1_g3,
+        'oth_menet128_8x1_g4': pt_oth_menet.oth_menet128_8x1_g4,
+        'oth_menet160_8x1_g8': pt_oth_menet.oth_menet160_8x1_g8,
+        'oth_menet228_12x1_g3': pt_oth_menet.oth_menet228_12x1_g3,
+        'oth_menet256_12x1_g4': pt_oth_menet.oth_menet256_12x1_g4,
+        'oth_menet348_12x1_g3': pt_oth_menet.oth_menet348_12x1_g3,
+        'oth_menet352_12x1_g8': pt_oth_menet.oth_menet352_12x1_g8,
+        'oth_menet456_24x1_g3': pt_oth_menet.oth_menet456_24x1_g3,
     }
     try:
         net = models.__dict__[name](**kwargs)

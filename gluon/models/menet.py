@@ -278,13 +278,12 @@ def get_menet(first_stage_channels,
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = MENet(
+    return MENet(
         channels=channels,
         init_block_channels=init_block_channels,
         side_channels=side_channels,
         groups=groups,
         **kwargs)
-    return net
 
 
 def menet108_8x1_g3(**kwargs):

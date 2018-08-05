@@ -23,8 +23,7 @@ from pytorch.models.darknet import *
 from pytorch.models.mobilenet import *
 from pytorch.models.mobilenetv2 import *
 from pytorch.models.shufflenet import *
-
-from pytorch.models.menet1 import *
+from pytorch.models.menet import *
 
 from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *
@@ -338,6 +337,15 @@ def _get_model(name, **kwargs):
         'shufflenet_g1_wd4': shufflenet_g1_wd4,
         'shufflenet_g3_wd4': shufflenet_g3_wd4,
 
+        'menet108_8x1_g3': menet108_8x1_g3,
+        'menet128_8x1_g4': menet128_8x1_g4,
+        'menet160_8x1_g8': menet160_8x1_g8,
+        'menet228_12x1_g3': menet228_12x1_g3,
+        'menet256_12x1_g4': menet256_12x1_g4,
+        'menet348_12x1_g3': menet348_12x1_g3,
+        'menet352_12x1_g8': menet352_12x1_g8,
+        'menet456_24x1_g3': menet456_24x1_g3,
+
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,
         'oth_mobilenet0_5': oth_mobilenet0_5,
@@ -356,15 +364,6 @@ def _get_model(name, **kwargs):
         'oth_menet348_12x1_g3': oth_menet348_12x1_g3,
         'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
         'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
-
-        'menet108_8x1_g3': menet108_8x1_g3,
-        'menet128_8x1_g4': menet128_8x1_g4,
-        'menet160_8x1_g8': menet160_8x1_g8,
-        'menet228_12x1_g3': menet228_12x1_g3,
-        'menet256_12x1_g4': menet256_12x1_g4,
-        'menet348_12x1_g3': menet348_12x1_g3,
-        'menet352_12x1_g8': menet352_12x1_g8,
-        'menet456_24x1_g3': menet456_24x1_g3,
     }
     try:
         net = models.__dict__[name](**kwargs)

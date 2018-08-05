@@ -26,9 +26,9 @@ from gluon.models.darknet import *
 from gluon.models.mobilenet import *
 from gluon.models.mobilenetv2 import *
 from gluon.models.shufflenet import *
+from gluon.models.menet import *
 
 from gluon.models.squeezenext import *
-from gluon.models.menet import *
 from gluon.models.nasnet import *
 
 
@@ -477,15 +477,6 @@ def _get_model(name, **kwargs):
         'shufflenet_g1_wd4': shufflenet_g1_wd4,
         'shufflenet_g3_wd4': shufflenet_g3_wd4,
 
-        'sqnxt23_1_0': sqnxt23_1_0,
-        'sqnxt23_1_5': sqnxt23_1_5,
-        'sqnxt23_2_0': sqnxt23_2_0,
-        'sqnxt23v5_1_0': sqnxt23v5_1_0,
-        'sqnxt23v5_1_5': sqnxt23v5_1_5,
-        'sqnxt23v5_2_0': sqnxt23v5_2_0,
-
-        'nasnet_a_mobile': nasnet_a_mobile,
-
         'menet108_8x1_g3': menet108_8x1_g3,
         'menet128_8x1_g4': menet128_8x1_g4,
         'menet160_8x1_g8': menet160_8x1_g8,
@@ -494,6 +485,15 @@ def _get_model(name, **kwargs):
         'menet348_12x1_g3': menet348_12x1_g3,
         'menet352_12x1_g8': menet352_12x1_g8,
         'menet456_24x1_g3': menet456_24x1_g3,
+
+        'sqnxt23_1_0': sqnxt23_1_0,
+        'sqnxt23_1_5': sqnxt23_1_5,
+        'sqnxt23_2_0': sqnxt23_2_0,
+        'sqnxt23v5_1_0': sqnxt23v5_1_0,
+        'sqnxt23v5_1_5': sqnxt23v5_1_5,
+        'sqnxt23v5_2_0': sqnxt23v5_2_0,
+
+        'nasnet_a_mobile': nasnet_a_mobile,
     }
     try:
         net = get_model(name, **kwargs)

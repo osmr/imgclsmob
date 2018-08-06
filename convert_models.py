@@ -88,7 +88,7 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.mobilenetv2 as gl_mobilenetv2
     import gluon.models.shufflenet as gl_shufflenet
     import gluon.models.menet as gl_menet
-    import gluon.models.menet1 as gl_meneta
+    # import gluon.models.menet1 as gl_meneta
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -158,9 +158,9 @@ def _get_model_gl(name, **kwargs):
         'menet352_12x1_g8': gl_menet.menet352_12x1_g8,
         'menet456_24x1_g3': gl_menet.menet456_24x1_g3,
 
-        'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
-        'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
-        'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
+        # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
+        # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
+        # 'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
     }
     try:
         net = get_model(name, **kwargs)

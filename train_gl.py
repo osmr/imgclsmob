@@ -31,6 +31,7 @@ from gluon.models.squeezenext import *
 
 from gluon.models.nasnet import *
 
+from gluon.models.menet1 import *
 from gluon.models.squeezenext1 import *
 
 
@@ -504,6 +505,9 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_1_5': sqnxt23v5_1_5,
         'sqnxt23v5_2_0': sqnxt23v5_2_0,
 
+        'menet108_8x1_g3a': menet108_8x1_g3,
+        'menet128_8x1_g4a': menet128_8x1_g4,
+        'menet160_8x1_g8a': menet160_8x1_g8,
     }
     try:
         net = get_model(name, **kwargs)

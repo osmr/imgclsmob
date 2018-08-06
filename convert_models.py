@@ -89,6 +89,8 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.shufflenet as gl_shufflenet
     import gluon.models.menet as gl_menet
     # import gluon.models.menet1 as gl_meneta
+    import gluon.models.squeezenext as gl_squeezenext
+    import gluon.models.squeezenext1 as gl_squeezenext1
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -157,6 +159,20 @@ def _get_model_gl(name, **kwargs):
         'menet348_12x1_g3': gl_menet.menet348_12x1_g3,
         'menet352_12x1_g8': gl_menet.menet352_12x1_g8,
         'menet456_24x1_g3': gl_menet.menet456_24x1_g3,
+
+        'sqnxt23_w1': gl_squeezenext.sqnxt23_w1,
+        'sqnxt23_w3d2': gl_squeezenext.sqnxt23_w3d2,
+        'sqnxt23_w2': gl_squeezenext.sqnxt23_w2,
+        'sqnxt23v5_w1': gl_squeezenext.sqnxt23v5_w1,
+        'sqnxt23v5_w3d2': gl_squeezenext.sqnxt23v5_w3d2,
+        'sqnxt23v5_w2': gl_squeezenext.sqnxt23v5_w2,
+
+        'sqnxt23_1_0': gl_squeezenext1.sqnxt23_1_0,
+        'sqnxt23_1_5': gl_squeezenext1.sqnxt23_1_5,
+        'sqnxt23_2_0': gl_squeezenext1.sqnxt23_2_0,
+        'sqnxt23v5_1_0': gl_squeezenext1.sqnxt23v5_1_0,
+        'sqnxt23v5_1_5': gl_squeezenext1.sqnxt23v5_1_5,
+        'sqnxt23v5_2_0': gl_squeezenext1.sqnxt23v5_2_0,
 
         # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
         # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
@@ -463,7 +479,8 @@ def main():
     if args.src_fwk == "gluon" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             # dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)  # preresnet
-            dst_params[dst_key]._load_init(src_params[src_param_keys[i]]._data[0], ctx)
+            assert (dst_params[dst_key].shape == src_params[src_key].shape)
+            dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):

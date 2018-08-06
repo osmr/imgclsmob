@@ -33,25 +33,6 @@ def group_conv1x1(in_channels,
         in_channels=in_channels)
 
 
-def channel_shuffle(x,
-                    groups):
-    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
-
-
-class ChannelShuffle(HybridBlock):
-
-    def __init__(self,
-                 channels,
-                 groups,
-                 **kwargs):
-        super(ChannelShuffle, self).__init__(**kwargs)
-        assert (channels % groups == 0)
-        self.groups = groups
-
-    def hybrid_forward(self, F, x):
-        return channel_shuffle(x, self.groups)
-
-
 def conv1x1(in_channels,
             out_channels):
     return nn.Conv2D(
@@ -71,6 +52,25 @@ def conv3x3(in_channels,
         padding=1,
         use_bias=False,
         in_channels=in_channels)
+
+
+def channel_shuffle(x,
+                    groups):
+    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+
+
+class ChannelShuffle(HybridBlock):
+
+    def __init__(self,
+                 channels,
+                 groups,
+                 **kwargs):
+        super(ChannelShuffle, self).__init__(**kwargs)
+        assert (channels % groups == 0)
+        self.groups = groups
+
+    def hybrid_forward(self, F, x):
+        return channel_shuffle(x, self.groups)
 
 
 class MEModule(HybridBlock):
@@ -131,14 +131,17 @@ class MEModule(HybridBlock):
     def hybrid_forward(self, F, x):
         identity = x
         # pointwise group convolution 1
-        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
+        x = self.compress_conv1(x)
+        x = self.compress_bn1(x)
+        x = self.activ(x)
         x = self.c_shuffle(x)
         # merging
         y = self.s_merge_conv(x)
         y = self.s_merge_bn(y)
         y = self.activ(y)
         # depthwise convolution (bottleneck)
-        x = self.dw_bn2(self.dw_conv2(x))
+        x = self.dw_conv2(x)
+        x = self.dw_bn2(x)
         # evolution
         y = self.s_conv(y)
         y = self.s_conv_bn(y)
@@ -148,7 +151,8 @@ class MEModule(HybridBlock):
         y = F.sigmoid(y)
         x = x * y
         # pointwise group convolution 2
-        x = self.expand_bn3(self.expand_conv3(x))
+        x = self.expand_conv3(x)
+        x = self.expand_bn3(x)
         # identity branch
         if self.downsample:
             identity = self.avgpool(identity)
@@ -159,13 +163,13 @@ class MEModule(HybridBlock):
         return x
 
 
-class ShuffleInitBlock(HybridBlock):
+class MEInitBlock(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  **kwargs):
-        super(ShuffleInitBlock, self).__init__(**kwargs)
+        super(MEInitBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -203,7 +207,7 @@ class MENet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(ShuffleInitBlock(
+            self.features.add(MEInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
             in_channels = init_block_channels

@@ -467,7 +467,8 @@ def main():
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            dst_params[dst_key] = torch.from_numpy(src_params[src_param_keys[i]].numpy())
+            assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size()))
+            dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy())
         torch.save(
             obj=dst_params,
             f=args.dst_params)

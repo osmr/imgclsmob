@@ -5,7 +5,6 @@
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.init as init
 
 
@@ -32,6 +31,27 @@ def group_conv1x1(in_channels,
         out_channels=out_channels,
         kernel_size=1,
         groups=groups,
+        bias=False)
+
+
+def conv1x1(in_channels,
+            out_channels):
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        bias=False)
+
+
+def conv3x3(in_channels,
+            out_channels,
+            stride):
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=1,
         bias=False)
 
 
@@ -64,27 +84,6 @@ class ChannelShuffle(nn.Module):
 
     def forward(self, x):
         return channel_shuffle(x, self.groups)
-
-
-def conv1x1(in_channels,
-            out_channels):
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        bias=False)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            stride):
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        bias=False)
 
 
 class MEModule(nn.Module):
@@ -143,24 +142,28 @@ class MEModule(nn.Module):
     def forward(self, x):
         identity = x
         # pointwise group convolution 1
-        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
+        x = self.compress_conv1(x)
+        x = self.compress_bn1(x)
+        x = self.activ(x)
         x = self.c_shuffle(x)
         # merging
         y = self.s_merge_conv(x)
         y = self.s_merge_bn(y)
         y = self.activ(y)
         # depthwise convolution (bottleneck)
-        x = self.dw_bn2(self.dw_conv2(x))
+        x = self.dw_conv2(x)
+        x = self.dw_bn2(x)
         # evolution
         y = self.s_conv(y)
         y = self.s_conv_bn(y)
         y = self.activ(y)
         y = self.s_evolve_conv(y)
         y = self.s_evolve_bn(y)
-        y = F.sigmoid(y)
+        y = torch.sigmoid(y)
         x = x * y
         # pointwise group convolution 2
-        x = self.expand_bn3(self.expand_conv3(x))
+        x = self.expand_conv3(x)
+        x = self.expand_bn3(x)
         # identity branch
         if self.downsample:
             identity = self.avgpool(identity)
@@ -171,12 +174,12 @@ class MEModule(nn.Module):
         return x
 
 
-class ShuffleInitBlock(nn.Module):
+class MEInitBlock(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(ShuffleInitBlock, self).__init__()
+        super(MEInitBlock, self).__init__()
 
         self.conv = nn.Conv2d(
             in_channels=in_channels,
@@ -212,7 +215,7 @@ class MENet(nn.Module):
         super(MENet, self).__init__()
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ShuffleInitBlock(
+        self.features.add_module("init_block", MEInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels

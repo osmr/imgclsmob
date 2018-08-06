@@ -87,7 +87,7 @@ class ShuffleUnit(nn.Module):
         self.compress_bn1 = nn.BatchNorm2d(num_features=mid_channels)
         self.c_shuffle = ChannelShuffle(
             channels=mid_channels,
-            groups=(1 if ignore_group else groups))
+            groups=groups)
         self.dw_conv2 = depthwise_conv3x3(
             channels=mid_channels,
             stride=(2 if self.downsample else 1))

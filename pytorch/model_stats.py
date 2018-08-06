@@ -91,7 +91,10 @@ def measure_model(model, H, W):
     global count_ops, count_params
     count_ops = 0
     count_params = 0
-    data = Variable(torch.zeros(1, 3, H, W))
+
+    model.eval()
+
+    data = Variable(torch.zeros(1, 3, H, W), requires_grad=False)
 
     def should_measure(x):
         return is_leaf(x)

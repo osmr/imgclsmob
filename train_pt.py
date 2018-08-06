@@ -725,8 +725,8 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
 
-    n_flops, n_params = measure_model(net, 224, 224)
-    logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(n_params, n_params / 1e6, n_flops, n_flops / 1e6))
+    #n_flops, n_params = measure_model(net, 224, 224)
+    #logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(n_params, n_params / 1e6, n_flops, n_flops / 1e6))
 
     train_data, val_data = get_data_loader(
         data_dir=args.data_dir,

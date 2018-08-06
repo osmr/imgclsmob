@@ -27,9 +27,11 @@ from gluon.models.mobilenet import *
 from gluon.models.mobilenetv2 import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
-
 from gluon.models.squeezenext import *
+
 from gluon.models.nasnet import *
+
+from gluon.models.squeezenext1 import *
 
 
 def parse_args():
@@ -486,6 +488,15 @@ def _get_model(name, **kwargs):
         'menet352_12x1_g8': menet352_12x1_g8,
         'menet456_24x1_g3': menet456_24x1_g3,
 
+        'sqnxt23_w1': sqnxt23_w1,
+        'sqnxt23_w3d2': sqnxt23_w3d2,
+        'sqnxt23_w2': sqnxt23_w2,
+        'sqnxt23v5_w1': sqnxt23v5_w1,
+        'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+        'sqnxt23v5_w2': sqnxt23v5_w2,
+
+        'nasnet_a_mobile': nasnet_a_mobile,
+
         'sqnxt23_1_0': sqnxt23_1_0,
         'sqnxt23_1_5': sqnxt23_1_5,
         'sqnxt23_2_0': sqnxt23_2_0,
@@ -493,7 +504,6 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_1_5': sqnxt23v5_1_5,
         'sqnxt23v5_2_0': sqnxt23v5_2_0,
 
-        'nasnet_a_mobile': nasnet_a_mobile,
     }
     try:
         net = get_model(name, **kwargs)

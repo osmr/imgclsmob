@@ -110,13 +110,14 @@ def _test():
     TESTING = True
 
     model = SqNxt_23_1x
-    net = model(100)
+    net = model(num_classes=1000)
 
     net.train()
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param.size())
+    print(weight_count)
     #assert (model != squeezenet_v1_0 or weight_count == 1248424)
     #assert (model != squeezenet_v1_1 or weight_count == 1235496)
     #assert (model != squeezeresnet_v1_0 or weight_count == 1248424)

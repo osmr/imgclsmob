@@ -108,65 +108,48 @@ class SqnxtBlock(HybridBlock):
         return x
 
 
-class SqnxtInitBlock(HybridBlock):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 **kwargs):
-        super(SqnxtInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = SqnxtConv(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=7,
-                strides=2,
-                padding=1)
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                ceil_mode=True)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
 class SqueezeNext(HybridBlock):
 
     def __init__(self,
-                 channels,
-                 init_block_channels,
-                 final_block_channels,
+                 layers,
+                 width_scale,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(SqueezeNext, self).__init__(**kwargs)
+        base_in_channels = 64
+        out_channels_per_stage = [32, 64, 128, 256]
+        strides_per_stage = [1, 2, 2, 2]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(SqnxtInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(SqnxtBlock(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides))
-                        in_channels = out_channels
-                self.features.add(stage)
             self.features.add(SqnxtConv(
                 in_channels=in_channels,
-                out_channels=final_block_channels,
+                out_channels=int(width_scale * base_in_channels),
+                kernel_size=7,
+                strides=2,
+                padding=1))
+            self.features.add(nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                ceil_mode=True))
+            for i, layers_per_stage in enumerate(layers):
+                stage = nn.HybridSequential(prefix='')
+                strides_i = [strides_per_stage[i]] + [1] * (layers_per_stage - 1)
+                for j in range(len(strides_i)):
+                    stage.add(SqnxtBlock(
+                        in_channels=int(width_scale * base_in_channels),
+                        out_channels=int(width_scale * out_channels_per_stage[i]),
+                        strides=strides_i[j]))
+                    if j == 0:
+                        base_in_channels = out_channels_per_stage[i]
+                self.features.add(stage)
+
+            self.features.add(SqnxtConv(
+                in_channels=int(width_scale * base_in_channels),
+                out_channels=int(width_scale * 128),
                 kernel_size=1,
                 strides=1))
-            in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))
@@ -175,7 +158,7 @@ class SqueezeNext(HybridBlock):
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
-                in_units=in_channels))
+                in_units=int(width_scale * 128)))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -188,10 +171,6 @@ def get_squeezenext(version,
                     pretrained=False,
                     ctx=cpu(),
                     **kwargs):
-    init_block_channels = 64
-    final_block_channels = 128
-    channels_per_layers = [32, 64, 128, 256]
-
     if version == '23':
         layers = [6, 6, 8, 1]
     elif version == '23v5':
@@ -199,44 +178,36 @@ def get_squeezenext(version,
     else:
         raise ValueError("Unsupported SqueezeNet version {}".format(version))
 
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
-
-    if width_scale != 1:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
-        init_block_channels = int(init_block_channels * width_scale)
-        final_block_channels = int(final_block_channels * width_scale)
-
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return SqueezeNext(
-        channels=channels,
-        init_block_channels=init_block_channels,
-        final_block_channels=final_block_channels,
+        layers=layers,
+        width_scale=width_scale,
         **kwargs)
 
 
-def sqnxt23_w1(**kwargs):
+def sqnxt23_1_0(**kwargs):
     return get_squeezenext('23', 1.0, **kwargs)
 
 
-def sqnxt23_w3d2(**kwargs):
+def sqnxt23_1_5(**kwargs):
     return get_squeezenext('23', 1.5, **kwargs)
 
 
-def sqnxt23_w2(**kwargs):
+def sqnxt23_2_0(**kwargs):
     return get_squeezenext('23', 2.0, **kwargs)
 
 
-def sqnxt23v5_w1(**kwargs):
+def sqnxt23v5_1_0(**kwargs):
     return get_squeezenext('23v5', 1.0, **kwargs)
 
 
-def sqnxt23v5_w3d2(**kwargs):
+def sqnxt23v5_1_5(**kwargs):
     return get_squeezenext('23v5', 1.5, **kwargs)
 
 
-def sqnxt23v5_w2(**kwargs):
+def sqnxt23v5_2_0(**kwargs):
     return get_squeezenext('23v5', 2.0, **kwargs)
 
 
@@ -248,12 +219,12 @@ def _test():
     TESTING = True
 
     models = [
-        sqnxt23_w1,
-        sqnxt23_w3d2,
-        sqnxt23_w2,
-        sqnxt23v5_w1,
-        sqnxt23v5_w3d2,
-        sqnxt23v5_w2,
+        sqnxt23_1_0,
+        sqnxt23_1_5,
+        sqnxt23_2_0,
+        sqnxt23v5_1_0,
+        sqnxt23v5_1_5,
+        sqnxt23v5_2_0,
     ]
 
     for model in models:
@@ -269,12 +240,12 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        assert (model != sqnxt23_w1 or weight_count == 724056)
-        assert (model != sqnxt23_w3d2 or weight_count == 1511824)
-        assert (model != sqnxt23_w2 or weight_count == 2583752)
-        assert (model != sqnxt23v5_w1 or weight_count == 921816)
-        assert (model != sqnxt23v5_w3d2 or weight_count == 1953616)
-        assert (model != sqnxt23v5_w2 or weight_count == 3366344)
+        assert (model != sqnxt23_1_0 or weight_count == 724056)
+        assert (model != sqnxt23_1_5 or weight_count == 1511824)
+        assert (model != sqnxt23_2_0 or weight_count == 2583752)
+        assert (model != sqnxt23v5_1_0 or weight_count == 921816)
+        assert (model != sqnxt23v5_1_5 or weight_count == 1953616)
+        assert (model != sqnxt23v5_2_0 or weight_count == 3366344)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

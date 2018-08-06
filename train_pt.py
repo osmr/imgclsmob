@@ -24,6 +24,7 @@ from pytorch.models.mobilenet import *
 from pytorch.models.mobilenetv2 import *
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
+from pytorch.models.squeezenext import *
 
 from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *
@@ -345,6 +346,13 @@ def _get_model(name, **kwargs):
         'menet348_12x1_g3': menet348_12x1_g3,
         'menet352_12x1_g8': menet352_12x1_g8,
         'menet456_24x1_g3': menet456_24x1_g3,
+
+        'sqnxt23_w1': sqnxt23_w1,
+        'sqnxt23_w3d2': sqnxt23_w3d2,
+        'sqnxt23_w2': sqnxt23_w2,
+        'sqnxt23v5_w1': sqnxt23v5_w1,
+        'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+        'sqnxt23v5_w2': sqnxt23v5_w2,
 
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,

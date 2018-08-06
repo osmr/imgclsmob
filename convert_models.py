@@ -88,9 +88,9 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.mobilenetv2 as gl_mobilenetv2
     import gluon.models.shufflenet as gl_shufflenet
     import gluon.models.menet as gl_menet
-    # import gluon.models.menet1 as gl_meneta
     import gluon.models.squeezenext as gl_squeezenext
-    import gluon.models.squeezenext1 as gl_squeezenext1
+    # import gluon.models.menet1 as gl_meneta
+    # import gluon.models.squeezenext1 as gl_squeezenext1
 
     models = {
         'resnet18': gl_resnet.resnet18,
@@ -167,12 +167,12 @@ def _get_model_gl(name, **kwargs):
         'sqnxt23v5_w3d2': gl_squeezenext.sqnxt23v5_w3d2,
         'sqnxt23v5_w2': gl_squeezenext.sqnxt23v5_w2,
 
-        'sqnxt23_1_0': gl_squeezenext1.sqnxt23_1_0,
-        'sqnxt23_1_5': gl_squeezenext1.sqnxt23_1_5,
-        'sqnxt23_2_0': gl_squeezenext1.sqnxt23_2_0,
-        'sqnxt23v5_1_0': gl_squeezenext1.sqnxt23v5_1_0,
-        'sqnxt23v5_1_5': gl_squeezenext1.sqnxt23v5_1_5,
-        'sqnxt23v5_2_0': gl_squeezenext1.sqnxt23v5_2_0,
+        # 'sqnxt23_1_0': gl_squeezenext1.sqnxt23_1_0,
+        # 'sqnxt23_1_5': gl_squeezenext1.sqnxt23_1_5,
+        # 'sqnxt23_2_0': gl_squeezenext1.sqnxt23_2_0,
+        # 'sqnxt23v5_1_0': gl_squeezenext1.sqnxt23v5_1_0,
+        # 'sqnxt23v5_1_5': gl_squeezenext1.sqnxt23v5_1_5,
+        # 'sqnxt23v5_2_0': gl_squeezenext1.sqnxt23v5_2_0,
 
         # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
         # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,

@@ -32,7 +32,7 @@ from gluon.models.squeezenext import *
 from gluon.models.nasnet import *
 
 # import gluon.models.menet1 as gl_meneta
-from gluon.models.squeezenext1 import *
+# from gluon.models.squeezenext1 import *
 
 
 def parse_args():
@@ -498,12 +498,12 @@ def _get_model(name, **kwargs):
 
         'nasnet_a_mobile': nasnet_a_mobile,
 
-        'sqnxt23_1_0': sqnxt23_1_0,
-        'sqnxt23_1_5': sqnxt23_1_5,
-        'sqnxt23_2_0': sqnxt23_2_0,
-        'sqnxt23v5_1_0': sqnxt23v5_1_0,
-        'sqnxt23v5_1_5': sqnxt23v5_1_5,
-        'sqnxt23v5_2_0': sqnxt23v5_2_0,
+        # 'sqnxt23_1_0': sqnxt23_1_0,
+        # 'sqnxt23_1_5': sqnxt23_1_5,
+        # 'sqnxt23_2_0': sqnxt23_2_0,
+        # 'sqnxt23v5_1_0': sqnxt23v5_1_0,
+        # 'sqnxt23v5_1_5': sqnxt23v5_1_5,
+        # 'sqnxt23v5_2_0': sqnxt23v5_2_0,
 
         # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
         # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,

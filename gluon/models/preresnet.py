@@ -237,8 +237,8 @@ class PreResActivation(HybridBlock):
 class PreResNet(HybridBlock):
 
     def __init__(self,
-                 layers,
                  channels,
+                 init_block_channels,
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
@@ -246,21 +246,19 @@ class PreResNet(HybridBlock):
                  classes=1000,
                  **kwargs):
         super(PreResNet, self).__init__(**kwargs)
-        assert (len(layers) == len(channels) - 1)
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(PreResInitBlock(
                 in_channels=in_channels,
-                out_channels=channels[0],
+                out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats))
-            in_channels = channels[0]
-            for i, layers_per_stage in enumerate(layers):
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
-                    out_channels = channels[i + 1]
-                    for j in range(layers_per_stage):
-                        strides = 1 if (i == 0) or (j != 0) else 2
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and (i != 0) else 1
                         stage.add(PreResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
@@ -271,7 +269,7 @@ class PreResNet(HybridBlock):
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(PreResActivation(
-                in_channels=channels[-1],
+                in_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
@@ -281,7 +279,7 @@ class PreResNet(HybridBlock):
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
-                in_units=channels[-1]))
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -319,19 +317,23 @@ def get_preresnet(version,
     else:
         raise ValueError("Unsupported PreResNet version {}".format(version))
 
+    init_block_channels = 64
+
     if blocks < 50:
-        channels = [64, 64, 128, 256, 512]
+        channels_per_layers = [64, 128, 256, 512]
         bottleneck = False
     else:
-        channels = [64, 256, 512, 1024, 2048]
+        channels_per_layers = [256, 512, 1024, 2048]
         bottleneck = True
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return PreResNet(
-        layers=layers,
         channels=channels,
+        init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)

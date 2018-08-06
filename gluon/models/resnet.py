@@ -219,8 +219,8 @@ class ResInitBlock(HybridBlock):
 class ResNet(HybridBlock):
 
     def __init__(self,
-                 layers,
                  channels,
+                 init_block_channels,
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
@@ -228,21 +228,19 @@ class ResNet(HybridBlock):
                  classes=1000,
                  **kwargs):
         super(ResNet, self).__init__(**kwargs)
-        assert (len(layers) == len(channels) - 1)
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
-                out_channels=channels[0],
+                out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats))
-            in_channels = channels[0]
-            for i, layers_per_stage in enumerate(layers):
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
-                    out_channels = channels[i + 1]
-                    for j in range(layers_per_stage):
-                        strides = 1 if (i == 0) or (j != 0) else 2
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and (i != 0) else 1
                         stage.add(ResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
@@ -260,7 +258,7 @@ class ResNet(HybridBlock):
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
-                in_units=channels[-1]))
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -269,25 +267,10 @@ class ResNet(HybridBlock):
 
 
 def get_resnet(version,
+               width_scale=1.0,
                pretrained=False,
                ctx=cpu(),
                **kwargs):
-    version_split = version.split("_")
-    if len(version_split) > 1:
-        if version_split[1] == "w1":
-            width_scale = 1
-        elif version_split[1] == "w3d4":
-            width_scale = 0.75
-        elif version_split[1] == "wd2":
-            width_scale = 0.5
-        elif version_split[1] == "wd4":
-            width_scale = 0.25
-        else:
-            raise ValueError("Unsupported ResNet version {}".format(version))
-        version = version_split[0]
-    else:
-        width_scale = 1
-
     if version.endswith("b"):
         conv1_stride = False
         pure_version = version[:-1]
@@ -322,22 +305,27 @@ def get_resnet(version,
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
 
+    init_block_channels = 64
+
     if blocks < 50:
-        channels = [64, 64, 128, 256, 512]
+        channels_per_layers = [64, 128, 256, 512]
         bottleneck = False
     else:
-        channels = [64, 256, 512, 1024, 2048]
+        channels_per_layers = [256, 512, 1024, 2048]
         bottleneck = True
 
-    if width_scale != 1:
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+
+    if width_scale != 1.0:
         channels = [int(ci * width_scale) for ci in channels]
+        init_block_channels = int(init_block_channels * width_scale)
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return ResNet(
-        layers=layers,
         channels=channels,
+        init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
@@ -364,15 +352,15 @@ def resnet18(**kwargs):
 
 
 def resnet18_w3d4(**kwargs):
-    return get_resnet('18_w3d4', **kwargs)
+    return get_resnet('18', 0.75, **kwargs)
 
 
 def resnet18_wd2(**kwargs):
-    return get_resnet('18_wd2', **kwargs)
+    return get_resnet('18', 0.5, **kwargs)
 
 
 def resnet18_wd4(**kwargs):
-    return get_resnet('18_wd4', **kwargs)
+    return get_resnet('18', 0.25, **kwargs)
 
 
 def resnet34(**kwargs):
@@ -420,7 +408,6 @@ def _test():
 
     models = [
         resnet18,
-        resnet18_wd4,
         resnet34,
         resnet50,
         resnet50b,

@@ -189,25 +189,23 @@ class ResInitBlock(nn.Module):
 class ResNet(nn.Module):
 
     def __init__(self,
-                 layers,
                  channels,
+                 init_block_channels,
                  bottleneck,
                  conv1_stride,
                  in_channels=3,
                  num_classes=1000):
         super(ResNet, self).__init__()
-        assert (len(layers) == len(channels) - 1)
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", ResInitBlock(
             in_channels=in_channels,
-            out_channels=channels[0]))
-        in_channels = channels[0]
-        for i, layers_per_stage in enumerate(layers):
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
-            out_channels = channels[i + 1]
-            for j in range(layers_per_stage):
-                stride = 1 if (i == 0) or (j != 0) else 2
+            for j, out_channels in enumerate(channels_per_stage):
+                stride = 2 if (j == 0) and (i != 0) else 1
                 stage.add_module("unit{}".format(j + 1), ResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
@@ -221,7 +219,7 @@ class ResNet(nn.Module):
             stride=1))
 
         self.output = nn.Linear(
-            in_features=channels[-1],
+            in_features=in_channels,
             out_features=num_classes)
 
         self._init_params()
@@ -269,19 +267,23 @@ def get_resnet(version,
     else:
         raise ValueError("Unsupported ResNet version {}".format(version))
 
+    init_block_channels = 64
+
     if blocks < 50:
-        channels = [64, 64, 128, 256, 512]
+        channels_per_layers = [64, 128, 256, 512]
         bottleneck = False
     else:
-        channels = [64, 256, 512, 1024, 2048]
+        channels_per_layers = [256, 512, 1024, 2048]
         bottleneck = True
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     return ResNet(
-        layers=layers,
         channels=channels,
+        init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)

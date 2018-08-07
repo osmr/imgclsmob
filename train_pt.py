@@ -25,6 +25,7 @@ from pytorch.models.mobilenetv2 import *
 from pytorch.models.shufflenet import *
 from pytorch.models.menet import *
 from pytorch.models.squeezenext import *
+from pytorch.models.densenet import *
 
 from pytorch.models.others.MobileNet import *
 from pytorch.models.others.ShuffleNet import *
@@ -367,6 +368,11 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_w1': sqnxt23v5_w1,
         'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
         'sqnxt23v5_w2': sqnxt23v5_w2,
+
+        'densenet121': densenet121,
+        'densenet161': densenet161,
+        'densenet169': densenet169,
+        'densenet201': densenet201,
 
         'oth_mobilenet1_0': oth_mobilenet1_0,
         'oth_mobilenet0_75': oth_mobilenet0_75,

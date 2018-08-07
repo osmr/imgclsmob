@@ -28,6 +28,7 @@ from gluon.models.mobilenetv2 import *
 from gluon.models.shufflenet import *
 from gluon.models.menet import *
 from gluon.models.squeezenext import *
+from gluon.models.densenet import *
 
 from gluon.models.nasnet import *
 
@@ -501,6 +502,11 @@ def _get_model(name, **kwargs):
         'sqnxt23v5_w1': sqnxt23v5_w1,
         'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
         'sqnxt23v5_w2': sqnxt23v5_w2,
+
+        'densenet121': densenet121,
+        'densenet161': densenet161,
+        'densenet169': densenet169,
+        'densenet201': densenet201,
 
         'nasnet_a_mobile': nasnet_a_mobile,
 

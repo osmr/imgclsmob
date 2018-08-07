@@ -89,6 +89,7 @@ def _get_model_gl(name, **kwargs):
     import gluon.models.shufflenet as gl_shufflenet
     import gluon.models.menet as gl_menet
     import gluon.models.squeezenext as gl_squeezenext
+    import gluon.models.densenet as gl_densenet
     # import gluon.models.menet1 as gl_meneta
     # import gluon.models.squeezenext1 as gl_squeezenext1
 
@@ -181,6 +182,11 @@ def _get_model_gl(name, **kwargs):
         'sqnxt23v5_w3d2': gl_squeezenext.sqnxt23v5_w3d2,
         'sqnxt23v5_w2': gl_squeezenext.sqnxt23v5_w2,
 
+        'densenet121': gl_densenet.densenet121,
+        'densenet161': gl_densenet.densenet161,
+        'densenet169': gl_densenet.densenet169,
+        'densenet201': gl_densenet.densenet201,
+
         # 'sqnxt23_1_0': gl_squeezenext1.sqnxt23_1_0,
         # 'sqnxt23_1_5': gl_squeezenext1.sqnxt23_1_5,
         # 'sqnxt23_2_0': gl_squeezenext1.sqnxt23_2_0,
@@ -214,6 +220,7 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.mobilenetv2 as pt_mobilenetv2
     import pytorch.models.shufflenet as pt_shufflenet
     import pytorch.models.menet as pt_menet
+    import pytorch.models.densenet as pt_densenet
 
     import pytorch.models.others.MobileNet as pt_oth_mobilenet
     import pytorch.models.others.MENet as pt_oth_menet
@@ -299,6 +306,11 @@ def _get_model_pt(name, **kwargs):
         'menet348_12x1_g3': pt_menet.menet348_12x1_g3,
         'menet352_12x1_g8': pt_menet.menet352_12x1_g8,
         'menet456_24x1_g3': pt_menet.menet456_24x1_g3,
+
+        'densenet121': pt_densenet.densenet121,
+        'densenet161': pt_densenet.densenet161,
+        'densenet169': pt_densenet.densenet169,
+        'densenet201': pt_densenet.densenet201,
 
         'oth_fd_mobilenet1_0': pt_oth_mobilenet.oth_fd_mobilenet1_0,
         'oth_fd_mobilenet0_75': pt_oth_mobilenet.oth_fd_mobilenet0_75,

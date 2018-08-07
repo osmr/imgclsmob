@@ -1,6 +1,6 @@
 """
     ShuffleNet, implemented in PyTorch.
-    Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices'
+    Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices.'
 """
 
 __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_w1', 'shufflenet_g4_w1',
@@ -150,7 +150,22 @@ class ShuffleInitBlock(nn.Module):
 
 
 class ShuffleNet(nn.Module):
+    """
+    ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    groups : int
+        Number of groups in convolution layers.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

@@ -1,6 +1,6 @@
 """
     SqueezeNet, implemented in Gluon.
-    Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'
+    Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size.'
 """
 
 __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
@@ -99,7 +99,24 @@ class SqueezeInitBlock(HybridBlock):
 
 
 class SqueezeNet(HybridBlock):
+    """
+    SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    residuals : bool
+        Whether to use residual units.
+    init_block_kernel_size : int or tuple/list of 2 int
+        The dimensions of the convolution window for the initial unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  residuals,

@@ -1,6 +1,6 @@
 """
     DarkNet, implemented in PyTorch.
-    Original paper: 'Darknet: Open source neural networks in c'
+    Original paper: 'Darknet: Open source neural networks in c.'
 """
 
 __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
@@ -69,7 +69,24 @@ def dark_convYxY(in_channels,
 
 
 class DarkNet(nn.Module):
+    """
+    DarkNet model from 'Darknet: Open source neural networks in c.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    odd_pointwise : bool
+        Whether pointwise convolution layer is used for each odd unit.
+    avg_pool_size : int
+        Window size of the final average pooling.
+    cls_activ : bool
+        Whether classification convolution layer uses an activation.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  odd_pointwise,

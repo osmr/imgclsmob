@@ -1,8 +1,8 @@
 """
     MobileNet & FD-MobileNet, implemented in Gluon.
     Original papers: 
-    - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'
-    - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'
+    - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.'
+    - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy.'
 """
 
 __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
@@ -73,7 +73,21 @@ class DwsConvBlock(HybridBlock):
 
 
 class MobileNet(HybridBlock):
+    """
+    MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.' Also
+    this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    first_stage_stride : bool
+        Whether stride is used at the first stage.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  first_stage_stride,

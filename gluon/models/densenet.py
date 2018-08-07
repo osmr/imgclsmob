@@ -1,6 +1,6 @@
 """
     DenseNet, implemented in Gluon.
-    Original paper: 'Densely Connected Convolutional Networks'
+    Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf
 """
 
 __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
@@ -177,12 +177,30 @@ class PostActivation(HybridBlock):
 
 
 class DenseNet(HybridBlock):
+    """
+    DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf.
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to dropout.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,
                  bn_use_global_stats=False,
-                 dropout_rate=0,
+                 dropout_rate=0.0,
                  in_channels=3,
                  classes=1000,
                  **kwargs):

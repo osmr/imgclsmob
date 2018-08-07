@@ -1,6 +1,6 @@
 """
     NASNet-A-Mobile, implemented in Gluon.
-    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition'
+    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition.'
 """
 
 

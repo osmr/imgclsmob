@@ -1,6 +1,6 @@
 """
     DarkNet, implemented in Gluon.
-    Original paper: 'Darknet: Open source neural networks in c'
+    Original paper: 'Darknet: Open source neural networks in c.'
 """
 
 __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
@@ -16,6 +16,7 @@ class DarkConv(HybridBlock):
                  out_channels,
                  kernel_size,
                  padding,
+                 bn_use_global_stats,
                  **kwargs):
         super(DarkConv, self).__init__(**kwargs)
         with self.name_scope():
@@ -25,7 +26,9 @@ class DarkConv(HybridBlock):
                 padding=padding,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
             #self.bn = nn.BatchNorm(in_channels=out_channels, momentum=0.01)
             self.activ = nn.LeakyReLU(alpha=0.1)
 
@@ -37,43 +40,71 @@ class DarkConv(HybridBlock):
 
 
 def dark_conv1x1(in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_use_global_stats):
     return DarkConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        padding=0)
+        padding=0,
+        bn_use_global_stats=bn_use_global_stats)
 
 
 def dark_conv3x3(in_channels,
-                 out_channels):
+                 out_channels,
+                 bn_use_global_stats):
     return DarkConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        padding=1)
+        padding=1,
+        bn_use_global_stats=bn_use_global_stats)
 
 
 def dark_convYxY(in_channels,
                  out_channels,
+                 bn_use_global_stats,
                  pointwise=True):
     if pointwise:
         return dark_conv1x1(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            bn_use_global_stats=bn_use_global_stats)
     else:
         return dark_conv3x3(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            bn_use_global_stats=bn_use_global_stats)
 
 
 class DarkNet(HybridBlock):
+    """
+    DarkNet model from 'Darknet: Open source neural networks in c.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    odd_pointwise : bool
+        Whether pointwise convolution layer is used for each odd unit.
+    avg_pool_size : int
+        Window size of the final average pooling.
+    cls_activ : bool
+        Whether classification convolution layer uses an activation.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  odd_pointwise,
                  avg_pool_size,
                  cls_activ,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -88,6 +119,7 @@ class DarkNet(HybridBlock):
                         stage.add(dark_convYxY(
                             in_channels=in_channels,
                             out_channels=out_channels,
+                            bn_use_global_stats=bn_use_global_stats,
                             pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
                         in_channels = out_channels
                     if i != len(channels) - 1:

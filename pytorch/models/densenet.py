@@ -1,6 +1,6 @@
 """
     DenseNet, implemented in PyTorch.
-    Original paper: 'Densely Connected Convolutional Networks'
+    Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf
 """
 
 __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
@@ -111,8 +111,7 @@ class DenseInitBlock(nn.Module):
 
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 bn_use_global_stats):
+                 out_channels):
         super(DenseInitBlock, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=in_channels,
@@ -151,12 +150,26 @@ class PostActivation(nn.Module):
 
 
 class DenseNet(nn.Module):
+    """
+    DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf.
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to dropout.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,
-                 bn_use_global_stats=False,
-                 dropout_rate=0,
+                 dropout_rate=0.0,
                  in_channels=3,
                  num_classes=1000):
         super(DenseNet, self).__init__()
@@ -164,8 +177,7 @@ class DenseNet(nn.Module):
         self.features = nn.Sequential()
         self.features.add_module("init_block", DenseInitBlock(
             in_channels=in_channels,
-            out_channels=init_block_channels,
-            bn_use_global_stats=bn_use_global_stats))
+            out_channels=init_block_channels))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()

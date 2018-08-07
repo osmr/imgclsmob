@@ -1,6 +1,6 @@
 """
     ResNet, implemented in PyTorch.
-    Original paper: 'Deep Residual Learning for Image Recognition'
+    Original paper: 'Deep Residual Learning for Image Recognition.'
 """
 
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18', 'resnet18_w3d4', 'resnet18_wd2',
@@ -190,7 +190,24 @@ class ResInitBlock(nn.Module):
 
 
 class ResNet(nn.Module):
+    """
+    ResNet model from 'Deep Residual Learning for Image Recognition.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer in units.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

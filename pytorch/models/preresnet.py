@@ -1,6 +1,6 @@
 """
     PreResNet, implemented in PyTorch.
-    Original paper: 'Identity Mappings in Deep Residual Networks'
+    Original paper: 'Identity Mappings in Deep Residual Networks.'
 """
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18', 'preresnet18_w3d4',
@@ -204,7 +204,24 @@ class PreResActivation(nn.Module):
 
 
 class PreResNet(nn.Module):
+    """
+    PreResNet model from 'Identity Mappings in Deep Residual Networks.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer in units.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

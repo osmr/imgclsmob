@@ -1,6 +1,6 @@
 """
     SqueezeNext, implemented in PyTorch.
-    Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design'
+    Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design.'
 """
 
 __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5_w1', 'sqnxt23v5_w3d2', 'sqnxt23v5_w2']
@@ -130,7 +130,22 @@ class SqnxtInitBlock(nn.Module):
 
 
 class SqueezeNext(nn.Module):
+    """
+    SqueezeNext model from 'SqueezeNext: Hardware-Aware Neural Network Design.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    final_block_channels : int
+        Number of output channels for the final block of the feature extractor.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

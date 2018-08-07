@@ -1,6 +1,6 @@
 """
     MobileNetV2, implemented in PyTorch.
-    Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks'
+    Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks.'
 """
 
 __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4']
@@ -109,7 +109,22 @@ class LinearBottleneck(nn.Module):
 
 
 class MobileNetV2(nn.Module):
+    """
+    MobileNetV2 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    final_block_channels : int
+        Number of output channels for the final block of the feature extractor.
+    in_channels : int, default 3
+        Number of input channels.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

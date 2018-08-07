@@ -1,6 +1,6 @@
 """
     MENet, implemented in Gluon.
-    Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications'
+    Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications.'
 """
 
 __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
@@ -197,7 +197,24 @@ class MEInitBlock(HybridBlock):
 
 
 class MENet(HybridBlock):
+    """
+    MENet model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications.'
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    side_channels : int
+        Number of side channels in a ME-unit.
+    groups : int
+        Number of groups in convolution layers.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_block_channels,

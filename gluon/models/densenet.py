@@ -62,6 +62,42 @@ def conv3x3_block(in_channels,
         bn_use_global_stats=bn_use_global_stats)
 
 
+class DenseUnit(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_use_global_stats,
+                 dropout_rate,
+                 **kwargs):
+        super(DenseUnit, self).__init__(**kwargs)
+        self.use_dropout = (dropout_rate != 0.0)
+        bn_size = 4
+        inc_channels = out_channels - in_channels
+        mid_channels = inc_channels * bn_size
+
+        with self.name_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=inc_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            if self.use_dropout:
+                self.dropout = nn.Dropout(rate=dropout_rate)
+
+    def hybrid_forward(self, F, x):
+        identity = x
+        x = self.conv1(x)
+        x = self.conv2(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        x = F.concat(x, identity, dim=1)
+        return x
+
+
 class TransitionBlock(HybridBlock):
 
     def __init__(self,
@@ -83,41 +119,6 @@ class TransitionBlock(HybridBlock):
     def hybrid_forward(self, F, x):
         x = self.conv(x)
         x = self.pool(x)
-        return x
-
-
-class DenseUnit(HybridBlock):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_use_global_stats,
-                 dropout_rate,
-                 **kwargs):
-        super(DenseUnit, self).__init__(**kwargs)
-        self.use_dropout = (dropout_rate != 0.0)
-        bn_size = 4
-        mid_channels = out_channels * bn_size
-
-        with self.name_scope():
-            self.conv1 = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats)
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
-
-    def hybrid_forward(self, F, x):
-        identity = x
-        x = self.conv1(x)
-        x = self.conv2(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        x = F.concat(x, identity, dim=1)
         return x
 
 
@@ -154,12 +155,30 @@ class DenseInitBlock(HybridBlock):
         return x
 
 
+class PreResActivation(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(PreResActivation, self).__init__(**kwargs)
+        with self.name_scope():
+            self.bn = nn.BatchNorm(
+                in_channels=in_channels,
+                use_global_stats=bn_use_global_stats)
+            self.activ = nn.Activation('relu')
+
+    def hybrid_forward(self, F, x):
+        x = self.bn(x)
+        x = self.activ(x)
+        return x
+
+
 class DenseNet(HybridBlock):
 
     def __init__(self,
                  channels,
                  init_block_channels,
-                 growth_rate,
                  bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
@@ -181,16 +200,19 @@ class DenseNet(HybridBlock):
                         if (j == 0) and (i != 0):
                             stage.add(TransitionBlock(
                                 in_channels=in_channels,
-                                out_channels=out_channels,
+                                out_channels=(in_channels // 2),
                                 bn_use_global_stats=bn_use_global_stats))
-                            in_channels = out_channels
+                            in_channels = in_channels // 2
                         stage.add(DenseUnit(
                             in_channels=in_channels,
-                            out_channels=growth_rate,
+                            out_channels=out_channels,
                             bn_use_global_stats=bn_use_global_stats,
                             dropout_rate=dropout_rate))
                         in_channels = out_channels
                 self.features.add(stage)
+            self.features.add(PreResActivation(
+                in_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))
@@ -230,9 +252,14 @@ def get_densenet(num_layers,
     else:
         raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
 
-    channels = [[ci] * li for (ci, li) in zip(growth_rate, layers)]
     from functools import reduce
-    channels = reduce(lambda x, y: x + [(x[-1] + y * growth_rate) // 2], layers, [init_block_channels])[1:]
+    channels = reduce(lambda xi, yi:
+                      xi + [reduce(lambda xj, yj:
+                                   xj + [xj[-1] + yj],
+                                   [growth_rate] * yi,
+                                   [xi[-1][-1] // 2])[1:]],
+                      layers,
+                      [[init_block_channels * 2]])[1:]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -240,7 +267,6 @@ def get_densenet(num_layers,
     return DenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
-        growth_rate=growth_rate,
         **kwargs)
 
 
@@ -288,6 +314,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         assert (model != densenet121 or weight_count == 7978856)
+        assert (model != densenet161 or weight_count == 28681000)
+        assert (model != densenet169 or weight_count == 14149480)
+        assert (model != densenet201 or weight_count == 20013928)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

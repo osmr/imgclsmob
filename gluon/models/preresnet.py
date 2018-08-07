@@ -328,7 +328,7 @@ def get_preresnet(blocks,
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        channels = [int(ci * width_scale) for ci in channels]
+        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
     if pretrained:

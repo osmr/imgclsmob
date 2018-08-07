@@ -114,7 +114,7 @@ class SqueezeNet(nn.Module):
             for j, out_channels in enumerate(channels_per_stage):
                 expand_channels = out_channels // 2
                 squeeze_channels = out_channels // 8
-                stage.add_module("unit{}".format(j + 1), FireUnit(
+                stage.add_module("fire{}".format(j + 1), FireUnit(
                     in_channels=in_channels,
                     squeeze_channels=squeeze_channels,
                     expand1x1_channels=expand_channels,

@@ -7,7 +7,7 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-class ConvBlock(HybridBlock):
+class DenseConv(HybridBlock):
 
     def __init__(self,
                  in_channels,
@@ -17,7 +17,7 @@ class ConvBlock(HybridBlock):
                  padding,
                  bn_use_global_stats,
                  **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
+        super(DenseConv, self).__init__(**kwargs)
         with self.name_scope():
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
@@ -38,10 +38,10 @@ class ConvBlock(HybridBlock):
         return x
 
 
-def conv1x1_block(in_channels,
+def dense_conv1x1(in_channels,
                   out_channels,
                   bn_use_global_stats):
-    return ConvBlock(
+    return DenseConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
@@ -50,10 +50,10 @@ def conv1x1_block(in_channels,
         bn_use_global_stats=bn_use_global_stats)
 
 
-def conv3x3_block(in_channels,
+def dense_conv3x3(in_channels,
                   out_channels,
                   bn_use_global_stats):
-    return ConvBlock(
+    return DenseConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
@@ -77,11 +77,11 @@ class DenseUnit(HybridBlock):
         mid_channels = inc_channels * bn_size
 
         with self.name_scope():
-            self.conv1 = conv1x1_block(
+            self.conv1 = dense_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
+            self.conv2 = dense_conv3x3(
                 in_channels=mid_channels,
                 out_channels=inc_channels,
                 bn_use_global_stats=bn_use_global_stats)
@@ -107,7 +107,7 @@ class TransitionBlock(HybridBlock):
                  **kwargs):
         super(TransitionBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = conv1x1_block(
+            self.conv = dense_conv1x1(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats)
@@ -155,13 +155,13 @@ class DenseInitBlock(HybridBlock):
         return x
 
 
-class PreResActivation(HybridBlock):
+class PostActivation(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(PreResActivation, self).__init__(**kwargs)
+        super(PostActivation, self).__init__(**kwargs)
         with self.name_scope():
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
@@ -196,13 +196,13 @@ class DenseNet(HybridBlock):
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
+                    if i != 0:
+                        stage.add(TransitionBlock(
+                            in_channels=in_channels,
+                            out_channels=(in_channels // 2),
+                            bn_use_global_stats=bn_use_global_stats))
+                        in_channels = in_channels // 2
                     for j, out_channels in enumerate(channels_per_stage):
-                        if (j == 0) and (i != 0):
-                            stage.add(TransitionBlock(
-                                in_channels=in_channels,
-                                out_channels=(in_channels // 2),
-                                bn_use_global_stats=bn_use_global_stats))
-                            in_channels = in_channels // 2
                         stage.add(DenseUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
@@ -210,7 +210,7 @@ class DenseNet(HybridBlock):
                             dropout_rate=dropout_rate))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(PreResActivation(
+            self.features.add(PostActivation(
                 in_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(

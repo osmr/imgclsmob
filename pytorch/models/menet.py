@@ -86,7 +86,7 @@ class ChannelShuffle(nn.Module):
         return channel_shuffle(x, self.groups)
 
 
-class MEModule(nn.Module):
+class MEUnit(nn.Module):
 
     def __init__(self,
                  in_channels,
@@ -95,7 +95,7 @@ class MEModule(nn.Module):
                  groups,
                  downsample,
                  ignore_group):
-        super(MEModule, self).__init__()
+        super(MEUnit, self).__init__()
         self.downsample = downsample
         mid_channels = out_channels // 4
 
@@ -224,7 +224,7 @@ class MENet(nn.Module):
             for j, out_channels in enumerate(channels_per_stage):
                 downsample = (j == 0)
                 ignore_group = (i == 0) and (j == 0)
-                stage.add_module("unit{}".format(j + 1), MEModule(
+                stage.add_module("unit{}".format(j + 1), MEUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     side_channels=side_channels,

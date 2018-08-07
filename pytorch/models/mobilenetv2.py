@@ -10,7 +10,7 @@ import torch.nn.init as init
 TESTING = False
 
 
-class ConvBlock(nn.Module):
+class MobnetConv(nn.Module):
 
     def __init__(self,
                  in_channels,
@@ -20,7 +20,7 @@ class ConvBlock(nn.Module):
                  padding,
                  groups,
                  activate):
-        super(ConvBlock, self).__init__()
+        super(MobnetConv, self).__init__()
         self.activate = activate
 
         self.conv = nn.Conv2d(
@@ -46,7 +46,7 @@ class ConvBlock(nn.Module):
 def mobnet_conv1x1(in_channels,
                    out_channels,
                    activate):
-    return ConvBlock(
+    return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
@@ -60,7 +60,7 @@ def mobnet_dwconv3x3(in_channels,
                      out_channels,
                      stride,
                      activate):
-    return ConvBlock(
+    return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
@@ -117,7 +117,7 @@ class MobileNetV2(nn.Module):
         super(MobileNetV2, self).__init__()
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ConvBlock(
+        self.features.add_module("init_block", MobnetConv(
             in_channels=in_channels,
             out_channels=init_block_channels,
             kernel_size=3,

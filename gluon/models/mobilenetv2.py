@@ -19,7 +19,7 @@ class ReLU6(nn.HybridBlock):
         return F.clip(x, 0, 6, name="relu6")
 
 
-class ConvBlock(HybridBlock):
+class MobnetConv(HybridBlock):
 
     def __init__(self,
                  in_channels,
@@ -30,7 +30,7 @@ class ConvBlock(HybridBlock):
                  groups,
                  activate,
                  **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
+        super(MobnetConv, self).__init__(**kwargs)
         self.activate = activate
 
         with self.name_scope():
@@ -57,7 +57,7 @@ class ConvBlock(HybridBlock):
 def mobnet_conv1x1(in_channels,
                    out_channels,
                    activate):
-    return ConvBlock(
+    return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
@@ -71,7 +71,7 @@ def mobnet_dwconv3x3(in_channels,
                      out_channels,
                      strides,
                      activate):
-    return ConvBlock(
+    return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
@@ -132,7 +132,7 @@ class MobileNetV2(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(ConvBlock(
+            self.features.add(MobnetConv(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 kernel_size=3,

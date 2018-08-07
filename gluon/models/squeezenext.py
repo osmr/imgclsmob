@@ -37,14 +37,14 @@ class SqnxtConv(HybridBlock):
         return x
 
 
-class SqnxtBlock(HybridBlock):
+class SqnxtUnit(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  **kwargs):
-        super(SqnxtBlock, self).__init__(**kwargs)
+        super(SqnxtUnit, self).__init__(**kwargs)
         if strides == 2:
             reduction_den = 1
             self.resize_identity = True
@@ -155,7 +155,7 @@ class SqueezeNext(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(SqnxtBlock(
+                        stage.add(SqnxtUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides))

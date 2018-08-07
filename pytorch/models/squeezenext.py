@@ -35,13 +35,13 @@ class SqnxtConv(nn.Module):
         return x
 
 
-class SqnxtBlock(nn.Module):
+class SqnxtUnit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride):
-        super(SqnxtBlock, self).__init__()
+        super(SqnxtUnit, self).__init__()
         if stride == 2:
             reduction_den = 1
             self.resize_identity = True
@@ -146,7 +146,7 @@ class SqueezeNext(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), SqnxtBlock(
+                stage.add_module("unit{}".format(j + 1), SqnxtUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride))

@@ -73,7 +73,7 @@ class ChannelShuffle(HybridBlock):
         return channel_shuffle(x, self.groups)
 
 
-class MEModule(HybridBlock):
+class MEUnit(HybridBlock):
 
     def __init__(self,
                  in_channels,
@@ -83,7 +83,7 @@ class MEModule(HybridBlock):
                  downsample,
                  ignore_group,
                  **kwargs):
-        super(MEModule, self).__init__(**kwargs)
+        super(MEUnit, self).__init__(**kwargs)
         self.downsample = downsample
         mid_channels = out_channels // 4
 
@@ -217,7 +217,7 @@ class MENet(HybridBlock):
                     for j, out_channels in enumerate(channels_per_stage):
                         downsample = (j == 0)
                         ignore_group = (i == 0) and (j == 0)
-                        stage.add(MEModule(
+                        stage.add(MEUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             side_channels=side_channels,

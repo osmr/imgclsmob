@@ -180,11 +180,11 @@ class DenseNet(HybridBlock):
                  channels,
                  init_block_channels,
                  bn_use_global_stats=False,
+                 dropout_rate=0,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(DenseNet, self).__init__(**kwargs)
-        dropout_rate = 0
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')

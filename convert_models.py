@@ -519,7 +519,8 @@ def main():
             f=args.dst_params)
     elif args.src_fwk == "gluon" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            dst_params[dst_key] = torch.from_numpy(src_params[src_param_keys[i]]._data[0].asnumpy())
+            assert (tuple(dst_params[dst_key].size()) == src_params[src_key].shape)
+            dst_params[dst_key] = torch.from_numpy(src_params[src_key]._data[0].asnumpy())
         torch.save(
             obj=dst_params,
             f=args.dst_params)

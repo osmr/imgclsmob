@@ -65,25 +65,52 @@ def preres_conv3x3(in_channels,
         bn_use_global_stats=bn_use_global_stats)
 
 
+class DenseTransBlock(HybridBlock):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(DenseTransBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = preres_conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats)
+            self.pool = nn.MaxPool2D(
+                pool_size=2,
+                strides=2,
+                padding=0)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.pool(x)
+        return x
+
+
 class DenseUnit(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dropout_rate,
                  bn_use_global_stats,
+                 dropout_rate,
                  **kwargs):
         super(DenseUnit, self).__init__(**kwargs)
         self.use_dropout = (dropout_rate != 0.0)
+        bn_size = 4
+        mid_channels = out_channels * bn_size
 
         with self.name_scope():
             self.conv1 = preres_conv1x1(
                 in_channels=in_channels,
-                out_channels=out_channels,
+                out_channels=mid_channels,
                 strides=1,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = preres_conv3x3(
-                in_channels=out_channels,
+                in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=1,
                 bn_use_global_stats=bn_use_global_stats)
@@ -138,13 +165,13 @@ class DenseNet(HybridBlock):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 bottleneck,
-                 conv1_stride,
+                 growth_rate,
                  bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(DenseNet, self).__init__(**kwargs)
+        dropout_rate = 0
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -157,14 +184,17 @@ class DenseNet(HybridBlock):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
+                        if (j == 0) and (i != 0):
+                            stage.add(DenseTransBlock(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                bn_use_global_stats=bn_use_global_stats))
+                            in_channels = out_channels
                         stage.add(DenseUnit(
                             in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
+                            out_channels=growth_rate,
                             bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
+                            dropout_rate=dropout_rate))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -207,7 +237,7 @@ def get_densenet(num_layers,
         raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
 
     from functools import reduce
-    channels = reduce(lambda x, y: x + [(x[-1] + y * growth_rate) // 2], layers, [init_block_channels])
+    channels = reduce(lambda x, y: x + [(x[-1] + y * growth_rate) // 2], layers, [init_block_channels])[1:]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -215,8 +245,7 @@ def get_densenet(num_layers,
     return DenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
-        bottleneck=bottleneck,
-        conv1_stride=conv1_stride,
+        growth_rate=growth_rate,
         **kwargs)
 
 

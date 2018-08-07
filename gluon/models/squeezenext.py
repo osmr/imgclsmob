@@ -3,6 +3,8 @@
     Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design'
 """
 
+__all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5_w1', 'sqnxt23v5_w3d2', 'sqnxt23v5_w2']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

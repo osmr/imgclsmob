@@ -3,6 +3,10 @@
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices'
 """
 
+__all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_w1', 'shufflenet_g4_w1',
+           'shufflenet_g8_w1', 'shufflenet_g1_w3d4', 'shufflenet_g3_w3d4', 'shufflenet_g1_wd2', 'shufflenet_g3_wd2',
+           'shufflenet_g1_wd4', 'shufflenet_g3_wd4']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

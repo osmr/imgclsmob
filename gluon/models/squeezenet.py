@@ -3,6 +3,8 @@
     Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'
 """
 
+__all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

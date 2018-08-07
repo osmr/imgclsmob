@@ -3,6 +3,9 @@
     Original paper: 'Deep Residual Learning for Image Recognition'
 """
 
+__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18', 'resnet18_w3d4', 'resnet18_wd2',
+           'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b']
+
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -369,7 +372,14 @@ def _test():
     TESTING = True
 
     models = [
+        resnet10,
+        resnet12,
+        resnet14,
+        resnet16,
         resnet18,
+        resnet18_w3d4,
+        resnet18_wd2,
+        resnet18_wd4,
         resnet34,
         resnet50,
         resnet50b,
@@ -388,7 +398,14 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        assert (model != resnet10 or weight_count == 5418792)
+        assert (model != resnet12 or weight_count == 5492776)
+        assert (model != resnet14 or weight_count == 5788200)
+        assert (model != resnet16 or weight_count == 6968872)
         assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
+        assert (model != resnet18_w3d4 or weight_count == 6675352)
+        assert (model != resnet18_wd2 or weight_count == 3055880)
+        assert (model != resnet18_wd4 or weight_count == 831096)
         assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
         assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
         assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912

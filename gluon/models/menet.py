@@ -3,6 +3,9 @@
     Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications'
 """
 
+__all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
+           'menet348_12x1_g3', 'menet352_12x1_g8', 'menet456_24x1_g3']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

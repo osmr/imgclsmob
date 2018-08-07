@@ -3,6 +3,10 @@
     Original paper: 'Identity Mappings in Deep Residual Networks'
 """
 
+__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18', 'preresnet18_w3d4',
+           'preresnet18_wd2', 'preresnet18_wd4', 'preresnet34', 'preresnet50', 'preresnet50b', 'preresnet101',
+           'preresnet101b', 'preresnet152', 'preresnet152b']
+
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -383,7 +387,14 @@ def _test():
     TESTING = True
 
     models = [
+        preresnet10,
+        preresnet12,
+        preresnet14,
+        preresnet16,
         preresnet18,
+        preresnet18_w3d4,
+        preresnet18_wd2,
+        preresnet18_wd4,
         preresnet34,
         preresnet50,
         preresnet50b,
@@ -402,7 +413,14 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        assert (model != preresnet10 or weight_count == 5417128)
+        assert (model != preresnet12 or weight_count == 5491112)
+        assert (model != preresnet14 or weight_count == 5786536)
+        assert (model != preresnet16 or weight_count == 6967208)
         assert (model != preresnet18 or weight_count == 11687848)  # resnet18_v2
+        assert (model != preresnet18_w3d4 or weight_count == 6674104)
+        assert (model != preresnet18_wd2 or weight_count == 3055048)
+        assert (model != preresnet18_wd4 or weight_count == 830680)
         assert (model != preresnet34 or weight_count == 21796008)  # resnet34_v2
         assert (model != preresnet50 or weight_count == 25549480)  # resnet50_v2
         assert (model != preresnet50b or weight_count == 25549480)  # resnet50_v2

@@ -3,6 +3,8 @@
     Original paper: 'Darknet: Open source neural networks in c'
 """
 
+__all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
+
 import torch
 import torch.nn as nn
 import torch.nn.init as init

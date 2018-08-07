@@ -3,6 +3,8 @@
     Original paper: 'Densely Connected Convolutional Networks'
 """
 
+__all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
+
 import torch
 import torch.nn as nn
 import torch.nn.init as init

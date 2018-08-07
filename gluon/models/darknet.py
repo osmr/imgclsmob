@@ -3,6 +3,8 @@
     Original paper: 'Darknet: Open source neural networks in c'
 """
 
+__all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

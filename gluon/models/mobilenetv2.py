@@ -3,6 +3,8 @@
     Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks'
 """
 
+__all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4']
+
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 

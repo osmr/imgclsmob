@@ -5,6 +5,9 @@
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'
 """
 
+__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
+           'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
+
 import torch.nn as nn
 import torch.nn.init as init
 

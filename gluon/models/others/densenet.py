@@ -22,10 +22,9 @@ __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201
 
 import os
 
-from ....context import cpu
-from ...block import HybridBlock
-from ... import nn
-from ...contrib.nn import HybridConcurrent, Identity
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
+from mxnet.gluon.contrib.nn import HybridConcurrent, Identity
 
 # Helpers
 def _make_dense_block(num_layers, bn_size, growth_rate, dropout, stage_index):
@@ -203,3 +202,28 @@ def densenet201(**kwargs):
         Location for keeping the model parameters.
     """
     return get_densenet(201, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    net = densenet121()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
+
+    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+    y = net(x)
+
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    pass
+
+
+if __name__ == "__main__":
+    _test()

@@ -93,7 +93,14 @@ def _get_model_gl(name, **kwargs):
     # import gluon.models.squeezenext1 as gl_squeezenext1
 
     models = {
+        'resnet10': gl_resnet.resnet10,
+        'resnet12': gl_resnet.resnet12,
+        'resnet14': gl_resnet.resnet14,
+        'resnet16': gl_resnet.resnet16,
         'resnet18': gl_resnet.resnet18,
+        'resnet18_w3d4': gl_resnet.resnet18_w3d4,
+        'resnet18_wd2': gl_resnet.resnet18_wd2,
+        'resnet18_wd4': gl_resnet.resnet18_wd4,
         'resnet34': gl_resnet.resnet34,
         'resnet50': gl_resnet.resnet50,
         'resnet50b': gl_resnet.resnet50b,
@@ -104,7 +111,14 @@ def _get_model_gl(name, **kwargs):
         'resnet200': gl_resnet.resnet200,
         'resnet200b': gl_resnet.resnet200b,
 
+        'preresnet10': gl_preresnet.preresnet10,
+        'preresnet12': gl_preresnet.preresnet12,
+        'preresnet14': gl_preresnet.preresnet14,
+        'preresnet16': gl_preresnet.preresnet16,
         'preresnet18': gl_preresnet.preresnet18,
+        'preresnet18_w3d4': gl_preresnet.preresnet18_w3d4,
+        'preresnet18_wd2': gl_preresnet.preresnet18_wd2,
+        'preresnet18_wd4': gl_preresnet.preresnet18_wd4,
         'preresnet34': gl_preresnet.preresnet34,
         'preresnet50': gl_preresnet.preresnet50,
         'preresnet50b': gl_preresnet.preresnet50b,
@@ -205,7 +219,14 @@ def _get_model_pt(name, **kwargs):
     import pytorch.models.others.MENet as pt_oth_menet
 
     slk_models = {
+        'resnet10': pt_resnet.resnet10,
+        'resnet12': pt_resnet.resnet12,
+        'resnet14': pt_resnet.resnet14,
+        'resnet16': pt_resnet.resnet16,
         'resnet18': pt_resnet.resnet18,
+        'resnet18_w3d4': pt_resnet.resnet18_w3d4,
+        'resnet18_wd2': pt_resnet.resnet18_wd2,
+        'resnet18_wd4': pt_resnet.resnet18_wd4,
         'resnet34': pt_resnet.resnet34,
         'resnet50': pt_resnet.resnet50,
         'resnet50b': pt_resnet.resnet50b,
@@ -216,7 +237,14 @@ def _get_model_pt(name, **kwargs):
         'resnet200': pt_resnet.resnet200,
         'resnet200b': pt_resnet.resnet200b,
 
+        'preresnet10': pt_preresnet.preresnet10,
+        'preresnet12': pt_preresnet.preresnet12,
+        'preresnet14': pt_preresnet.preresnet14,
+        'preresnet16': pt_preresnet.preresnet16,
         'preresnet18': pt_preresnet.preresnet18,
+        'preresnet18_w3d4': pt_preresnet.preresnet18_w3d4,
+        'preresnet18_wd2': pt_preresnet.preresnet18_wd2,
+        'preresnet18_wd4': pt_preresnet.preresnet18_wd4,
         'preresnet34': pt_preresnet.preresnet34,
         'preresnet50': pt_preresnet.preresnet50,
         'preresnet50b': pt_preresnet.preresnet50b,

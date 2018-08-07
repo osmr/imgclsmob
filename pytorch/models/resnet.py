@@ -238,21 +238,20 @@ class ResNet(nn.Module):
         return x
 
 
-def get_resnet(version,
+def get_resnet(blocks,
+               conv1_stride=True,
+               width_scale=1.0,
                pretrained=False,
                **kwargs):
-    if version.endswith("b"):
-        conv1_stride = False
-        pure_version = version[:-1]
-    else:
-        conv1_stride = True
-        pure_version = version
-
-    if not pure_version.isdigit():
-        raise ValueError("Unsupported ResNet version {}".format(version))
-
-    blocks = int(pure_version)
-    if blocks == 18:
+    if blocks == 10:
+        layers = [1, 1, 1, 1]
+    elif blocks == 12:
+        layers = [2, 1, 1, 1]
+    elif blocks == 14:
+        layers = [2, 2, 1, 1]
+    elif blocks == 16:
+        layers = [2, 2, 2, 1]
+    elif blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -265,7 +264,7 @@ def get_resnet(version,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet version {}".format(version))
+        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 
@@ -278,6 +277,10 @@ def get_resnet(version,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
+    if width_scale != 1.0:
+        channels = [int(ci * width_scale) for ci in channels]
+        init_block_channels = int(init_block_channels * width_scale)
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
@@ -289,44 +292,72 @@ def get_resnet(version,
         **kwargs)
 
 
+def resnet10(**kwargs):
+    return get_resnet(blocks=10, **kwargs)
+
+
+def resnet12(**kwargs):
+    return get_resnet(blocks=12, **kwargs)
+
+
+def resnet14(**kwargs):
+    return get_resnet(blocks=14, **kwargs)
+
+
+def resnet16(**kwargs):
+    return get_resnet(blocks=16, **kwargs)
+
+
 def resnet18(**kwargs):
-    return get_resnet('18', **kwargs)
+    return get_resnet(blocks=18, **kwargs)
+
+
+def resnet18_w3d4(**kwargs):
+    return get_resnet(blocks=18, width_scale=0.75, **kwargs)
+
+
+def resnet18_wd2(**kwargs):
+    return get_resnet(blocks=18, width_scale=0.5, **kwargs)
+
+
+def resnet18_wd4(**kwargs):
+    return get_resnet(blocks=18, width_scale=0.25, **kwargs)
 
 
 def resnet34(**kwargs):
-    return get_resnet('34', **kwargs)
+    return get_resnet(blocks=34, **kwargs)
 
 
 def resnet50(**kwargs):
-    return get_resnet('50', **kwargs)
+    return get_resnet(blocks=50, **kwargs)
 
 
 def resnet50b(**kwargs):
-    return get_resnet('50b', **kwargs)
+    return get_resnet(blocks=50, conv1_stride=False, **kwargs)
 
 
 def resnet101(**kwargs):
-    return get_resnet('101', **kwargs)
+    return get_resnet(blocks=101, **kwargs)
 
 
 def resnet101b(**kwargs):
-    return get_resnet('101b', **kwargs)
+    return get_resnet(blocks=101, conv1_stride=False, **kwargs)
 
 
 def resnet152(**kwargs):
-    return get_resnet('152', **kwargs)
+    return get_resnet(blocks=152, **kwargs)
 
 
 def resnet152b(**kwargs):
-    return get_resnet('152b', **kwargs)
+    return get_resnet(blocks=152, conv1_stride=False, **kwargs)
 
 
 def resnet200(**kwargs):
-    return get_resnet('200', **kwargs)
+    return get_resnet(blocks=200, **kwargs)
 
 
 def resnet200b(**kwargs):
-    return get_resnet('200b', **kwargs)
+    return get_resnet(blocks=200, conv1_stride=False, **kwargs)
 
 
 def _test():

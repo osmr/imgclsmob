@@ -252,21 +252,20 @@ class PreResNet(nn.Module):
         return x
 
 
-def get_preresnet(version,
+def get_preresnet(blocks,
+                  conv1_stride=True,
+                  width_scale=1.0,
                   pretrained=False,
                   **kwargs):
-    if version.endswith("b"):
-        conv1_stride = False
-        pure_version = version[:-1]
-    else:
-        conv1_stride = True
-        pure_version = version
-
-    if not pure_version.isdigit():
-        raise ValueError("Unsupported PreResNet version {}".format(version))
-
-    blocks = int(pure_version)
-    if blocks == 18:
+    if blocks == 10:
+        layers = [1, 1, 1, 1]
+    elif blocks == 12:
+        layers = [2, 1, 1, 1]
+    elif blocks == 14:
+        layers = [2, 2, 1, 1]
+    elif blocks == 16:
+        layers = [2, 2, 2, 1]
+    elif blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -279,7 +278,7 @@ def get_preresnet(version,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported PreResNet version {}".format(version))
+        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 
@@ -292,6 +291,10 @@ def get_preresnet(version,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
+    if width_scale != 1.0:
+        channels = [int(ci * width_scale) for ci in channels]
+        init_block_channels = int(init_block_channels * width_scale)
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
@@ -303,44 +306,72 @@ def get_preresnet(version,
         **kwargs)
 
 
+def preresnet10(**kwargs):
+    return get_preresnet(blocks=10, **kwargs)
+
+
+def preresnet12(**kwargs):
+    return get_preresnet(blocks=12, **kwargs)
+
+
+def preresnet14(**kwargs):
+    return get_preresnet(blocks=14, **kwargs)
+
+
+def preresnet16(**kwargs):
+    return get_preresnet(blocks=16, **kwargs)
+
+
 def preresnet18(**kwargs):
-    return get_preresnet('18', **kwargs)
+    return get_preresnet(blocks=18, **kwargs)
+
+
+def preresnet18_w3d4(**kwargs):
+    return get_preresnet(blocks=18, width_scale=0.75, **kwargs)
+
+
+def preresnet18_wd2(**kwargs):
+    return get_preresnet(blocks=18, width_scale=0.5, **kwargs)
+
+
+def preresnet18_wd4(**kwargs):
+    return get_preresnet(blocks=18, width_scale=0.25, **kwargs)
 
 
 def preresnet34(**kwargs):
-    return get_preresnet('34', **kwargs)
+    return get_preresnet(blocks=34, **kwargs)
 
 
 def preresnet50(**kwargs):
-    return get_preresnet('50', **kwargs)
+    return get_preresnet(blocks=50, **kwargs)
 
 
 def preresnet50b(**kwargs):
-    return get_preresnet('50b', **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, **kwargs)
 
 
 def preresnet101(**kwargs):
-    return get_preresnet('101', **kwargs)
+    return get_preresnet(blocks=101, **kwargs)
 
 
 def preresnet101b(**kwargs):
-    return get_preresnet('101b', **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, **kwargs)
 
 
 def preresnet152(**kwargs):
-    return get_preresnet('152', **kwargs)
+    return get_preresnet(blocks=152, **kwargs)
 
 
 def preresnet152b(**kwargs):
-    return get_preresnet('152b', **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, **kwargs)
 
 
 def preresnet200(**kwargs):
-    return get_preresnet('200', **kwargs)
+    return get_preresnet(blocks=200, **kwargs)
 
 
 def preresnet200b(**kwargs):
-    return get_preresnet('200b', **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, **kwargs)
 
 
 def _test():

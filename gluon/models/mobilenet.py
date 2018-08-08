@@ -14,7 +14,24 @@ from mxnet.gluon import nn, HybridBlock
 
 
 class ConvBlock(HybridBlock):
+    """
+    Standard enough convolution block with BatchNorm and activation.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -47,7 +64,21 @@ class ConvBlock(HybridBlock):
 
 
 class DwsConvBlock(HybridBlock):
+    """
+    Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
+    a MobileNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,

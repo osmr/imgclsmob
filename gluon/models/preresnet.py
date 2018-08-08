@@ -1,6 +1,6 @@
 """
     PreResNet, implemented in Gluon.
-    Original paper: 'Identity Mappings in Deep Residual Networks.'
+    Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18', 'preresnet18_w3d4',
@@ -240,7 +240,7 @@ class PreResActivation(HybridBlock):
 
 class PreResNet(HybridBlock):
     """
-    PreResNet model from 'Identity Mappings in Deep Residual Networks.'
+    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------

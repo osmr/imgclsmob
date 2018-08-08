@@ -1,6 +1,7 @@
 """
     ShuffleNet, implemented in Gluon.
-    Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices.'
+    Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
 """
 
 __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_w1', 'shufflenet_g4_w1',
@@ -144,7 +145,8 @@ class ShuffleInitBlock(HybridBlock):
 
 class ShuffleNet(HybridBlock):
     """
-    ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices.'
+    ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
 
     Parameters:
     ----------

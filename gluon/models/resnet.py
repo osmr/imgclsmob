@@ -1,6 +1,6 @@
 """
     ResNet, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition.'
+    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18', 'resnet18_w3d4', 'resnet18_wd2',
@@ -221,7 +221,7 @@ class ResInitBlock(HybridBlock):
 
 class ResNet(HybridBlock):
     """
-    ResNet model from 'Deep Residual Learning for Image Recognition.'
+    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
     Parameters:
     ----------

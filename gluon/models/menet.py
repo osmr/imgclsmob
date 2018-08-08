@@ -1,6 +1,7 @@
 """
     MENet, implemented in Gluon.
-    Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications.'
+    Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
+    https://arxiv.org/abs/1803.09127.
 """
 
 __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
@@ -198,7 +199,8 @@ class MEInitBlock(HybridBlock):
 
 class MENet(HybridBlock):
     """
-    MENet model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications.'
+    MENet model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
+    https://arxiv.org/abs/1803.09127.
 
     Parameters:
     ----------

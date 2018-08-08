@@ -1,6 +1,6 @@
 """
     DenseNet, implemented in PyTorch.
-    Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf
+    Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
 __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
@@ -151,7 +151,7 @@ class PostActivation(nn.Module):
 
 class DenseNet(nn.Module):
     """
-    DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/pdf/1608.06993.pdf.
+    DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------

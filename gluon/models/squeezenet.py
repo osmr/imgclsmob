@@ -1,6 +1,7 @@
 """
     SqueezeNet, implemented in Gluon.
-    Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size.'
+    Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
+    https://arxiv.org/abs/1602.07360.
 """
 
 __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
@@ -100,7 +101,8 @@ class SqueezeInitBlock(HybridBlock):
 
 class SqueezeNet(HybridBlock):
     """
-    SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size.'
+    SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
+    https://arxiv.org/abs/1602.07360.
 
     Parameters:
     ----------

@@ -1,6 +1,6 @@
 """
     DarkNet, implemented in PyTorch.
-    Original paper: 'Darknet: Open source neural networks in c.'
+    Original source: 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 """
 
 __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
@@ -70,7 +70,7 @@ def dark_convYxY(in_channels,
 
 class DarkNet(nn.Module):
     """
-    DarkNet model from 'Darknet: Open source neural networks in c.'
+    DarkNet model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
     Parameters:
     ----------

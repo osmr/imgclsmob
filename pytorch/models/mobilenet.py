@@ -1,8 +1,9 @@
 """
     MobileNet & FD-MobileNet, implemented in PyTorch.
     Original papers: 
-    - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.'
-    - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy.'
+    - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+       https://arxiv.org/abs/1704.04861.
+    - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.
 """
 
 __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
@@ -70,8 +71,9 @@ class DwsConvBlock(nn.Module):
 
 class MobileNet(nn.Module):
     """
-    MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.' Also
-    this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy.'
+    MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+    https://arxiv.org/abs/1704.04861. Also this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet
+    with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750
 
     Parameters:
     ----------

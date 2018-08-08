@@ -5,7 +5,7 @@
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18', 'preresnet18_w3d4',
            'preresnet18_wd2', 'preresnet18_wd4', 'preresnet34', 'preresnet50', 'preresnet50b', 'preresnet101',
-           'preresnet101b', 'preresnet152', 'preresnet152b']
+           'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
 
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
@@ -457,6 +457,8 @@ def _test():
         preresnet101b,
         preresnet152,
         preresnet152b,
+        preresnet200,
+        preresnet200b,
     ]
 
     for model in models:
@@ -487,6 +489,8 @@ def _test():
         assert (model != preresnet101b or weight_count == 44541608)  # resnet101_v2
         assert (model != preresnet152 or weight_count == 60185256)  # resnet152_v2
         assert (model != preresnet152b or weight_count == 60185256)  # resnet152_v2
+        assert (model != preresnet200 or weight_count == 64666280)
+        assert (model != preresnet200b or weight_count == 64666280)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

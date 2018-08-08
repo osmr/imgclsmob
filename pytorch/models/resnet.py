@@ -4,7 +4,8 @@
 """
 
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18', 'resnet18_w3d4', 'resnet18_wd2',
-           'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b']
+           'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
+           'resnet200', 'resnet200b']
 
 import torch.nn as nn
 import torch.nn.init as init
@@ -404,6 +405,8 @@ def _test():
         resnet101b,
         resnet152,
         resnet152b,
+        resnet200,
+        resnet200b,
     ]
 
     for model in models:
@@ -430,6 +433,8 @@ def _test():
         assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
         assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
         assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+        assert (model != resnet200 or weight_count == 64673832)
+        assert (model != resnet200b or weight_count == 64673832)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

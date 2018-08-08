@@ -278,6 +278,21 @@ def get_preresnet(blocks,
                   width_scale=1.0,
                   pretrained=False,
                   **kwargs):
+    """
+    Create PreResNet model with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer in units.
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:

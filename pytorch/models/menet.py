@@ -281,6 +281,21 @@ def get_menet(first_stage_channels,
               groups,
               pretrained=False,
               **kwargs):
+    """
+    Create MENet model with specific parameters.
+
+    Parameters:
+    ----------
+    first_stage_channels : int
+        Number of output channels at the first stage.
+    side_channels : int
+        Number of side channels in a ME-unit.
+    groups : int
+        Number of groups in convolution layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+
     layers = [4, 8, 4]
 
     if first_stage_channels == 108:

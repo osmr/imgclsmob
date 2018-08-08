@@ -208,6 +208,21 @@ def get_shufflenet(groups,
                    pretrained=False,
                    ctx=cpu(),
                    **kwargs):
+    """
+    Create ShuffleNet model with specific parameters.
+
+    Parameters:
+    ----------
+    groups : int
+        Number of groups in convolution layers.
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
+
     init_block_channels = 24
     layers = [4, 8, 4]
 

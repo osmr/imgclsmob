@@ -186,6 +186,17 @@ class MobileNetV2(nn.Module):
 def get_mobilenetv2(width_scale,
                     pretrained=False,
                     **kwargs):
+    """
+    Create MobileNetV2 model with specific parameters.
+
+    Parameters:
+    ----------
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+
     init_block_channels = 32
     final_block_channels = 1280
     layers = [1, 2, 3, 4, 3, 3, 1]

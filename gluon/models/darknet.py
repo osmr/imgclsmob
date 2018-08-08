@@ -150,6 +150,19 @@ def get_darknet(version,
                 pretrained=False,
                 ctx=cpu(),
                 **kwargs):
+    """
+    Create DarkNet model with specific parameters.
+
+    Parameters:
+    ----------
+    version : str
+        Version of SqueezeNet ('ref', 'tiny' or '19').
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
+
     if version == 'ref':
         channels = [[16], [32], [64], [128], [256], [512], [1024]]
         odd_pointwise = False

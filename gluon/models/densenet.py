@@ -253,6 +253,19 @@ def get_densenet(num_layers,
                  pretrained=False,
                  ctx=cpu(),
                  **kwargs):
+    """
+    Create DenseNet model with specific parameters.
+
+    Parameters:
+    ----------
+    num_layers : int
+        Number of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
+
     if num_layers == 121:
         init_block_channels = 64
         growth_rate = 32

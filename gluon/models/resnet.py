@@ -296,6 +296,23 @@ def get_resnet(blocks,
                pretrained=False,
                ctx=cpu(),
                **kwargs):
+    """
+    Create ResNet model with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer in units.
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
+
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:

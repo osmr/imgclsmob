@@ -202,6 +202,21 @@ def get_squeezenext(version,
                     pretrained=False,
                     ctx=cpu(),
                     **kwargs):
+    """
+    Create SqueezeNext model with specific parameters.
+
+    Parameters:
+    ----------
+    version : str
+        Version of SqueezeNet ('23' or '23v5').
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
+
     init_block_channels = 64
     final_block_channels = 128
     channels_per_layers = [32, 64, 128, 256]

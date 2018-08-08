@@ -178,6 +178,19 @@ def get_squeezenet(version,
                    residual=False,
                    pretrained=False,
                    **kwargs):
+    """
+    Create SqueezeNet model with specific parameters.
+
+    Parameters:
+    ----------
+    version : str
+        Version of SqueezeNet ('1.0' or '1.1').
+    residual : bool, default False
+        Whether to use residual connections.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+
     if version == '1.0':
         channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
         residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
@@ -233,7 +246,7 @@ def squeezenet_v1_1(**kwargs):
 
 def squeezeresnet_v1_0(**kwargs):
     """
-    SqueezeNet model with residual connection from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and
+    SqueezeNet model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and
     <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
     Parameters:
@@ -246,7 +259,7 @@ def squeezeresnet_v1_0(**kwargs):
 
 def squeezeresnet_v1_1(**kwargs):
     """
-    SqueezeNet v1.1 model with residual connection from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
+    SqueezeNet v1.1 model with residual connections from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
     and <0.5MB model size,' https://arxiv.org/abs/1602.07360.
 
     Parameters:

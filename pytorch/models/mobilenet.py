@@ -143,6 +143,19 @@ def get_mobilenet(version,
                   width_scale,
                   pretrained=False,
                   **kwargs):
+    """
+    Create MobileNet model with specific parameters.
+
+    Parameters:
+    ----------
+    version : str
+        Version of SqueezeNet ('orig' or 'fd').
+    width_scale : float
+        Scale factor for width of layers.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+
     if version == 'orig':
         channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 512], [1024, 1024]]
         first_stage_stride = False

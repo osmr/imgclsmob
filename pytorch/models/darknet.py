@@ -11,7 +11,20 @@ import torch.nn.init as init
 
 
 class DarkConv(nn.Module):
+    """
+    DarkNet specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -39,6 +52,16 @@ class DarkConv(nn.Module):
 
 def dark_conv1x1(in_channels,
                  out_channels):
+    """
+    1x1 version of the DarkNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     return DarkConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -48,6 +71,16 @@ def dark_conv1x1(in_channels,
 
 def dark_conv3x3(in_channels,
                  out_channels):
+    """
+    3x3 version of the DarkNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     return DarkConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -58,6 +91,18 @@ def dark_conv3x3(in_channels,
 def dark_convYxY(in_channels,
                  out_channels,
                  pointwise=True):
+    """
+    DarkNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    pointwise : bool
+        Whether use 1x1 (pointwise) convolution or 3x3 convolution.
+    """
     if pointwise:
         return dark_conv1x1(
             in_channels=in_channels,

@@ -10,7 +10,22 @@ import torch.nn.init as init
 
 
 class SqnxtConv(nn.Module):
+    """
+    SqueezeNext specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default (0, 0)
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -35,7 +50,18 @@ class SqnxtConv(nn.Module):
 
 
 class SqnxtUnit(nn.Module):
+    """
+    SqueezeNext unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -104,7 +130,16 @@ class SqnxtUnit(nn.Module):
 
 
 class SqnxtInitBlock(nn.Module):
+    """
+    SqueezeNext specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):

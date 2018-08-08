@@ -211,18 +211,62 @@ def get_squeezenet(version,
 
 
 def squeezenet_v1_0(**kwargs):
+    """
+    SqueezeNet 'vanilla' model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model
+    size,' https://arxiv.org/abs/1602.07360.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_squeezenet(version='1.0', residual=False, **kwargs)
 
 
 def squeezenet_v1_1(**kwargs):
+    """
+    SqueezeNet v1.1 model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model
+    size,' https://arxiv.org/abs/1602.07360.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_squeezenet(version='1.1', residual=False, **kwargs)
 
 
 def squeezeresnet_v1_0(**kwargs):
+    """
+    SqueezeNet model with residual connection from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and
+    <0.5MB model size,' https://arxiv.org/abs/1602.07360.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_squeezenet(version='1.0', residual=True, **kwargs)
 
 
 def squeezeresnet_v1_1(**kwargs):
+    """
+    SqueezeNet v1.1 model with residual connection from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters
+    and <0.5MB model size,' https://arxiv.org/abs/1602.07360.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_squeezenet(version='1.1', residual=True, **kwargs)
 
 

@@ -313,34 +313,122 @@ def get_menet(first_stage_channels,
 
 
 def menet108_8x1_g3(**kwargs):
+    """
+    108-MENet-8x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(108, 8, 3, **kwargs)
 
 
 def menet128_8x1_g4(**kwargs):
+    """
+    128-MENet-8x1 (g=4) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(128, 8, 4, **kwargs)
 
 
 def menet160_8x1_g8(**kwargs):
+    """
+    160-MENet-8x1 (g=8) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(160, 8, 8, **kwargs)
 
 
 def menet228_12x1_g3(**kwargs):
+    """
+    228-MENet-12x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(228, 12, 3, **kwargs)
 
 
 def menet256_12x1_g4(**kwargs):
+    """
+    256-MENet-12x1 (g=4) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(256, 12, 4, **kwargs)
 
 
 def menet348_12x1_g3(**kwargs):
+    """
+    348-MENet-12x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(348, 12, 3, **kwargs)
 
 
 def menet352_12x1_g8(**kwargs):
+    """
+    352-MENet-12x1 (g=8) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(352, 12, 8, **kwargs)
 
 
 def menet456_24x1_g3(**kwargs):
+    """
+    456-MENet-24x1 (g=3) model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile
+    Applications,' https://arxiv.org/abs/1803.09127.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_menet(456, 24, 3, **kwargs)
 
 

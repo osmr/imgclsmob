@@ -259,18 +259,50 @@ def get_densenet(num_layers,
 
 
 def densenet121(**kwargs):
+    """
+    DenseNet-121 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_densenet(121, **kwargs)
 
 
 def densenet161(**kwargs):
+    """
+    DenseNet-161 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_densenet(161, **kwargs)
 
 
 def densenet169(**kwargs):
+    """
+    DenseNet-169 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_densenet(169, **kwargs)
 
 
 def densenet201(**kwargs):
+    """
+    DenseNet-201 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_densenet(201, **kwargs)
 
 

@@ -73,7 +73,7 @@ class MobileNet(nn.Module):
     """
     MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861. Also this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet
-    with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750
+    with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.
 
     Parameters:
     ----------
@@ -155,7 +155,8 @@ def get_mobilenet(version,
     else:
         raise ValueError("Unsupported MobileNet version {}".format(version))
 
-    channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+    if width_scale != 1.0:
+        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
@@ -167,34 +168,106 @@ def get_mobilenet(version,
 
 
 def mobilenet_w1(**kwargs):
-    return get_mobilenet('orig', 1, **kwargs)
+    """
+    1.0 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+    https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+    return get_mobilenet('orig', 1.0, **kwargs)
 
 
 def mobilenet_w3d4(**kwargs):
+    """
+    0.75 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+    https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('orig', 0.75, **kwargs)
 
 
 def mobilenet_wd2(**kwargs):
+    """
+    0.5 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+    https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('orig', 0.5, **kwargs)
 
 
 def mobilenet_wd4(**kwargs):
+    """
+    0.25 MobileNet-224 model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
+    https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('orig', 0.25, **kwargs)
 
 
 def fdmobilenet_w1(**kwargs):
-    return get_mobilenet('fd', 1, **kwargs)
+    """
+    FD-MobileNet 1.0x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    https://arxiv.org/abs/1802.03750.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+    return get_mobilenet('fd', 1.0, **kwargs)
 
 
 def fdmobilenet_w3d4(**kwargs):
+    """
+    FD-MobileNet 0.75x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    https://arxiv.org/abs/1802.03750.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('fd', 0.75, **kwargs)
 
 
 def fdmobilenet_wd2(**kwargs):
+    """
+    FD-MobileNet 0.5x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    https://arxiv.org/abs/1802.03750.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('fd', 0.5, **kwargs)
 
 
 def fdmobilenet_wd4(**kwargs):
+    """
+    FD-MobileNet 0.25x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    https://arxiv.org/abs/1802.03750.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenet('fd', 0.25, **kwargs)
 
 

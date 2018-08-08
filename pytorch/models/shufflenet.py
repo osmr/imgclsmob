@@ -255,46 +255,145 @@ def get_shufflenet(groups,
 
 
 def shufflenet_g1_w1(**kwargs):
+    """
+    ShuffleNet 1x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(1, 1.0, **kwargs)
 
 
 def shufflenet_g2_w1(**kwargs):
+    """
+    ShuffleNet 1x (g=2) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(2, 1.0, **kwargs)
 
 
 def shufflenet_g3_w1(**kwargs):
+    """
+    ShuffleNet 1x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(3, 1.0, **kwargs)
 
 
 def shufflenet_g4_w1(**kwargs):
+    """
+    ShuffleNet 1x (g=4) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(4, 1.0, **kwargs)
 
 
 def shufflenet_g8_w1(**kwargs):
+    """
+    ShuffleNet 1x (g=8) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(8, 1.0, **kwargs)
 
 
 def shufflenet_g1_w3d4(**kwargs):
+    """
+    ShuffleNet 0.75x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(1, 0.75, **kwargs)
 
 
 def shufflenet_g3_w3d4(**kwargs):
+    """
+    ShuffleNet 0.75x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(3, 0.75, **kwargs)
 
 
 def shufflenet_g1_wd2(**kwargs):
+    """
+    ShuffleNet 0.5x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(1, 0.5, **kwargs)
 
 
 def shufflenet_g3_wd2(**kwargs):
+    """
+    ShuffleNet 0.5x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(3, 0.5, **kwargs)
 
 
 def shufflenet_g1_wd4(**kwargs):
+    """
+    ShuffleNet 0.25x (g=1) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(1, 0.25, **kwargs)
 
 
 def shufflenet_g3_wd4(**kwargs):
+    """
+    ShuffleNet 0.25x (g=3) model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile
+    Devices,' https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_shufflenet(3, 0.25, **kwargs)
 
 

@@ -232,26 +232,74 @@ def get_squeezenext(version,
 
 
 def sqnxt23_w1(**kwargs):
+    """
+    1.0-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23', 1.0, **kwargs)
 
 
 def sqnxt23_w3d2(**kwargs):
+    """
+    0.75-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23', 1.5, **kwargs)
 
 
 def sqnxt23_w2(**kwargs):
+    """
+    0.5-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23', 2.0, **kwargs)
 
 
 def sqnxt23v5_w1(**kwargs):
+    """
+    1.0-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23v5', 1.0, **kwargs)
 
 
 def sqnxt23v5_w3d2(**kwargs):
+    """
+    0.75-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23v5', 1.5, **kwargs)
 
 
 def sqnxt23v5_w2(**kwargs):
+    """
+    0.5-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_squeezenext('23v5', 2.0, **kwargs)
 
 

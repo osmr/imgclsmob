@@ -322,8 +322,6 @@ def resnet10(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=10, **kwargs)
 
@@ -337,8 +335,6 @@ def resnet12(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=12, **kwargs)
 
@@ -352,8 +348,6 @@ def resnet14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=14, **kwargs)
 
@@ -367,8 +361,6 @@ def resnet16(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=16, **kwargs)
 
@@ -381,8 +373,6 @@ def resnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=18, **kwargs)
 
@@ -396,8 +386,6 @@ def resnet18_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=18, width_scale=0.75, **kwargs)
 
@@ -411,8 +399,6 @@ def resnet18_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=18, width_scale=0.5, **kwargs)
 
@@ -426,8 +412,6 @@ def resnet18_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=18, width_scale=0.25, **kwargs)
 
@@ -440,8 +424,6 @@ def resnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=34, **kwargs)
 
@@ -454,8 +436,6 @@ def resnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=50, **kwargs)
 
@@ -469,8 +449,6 @@ def resnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=50, conv1_stride=False, **kwargs)
 
@@ -483,8 +461,6 @@ def resnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=101, **kwargs)
 
@@ -498,8 +474,6 @@ def resnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=101, conv1_stride=False, **kwargs)
 
@@ -512,8 +486,6 @@ def resnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=152, **kwargs)
 
@@ -527,8 +499,6 @@ def resnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=152, conv1_stride=False, **kwargs)
 
@@ -542,8 +512,6 @@ def resnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=200, **kwargs)
 
@@ -557,8 +525,6 @@ def resnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     """
     return get_resnet(blocks=200, conv1_stride=False, **kwargs)
 

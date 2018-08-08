@@ -199,7 +199,7 @@ def get_mobilenetv2(width_scale,
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                       zip(channels_per_layers, layers, downsample), [[]])
 
-    if width_scale != 1:
+    if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
         if width_scale > 1.0:
@@ -216,18 +216,54 @@ def get_mobilenetv2(width_scale,
 
 
 def mobilenetv2_w1(**kwargs):
-    return get_mobilenetv2(1, **kwargs)
+    """
+    1.0 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
+    return get_mobilenetv2(1.0, **kwargs)
 
 
 def mobilenetv2_w3d4(**kwargs):
+    """
+    0.75 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenetv2(0.75, **kwargs)
 
 
 def mobilenetv2_wd2(**kwargs):
+    """
+    0.5 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenetv2(0.5, **kwargs)
 
 
 def mobilenetv2_wd4(**kwargs):
+    """
+    0.25 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    """
     return get_mobilenetv2(0.25, **kwargs)
 
 

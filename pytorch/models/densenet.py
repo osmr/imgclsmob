@@ -11,7 +11,22 @@ import torch.nn.init as init
 
 
 class DenseConv(nn.Module):
+    """
+    DenseNet specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -38,6 +53,16 @@ class DenseConv(nn.Module):
 
 def dense_conv1x1(in_channels,
                   out_channels):
+    """
+    1x1 version of the DenseNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     return DenseConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -48,6 +73,16 @@ def dense_conv1x1(in_channels,
 
 def dense_conv3x3(in_channels,
                   out_channels):
+    """
+    3x3 version of the DenseNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     return DenseConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -57,7 +92,20 @@ def dense_conv3x3(in_channels,
 
 
 class DenseUnit(nn.Module):
+    """
+    DenseNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    dropout_rate : bool
+        Parameter of Dropout layer. Faction of the input units to drop.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -88,7 +136,17 @@ class DenseUnit(nn.Module):
 
 
 class TransitionBlock(nn.Module):
+    """
+    DenseNet's auxiliary block, which can be treated as the initial part of the DenseNet unit, triggered only in the
+    first unit of each stage.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -108,7 +166,16 @@ class TransitionBlock(nn.Module):
 
 
 class DenseInitBlock(nn.Module):
+    """
+    DenseNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -136,7 +203,14 @@ class DenseInitBlock(nn.Module):
 
 
 class PostActivation(nn.Module):
+    """
+    DenseNet final block, which performs the same function of postactivation as in PreResNet.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    """
     def __init__(self,
                  in_channels):
         super(PostActivation, self).__init__()
@@ -160,7 +234,7 @@ class DenseNet(nn.Module):
     init_block_channels : int
         Number of output channels for the initial unit.
     dropout_rate : float, default 0.0
-        Fraction of the input units to dropout.
+        Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
     num_classes : int, default 1000

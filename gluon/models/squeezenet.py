@@ -11,7 +11,20 @@ from mxnet.gluon import nn, HybridBlock
 
 
 class FireConv(HybridBlock):
+    """
+    SqueezeNet specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -34,7 +47,22 @@ class FireConv(HybridBlock):
 
 
 class FireUnit(HybridBlock):
+    """
+    SqueezeNet unit, so-called 'Fire' unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    squeeze_channels : int
+        Number of output channels for squeeze convolution blocks.
+    expand1x1_channels : int
+        Number of output channels for expand 1x1 convolution blocks.
+    expand3x3_channels : int
+        Number of output channels for expand 3x3 convolution blocks.
+    residual : bool
+        Whether use residual connection.
+    """
     def __init__(self,
                  in_channels,
                  squeeze_channels,
@@ -75,7 +103,18 @@ class FireUnit(HybridBlock):
 
 
 class SqueezeInitBlock(HybridBlock):
+    """
+    SqueezeNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,

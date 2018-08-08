@@ -10,7 +10,26 @@ import torch.nn.init as init
 
 
 class MobnetConv(nn.Module):
+    """
+    MobileNetV2 specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    activate : bool
+        Whether activate the convolution block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -45,6 +64,18 @@ class MobnetConv(nn.Module):
 def mobnet_conv1x1(in_channels,
                    out_channels,
                    activate):
+    """
+    1x1 version of the MobileNetV2 specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -59,6 +90,20 @@ def mobnet_dwconv3x3(in_channels,
                      out_channels,
                      stride,
                      activate):
+    """
+    3x3 depthwise version of the MobileNetV2 specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -70,7 +115,20 @@ def mobnet_dwconv3x3(in_channels,
 
 
 class LinearBottleneck(nn.Module):
+    """
+    So-called 'Linear Bottleneck' layer. It is used as a MobileNetV2 unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the second convolution layer.
+    expansion : bool
+        Whether do expansion of channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,

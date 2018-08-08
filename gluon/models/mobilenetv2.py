@@ -10,7 +10,9 @@ from mxnet.gluon import nn, HybridBlock
 
 
 class ReLU6(nn.HybridBlock):
-
+    """
+    ReLU6 activation layer.
+    """
     def __init__(self, **kwargs):
         super(ReLU6, self).__init__(**kwargs)
 
@@ -19,7 +21,28 @@ class ReLU6(nn.HybridBlock):
 
 
 class MobnetConv(HybridBlock):
+    """
+    MobileNetV2 specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -60,6 +83,20 @@ def mobnet_conv1x1(in_channels,
                    out_channels,
                    bn_use_global_stats,
                    activate):
+    """
+    1x1 version of the MobileNetV2 specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -76,6 +113,22 @@ def mobnet_dwconv3x3(in_channels,
                      strides,
                      bn_use_global_stats,
                      activate):
+    """
+    3x3 depthwise version of the MobileNetV2 specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return MobnetConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -88,13 +141,28 @@ def mobnet_dwconv3x3(in_channels,
 
 
 class LinearBottleneck(HybridBlock):
+    """
+    So-called 'Linear Bottleneck' layer. It is used as a MobileNetV2 unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the second convolution layer.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    expansion : bool
+        Whether do expansion of channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 expansion,
                  bn_use_global_stats,
+                 expansion,
                  **kwargs):
         super(LinearBottleneck, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
@@ -181,8 +249,8 @@ class MobileNetV2(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            expansion=expansion,
-                            bn_use_global_stats=bn_use_global_stats))
+                            bn_use_global_stats=bn_use_global_stats,
+                            expansion=expansion))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(mobnet_conv1x1(

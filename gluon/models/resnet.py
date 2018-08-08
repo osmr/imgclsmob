@@ -12,7 +12,26 @@ from mxnet.gluon import nn, HybridBlock
 
 
 class ResConv(HybridBlock):
+    """
+    ResNet specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -52,6 +71,22 @@ def res_conv1x1(in_channels,
                 strides,
                 bn_use_global_stats,
                 activate):
+    """
+    1x1 version of the ResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return ResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -67,6 +102,22 @@ def res_conv3x3(in_channels,
                 strides,
                 bn_use_global_stats,
                 activate):
+    """
+    3x3 version of the ResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return ResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -78,7 +129,20 @@ def res_conv3x3(in_channels,
 
 
 class ResBlock(HybridBlock):
+    """
+    Simple ResNet block for residual path in ResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -107,7 +171,22 @@ class ResBlock(HybridBlock):
 
 
 class ResBottleneck(HybridBlock):
+    """
+    ResNet bottleneck block for residual path in ResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -146,7 +225,24 @@ class ResBottleneck(HybridBlock):
 
 
 class ResUnit(HybridBlock):
+    """
+    ResNet unit with residual connection.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -193,7 +289,18 @@ class ResUnit(HybridBlock):
 
 
 class ResInitBlock(HybridBlock):
+    """
+    ResNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,

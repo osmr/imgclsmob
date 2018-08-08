@@ -12,7 +12,26 @@ import torch.nn.init as init
 
 
 class ResConv(nn.Module):
+    """
+    ResNet specific convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -46,6 +65,20 @@ def res_conv1x1(in_channels,
                 out_channels,
                 stride,
                 activate):
+    """
+    1x1 version of the ResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return ResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -59,6 +92,20 @@ def res_conv3x3(in_channels,
                 out_channels,
                 stride,
                 activate):
+    """
+    3x3 version of the ResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    activate : bool
+        Whether activate the convolution block.
+    """
     return ResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -69,7 +116,18 @@ def res_conv3x3(in_channels,
 
 
 class ResBlock(nn.Module):
+    """
+    Simple ResNet block for residual path in ResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -93,7 +151,20 @@ class ResBlock(nn.Module):
 
 
 class ResBottleneck(nn.Module):
+    """
+    ResNet bottleneck block for residual path in ResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -126,13 +197,28 @@ class ResBottleneck(nn.Module):
 
 
 class ResUnit(nn.Module):
+    """
+    ResNet unit with residual connection.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
                  bottleneck,
-                 conv1_stride=True):
+                 conv1_stride):
         super(ResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -167,7 +253,16 @@ class ResUnit(nn.Module):
 
 
 class ResInitBlock(nn.Module):
+    """
+    ResNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):

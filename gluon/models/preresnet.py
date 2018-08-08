@@ -12,7 +12,24 @@ from mxnet.gluon import nn, HybridBlock
 
 
 class PreResConv(HybridBlock):
+    """
+    PreResNet specific convolution block, with pre-activation.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -46,6 +63,18 @@ class PreResConv(HybridBlock):
 def conv1x1(in_channels,
             out_channels,
             strides):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     return nn.Conv2D(
         channels=out_channels,
         kernel_size=1,
@@ -59,6 +88,20 @@ def preres_conv1x1(in_channels,
                    out_channels,
                    strides,
                    bn_use_global_stats):
+    """
+    1x1 version of the PreResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -72,6 +115,20 @@ def preres_conv3x3(in_channels,
                    out_channels,
                    strides,
                    bn_use_global_stats):
+    """
+    3x3 version of the PreResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -82,7 +139,20 @@ def preres_conv3x3(in_channels,
 
 
 class PreResBlock(HybridBlock):
+    """
+    Simple PreResNet block for residual path in PreResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -109,7 +179,22 @@ class PreResBlock(HybridBlock):
 
 
 class PreResBottleneck(HybridBlock):
+    """
+    PreResNet bottleneck block for residual path in PreResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -145,14 +230,31 @@ class PreResBottleneck(HybridBlock):
 
 
 class PreResUnit(HybridBlock):
+    """
+    PreResNet unit with residual connection.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  bn_use_global_stats,
                  bottleneck,
-                 conv1_stride=True,
+                 conv1_stride,
                  **kwargs):
         super(PreResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
@@ -187,7 +289,18 @@ class PreResUnit(HybridBlock):
 
 
 class PreResInitBlock(HybridBlock):
+    """
+    PreResNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -220,7 +333,16 @@ class PreResInitBlock(HybridBlock):
 
 
 class PreResActivation(HybridBlock):
+    """
+    PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     def __init__(self,
                  in_channels,
                  bn_use_global_stats,

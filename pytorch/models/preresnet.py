@@ -12,7 +12,22 @@ import torch.nn.init as init
 
 
 class PreResConv(nn.Module):
+    """
+    PreResNet specific convolution block, with pre-activation.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -41,6 +56,18 @@ class PreResConv(nn.Module):
 def conv1x1(in_channels,
             out_channels,
             stride):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     return nn.Conv2d(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -53,6 +80,18 @@ def conv1x1(in_channels,
 def preres_conv1x1(in_channels,
                    out_channels,
                    stride):
+    """
+    1x1 version of the PreResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -64,6 +103,20 @@ def preres_conv1x1(in_channels,
 def preres_conv3x3(in_channels,
                    out_channels,
                    stride):
+    """
+    3x3 version of the PreResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -73,7 +126,18 @@ def preres_conv3x3(in_channels,
 
 
 class PreResBlock(nn.Module):
+    """
+    Simple PreResNet block for residual path in ResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -95,7 +159,20 @@ class PreResBlock(nn.Module):
 
 
 class PreResBottleneck(nn.Module):
+    """
+    PreResNet bottleneck block for residual path in PreResNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -125,13 +202,28 @@ class PreResBottleneck(nn.Module):
 
 
 class PreResUnit(nn.Module):
+    """
+    PreResNet unit with residual connection.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    conv1_stride : bool
+        Whether to use stride in the first or the second convolution layer of the block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
                  bottleneck,
-                 conv1_stride=True):
+                 conv1_stride):
         super(PreResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -162,7 +254,16 @@ class PreResUnit(nn.Module):
 
 
 class PreResInitBlock(nn.Module):
+    """
+    PreResNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -190,7 +291,14 @@ class PreResInitBlock(nn.Module):
 
 
 class PreResActivation(nn.Module):
+    """
+    PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    """
     def __init__(self,
                  in_channels):
         super(PreResActivation, self).__init__()

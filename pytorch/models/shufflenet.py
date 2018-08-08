@@ -15,6 +15,16 @@ import torch.nn.init as init
 
 def depthwise_conv3x3(channels,
                       stride):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     return nn.Conv2d(
         in_channels=channels,
         out_channels=channels,
@@ -28,6 +38,18 @@ def depthwise_conv3x3(channels,
 def group_conv1x1(in_channels,
                   out_channels,
                   groups):
+    """
+    Group convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of groups.
+    """
     return nn.Conv2d(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -38,10 +60,15 @@ def group_conv1x1(in_channels,
 
 def channel_shuffle(x,
                     groups):
-    """Channel Shuffle operation from ShuffleNet [arxiv: 1707.01083]
-    Arguments:
-        x (Tensor): tensor to shuffle.
-        groups (int): groups to be split
+    """
+    Channel shuffle operation.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    groups : int
+        Number of groups.
     """
     batch, channels, height, width = x.size()
     #assert (channels % groups == 0)
@@ -53,7 +80,16 @@ def channel_shuffle(x,
 
 
 class ChannelShuffle(nn.Module):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
     def __init__(self,
                  channels,
                  groups):
@@ -68,7 +104,22 @@ class ChannelShuffle(nn.Module):
 
 
 class ShuffleUnit(nn.Module):
+    """
+    ShuffleNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of groups in convolution layers.
+    downsample : bool
+        Whether do downsample.
+    ignore_group : bool
+        Whether ignore group value in the first convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -105,10 +156,14 @@ class ShuffleUnit(nn.Module):
 
     def forward(self, x):
         identity = x
-        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
+        x = self.compress_conv1(x)
+        x = self.compress_bn1(x)
+        x = self.activ(x)
         x = self.c_shuffle(x)
-        x = self.dw_bn2(self.dw_conv2(x))
-        x = self.expand_bn3(self.expand_conv3(x))
+        x = self.dw_conv2(x)
+        x = self.dw_bn2(x)
+        x = self.expand_conv3(x)
+        x = self.expand_bn3(x)
         if self.downsample:
             identity = self.avgpool(identity)
             x = torch.cat((x, identity), dim=1)
@@ -119,7 +174,16 @@ class ShuffleUnit(nn.Module):
 
 
 class ShuffleInitBlock(nn.Module):
+    """
+    ShuffleNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels):

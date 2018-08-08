@@ -14,6 +14,16 @@ from mxnet.gluon import nn, HybridBlock
 
 def depthwise_conv3x3(channels,
                       strides):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
     return nn.Conv2D(
         channels=channels,
         kernel_size=3,
@@ -27,6 +37,18 @@ def depthwise_conv3x3(channels,
 def group_conv1x1(in_channels,
                   out_channels,
                   groups):
+    """
+    Group convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of groups.
+    """
     return nn.Conv2D(
         channels=out_channels,
         kernel_size=1,
@@ -37,11 +59,30 @@ def group_conv1x1(in_channels,
 
 def channel_shuffle(x,
                     groups):
+    """
+    Channel shuffle operation.
+
+    Parameters:
+    ----------
+    x : NDArray
+        Input tensor.
+    groups : int
+        Number of groups.
+    """
     return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
 
 
 class ChannelShuffle(HybridBlock):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
     def __init__(self,
                  channels,
                  groups,
@@ -55,7 +96,22 @@ class ChannelShuffle(HybridBlock):
 
 
 class ShuffleUnit(HybridBlock):
+    """
+    ShuffleNet unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of groups in convolution layers.
+    downsample : bool
+        Whether do downsample.
+    ignore_group : bool
+        Whether ignore group value in the first convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -97,10 +153,14 @@ class ShuffleUnit(HybridBlock):
 
     def hybrid_forward(self, F, x):
         identity = x
-        x = self.activ(self.compress_bn1(self.compress_conv1(x)))
+        x = self.compress_conv1(x)
+        x = self.compress_bn1(x)
+        x = self.activ(x)
         x = self.c_shuffle(x)
-        x = self.dw_bn2(self.dw_conv2(x))
-        x = self.expand_bn3(self.expand_conv3(x))
+        x = self.dw_conv2(x)
+        x = self.dw_bn2(x)
+        x = self.expand_conv3(x)
+        x = self.expand_bn3(x)
         if self.downsample:
             identity = self.avgpool(identity)
             x = F.concat(x, identity, dim=1)
@@ -111,7 +171,16 @@ class ShuffleUnit(HybridBlock):
 
 
 class ShuffleInitBlock(HybridBlock):
+    """
+    ShuffleNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,

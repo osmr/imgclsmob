@@ -314,70 +314,252 @@ def get_resnet(blocks,
 
 
 def resnet10(**kwargs):
+    """
+    ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=10, **kwargs)
 
 
 def resnet12(**kwargs):
+    """
+    ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=12, **kwargs)
 
 
 def resnet14(**kwargs):
+    """
+    ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=14, **kwargs)
 
 
 def resnet16(**kwargs):
+    """
+    ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=16, **kwargs)
 
 
 def resnet18(**kwargs):
+    """
+    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=18, **kwargs)
 
 
 def resnet18_w3d4(**kwargs):
+    """
+    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=18, width_scale=0.75, **kwargs)
 
 
 def resnet18_wd2(**kwargs):
+    """
+    ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=18, width_scale=0.5, **kwargs)
 
 
 def resnet18_wd4(**kwargs):
+    """
+    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=18, width_scale=0.25, **kwargs)
 
 
 def resnet34(**kwargs):
+    """
+    ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=34, **kwargs)
 
 
 def resnet50(**kwargs):
+    """
+    ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=50, **kwargs)
 
 
 def resnet50b(**kwargs):
+    """
+    ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
+    Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=50, conv1_stride=False, **kwargs)
 
 
 def resnet101(**kwargs):
+    """
+    ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=101, **kwargs)
 
 
 def resnet101b(**kwargs):
+    """
+    ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
+    Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=101, conv1_stride=False, **kwargs)
 
 
 def resnet152(**kwargs):
+    """
+    ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=152, **kwargs)
 
 
 def resnet152b(**kwargs):
+    """
+    ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
+    Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=152, conv1_stride=False, **kwargs)
 
 
 def resnet200(**kwargs):
+    """
+    ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=200, **kwargs)
 
 
 def resnet200b(**kwargs):
+    """
+    ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
+    Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_resnet(blocks=200, conv1_stride=False, **kwargs)
 
 

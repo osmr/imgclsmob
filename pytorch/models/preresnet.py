@@ -328,70 +328,251 @@ def get_preresnet(blocks,
 
 
 def preresnet10(**kwargs):
+    """
+    PreResNet-10 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=10, **kwargs)
 
 
 def preresnet12(**kwargs):
+    """
+    PreResNet-12 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=12, **kwargs)
 
 
 def preresnet14(**kwargs):
+    """
+    PreResNet-14 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=14, **kwargs)
 
 
 def preresnet16(**kwargs):
+    """
+    PreResNet-16 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=16, **kwargs)
 
 
 def preresnet18(**kwargs):
+    """
+    PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=18, **kwargs)
 
 
 def preresnet18_w3d4(**kwargs):
+    """
+    PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=18, width_scale=0.75, **kwargs)
 
 
 def preresnet18_wd2(**kwargs):
+    """
+    PreResNet-18 model with 0.5 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=18, width_scale=0.5, **kwargs)
 
 
 def preresnet18_wd4(**kwargs):
+    """
+    PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=18, width_scale=0.25, **kwargs)
 
 
 def preresnet34(**kwargs):
+    """
+    PreResNet-34 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=34, **kwargs)
 
 
 def preresnet50(**kwargs):
+    """
+    PreResNet-50 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=50, **kwargs)
 
 
 def preresnet50b(**kwargs):
+    """
+    PreResNet-50 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=50, conv1_stride=False, **kwargs)
 
 
 def preresnet101(**kwargs):
+    """
+    PreResNet-101 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=101, **kwargs)
 
 
 def preresnet101b(**kwargs):
+    """
+    PreResNet-101 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=101, conv1_stride=False, **kwargs)
 
 
 def preresnet152(**kwargs):
+    """
+    PreResNet-152 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=152, **kwargs)
 
 
 def preresnet152b(**kwargs):
+    """
+    PreResNet-152 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=152, conv1_stride=False, **kwargs)
 
 
 def preresnet200(**kwargs):
+    """
+    PreResNet-200 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=200, **kwargs)
 
 
 def preresnet200b(**kwargs):
+    """
+    PreResNet-200 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    """
     return get_preresnet(blocks=200, conv1_stride=False, **kwargs)
 
 

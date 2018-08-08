@@ -30,6 +30,7 @@ class MobnetConv(HybridBlock):
                  strides,
                  padding,
                  groups,
+                 bn_use_global_stats,
                  activate,
                  **kwargs):
         super(MobnetConv, self).__init__(**kwargs)
@@ -44,7 +45,9 @@ class MobnetConv(HybridBlock):
                 groups=groups,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
             if self.activate:
                 self.activ = ReLU6()
 
@@ -58,6 +61,7 @@ class MobnetConv(HybridBlock):
 
 def mobnet_conv1x1(in_channels,
                    out_channels,
+                   bn_use_global_stats,
                    activate):
     return MobnetConv(
         in_channels=in_channels,
@@ -66,12 +70,14 @@ def mobnet_conv1x1(in_channels,
         strides=1,
         padding=0,
         groups=1,
+        bn_use_global_stats=bn_use_global_stats,
         activate=activate)
 
 
 def mobnet_dwconv3x3(in_channels,
                      out_channels,
                      strides,
+                     bn_use_global_stats,
                      activate):
     return MobnetConv(
         in_channels=in_channels,
@@ -80,6 +86,7 @@ def mobnet_dwconv3x3(in_channels,
         strides=strides,
         padding=1,
         groups=out_channels,
+        bn_use_global_stats=bn_use_global_stats,
         activate=activate)
 
 
@@ -90,6 +97,7 @@ class LinearBottleneck(HybridBlock):
                  out_channels,
                  strides,
                  expansion,
+                 bn_use_global_stats,
                  **kwargs):
         super(LinearBottleneck, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
@@ -99,15 +107,18 @@ class LinearBottleneck(HybridBlock):
             self.conv1 = mobnet_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv2 = mobnet_dwconv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=strides,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv3 = mobnet_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -133,6 +144,9 @@ class MobileNetV2(HybridBlock):
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -142,6 +156,7 @@ class MobileNetV2(HybridBlock):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -156,6 +171,7 @@ class MobileNetV2(HybridBlock):
                 strides=2,
                 padding=1,
                 groups=1,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
@@ -168,12 +184,14 @@ class MobileNetV2(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            expansion=expansion))
+                            expansion=expansion,
+                            bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(mobnet_conv1x1(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
+                bn_use_global_stats=bn_use_global_stats,
                 activate=True))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(

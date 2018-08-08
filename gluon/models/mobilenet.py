@@ -25,6 +25,7 @@ class ConvBlock(HybridBlock):
                  strides=1,
                  padding=0,
                  groups=1,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -36,7 +37,9 @@ class ConvBlock(HybridBlock):
                 groups=groups,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
@@ -52,6 +55,7 @@ class DwsConvBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_use_global_stats,
                  **kwargs):
         super(DwsConvBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -61,11 +65,13 @@ class DwsConvBlock(HybridBlock):
                 kernel_size=3,
                 strides=strides,
                 padding=1,
-                groups=in_channels)
+                groups=in_channels,
+                bn_use_global_stats=bn_use_global_stats)
             self.pw_conv = ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=1)
+                kernel_size=1,
+                bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
         x = self.dw_conv(x)
@@ -85,6 +91,9 @@ class MobileNet(HybridBlock):
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -93,6 +102,7 @@ class MobileNet(HybridBlock):
     def __init__(self,
                  channels,
                  first_stage_stride,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -106,7 +116,8 @@ class MobileNet(HybridBlock):
                 out_channels=init_block_channels,
                 kernel_size=3,
                 strides=2,
-                padding=1))
+                padding=1,
+                bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels[1:]):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -116,7 +127,8 @@ class MobileNet(HybridBlock):
                         stage.add(DwsConvBlock(
                             in_channels=in_channels,
                             out_channels=out_channels,
-                            strides=strides))
+                            strides=strides,
+                            bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(

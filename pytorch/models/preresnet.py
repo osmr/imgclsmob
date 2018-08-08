@@ -547,9 +547,6 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    global TESTING
-    TESTING = True
-
     models = [
         preresnet10,
         preresnet12,

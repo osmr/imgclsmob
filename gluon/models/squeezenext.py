@@ -9,9 +9,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-TESTING = False
-
-
 class SqnxtConv(HybridBlock):
 
     def __init__(self,
@@ -320,9 +317,6 @@ def sqnxt23v5_w2(**kwargs):
 def _test():
     import numpy as np
     import mxnet as mx
-
-    global TESTING
-    TESTING = True
 
     models = [
         sqnxt23_w1,

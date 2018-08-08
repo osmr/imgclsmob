@@ -12,9 +12,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-TESTING = False
-
-
 def depthwise_conv3x3(channels,
                       strides):
     return nn.Conv2D(
@@ -411,9 +408,6 @@ def shufflenet_g3_wd4(**kwargs):
 def _test():
     import numpy as np
     import mxnet as mx
-
-    global TESTING
-    TESTING = True
 
     models = [
         shufflenet_g1_w1,

@@ -10,9 +10,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-TESTING = False
-
-
 class FireConv(HybridBlock):
 
     def __init__(self,
@@ -168,13 +165,8 @@ class SqueezeNet(HybridBlock):
             self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-
         x = self.features(x)
-        assert ((not TESTING) or x.shape == (1, 512, 13, 13))
         x = self.output(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
         return x
 
 
@@ -273,9 +265,6 @@ def squeezeresnet_v1_1(**kwargs):
 def _test():
     import numpy as np
     import mxnet as mx
-
-    global TESTING
-    TESTING = True
 
     models = [
         squeezenet_v1_0,

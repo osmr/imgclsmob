@@ -599,9 +599,6 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    global TESTING
-    TESTING = True
-
     models = [
         resnet10,
         resnet12,

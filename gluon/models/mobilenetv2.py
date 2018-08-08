@@ -9,9 +9,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-TESTING = False
-
-
 class ReLU6(nn.HybridBlock):
 
     def __init__(self, **kwargs):
@@ -305,9 +302,6 @@ def mobilenetv2_wd4(**kwargs):
 def _test():
     import numpy as np
     import mxnet as mx
-
-    global TESTING
-    TESTING = True
 
     models = [
         mobilenetv2_w1,

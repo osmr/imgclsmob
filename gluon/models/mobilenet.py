@@ -13,9 +13,6 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-TESTING = False
-
-
 class ConvBlock(HybridBlock):
 
     def __init__(self,
@@ -142,13 +139,8 @@ class MobileNet(HybridBlock):
                 in_units=in_channels))
 
     def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-
         x = self.features(x)
-        assert ((not TESTING) or (x.shape[0] == 1) or (x.shape[2:] == (1, 1)))
         x = self.output(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
         return x
 
 
@@ -301,9 +293,6 @@ def fdmobilenet_wd4(**kwargs):
 def _test():
     import numpy as np
     import mxnet as mx
-
-    global TESTING
-    TESTING = True
 
     models = [
         mobilenet_w1,

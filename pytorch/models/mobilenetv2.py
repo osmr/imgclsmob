@@ -9,9 +9,6 @@ import torch.nn as nn
 import torch.nn.init as init
 
 
-TESTING = False
-
-
 class MobnetConv(nn.Module):
 
     def __init__(self,
@@ -271,9 +268,6 @@ def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
-
-    global TESTING
-    TESTING = True
 
     models = [
         mobilenetv2_w1,

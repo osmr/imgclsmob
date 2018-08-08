@@ -311,9 +311,6 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    global TESTING
-    TESTING = True
-
     models = [
         densenet121,
         densenet161,

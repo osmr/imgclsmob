@@ -12,9 +12,6 @@ import torch.nn as nn
 import torch.nn.init as init
 
 
-TESTING = False
-
-
 def depthwise_conv3x3(channels,
                       stride):
     return nn.Conv2d(
@@ -434,9 +431,6 @@ def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
-
-    global TESTING
-    TESTING = True
 
     models = [
         menet108_8x1_g3,

@@ -215,9 +215,6 @@ def _test():
     import numpy as np
     from torch.autograd import Variable
 
-    global TESTING
-    TESTING = True
-
     models = [
         darknet_ref,
         darknet_tiny,

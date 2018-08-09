@@ -633,10 +633,11 @@ def prepare_trainer(net,
     if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
         logging.info('Loading trainer states: {}'.format(state_file_path))
         trainer.load_states(state_file_path)
-        lr_scheduler = trainer._optimizer.lr_scheduler
         if trainer._optimizer.wd != wd:
             trainer._optimizer.wd = wd
             logging.info('Reset the weight decay: {}'.format(wd))
+        #lr_scheduler = trainer._optimizer.lr_scheduler
+        trainer._optimizer.lr_scheduler = lr_scheduler
 
     return trainer, lr_scheduler
 

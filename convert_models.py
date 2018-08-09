@@ -518,6 +518,7 @@ def main():
 
     if args.src_fwk == "gluon" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            # assert (dst_params[dst_key].shape == src_params[src_param_keys[i+4]].shape)
             # dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)  # preresnet
             assert (dst_params[dst_key].shape == src_params[src_key].shape)
             dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)

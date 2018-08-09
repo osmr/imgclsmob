@@ -579,7 +579,8 @@ def validate(acc_top1,
 def test(net,
          val_data,
          use_cuda,
-         calc_weight_count=False):
+         calc_weight_count=False,
+         extended_log=False):
     acc_top1 = AverageMeter()
     acc_top5 = AverageMeter()
 
@@ -593,8 +594,12 @@ def test(net,
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
         logging.info('Model: {} trainable parameters'.format(weight_count))
-    logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
-        err_top1_val, err_top5_val))
+    if extended_log:
+        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            top1=err_top1_val, top5=err_top5_val))
+    else:
+        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            top1=err_top1_val, top5=err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
@@ -767,7 +772,8 @@ def main():
             net=net,
             val_data=val_data,
             use_cuda=use_cuda,
-            calc_weight_count=(not log_file_exist))
+            calc_weight_count=(not log_file_exist),
+            extended_log=True)
     else:
         num_training_samples = 1281167
         optimizer, lr_scheduler, start_epoch = prepare_trainer(

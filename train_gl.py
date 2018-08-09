@@ -686,7 +686,8 @@ def test(net,
          use_rec,
          dtype,
          ctx,
-         calc_weight_count=False):
+         calc_weight_count=False,
+         extended_log=False):
     acc_top1 = mx.metric.Accuracy()
     acc_top5 = mx.metric.TopKAccuracy(5)
 
@@ -703,8 +704,12 @@ def test(net,
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
         logging.info('Model: {} trainable parameters'.format(weight_count))
-    logging.info('Test: err-top1={:.4f}\terr-top5={:.4f}'.format(
-        err_top1_val, err_top5_val))
+    if extended_log:
+        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            top1=err_top1_val, top5=err_top5_val))
+    else:
+        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            top1=err_top1_val, top5=err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
@@ -937,7 +942,8 @@ def main():
             use_rec=args.use_rec,
             dtype=args.dtype,
             ctx=ctx,
-            calc_weight_count=(not log_file_exist))
+            calc_weight_count=(not log_file_exist),
+            extended_log=True)
     else:
         num_training_samples = 1281167
         trainer, lr_scheduler = prepare_trainer(

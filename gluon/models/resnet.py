@@ -7,6 +7,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18',
            'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -402,6 +403,7 @@ def get_resnet(blocks,
                width_scale=1.0,
                pretrained=False,
                ctx=cpu(),
+               root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
     Create ResNet model with specific parameters.
@@ -418,6 +420,8 @@ def get_resnet(blocks,
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     if blocks == 10:
@@ -458,15 +462,27 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return ResNet(
+    net = ResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
+
+    if pretrained:
+        if blocks in [18]:
+            from .model_store import get_model_file
+            net.load_parameters(
+                filename=get_model_file(
+                    model_name='resnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
+                    local_model_store_dir_path=root),
+                ctx=ctx)
+
+        else:
+            raise ValueError("Pretrained model is not supported")
+            #pass
+
+    return net
 
 
 def resnet10(**kwargs):
@@ -745,7 +761,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=True)
 
         ctx = mx.cpu()
         net.initialize(ctx=ctx)

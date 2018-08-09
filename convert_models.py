@@ -230,16 +230,16 @@ def _get_model_pt(name, **kwargs):
         'resnet12': pt_resnet.resnet12,
         'resnet14': pt_resnet.resnet14,
         'resnet16': pt_resnet.resnet16,
-        'resnet18': pt_resnet.resnet18,
+        'slk_resnet18': pt_resnet.resnet18,
         'resnet18_w3d4': pt_resnet.resnet18_w3d4,
         'resnet18_wd2': pt_resnet.resnet18_wd2,
         'resnet18_wd4': pt_resnet.resnet18_wd4,
-        'resnet34': pt_resnet.resnet34,
-        'resnet50': pt_resnet.resnet50,
+        'slk_resnet34': pt_resnet.resnet34,
+        'slk_resnet50': pt_resnet.resnet50,
         'resnet50b': pt_resnet.resnet50b,
-        'resnet101': pt_resnet.resnet101,
+        'slk_resnet101': pt_resnet.resnet101,
         'resnet101b': pt_resnet.resnet101b,
-        'resnet152': pt_resnet.resnet152,
+        'slk_resnet152': pt_resnet.resnet152,
         'resnet152b': pt_resnet.resnet152b,
         'resnet200': pt_resnet.resnet200,
         'resnet200b': pt_resnet.resnet200b,
@@ -539,7 +539,8 @@ def main():
             f=args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            dst_params[dst_key]._load_init(mx.nd.array(src_params[src_param_keys[i]].numpy(), ctx), ctx)
+            assert (dst_params[dst_key].shape == tuple(src_params[src_key].size()))
+            dst_params[dst_key]._load_init(mx.nd.array(src_params[src_key].numpy(), ctx), ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "mxnet" and args.dst_fwk == "gluon":
 

@@ -11,26 +11,10 @@ import torch.backends.cudnn as cudnn
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
 
 from common.env_stats import get_env_stats
 from common.train_log_param_saver import TrainLogParamSaver
-
-from pytorch.models.resnet import *
-from pytorch.models.preresnet import *
-from pytorch.models.squeezenet import *
-from pytorch.models.darknet import *
-from pytorch.models.mobilenet import *
-from pytorch.models.mobilenetv2 import *
-from pytorch.models.shufflenet import *
-from pytorch.models.menet import *
-from pytorch.models.squeezenext import *
-from pytorch.models.densenet import *
-
-from pytorch.models.others.MobileNet import *
-from pytorch.models.others.ShuffleNet import *
-from pytorch.models.others.MENet import *
-
+from pytorch.utils import get_model
 from pytorch.model_stats import measure_model
 
 
@@ -279,132 +263,6 @@ def get_data_loader(data_dir,
     return train_loader, val_loader
 
 
-def _get_model(name, **kwargs):
-    slk_models = {
-        'resnet10': resnet10,
-        'resnet12': resnet12,
-        'resnet14': resnet14,
-        'resnet16': resnet16,
-        'slk_resnet18': resnet18,
-        'resnet18_w3d4': resnet18_w3d4,
-        'resnet18_wd2': resnet18_wd2,
-        'resnet18_wd4': resnet18_wd4,
-        'slk_resnet34': resnet34,
-        'slk_resnet50': resnet50,
-        'resnet50b': resnet50b,
-        'slk_resnet101': resnet101,
-        'resnet101b': resnet101b,
-        'slk_resnet152': resnet152,
-        'resnet152b': resnet152b,
-        'resnet200': resnet200,
-        'resnet200b': resnet200b,
-
-        'preresnet10': preresnet10,
-        'preresnet12': preresnet12,
-        'preresnet14': preresnet14,
-        'preresnet16': preresnet16,
-        'preresnet18': preresnet18,
-        'preresnet18_w3d4': preresnet18_w3d4,
-        'preresnet18_wd2': preresnet18_wd2,
-        'preresnet18_wd4': preresnet18_wd4,
-        'preresnet34': preresnet34,
-        'preresnet50': preresnet50,
-        'preresnet50b': preresnet50b,
-        'preresnet101': preresnet101,
-        'preresnet101b': preresnet101b,
-        'preresnet152': preresnet152,
-        'preresnet152b': preresnet152b,
-        'preresnet200': preresnet200,
-        'preresnet200b': preresnet200b,
-
-        'squeezenet_v1_0': squeezenet_v1_0,
-        'squeezenet_v1_1': squeezenet_v1_1,
-        'squeezeresnet_v1_0': squeezeresnet_v1_0,
-        'squeezeresnet_v1_1': squeezeresnet_v1_1,
-
-        'darknet_ref': darknet_ref,
-        'darknet_tiny': darknet_tiny,
-        'darknet19': darknet19,
-
-        'mobilenet_w1': mobilenet_w1,
-        'mobilenet_w3d4': mobilenet_w3d4,
-        'mobilenet_wd2': mobilenet_wd2,
-        'mobilenet_wd4': mobilenet_wd4,
-
-        'fdmobilenet_w1': fdmobilenet_w1,
-        'fdmobilenet_w3d4': fdmobilenet_w3d4,
-        'fdmobilenet_wd2': fdmobilenet_wd2,
-        'fdmobilenet_wd4': fdmobilenet_wd4,
-
-        'mobilenetv2_w1': mobilenetv2_w1,
-        'mobilenetv2_w3d4': mobilenetv2_w3d4,
-        'mobilenetv2_wd2': mobilenetv2_wd2,
-        'mobilenetv2_wd4': mobilenetv2_wd4,
-
-        'shufflenet_g1_w1': shufflenet_g1_w1,
-        'shufflenet_g2_w1': shufflenet_g2_w1,
-        'shufflenet_g3_w1': shufflenet_g3_w1,
-        'shufflenet_g4_w1': shufflenet_g4_w1,
-        'shufflenet_g8_w1': shufflenet_g8_w1,
-        'shufflenet_g1_w3d4': shufflenet_g1_w3d4,
-        'shufflenet_g3_w3d4': shufflenet_g3_w3d4,
-        'shufflenet_g1_wd2': shufflenet_g1_wd2,
-        'shufflenet_g3_wd2': shufflenet_g3_wd2,
-        'shufflenet_g1_wd4': shufflenet_g1_wd4,
-        'shufflenet_g3_wd4': shufflenet_g3_wd4,
-
-        'menet108_8x1_g3': menet108_8x1_g3,
-        'menet128_8x1_g4': menet128_8x1_g4,
-        'menet160_8x1_g8': menet160_8x1_g8,
-        'menet228_12x1_g3': menet228_12x1_g3,
-        'menet256_12x1_g4': menet256_12x1_g4,
-        'menet348_12x1_g3': menet348_12x1_g3,
-        'menet352_12x1_g8': menet352_12x1_g8,
-        'menet456_24x1_g3': menet456_24x1_g3,
-
-        'sqnxt23_w1': sqnxt23_w1,
-        'sqnxt23_w3d2': sqnxt23_w3d2,
-        'sqnxt23_w2': sqnxt23_w2,
-        'sqnxt23v5_w1': sqnxt23v5_w1,
-        'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
-        'sqnxt23v5_w2': sqnxt23v5_w2,
-
-        'densenet121': densenet121,
-        'densenet161': densenet161,
-        'densenet169': densenet169,
-        'densenet201': densenet201,
-
-        'oth_mobilenet1_0': oth_mobilenet1_0,
-        'oth_mobilenet0_75': oth_mobilenet0_75,
-        'oth_mobilenet0_5': oth_mobilenet0_5,
-        'oth_mobilenet0_25': oth_mobilenet0_25,
-        'oth_fd_mobilenet1_0': oth_fd_mobilenet1_0,
-        'oth_fd_mobilenet0_75': oth_fd_mobilenet0_75,
-        'oth_fd_mobilenet0_5': oth_fd_mobilenet0_5,
-        'oth_fd_mobilenet0_25': oth_fd_mobilenet0_25,
-        'oth_shufflenet1_0_g1': oth_shufflenet1_0_g1,
-        'oth_shufflenet1_0_g8': oth_shufflenet1_0_g8,
-        'oth_menet108_8x1_g3': oth_menet108_8x1_g3,
-        'oth_menet128_8x1_g4': oth_menet128_8x1_g4,
-        'oth_menet160_8x1_g8': oth_menet160_8x1_g8,
-        'oth_menet228_12x1_g3': oth_menet228_12x1_g3,
-        'oth_menet256_12x1_g4': oth_menet256_12x1_g4,
-        'oth_menet348_12x1_g3': oth_menet348_12x1_g3,
-        'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
-        'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
-    }
-    try:
-        net = models.__dict__[name](**kwargs)
-        return net
-    except KeyError as e:
-        upstream_supported = str(e)
-    name = name.lower()
-    if name not in slk_models:
-        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(slk_models.keys()))))
-    net = slk_models[name](**kwargs)
-    return net
-
-
 def prepare_model(model_name,
                   classes,
                   use_pretrained,
@@ -413,7 +271,7 @@ def prepare_model(model_name,
     kwargs = {'pretrained': use_pretrained,
               'num_classes': classes}
 
-    net = _get_model(model_name, **kwargs)
+    net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))

@@ -45,6 +45,12 @@ def parse_args():
         help='destination model parameter file path')
 
     parser.add_argument(
+        '--index-shift',
+        type=int,
+        default=0,
+        help='index shift for some models')
+
+    parser.add_argument(
         '--save-dir',
         type=str,
         default='',
@@ -78,266 +84,6 @@ def prepare_logger(log_dir_path,
     return logger, log_file_exist
 
 
-def _get_model_gl(name, **kwargs):
-    from gluoncv.model_zoo import get_model
-    import gluon.models.resnet as gl_resnet
-    import gluon.models.preresnet as gl_preresnet
-    import gluon.models.squeezenet as gl_squeezenet
-    import gluon.models.darknet as gl_darknet
-    import gluon.models.mobilenet as gl_mobilenet
-    import gluon.models.mobilenetv2 as gl_mobilenetv2
-    import gluon.models.shufflenet as gl_shufflenet
-    import gluon.models.menet as gl_menet
-    import gluon.models.squeezenext as gl_squeezenext
-    import gluon.models.densenet as gl_densenet
-    # import gluon.models.menet1 as gl_meneta
-    # import gluon.models.squeezenext1 as gl_squeezenext1
-
-    models = {
-        'resnet10': gl_resnet.resnet10,
-        'resnet12': gl_resnet.resnet12,
-        'resnet14': gl_resnet.resnet14,
-        'resnet16': gl_resnet.resnet16,
-        'resnet18': gl_resnet.resnet18,
-        'resnet18_w3d4': gl_resnet.resnet18_w3d4,
-        'resnet18_wd2': gl_resnet.resnet18_wd2,
-        'resnet18_wd4': gl_resnet.resnet18_wd4,
-        'resnet34': gl_resnet.resnet34,
-        'resnet50': gl_resnet.resnet50,
-        'resnet50b': gl_resnet.resnet50b,
-        'resnet101': gl_resnet.resnet101,
-        'resnet101b': gl_resnet.resnet101b,
-        'resnet152': gl_resnet.resnet152,
-        'resnet152b': gl_resnet.resnet152b,
-        'resnet200': gl_resnet.resnet200,
-        'resnet200b': gl_resnet.resnet200b,
-
-        'preresnet10': gl_preresnet.preresnet10,
-        'preresnet12': gl_preresnet.preresnet12,
-        'preresnet14': gl_preresnet.preresnet14,
-        'preresnet16': gl_preresnet.preresnet16,
-        'preresnet18': gl_preresnet.preresnet18,
-        'preresnet18_w3d4': gl_preresnet.preresnet18_w3d4,
-        'preresnet18_wd2': gl_preresnet.preresnet18_wd2,
-        'preresnet18_wd4': gl_preresnet.preresnet18_wd4,
-        'preresnet34': gl_preresnet.preresnet34,
-        'preresnet50': gl_preresnet.preresnet50,
-        'preresnet50b': gl_preresnet.preresnet50b,
-        'preresnet101': gl_preresnet.preresnet101,
-        'preresnet101b': gl_preresnet.preresnet101b,
-        'preresnet152': gl_preresnet.preresnet152,
-        'preresnet152b': gl_preresnet.preresnet152b,
-        'preresnet200': gl_preresnet.preresnet200,
-        'preresnet200b': gl_preresnet.preresnet200b,
-
-        'squeezenet_v1_0': gl_squeezenet.squeezenet_v1_0,
-        'squeezenet_v1_1': gl_squeezenet.squeezenet_v1_1,
-        'squeezeresnet_v1_0': gl_squeezenet.squeezeresnet_v1_0,
-        'squeezeresnet_v1_1': gl_squeezenet.squeezeresnet_v1_1,
-
-        'darknet_ref': gl_darknet.darknet_ref,
-        'darknet_tiny': gl_darknet.darknet_tiny,
-        'darknet19': gl_darknet.darknet19,
-
-        'mobilenet_w1': gl_mobilenet.mobilenet_w1,
-        'mobilenet_w3d4': gl_mobilenet.mobilenet_w3d4,
-        'mobilenet_wd2': gl_mobilenet.mobilenet_wd2,
-        'mobilenet_wd4': gl_mobilenet.mobilenet_wd4,
-
-        'fdmobilenet_w1': gl_mobilenet.fdmobilenet_w1,
-        'fdmobilenet_w3d4': gl_mobilenet.fdmobilenet_w3d4,
-        'fdmobilenet_wd2': gl_mobilenet.fdmobilenet_wd2,
-        'fdmobilenet_wd4': gl_mobilenet.fdmobilenet_wd4,
-
-        'mobilenetv2_w1': gl_mobilenetv2.mobilenetv2_w1,
-        'mobilenetv2_w3d4': gl_mobilenetv2.mobilenetv2_w3d4,
-        'mobilenetv2_wd2': gl_mobilenetv2.mobilenetv2_wd2,
-        'mobilenetv2_wd4': gl_mobilenetv2.mobilenetv2_wd4,
-
-        'shufflenet_g1_w1': gl_shufflenet.shufflenet_g1_w1,
-        'shufflenet_g2_w1': gl_shufflenet.shufflenet_g2_w1,
-        'shufflenet_g3_w1': gl_shufflenet.shufflenet_g3_w1,
-        'shufflenet_g4_w1': gl_shufflenet.shufflenet_g4_w1,
-        'shufflenet_g8_w1': gl_shufflenet.shufflenet_g8_w1,
-        'shufflenet_g1_w3d4': gl_shufflenet.shufflenet_g1_w3d4,
-        'shufflenet_g3_w3d4': gl_shufflenet.shufflenet_g3_w3d4,
-        'shufflenet_g1_wd2': gl_shufflenet.shufflenet_g1_wd2,
-        'shufflenet_g3_wd2': gl_shufflenet.shufflenet_g3_wd2,
-        'shufflenet_g1_wd4': gl_shufflenet.shufflenet_g1_wd4,
-        'shufflenet_g3_wd4': gl_shufflenet.shufflenet_g3_wd4,
-
-        'menet108_8x1_g3': gl_menet.menet108_8x1_g3,
-        'menet128_8x1_g4': gl_menet.menet128_8x1_g4,
-        'menet160_8x1_g8': gl_menet.menet160_8x1_g8,
-        'menet228_12x1_g3': gl_menet.menet228_12x1_g3,
-        'menet256_12x1_g4': gl_menet.menet256_12x1_g4,
-        'menet348_12x1_g3': gl_menet.menet348_12x1_g3,
-        'menet352_12x1_g8': gl_menet.menet352_12x1_g8,
-        'menet456_24x1_g3': gl_menet.menet456_24x1_g3,
-
-        'sqnxt23_w1': gl_squeezenext.sqnxt23_w1,
-        'sqnxt23_w3d2': gl_squeezenext.sqnxt23_w3d2,
-        'sqnxt23_w2': gl_squeezenext.sqnxt23_w2,
-        'sqnxt23v5_w1': gl_squeezenext.sqnxt23v5_w1,
-        'sqnxt23v5_w3d2': gl_squeezenext.sqnxt23v5_w3d2,
-        'sqnxt23v5_w2': gl_squeezenext.sqnxt23v5_w2,
-
-        'densenet121': gl_densenet.densenet121,
-        'densenet161': gl_densenet.densenet161,
-        'densenet169': gl_densenet.densenet169,
-        'densenet201': gl_densenet.densenet201,
-
-        # 'sqnxt23_1_0': gl_squeezenext1.sqnxt23_1_0,
-        # 'sqnxt23_1_5': gl_squeezenext1.sqnxt23_1_5,
-        # 'sqnxt23_2_0': gl_squeezenext1.sqnxt23_2_0,
-        # 'sqnxt23v5_1_0': gl_squeezenext1.sqnxt23v5_1_0,
-        # 'sqnxt23v5_1_5': gl_squeezenext1.sqnxt23v5_1_5,
-        # 'sqnxt23v5_2_0': gl_squeezenext1.sqnxt23v5_2_0,
-
-        # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
-        # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
-        # 'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
-    }
-    try:
-        net = get_model(name, **kwargs)
-        return net
-    except ValueError as e:
-        upstream_supported = str(e)
-    name = name.lower()
-    if name not in models:
-        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(models.keys()))))
-    net = models[name](**kwargs)
-    return net
-
-
-def _get_model_pt(name, **kwargs):
-    import torchvision.models as models
-    import pytorch.models.preresnet as pt_preresnet
-    import pytorch.models.resnet as pt_resnet
-    import pytorch.models.squeezenet as pt_squeezenet
-    import pytorch.models.darknet as pt_darknet
-    import pytorch.models.mobilenet as pt_mobilenet
-    import pytorch.models.mobilenetv2 as pt_mobilenetv2
-    import pytorch.models.shufflenet as pt_shufflenet
-    import pytorch.models.menet as pt_menet
-    import pytorch.models.densenet as pt_densenet
-
-    import pytorch.models.others.MobileNet as pt_oth_mobilenet
-    import pytorch.models.others.MENet as pt_oth_menet
-
-    slk_models = {
-        'resnet10': pt_resnet.resnet10,
-        'resnet12': pt_resnet.resnet12,
-        'resnet14': pt_resnet.resnet14,
-        'resnet16': pt_resnet.resnet16,
-        'slk_resnet18': pt_resnet.resnet18,
-        'resnet18_w3d4': pt_resnet.resnet18_w3d4,
-        'resnet18_wd2': pt_resnet.resnet18_wd2,
-        'resnet18_wd4': pt_resnet.resnet18_wd4,
-        'slk_resnet34': pt_resnet.resnet34,
-        'slk_resnet50': pt_resnet.resnet50,
-        'resnet50b': pt_resnet.resnet50b,
-        'slk_resnet101': pt_resnet.resnet101,
-        'resnet101b': pt_resnet.resnet101b,
-        'slk_resnet152': pt_resnet.resnet152,
-        'resnet152b': pt_resnet.resnet152b,
-        'resnet200': pt_resnet.resnet200,
-        'resnet200b': pt_resnet.resnet200b,
-
-        'preresnet10': pt_preresnet.preresnet10,
-        'preresnet12': pt_preresnet.preresnet12,
-        'preresnet14': pt_preresnet.preresnet14,
-        'preresnet16': pt_preresnet.preresnet16,
-        'preresnet18': pt_preresnet.preresnet18,
-        'preresnet18_w3d4': pt_preresnet.preresnet18_w3d4,
-        'preresnet18_wd2': pt_preresnet.preresnet18_wd2,
-        'preresnet18_wd4': pt_preresnet.preresnet18_wd4,
-        'preresnet34': pt_preresnet.preresnet34,
-        'preresnet50': pt_preresnet.preresnet50,
-        'preresnet50b': pt_preresnet.preresnet50b,
-        'preresnet101': pt_preresnet.preresnet101,
-        'preresnet101b': pt_preresnet.preresnet101b,
-        'preresnet152': pt_preresnet.preresnet152,
-        'preresnet152b': pt_preresnet.preresnet152b,
-        'preresnet200': pt_preresnet.preresnet200,
-        'preresnet200b': pt_preresnet.preresnet200b,
-
-        'squeezenet_v1_0': pt_squeezenet.squeezenet_v1_0,
-        'squeezenet_v1_1': pt_squeezenet.squeezenet_v1_1,
-        'squeezeresnet_v1_0': pt_squeezenet.squeezeresnet_v1_0,
-        'squeezeresnet_v1_1': pt_squeezenet.squeezeresnet_v1_1,
-
-        'darknet_ref': pt_darknet.darknet_ref,
-        'darknet_tiny': pt_darknet.darknet_tiny,
-        'darknet19': pt_darknet.darknet19,
-
-        'mobilenet_w1': pt_mobilenet.mobilenet_w1,
-        'mobilenet_w3d4': pt_mobilenet.mobilenet_w3d4,
-        'mobilenet_wd2': pt_mobilenet.mobilenet_wd2,
-        'mobilenet_wd4': pt_mobilenet.mobilenet_wd4,
-
-        'fdmobilenet_w1': pt_mobilenet.fdmobilenet_w1,
-        'fdmobilenet_w3d4': pt_mobilenet.fdmobilenet_w3d4,
-        'fdmobilenet_wd2': pt_mobilenet.fdmobilenet_wd2,
-        'fdmobilenet_wd4': pt_mobilenet.fdmobilenet_wd4,
-
-        'mobilenetv2_w1': pt_mobilenetv2.mobilenetv2_w1,
-        'mobilenetv2_w3d4': pt_mobilenetv2.mobilenetv2_w3d4,
-        'mobilenetv2_wd2': pt_mobilenetv2.mobilenetv2_wd2,
-        'mobilenetv2_wd4': pt_mobilenetv2.mobilenetv2_wd4,
-
-        'shufflenet_g1_w1': pt_shufflenet.shufflenet_g1_w1,
-        'shufflenet_g2_w1': pt_shufflenet.shufflenet_g2_w1,
-        'shufflenet_g3_w1': pt_shufflenet.shufflenet_g3_w1,
-        'shufflenet_g4_w1': pt_shufflenet.shufflenet_g4_w1,
-        'shufflenet_g8_w1': pt_shufflenet.shufflenet_g8_w1,
-        'shufflenet_g1_w3d4': pt_shufflenet.shufflenet_g1_w3d4,
-        'shufflenet_g3_w3d4': pt_shufflenet.shufflenet_g3_w3d4,
-        'shufflenet_g1_wd2': pt_shufflenet.shufflenet_g1_wd2,
-        'shufflenet_g3_wd2': pt_shufflenet.shufflenet_g3_wd2,
-        'shufflenet_g1_wd4': pt_shufflenet.shufflenet_g1_wd4,
-        'shufflenet_g3_wd4': pt_shufflenet.shufflenet_g3_wd4,
-
-        'menet108_8x1_g3': pt_menet.menet108_8x1_g3,
-        'menet128_8x1_g4': pt_menet.menet128_8x1_g4,
-        'menet160_8x1_g8': pt_menet.menet160_8x1_g8,
-        'menet228_12x1_g3': pt_menet.menet228_12x1_g3,
-        'menet256_12x1_g4': pt_menet.menet256_12x1_g4,
-        'menet348_12x1_g3': pt_menet.menet348_12x1_g3,
-        'menet352_12x1_g8': pt_menet.menet352_12x1_g8,
-        'menet456_24x1_g3': pt_menet.menet456_24x1_g3,
-
-        'densenet121': pt_densenet.densenet121,
-        'densenet161': pt_densenet.densenet161,
-        'densenet169': pt_densenet.densenet169,
-        'densenet201': pt_densenet.densenet201,
-
-        'oth_fd_mobilenet1_0': pt_oth_mobilenet.oth_fd_mobilenet1_0,
-        'oth_fd_mobilenet0_75': pt_oth_mobilenet.oth_fd_mobilenet0_75,
-        'oth_fd_mobilenet0_5': pt_oth_mobilenet.oth_fd_mobilenet0_5,
-        'oth_fd_mobilenet0_25': pt_oth_mobilenet.oth_fd_mobilenet0_25,
-
-        'oth_menet108_8x1_g3': pt_oth_menet.oth_menet108_8x1_g3,
-        'oth_menet128_8x1_g4': pt_oth_menet.oth_menet128_8x1_g4,
-        'oth_menet160_8x1_g8': pt_oth_menet.oth_menet160_8x1_g8,
-        'oth_menet228_12x1_g3': pt_oth_menet.oth_menet228_12x1_g3,
-        'oth_menet256_12x1_g4': pt_oth_menet.oth_menet256_12x1_g4,
-        'oth_menet348_12x1_g3': pt_oth_menet.oth_menet348_12x1_g3,
-        'oth_menet352_12x1_g8': pt_oth_menet.oth_menet352_12x1_g8,
-        'oth_menet456_24x1_g3': pt_oth_menet.oth_menet456_24x1_g3,
-    }
-    try:
-        net = models.__dict__[name](**kwargs)
-        return net
-    except KeyError as e:
-        upstream_supported = str(e)
-    name = name.lower()
-    if name not in slk_models:
-        raise ValueError('%s\n\t%s' % (upstream_supported, '\n\t'.join(sorted(slk_models.keys()))))
-    net = slk_models[name](**kwargs)
-    return net
-
-
 def prepare_model_gl(model_name,
                      classes,
                      use_pretrained,
@@ -359,7 +105,8 @@ def prepare_model_gl(model_name,
     if last_gamma:
         kwargs['last_gamma'] = True
 
-    net = _get_model_gl(model_name, **kwargs)
+    from gluon.utils import get_model
+    net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
@@ -393,7 +140,8 @@ def prepare_model_pt(model_name,
     kwargs = {'pretrained': use_pretrained,
               'num_classes': classes}
 
-    net = _get_model_pt(model_name, **kwargs)
+    from pytorch.utils import get_model
+    net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
@@ -513,15 +261,15 @@ def main():
     else:
         raise ValueError("Unsupported dst fwk: {}".format(args.dst_fwk))
 
-    # assert (len(src_param_keys) == len(dst_param_keys) + 4)  # preresnet
-    assert (len(src_param_keys) == len(dst_param_keys))
+    assert (len(src_param_keys) == len(dst_param_keys) + args.index_shift)  # preresnet
+    #assert (len(src_param_keys) == len(dst_param_keys))
 
     if args.src_fwk == "gluon" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            # assert (dst_params[dst_key].shape == src_params[src_param_keys[i+4]].shape)
-            # dst_params[dst_key]._load_init(src_params[src_param_keys[i+4]]._data[0], ctx)  # preresnet
-            assert (dst_params[dst_key].shape == src_params[src_key].shape)
-            dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
+            assert (dst_params[dst_key].shape == src_params[src_param_keys[i+args.index_shift]].shape)
+            dst_params[dst_key]._load_init(src_params[src_param_keys[i+args.index_shift]]._data[0], ctx)  # preresnet
+            #assert (dst_params[dst_key].shape == src_params[src_key].shape)
+            #dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):

@@ -545,8 +545,8 @@ def train_net(batch_size,
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
             start_epoch1 - 1, err_top1_val, err_top5_val))
 
-    weight_count = calc_net_weight_count(net)
-    logging.info('Model: {} trainable parameters'.format(weight_count))
+    # weight_count = calc_net_weight_count(net)
+    # logging.info('Model: {} trainable parameters'.format(weight_count))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
@@ -630,7 +630,8 @@ def main():
             net=net,
             val_data=val_data,
             use_cuda=use_cuda,
-            calc_weight_count=(not log_file_exist),
+            #calc_weight_count=(not log_file_exist),
+            calc_weight_count=True,
             extended_log=True)
     else:
         num_training_samples = 1281167

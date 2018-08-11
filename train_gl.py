@@ -578,6 +578,9 @@ def test(net,
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
+    # weight_count = calc_net_weight_count(net)
+    # logging.info('Model: {} trainable parameters'.format(weight_count))
+
 
 def train_epoch(epoch,
                 net,
@@ -625,9 +628,9 @@ def train_epoch(epoch,
         lr_scheduler.update(i, epoch)
         trainer.step(batch_size)
 
-        if epoch == 0 and i == 0:
-            weight_count = calc_net_weight_count(net)
-            logging.info('Model: {} trainable parameters'.format(weight_count))
+        # if epoch == 0 and i == 0:
+        #     weight_count = calc_net_weight_count(net)
+        #     logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
         acc_top1_train.update(
@@ -807,7 +810,8 @@ def main():
             use_rec=args.use_rec,
             dtype=args.dtype,
             ctx=ctx,
-            calc_weight_count=(not log_file_exist),
+            #calc_weight_count=(not log_file_exist),
+            calc_weight_count=True,
             extended_log=True)
     else:
         num_training_samples = 1281167

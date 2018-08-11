@@ -497,12 +497,22 @@ def get_preresnet(blocks,
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    return PreResNet(
+    net = PreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
+
+    if pretrained:
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name='preresnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
 
 
 def preresnet10(**kwargs):
@@ -780,7 +790,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=True)
 
         ctx = mx.cpu()
         net.initialize(ctx=ctx)

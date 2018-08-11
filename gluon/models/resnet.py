@@ -470,17 +470,12 @@ def get_resnet(blocks,
         **kwargs)
 
     if pretrained:
-        if blocks in [18]:
-            from .model_store import get_model_file
-            net.load_parameters(
-                filename=get_model_file(
-                    model_name='resnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
-                    local_model_store_dir_path=root),
-                ctx=ctx)
-
-        else:
-            raise ValueError("Pretrained model is not supported")
-            #pass
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name='resnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 

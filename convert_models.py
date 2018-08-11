@@ -210,7 +210,7 @@ def main():
         src_params = src_net._collect_params_with_prefix()
         src_param_keys = list(src_params.keys())
 
-        if args.src_model in ["resnet50_v1"]:
+        if args.src_model in ["resnet50_v1", "resnet101_v1", "resnet152_v1"]:
             src_param_keys = [key for key in src_param_keys if
                               not (key.startswith("features.") and key.endswith(".bias"))]
 

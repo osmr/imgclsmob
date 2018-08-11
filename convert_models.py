@@ -268,11 +268,13 @@ def main():
     if args.src_fwk == "gluon" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             assert (dst_params[dst_key].shape == src_params[src_key].shape)
+            assert (dst_key.split('.')[-1] == src_key.split('.')[-1])
             dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size()))
+            assert (dst_key.split('.')[-1] == src_key.split('.')[-1])
             dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy())
         torch.save(
             obj=dst_params,

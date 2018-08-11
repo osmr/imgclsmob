@@ -7,25 +7,26 @@ __all__ = ['get_model_file']
 import os
 import zipfile
 import logging
-from mxnet.gluon.utils import download, check_sha1
+import hashlib
+from torch.utils.model_zoo import load_url
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
-    ('resnet18', '1008', '4f9f7e8f611a51501a23414fc147a3850b8b307b', 'v0.0.2'),
-    ('resnet34', '0792', '5b875f4934da8d83d44afc30d8e91362d3103115', 'v0.0.2'),
-    ('resnet50', '0687', '79fae958a0acd7a66d688f6453b2bbbc5fe8b3d3', 'v0.0.2'),
-    ('resnet50b', '0644', '27a36c02aed870c0c455774f7fb853223f83abc8', 'v0.0.2'),
-    ('resnet101', '0599', 'a6d3a5f4933794d56b61867c050ee730f6310f1b', 'v0.0.2'),
-    ('resnet101b', '0560', '6517274e7aacd6b05b50da78cb1bf6b9ef85ab57', 'v0.0.2'),
-    ('resnet152', '0561', 'd05971c8f10d991ffdbf10318e58f27c2d3471ef', 'v0.0.2'),
-    ('resnet152b', '0537', '4f5bd8799404acd1e9e9c857c83877bdb43e299c', 'v0.0.2'),
-    ('preresnet18', '1029', '26f46f0b935779826c35d11b7f232ba4bc82a38d', 'v0.0.2'),
-    ('preresnet34', '0811', 'f8fe98a25337d747b8687ffdbd1c83ce0d9b9a34', 'v0.0.2'),
-    ('preresnet50', '1829', '2fcfddb13fbb8d7f58fb949f137610bf3d99a892', 'v0.0.2'),
-    ('preresnet50b', '0664', '2fcfddb13fbb8d7f58fb949f137610bf3d99a892', 'v0.0.2'),
-    ('preresnet101', '1746', '1015145a6228aa16583a975b9c33f879ee2a6fc0', 'v0.0.2'),
-    ('preresnet101b', '0588', '1015145a6228aa16583a975b9c33f879ee2a6fc0', 'v0.0.2'),
-    ('preresnet152', '1451', 'dc303191ea47ca258f5abadd203b5de24d059d1a', 'v0.0.2'),
-    ('preresnet152b', '0575', 'dc303191ea47ca258f5abadd203b5de24d059d1a', 'v0.0.2')]}
+    ('resnet18', '1030', 'a516bab56c559f465bfeef3c63c15499c6f270fa', 'v0.0.3'),
+    ('resnet34', '0818', '6f947d409313c862a1ef22c46e29b09c85eb9abf', 'v0.0.3'),
+    ('resnet50', '0705', 'f7a2027ee704dac27a9b5184276dd7fd7969b9e8', 'v0.0.3'),
+    ('resnet50b', '0665', '89691746c7fc77f79e2ce4e939001c59c99c25f2', 'v0.0.3'),
+    ('resnet101', '0622', 'ab0cf005bbe9b17e53f9e3c330c6147a8c80b3a5', 'v0.0.3'),
+    ('resnet101b', '0581', 'd983e68295a38498cf7b2feb4dd0dc33102201b0', 'v0.0.3'),
+    ('resnet152', '0582', 'af1a3bd5285762330a8e8a5e7ec1ba23ed429e55', 'v0.0.3'),
+    ('resnet152b', '0550', '216604cf5b7014f1349a879270926ef57273f952', 'v0.0.3'),
+    ('preresnet18', '1057', '119bd3de6ab9abd1de9c4d67a8d6fee28eb800fd', 'v0.0.3'),
+    ('preresnet34', '0841', 'b4dd761f32f603e4ea352f73ab84c0db3d5299af', 'v0.0.3'),
+    ('preresnet50', '1889', '8a1091cb1a978001dc79a7114ee938b4bab31ea6', 'v0.0.3'),
+    ('preresnet50b', '0687', '65be98fbe7b82c79bccd9c794ce9d9a3482aec9c', 'v0.0.3'),
+    ('preresnet101', '1808', '0340579d000ae82e027eea0188fc4d6525b12470', 'v0.0.3'),
+    ('preresnet101b', '0603', 'b1e37a09424dde15ecba72365d46b1f59abd479b', 'v0.0.3'),
+    ('preresnet152', '1488', '0cecb4fc084715774242d3c4a95ed3592cc6ca0e', 'v0.0.3'),
+    ('preresnet152b', '0591', '2c91ab2c8d90f3990e7c30fd6ee2184f6c2c3bee', 'v0.0.3')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/tmp1'
 
@@ -38,7 +39,7 @@ def get_model_name_suffix_data(model_name):
 
 
 def get_model_file(model_name,
-                   local_model_store_dir_path=os.path.join('~', '.mxnet', 'models')):
+                   local_model_store_dir_path=os.path.join('~', '.torch', 'models')):
     """
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
@@ -47,7 +48,7 @@ def get_model_file(model_name,
     ----------
     model_name : str
         Name of the model.
-    local_model_store_dir_path : str, default $MXNET_HOME/models
+    local_model_store_dir_path : str, default $TORCH_HOME/models
         Location for keeping the model parameters.
 
     Returns
@@ -64,7 +65,7 @@ def get_model_file(model_name,
     local_model_store_dir_path = os.path.expanduser(local_model_store_dir_path)
     file_path = os.path.join(local_model_store_dir_path, file_name)
     if os.path.exists(file_path):
-        if check_sha1(file_path, sha1_hash):
+        if _check_sha1(file_path, sha1_hash):
             return file_path
         else:
             logging.warning('Mismatch in the content of model file detected. Downloading again.')
@@ -75,19 +76,43 @@ def get_model_file(model_name,
         os.makedirs(local_model_store_dir_path)
 
     zip_file_path = file_path + '.zip'
-    download(
+    load_url(
         url='{repo_url}/releases/download/{repo_release_tag}/{file_name}.zip'.format(
             repo_url=imgclsmob_repo_url,
             repo_release_tag=repo_release_tag,
-            file_name=file_name),
-        path=zip_file_path,
-        overwrite=True)
+            file_name=file_name))
     with zipfile.ZipFile(zip_file_path) as zf:
         zf.extractall(local_model_store_dir_path)
     os.remove(zip_file_path)
 
-    if check_sha1(file_path, sha1_hash):
+    if _check_sha1(file_path, sha1_hash):
         return file_path
     else:
         raise ValueError('Downloaded file has different hash. Please try again.')
+
+
+def _check_sha1(filename, sha1_hash):
+    """Check whether the sha1 hash of the file content matches the expected hash.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file.
+    sha1_hash : str
+        Expected sha1 hash in hexadecimal digits.
+
+    Returns
+    -------
+    bool
+        Whether the file content matches the expected hash.
+    """
+    sha1 = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(1048576)
+            if not data:
+                break
+            sha1.update(data)
+
+    return sha1.hexdigest() == sha1_hash
 

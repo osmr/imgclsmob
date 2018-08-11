@@ -61,3 +61,24 @@ bottleneck block. Respectively network without b-suffix has the stride in the fi
 | PreResNet-101b | 21.73 | 5.88 | 44,541,608 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet101b-0588-1015145a.params.log)) |
 | ~~PreResNet-152~~ | 35.88 | 14.51 | 60,185,256 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet152-1451-dc303191.params.log)) |
 | PreResNet-152b | 21.00 | 5.75 | 60,185,256 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet152b-0575-dc303191.params.log)) |
+
+### For PyTorch
+
+| Model | Top1 | Top5 | Params | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-18 | 29.33 | 10.30 | 11,689,512 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet18-1030-a516bab5.pth.log)) |
+| ResNet-34 | 25.66 | 8.18 | 21,797,672 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet34-0818-6f947d40.pth.log)) |
+| ResNet-50 | 23.79 | 7.05 | 25,557,032 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet50-0705-f7a2027e.pth.log)) |
+| ResNet-50b | 23.05 | 6.65 | 25,557,032 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet50b-0665-89691746.pth.log)) |
+| ResNet-101 | 21.90 | 6.22 | 44,549,160 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet101-0622-ab0cf005.pth.log)) |
+| ResNet-101b | 21.45 | 5.81 | 44,549,160 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet101b-0581-d983e682.pth.log)) |
+| ResNet-152 | 21.26 | 5.82 | 60,192,808 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet152-0582-af1a3bd5.pth.log)) |
+| ResNet-152b | 20.74 | 5.50 | 60,192,808 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet152b-0550-216604cf.pth.log)) |
+| PreResNet-18 | 29.76 | 10.57 | 11,687,848 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet18-1057-119bd3de.pth.log)) |
+| PreResNet-34 | 26.23 | 8.41 | 21,796,008 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet34-0841-b4dd761f.pth.log)) |
+| ~~PreResNet-50~~ | 41.63 | 18.89 | 25,549,480 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet50-1889-8a1091cb.pth.log)) |
+| PreResNet-50b | 23.33 | 6.87 | 25,549,480 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet50b-0687-65be98fb.pth.log)) |
+| ~~PreResNet-101~~ | 40.29 | 18.08 | 44,541,608 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet101-1808-0340579d.pth.log)) |
+| PreResNet-101b | 21.95 | 6.03 | 44,541,608 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet101b-0603-b1e37a09.pth.log)) |
+| ~~PreResNet-152~~ | 36.35 | 14.88 | 60,185,256 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet152-1488-0cecb4fc.pth.log)) |
+| PreResNet-152b | 21.34 | 5.91 | 60,185,256 | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet152b-0591-2c91ab2c.pth.log)) |

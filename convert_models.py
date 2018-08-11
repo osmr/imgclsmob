@@ -215,7 +215,7 @@ def main():
                               not (key.startswith("features.") and key.endswith(".bias"))]
 
         if args.src_model in ["resnet50_v2"]:
-            src_param_keys = src_param_keys[3:]
+            src_param_keys = src_param_keys[4:]
 
     elif args.src_fwk == "pytorch":
         src_net = prepare_model_pt(

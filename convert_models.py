@@ -45,12 +45,6 @@ def parse_args():
         help='destination model parameter file path')
 
     parser.add_argument(
-        '--index-shift',
-        type=int,
-        default=0,
-        help='index shift for some models')
-
-    parser.add_argument(
         '--save-dir',
         type=str,
         default='',
@@ -215,6 +209,14 @@ def main():
             ctx=ctx)
         src_params = src_net._collect_params_with_prefix()
         src_param_keys = list(src_params.keys())
+
+        if args.src_model in ["resnet50_v1"]:
+            src_param_keys = [key for key in src_param_keys if
+                              not (key.startswith("features.") and key.endswith(".bias"))]
+
+        if args.src_model in ["resnet50_v2"]:
+            src_param_keys = src_param_keys[3:]
+
     elif args.src_fwk == "pytorch":
         src_net = prepare_model_pt(
             model_name=args.src_model,
@@ -261,15 +263,12 @@ def main():
     else:
         raise ValueError("Unsupported dst fwk: {}".format(args.dst_fwk))
 
-    assert (len(src_param_keys) == len(dst_param_keys) + args.index_shift)  # preresnet
-    #assert (len(src_param_keys) == len(dst_param_keys))
+    assert (len(src_param_keys) == len(dst_param_keys))
 
     if args.src_fwk == "gluon" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            assert (dst_params[dst_key].shape == src_params[src_param_keys[i+args.index_shift]].shape)
-            dst_params[dst_key]._load_init(src_params[src_param_keys[i+args.index_shift]]._data[0], ctx)  # preresnet
-            #assert (dst_params[dst_key].shape == src_params[src_key].shape)
-            #dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
+            assert (dst_params[dst_key].shape == src_params[src_key].shape)
+            dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):

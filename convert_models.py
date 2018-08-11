@@ -214,7 +214,7 @@ def main():
             src_param_keys = [key for key in src_param_keys if
                               not (key.startswith("features.") and key.endswith(".bias"))]
 
-        if args.src_model in ["resnet50_v2"]:
+        if args.src_model in ["resnet18_v2", "resnet34_v2", "resnet50_v2", "resnet101_v2", "resnet152_v2"]:
             src_param_keys = src_param_keys[4:]
 
     elif args.src_fwk == "pytorch":

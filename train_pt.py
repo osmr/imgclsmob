@@ -7,6 +7,7 @@ import warnings
 import random
 import numpy as np
 
+import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.utils.data
 import torchvision.transforms as transforms
@@ -438,6 +439,7 @@ def test(net,
          val_data,
          use_cuda,
          calc_weight_count=False,
+         calc_flops=False,
          extended_log=False):
     acc_top1 = AverageMeter()
     acc_top5 = AverageMeter()
@@ -452,6 +454,10 @@ def test(net,
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
         logging.info('Model: {} trainable parameters'.format(weight_count))
+    if calc_flops:
+        n_flops, n_params = measure_model(net, 224, 224)
+        logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(
+            n_params, n_params / 1e6, n_flops, n_flops / 1e6))
     if extended_log:
         logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
             top1=err_top1_val, top5=err_top5_val))
@@ -616,9 +622,6 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
 
-    #n_flops, n_params = measure_model(net, 224, 224)
-    #logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(n_params, n_params / 1e6, n_flops, n_flops / 1e6))
-
     train_data, val_data = get_data_loader(
         data_dir=args.data_dir,
         batch_size=batch_size,
@@ -632,6 +635,7 @@ def main():
             use_cuda=use_cuda,
             #calc_weight_count=(not log_file_exist),
             calc_weight_count=True,
+            calc_flops=True,
             extended_log=True)
     else:
         num_training_samples = 1281167

@@ -401,6 +401,7 @@ class ResNet(HybridBlock):
 def get_resnet(blocks,
                conv1_stride=True,
                width_scale=1.0,
+               model_name=None,
                pretrained=False,
                ctx=cpu(),
                root=os.path.join('~', '.mxnet', 'models'),
@@ -416,6 +417,8 @@ def get_resnet(blocks,
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -470,10 +473,12 @@ def get_resnet(blocks,
         **kwargs)
 
     if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
         net.load_parameters(
             filename=get_model_file(
-                model_name='resnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
+                model_name=model_name,
                 local_model_store_dir_path=root),
             ctx=ctx)
 
@@ -491,8 +496,10 @@ def resnet10(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, **kwargs)
+    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
 
 
 def resnet12(**kwargs):
@@ -506,8 +513,10 @@ def resnet12(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, **kwargs)
+    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
 
 
 def resnet14(**kwargs):
@@ -521,8 +530,10 @@ def resnet14(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, **kwargs)
+    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
 
 
 def resnet16(**kwargs):
@@ -536,8 +547,10 @@ def resnet16(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, **kwargs)
+    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
 
 
 def resnet18(**kwargs):
@@ -550,8 +563,10 @@ def resnet18(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, **kwargs)
+    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
 
 
 def resnet18_w3d4(**kwargs):
@@ -565,8 +580,10 @@ def resnet18_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
 
 
 def resnet18_wd2(**kwargs):
@@ -580,8 +597,10 @@ def resnet18_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.5, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
 
 
 def resnet18_wd4(**kwargs):
@@ -595,8 +614,10 @@ def resnet18_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
 
 
 def resnet34(**kwargs):
@@ -609,8 +630,10 @@ def resnet34(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, **kwargs)
+    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
 
 
 def resnet50(**kwargs):
@@ -623,8 +646,10 @@ def resnet50(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, **kwargs)
+    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
 
 
 def resnet50b(**kwargs):
@@ -638,8 +663,10 @@ def resnet50b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
 
 
 def resnet101(**kwargs):
@@ -652,8 +679,10 @@ def resnet101(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, **kwargs)
+    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
 
 
 def resnet101b(**kwargs):
@@ -667,8 +696,10 @@ def resnet101b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
 
 
 def resnet152(**kwargs):
@@ -681,8 +712,10 @@ def resnet152(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, **kwargs)
+    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
 
 
 def resnet152b(**kwargs):
@@ -696,8 +729,10 @@ def resnet152b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
 
 
 def resnet200(**kwargs):
@@ -711,8 +746,10 @@ def resnet200(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, **kwargs)
+    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
 
 
 def resnet200b(**kwargs):
@@ -726,23 +763,27 @@ def resnet200b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
 
+    pretrained = True
+
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnet16,
+        #resnet10,
+        #resnet12,
+        #resnet14,
+        #resnet16,
         resnet18,
-        resnet18_w3d4,
-        resnet18_wd2,
-        resnet18_wd4,
+        #resnet18_w3d4,
+        #resnet18_wd2,
+        #resnet18_wd4,
         resnet34,
         resnet50,
         resnet50b,
@@ -750,16 +791,17 @@ def _test():
         resnet101b,
         resnet152,
         resnet152b,
-        resnet200,
-        resnet200b,
+        #resnet200,
+        #resnet200b,
     ]
 
     for model in models:
 
-        net = model(pretrained=True)
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

@@ -7,6 +7,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preresnet18_wd2', 'preresnet18_wd4', 'preresnet34', 'preresnet50', 'preresnet50b', 'preresnet101',
            'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -436,8 +437,10 @@ class PreResNet(HybridBlock):
 def get_preresnet(blocks,
                   conv1_stride=True,
                   width_scale=1.0,
+                  model_name=None,
                   pretrained=False,
                   ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
                   **kwargs):
     """
     Create PreResNet model with specific parameters.
@@ -450,10 +453,14 @@ def get_preresnet(blocks,
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     if blocks == 10:
@@ -494,9 +501,6 @@ def get_preresnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
     net = PreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
@@ -505,10 +509,12 @@ def get_preresnet(blocks,
         **kwargs)
 
     if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
         net.load_parameters(
             filename=get_model_file(
-                model_name='preresnet{}{}'.format(blocks, '' if conv1_stride else 'b'),
+                model_name=model_name,
                 local_model_store_dir_path=root),
             ctx=ctx)
 
@@ -526,8 +532,10 @@ def preresnet10(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=10, **kwargs)
+    return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
 
 
 def preresnet12(**kwargs):
@@ -541,8 +549,10 @@ def preresnet12(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=12, **kwargs)
+    return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
 
 
 def preresnet14(**kwargs):
@@ -556,8 +566,10 @@ def preresnet14(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=14, **kwargs)
+    return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
 
 
 def preresnet16(**kwargs):
@@ -571,8 +583,10 @@ def preresnet16(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=16, **kwargs)
+    return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
 
 def preresnet18(**kwargs):
@@ -585,8 +599,10 @@ def preresnet18(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, **kwargs)
+    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
 
 def preresnet18_w3d4(**kwargs):
@@ -600,8 +616,10 @@ def preresnet18_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.75, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
 
 
 def preresnet18_wd2(**kwargs):
@@ -615,8 +633,10 @@ def preresnet18_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.5, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
 
 def preresnet18_wd4(**kwargs):
@@ -630,8 +650,10 @@ def preresnet18_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.25, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
 
 def preresnet34(**kwargs):
@@ -644,8 +666,10 @@ def preresnet34(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=34, **kwargs)
+    return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
 
 def preresnet50(**kwargs):
@@ -658,8 +682,10 @@ def preresnet50(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=50, **kwargs)
+    return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
 
 
 def preresnet50b(**kwargs):
@@ -673,8 +699,10 @@ def preresnet50b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=50, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
 
 
 def preresnet101(**kwargs):
@@ -687,8 +715,10 @@ def preresnet101(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=101, **kwargs)
+    return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
 
 
 def preresnet101b(**kwargs):
@@ -702,8 +732,10 @@ def preresnet101b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=101, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
 
 
 def preresnet152(**kwargs):
@@ -716,8 +748,10 @@ def preresnet152(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=152, **kwargs)
+    return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
 
 
 def preresnet152b(**kwargs):
@@ -731,8 +765,10 @@ def preresnet152b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=152, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
 
 
 def preresnet200(**kwargs):
@@ -745,8 +781,10 @@ def preresnet200(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=200, **kwargs)
+    return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
 
 
 def preresnet200b(**kwargs):
@@ -760,23 +798,27 @@ def preresnet200b(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=200, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
 
+    pretrained = True
+
     models = [
-        preresnet10,
-        preresnet12,
-        preresnet14,
-        preresnet16,
+        #preresnet10,
+        #preresnet12,
+        #preresnet14,
+        #preresnet16,
         preresnet18,
-        preresnet18_w3d4,
-        preresnet18_wd2,
-        preresnet18_wd4,
+        #preresnet18_w3d4,
+        #preresnet18_wd2,
+        #preresnet18_wd4,
         preresnet34,
         preresnet50,
         preresnet50b,
@@ -784,16 +826,17 @@ def _test():
         preresnet101b,
         preresnet152,
         preresnet152b,
-        preresnet200,
-        preresnet200b,
+        #preresnet200,
+        #preresnet200b,
     ]
 
     for model in models:
 
-        net = model(pretrained=True)
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

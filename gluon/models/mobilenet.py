@@ -9,6 +9,7 @@
 __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
            'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -177,8 +178,10 @@ class MobileNet(HybridBlock):
 
 def get_mobilenet(version,
                   width_scale,
+                  model_name=None,
                   pretrained=False,
                   ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
                   **kwargs):
     """
     Create MobileNet model with specific parameters.
@@ -189,10 +192,14 @@ def get_mobilenet(version,
         Version of SqueezeNet ('orig' or 'fd').
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     if version == 'orig':
@@ -207,13 +214,22 @@ def get_mobilenet(version,
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return MobileNet(
+    net = MobileNet(
         channels=channels,
         first_stage_stride=first_stage_stride,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
 
 
 def mobilenet_w1(**kwargs):
@@ -227,8 +243,10 @@ def mobilenet_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('orig', 1.0, **kwargs)
+    return get_mobilenet(version='orig', width_scale=1.0, model_name="mobilenet_w1", **kwargs)
 
 
 def mobilenet_w3d4(**kwargs):
@@ -242,8 +260,10 @@ def mobilenet_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('orig', 0.75, **kwargs)
+    return get_mobilenet(version='orig', width_scale=0.75, model_name="mobilenet_w3d4", **kwargs)
 
 
 def mobilenet_wd2(**kwargs):
@@ -257,8 +277,10 @@ def mobilenet_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('orig', 0.5, **kwargs)
+    return get_mobilenet(version='orig', width_scale=0.5, model_name="mobilenet_wd2", **kwargs)
 
 
 def mobilenet_wd4(**kwargs):
@@ -272,8 +294,10 @@ def mobilenet_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('orig', 0.25, **kwargs)
+    return get_mobilenet(version='orig', width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
 
 def fdmobilenet_w1(**kwargs):
@@ -287,8 +311,10 @@ def fdmobilenet_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('fd', 1.0, **kwargs)
+    return get_mobilenet(version='fd', width_scale=1.0, model_name="fdmobilenet_w1", **kwargs)
 
 
 def fdmobilenet_w3d4(**kwargs):
@@ -302,8 +328,10 @@ def fdmobilenet_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('fd', 0.75, **kwargs)
+    return get_mobilenet(version='fd', width_scale=0.75, model_name="fdmobilenet_w3d4", **kwargs)
 
 
 def fdmobilenet_wd2(**kwargs):
@@ -317,8 +345,10 @@ def fdmobilenet_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('fd', 0.5, **kwargs)
+    return get_mobilenet(version='fd', width_scale=0.5, model_name="fdmobilenet_wd2", **kwargs)
 
 
 def fdmobilenet_wd4(**kwargs):
@@ -332,13 +362,17 @@ def fdmobilenet_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenet('fd', 0.25, **kwargs)
+    return get_mobilenet(version='fd', width_scale=0.25, model_name="fdmobilenet_wd4", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
+
+    pretrained = True
 
     models = [
         mobilenet_w1,
@@ -353,10 +387,11 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

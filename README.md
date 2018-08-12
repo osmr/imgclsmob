@@ -70,6 +70,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-152b | 21.00 | 5.75 | 60,185,256 | 11,536.78M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet152b-0575-dc303191.params.log)) |
 | SqueezeNet v1.0 | 42.81 | 19.98 | 1,248,424 | 828.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1998-1b771149.params.log)) |
 | SqueezeNet v1.1 | 43.06 | 20.23 | 1,235,496 | 354.88M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-2023-ab455761.params.log)) |
+| MobileNet x0.25 | 48.37 | 24.10 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd4-2410-db312a26.params.log)) |
+| MobileNet x0.5 | 37.37 | 15.37 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1537-5419ccc2.params.log)) |
+| MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1228-dc11727a.params.log)) |
+| MobileNet x1.0 | 29.25 | 10.03 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w1-1003-b4fb8f1b.params.log)) |
 
 ### For PyTorch
 
@@ -98,3 +102,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-152b | 21.34 | 5.91 | 60,185,256 | 11,536.78M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet152b-0591-2c91ab2c.pth.log)) |
 | SqueezeNet v1.0 | 41.91 | 19.58 | 1,248,424 | 828.30M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1958-d6d59f9c.pth.log)) |
 | SqueezeNet v1.1 | 41.82 | 19.38 | 1,235,496 | 354.88M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-1938-8dcd1cc5.pth.log)) |
+| MobileNet x0.25 | 49.13 | 24.93 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd4-2493-c05b5fab.pth.log)) |
+| MobileNet x0.5 | 38.12 | 15.99 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1599-5883b38d.pth.log)) |
+| MobileNet x0.75 | 33.54 | 12.85 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1285-b8022fae.pth.log)) |
+| MobileNet x1.0 | 29.86 | 10.36 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w1-1036-34f7a0cb.pth.log)) |

@@ -349,8 +349,8 @@ def _test():
     models = [
         squeezenet_v1_0,
         squeezenet_v1_1,
-        squeezeresnet_v1_0,
-        squeezeresnet_v1_1,
+        # squeezeresnet_v1_0,
+        # squeezeresnet_v1_1,
     ]
 
     for model in models:

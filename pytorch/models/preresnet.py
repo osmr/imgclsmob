@@ -3,9 +3,9 @@
     Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
-__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18', 'preresnet18_w3d4',
-           'preresnet18_wd2', 'preresnet18_wd4', 'preresnet34', 'preresnet50', 'preresnet50b', 'preresnet101',
-           'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
+__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
+           'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
+           'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
 
 import os
 import torch.nn as nn
@@ -525,23 +525,9 @@ def preresnet16(**kwargs):
     return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
 
-def preresnet18(**kwargs):
+def preresnet18_wd4(**kwargs):
     """
-    PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
-
-
-def preresnet18_w3d4(**kwargs):
-    """
-    PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
+    PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
@@ -551,7 +537,7 @@ def preresnet18_w3d4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
 
 def preresnet18_wd2(**kwargs):
@@ -569,9 +555,9 @@ def preresnet18_wd2(**kwargs):
     return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
 
-def preresnet18_wd4(**kwargs):
+def preresnet18_w3d4(**kwargs):
     """
-    PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
+    PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
     https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
@@ -581,7 +567,21 @@ def preresnet18_wd4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
+
+
+def preresnet18(**kwargs):
+    """
+    PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
 
 def preresnet34(**kwargs):
@@ -726,10 +726,10 @@ def _test():
         # preresnet12,
         # preresnet14,
         # preresnet16,
-        preresnet18,
-        # preresnet18_w3d4,
-        # preresnet18_wd2,
         # preresnet18_wd4,
+        # preresnet18_wd2,
+        # preresnet18_w3d4,
+        preresnet18,
         preresnet34,
         preresnet50,
         preresnet50b,

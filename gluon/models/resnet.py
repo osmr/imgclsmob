@@ -3,8 +3,8 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18', 'resnet18_w3d4', 'resnet18_wd2',
-           'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
+__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
+           'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b']
 
 import os
@@ -553,25 +553,9 @@ def resnet16(**kwargs):
     return get_resnet(blocks=16, model_name="resnet16", **kwargs)
 
 
-def resnet18(**kwargs):
+def resnet18_wd4(**kwargs):
     """
-    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
-
-
-def resnet18_w3d4(**kwargs):
-    """
-    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
+    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters:
@@ -583,7 +567,7 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
 
 
 def resnet18_wd2(**kwargs):
@@ -603,9 +587,9 @@ def resnet18_wd2(**kwargs):
     return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def resnet18_w3d4(**kwargs):
     """
-    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
+    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385. It's an experimental model.
 
     Parameters:
@@ -617,7 +601,23 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+
+
+def resnet18(**kwargs):
+    """
+    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
 
 
 def resnet34(**kwargs):
@@ -780,10 +780,10 @@ def _test():
         #resnet12,
         #resnet14,
         #resnet16,
-        resnet18,
-        #resnet18_w3d4,
-        #resnet18_wd2,
         #resnet18_wd4,
+        #resnet18_wd2,
+        #resnet18_w3d4,
+        resnet18,
         resnet34,
         resnet50,
         resnet50b,

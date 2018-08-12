@@ -1,5 +1,6 @@
 from .models.resnet import *
 from .models.preresnet import *
+from .models.densenet import *
 from .models.squeezenet import *
 from .models.darknet import *
 from .models.mobilenet import *
@@ -7,7 +8,6 @@ from .models.mobilenetv2 import *
 from .models.shufflenet import *
 from .models.menet import *
 from .models.squeezenext import *
-from .models.densenet import *
 
 #from .models.nasnet import *
 
@@ -23,10 +23,11 @@ _models = {
     'resnet12': resnet12,
     'resnet14': resnet14,
     'resnet16': resnet16,
-    'slk_resnet18': resnet18,
-    'resnet18_w3d4': resnet18_w3d4,
-    'resnet18_wd2': resnet18_wd2,
     'resnet18_wd4': resnet18_wd4,
+    'resnet18_wd2': resnet18_wd2,
+    'resnet18_w3d4': resnet18_w3d4,
+
+    'slk_resnet18': resnet18,
     'slk_resnet34': resnet34,
     'slk_resnet50': resnet50,
     'resnet50b': resnet50b,
@@ -41,10 +42,11 @@ _models = {
     'preresnet12': preresnet12,
     'preresnet14': preresnet14,
     'preresnet16': preresnet16,
-    'preresnet18': preresnet18,
-    'preresnet18_w3d4': preresnet18_w3d4,
-    'preresnet18_wd2': preresnet18_wd2,
     'preresnet18_wd4': preresnet18_wd4,
+    'preresnet18_wd2': preresnet18_wd2,
+    'preresnet18_w3d4': preresnet18_w3d4,
+
+    'preresnet18': preresnet18,
     'preresnet34': preresnet34,
     'preresnet50': preresnet50,
     'preresnet50b': preresnet50b,
@@ -54,6 +56,11 @@ _models = {
     'preresnet152b': preresnet152b,
     'preresnet200': preresnet200,
     'preresnet200b': preresnet200b,
+
+    'slk_densenet121': densenet121,
+    'slk_densenet161': densenet161,
+    'slk_densenet169': densenet169,
+    'slk_densenet201': densenet201,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,
@@ -106,11 +113,6 @@ _models = {
     'sqnxt23v5_w1': sqnxt23v5_w1,
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
-
-    'densenet121': densenet121,
-    'densenet161': densenet161,
-    'densenet169': densenet169,
-    'densenet201': densenet201,
 
     # 'nasnet_a_mobile': nasnet_a_mobile,
 

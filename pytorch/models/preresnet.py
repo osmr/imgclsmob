@@ -7,6 +7,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preresnet18_wd2', 'preresnet18_wd4', 'preresnet34', 'preresnet50', 'preresnet50b', 'preresnet101',
            'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
 
+import os
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -384,7 +385,9 @@ class PreResNet(nn.Module):
 def get_preresnet(blocks,
                   conv1_stride=True,
                   width_scale=1.0,
+                  model_name=None,
                   pretrained=False,
+                  root=os.path.join('~', '.torch', 'models'),
                   **kwargs):
     """
     Create PreResNet model with specific parameters.
@@ -397,8 +400,12 @@ def get_preresnet(blocks,
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     if blocks == 10:
@@ -439,15 +446,23 @@ def get_preresnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return PreResNet(
+    net = PreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def preresnet10(**kwargs):
@@ -459,8 +474,10 @@ def preresnet10(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=10, **kwargs)
+    return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
 
 
 def preresnet12(**kwargs):
@@ -472,8 +489,10 @@ def preresnet12(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=12, **kwargs)
+    return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
 
 
 def preresnet14(**kwargs):
@@ -485,8 +504,10 @@ def preresnet14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=14, **kwargs)
+    return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
 
 
 def preresnet16(**kwargs):
@@ -498,8 +519,10 @@ def preresnet16(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=16, **kwargs)
+    return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
 
 def preresnet18(**kwargs):
@@ -510,8 +533,10 @@ def preresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, **kwargs)
+    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
 
 def preresnet18_w3d4(**kwargs):
@@ -523,8 +548,10 @@ def preresnet18_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.75, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
 
 
 def preresnet18_wd2(**kwargs):
@@ -536,8 +563,10 @@ def preresnet18_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.5, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
 
 def preresnet18_wd4(**kwargs):
@@ -549,8 +578,10 @@ def preresnet18_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=18, width_scale=0.25, **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
 
 def preresnet34(**kwargs):
@@ -561,8 +592,10 @@ def preresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=34, **kwargs)
+    return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
 
 def preresnet50(**kwargs):
@@ -573,8 +606,10 @@ def preresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=50, **kwargs)
+    return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
 
 
 def preresnet50b(**kwargs):
@@ -586,8 +621,10 @@ def preresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=50, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
 
 
 def preresnet101(**kwargs):
@@ -598,8 +635,10 @@ def preresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=101, **kwargs)
+    return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
 
 
 def preresnet101b(**kwargs):
@@ -611,8 +650,10 @@ def preresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=101, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
 
 
 def preresnet152(**kwargs):
@@ -623,8 +664,10 @@ def preresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=152, **kwargs)
+    return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
 
 
 def preresnet152b(**kwargs):
@@ -636,8 +679,10 @@ def preresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=152, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
 
 
 def preresnet200(**kwargs):
@@ -648,8 +693,10 @@ def preresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=200, **kwargs)
+    return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
 
 
 def preresnet200b(**kwargs):
@@ -661,8 +708,10 @@ def preresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_preresnet(blocks=200, conv1_stride=False, **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
 def _test():
@@ -670,15 +719,17 @@ def _test():
     import torch
     from torch.autograd import Variable
 
+    pretrained = True
+
     models = [
-        preresnet10,
-        preresnet12,
-        preresnet14,
-        preresnet16,
+        # preresnet10,
+        # preresnet12,
+        # preresnet14,
+        # preresnet16,
         preresnet18,
-        preresnet18_w3d4,
-        preresnet18_wd2,
-        preresnet18_wd4,
+        # preresnet18_w3d4,
+        # preresnet18_wd2,
+        # preresnet18_wd4,
         preresnet34,
         preresnet50,
         preresnet50b,
@@ -686,13 +737,13 @@ def _test():
         preresnet101b,
         preresnet152,
         preresnet152b,
-        preresnet200,
-        preresnet200b,
+        # preresnet200,
+        # preresnet200b,
     ]
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

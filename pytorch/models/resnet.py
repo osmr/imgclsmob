@@ -7,6 +7,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18',
            'resnet18_wd4', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b']
 
+import os
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -357,7 +358,9 @@ class ResNet(nn.Module):
 def get_resnet(blocks,
                conv1_stride=True,
                width_scale=1.0,
+               model_name=None,
                pretrained=False,
+               root=os.path.join('~', '.torch', 'models'),
                **kwargs):
     """
     Create ResNet model with specific parameters.
@@ -370,6 +373,8 @@ def get_resnet(blocks,
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -414,15 +419,23 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return ResNet(
+    net = ResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def resnet10(**kwargs):
@@ -437,7 +450,7 @@ def resnet10(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, **kwargs)
+    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
 
 
 def resnet12(**kwargs):
@@ -452,8 +465,7 @@ def resnet12(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, **kwargs)
-
+    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
 
 def resnet14(**kwargs):
     """
@@ -467,7 +479,7 @@ def resnet14(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, **kwargs)
+    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
 
 
 def resnet16(**kwargs):
@@ -482,7 +494,7 @@ def resnet16(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, **kwargs)
+    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
 
 
 def resnet18(**kwargs):
@@ -496,7 +508,7 @@ def resnet18(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, **kwargs)
+    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
 
 
 def resnet18_w3d4(**kwargs):
@@ -511,7 +523,7 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
 
 
 def resnet18_wd2(**kwargs):
@@ -526,7 +538,7 @@ def resnet18_wd2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.5, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
 
 
 def resnet18_wd4(**kwargs):
@@ -541,7 +553,7 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, **kwargs)
+    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
 
 
 def resnet34(**kwargs):
@@ -555,7 +567,7 @@ def resnet34(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, **kwargs)
+    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
 
 
 def resnet50(**kwargs):
@@ -569,7 +581,7 @@ def resnet50(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, **kwargs)
+    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
 
 
 def resnet50b(**kwargs):
@@ -584,7 +596,7 @@ def resnet50b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
 
 
 def resnet101(**kwargs):
@@ -598,7 +610,7 @@ def resnet101(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, **kwargs)
+    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
 
 
 def resnet101b(**kwargs):
@@ -613,7 +625,7 @@ def resnet101b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
 
 
 def resnet152(**kwargs):
@@ -627,7 +639,7 @@ def resnet152(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, **kwargs)
+    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
 
 
 def resnet152b(**kwargs):
@@ -642,7 +654,7 @@ def resnet152b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
 
 
 def resnet200(**kwargs):
@@ -657,7 +669,7 @@ def resnet200(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, **kwargs)
+    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
 
 
 def resnet200b(**kwargs):
@@ -672,7 +684,7 @@ def resnet200b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, **kwargs)
+    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
 def _test():
@@ -680,15 +692,17 @@ def _test():
     import torch
     from torch.autograd import Variable
 
+    pretrained = True
+
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnet16,
+        # resnet10,
+        # resnet12,
+        # resnet14,
+        # resnet16,
         resnet18,
-        resnet18_w3d4,
-        resnet18_wd2,
-        resnet18_wd4,
+        # resnet18_w3d4,
+        # resnet18_wd2,
+        # resnet18_wd4,
         resnet34,
         resnet50,
         resnet50b,
@@ -696,13 +710,13 @@ def _test():
         resnet101b,
         resnet152,
         resnet152b,
-        resnet200,
-        resnet200b,
+        # resnet200,
+        # resnet200b,
     ]
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

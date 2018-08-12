@@ -37,9 +37,11 @@ torchvision >= 0.2.1
 ## Pretrained models
 
 Some remarks:
-- Top1/Top5 are Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet1k dataset.
+- All pretrained models can be downloaded automatically during use (use the parameter `pretrained`).
+- Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet1k dataset.
 - ResNet/PreResNet with b-suffix is a version of the networks with the stride in the second convolution of the
-bottleneck block. Respectively network without b-suffix has the stride in the first convolution.
+bottleneck block. Respectively a network without b-suffix has the stride in the first convolution.
+- ResNet/PreResNet models do not use biasses in convolutions at all.
 
 ### For Gluon
 

@@ -47,6 +47,11 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
+| ResNet-10 | 38.88 | 16.63 | 5,418,792 | 892.62M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet10-1663-6dc653d3.params.log)) |
+| ResNet-12 | 37.62 | 15.56 | 5,492,776 | 1,124.23M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1556-6395e8b1.params.log)) |
+| ResNet-14 | 36.17 | 14.52 | 5,788,200 | 1,355.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1452-70faeeaa.params.log)) |
+| ResNet-18 x0.25 | 53.13 | 27.77 | 831,096 | 136.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2777-42c5a34c.params.log)) |
+| ResNet-18 x0.5 | 38.94 | 16.46 | 3,055,880 | 485.22M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd2-1646-99006438.params.log)) |
 | ResNet-18 | 29.06 | 10.08 | 11,689,512 | 1,818.21M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet18-1008-4f9f7e8f.params.log)) |
 | ResNet-34 | 25.34 | 7.92 | 21,797,672 | 3,669.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet34-0792-5b875f49.params.log)) |
 | ResNet-50 | 23.50 | 6.87 | 25,557,032 | 3,868.96M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet50-0687-79fae958.params.log)) |
@@ -68,6 +73,11 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
+| ResNet-10 | 39.09 | 16.90 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet10-1690-37e57029.pth.log)) |
+| ResNet-12 | 38.02 | 15.89 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1589-9552d5a8.pth.log)) |
+| ResNet-12 | 36.50 | 14.84 | 5,492,776 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1484-542e6bd4.pth.log)) |
+| ResNet-18 x0.25 | 53.37 | 28.06 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2806-d0cda855.pth.log)) |
+| ResNet-18 x0.5 | 39.31 | 16.79 | 3,055,880 | 485.22M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd2-1679-12f81d73.pth.log)) |
 | ResNet-18 | 29.33 | 10.30 | 11,689,512 | 1,818.21M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet18-1030-a516bab5.pth.log)) |
 | ResNet-34 | 25.66 | 8.18 | 21,797,672 | 3,669.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet34-0818-6f947d40.pth.log)) |
 | ResNet-50 | 23.79 | 7.05 | 25,557,032 | 3,868.96M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet50-0705-f7a2027e.pth.log)) |

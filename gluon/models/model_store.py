@@ -10,6 +10,11 @@ import logging
 from mxnet.gluon.utils import download, check_sha1
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
+    ('resnet10', '1663', '6dc653d322284f022ceee9e4ae50f49d16b12d61', 'v0.0.5'),
+    ('resnet12', '1556', '6395e8b12460738ef7a31aaa180fb3c4bc49464a', 'v0.0.5'),
+    ('resnet14', '1452', '70faeeaacf2067c6b1cd44c5c17110f91bafe4fa', 'v0.0.5'),
+    ('resnet18_wd4', '2777', '42c5a34cb9380f89377bb2122664ebbe087dd49d', 'v0.0.5'),
+    ('resnet18_wd2', '1646', '99006438e7f89c0e46cfd5535ced5e173b6417a5', 'v0.0.5'),
     ('resnet18', '1008', '4f9f7e8f611a51501a23414fc147a3850b8b307b', 'v0.0.2'),
     ('resnet34', '0792', '5b875f4934da8d83d44afc30d8e91362d3103115', 'v0.0.2'),
     ('resnet50', '0687', '79fae958a0acd7a66d688f6453b2bbbc5fe8b3d3', 'v0.0.2'),

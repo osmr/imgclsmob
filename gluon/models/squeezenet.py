@@ -6,6 +6,7 @@
 
 __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -211,8 +212,10 @@ class SqueezeNet(HybridBlock):
 
 def get_squeezenet(version,
                    residual=False,
+                   model_name=None,
                    pretrained=False,
                    ctx=cpu(),
+                   root=os.path.join('~', '.mxnet', 'models'),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.
@@ -223,10 +226,14 @@ def get_squeezenet(version,
         Version of SqueezeNet ('1.0' or '1.1').
     residual : bool, default False
         Whether to use residual connections.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     if version == '1.0':
@@ -245,15 +252,24 @@ def get_squeezenet(version,
     if not residual:
         residuals = None
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return SqueezeNet(
+    net = SqueezeNet(
         channels=channels,
         residuals=residuals,
         init_block_kernel_size=init_block_kernel_size,
         init_block_channels=init_block_channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
 
 
 def squeezenet_v1_0(**kwargs):
@@ -267,8 +283,10 @@ def squeezenet_v1_0(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.0', residual=False, **kwargs)
+    return get_squeezenet(version='1.0', residual=False, model_name="squeezenet_v1_0", **kwargs)
 
 
 def squeezenet_v1_1(**kwargs):
@@ -282,8 +300,10 @@ def squeezenet_v1_1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.1', residual=False, **kwargs)
+    return get_squeezenet(version='1.1', residual=False, model_name="squeezenet_v1_1", **kwargs)
 
 
 def squeezeresnet_v1_0(**kwargs):
@@ -297,8 +317,10 @@ def squeezeresnet_v1_0(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.0', residual=True, **kwargs)
+    return get_squeezenet(version='1.0', residual=True, model_name="squeezeresnet_v1_0", **kwargs)
 
 
 def squeezeresnet_v1_1(**kwargs):
@@ -312,13 +334,17 @@ def squeezeresnet_v1_1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.1', residual=True, **kwargs)
+    return get_squeezenet(version='1.1', residual=True, model_name="squeezeresnet_v1_1", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
+
+    pretrained = True
 
     models = [
         squeezenet_v1_0,
@@ -329,10 +355,11 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

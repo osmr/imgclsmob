@@ -31,7 +31,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('preresnet101', '1808', '0340579d000ae82e027eea0188fc4d6525b12470', 'v0.0.3'),
     ('preresnet101b', '0603', 'b1e37a09424dde15ecba72365d46b1f59abd479b', 'v0.0.3'),
     ('preresnet152', '1488', '0cecb4fc084715774242d3c4a95ed3592cc6ca0e', 'v0.0.3'),
-    ('preresnet152b', '0591', '2c91ab2c8d90f3990e7c30fd6ee2184f6c2c3bee', 'v0.0.3')]}
+    ('preresnet152b', '0591', '2c91ab2c8d90f3990e7c30fd6ee2184f6c2c3bee', 'v0.0.3'),
+    ('squeezenet_v1_0', '1958', 'd6d59f9cc04c147d1f2eeeead9ac315391c3f028', 'v0.0.6'),
+    ('squeezenet_v1_1', '1938', '8dcd1cc5d955f3d154bfa5be20cd278f3e77f21b', 'v0.0.6')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/tmp1'
 

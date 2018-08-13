@@ -150,7 +150,7 @@ class DenseUnit(HybridBlock):
         x = self.conv2(x)
         if self.use_dropout:
             x = self.dropout(x)
-        x = F.concat(x, identity, dim=1)
+        x = F.concat(identity, x, dim=1)
         return x
 
 
@@ -179,7 +179,7 @@ class TransitionBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.pool = nn.MaxPool2D(
+            self.pool = nn.AvgPool2D(
                 pool_size=2,
                 strides=2,
                 padding=0)

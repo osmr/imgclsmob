@@ -208,7 +208,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    net = densenet201()
+    net = densenet121()
 
     ctx = mx.cpu()
     net.initialize(ctx=ctx)

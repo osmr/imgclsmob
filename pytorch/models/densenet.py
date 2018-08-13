@@ -131,7 +131,7 @@ class DenseUnit(nn.Module):
         x = self.conv2(x)
         if self.use_dropout:
             x = self.dropout(x)
-        x = torch.cat((x, identity), dim=1)
+        x = torch.cat((identity, x), dim=1)
         return x
 
 
@@ -154,7 +154,7 @@ class TransitionBlock(nn.Module):
         self.conv = dense_conv1x1(
             in_channels=in_channels,
             out_channels=out_channels)
-        self.pool = nn.MaxPool2d(
+        self.pool = nn.AvgPool2d(
             kernel_size=2,
             stride=2,
             padding=0)

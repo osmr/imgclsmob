@@ -11,7 +11,7 @@ import hashlib
 #from torch.utils.model_zoo import load_url
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
-    ('resnet10', '1690', '37e57029deb6785d00564ee61998c275e31178c7', 'v0.0.5'),
+    ('resnet10', '1597', '46629fa4321288029924778e51ceaa233e989235', 'v0.0.8'),
     ('resnet12', '1589', '9552d5a89eedf8df49516e381b57ea32d0338115', 'v0.0.5'),
     ('resnet14', '1484', '542e6bd4eb7316d12a42225f3d88d4813e700fda', 'v0.0.5'),
     ('resnet18_wd4', '2806', 'd0cda855f8772dddf3efef5cbd6ac5874d166ab4', 'v0.0.5'),

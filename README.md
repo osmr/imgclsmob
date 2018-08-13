@@ -47,7 +47,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
-| ResNet-10 | 38.88 | 16.63 | 5,418,792 | 892.62M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet10-1663-6dc653d3.params.log)) |
+| ResNet-10 | 37.64 | 15.72 | 5,418,792 | 892.62M | 2-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.8/resnet10-1572-cc1f7e15.params.log)) |
 | ResNet-12 | 37.62 | 15.56 | 5,492,776 | 1,124.23M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1556-6395e8b1.params.log)) |
 | ResNet-14 | 36.17 | 14.52 | 5,788,200 | 1,355.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1452-70faeeaa.params.log)) |
 | ResNet-18 x0.25 | 53.13 | 27.77 | 831,096 | 136.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2777-42c5a34c.params.log)) |
@@ -79,7 +79,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
-| ResNet-10 | 39.09 | 16.90 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet10-1690-37e57029.pth.log)) |
+| ResNet-10 | 37.98 | 15.97 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.8/resnet10-1597-46629fa4.pth.log)) |
 | ResNet-12 | 38.02 | 15.89 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1589-9552d5a8.pth.log)) |
 | ResNet-12 | 36.50 | 14.84 | 5,492,776 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1484-542e6bd4.pth.log)) |
 | ResNet-18 x0.25 | 53.37 | 28.06 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2806-d0cda855.pth.log)) |

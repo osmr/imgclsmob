@@ -36,7 +36,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenet_wd4', '2410', 'db312a26033119ad1601fe0300e7c52a11cba93c', 'v0.0.7'),
     ('mobilenet_wd2', '1537', '5419ccc26dedfbb7242e2f4f7c52b13f94812099', 'v0.0.7'),
     ('mobilenet_w3d4', '1228', 'dc11727a3917f2c795c9f286ad9cf299a165fe85', 'v0.0.7'),
-    ('mobilenet_w1', '1003', 'b4fb8f1b44a91f6636782a98d81470cadd152c19', 'v0.0.7')]}
+    ('mobilenet_w1', '1003', 'b4fb8f1b44a91f6636782a98d81470cadd152c19', 'v0.0.7'),
+    ('mobilenetv2_wd4', '2524', 'a2468611a7424dcb8fadf294e4f3bcf862c7f3fb', 'v0.0.9'),
+    ('mobilenetv2_wd2', '1464', '02fe7ff2b176f9c2056ba3bf28d1a116cd1ecc95', 'v0.0.9'),
+    ('mobilenetv2_w3d4', '2627592', '152672f558b4f350f82056b4d09e6c79f54eaca9', 'v0.0.9'),
+    ('mobilenetv2_w1', '0990', '4e1a3878e588fc84e6317e14f3437a018223b10a', 'v0.0.9')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/tmp1'
 

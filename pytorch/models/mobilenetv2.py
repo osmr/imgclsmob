@@ -5,6 +5,7 @@
 
 __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4']
 
+import os
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -242,7 +243,9 @@ class MobileNetV2(nn.Module):
 
 
 def get_mobilenetv2(width_scale,
+                    model_name=None,
                     pretrained=False,
+                    root=os.path.join('~', '.torch', 'models'),
                     **kwargs):
     """
     Create MobileNetV2 model with specific parameters.
@@ -251,8 +254,12 @@ def get_mobilenetv2(width_scale,
     ----------
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     init_block_channels = 32
@@ -271,14 +278,22 @@ def get_mobilenetv2(width_scale,
         if width_scale > 1.0:
             final_block_channels = int(final_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return MobileNetV2(
+    net = MobileNetV2(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def mobilenetv2_w1(**kwargs):
@@ -290,8 +305,10 @@ def mobilenetv2_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenetv2(1.0, **kwargs)
+    return get_mobilenetv2(width_scale=1.0, model_name="mobilenetv2_w1", **kwargs)
 
 
 def mobilenetv2_w3d4(**kwargs):
@@ -303,8 +320,10 @@ def mobilenetv2_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenetv2(0.75, **kwargs)
+    return get_mobilenetv2(width_scale=0.75, model_name="mobilenetv2_w3d4", **kwargs)
 
 
 def mobilenetv2_wd2(**kwargs):
@@ -316,8 +335,10 @@ def mobilenetv2_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenetv2(0.5, **kwargs)
+    return get_mobilenetv2(width_scale=0.5, model_name="mobilenetv2_wd2", **kwargs)
 
 
 def mobilenetv2_wd4(**kwargs):
@@ -329,14 +350,18 @@ def mobilenetv2_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_mobilenetv2(0.25, **kwargs)
+    return get_mobilenetv2(width_scale=0.25, model_name="mobilenetv2_wd4", **kwargs)
 
 
 def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
+
+    pretrained = True
 
     models = [
         mobilenetv2_w1,
@@ -347,7 +372,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

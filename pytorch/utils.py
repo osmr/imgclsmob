@@ -114,6 +114,11 @@ _models = {
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
+    'oth_fd_mobilenet1_0': oth_fd_mobilenet1_0,
+    'oth_fd_mobilenet0_75': oth_fd_mobilenet0_75,
+    'oth_fd_mobilenet0_5': oth_fd_mobilenet0_5,
+    'oth_fd_mobilenet0_25': oth_fd_mobilenet0_25,
+
     # 'nasnet_a_mobile': nasnet_a_mobile,
 
     # 'sqnxt23_1_0': sqnxt23_1_0,

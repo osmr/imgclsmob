@@ -79,9 +79,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 37.37 | 15.37 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1537-5419ccc2.params.log)) |
 | MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1228-dc11727a.params.log)) |
 | MobileNet x1.0 | 29.25 | 10.03 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w1-1003-b4fb8f1b.params.log)) |
-| FD-MobileNet x0.25 | 56.73 | 31.99 | 383,160 | 12.44M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd4-3199-351c0023.params.log)) |
-| FD-MobileNet x0.5 | 44.66 | 21.08 | 993,928 | 40.93M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd2-2108-21376755.params.log)) |
-| FD-MobileNet x1.0 | 35.95 | 14.72 | 2,901,288 | 146.08M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_w1-1472-a525b206.params.log)) |
+| FD-MobileNet x0.25 | 56.73 | 31.99 | 383,160 | 12.44M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd4-3199-351c0023.params.log)) |
+| FD-MobileNet x0.5 | 44.66 | 21.08 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd2-2108-21376755.params.log)) |
+| FD-MobileNet x1.0 | 35.95 | 14.72 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_w1-1472-a525b206.params.log)) |
 | MobileNetV2 x0.25 | 48.89 | 25.24 | 1,516,392 | 32.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_wd4-2524-a2468611.params.log)) |
 | MobileNetV2 x0.5 | 35.51 | 14.64 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_wd2-1464-02fe7ff2.params.log)) |
 | MobileNetV2 x0.75 | 30.82 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w3d4-1126-152672f5.params.log)) |
@@ -123,9 +123,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 38.12 | 15.99 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1599-5883b38d.pth.log)) |
 | MobileNet x0.75 | 33.54 | 12.85 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1285-b8022fae.pth.log)) |
 | MobileNet x1.0 | 29.86 | 10.36 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w1-1036-34f7a0cb.pth.log)) |
-| FD-MobileNet x0.25 | 55.77 | 31.32 | 383,160 | 12.44M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd4-3132-0b242eff.pth.log)) |
-| FD-MobileNet x0.5 | 43.85 | 20.72 | 993,928 | 40.93M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd2-2072-884550e.pth.log)) |
-| FD-MobileNet x1.0 | 34.70 | 14.05 | 2,901,288 | 146.08M | Converted from [clavichord93/FD-MobileNet] repo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_w1-1405-a6538879.pth.log)) |
+| FD-MobileNet x0.25 | 55.77 | 31.32 | 383,160 | 12.44M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd4-3132-0b242eff.pth.log)) |
+| FD-MobileNet x0.5 | 43.85 | 20.72 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_wd2-2072-884550e9.pth.log)) |
+| FD-MobileNet x1.0 | 34.70 | 14.05 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.11/fdmobilenet_w1-1405-a6538879.pth.log)) |
 | MobileNetV2 x0.25 | 49.72 | 25.87 | 1,516,392 | 32.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_wd4-2587-189d4ea2.pth.log)) |
 | MobileNetV2 x0.5 | 36.54 | 15.19 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_wd2-1519-d0937a23.pth.log)) |
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |

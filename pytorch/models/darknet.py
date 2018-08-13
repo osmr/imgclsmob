@@ -5,6 +5,7 @@
 
 __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -189,7 +190,9 @@ class DarkNet(nn.Module):
 
 
 def get_darknet(version,
+                model_name=None,
                 pretrained=False,
+                root=os.path.join('~', '.torch', 'models'),
                 **kwargs):
     """
     Create DarkNet model with specific parameters.
@@ -198,8 +201,12 @@ def get_darknet(version,
     ----------
     version : str
         Version of SqueezeNet ('ref', 'tiny' or '19').
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     if version == 'ref':
@@ -220,15 +227,23 @@ def get_darknet(version,
     else:
         raise ValueError("Unsupported DarkNet version {}".format(version))
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return DarkNet(
+    net = DarkNet(
         channels=channels,
         odd_pointwise=odd_pointwise,
         avg_pool_size=avg_pool_size,
         cls_activ=cls_activ,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def darknet_ref(**kwargs):
@@ -239,8 +254,10 @@ def darknet_ref(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_darknet('ref', **kwargs)
+    return get_darknet(version="ref", model_name="darknet_ref", **kwargs)
 
 
 def darknet_tiny(**kwargs):
@@ -251,8 +268,10 @@ def darknet_tiny(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_darknet('tiny', **kwargs)
+    return get_darknet(version="tiny", model_name="darknet_tiny", **kwargs)
 
 
 def darknet19(**kwargs):
@@ -263,13 +282,17 @@ def darknet19(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_darknet('19', **kwargs)
+    return get_darknet(version="19", model_name="darknet19", **kwargs)
 
 
 def _test():
     import numpy as np
     from torch.autograd import Variable
+
+    pretrained = True
 
     models = [
         darknet_ref,
@@ -279,7 +302,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

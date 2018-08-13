@@ -5,6 +5,7 @@
 
 __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -293,7 +294,9 @@ class DenseNet(nn.Module):
 
 
 def get_densenet(num_layers,
+                 model_name=None,
                  pretrained=False,
+                 root=os.path.join('~', '.torch', 'models'),
                  **kwargs):
     """
     Create DenseNet model with specific parameters.
@@ -302,8 +305,12 @@ def get_densenet(num_layers,
     ----------
     num_layers : int
         Number of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     if num_layers == 121:
@@ -334,13 +341,21 @@ def get_densenet(num_layers,
                       layers,
                       [[init_block_channels * 2]])[1:]
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return DenseNet(
+    net = DenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def densenet121(**kwargs):
@@ -351,8 +366,10 @@ def densenet121(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(121, **kwargs)
+    return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
 
 
 def densenet161(**kwargs):
@@ -363,8 +380,10 @@ def densenet161(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(161, **kwargs)
+    return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
 
 
 def densenet169(**kwargs):
@@ -375,8 +394,10 @@ def densenet169(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(169, **kwargs)
+    return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
 
 
 def densenet201(**kwargs):
@@ -387,14 +408,18 @@ def densenet201(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(201, **kwargs)
+    return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
 
 
 def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
+
+    pretrained = True
 
     models = [
         densenet121,
@@ -405,7 +430,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

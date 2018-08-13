@@ -5,6 +5,7 @@
 
 __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5_w1', 'sqnxt23v5_w3d2', 'sqnxt23v5_w2']
 
+import os
 import torch.nn as nn
 import torch.nn.init as init
 
@@ -233,7 +234,9 @@ class SqueezeNext(nn.Module):
 
 def get_squeezenext(version,
                     width_scale,
+                    model_name=None,
                     pretrained=False,
+                    root=os.path.join('~', '.torch', 'models'),
                     **kwargs):
     """
     Create SqueezeNext model with specific parameters.
@@ -244,10 +247,14 @@ def get_squeezenext(version,
         Version of SqueezeNet ('23' or '23v5').
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     init_block_channels = 64
@@ -268,14 +275,22 @@ def get_squeezenext(version,
         init_block_channels = int(init_block_channels * width_scale)
         final_block_channels = int(final_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return SqueezeNext(
+    net = SqueezeNext(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def sqnxt23_w1(**kwargs):
@@ -286,8 +301,10 @@ def sqnxt23_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23', 1.0, **kwargs)
+    return get_squeezenext(version="23", width_scale=1.0, model_name="sqnxt23_w1", **kwargs)
 
 
 def sqnxt23_w3d2(**kwargs):
@@ -298,8 +315,10 @@ def sqnxt23_w3d2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23', 1.5, **kwargs)
+    return get_squeezenext(version="23", width_scale=1.5, model_name="sqnxt23_w3d2", **kwargs)
 
 
 def sqnxt23_w2(**kwargs):
@@ -310,8 +329,10 @@ def sqnxt23_w2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23', 2.0, **kwargs)
+    return get_squeezenext(version="23", width_scale=2.0, model_name="sqnxt23_w2", **kwargs)
 
 
 def sqnxt23v5_w1(**kwargs):
@@ -322,8 +343,10 @@ def sqnxt23v5_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23v5', 1.0, **kwargs)
+    return get_squeezenext(version="23v5", width_scale=1.0, model_name="sqnxt23v5_w1", **kwargs)
 
 
 def sqnxt23v5_w3d2(**kwargs):
@@ -334,8 +357,10 @@ def sqnxt23v5_w3d2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23v5', 1.5, **kwargs)
+    return get_squeezenext(version="23v5", width_scale=1.5, model_name="sqnxt23v5_w3d2", **kwargs)
 
 
 def sqnxt23v5_w2(**kwargs):
@@ -346,14 +371,18 @@ def sqnxt23v5_w2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_squeezenext('23v5', 2.0, **kwargs)
+    return get_squeezenext(version="23v5", width_scale=2.0, model_name="sqnxt23v5_w2", **kwargs)
 
 
 def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
+
+    pretrained = True
 
     models = [
         sqnxt23_w1,
@@ -366,7 +395,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

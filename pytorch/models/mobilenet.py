@@ -231,7 +231,7 @@ def mobilenet_w1(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='orig', width_scale=1.0, model_name="mobilenet_w1", **kwargs)
+    return get_mobilenet(version="orig", width_scale=1.0, model_name="mobilenet_w1", **kwargs)
 
 
 def mobilenet_w3d4(**kwargs):
@@ -246,7 +246,7 @@ def mobilenet_w3d4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='orig', width_scale=0.75, model_name="mobilenet_w3d4", **kwargs)
+    return get_mobilenet(version="orig", width_scale=0.75, model_name="mobilenet_w3d4", **kwargs)
 
 
 def mobilenet_wd2(**kwargs):
@@ -261,7 +261,7 @@ def mobilenet_wd2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='orig', width_scale=0.5, model_name="mobilenet_wd2", **kwargs)
+    return get_mobilenet(version="orig", width_scale=0.5, model_name="mobilenet_wd2", **kwargs)
 
 
 def mobilenet_wd4(**kwargs):
@@ -276,7 +276,7 @@ def mobilenet_wd4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='orig', width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
+    return get_mobilenet(version="orig", width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
 
 def fdmobilenet_w1(**kwargs):
@@ -291,7 +291,7 @@ def fdmobilenet_w1(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='fd', width_scale=1.0, model_name="fdmobilenet_w1", **kwargs)
+    return get_mobilenet(version="fd", width_scale=1.0, model_name="fdmobilenet_w1", **kwargs)
 
 
 def fdmobilenet_w3d4(**kwargs):
@@ -306,7 +306,7 @@ def fdmobilenet_w3d4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='fd', width_scale=0.75, model_name="fdmobilenet_w3d4", **kwargs)
+    return get_mobilenet(version="fd", width_scale=0.75, model_name="fdmobilenet_w3d4", **kwargs)
 
 
 def fdmobilenet_wd2(**kwargs):
@@ -321,7 +321,7 @@ def fdmobilenet_wd2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='fd', width_scale=0.5, model_name="fdmobilenet_wd2", **kwargs)
+    return get_mobilenet(version="fd", width_scale=0.5, model_name="fdmobilenet_wd2", **kwargs)
 
 
 def fdmobilenet_wd4(**kwargs):
@@ -336,7 +336,7 @@ def fdmobilenet_wd4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(version='fd', width_scale=0.25, model_name="fdmobilenet_wd4", **kwargs)
+    return get_mobilenet(version="fd", width_scale=0.25, model_name="fdmobilenet_wd4", **kwargs)
 
 
 def _test():

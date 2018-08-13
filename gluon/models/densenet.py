@@ -5,6 +5,7 @@
 
 __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -336,8 +337,10 @@ class DenseNet(HybridBlock):
 
 
 def get_densenet(num_layers,
+                 model_name=None,
                  pretrained=False,
                  ctx=cpu(),
+                 root=os.path.join('~', '.mxnet', 'models'),
                  **kwargs):
     """
     Create DenseNet model with specific parameters.
@@ -346,10 +349,14 @@ def get_densenet(num_layers,
     ----------
     num_layers : int
         Number of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     if num_layers == 121:
@@ -380,13 +387,22 @@ def get_densenet(num_layers,
                       layers,
                       [[init_block_channels * 2]])[1:]
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return DenseNet(
+    net = DenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
 
 
 def densenet121(**kwargs):
@@ -399,8 +415,10 @@ def densenet121(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(121, **kwargs)
+    return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
 
 
 def densenet161(**kwargs):
@@ -413,8 +431,10 @@ def densenet161(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(161, **kwargs)
+    return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
 
 
 def densenet169(**kwargs):
@@ -427,8 +447,10 @@ def densenet169(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(169, **kwargs)
+    return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
 
 
 def densenet201(**kwargs):
@@ -441,13 +463,17 @@ def densenet201(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_densenet(201, **kwargs)
+    return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
+
+    pretrained = True
 
     models = [
         densenet121,
@@ -458,10 +484,11 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

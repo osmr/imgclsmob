@@ -286,7 +286,7 @@ def squeezenet_v1_0(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.0', residual=False, model_name="squeezenet_v1_0", **kwargs)
+    return get_squeezenet(version="1.0", residual=False, model_name="squeezenet_v1_0", **kwargs)
 
 
 def squeezenet_v1_1(**kwargs):
@@ -303,7 +303,7 @@ def squeezenet_v1_1(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.1', residual=False, model_name="squeezenet_v1_1", **kwargs)
+    return get_squeezenet(version="1.1", residual=False, model_name="squeezenet_v1_1", **kwargs)
 
 
 def squeezeresnet_v1_0(**kwargs):
@@ -320,7 +320,7 @@ def squeezeresnet_v1_0(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.0', residual=True, model_name="squeezeresnet_v1_0", **kwargs)
+    return get_squeezenet(version="1.0", residual=True, model_name="squeezeresnet_v1_0", **kwargs)
 
 
 def squeezeresnet_v1_1(**kwargs):
@@ -337,7 +337,7 @@ def squeezeresnet_v1_1(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_squeezenet(version='1.1', residual=True, model_name="squeezeresnet_v1_1", **kwargs)
+    return get_squeezenet(version="1.1", residual=True, model_name="squeezeresnet_v1_1", **kwargs)
 
 
 def _test():

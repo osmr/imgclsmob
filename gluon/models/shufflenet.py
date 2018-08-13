@@ -8,6 +8,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
            'shufflenet_g8_w1', 'shufflenet_g1_w3d4', 'shufflenet_g3_w3d4', 'shufflenet_g1_wd2', 'shufflenet_g3_wd2',
            'shufflenet_g1_wd4', 'shufflenet_g3_wd4']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
@@ -274,8 +275,10 @@ class ShuffleNet(HybridBlock):
 
 def get_shufflenet(groups,
                    width_scale,
+                   model_name=None,
                    pretrained=False,
                    ctx=cpu(),
+                   root=os.path.join('~', '.mxnet', 'models'),
                    **kwargs):
     """
     Create ShuffleNet model with specific parameters.
@@ -286,10 +289,14 @@ def get_shufflenet(groups,
         Number of groups in convolution layers.
     width_scale : float
         Scale factor for width of layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
 
     init_block_channels = 24
@@ -314,14 +321,23 @@ def get_shufflenet(groups,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return ShuffleNet(
+    net = ShuffleNet(
         channels=channels,
         init_block_channels=init_block_channels,
         groups=groups,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
 
 
 def shufflenet_g1_w1(**kwargs):
@@ -335,8 +351,10 @@ def shufflenet_g1_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(1, 1.0, **kwargs)
+    return get_shufflenet(groups=1, width_scale=1.0, model_name="shufflenet_g1_w1", **kwargs)
 
 
 def shufflenet_g2_w1(**kwargs):
@@ -350,8 +368,10 @@ def shufflenet_g2_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(2, 1.0, **kwargs)
+    return get_shufflenet(groups=2, width_scale=1.0, model_name="shufflenet_g2_w1", **kwargs)
 
 
 def shufflenet_g3_w1(**kwargs):
@@ -365,8 +385,10 @@ def shufflenet_g3_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(3, 1.0, **kwargs)
+    return get_shufflenet(groups=3, width_scale=1.0, model_name="shufflenet_g3_w1", **kwargs)
 
 
 def shufflenet_g4_w1(**kwargs):
@@ -380,8 +402,10 @@ def shufflenet_g4_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(4, 1.0, **kwargs)
+    return get_shufflenet(groups=4, width_scale=1.0, model_name="shufflenet_g4_w1", **kwargs)
 
 
 def shufflenet_g8_w1(**kwargs):
@@ -395,8 +419,10 @@ def shufflenet_g8_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(8, 1.0, **kwargs)
+    return get_shufflenet(groups=8, width_scale=1.0, model_name="shufflenet_g8_w1", **kwargs)
 
 
 def shufflenet_g1_w3d4(**kwargs):
@@ -410,8 +436,10 @@ def shufflenet_g1_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(1, 0.75, **kwargs)
+    return get_shufflenet(groups=1, width_scale=0.75, model_name="shufflenet_g1_w3d4", **kwargs)
 
 
 def shufflenet_g3_w3d4(**kwargs):
@@ -425,8 +453,10 @@ def shufflenet_g3_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(3, 0.75, **kwargs)
+    return get_shufflenet(groups=3, width_scale=0.75, model_name="shufflenet_g3_w3d4", **kwargs)
 
 
 def shufflenet_g1_wd2(**kwargs):
@@ -440,8 +470,10 @@ def shufflenet_g1_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(1, 0.5, **kwargs)
+    return get_shufflenet(groups=1, width_scale=0.5, model_name="shufflenet_g1_wd2", **kwargs)
 
 
 def shufflenet_g3_wd2(**kwargs):
@@ -455,8 +487,10 @@ def shufflenet_g3_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(3, 0.5, **kwargs)
+    return get_shufflenet(groups=3, width_scale=0.5, model_name="shufflenet_g3_wd2", **kwargs)
 
 
 def shufflenet_g1_wd4(**kwargs):
@@ -470,8 +504,10 @@ def shufflenet_g1_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(1, 0.25, **kwargs)
+    return get_shufflenet(groups=1, width_scale=0.25, model_name="shufflenet_g1_wd4", **kwargs)
 
 
 def shufflenet_g3_wd4(**kwargs):
@@ -485,13 +521,17 @@ def shufflenet_g3_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
     """
-    return get_shufflenet(3, 0.25, **kwargs)
+    return get_shufflenet(groups=3, width_scale=0.25, model_name="shufflenet_g3_wd4", **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
+
+    pretrained = True
 
     models = [
         shufflenet_g1_w1,
@@ -509,10 +549,11 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
-        net.initialize(ctx=ctx)
+        if not pretrained:
+            net.initialize(ctx=ctx)
 
         net_params = net.collect_params()
         weight_count = 0

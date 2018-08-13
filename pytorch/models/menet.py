@@ -7,6 +7,7 @@
 __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
            'menet348_12x1_g3', 'menet352_12x1_g8', 'menet456_24x1_g3']
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -364,7 +365,9 @@ class MENet(nn.Module):
 def get_menet(first_stage_channels,
               side_channels,
               groups,
+              model_name=None,
               pretrained=False,
+              root=os.path.join('~', '.torch', 'models'),
               **kwargs):
     """
     Create MENet model with specific parameters.
@@ -377,8 +380,12 @@ def get_menet(first_stage_channels,
         Number of side channels in a ME-unit.
     groups : int
         Number of groups in convolution layers.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
 
     layers = [4, 8, 4]
@@ -412,15 +419,23 @@ def get_menet(first_stage_channels,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
-    return MENet(
+    net = MENet(
         channels=channels,
         init_block_channels=init_block_channels,
         side_channels=side_channels,
         groups=groups,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        import torch
+        from .model_store import get_model_file
+        net.load_state_dict(torch.load(get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)))
+
+    return net
 
 
 def menet108_8x1_g3(**kwargs):
@@ -432,8 +447,10 @@ def menet108_8x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(108, 8, 3, **kwargs)
+    return get_menet(first_stage_channels=108, side_channels=8, groups=3, model_name="menet108_8x1_g3", **kwargs)
 
 
 def menet128_8x1_g4(**kwargs):
@@ -445,8 +462,10 @@ def menet128_8x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(128, 8, 4, **kwargs)
+    return get_menet(first_stage_channels=128, side_channels=8, groups=4, model_name="menet128_8x1_g4", **kwargs)
 
 
 def menet160_8x1_g8(**kwargs):
@@ -458,8 +477,10 @@ def menet160_8x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(160, 8, 8, **kwargs)
+    return get_menet(first_stage_channels=160, side_channels=8, groups=8, model_name="menet160_8x1_g8", **kwargs)
 
 
 def menet228_12x1_g3(**kwargs):
@@ -471,8 +492,10 @@ def menet228_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(228, 12, 3, **kwargs)
+    return get_menet(first_stage_channels=228, side_channels=12, groups=3, model_name="menet228_12x1_g3", **kwargs)
 
 
 def menet256_12x1_g4(**kwargs):
@@ -484,8 +507,10 @@ def menet256_12x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(256, 12, 4, **kwargs)
+    return get_menet(first_stage_channels=256, side_channels=12, groups=4, model_name="menet256_12x1_g4", **kwargs)
 
 
 def menet348_12x1_g3(**kwargs):
@@ -497,8 +522,10 @@ def menet348_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(348, 12, 3, **kwargs)
+    return get_menet(first_stage_channels=348, side_channels=12, groups=3, model_name="menet348_12x1_g3", **kwargs)
 
 
 def menet352_12x1_g8(**kwargs):
@@ -510,8 +537,10 @@ def menet352_12x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(352, 12, 8, **kwargs)
+    return get_menet(first_stage_channels=352, side_channels=12, groups=8, model_name="menet352_12x1_g8", **kwargs)
 
 
 def menet456_24x1_g3(**kwargs):
@@ -523,14 +552,18 @@ def menet456_24x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    return get_menet(456, 24, 3, **kwargs)
+    return get_menet(first_stage_channels=456, side_channels=24, groups=3, model_name="menet456_24x1_g3", **kwargs)
 
 
 def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
+
+    pretrained = True
 
     models = [
         menet108_8x1_g3,
@@ -545,7 +578,7 @@ def _test():
 
     for model in models:
 
-        net = model()
+        net = model(pretrained=pretrained)
 
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())

@@ -776,12 +776,12 @@ def _test():
     pretrained = True
 
     models = [
-        #resnet10,
-        #resnet12,
-        #resnet14,
-        #resnet16,
-        #resnet18_wd4,
-        #resnet18_wd2,
+        resnet10,
+        resnet12,
+        resnet14,
+        resnet16,
+        resnet18_wd4,
+        resnet18_wd2,
         #resnet18_w3d4,
         resnet18,
         resnet34,

@@ -47,7 +47,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
-| ResNet-10 | 37.64 | 15.72 | 5,418,792 | 892.62M | 2-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.8/resnet10-1572-cc1f7e15.params.log)) |
+| ResNet-10 | 37.09 | 15.55 | 5,418,792 | 892.62M | Training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/resnet10-1555-cfb0a76d.params.log)) |
 | ResNet-12 | 37.62 | 15.56 | 5,492,776 | 1,124.23M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1556-6395e8b1.params.log)) |
 | ResNet-14 | 36.17 | 14.52 | 5,788,200 | 1,355.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1452-70faeeaa.params.log)) |
 | ResNet-16 | 33.57 | 12.50 | 6,968,872 | 1,586.95M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/resnet16-1250-fc901840.params.log)) |
@@ -75,6 +75,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet201-0636-65b5d389.params.log)) |
 | SqueezeNet v1.0 | 42.81 | 19.98 | 1,248,424 | 828.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1998-1b771149.params.log)) |
 | SqueezeNet v1.1 | 43.06 | 20.23 | 1,235,496 | 354.88M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-2023-ab455761.params.log)) |
+| 108-MENet-8x1 (g=3) | 46.11 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet108_8x1_g3-2237-d3bb5a4f.params.log)) |
+| 128-MENet-8x1 (g=4) | 45.80 | 21.93 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet128_8x1_g4-2193-fe760f0d.params.log)) |
+| 228-MENet-12x1 (g=3) | 35.03 | 13.99 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet228_12x1_g3-1399-8c28d22f.params.log)) |
+| 256-MENet-12x1 (g=4) | 34.49 | 13.90 | 1,888,240 | 146.11M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet256_12x1_g4-1390-4502f223.params.log)) |
+| 348-MENet-12x1 (g=3) | 31.17 | 11.41 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet348_12x1_g3-1141-ac69b246.params.log)) |
+| 352-MENet-12x1 (g=8) | 34.70 | 13.75 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet352_12x1_g8-1375-85779b8a.params.log)) |
+| 456-MENet-24x1 (g=3) | 29.57 | 10.43 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet456_24x1_g3-1043-6e777068.params.log)) |
 | MobileNet x0.25 | 48.37 | 24.10 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd4-2410-db312a26.params.log)) |
 | MobileNet x0.5 | 37.37 | 15.37 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1537-5419ccc2.params.log)) |
 | MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1228-dc11727a.params.log)) |
@@ -91,7 +98,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
-| ResNet-10 | 37.98 | 15.97 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.8/resnet10-1597-46629fa4.pth.log)) |
+| ResNet-10 | 37.46 | 15.85 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/resnet10-1585-ef8a3ae3.pth.log)) |
 | ResNet-12 | 38.02 | 15.89 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet12-1589-9552d5a8.pth.log)) |
 | ResNet-14 | 36.50 | 14.84 | 5,492,776 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet14-1484-542e6bd4.pth.log)) |
 | ResNet-16 | 33.73 | 12.87 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/resnet16-1287-bdb0b7fa.pth.log)) |
@@ -119,6 +126,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 23,10 | 6.63 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet201-0663-71ece4ad.pth.log)) |
 | SqueezeNet v1.0 | 41.91 | 19.58 | 1,248,424 | 828.30M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1958-d6d59f9c.pth.log)) |
 | SqueezeNet v1.1 | 41.82 | 19.38 | 1,235,496 | 354.88M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-1938-8dcd1cc5.pth.log)) |
+| 108-MENet-8x1 (g=3) | 43.92 | 20.76 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet108_8x1_g3-2076-7f47b37e.pth.log)) |
+| 128-MENet-8x1 (g=4) | 43.95 | 20.62 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet128_8x1_g4-2062-dd4531fd.pth.log)) |
+| 228-MENet-12x1 (g=3) | 33.57 | 13.28 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet228_12x1_g3-1328-27991387.pth.log)) |
+| 256-MENet-12x1 (g=4) | 33.41 | 13.26 | 1,888,240 | 146.11M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet256_12x1_g4-1326-e5d35476.pth.log)) |
+| 348-MENet-12x1 (g=3) | 30.10 | 10.92 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet348_12x1_g3-1092-66be1a18.pth.log)) |
+| 352-MENet-12x1 (g=8) | 33.31 | 13.08 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet352_12x1_g8-1308-e91ec72c.pth.log)) |
+| 456-MENet-24x1 (g=3) | 28.40 | 9.93 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet456_24x1_g3-0993-cb9fd376.pth.log)) |
 | MobileNet x0.25 | 49.13 | 24.93 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd4-2493-c05b5fab.pth.log)) |
 | MobileNet x0.5 | 38.12 | 15.99 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_wd2-1599-5883b38d.pth.log)) |
 | MobileNet x0.75 | 33.54 | 12.85 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.7/mobilenet_w3d4-1285-b8022fae.pth.log)) |
@@ -131,4 +145,5 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
 
+[clavichord93/MENet]: https://github.com/clavichord93/MENet
 [clavichord93/FD-MobileNet]: https://github.com/clavichord93/FD-MobileNet

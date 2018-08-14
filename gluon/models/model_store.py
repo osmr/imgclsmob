@@ -10,7 +10,7 @@ import logging
 from mxnet.gluon.utils import download, check_sha1
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
-    ('resnet10', '1572', 'cc1f7e157901697b2f28956c3418346000258a17', 'v0.0.8'),
+    ('resnet10', '1555', 'cfb0a76d89d916adf3e167fe3002f18096f73b4e', 'v0.0.12'),
     ('resnet12', '1556', '6395e8b12460738ef7a31aaa180fb3c4bc49464a', 'v0.0.5'),
     ('resnet14', '1452', '70faeeaacf2067c6b1cd44c5c17110f91bafe4fa', 'v0.0.5'),
     ('resnet16', '1250', 'fc901840ae90db3c2b4c388feb129baeed74ed6b', 'v0.0.10'),
@@ -38,6 +38,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('densenet201', '0636', '65b5d389b1f2a18c62dc39f74960266c601fec76', 'v0.0.10'),
     ('squeezenet_v1_0', '1998', '1b771149cafb1631f70814bd40d6ee8642f30148', 'v0.0.6'),
     ('squeezenet_v1_1', '2023', 'ab45576120fa846c6e69a99ca9afe82083f0f89d', 'v0.0.6'),
+    ('menet108_8x1_g3', '2237', 'd3bb5a4fa19a5e1dad2d036ffe64cc2a376defcc', 'v0.0.12'),
+    ('menet128_8x1_g4', '2193', 'fe760f0dffdb5441e25fa38facc1e342adcc38eb', 'v0.0.12'),
+    ('menet228_12x1_g3', '1399', '8c28d22f8355345f535ca8f94a472b001095aff5', 'v0.0.12'),
+    ('menet256_12x1_g4', '1390', '4502f2230e16a8e43fd84960ec4d3690bd7bb582', 'v0.0.12'),
+    ('menet348_12x1_g3', '1141', 'ac69b246629131d77bf5a0a454bda28f5c2e6bc0', 'v0.0.12'),
+    ('menet352_12x1_g8', '1375', '85779b8a576540ec1082a433bd5ea1ab93def27a', 'v0.0.12'),
+    ('menet456_24x1_g3', '1043', '6e777068761f9c45cd0527f3824ad3b5cf36b0b5', 'v0.0.12'),
     ('mobilenet_wd4', '2410', 'db312a26033119ad1601fe0300e7c52a11cba93c', 'v0.0.7'),
     ('mobilenet_wd2', '1537', '5419ccc26dedfbb7242e2f4f7c52b13f94812099', 'v0.0.7'),
     ('mobilenet_w3d4', '1228', 'dc11727a3917f2c795c9f286ad9cf299a165fe85', 'v0.0.7'),

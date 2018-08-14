@@ -11,7 +11,7 @@ import hashlib
 #from torch.utils.model_zoo import load_url
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
-    ('resnet10', '1597', '46629fa4321288029924778e51ceaa233e989235', 'v0.0.8'),
+    ('resnet10', '1585', 'ef8a3ae358543fbce38088ac4955f41ce860e45b', 'v0.0.12'),
     ('resnet12', '1589', '9552d5a89eedf8df49516e381b57ea32d0338115', 'v0.0.5'),
     ('resnet14', '1484', '542e6bd4eb7316d12a42225f3d88d4813e700fda', 'v0.0.5'),
     ('resnet16', '1287', 'bdb0b7fa741ddab726bb85fb8311fa90bd80a859', 'v0.0.10'),
@@ -39,6 +39,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('densenet201', '0663', '71ece4ad7be5d1e2aa4bbf6f1a6b32ac2562d847', 'v0.0.10'),
     ('squeezenet_v1_0', '1958', 'd6d59f9cc04c147d1f2eeeead9ac315391c3f028', 'v0.0.6'),
     ('squeezenet_v1_1', '1938', '8dcd1cc5d955f3d154bfa5be20cd278f3e77f21b', 'v0.0.6'),
+    ('menet108_8x1_g3', '2076', '7f47b37e10912a55ea85fefa616f822fc6b32859', 'v0.0.12'),
+    ('menet128_8x1_g4', '2062', 'dd4531fdbabf464ffd3a7145ef7f3628871395ca', 'v0.0.12'),
+    ('menet228_12x1_g3', '1328', '27991387c8fa27f98785d1910a76e9a9a19f42c5', 'v0.0.12'),
+    ('menet256_12x1_g4', '1326', 'e5d35476f4082dac61dd2d15a597d4365ad39793', 'v0.0.12'),
+    ('menet348_12x1_g3', '1092', '66be1a1896fa0bea27290580e8b98057dfdbda2c', 'v0.0.12'),
+    ('menet352_12x1_g8', '1308', 'e91ec72ce2d0c3c2bf2a3cba6719c6b23ea7c736', 'v0.0.12'),
+    ('menet456_24x1_g3', '0993', 'cb9fd37660b6064f44a6c779a330a967b2b41c2d', 'v0.0.12'),
     ('mobilenet_wd4', '2493', 'c05b5fab876300552b1c9b58d82ff98eb755c15b', 'v0.0.7'),
     ('mobilenet_wd2', '1599', '5883b38d611897bf4b1b49d9eeded2d1868c5c0a', 'v0.0.7'),
     ('mobilenet_w3d4', '1285', 'b8022faebe280b6e6571bec3a4bb6e293895a72d', 'v0.0.7'),

@@ -114,6 +114,15 @@ _models = {
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
+    'oth_menet108_8x1_g3': oth_menet108_8x1_g3,
+    'oth_menet128_8x1_g4': oth_menet128_8x1_g4,
+    'oth_menet160_8x1_g8': oth_menet160_8x1_g8,
+    'oth_menet228_12x1_g3': oth_menet228_12x1_g3,
+    'oth_menet256_12x1_g4': oth_menet256_12x1_g4,
+    'oth_menet348_12x1_g3': oth_menet348_12x1_g3,
+    'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
+    'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
+
     # 'oth_fd_mobilenet1_0': oth_fd_mobilenet1_0,
     # 'oth_fd_mobilenet0_75': oth_fd_mobilenet0_75,
     # 'oth_fd_mobilenet0_5': oth_fd_mobilenet0_5,

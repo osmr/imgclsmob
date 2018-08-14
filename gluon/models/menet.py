@@ -577,7 +577,7 @@ def _test():
     models = [
         menet108_8x1_g3,
         menet128_8x1_g4,
-        menet160_8x1_g8,
+        # menet160_8x1_g8,
         menet228_12x1_g3,
         menet256_12x1_g4,
         menet348_12x1_g3,

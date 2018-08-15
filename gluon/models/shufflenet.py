@@ -317,7 +317,7 @@ def get_shufflenet(groups,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    if width_scale != 1:
+    if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 

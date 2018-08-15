@@ -6,6 +6,7 @@ from .models.darknet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.shufflenet import *
+from .models.shufflenetv2 import *
 from .models.menet import *
 from .models.squeezenext import *
 
@@ -97,6 +98,11 @@ _models = {
     'shufflenet_g3_wd2': shufflenet_g3_wd2,
     'shufflenet_g1_wd4': shufflenet_g1_wd4,
     'shufflenet_g3_wd4': shufflenet_g3_wd4,
+
+    'shufflenetv2_wd2': shufflenetv2_wd2,
+    'shufflenetv2_w1': shufflenetv2_w1,
+    'shufflenetv2_w2d3': shufflenetv2_w2d3,
+    'shufflenetv2_w2': shufflenetv2_w2,
 
     'menet108_8x1_g3': menet108_8x1_g3,
     'menet128_8x1_g4': menet128_8x1_g4,

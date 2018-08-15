@@ -12,9 +12,6 @@ from .models.squeezenext import *
 
 from .models.nasnet import *
 
-# import .models.menet1 as gl_meneta
-# from .models.squeezenext1 import *
-
 __all__ = ['get_model']
 
 
@@ -120,17 +117,6 @@ _models = {
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
     'nasnet_a_mobile': nasnet_a_mobile,
-
-    # 'sqnxt23_1_0': sqnxt23_1_0,
-    # 'sqnxt23_1_5': sqnxt23_1_5,
-    # 'sqnxt23_2_0': sqnxt23_2_0,
-    # 'sqnxt23v5_1_0': sqnxt23v5_1_0,
-    # 'sqnxt23v5_1_5': sqnxt23v5_1_5,
-    # 'sqnxt23v5_2_0': sqnxt23v5_2_0,
-
-    # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
-    # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
-    # 'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
 }
 
 

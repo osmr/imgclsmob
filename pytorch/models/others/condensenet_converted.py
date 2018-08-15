@@ -5,13 +5,11 @@ from __future__ import division
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.autograd import Variable
 import math
-from layers import Conv, LearnedGroupConv
+from layers import ShuffleLayer, Conv, CondenseConv, CondenseLinear
 
 __all__ = ['CondenseNet']
-
 
 class _DenseLayer(nn.Module):
     def __init__(self, in_channels, growth_rate, args):
@@ -19,11 +17,9 @@ class _DenseLayer(nn.Module):
         self.group_1x1 = args.group_1x1
         self.group_3x3 = args.group_3x3
         ### 1x1 conv i --> b*k
-        self.conv_1 = LearnedGroupConv(in_channels, args.bottleneck * growth_rate,
-                                       kernel_size=1, groups=self.group_1x1,
-                                       condense_factor=args.condense_factor,
-                                       dropout_rate=args.dropout_rate)
-        ### 3x3 conv b*k --> k
+        self.conv_1 = CondenseConv(in_channels, args.bottleneck * growth_rate,
+                                   kernel_size=1, groups=self.group_1x1)
+        ### 3x3 conv b*k-->k
         self.conv_2 = Conv(args.bottleneck * growth_rate, growth_rate,
                            kernel_size=3, padding=1, groups=self.group_3x3)
 
@@ -82,8 +78,8 @@ class CondenseNet(nn.Module):
             ### Dense-block i
             self.add_block(i)
         ### Linear layer
-        self.classifier = nn.Linear(self.num_features, args.num_classes)
-
+        self.classifier = CondenseLinear(self.num_features, args.num_classes,
+                                         0.5)
         ### initialize
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -94,7 +90,6 @@ class CondenseNet(nn.Module):
                 m.bias.data.zero_()
             elif isinstance(m, nn.Linear):
                 m.bias.data.zero_()
-        return
 
     def add_block(self, i):
         ### Check if ith is the last one
@@ -120,31 +115,33 @@ class CondenseNet(nn.Module):
                                      nn.AvgPool2d(self.pool_size))
 
     def forward(self, x, progress=None):
-        if progress:
-            LearnedGroupConv.global_progress = progress
         features = self.features(x)
         out = features.view(features.size(0), -1)
         out = self.classifier(out)
         return out
 
 
-# if __name__ == "__main__":
-#     import numpy as np
-#     import torch
-#     from torch.autograd import Variable
-#
-#     from easydict import EasyDict
-#     args = EasyDict({'data': 'imagenet', 'stages': [6, 12, 24, 16], 'growth': 32, 'num_classes': 1000})
-#     net = CondenseNet(args=args)
-#
-#     input = Variable(torch.randn(1, 3, 224, 224))
-#     output = net(input)
-#     #print(output.size())
-#     #print("net={}".format(net))
-#
-#     net.eval()
-#     net_params = filter(lambda p: p.requires_grad, net.parameters())
-#     weight_count = 0
-#     for param in net_params:
-#         weight_count += np.prod(param.size())
-#     print("weight_count={}".format(weight_count))
+if __name__ == "__main__":
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    from easydict import EasyDict
+    args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 4,
+                     'group_3x3': 4, 'condense_factor': 4, 'bottleneck': 4, 'num_classes': 1000})
+    net = CondenseNet(args=args)
+    net = torch.nn.DataParallel(net)
+    state_dict = torch.load("D:/langs/imgclsmob_data/converted_condensenet_4.pth.tar", map_location='cpu')['state_dict']
+    net.load_state_dict(state_dict)
+
+    input = Variable(torch.randn(1, 3, 224, 224))
+    output = net(input)
+    #print(output.size())
+    #print("net={}".format(net))
+
+    net.eval()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    print("weight_count={}".format(weight_count))

@@ -332,7 +332,7 @@ def get_shufflenetv2(width_scale,
                      root=os.path.join('~', '.mxnet', 'models'),
                      **kwargs):
     """
-    Create ShuffleNet model with specific parameters.
+    Create ShuffleNetV2 model with specific parameters.
 
     Parameters:
     ----------

@@ -227,7 +227,7 @@ if __name__ == "__main__":
     import torch
     from torch.autograd import Variable
 
-    net = Network(num_classes=1000, width_multiplier=1.0)
+    net = Network(num_classes=1000, width_multiplier=0.5)
 
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)

@@ -102,8 +102,6 @@ class DenseUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     dropout_rate : bool
         Parameter of Dropout layer. Faction of the input units to drop.
     """

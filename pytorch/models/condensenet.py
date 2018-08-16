@@ -4,53 +4,59 @@
     https://arxiv.org/abs/1711.09224.
 """
 
-__all__ = ['CondenseNet']
+__all__ = ['CondenseNet', 'codensenet74_c4_g4', 'codensenet74_c8_g8']
 
 import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
+from torch.autograd import Variable
 
 
-class CondenseComplexConv(nn.Module):
+def channel_shuffle(x,
+                    groups):
     """
-    CondenseNet specific complex convolution block.
+    Channel shuffle operation. This is exactly the same operation as in ShuffleNet.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
+    x : Tensor
+        Input tensor.
+    groups : int
+        Number of groups.
+    """
+    batch, channels, height, width = x.size()
+    #assert (channels % groups == 0)
+    channels_per_group = channels // groups
+    x = x.view(batch, groups, channels_per_group, height, width)
+    x = torch.transpose(x, 1, 2).contiguous()
+    x = x.view(batch, channels, height, width)
+    return x
+
+
+class ChannelShuffle(nn.Module):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
+    This is exactly the same layer as in ShuffleNet.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(CondenseComplexConv, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
+                 channels,
+                 groups):
+        super(ChannelShuffle, self).__init__()
+        #assert (channels % groups == 0)
+        if channels % groups != 0:
+            raise ValueError('channels must be divisible by groups')
+        self.groups = groups
 
     def forward(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.conv(x)
-        return x
+        return channel_shuffle(x, self.groups)
 
 
 class CondenseSimpleConv(nn.Module):
@@ -69,13 +75,16 @@ class CondenseSimpleConv(nn.Module):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    groups : int
+        Number of groups.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride,
-                 padding):
+                 padding,
+                 groups):
         super(CondenseSimpleConv, self).__init__()
         self.bn = nn.BatchNorm2d(num_features=in_channels)
         self.activ = nn.ReLU(inplace=True)
@@ -85,6 +94,7 @@ class CondenseSimpleConv(nn.Module):
             kernel_size=kernel_size,
             stride=stride,
             padding=padding,
+            groups=groups,
             bias=False)
 
     def forward(self, x):
@@ -94,30 +104,11 @@ class CondenseSimpleConv(nn.Module):
         return x
 
 
-def condense_conv1x1(in_channels,
-                     out_channels):
-    """
-    1x1 version of the CondenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return CondenseComplexConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0)
-
-
 def condense_simple_conv3x3(in_channels,
-                            out_channels):
+                            out_channels,
+                            groups):
     """
-    3x3 version of the CondenseNet specific convolution block.
+    3x3 version of the CondenseNet specific simple convolution block.
 
     Parameters:
     ----------
@@ -125,13 +116,92 @@ def condense_simple_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    groups : int
+        Number of groups.
     """
     return CondenseSimpleConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         stride=1,
-        padding=1)
+        padding=1,
+        groups=groups)
+
+
+class CondenseComplexConv(nn.Module):
+    """
+    CondenseNet specific complex convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 groups):
+        super(CondenseComplexConv, self).__init__()
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        self.activ = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            groups=groups,
+            bias=False)
+        self.register_buffer('index', torch.LongTensor(in_channels))
+        self.index.fill_(0)
+        self.c_shuffle = ChannelShuffle(
+            channels=out_channels,
+            groups=groups)
+
+    def forward(self, x):
+        x = torch.index_select(x, dim=1, index=Variable(self.index))
+        x = self.bn(x)
+        x = self.activ(x)
+        x = self.conv(x)
+        x = self.c_shuffle(x)
+        return x
+
+
+def condense_complex_conv1x1(in_channels,
+                             out_channels,
+                             groups):
+    """
+    1x1 version of the CondenseNet specific complex convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of groups.
+    """
+    return CondenseComplexConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=1,
+        padding=0,
+        groups=groups)
 
 
 class CondenseUnit(nn.Module):
@@ -144,36 +214,31 @@ class CondenseUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
-        Parameter of Dropout layer. Faction of the input units to drop.
+    groups : int
+        Number of groups.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dropout_rate):
+                 groups):
         super(CondenseUnit, self).__init__()
-        self.use_dropout = (dropout_rate != 0.0)
-        bn_size = 4
+        bottleneck_size = 4
         inc_channels = out_channels - in_channels
-        mid_channels = inc_channels * bn_size
+        mid_channels = inc_channels * bottleneck_size
 
-        self.conv1 = condense_conv1x1(
+        self.conv1 = condense_complex_conv1x1(
             in_channels=in_channels,
-            out_channels=mid_channels)
+            out_channels=mid_channels,
+            groups=groups)
         self.conv2 = condense_simple_conv3x3(
             in_channels=mid_channels,
-            out_channels=inc_channels)
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=dropout_rate)
+            out_channels=inc_channels,
+            groups=groups)
 
     def forward(self, x):
         identity = x
         x = self.conv1(x)
         x = self.conv2(x)
-        if self.use_dropout:
-            x = self.dropout(x)
         x = torch.cat((identity, x), dim=1)
         return x
 
@@ -251,6 +316,36 @@ class PostActivation(nn.Module):
         return x
 
 
+class CondenseLinear(nn.Module):
+    """
+    CondenseNet specific complex convolution block.
+
+    Parameters:
+    ----------
+    in_features : int
+        Number of input channels.
+    out_features : int
+        Number of output channels.
+    drop_rate : float
+        Fraction of input channels for drop.
+    """
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 drop_rate=0.5):
+        super(CondenseLinear, self).__init__()
+        drop_in_features = int(in_features * drop_rate)
+        self.linear = nn.Linear(
+            in_features=drop_in_features,
+            out_features=out_features)
+        self.register_buffer('index', torch.LongTensor(drop_in_features))
+
+    def forward(self, x):
+        x = torch.index_select(x, dim=1, index=Variable(self.index))
+        x = self.linear(x)
+        return x
+
+
 class CondenseNet(nn.Module):
     """
     CondenseNet model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
@@ -262,8 +357,8 @@ class CondenseNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    dropout_rate : float, default 0.0
-        Parameter of Dropout layer. Faction of the input units to drop.
+    groups : int
+        Number of groups in convolution layers.
     in_channels : int, default 3
         Number of input channels.
     num_classes : int, default 1000
@@ -272,7 +367,7 @@ class CondenseNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 dropout_rate=0.0,
+                 groups,
                  in_channels=3,
                  num_classes=1000):
         super(CondenseNet, self).__init__()
@@ -290,7 +385,7 @@ class CondenseNet(nn.Module):
                 stage.add_module("unit{}".format(j + 1), CondenseUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    dropout_rate=dropout_rate))
+                    groups=groups))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('post_activ', PostActivation(in_channels=in_channels))
@@ -298,7 +393,7 @@ class CondenseNet(nn.Module):
             kernel_size=7,
             stride=1))
 
-        self.output = nn.Linear(
+        self.output = CondenseLinear(
             in_features=in_channels,
             out_features=num_classes)
 
@@ -310,6 +405,11 @@ class CondenseNet(nn.Module):
                 init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
                     init.constant_(module.bias, 0)
+            elif isinstance(module, nn.BatchNorm2d):
+                init.constant_(module.weight, 1)
+                init.constant_(module.bias, 0)
+            elif isinstance(module, nn.Linear):
+                init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)
@@ -319,7 +419,6 @@ class CondenseNet(nn.Module):
 
 
 def get_condensenet(num_layers,
-                    condense_factor=4,
                     groups=4,
                     model_name=None,
                     pretrained=False,
@@ -332,6 +431,8 @@ def get_condensenet(num_layers,
     ----------
     num_layers : int
         Number of layers.
+    groups : int
+        Number of groups in convolution layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -342,8 +443,8 @@ def get_condensenet(num_layers,
 
     if num_layers == 74:
         init_block_channels = 16
-        growth_rates = [8, 16, 32, 64, 128]
         layers = [4, 6, 8, 10, 8]
+        growth_rates = [8, 16, 32, 64, 128]
     else:
         raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
 
@@ -359,6 +460,7 @@ def get_condensenet(num_layers,
     net = CondenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        groups=groups,
         **kwargs)
 
     if pretrained:
@@ -385,7 +487,23 @@ def codensenet74_c4_g4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_condensenet(num_layers=74, condense_factor=4, groups=4, model_name="codensenet74_c4_g4", **kwargs)
+    return get_condensenet(num_layers=74, groups=4, model_name="codensenet74_c4_g4", **kwargs)
+
+
+def codensenet74_c8_g8(**kwargs):
+    """
+    CondenseNet-74 (C=G=8) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
+    https://arxiv.org/abs/1711.09224.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_condensenet(num_layers=74, groups=8, model_name="codensenet74_c8_g8", **kwargs)
+
 
 def _test():
     import numpy as np
@@ -396,6 +514,7 @@ def _test():
 
     models = [
         codensenet74_c4_g4,
+        codensenet74_c8_g8,
     ]
 
     for model in models:
@@ -407,7 +526,8 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        assert (model != codensenet74_c4_g4 or weight_count == 7978856)
+        assert (model != codensenet74_c4_g4 or weight_count == 4773944)
+        assert (model != codensenet74_c8_g8 or weight_count == 4773944)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

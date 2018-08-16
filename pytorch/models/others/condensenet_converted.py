@@ -7,9 +7,10 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import math
-from layers import ShuffleLayer, Conv, CondenseConv, CondenseLinear
+from .layers import ShuffleLayer, Conv, CondenseConv, CondenseLinear
 
-__all__ = ['CondenseNet']
+__all__ = ['CondenseNet', 'oth_codensenet74_c4_g4', 'oth_codensenet74_c8_g8']
+
 
 class _DenseLayer(nn.Module):
     def __init__(self, in_channels, growth_rate, args):
@@ -121,18 +122,37 @@ class CondenseNet(nn.Module):
         return out
 
 
+def oth_codensenet74_c4_g4(**kwargs):
+    from easydict import EasyDict
+    args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 4,
+                     'group_3x3': 4, 'condense_factor': 4, 'bottleneck': 4, 'num_classes': 1000})
+    net = CondenseNet(args=args)
+    return net
+
+
+def oth_codensenet74_c8_g8(**kwargs):
+    from easydict import EasyDict
+    args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 8,
+                     'group_3x3': 8, 'condense_factor': 8, 'bottleneck': 4, 'num_classes': 1000})
+    net = CondenseNet(args=args)
+    return net
+
+
 if __name__ == "__main__":
     import numpy as np
     import torch
     from torch.autograd import Variable
 
     from easydict import EasyDict
-    args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 4,
-                     'group_3x3': 4, 'condense_factor': 4, 'bottleneck': 4, 'num_classes': 1000})
+    # args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 4,
+    #                  'group_3x3': 4, 'condense_factor': 4, 'bottleneck': 4, 'num_classes': 1000})
+    args = EasyDict({'data': 'imagenet', 'stages': [4, 6, 8, 10, 8], 'growth': [8, 16, 32, 64, 128], 'group_1x1': 8,
+                     'group_3x3': 8, 'condense_factor': 8, 'bottleneck': 4, 'num_classes': 1000})
     net = CondenseNet(args=args)
     net = torch.nn.DataParallel(net)
-    state_dict = torch.load("D:/langs/imgclsmob_data/converted_condensenet_4.pth.tar", map_location='cpu')['state_dict']
+    state_dict = torch.load("../imgclsmob_data/converted_condensenet_8.pth.tar", map_location='cpu')['state_dict']
     net.load_state_dict(state_dict)
+    #torch.save(obj=net.cpu().module.state_dict(), f="../imgclsmob_data/converted_condensenet_8_pure.pth")
 
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)

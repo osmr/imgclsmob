@@ -511,7 +511,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
         codensenet74_c4_g4,

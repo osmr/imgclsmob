@@ -67,7 +67,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenetv2_w3d4', '1126', '152672f558b4f350f82056b4d09e6c79f54eaca9', 'v0.0.9'),
     ('mobilenetv2_w1', '0990', '4e1a3878e588fc84e6317e14f3437a018223b10a', 'v0.0.9')]}
 
-imgclsmob_repo_url = 'https://github.com/osmr//osmr/imgclsmob/'
+imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 
 
 def get_model_name_suffix_data(model_name):

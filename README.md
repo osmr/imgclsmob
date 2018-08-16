@@ -25,6 +25,7 @@ torchvision >= 0.2.1
 - ResNet (['Deep Residual Learning for Image Recognition'](https://arxiv.org/abs/1512.03385))
 - PreResNet (['Identity Mappings in Deep Residual Networks'](https://arxiv.org/abs/1603.05027))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
+- CondenseNet (['CondenseNet: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))
 - DarkNet (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet)) 
 - SqueezeNet (['SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'](https://arxiv.org/abs/1602.07360))
 - SqueezeNext (['SqueezeNext: Hardware-Aware Neural Network Design'](https://arxiv.org/abs/1803.10615))
@@ -43,6 +44,7 @@ Some remarks:
 - ResNet/PreResNet with b-suffix is a version of the networks with the stride in the second convolution of the
 bottleneck block. Respectively a network without b-suffix has the stride in the first convolution.
 - ResNet/PreResNet models do not use biasses in convolutions at all.
+- CondenseNet models are only so-called converted versions.
 
 ### For Gluon
 
@@ -54,7 +56,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-16 | 33.57 | 12.50 | 6,968,872 | 1,586.95M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/resnet16-1250-fc901840.params.log)) |
 | ResNet-18 x0.25 | 53.13 | 27.77 | 831,096 | 136.64M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2777-42c5a34c.params.log)) |
 | ResNet-18 x0.5 | 38.94 | 16.46 | 3,055,880 | 485.22M | 1-stage training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd2-1646-99006438.params.log)) |
-| ResNet-18 | 29.13 | 9.97 | 11,689,512 | 1,818.21M | Training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.14/resnet18-0997-9518fd00.params.log)) |
+| ResNet-18 | 29.13 | 9.94 | 11,689,512 | 1,818.21M | Training ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/resnet18-0994-ae25f2b2.params.log)) |
 | ResNet-34 | 25.34 | 7.92 | 21,797,672 | 3,669.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet34-0792-5b875f49.params.log)) |
 | ResNet-50 | 23.50 | 6.87 | 25,557,032 | 3,868.96M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet50-0687-79fae958.params.log)) |
 | ResNet-50b | 22.92 | 6.44 | 25,557,032 | 4,100.70M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/resnet50b-0644-27a36c02.params.log)) |
@@ -66,14 +68,16 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-34 | 25.88 | 8.11 | 21,796,008 | 3,669.36M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet34-0811-f8fe98a2.params.log)) |
 | PreResNet-50 | 23.39 | 6.68 | 25,549,480 | 3,869.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.4/preresnet50-0668-4940c94b.params.log)) |
 | PreResNet-50b | 23.16 | 6.64 | 25,549,480 | 4,100.90M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet50b-0664-2fcfddb1.params.log)) |
-| ~~PreResNet-101~~ | 39.91 | 17.46 | 44,541,608 | 7,586.50M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet101-1746-1015145a.params.log)) |
+| PreResNet-101 | 21.45 | 5.75 | 44,541,608 | 7,586.50M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/preresnet101-0575-e2887e53.params.log)) |
 | PreResNet-101b | 21.73 | 5.88 | 44,541,608 | 7,818.24M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet101b-0588-1015145a.params.log)) |
-| ~~PreResNet-152~~ | 35.88 | 14.51 | 60,185,256 | 11,305.05M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet152-1451-dc303191.params.log)) |
+| PreResNet-152 | 23.00 | 6.34 | 60,185,256 | 11,305.05M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/preresnet152-0634-a509a388.params.log)) |
 | PreResNet-152b | 21.00 | 5.75 | 60,185,256 | 11,536.78M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.2/preresnet152b-0575-dc303191.params.log)) |
 | DenseNet-121 | 25.11 | 7.80 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet121-0780-49b72d04.params.log)) |
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet169-0689-281ec06b.params.log)) |
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet201-0636-65b5d389.params.log)) |
+| CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/codensenet74_c4_g4-0864-cde68fa2.params.log)) |
+| CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/codensenet74_c8_g8-1049-4cf4a08e.params.log)) |
 | SqueezeNet v1.0 | 42.81 | 19.98 | 1,248,424 | 828.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1998-1b771149.params.log)) |
 | SqueezeNet v1.1 | 43.06 | 20.23 | 1,235,496 | 354.88M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-2023-ab455761.params.log)) |
 | 108-MENet-8x1 (g=3) | 46.11 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet108_8x1_g3-2237-d3bb5a4f.params.log)) |
@@ -105,7 +109,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-16 | 33.73 | 12.87 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/resnet16-1287-bdb0b7fa.pth.log)) |
 | ResNet-18 x0.25 | 53.37 | 28.06 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd4-2806-d0cda855.pth.log)) |
 | ResNet-18 x0.5 | 39.31 | 16.79 | 3,055,880 | 485.22M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.5/resnet18_wd2-1679-12f81d73.pth.log)) |
-| ResNet-18 | 29.38 | 10.28 | 11,689,512 | 1,818.21M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.14/resnet18-1028-848cec51.pth.log)) |
+| ResNet-18 | 29.52 | 10.21 | 11,689,512 | 1,818.21M | Converted from GL model ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/resnet18-1021-b0d7daea.pth.log)) |
 | ResNet-34 | 25.66 | 8.18 | 21,797,672 | 3,669.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet34-0818-6f947d40.pth.log)) |
 | ResNet-50 | 23.79 | 7.05 | 25,557,032 | 3,868.96M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet50-0705-f7a2027e.pth.log)) |
 | ResNet-50b | 23.05 | 6.65 | 25,557,032 | 4,100.70M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/resnet50b-0665-89691746.pth.log)) |
@@ -117,14 +121,16 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-34 | 26.23 | 8.41 | 21,796,008 | 3,669.36M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet34-0841-b4dd761f.pth.log)) |
 | PreResNet-50 | 23.70 | 6.85 | 25,549,480 | 3,869.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.4/preresnet50-0685-d81a7aca.pth.log)) |
 | PreResNet-50b | 23.33 | 6.87 | 25,549,480 | 4,100.90M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet50b-0687-65be98fb.pth.log)) |
-| ~~PreResNet-101~~ | 40.29 | 18.08 | 44,541,608 | 7,586.50M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet101-1808-0340579d.pth.log)) |
+| PreResNet-101 | 21.74 | 5.91 | 44,541,608 | 7,586.50M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/preresnet101-0591-4bacff79.pth.log)) |
 | PreResNet-101b | 21.95 | 6.03 | 44,541,608 | 7,818.24M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet101b-0603-b1e37a09.pth.log)) |
-| ~~PreResNet-152~~ | 36.35 | 14.88 | 60,185,256 | 11,305.05M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet152-1488-0cecb4fc.pth.log)) |
+| PreResNet-152 | 23.20 | 6.53 | 60,185,256 | 11,305.05M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/preresnet152-0653-426962af.pth.log)) |
 | PreResNet-152b | 21.34 | 5.91 | 60,185,256 | 11,536.78M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.3/preresnet152b-0591-2c91ab2c.pth.log)) |
 | DenseNet-121 | 25.57 | 8.03 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet121-0803-f994107a.pth.log)) |
 | DenseNet-161 | 22.86 | 6.44 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet161-0644-c0fb22c8.pth.log)) |
 | DenseNet-169 | 24.40 | 7.19 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet169-0719-27139105.pth.log)) |
 | DenseNet-201 | 23,10 | 6.63 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.10/densenet201-0663-71ece4ad.pth.log)) |
+| CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/codensenet74_c4_g4-0828-5ba55049.pth.log)) |
+| CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.15/codensenet74_c8_g8-1006-3574d874.pth.log)) |
 | SqueezeNet v1.0 | 41.91 | 19.58 | 1,248,424 | 828.30M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_0-1958-d6d59f9c.pth.log)) |
 | SqueezeNet v1.1 | 41.82 | 19.38 | 1,235,496 | 354.88M | Converted from TorchVision ([log](https://github.com/osmr/tmp1/releases/download/v0.0.6/squeezenet_v1_1-1938-8dcd1cc5.pth.log)) |
 | 108-MENet-8x1 (g=3) | 43.92 | 20.76 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/tmp1/releases/download/v0.0.12/menet108_8x1_g3-2076-7f47b37e.pth.log)) |
@@ -146,5 +152,6 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/tmp1/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
 
+[ShichenLiu/CondenseNet]: https://github.com/ShichenLiu/CondenseNet
 [clavichord93/MENet]: https://github.com/clavichord93/MENet
 [clavichord93/FD-MobileNet]: https://github.com/clavichord93/FD-MobileNet

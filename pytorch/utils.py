@@ -16,7 +16,7 @@ from .models.condensenet import *
 # from .models.others.MobileNet import *
 # from .models.others.MENet import *
 from .models.others.ShuffleNet import *
-from .models.others.condensenet_converted import *
+#from .models.others.condensenet_converted import *
 
 __all__ = ['get_model']
 
@@ -125,8 +125,8 @@ _models = {
     'codensenet74_c4_g4': codensenet74_c4_g4,
     'codensenet74_c8_g8': codensenet74_c8_g8,
 
-    'oth_codensenet74_c4_g4': oth_codensenet74_c4_g4,
-    'oth_codensenet74_c8_g8': oth_codensenet74_c8_g8,
+    # 'oth_codensenet74_c4_g4': oth_codensenet74_c4_g4,
+    # 'oth_codensenet74_c8_g8': oth_codensenet74_c8_g8,
 
     # 'oth_menet108_8x1_g3': oth_menet108_8x1_g3,
     # 'oth_menet128_8x1_g4': oth_menet128_8x1_g4,

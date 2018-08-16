@@ -122,8 +122,8 @@ _models = {
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
-    'codensenet74_c4_g4': codensenet74_c4_g4,
-    'codensenet74_c8_g8': codensenet74_c8_g8,
+    'codensenet74_c4_g4': condensenet74_c4_g4,
+    'codensenet74_c8_g8': condensenet74_c8_g8,
 
     # 'oth_codensenet74_c4_g4': oth_codensenet74_c4_g4,
     # 'oth_codensenet74_c8_g8': oth_codensenet74_c8_g8,

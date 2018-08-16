@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1711.09224.
 """
 
-__all__ = ['CondenseNet', 'codensenet74_c4_g4', 'codensenet74_c8_g8']
+__all__ = ['CondenseNet', 'condensenet74_c4_g4', 'condensenet74_c8_g8']
 
 import os
 import torch
@@ -476,7 +476,7 @@ def get_condensenet(num_layers,
     return net
 
 
-def codensenet74_c4_g4(**kwargs):
+def condensenet74_c4_g4(**kwargs):
     """
     CondenseNet-74 (C=G=4) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
@@ -488,10 +488,10 @@ def codensenet74_c4_g4(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_condensenet(num_layers=74, groups=4, model_name="codensenet74_c4_g4", **kwargs)
+    return get_condensenet(num_layers=74, groups=4, model_name="condensenet74_c4_g4", **kwargs)
 
 
-def codensenet74_c8_g8(**kwargs):
+def condensenet74_c8_g8(**kwargs):
     """
     CondenseNet-74 (C=G=8) model (converted) from 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
@@ -503,7 +503,7 @@ def codensenet74_c8_g8(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_condensenet(num_layers=74, groups=8, model_name="codensenet74_c8_g8", **kwargs)
+    return get_condensenet(num_layers=74, groups=8, model_name="condensenet74_c8_g8", **kwargs)
 
 
 def _test():
@@ -514,8 +514,8 @@ def _test():
     pretrained = True
 
     models = [
-        codensenet74_c4_g4,
-        codensenet74_c8_g8,
+        condensenet74_c4_g4,
+        condensenet74_c8_g8,
     ]
 
     for model in models:
@@ -528,8 +528,8 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        assert (model != codensenet74_c4_g4 or weight_count == 4773944)
-        assert (model != codensenet74_c8_g8 or weight_count == 2935416)
+        assert (model != condensenet74_c4_g4 or weight_count == 4773944)
+        assert (model != condensenet74_c8_g8 or weight_count == 2935416)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

@@ -33,14 +33,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('preresnet101b', '0603', 'b1e37a09424dde15ecba72365d46b1f59abd479b', 'v0.0.2'),
     ('preresnet152', '0653', '426962af4d9f6944611d36c29bcc83a3a24a268c', 'v0.0.2'),
     ('preresnet152b', '0591', '2c91ab2c8d90f3990e7c30fd6ee2184f6c2c3bee', 'v0.0.2'),
-
     ('densenet121', '0803', 'f994107a83aed162916ff89e2ded4c5af5bc6457', 'v0.0.3'),
     ('densenet161', '0644', 'c0fb22c83e8077a952ce1a0c9703d1a08b2b9e3a', 'v0.0.3'),
     ('densenet169', '0719', '271391051775ba9bbf458a6bd77af4b3007dc892', 'v0.0.3'),
     ('densenet201', '0663', '71ece4ad7be5d1e2aa4bbf6f1a6b32ac2562d847', 'v0.0.3'),
 
-    ('codensenet74_c4_g4', '0828', '5ba550494cae7081d12c14b02b2a02365539d377', 'v0.0.4'),
-    ('codensenet74_c8_g8', '1006', '3574d874fefc3307f241690bad51f20e61be1542', 'v0.0.4'),
+    ('condensenet74_c4_g4', '0828', '5ba550494cae7081d12c14b02b2a02365539d377', 'v0.0.4'),
+    ('condensenet74_c8_g8', '1006', '3574d874fefc3307f241690bad51f20e61be1542', 'v0.0.4'),
 
     ('squeezenet_v1_0', '1958', 'd6d59f9cc04c147d1f2eeeead9ac315391c3f028', 'v0.0.5'),
     ('squeezenet_v1_1', '1938', '8dcd1cc5d955f3d154bfa5be20cd278f3e77f21b', 'v0.0.5'),

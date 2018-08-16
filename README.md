@@ -25,7 +25,7 @@ torchvision >= 0.2.1
 - ResNet (['Deep Residual Learning for Image Recognition'](https://arxiv.org/abs/1512.03385))
 - PreResNet (['Identity Mappings in Deep Residual Networks'](https://arxiv.org/abs/1603.05027))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
-- CondenseNet (['CondenseNet: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))
+- CondenseNet (['Condense````Net: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))
 - DarkNet (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet)) 
 - SqueezeNet (['SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'](https://arxiv.org/abs/1602.07360))
 - SqueezeNext (['SqueezeNext: Hardware-Aware Neural Network Design'](https://arxiv.org/abs/1803.10615))
@@ -76,8 +76,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0689-281ec06b.params.log)) |
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0636-65b5d389.params.log)) |
-| CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/codensenet74_c4_g4-0864-cde68fa2.params.log)) |
-| CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/codensenet74_c8_g8-1049-4cf4a08e.params.log)) |
+| CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c4_g4-0864-cde68fa2.params.log)) |
+| CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c8_g8-1049-4cf4a08e.params.log)) |
 | SqueezeNet v1.0 | 42.81 | 19.98 | 1,248,424 | 828.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.5/squeezenet_v1_0-1998-1b771149.params.log)) |
 | SqueezeNet v1.1 | 43.06 | 20.23 | 1,235,496 | 354.88M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.5/squeezenet_v1_1-2023-ab455761.params.log)) |
 | 108-MENet-8x1 (g=3) | 46.11 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2237-d3bb5a4f.params.log)) |
@@ -129,8 +129,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-161 | 22.86 | 6.44 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0644-c0fb22c8.pth.log)) |
 | DenseNet-169 | 24.40 | 7.19 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0719-27139105.pth.log)) |
 | DenseNet-201 | 23,10 | 6.63 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0663-71ece4ad.pth.log)) |
-| CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/codensenet74_c4_g4-0828-5ba55049.pth.log)) |
-| CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/codensenet74_c8_g8-1006-3574d874.pth.log)) |
+| CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c4_g4-0828-5ba55049.pth.log)) |
+| CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c8_g8-1006-3574d874.pth.log)) |
 | SqueezeNet v1.0 | 41.91 | 19.58 | 1,248,424 | 828.30M | Converted from TorchVision ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.5/squeezenet_v1_0-1958-d6d59f9c.pth.log)) |
 | SqueezeNet v1.1 | 41.82 | 19.38 | 1,235,496 | 354.88M | Converted from TorchVision ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.5/squeezenet_v1_1-1938-8dcd1cc5.pth.log)) |
 | 108-MENet-8x1 (g=3) | 43.92 | 20.76 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2076-7f47b37e.pth.log)) |

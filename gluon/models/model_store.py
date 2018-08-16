@@ -36,7 +36,6 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('densenet161', '0618', '52e30516e566bdef53dcb417f86849530c83d0d1', 'v0.0.3'),
     ('densenet169', '0689', '281ec06b02f407b4523245622371da669a287044', 'v0.0.3'),
     ('densenet201', '0636', '65b5d389b1f2a18c62dc39f74960266c601fec76', 'v0.0.3'),
-
     ('condensenet74_c4_g4', '0864', 'cde68fa2fcc9197e336717a17753a15a6efd7596', 'v0.0.4'),
     ('condensenet74_c8_g8', '1049', '4cf4a08e7fb46f5821049dcae97ae442b0ceb546', 'v0.0.4'),
 

@@ -165,11 +165,11 @@ class CondenseComplexConv(nn.Module):
             padding=padding,
             groups=groups,
             bias=False)
-        self.register_buffer('index', torch.LongTensor(in_channels))
-        self.index.fill_(0)
         self.c_shuffle = ChannelShuffle(
             channels=out_channels,
             groups=groups)
+        self.register_buffer('index', torch.LongTensor(in_channels))
+        self.index.fill_(0)
 
     def forward(self, x):
         x = torch.index_select(x, dim=1, index=Variable(self.index))

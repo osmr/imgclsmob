@@ -177,9 +177,16 @@ class CondenseComplexConv(HybridBlock):
             self.c_shuffle = ChannelShuffle(
                 channels=out_channels,
                 groups=groups)
+            self.index = self.params.get(
+                'index',
+                grad_req='null',
+                shape=(in_channels,),
+                init='zeros',
+                allow_deferred_init=True,
+                differentiable=False)
 
-    def hybrid_forward(self, F, x):
-        x = x
+    def hybrid_forward(self, F, x, index):
+        x = F.take(x, index, axis=1)
         x = self.bn(x)
         x = self.activ(x)
         x = self.conv(x)
@@ -357,14 +364,21 @@ class CondenseDense(HybridBlock):
                  drop_rate=0.5,
                  **kwargs):
         super(CondenseDense, self).__init__(**kwargs)
-        self.drop_in_units = int(in_units * drop_rate)
+        drop_in_units = int(in_units * drop_rate)
         with self.name_scope():
             self.dense = nn.Dense(
                 units=units,
-                in_units=self.drop_in_units)
+                in_units=drop_in_units)
+            self.index = self.params.get(
+                'index',
+                grad_req='null',
+                shape=(drop_in_units,),
+                init='zeros',
+                allow_deferred_init=True,
+                differentiable=False)
 
-    def hybrid_forward(self, F, x):
-        x, _ = F.split(x, axis=1, num_outputs=2)
+    def hybrid_forward(self, F, x, index):
+        x = F.take(x, index, axis=1)
         x = self.dense(x)
         return x
 
@@ -552,6 +566,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        #net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():

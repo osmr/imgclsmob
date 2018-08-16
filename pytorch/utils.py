@@ -13,11 +13,6 @@ from .models.condensenet import *
 
 #from .models.nasnet import *
 
-# from .models.others.MobileNet import *
-# from .models.others.MENet import *
-from .models.others.ShuffleNet import *
-#from .models.others.condensenet_converted import *
-
 __all__ = ['get_model']
 
 

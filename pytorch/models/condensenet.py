@@ -318,7 +318,7 @@ class PostActivation(nn.Module):
 
 class CondenseLinear(nn.Module):
     """
-    CondenseNet specific complex convolution block.
+    CondenseNet specific linear block.
 
     Parameters:
     ----------
@@ -339,6 +339,7 @@ class CondenseLinear(nn.Module):
             in_features=drop_in_features,
             out_features=out_features)
         self.register_buffer('index', torch.LongTensor(drop_in_features))
+        self.index.fill_(0)
 
     def forward(self, x):
         x = torch.index_select(x, dim=1, index=Variable(self.index))
@@ -446,7 +447,7 @@ def get_condensenet(num_layers,
         layers = [4, 6, 8, 10, 8]
         growth_rates = [8, 16, 32, 64, 128]
     else:
-        raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
+        raise ValueError("Unsupported CondenseNet version with number of layers {}".format(num_layers))
 
     from functools import reduce
     channels = reduce(lambda xi, yi:
@@ -521,13 +522,14 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        #net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
         assert (model != codensenet74_c4_g4 or weight_count == 4773944)
-        assert (model != codensenet74_c8_g8 or weight_count == 4773944)
+        assert (model != codensenet74_c8_g8 or weight_count == 2935416)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

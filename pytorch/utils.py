@@ -117,38 +117,10 @@ _models = {
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
-    'codensenet74_c4_g4': condensenet74_c4_g4,
-    'codensenet74_c8_g8': condensenet74_c8_g8,
-
-    # 'oth_codensenet74_c4_g4': oth_codensenet74_c4_g4,
-    # 'oth_codensenet74_c8_g8': oth_codensenet74_c8_g8,
-
-    # 'oth_menet108_8x1_g3': oth_menet108_8x1_g3,
-    # 'oth_menet128_8x1_g4': oth_menet128_8x1_g4,
-    # 'oth_menet160_8x1_g8': oth_menet160_8x1_g8,
-    # 'oth_menet228_12x1_g3': oth_menet228_12x1_g3,
-    # 'oth_menet256_12x1_g4': oth_menet256_12x1_g4,
-    # 'oth_menet348_12x1_g3': oth_menet348_12x1_g3,
-    # 'oth_menet352_12x1_g8': oth_menet352_12x1_g8,
-    # 'oth_menet456_24x1_g3': oth_menet456_24x1_g3,
-
-    # 'oth_fd_mobilenet1_0': oth_fd_mobilenet1_0,
-    # 'oth_fd_mobilenet0_75': oth_fd_mobilenet0_75,
-    # 'oth_fd_mobilenet0_5': oth_fd_mobilenet0_5,
-    # 'oth_fd_mobilenet0_25': oth_fd_mobilenet0_25,
+    'condensenet74_c4_g4': condensenet74_c4_g4,
+    'condensenet74_c8_g8': condensenet74_c8_g8,
 
     # 'nasnet_a_mobile': nasnet_a_mobile,
-
-    # 'sqnxt23_1_0': sqnxt23_1_0,
-    # 'sqnxt23_1_5': sqnxt23_1_5,
-    # 'sqnxt23_2_0': sqnxt23_2_0,
-    # 'sqnxt23v5_1_0': sqnxt23v5_1_0,
-    # 'sqnxt23v5_1_5': sqnxt23v5_1_5,
-    # 'sqnxt23v5_2_0': sqnxt23v5_2_0,
-
-    # 'menet108_8x1_g3a': gl_meneta.menet108_8x1_g3,
-    # 'menet128_8x1_g4a': gl_meneta.menet128_8x1_g4,
-    # 'menet160_8x1_g8a': gl_meneta.menet160_8x1_g8,
 }
 
 

@@ -1,15 +1,20 @@
 """
-    PreResNet, implemented in PyTorch.
-    Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    PreResNet & SE-PreResNet, implemented in PyTorch.
+    Original papers:
+    - 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
-           'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b']
+           'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
+           'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
+           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
 
 import os
 import torch.nn as nn
 import torch.nn.init as init
+from .common import SEBlock
 
 
 class PreResConv(nn.Module):
@@ -218,14 +223,18 @@ class PreResUnit(nn.Module):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    use_se : bool
+        Whether to use SE block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
                  bottleneck,
-                 conv1_stride):
+                 conv1_stride,
+                 use_se):
         super(PreResUnit, self).__init__()
+        self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         if bottleneck:
@@ -239,6 +248,8 @@ class PreResUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride)
+        if self.use_se:
+            self.se = SEBlock(channels=out_channels)
         if self.resize_identity:
             self.identity_conv = conv1x1(
                 in_channels=in_channels,
@@ -248,6 +259,8 @@ class PreResUnit(nn.Module):
     def forward(self, x):
         identity = x
         x, x_pre_activ = self.body(x)
+        if self.use_se:
+            x = self.se(x)
         if self.resize_identity:
             identity = self.identity_conv(x_pre_activ)
         x = x + identity
@@ -314,7 +327,8 @@ class PreResActivation(nn.Module):
 
 class PreResNet(nn.Module):
     """
-    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027. Also this
+    class implements SE-PreResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -326,6 +340,8 @@ class PreResNet(nn.Module):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
+    use_se : bool
+        Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
     num_classes : int, default 1000
@@ -336,6 +352,7 @@ class PreResNet(nn.Module):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
+                 use_se,
                  in_channels=3,
                  num_classes=1000):
         super(PreResNet, self).__init__()
@@ -354,7 +371,8 @@ class PreResNet(nn.Module):
                     out_channels=out_channels,
                     stride=stride,
                     bottleneck=bottleneck,
-                    conv1_stride=conv1_stride))
+                    conv1_stride=conv1_stride,
+                    use_se=use_se))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('post_activ', PreResActivation(in_channels=in_channels))
@@ -384,13 +402,14 @@ class PreResNet(nn.Module):
 
 def get_preresnet(blocks,
                   conv1_stride=True,
+                  use_se=False,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
                   root=os.path.join('~', '.torch', 'models'),
                   **kwargs):
     """
-    Create PreResNet model with specific parameters.
+    Create PreResNet or SE-PreResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -398,6 +417,8 @@ def get_preresnet(blocks,
         Number of blocks.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
+    use_se : bool
+        Whether to use SE block.
     width_scale : float
         Scale factor for width of layers.
     model_name : str or None, default None
@@ -451,6 +472,7 @@ def get_preresnet(blocks,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
+        use_se=use_se,
         **kwargs)
 
     if pretrained:
@@ -714,12 +736,157 @@ def preresnet200b(**kwargs):
     return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
+def sepreresnet18(**kwargs):
+    """
+    SE-PreResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=18, use_se=True, model_name="sepreresnet18", **kwargs)
+
+
+def sepreresnet34(**kwargs):
+    """
+    SE-PreResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=34, use_se=True, model_name="sepreresnet34", **kwargs)
+
+
+def sepreresnet50(**kwargs):
+    """
+    SE-PreResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=50, use_se=True, model_name="sepreresnet50", **kwargs)
+
+
+def sepreresnet50b(**kwargs):
+    """
+    SE-PreResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=50, conv1_stride=False, use_se=True, model_name="sepreresnet50b", **kwargs)
+
+
+def sepreresnet101(**kwargs):
+    """
+    SE-PreResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=101, use_se=True, model_name="sepreresnet101", **kwargs)
+
+
+def sepreresnet101b(**kwargs):
+    """
+    SE-PreResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=101, conv1_stride=False, use_se=True, model_name="sepreresnet101b", **kwargs)
+
+
+def sepreresnet152(**kwargs):
+    """
+    SE-PreResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=152, use_se=True, model_name="sepreresnet152", **kwargs)
+
+
+def sepreresnet152b(**kwargs):
+    """
+    SE-PreResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=152, conv1_stride=False, use_se=True, model_name="sepreresnet152b", **kwargs)
+
+
+def sepreresnet200(**kwargs):
+    """
+    SE-PreResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507. It's an
+    experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=200, use_se=True, model_name="sepreresnet200", **kwargs)
+
+
+def sepreresnet200b(**kwargs):
+    """
+    SE-PreResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=200, conv1_stride=False, use_se=True, model_name="sepreresnet200b", **kwargs)
+
+
 def _test():
     import numpy as np
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         # preresnet10,
@@ -729,6 +896,7 @@ def _test():
         # preresnet18_wd4,
         # preresnet18_wd2,
         # preresnet18_w3d4,
+
         preresnet18,
         preresnet34,
         preresnet50,
@@ -739,6 +907,17 @@ def _test():
         preresnet152b,
         # preresnet200,
         # preresnet200b,
+
+        sepreresnet18,
+        sepreresnet34,
+        sepreresnet50,
+        sepreresnet50b,
+        sepreresnet101,
+        sepreresnet101b,
+        sepreresnet152,
+        sepreresnet152b,
+        sepreresnet200,
+        sepreresnet200b,
     ]
 
     for model in models:
@@ -754,19 +933,29 @@ def _test():
         assert (model != preresnet12 or weight_count == 5491112)
         assert (model != preresnet14 or weight_count == 5786536)
         assert (model != preresnet16 or weight_count == 6967208)
-        assert (model != preresnet18 or weight_count == 11687848)  # resnet18_v2
-        assert (model != preresnet18_w3d4 or weight_count == 6674104)
-        assert (model != preresnet18_wd2 or weight_count == 3055048)
         assert (model != preresnet18_wd4 or weight_count == 830680)
-        assert (model != preresnet34 or weight_count == 21796008)  # resnet34_v2
-        assert (model != preresnet50 or weight_count == 25549480)  # resnet50_v2
-        assert (model != preresnet50b or weight_count == 25549480)  # resnet50_v2
-        assert (model != preresnet101 or weight_count == 44541608)  # resnet101_v2
-        assert (model != preresnet101b or weight_count == 44541608)  # resnet101_v2
-        assert (model != preresnet152 or weight_count == 60185256)  # resnet152_v2
-        assert (model != preresnet152b or weight_count == 60185256)  # resnet152_v2
+        assert (model != preresnet18_wd2 or weight_count == 3055048)
+        assert (model != preresnet18_w3d4 or weight_count == 6674104)
+        assert (model != preresnet18 or weight_count == 11687848)
+        assert (model != preresnet34 or weight_count == 21796008)
+        assert (model != preresnet50 or weight_count == 25549480)
+        assert (model != preresnet50b or weight_count == 25549480)
+        assert (model != preresnet101 or weight_count == 44541608)
+        assert (model != preresnet101b or weight_count == 44541608)
+        assert (model != preresnet152 or weight_count == 60185256)
+        assert (model != preresnet152b or weight_count == 60185256)
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
+        assert (model != sepreresnet18 or weight_count == 11774888)  # se_resnet18_v2 -> 11670504
+        assert (model != sepreresnet34 or weight_count == 21953192)  # se_resnet34_v2 -> 21771240
+        assert (model != sepreresnet50 or weight_count == 28064424)  # se_resnet50_v2 -> 16135144
+        assert (model != sepreresnet50b or weight_count == 28064424)
+        assert (model != sepreresnet101 or weight_count == 49284776)  # se_resnet101_v2 -> 26162152
+        assert (model != sepreresnet101b or weight_count == 49284776)
+        assert (model != sepreresnet152 or weight_count == 66763432)  # se_resnet152_v2 -> 34419688
+        assert (model != sepreresnet152b or weight_count == 66763432)
+        assert (model != sepreresnet200 or weight_count == 71768744)
+        assert (model != sepreresnet200b or weight_count == 71768744)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

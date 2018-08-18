@@ -66,6 +66,17 @@ _models = {
     'preresnet200': preresnet200,
     'preresnet200b': preresnet200b,
 
+    'sepreresnet18': sepreresnet18,
+    'sepreresnet34': sepreresnet34,
+    'sepreresnet50': sepreresnet50,
+    'sepreresnet50b': sepreresnet50b,
+    'sepreresnet101': sepreresnet101,
+    'sepreresnet101b': sepreresnet101b,
+    'sepreresnet152': sepreresnet152,
+    'sepreresnet152b': sepreresnet152b,
+    'sepreresnet200': sepreresnet200,
+    'sepreresnet200b': sepreresnet200b,
+
     'slk_densenet121': densenet121,
     'slk_densenet161': densenet161,
     'slk_densenet169': densenet169,
@@ -137,6 +148,10 @@ _models = {
 
 def get_model(name, **kwargs):
     try:
+        # if name == 'se_resnet18_v1':
+        #     from gluoncv.model_zoo.se_resnet import se_resnet18_v1
+        #     net = se_resnet18_v1(**kwargs)
+        #     return net
         from gluoncv.model_zoo import get_model as glcv_get_model
         net = glcv_get_model(name, **kwargs)
         return net

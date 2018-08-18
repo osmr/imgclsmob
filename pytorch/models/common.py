@@ -68,6 +68,7 @@ class SEBlock(nn.Module):
         super(SEBlock, self).__init__()
         mid_cannels = channels // 16
 
+        self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.fc1 = nn.Linear(
             in_features=channels,
             out_features=mid_cannels,
@@ -80,9 +81,12 @@ class SEBlock(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        x = self.sigmoid(x)
+        w = self.pool(x)
+        w = w.view(w.size(0), -1)
+        w = self.fc1(w)
+        w = self.relu(w)
+        w = self.fc2(w)
+        w = self.sigmoid(w)
+        x = x * w.unsqueeze(dim=2).unsqueeze(dim=2)
         return x
 

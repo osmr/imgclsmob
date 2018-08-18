@@ -584,3 +584,47 @@ def se_resnet152_v2(**kwargs):
         Location for keeping the model parameters.
     """
     return get_se_resnet(2, 152, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        se_resnet18_v1,
+        se_resnet34_v1,
+        se_resnet50_v1,
+        se_resnet101_v1,
+        se_resnet152_v1,
+        se_resnet18_v2,
+        se_resnet34_v2,
+        se_resnet50_v2,
+        se_resnet101_v2,
+        se_resnet152_v2,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__,weight_count))
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

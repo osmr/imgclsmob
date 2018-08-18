@@ -2,7 +2,7 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['ChannelShuffle']
+__all__ = ['ChannelShuffle', 'SEBlock']
 
 import torch
 import torch.nn as nn
@@ -52,4 +52,37 @@ class ChannelShuffle(nn.Module):
 
     def forward(self, x):
         return channel_shuffle(x, self.groups)
+
+
+class SEBlock(nn.Module):
+    """
+    Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    """
+    def __init__(self,
+                 channels):
+        super(SEBlock, self).__init__()
+        mid_cannels = channels // 16
+
+        self.fc1 = nn.Linear(
+            in_features=channels,
+            out_features=mid_cannels,
+            bias=False)
+        self.relu = nn.ReLU(inplace=True)
+        self.fc2 = nn.Linear(
+            in_features=mid_cannels,
+            out_features=channels,
+            bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.sigmoid(x)
+        return x
 

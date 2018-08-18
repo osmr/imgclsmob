@@ -174,7 +174,7 @@ def get_mobilenet(version,
                   root=os.path.join('~', '.torch', 'models'),
                   **kwargs):
     """
-    Create MobileNet model with specific parameters.
+    Create MobileNet or FD-MobileNet model with specific parameters.
 
     Parameters:
     ----------

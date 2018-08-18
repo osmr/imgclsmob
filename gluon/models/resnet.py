@@ -1,15 +1,19 @@
 """
-    ResNet, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNet & SE-ResNet, implemented in Gluon.
+    Original papers:
+    - 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b']
+           'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
+           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
+from .common import SEBlock
 
 
 class ResConv(HybridBlock):
@@ -243,6 +247,8 @@ class ResUnit(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    use_se : bool
+        Whether to use SE block.
     """
     def __init__(self,
                  in_channels,
@@ -251,8 +257,10 @@ class ResUnit(HybridBlock):
                  bn_use_global_stats,
                  bottleneck,
                  conv1_stride,
+                 use_se,
                  **kwargs):
         super(ResUnit, self).__init__(**kwargs)
+        self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
@@ -269,6 +277,8 @@ class ResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats)
+            if self.use_se:
+                self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 self.identity_conv = res_conv1x1(
                     in_channels=in_channels,
@@ -284,6 +294,8 @@ class ResUnit(HybridBlock):
         else:
             identity = x
         x = self.body(x)
+        if self.use_se:
+            x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x
@@ -330,7 +342,8 @@ class ResInitBlock(HybridBlock):
 
 class ResNet(HybridBlock):
     """
-    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
+    implements SE-ResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -342,6 +355,8 @@ class ResNet(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
+    use_se : bool
+        Whether to use SE block.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -355,6 +370,7 @@ class ResNet(HybridBlock):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
+                 use_se,
                  bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
@@ -379,7 +395,8 @@ class ResNet(HybridBlock):
                             strides=strides,
                             bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
+                            conv1_stride=conv1_stride,
+                            use_se=use_se))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -400,6 +417,7 @@ class ResNet(HybridBlock):
 
 def get_resnet(blocks,
                conv1_stride=True,
+               use_se=False,
                width_scale=1.0,
                model_name=None,
                pretrained=False,
@@ -407,7 +425,7 @@ def get_resnet(blocks,
                root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
-    Create ResNet model with specific parameters.
+    Create ResNet or SE-ResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -415,6 +433,8 @@ def get_resnet(blocks,
         Number of blocks.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
+    use_se : bool
+        Whether to use SE block.
     width_scale : float
         Scale factor for width of layers.
     model_name : str or None, default None
@@ -470,12 +490,13 @@ def get_resnet(blocks,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
+        use_se=use_se,
         **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
+        from model_store import get_model_file
         net.load_parameters(
             filename=get_model_file(
                 model_name=model_name,
@@ -769,13 +790,189 @@ def resnet200b(**kwargs):
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
+def seresnet18(**kwargs):
+    """
+    SE-ResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=18, use_se=True, model_name="seresnet18", **kwargs)
+
+
+def seresnet34(**kwargs):
+    """
+    SE-ResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=34, use_se=True, model_name="seresnet34", **kwargs)
+
+
+def seresnet50(**kwargs):
+    """
+    SE-ResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=50, use_se=True, model_name="seresnet50", **kwargs)
+
+
+def seresnet50b(**kwargs):
+    """
+    SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=50, conv1_stride=False, use_se=True, model_name="seresnet50b", **kwargs)
+
+
+def seresnet101(**kwargs):
+    """
+    SE-ResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=101, use_se=True, model_name="seresnet101", **kwargs)
+
+
+def seresnet101b(**kwargs):
+    """
+    SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=101, conv1_stride=False, use_se=True, model_name="seresnet101b", **kwargs)
+
+
+def seresnet152(**kwargs):
+    """
+    SE-ResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=152, use_se=True, model_name="seresnet152", **kwargs)
+
+
+def seresnet152b(**kwargs):
+    """
+    SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=152, conv1_stride=False, use_se=True, model_name="seresnet152b", **kwargs)
+
+
+def seresnet200(**kwargs):
+    """
+    SE-ResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=200, use_se=True, model_name="seresnet200", **kwargs)
+
+
+def seresnet200b(**kwargs):
+    """
+    SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=200, conv1_stride=False, use_se=True, model_name="seresnet200b", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
+        seresnet18,
+        seresnet34,
+        seresnet50,
+        seresnet50b,
+        seresnet101,
+        seresnet101b,
+        seresnet152,
+        seresnet152b,
+        seresnet200,
+        seresnet200b,
+
         resnet10,
         resnet12,
         resnet14,
@@ -813,19 +1010,30 @@ def _test():
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)
         assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18 or weight_count == 11689512)  # resnet18_v1
-        assert (model != resnet18_w3d4 or weight_count == 6675352)
-        assert (model != resnet18_wd2 or weight_count == 3055880)
         assert (model != resnet18_wd4 or weight_count == 831096)
-        assert (model != resnet34 or weight_count == 21797672)  # resnet34_v1
-        assert (model != resnet50 or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-        assert (model != resnet50b or weight_count == 25557032)  # resnet50_v1b; resnet50_v1 -> 25575912
-        assert (model != resnet101 or weight_count == 44549160)  # resnet101_v1b
-        assert (model != resnet101b or weight_count == 44549160)  # resnet101_v1b
-        assert (model != resnet152 or weight_count == 60192808)  # resnet152_v1b
-        assert (model != resnet152b or weight_count == 60192808)  # resnet152_v1b
+        assert (model != resnet18_wd2 or weight_count == 3055880)
+        assert (model != resnet18_w3d4 or weight_count == 6675352)
+        assert (model != resnet18 or weight_count == 11689512)
+        assert (model != resnet34 or weight_count == 21797672)
+        assert (model != resnet50 or weight_count == 25557032)
+        assert (model != resnet50b or weight_count == 25557032)
+        assert (model != resnet101 or weight_count == 44549160)
+        assert (model != resnet101b or weight_count == 44549160)
+        assert (model != resnet152 or weight_count == 60192808)
+        assert (model != resnet152b or weight_count == 60192808)
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
+
+        #assert (model != seresnet18 or weight_count == 11670504)
+        assert (model != seresnet34 or weight_count == 21771240)
+        assert (model != seresnet50 or weight_count == 16154024)
+        assert (model != seresnet50b or weight_count == 0)
+        assert (model != seresnet101 or weight_count == 26202792)
+        assert (model != seresnet101b or weight_count == 0)
+        assert (model != seresnet152 or weight_count == 34479528)
+        assert (model != seresnet152b or weight_count == 0)
+        assert (model != seresnet200 or weight_count == 0)
+        assert (model != seresnet200b or weight_count == 0)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

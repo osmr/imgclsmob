@@ -11,6 +11,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
+from .common import ChannelShuffle
 
 
 def depthwise_conv3x3(channels,
@@ -56,44 +57,6 @@ def group_conv1x1(in_channels,
         groups=groups,
         use_bias=False,
         in_channels=in_channels)
-
-
-def channel_shuffle(x,
-                    groups):
-    """
-    Channel shuffle operation.
-
-    Parameters:
-    ----------
-    x : NDArray
-        Input tensor.
-    groups : int
-        Number of groups.
-    """
-    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
-
-
-class ChannelShuffle(HybridBlock):
-    """
-    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of channels.
-    groups : int
-        Number of groups.
-    """
-    def __init__(self,
-                 channels,
-                 groups,
-                 **kwargs):
-        super(ChannelShuffle, self).__init__(**kwargs)
-        assert (channels % groups == 0)
-        self.groups = groups
-
-    def hybrid_forward(self, F, x):
-        return channel_shuffle(x, self.groups)
 
 
 class ShuffleUnit(HybridBlock):
@@ -531,7 +494,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         shufflenet_g1_w1,

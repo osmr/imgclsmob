@@ -10,6 +10,7 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
+from .common import ChannelShuffle
 
 
 def depthwise_conv3x3(channels,
@@ -98,45 +99,6 @@ def conv3x3(in_channels,
         padding=1,
         use_bias=False,
         in_channels=in_channels)
-
-
-def channel_shuffle(x,
-                    groups):
-    """
-    Channel shuffle operation. This is exactly the same operation as in ShuffleNet.
-
-    Parameters:
-    ----------
-    x : NDArray
-        Input tensor.
-    groups : int
-        Number of groups.
-    """
-    return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
-
-
-class ChannelShuffle(HybridBlock):
-    """
-    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
-    This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of channels.
-    groups : int
-        Number of groups.
-    """
-    def __init__(self,
-                 channels,
-                 groups,
-                 **kwargs):
-        super(ChannelShuffle, self).__init__(**kwargs)
-        assert (channels % groups == 0)
-        self.groups = groups
-
-    def hybrid_forward(self, F, x):
-        return channel_shuffle(x, self.groups)
 
 
 class MEUnit(HybridBlock):
@@ -572,7 +534,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         menet108_8x1_g3,

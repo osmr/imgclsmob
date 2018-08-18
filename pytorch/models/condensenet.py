@@ -11,52 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 from torch.autograd import Variable
-
-
-def channel_shuffle(x,
-                    groups):
-    """
-    Channel shuffle operation. This is exactly the same operation as in ShuffleNet.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    groups : int
-        Number of groups.
-    """
-    batch, channels, height, width = x.size()
-    #assert (channels % groups == 0)
-    channels_per_group = channels // groups
-    x = x.view(batch, groups, channels_per_group, height, width)
-    x = torch.transpose(x, 1, 2).contiguous()
-    x = x.view(batch, channels, height, width)
-    return x
-
-
-class ChannelShuffle(nn.Module):
-    """
-    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
-    This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of channels.
-    groups : int
-        Number of groups.
-    """
-    def __init__(self,
-                 channels,
-                 groups):
-        super(ChannelShuffle, self).__init__()
-        #assert (channels % groups == 0)
-        if channels % groups != 0:
-            raise ValueError('channels must be divisible by groups')
-        self.groups = groups
-
-    def forward(self, x):
-        return channel_shuffle(x, self.groups)
+from .common import ChannelShuffle
 
 
 class CondenseSimpleConv(nn.Module):
@@ -511,7 +466,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         condensenet74_c4_g4,

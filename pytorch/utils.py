@@ -1,6 +1,7 @@
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
+from .models.senet import *
 from .models.densenet import *
 from .models.squeezenet import *
 from .models.darknet import *
@@ -85,19 +86,34 @@ _models = {
     'seresnext101_32x4d': seresnext101_32x4d,
     'seresnext101_64x4d': seresnext101_64x4d,
 
+    'senet52': senet52,
+    'senet103': senet103,
+    'senet154': senet154,
+
     'slk_densenet121': densenet121,
     'slk_densenet161': densenet161,
     'slk_densenet169': densenet169,
     'slk_densenet201': densenet201,
 
-    'squeezenet_v1_0': squeezenet_v1_0,
-    'squeezenet_v1_1': squeezenet_v1_1,
-    'squeezeresnet_v1_0': squeezeresnet_v1_0,
-    'squeezeresnet_v1_1': squeezeresnet_v1_1,
+    'condensenet74_c4_g4': condensenet74_c4_g4,
+    'condensenet74_c8_g8': condensenet74_c8_g8,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
+
+    'squeezenet_v1_0': squeezenet_v1_0,
+    'squeezenet_v1_1': squeezenet_v1_1,
+
+    'squeezeresnet_v1_0': squeezeresnet_v1_0,
+    'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+    'sqnxt23_w1': sqnxt23_w1,
+    'sqnxt23_w3d2': sqnxt23_w3d2,
+    'sqnxt23_w2': sqnxt23_w2,
+    'sqnxt23v5_w1': sqnxt23v5_w1,
+    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+    'sqnxt23v5_w2': sqnxt23v5_w2,
 
     'mobilenet_w1': mobilenet_w1,
     'mobilenet_w3d4': mobilenet_w3d4,
@@ -139,16 +155,6 @@ _models = {
     'menet348_12x1_g3': menet348_12x1_g3,
     'menet352_12x1_g8': menet352_12x1_g8,
     'menet456_24x1_g3': menet456_24x1_g3,
-
-    'sqnxt23_w1': sqnxt23_w1,
-    'sqnxt23_w3d2': sqnxt23_w3d2,
-    'sqnxt23_w2': sqnxt23_w2,
-    'sqnxt23v5_w1': sqnxt23v5_w1,
-    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
-    'sqnxt23v5_w2': sqnxt23v5_w2,
-
-    'condensenet74_c4_g4': condensenet74_c4_g4,
-    'condensenet74_c8_g8': condensenet74_c8_g8,
 
     # 'nasnet_a_mobile': nasnet_a_mobile,
 }

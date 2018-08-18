@@ -6,7 +6,7 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_conv3x3', 'resnext_conv1x1']
 
 import os
 import math
@@ -290,7 +290,7 @@ class ResNeXt(nn.Module):
         Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -409,7 +409,7 @@ def get_resnext(blocks,
 def resnext50_32x4d(**kwargs):
     """
     ResNeXt-50 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431
+    http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------

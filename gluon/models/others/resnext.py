@@ -331,3 +331,44 @@ def se_resnext101_64x4d(**kwargs):
         Location for keeping the model parameters.
     """
     return get_resnext(101, 64, 4, use_se=True, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        resnext50_32x4d,
+        resnext101_32x4d,
+        resnext101_64x4d,
+        se_resnext50_32x4d,
+        se_resnext101_32x4d,
+        se_resnext101_64x4d,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+
+
+if __name__ == "__main__":
+    _test()
+

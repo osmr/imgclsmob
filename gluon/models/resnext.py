@@ -1,0 +1,596 @@
+"""
+    ResNeXt & SE-ResNeXt, implemented in Gluon.
+    Original papers:
+    - 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+"""
+
+__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
+           'seresnext101_32x4d', 'seresnext101_64x4d']
+
+import os
+import math
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
+from .common import SEBlock
+
+
+class ResNeXtConv(HybridBlock):
+    """
+    ResNeXt specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 groups,
+                 bn_use_global_stats,
+                 activate,
+                 **kwargs):
+        super(ResNeXtConv, self).__init__(**kwargs)
+        self.activate = activate
+
+        with self.name_scope():
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                groups=groups,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
+            if self.activate:
+                self.activ = nn.Activation('relu')
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def resnext_conv1x1(in_channels,
+                    out_channels,
+                    strides,
+                    bn_use_global_stats,
+                    activate):
+    """
+    1x1 version of the ResNeXt specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
+    return ResNeXtConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=strides,
+        padding=0,
+        groups=1,
+        bn_use_global_stats=bn_use_global_stats,
+        activate=activate)
+
+
+def resnext_conv3x3(in_channels,
+                    out_channels,
+                    strides,
+                    groups,
+                    bn_use_global_stats,
+                    activate):
+    """
+    3x3 version of the ResNeXt specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    groups : int
+        Number of groups.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool
+        Whether activate the convolution block.
+    """
+    return ResNeXtConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=groups,
+        bn_use_global_stats=bn_use_global_stats,
+        activate=activate)
+
+
+class ResNeXtBottleneck(HybridBlock):
+    """
+    ResNeXt bottleneck block for residual path in ResNeXt unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 strides,
+                 cardinality,
+                 bottleneck_width,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(ResNeXtBottleneck, self).__init__(**kwargs)
+        mid_channels = out_channels // 4
+        D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+        group_width = cardinality * D
+
+        with self.name_scope():
+            self.conv1 = resnext_conv1x1(
+                in_channels=in_channels,
+                out_channels=group_width,
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=True)
+            self.conv2 = resnext_conv3x3(
+                in_channels=group_width,
+                out_channels=group_width,
+                strides=strides,
+                groups=cardinality,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=True)
+            self.conv3 = resnext_conv1x1(
+                in_channels=group_width,
+                out_channels=out_channels,
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=False)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        return x
+
+
+class ResNeXtUnit(HybridBlock):
+    """
+    ResNeXt unit with residual connection.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    use_se : bool
+        Whether to use SE block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 strides,
+                 cardinality,
+                 bottleneck_width,
+                 bn_use_global_stats,
+                 use_se,
+                 **kwargs):
+        super(ResNeXtUnit, self).__init__(**kwargs)
+        self.use_se = use_se
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+
+        with self.name_scope():
+            self.body = ResNeXtBottleneck(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                cardinality=cardinality,
+                bottleneck_width=bottleneck_width,
+                bn_use_global_stats=bn_use_global_stats)
+            if self.use_se:
+                self.se = SEBlock(channels=out_channels)
+            if self.resize_identity:
+                self.identity_conv = resnext_conv1x1(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
+                    activate=False)
+            self.activ = nn.Activation('relu')
+
+    def hybrid_forward(self, F, x):
+        if self.resize_identity:
+            identity = self.identity_conv(x)
+        else:
+            identity = x
+        x = self.body(x)
+        if self.use_se:
+            x = self.se(x)
+        x = x + identity
+        x = self.activ(x)
+        return x
+
+
+class ResNeXtInitBlock(HybridBlock):
+    """
+    ResNeXt specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(ResNeXtInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = ResNeXtConv(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=7,
+                strides=2,
+                padding=3,
+                groups=1,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=True)
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.pool(x)
+        return x
+
+
+class ResNeXt(HybridBlock):
+    """
+    ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    Also this class implements SE-ResNeXt from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
+    use_se : bool
+        Whether to use SE block.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 cardinality,
+                 bottleneck_width,
+                 use_se,
+                 bn_use_global_stats=False,
+                 in_channels=3,
+                 classes=1000,
+                 **kwargs):
+        super(ResNeXt, self).__init__(**kwargs)
+
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(ResNeXtInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and (i != 0) else 1
+                        stage.add(ResNeXtUnit(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            strides=strides,
+                            cardinality=cardinality,
+                            bottleneck_width=bottleneck_width,
+                            bn_use_global_stats=bn_use_global_stats,
+                            use_se=use_se))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
+
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
+
+    def hybrid_forward(self, F, x):
+        x = self.features(x)
+        x = self.output(x)
+        return x
+
+
+def get_resnext(blocks,
+                cardinality,
+                bottleneck_width,
+                use_se=False,
+                model_name=None,
+                pretrained=False,
+                ctx=cpu(),
+                root=os.path.join('~', '.mxnet', 'models'),
+                **kwargs):
+    """
+    Create ResNeXt or SE-ResNeXt model with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
+    use_se : bool
+        Whether to use SE block.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+
+    if blocks == 50:
+        layers = [3, 4, 6, 3]
+    elif blocks == 101:
+        layers = [3, 4, 23, 3]
+    else:
+        raise ValueError("Unsupported ResNeXt with number of blocks: {}".format(blocks))
+
+    init_block_channels = 64
+    channels_per_layers = [256, 512, 1024, 2048]
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+
+    net = ResNeXt(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
+        use_se=use_se,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
+    return net
+
+
+def resnext50_32x4d(**kwargs):
+    """
+    ResNeXt-50 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="resnext50_32x4d", **kwargs)
+
+
+def resnext101_32x4d(**kwargs):
+    """
+    ResNeXt-101 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="resnext101_32x4d", **kwargs)
+
+
+def resnext101_64x4d(**kwargs):
+    """
+    ResNeXt-101 (64x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="resnext101_64x4d", **kwargs)
+
+
+def seresnext50_32x4d(**kwargs):
+    """
+    SE-ResNeXt-50 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext50_32x4d",
+                       **kwargs)
+
+
+def seresnext101_32x4d(**kwargs):
+    """
+    SE-ResNeXt-101 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext101_32x4d",
+                       **kwargs)
+
+
+def seresnext101_64x4d(**kwargs):
+    """
+    SE-ResNeXt-101 (64x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, use_se=True, model_name="seresnext101_64x4d",
+                       **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        resnext50_32x4d,
+        resnext101_32x4d,
+        resnext101_64x4d,
+        seresnext50_32x4d,
+        seresnext101_32x4d,
+        seresnext101_64x4d,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        #print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resnext50_32x4d or weight_count == 25028904)
+        assert (model != resnext101_32x4d or weight_count == 44177704)
+        assert (model != resnext101_64x4d or weight_count == 83455272)
+        assert (model != seresnext50_32x4d or weight_count == 27543848)
+        assert (model != seresnext101_32x4d or weight_count == 48920872)
+        assert (model != seresnext101_64x4d or weight_count == 88198440)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
+

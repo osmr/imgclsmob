@@ -946,13 +946,13 @@ def _test():
         assert (model != preresnet152b or weight_count == 60185256)
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
-        assert (model != sepreresnet18 or weight_count == 11774888)  # se_resnet18_v2 -> 11670504
-        assert (model != sepreresnet34 or weight_count == 21953192)  # se_resnet34_v2 -> 21771240
-        assert (model != sepreresnet50 or weight_count == 28064424)  # se_resnet50_v2 -> 16135144
+        assert (model != sepreresnet18 or weight_count == 11774888)
+        assert (model != sepreresnet34 or weight_count == 21953192)
+        assert (model != sepreresnet50 or weight_count == 28064424)
         assert (model != sepreresnet50b or weight_count == 28064424)
-        assert (model != sepreresnet101 or weight_count == 49284776)  # se_resnet101_v2 -> 26162152
+        assert (model != sepreresnet101 or weight_count == 49284776)
         assert (model != sepreresnet101b or weight_count == 49284776)
-        assert (model != sepreresnet152 or weight_count == 66763432)  # se_resnet152_v2 -> 34419688
+        assert (model != sepreresnet152 or weight_count == 66763432)
         assert (model != sepreresnet152b or weight_count == 66763432)
         assert (model != sepreresnet200 or weight_count == 71768744)
         assert (model != sepreresnet200b or weight_count == 71768744)

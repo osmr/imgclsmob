@@ -507,8 +507,8 @@ def _test():
         # resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
-        # seresnext50_32x4d,
-        # seresnext101_32x4d,
+        seresnext50_32x4d,
+        seresnext101_32x4d,
         # seresnext101_64x4d,
     ]
 
@@ -521,13 +521,13 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        #print("m={}, {}".format(model.__name__, weight_count))
+        # print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)
-        assert (model != seresnext50_32x4d or weight_count == 27543848)
-        assert (model != seresnext101_32x4d or weight_count == 48920872)
-        assert (model != seresnext101_64x4d or weight_count == 88198440)
+        assert (model != seresnext50_32x4d or weight_count == 27559896)
+        assert (model != seresnext101_32x4d or weight_count == 48955416)
+        assert (model != seresnext101_64x4d or weight_count == 88232984)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

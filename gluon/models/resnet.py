@@ -1024,16 +1024,16 @@ def _test():
         assert (model != resnet152b or weight_count == 60192808)
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
-        assert (model != seresnet18 or weight_count == 11776552)  # se_resnet18_v1 -> 11776552
-        assert (model != seresnet34 or weight_count == 21954856)  # se_resnet34_v1 -> 21954856
-        assert (model != seresnet50 or weight_count == 28071976)  # se_resnet50_v1 -> 28090856
-        assert (model != seresnet50b or weight_count == 28071976)
-        assert (model != seresnet101 or weight_count == 49292328)  # se_resnet101_v1 -> 49332968
-        assert (model != seresnet101b or weight_count == 49292328)
-        assert (model != seresnet152 or weight_count == 66770984)  # se_resnet152_v1 -> 66830824
-        assert (model != seresnet152b or weight_count == 66770984)
-        assert (model != seresnet200 or weight_count == 71776296)
-        assert (model != seresnet200b or weight_count == 71776296)
+        assert (model != seresnet18 or weight_count == 11778592)  # 11776552
+        assert (model != seresnet34 or weight_count == 21958868)  # 21954856
+        assert (model != seresnet50 or weight_count == 28088024)  # 28071976
+        assert (model != seresnet50b or weight_count == 28088024)  # 28071976
+        assert (model != seresnet101 or weight_count == 49326872)  # 49292328
+        assert (model != seresnet101b or weight_count == 49326872)  # 49292328
+        assert (model != seresnet152 or weight_count == 66821848)  # 66770984
+        assert (model != seresnet152b or weight_count == 66821848)  # 66770984
+        assert (model != seresnet200 or weight_count == 71835864)  # 71776296
+        assert (model != seresnet200b or weight_count == 71835864)  # 71776296
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

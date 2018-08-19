@@ -391,11 +391,11 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        senet52,
-        senet103,
+        # senet52,
+        # senet103,
         senet154,
     ]
 

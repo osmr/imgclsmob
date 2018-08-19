@@ -358,11 +358,11 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        senet52,
-        senet103,
+        # senet52,
+        # senet103,
         senet154,
     ]
 

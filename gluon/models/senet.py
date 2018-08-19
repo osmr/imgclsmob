@@ -105,7 +105,7 @@ class SENetUnit(HybridBlock):
                  identity_conv3x3,
                  **kwargs):
         super(SENetUnit, self).__init__(**kwargs)
-        self.use_se = use_se
+        self.use_se = True
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():

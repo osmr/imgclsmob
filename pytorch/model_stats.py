@@ -46,7 +46,7 @@ def measure_layer(layer, x):
         delta_ops = x.numel()
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['ReLU', 'LeakyReLU', 'ReLU6']:  # NB: Maybe bake!
+    elif type_name in ['ReLU', 'LeakyReLU', 'ReLU6', 'Sigmoid']:  # NB: Maybe bake!
         delta_ops = x.numel()
         delta_params = get_layer_param(layer)
 

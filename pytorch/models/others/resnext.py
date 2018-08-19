@@ -77,32 +77,32 @@ class ResNeXt101_64x4d(nn.Module):
 
 def oth_resnext101_32x4d(num_classes=1000, pretrained='imagenet'):
     model = ResNeXt101_32x4d(num_classes=num_classes)
-    if (type(pretrained) == bool) and pretrained:
-        pretrained = 'imagenet'
     if pretrained is not None:
-        settings = pretrained_settings['resnext101_32x4d'][pretrained]
-        assert num_classes == settings['num_classes'], \
-            "num_classes should be {}, but is {}".format(settings['num_classes'], num_classes)
-        model.load_state_dict(model_zoo.load_url(settings['url']))
-        model.input_space = settings['input_space']
-        model.input_size = settings['input_size']
-        model.input_range = settings['input_range']
-        model.mean = settings['mean']
-        model.std = settings['std']
+        if (type(pretrained) == bool) and pretrained:
+            pretrained = 'imagenet'
+            settings = pretrained_settings['resnext101_32x4d'][pretrained]
+            assert num_classes == settings['num_classes'], \
+                "num_classes should be {}, but is {}".format(settings['num_classes'], num_classes)
+            model.load_state_dict(model_zoo.load_url(settings['url']))
+            model.input_space = settings['input_space']
+            model.input_size = settings['input_size']
+            model.input_range = settings['input_range']
+            model.mean = settings['mean']
+            model.std = settings['std']
     return model
 
 def oth_resnext101_64x4d(num_classes=1000, pretrained='imagenet'):
     model = ResNeXt101_64x4d(num_classes=num_classes)
-    if (type(pretrained) == bool) and pretrained:
-        pretrained = 'imagenet'
     if pretrained is not None:
-        settings = pretrained_settings['resnext101_64x4d'][pretrained]
-        assert num_classes == settings['num_classes'], \
-            "num_classes should be {}, but is {}".format(settings['num_classes'], num_classes)
-        model.load_state_dict(model_zoo.load_url(settings['url']))
-        model.input_space = settings['input_space']
-        model.input_size = settings['input_size']
-        model.input_range = settings['input_range']
-        model.mean = settings['mean']
-        model.std = settings['std']
+        if (type(pretrained) == bool) and pretrained:
+            pretrained = 'imagenet'
+            settings = pretrained_settings['resnext101_64x4d'][pretrained]
+            assert num_classes == settings['num_classes'], \
+                "num_classes should be {}, but is {}".format(settings['num_classes'], num_classes)
+            model.load_state_dict(model_zoo.load_url(settings['url']))
+            model.input_space = settings['input_space']
+            model.input_size = settings['input_size']
+            model.input_range = settings['input_range']
+            model.mean = settings['mean']
+            model.std = settings['std']
     return model

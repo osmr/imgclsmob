@@ -3,20 +3,17 @@ from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
 from .models.densenet import *
-from .models.squeezenet import *
+from .models.condensenet import *
 from .models.darknet import *
-from .models.mobilenet import *
-from .models.mobilenetv2 import *
+from .models.squeezenet import *
+from .models.squeezenext import *
 from .models.shufflenet import *
 from .models.shufflenetv2 import *
 from .models.menet import *
-from .models.squeezenext import *
-from .models.condensenet import *
+from .models.mobilenet import *
+from .models.mobilenetv2 import *
 
 #from .models.nasnet import *
-
-from .models.others.senet import *
-from .models.others.resnext import *
 
 __all__ = ['get_model']
 
@@ -118,21 +115,6 @@ _models = {
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
 
-    'mobilenet_w1': mobilenet_w1,
-    'mobilenet_w3d4': mobilenet_w3d4,
-    'mobilenet_wd2': mobilenet_wd2,
-    'mobilenet_wd4': mobilenet_wd4,
-
-    'fdmobilenet_w1': fdmobilenet_w1,
-    'fdmobilenet_w3d4': fdmobilenet_w3d4,
-    'fdmobilenet_wd2': fdmobilenet_wd2,
-    'fdmobilenet_wd4': fdmobilenet_wd4,
-
-    'mobilenetv2_w1': mobilenetv2_w1,
-    'mobilenetv2_w3d4': mobilenetv2_w3d4,
-    'mobilenetv2_wd2': mobilenetv2_wd2,
-    'mobilenetv2_wd4': mobilenetv2_wd4,
-
     'shufflenet_g1_w1': shufflenet_g1_w1,
     'shufflenet_g2_w1': shufflenet_g2_w1,
     'shufflenet_g3_w1': shufflenet_g3_w1,
@@ -159,17 +141,22 @@ _models = {
     'menet352_12x1_g8': menet352_12x1_g8,
     'menet456_24x1_g3': menet456_24x1_g3,
 
+    'mobilenet_w1': mobilenet_w1,
+    'mobilenet_w3d4': mobilenet_w3d4,
+    'mobilenet_wd2': mobilenet_wd2,
+    'mobilenet_wd4': mobilenet_wd4,
+
+    'fdmobilenet_w1': fdmobilenet_w1,
+    'fdmobilenet_w3d4': fdmobilenet_w3d4,
+    'fdmobilenet_wd2': fdmobilenet_wd2,
+    'fdmobilenet_wd4': fdmobilenet_wd4,
+
+    'mobilenetv2_w1': mobilenetv2_w1,
+    'mobilenetv2_w3d4': mobilenetv2_w3d4,
+    'mobilenetv2_wd2': mobilenetv2_wd2,
+    'mobilenetv2_wd4': mobilenetv2_wd4,
+
     # 'nasnet_a_mobile': nasnet_a_mobile,
-
-    'oth_senet154': oth_senet154,
-    'oth_se_resnet50': oth_se_resnet50,
-    'oth_se_resnet101': oth_se_resnet101,
-    'oth_se_resnet152': oth_se_resnet152,
-    'oth_se_resnext50_32x4d': oth_se_resnext50_32x4d,
-    'oth_se_resnext101_32x4d': oth_se_resnext101_32x4d,
-
-    'oth_resnext101_32x4d': oth_resnext101_32x4d,
-    'oth_resnext101_64x4d': oth_resnext101_64x4d,
 }
 
 

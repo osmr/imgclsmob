@@ -82,8 +82,8 @@ class SENetUnit(nn.Module):
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    use_se : bool
-        Whether to use SE block.
+    identity_conv3x3 : bool, default False
+        Whether to use 3x3 convolution in the identity link.
     """
     def __init__(self,
                  in_channels,
@@ -91,9 +91,9 @@ class SENetUnit(nn.Module):
                  stride,
                  cardinality,
                  bottleneck_width,
-                 use_se):
+                 identity_conv3x3):
         super(SENetUnit, self).__init__()
-        self.use_se = use_se
+        self.use_se = True
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         self.body = SENetBottleneck(
@@ -105,11 +105,19 @@ class SENetUnit(nn.Module):
         if self.use_se:
             self.se = SEBlock(channels=out_channels)
         if self.resize_identity:
-            self.identity_conv = resnext_conv1x1(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                activate=False)
+            if identity_conv3x3:
+                self.identity_conv = resnext_conv3x3(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    groups=1,
+                    activate=False)
+            else:
+                self.identity_conv = resnext_conv1x1(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    activate=False)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
@@ -208,6 +216,7 @@ class SENet(nn.Module):
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
+            identity_conv3x3 = (i != 0)
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
                 stage.add_module("unit{}".format(j + 1), SENetUnit(
@@ -216,7 +225,7 @@ class SENet(nn.Module):
                     stride=stride,
                     cardinality=cardinality,
                     bottleneck_width=bottleneck_width,
-                    use_se=True))
+                    identity_conv3x3=identity_conv3x3))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('final_pool', nn.AvgPool2d(
@@ -367,9 +376,9 @@ def _test():
         for param in net_params:
             weight_count += np.prod(param.size())
         #print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 22623272)
-        assert (model != senet103 or weight_count == 38908456)
-        assert (model != senet154 or weight_count == 93018024)
+        assert (model != senet52 or weight_count == 22639320)  # 22623272
+        assert (model != senet103 or weight_count == 38943000)  # 38908456
+        assert (model != senet154 or weight_count == 93068888)  # 93018024
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

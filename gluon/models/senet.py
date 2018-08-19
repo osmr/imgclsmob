@@ -92,8 +92,8 @@ class SENetUnit(HybridBlock):
         Width of bottleneck block.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    use_se : bool
-        Whether to use SE block.
+    identity_conv3x3 : bool, default False
+        Whether to use 3x3 convolution in the identity link.
     """
     def __init__(self,
                  in_channels,
@@ -102,7 +102,7 @@ class SENetUnit(HybridBlock):
                  cardinality,
                  bottleneck_width,
                  bn_use_global_stats,
-                 use_se,
+                 identity_conv3x3,
                  **kwargs):
         super(SENetUnit, self).__init__(**kwargs)
         self.use_se = use_se
@@ -119,12 +119,19 @@ class SENetUnit(HybridBlock):
             if self.use_se:
                 self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
-                self.identity_conv = resnext_conv1x1(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
+                if identity_conv3x3:
+                    self.identity_conv = resnext_conv3x3(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        strides=strides,
+                        groups=1,
+                        activate=False)
+                else:
+                    self.identity_conv = resnext_conv1x1(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        strides=strides,
+                        activate=False)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
@@ -238,6 +245,7 @@ class SENet(HybridBlock):
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                identity_conv3x3 = (i != 0)
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -248,7 +256,7 @@ class SENet(HybridBlock):
                             cardinality=cardinality,
                             bottleneck_width=bottleneck_width,
                             bn_use_global_stats=bn_use_global_stats,
-                            use_se=True))
+                            identity_conv3x3=identity_conv3x3))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -403,10 +411,10 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        #print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 22623272)
-        assert (model != senet103 or weight_count == 38908456)
-        assert (model != senet154 or weight_count == 93018024)
+        # print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != senet52 or weight_count == 22639320)  # 22623272
+        assert (model != senet103 or weight_count == 38943000)  # 38908456
+        assert (model != senet154 or weight_count == 93068888)  # 93018024
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

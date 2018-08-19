@@ -8,6 +8,28 @@ import torch
 import torch.nn as nn
 
 
+def conv1x1(in_channels,
+            out_channels,
+            bias=False):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        bias=bias)
+
+
 def channel_shuffle(x,
                     groups):
     """
@@ -69,24 +91,23 @@ class SEBlock(nn.Module):
         mid_cannels = channels // 16
 
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
-        self.fc1 = nn.Linear(
-            in_features=channels,
-            out_features=mid_cannels,
-            bias=False)
+        self.conv1 = conv1x1(
+            in_channels=channels,
+            out_channels=mid_cannels,
+            bias=True)
         self.relu = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(
-            in_features=mid_cannels,
-            out_features=channels,
-            bias=False)
+        self.conv2 = conv1x1(
+            in_channels=mid_cannels,
+            out_channels=channels,
+            bias=True)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         w = self.pool(x)
-        w = w.view(w.size(0), -1)
-        w = self.fc1(w)
+        w = self.conv1(w)
         w = self.relu(w)
-        w = self.fc2(w)
+        w = self.conv2(w)
         w = self.sigmoid(w)
-        x = x * w.unsqueeze(dim=2).unsqueeze(dim=2)
+        x = x * w
         return x
 

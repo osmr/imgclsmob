@@ -15,6 +15,8 @@ from .models.condensenet import *
 
 #from .models.nasnet import *
 
+from .models.others.senet import oth_senet154
+
 __all__ = ['get_model']
 
 
@@ -157,6 +159,8 @@ _models = {
     'menet456_24x1_g3': menet456_24x1_g3,
 
     # 'nasnet_a_mobile': nasnet_a_mobile,
+
+    'oth_senet154': oth_senet154,
 }
 
 

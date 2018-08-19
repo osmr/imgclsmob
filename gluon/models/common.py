@@ -7,6 +7,28 @@ __all__ = ['ChannelShuffle', 'SEBlock']
 from mxnet.gluon import nn, HybridBlock
 
 
+def conv1x1(in_channels,
+            out_channels,
+            use_bias=False):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=1,
+        use_bias=use_bias,
+        in_channels=in_channels)
+
+
 def channel_shuffle(x,
                     groups):
     """
@@ -54,31 +76,34 @@ class SEBlock(HybridBlock):
     ----------
     channels : int
         Number of channels.
+    reduction : int, default 16
+        Squeeze reduction value.
     """
     def __init__(self,
                  channels,
+                 reduction=16,
                  **kwargs):
         super(SEBlock, self).__init__(**kwargs)
-        mid_cannels = channels // 16
+        mid_cannels = channels // reduction
 
         with self.name_scope():
-            self.fc1 = nn.Dense(
-                units=mid_cannels,
-                use_bias=False,
-                in_units=channels)
+            self.conv1 = conv1x1(
+                in_channels=channels,
+                out_channels=mid_cannels,
+                use_bias=True)
             self.relu = nn.Activation('relu')
-            self.fc2 = nn.Dense(
-                units=channels,
-                use_bias=False,
-                in_units=mid_cannels)
+            self.conv2 = conv1x1(
+                in_channels=mid_cannels,
+                out_channels=channels,
+                use_bias=True)
             self.sigmoid = nn.Activation('sigmoid')
 
     def hybrid_forward(self, F, x):
         w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
-        w = self.fc1(w)
+        w = self.conv1(w)
         w = self.relu(w)
-        w = self.fc2(w)
+        w = self.conv2(w)
         w = self.sigmoid(w)
-        x = F.broadcast_mul(x, w.expand_dims(axis=2).expand_dims(axis=2))
+        x = F.broadcast_mul(x, w)
         return x
 

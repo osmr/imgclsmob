@@ -125,12 +125,14 @@ class SENetUnit(HybridBlock):
                         out_channels=out_channels,
                         strides=strides,
                         groups=1,
+                        bn_use_global_stats=bn_use_global_stats,
                         activate=False)
                 else:
                     self.identity_conv = resnext_conv1x1(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         strides=strides,
+                        bn_use_global_stats=bn_use_global_stats,
                         activate=False)
             self.activ = nn.Activation('relu')
 
@@ -412,9 +414,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         # print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 22639320)  # 22623272
-        assert (model != senet103 or weight_count == 38943000)  # 38908456
-        assert (model != senet154 or weight_count == 93068888)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)  # 22623272
+        assert (model != senet103 or weight_count == 60963096)  # 38908456
+        assert (model != senet154 or weight_count == 115088984)  # 93018024
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

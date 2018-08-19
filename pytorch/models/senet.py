@@ -375,10 +375,10 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        #print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 22639320)  # 22623272
-        assert (model != senet103 or weight_count == 38943000)  # 38908456
-        assert (model != senet154 or weight_count == 93068888)  # 93018024
+        # print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != senet52 or weight_count == 44659416)  # 22623272
+        assert (model != senet103 or weight_count == 60963096)  # 38908456
+        assert (model != senet154 or weight_count == 115088984)  # 93018024
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

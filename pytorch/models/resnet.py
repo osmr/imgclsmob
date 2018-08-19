@@ -859,7 +859,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
         resnet10,
@@ -881,16 +881,16 @@ def _test():
         # resnet200,
         # resnet200b,
 
-        seresnet18,
-        seresnet34,
+        # seresnet18,
+        # seresnet34,
         seresnet50,
-        seresnet50b,
+        # seresnet50b,
         seresnet101,
-        seresnet101b,
+        # seresnet101b,
         seresnet152,
-        seresnet152b,
-        seresnet200,
-        seresnet200b,
+        # seresnet152b,
+        # seresnet200,
+        # seresnet200b,
     ]
 
     for model in models:

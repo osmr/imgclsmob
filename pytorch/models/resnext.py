@@ -501,15 +501,15 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        resnext50_32x4d,
+        # resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
-        seresnext50_32x4d,
-        seresnext101_32x4d,
-        seresnext101_64x4d,
+        # seresnext50_32x4d,
+        # seresnext101_32x4d,
+        # seresnext101_64x4d,
     ]
 
     for model in models:

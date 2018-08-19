@@ -52,17 +52,45 @@ def measure_layer(layer, x):
 
     elif type_name in ['AvgPool2d']:
         in_w = x.size()[2]
-        kernel_ops = layer.kernel_size * layer.kernel_size
-        out_w = int((in_w + 2 * layer.padding - layer.kernel_size) / layer.stride + 1)
-        out_h = int((in_w + 2 * layer.padding - layer.kernel_size) / layer.stride + 1)
+        if type(layer.kernel_size) == tuple:
+            layer_kernel_size = layer.kernel_size[0]
+        else:
+            layer_kernel_size = layer.kernel_size
+        if type(layer.stride) == tuple:
+            layer_stride = layer.stride[0]
+        else:
+            layer_stride = layer.stride
+        if type(layer.padding) == tuple:
+            layer_padding = layer.padding[0]
+        else:
+            layer_padding = layer.padding
+        kernel_ops = layer_kernel_size * layer_kernel_size
+        out_w = int((in_w + 2 * layer_padding - layer_kernel_size) / layer_stride + 1)
+        out_h = int((in_w + 2 * layer_padding - layer_kernel_size) / layer_stride + 1)
         delta_ops = x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
         delta_params = get_layer_param(layer)
 
     elif type_name in ['MaxPool2d']:
         in_w = x.size()[2]
-        kernel_ops = layer.kernel_size * layer.kernel_size
-        out_w = int((in_w + 2 * layer.padding - layer.dilation * (layer.kernel_size - 1) - 1) / layer.stride + 1)
-        out_h = int((in_w + 2 * layer.padding - layer.dilation * (layer.kernel_size - 1) - 1) / layer.stride + 1)
+        if type(layer.kernel_size) == tuple:
+            layer_kernel_size = layer.kernel_size[0]
+        else:
+            layer_kernel_size = layer.kernel_size
+        if type(layer.dilation) == tuple:
+            layer_dilation = layer.dilation[0]
+        else:
+            layer_dilation = layer.dilation
+        if type(layer.stride) == tuple:
+            layer_stride = layer.stride[0]
+        else:
+            layer_stride = layer.stride
+        if type(layer.padding) == tuple:
+            layer_padding = layer.padding[0]
+        else:
+            layer_padding = layer.padding
+        kernel_ops = layer_kernel_size * layer_kernel_size
+        out_w = int((in_w + 2 * layer_padding - layer_dilation * (layer_kernel_size - 1) - 1) / layer_stride + 1)
+        out_h = int((in_w + 2 * layer_padding - layer_dilation * (layer_kernel_size - 1) - 1) / layer_stride + 1)
         delta_ops = x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
         delta_params = get_layer_param(layer)
 
@@ -76,7 +104,7 @@ def measure_layer(layer, x):
         delta_ops = x.size()[0] * (weight_ops + bias_ops)
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['BatchNorm2d', 'Dropout2d', 'DropChannel', 'Dropout']:
+    elif type_name in ['BatchNorm2d', 'Dropout2d', 'DropChannel', 'Dropout', 'LambdaReduce', 'Lambda']:
         delta_params = get_layer_param(layer)
 
     else:

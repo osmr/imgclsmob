@@ -16,6 +16,7 @@ from .models.condensenet import *
 #from .models.nasnet import *
 
 from .models.others.senet import *
+from .models.others.resnext import *
 
 __all__ = ['get_model']
 
@@ -164,6 +165,11 @@ _models = {
     'oth_se_resnet50': oth_se_resnet50,
     'oth_se_resnet101': oth_se_resnet101,
     'oth_se_resnet152': oth_se_resnet152,
+    'oth_se_resnext50_32x4d': oth_se_resnext50_32x4d,
+    'oth_se_resnext101_32x4d': oth_se_resnext101_32x4d,
+
+    'oth_resnext101_32x4d': oth_resnext101_32x4d,
+    'oth_resnext101_64x4d': oth_resnext101_64x4d,
 }
 
 

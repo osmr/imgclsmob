@@ -15,7 +15,7 @@ from .models.condensenet import *
 
 #from .models.nasnet import *
 
-from .models.others.senet import oth_senet154
+from .models.others.senet import oth_senet154, oth_se_resnet50
 
 __all__ = ['get_model']
 
@@ -161,6 +161,7 @@ _models = {
     # 'nasnet_a_mobile': nasnet_a_mobile,
 
     'oth_senet154': oth_senet154,
+    'oth_se_resnet50': oth_se_resnet50,
 }
 
 

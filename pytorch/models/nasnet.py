@@ -1,15 +1,13 @@
 """
-    NASNet-A Mobile.
-    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition'
-    Source repo: https://github.com/veronikayurchuk/pretrained-models.pytorch/blob/master/pretrainedmodels/models/nasnet_mobile.py
+    NASNet-A Mobile, implemented in PyTorch.
+    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
+    https://arxiv.org/abs/1707.07012.
 """
+
+__all__ = ['nasnet_a_mobile']
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.utils.model_zoo as model_zoo
-from torch.autograd import Variable
-import numpy as np
 
 
 class MaxPoolPad(nn.Module):
@@ -28,10 +26,16 @@ class MaxPoolPad(nn.Module):
 
 class AvgPoolPad(nn.Module):
 
-    def __init__(self, stride=2, padding=1):
+    def __init__(self,
+                 stride=2,
+                 padding=1):
         super(AvgPoolPad, self).__init__()
-        self.pad = nn.ZeroPad2d((1, 0, 1, 0))
-        self.pool = nn.AvgPool2d(3, stride=stride, padding=padding, count_include_pad=False)
+        self.pad = nn.ZeroPad2d(padding=(1, 0, 1, 0))
+        self.pool = nn.AvgPool2d(
+            kernel_size=3,
+            stride=stride,
+            padding=padding,
+            count_include_pad=False)
 
     def forward(self, x):
         x = self.pad(x)

@@ -2,7 +2,7 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['ChannelShuffle', 'SEBlock']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock']
 
 import torch
 import torch.nn as nn

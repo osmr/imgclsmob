@@ -2,7 +2,7 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ChannelShuffle', 'SEBlock']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock']
 
 from mxnet.gluon import nn, HybridBlock
 

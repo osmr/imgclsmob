@@ -579,7 +579,7 @@ class ReductionCell1(nn.Module):
 class NASNetAMobile(nn.Module):
     """NASNetAMobile (4 @ 1056) """
 
-    def __init__(self, num_classes=1001, stem_filters=32, penultimate_filters=1056, filters_multiplier=2):
+    def __init__(self, num_classes=1000, stem_filters=32, penultimate_filters=1056, filters_multiplier=2):
         super(NASNetAMobile, self).__init__()
         self.num_classes = num_classes
         self.stem_filters = stem_filters
@@ -684,7 +684,6 @@ def get_nasnet(cell_repeats,
         raise ValueError("Pretrained model is not supported")
 
     net = NASNetAMobile(
-        num_classes=1000,
         **kwargs)
     return net
 

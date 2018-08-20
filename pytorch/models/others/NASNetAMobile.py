@@ -661,7 +661,7 @@ def nasnetamobile(num_classes=1001, pretrained='imagenet'):
     return model
 
 
-def oth_nasnet_a_mobile(pretrained=False):
+def oth_nasnet_a_mobile(pretrained=False, **kwargs):
     if type(pretrained) == bool:
         pretrained = 'imagenet' if pretrained else ''
     return nasnetamobile(num_classes=1000, pretrained=pretrained)

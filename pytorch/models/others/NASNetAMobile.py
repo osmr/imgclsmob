@@ -26,6 +26,8 @@ import torch.utils.model_zoo as model_zoo
 from torch.autograd import Variable
 import numpy as np
 
+__all__ = ['oth_nasnet_a_mobile']
+
 
 pretrained_settings = {
     'nasnetamobile': {
@@ -657,6 +659,12 @@ def nasnetamobile(num_classes=1001, pretrained='imagenet'):
         model.mean = settings['mean']
         model.std = settings['std']
     return model
+
+
+def oth_nasnet_a_mobile(pretrained=False):
+    if type(pretrained) == bool:
+        pretrained = 'imagenet' if pretrained else ''
+    return nasnetamobile(num_classes=1000, pretrained=pretrained)
 
 
 if __name__ == "__main__":

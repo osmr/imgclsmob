@@ -14,6 +14,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 
 #from .models.nasnet import *
+from .models.others.NASNetAMobile import *
 
 __all__ = ['get_model']
 
@@ -156,7 +157,7 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
-    # 'nasnet_a_mobile': nasnet_a_mobile,
+    'oth_nasnet_a_mobile': oth_nasnet_a_mobile,
 }
 
 

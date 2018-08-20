@@ -14,7 +14,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import SEBlock
+from .common import conv1x1, SEBlock
 
 
 class PreResConv(HybridBlock):
@@ -64,30 +64,6 @@ class PreResConv(HybridBlock):
         x_pre_activ = x
         x = self.conv(x)
         return x, x_pre_activ
-
-
-def conv1x1(in_channels,
-            out_channels,
-            strides):
-    """
-    Convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        use_bias=False,
-        in_channels=in_channels)
 
 
 def preres_conv1x1(in_channels,
@@ -1043,6 +1019,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        # print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet10 or weight_count == 5417128)
         assert (model != preresnet12 or weight_count == 5491112)
         assert (model != preresnet14 or weight_count == 5786536)
@@ -1060,16 +1037,16 @@ def _test():
         assert (model != preresnet152b or weight_count == 60185256)
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
-        assert (model != sepreresnet18 or weight_count == 11774888)  # se_resnet18_v2 -> 11774888
-        assert (model != sepreresnet34 or weight_count == 21953192)  # se_resnet34_v2 -> 21953192
-        assert (model != sepreresnet50 or weight_count == 28064424)  # se_resnet50_v2 -> 28064424
-        assert (model != sepreresnet50b or weight_count == 28064424)
-        assert (model != sepreresnet101 or weight_count == 49284776)  # se_resnet101_v2 -> 49284776
-        assert (model != sepreresnet101b or weight_count == 49284776)
-        assert (model != sepreresnet152 or weight_count == 66763432)  # se_resnet152_v2 -> 66763432
-        assert (model != sepreresnet152b or weight_count == 66763432)
-        assert (model != sepreresnet200 or weight_count == 71768744)
-        assert (model != sepreresnet200b or weight_count == 71768744)
+        assert (model != sepreresnet18 or weight_count == 11776928)
+        assert (model != sepreresnet34 or weight_count == 21957204)
+        assert (model != sepreresnet50 or weight_count == 28080472)
+        assert (model != sepreresnet50b or weight_count == 28080472)
+        assert (model != sepreresnet101 or weight_count == 49319320)
+        assert (model != sepreresnet101b or weight_count == 49319320)
+        assert (model != sepreresnet152 or weight_count == 66814296)
+        assert (model != sepreresnet152b or weight_count == 66814296)
+        assert (model != sepreresnet200 or weight_count == 71828312)
+        assert (model != sepreresnet200b or weight_count == 71828312)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

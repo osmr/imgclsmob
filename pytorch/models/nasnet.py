@@ -14,8 +14,11 @@ class MaxPoolPad(nn.Module):
 
     def __init__(self):
         super(MaxPoolPad, self).__init__()
-        self.pad = nn.ZeroPad2d((1, 0, 1, 0))
-        self.pool = nn.MaxPool2d(3, stride=2, padding=1)
+        self.pad = nn.ZeroPad2d(padding=(1, 0, 1, 0))
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
 
     def forward(self, x):
         x = self.pad(x)
@@ -46,14 +49,28 @@ class AvgPoolPad(nn.Module):
 
 class SeparableConv2d(nn.Module):
 
-    def __init__(self, in_channels, out_channels, dw_kernel, dw_stride, dw_padding, bias=False):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 dw_kernel,
+                 dw_stride,
+                 dw_padding,
+                 bias=False):
         super(SeparableConv2d, self).__init__()
-        self.depthwise_conv2d = nn.Conv2d(in_channels, in_channels, dw_kernel,
-                                          stride=dw_stride,
-                                          padding=dw_padding,
-                                          bias=bias,
-                                          groups=in_channels)
-        self.pointwise_conv2d = nn.Conv2d(in_channels, out_channels, 1, stride=1, bias=bias)
+        self.depthwise_conv2d = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=dw_kernel,
+            stride=dw_stride,
+            padding=dw_padding,
+            groups=in_channels,
+            bias=bias)
+        self.pointwise_conv2d = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=1,
+            bias=bias)
 
     def forward(self, x):
         x = self.depthwise_conv2d(x)
@@ -63,14 +80,41 @@ class SeparableConv2d(nn.Module):
 
 class BranchSeparables(nn.Module):
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, name=None, bias=False):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 name=None,
+                 bias=False):
         super(BranchSeparables, self).__init__()
         self.relu = nn.ReLU()
-        self.separable_1 = SeparableConv2d(in_channels, in_channels, kernel_size, stride, padding, bias=bias)
-        self.bn_sep_1 = nn.BatchNorm2d(in_channels, eps=0.001, momentum=0.1, affine=True)
+        self.separable_1 = SeparableConv2d(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            dw_kernel=kernel_size,
+            dw_stride=stride,
+            dw_padding=padding,
+            bias=bias)
+        self.bn_sep_1 = nn.BatchNorm2d(
+            num_features=in_channels,
+            eps=0.001,
+            momentum=0.1,
+            affine=True)
         self.relu1 = nn.ReLU()
-        self.separable_2 = SeparableConv2d(in_channels, out_channels, kernel_size, 1, padding, bias=bias)
-        self.bn_sep_2 = nn.BatchNorm2d(out_channels, eps=0.001, momentum=0.1, affine=True)
+        self.separable_2 = SeparableConv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            dw_kernel=kernel_size,
+            dw_stride=1,
+            dw_padding=padding,
+            bias=bias)
+        self.bn_sep_2 = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=0.001,
+            momentum=0.1,
+            affine=True)
         self.name = name
 
     def forward(self, x):
@@ -90,14 +134,40 @@ class BranchSeparables(nn.Module):
 
 class BranchSeparablesStem(nn.Module):
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, bias=False):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 bias=False):
         super(BranchSeparablesStem, self).__init__()
         self.relu = nn.ReLU()
-        self.separable_1 = SeparableConv2d(in_channels, out_channels, kernel_size, stride, padding, bias=bias)
-        self.bn_sep_1 = nn.BatchNorm2d(out_channels, eps=0.001, momentum=0.1, affine=True)
+        self.separable_1 = SeparableConv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            dw_kernel=kernel_size,
+            dw_stride=stride,
+            dw_padding=padding,
+            bias=bias)
+        self.bn_sep_1 = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=0.001,
+            momentum=0.1,
+            affine=True)
         self.relu1 = nn.ReLU()
-        self.separable_2 = SeparableConv2d(out_channels, out_channels, kernel_size, 1, padding, bias=bias)
-        self.bn_sep_2 = nn.BatchNorm2d(out_channels, eps=0.001, momentum=0.1, affine=True)
+        self.separable_2 = SeparableConv2d(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            dw_kernel=kernel_size,
+            dw_stride=1,
+            dw_padding=padding,
+            bias=bias)
+        self.bn_sep_2 = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=0.001,
+            momentum=0.1,
+            affine=True)
 
     def forward(self, x):
         x = self.relu(x)
@@ -111,9 +181,16 @@ class BranchSeparablesStem(nn.Module):
 
 class BranchSeparablesReduction(BranchSeparables):
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, z_padding=1, bias=False):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 z_padding=1,
+                 bias=False):
         BranchSeparables.__init__(self, in_channels, out_channels, kernel_size, stride, padding, bias)
-        self.padding = nn.ZeroPad2d((z_padding, 0, z_padding, 0))
+        self.padding = nn.ZeroPad2d(padding=(z_padding, 0, z_padding, 0))
 
     def forward(self, x):
         x = self.relu(x)
@@ -128,14 +205,25 @@ class BranchSeparablesReduction(BranchSeparables):
 
 
 class CellStem0(nn.Module):
-    def __init__(self, stem_filters, num_filters=42):
+    def __init__(self,
+                 stem_filters,
+                 num_filters=42):
         super(CellStem0, self).__init__()
         self.num_filters = num_filters
         self.stem_filters = stem_filters
         self.conv_1x1 = nn.Sequential()
         self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', nn.Conv2d(self.stem_filters, self.num_filters, 1, stride=1, bias=False))
-        self.conv_1x1.add_module('bn', nn.BatchNorm2d(self.num_filters, eps=0.001, momentum=0.1, affine=True))
+        self.conv_1x1.add_module('conv', nn.Conv2d(
+            self.stem_filters,
+            self.num_filters,
+            1,
+            stride=1,
+            bias=False))
+        self.conv_1x1.add_module('bn', nn.BatchNorm2d(
+            self.num_filters,
+            eps=0.001,
+            momentum=0.1,
+            affine=True))
 
         self.comb_iter_0_left = BranchSeparables(self.num_filters, self.num_filters, 5, 2, 2)
         self.comb_iter_0_right = BranchSeparablesStem(self.stem_filters, self.num_filters, 7, 2, 3, bias=False)

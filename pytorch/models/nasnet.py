@@ -10,6 +10,20 @@ import torch
 import torch.nn as nn
 
 
+class DoubleLinkedSequential(nn.Sequential):
+
+    def __init__(self, *args):
+        super(DoubleLinkedSequential, self).__init__(*args)
+
+    def forward(self, x, x_prev=None):
+        for module in self._modules.values():
+            if x_prev is None:
+                x_prev, x = x, module(x)
+            else:
+                x_prev, x = x, module(x, x_prev)
+        return x
+
+
 def nasnet_batch_norm(channels):
     return nn.BatchNorm2d(
         num_features=channels,
@@ -184,24 +198,54 @@ class BranchSeparables(nn.Module):
 
 
 def branch_separables_k3_s1_p1(in_channels,
-                               out_channels):
+                               out_channels,
+                               name=None):
     return BranchSeparables(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         stride=1,
         padding=1,
+        name=name,
+        bias=False)
+
+
+def branch_separables_k5_s1_p2(in_channels,
+                               out_channels,
+                               name=None):
+    return BranchSeparables(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=1,
+        padding=2,
+        name=name,
         bias=False)
 
 
 def branch_separables_k5_s2_p2(in_channels,
-                               out_channels):
+                               out_channels,
+                               name=None):
     return BranchSeparables(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=5,
         stride=2,
         padding=2,
+        name=name,
+        bias=False)
+
+
+def branch_separables_k7_s2_p3(in_channels,
+                               out_channels,
+                               name=None):
+    return BranchSeparables(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        stride=2,
+        padding=3,
+        name=name,
         bias=False)
 
 
@@ -289,6 +333,39 @@ class BranchSeparablesReduction(BranchSeparables):
         x = self.separable_2(x)
         x = self.bn_sep_2(x)
         return x
+
+
+def branch_separables_reduction_k3_s1_p1(in_channels,
+                                         out_channels):
+    return BranchSeparablesReduction(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=1,
+        padding=1,
+        bias=False)
+
+
+def branch_separables_reduction_k5_s2_p2(in_channels,
+                                         out_channels):
+    return BranchSeparablesReduction(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=2,
+        padding=2,
+        bias=False)
+
+
+def branch_separables_reduction_k7_s2_p3(in_channels,
+                                         out_channels):
+    return BranchSeparablesReduction(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        stride=2,
+        padding=3,
+        bias=False)
 
 
 class CellStem0(nn.Module):
@@ -383,21 +460,36 @@ class CellStem1(nn.Module):
 
         self.final_path_bn = nasnet_batch_norm(channels=self.num_filters)
 
-        self.comb_iter_0_left = BranchSeparables(self.num_filters, self.num_filters, 5, 2, 2, name='specific', bias=False)
-        self.comb_iter_0_right = BranchSeparables(self.num_filters, self.num_filters, 7, 2, 3, name='specific', bias=False)
+        self.comb_iter_0_left = branch_separables_k5_s2_p2(
+            in_channels=self.num_filters,
+            out_channels=self.num_filters,
+            name='specific')
+        self.comb_iter_0_right = branch_separables_k7_s2_p3(
+            in_channels=self.num_filters,
+            out_channels=self.num_filters,
+            name='specific')
 
         self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = BranchSeparables(self.num_filters, self.num_filters, 7, 2, 3, name='specific', bias=False)
+        self.comb_iter_1_right = branch_separables_k7_s2_p3(
+            in_channels=self.num_filters,
+            out_channels=self.num_filters,
+            name='specific')
 
         self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = BranchSeparables(self.num_filters, self.num_filters, 5, 2, 2, name='specific', bias=False)
+        self.comb_iter_2_right = branch_separables_k5_s2_p2(
+            in_channels=self.num_filters,
+            out_channels=self.num_filters,
+            name='specific')
 
         self.comb_iter_3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = BranchSeparables(self.num_filters, self.num_filters, 3, 1, 1, name='specific', bias=False)
+        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+            in_channels=self.num_filters,
+            out_channels=self.num_filters,
+            name='specific')
         self.comb_iter_4_right = MaxPoolPad()
 
-    def forward(self, x_conv0, x_stem_0):
+    def forward(self, x_stem_0, x_conv0):
         x_left = self.conv_1x1(x_stem_0)
 
         x_relu = self.relu(x_conv0)
@@ -436,7 +528,11 @@ class CellStem1(nn.Module):
 
 class FirstCell(nn.Module):
 
-    def __init__(self, in_channels_left, out_channels_left, in_channels_right, out_channels_right):
+    def __init__(self,
+                 in_channels_left,
+                 out_channels_left,
+                 in_channels_right,
+                 out_channels_right):
         super(FirstCell, self).__init__()
         self.conv_1x1 = nn.Sequential()
         self.conv_1x1.add_module('relu', nn.ReLU())
@@ -460,18 +556,28 @@ class FirstCell(nn.Module):
 
         self.final_path_bn = nasnet_batch_norm(channels=out_channels_left * 2)
 
-        self.comb_iter_0_left = BranchSeparables(out_channels_right, out_channels_right, 5, 1, 2, bias=False)
-        self.comb_iter_0_right = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, bias=False)
+        self.comb_iter_0_left = branch_separables_k5_s1_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+        self.comb_iter_0_right = branch_separables_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
-        self.comb_iter_1_left = BranchSeparables(out_channels_right, out_channels_right, 5, 1, 2, bias=False)
-        self.comb_iter_1_right = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, bias=False)
+        self.comb_iter_1_left = branch_separables_k5_s1_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+        self.comb_iter_1_right = branch_separables_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
         self.comb_iter_2_left = nasnet_avgpool3x3_s1()
 
         self.comb_iter_3_left = nasnet_avgpool3x3_s1()
         self.comb_iter_3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, bias=False)
+        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
     def forward(self, x, x_prev):
         x_relu = self.relu(x_prev)
@@ -527,18 +633,28 @@ class NormalCell(nn.Module):
             out_channels=out_channels_right))
         self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_0_left = BranchSeparables(out_channels_right, out_channels_right, 5, 1, 2, bias=False)
-        self.comb_iter_0_right = BranchSeparables(out_channels_left, out_channels_left, 3, 1, 1, bias=False)
+        self.comb_iter_0_left = branch_separables_k5_s1_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+        self.comb_iter_0_right = branch_separables_k3_s1_p1(
+            in_channels=out_channels_left,
+            out_channels=out_channels_left)
 
-        self.comb_iter_1_left = BranchSeparables(out_channels_left, out_channels_left, 5, 1, 2, bias=False)
-        self.comb_iter_1_right = BranchSeparables(out_channels_left, out_channels_left, 3, 1, 1, bias=False)
+        self.comb_iter_1_left = branch_separables_k5_s1_p2(
+            in_channels=out_channels_left,
+            out_channels=out_channels_left)
+        self.comb_iter_1_right = branch_separables_k3_s1_p1(
+            in_channels=out_channels_left,
+            out_channels=out_channels_left)
 
         self.comb_iter_2_left = nasnet_avgpool3x3_s1()
 
         self.comb_iter_3_left = nasnet_avgpool3x3_s1()
         self.comb_iter_3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, bias=False)
+        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
     def forward(self, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
@@ -584,18 +700,28 @@ class ReductionCell0(nn.Module):
             out_channels=out_channels_right))
         self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_0_left = BranchSeparablesReduction(out_channels_right, out_channels_right, 5, 2, 2, bias=False)
-        self.comb_iter_0_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 7, 2, 3, bias=False)
+        self.comb_iter_0_left = branch_separables_reduction_k5_s2_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+        self.comb_iter_0_right = branch_separables_reduction_k7_s2_p3(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
         self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 7, 2, 3, bias=False)
+        self.comb_iter_1_right = branch_separables_reduction_k7_s2_p3(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
         self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = BranchSeparablesReduction(out_channels_right, out_channels_right, 5, 2, 2, bias=False)
+        self.comb_iter_2_right = branch_separables_reduction_k5_s2_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
 
         self.comb_iter_3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = BranchSeparablesReduction(out_channels_right, out_channels_right, 3, 1, 1, bias=False)
+        self.comb_iter_4_left = branch_separables_reduction_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
         self.comb_iter_4_right = MaxPoolPad()
 
     def forward(self, x, x_prev):
@@ -648,18 +774,33 @@ class ReductionCell1(nn.Module):
             out_channels=out_channels_right))
         self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_0_left = BranchSeparables(out_channels_right, out_channels_right, 5, 2, 2, name='specific', bias=False)
-        self.comb_iter_0_right = BranchSeparables(out_channels_right, out_channels_right, 7, 2, 3, name='specific', bias=False)
+        self.comb_iter_0_left = branch_separables_k5_s2_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            name='specific')
+        self.comb_iter_0_right = branch_separables_k7_s2_p3(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            name='specific')
 
         self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = BranchSeparables(out_channels_right, out_channels_right, 7, 2, 3, name='specific', bias=False)
+        self.comb_iter_1_right = branch_separables_k7_s2_p3(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            name='specific')
 
         self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = BranchSeparables(out_channels_right, out_channels_right, 5, 2, 2, name='specific', bias=False)
+        self.comb_iter_2_right = branch_separables_k5_s2_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            name='specific')
 
         self.comb_iter_3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = BranchSeparables(out_channels_right, out_channels_right, 3, 1, 1, name='specific', bias=False)
+        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            name='specific')
         self.comb_iter_4_right =MaxPoolPad()
 
     def forward(self, x, x_prev):
@@ -728,87 +869,89 @@ class NASNetAMobile(nn.Module):
             in_channels=in_channels,
             out_channels=stem_filters)
 
-        self.cell_stem_0 = CellStem0(
-            stem_filters=stem_filters,
-            num_filters=filters // (filters_multiplier ** 2))
-        self.cell_stem_1 = CellStem1(
-            stem_filters=stem_filters,
-            num_filters=filters // filters_multiplier)
+        self.features = DoubleLinkedSequential()
 
-        self.cell_0 = FirstCell(
+        self.features.add_module("cell_stem_0", CellStem0(
+            stem_filters=stem_filters,
+            num_filters=filters // (filters_multiplier ** 2)))
+        self.features.add_module("cell_stem_1", CellStem1(
+            stem_filters=stem_filters,
+            num_filters=filters // filters_multiplier))
+
+        self.features.add_module("cell_0", FirstCell(
             in_channels_left=filters,
             out_channels_left=filters//2,
             in_channels_right=2*filters,
-            out_channels_right=filters)
-        self.cell_1 = NormalCell(
+            out_channels_right=filters))
+        self.features.add_module("cell_1", NormalCell(
             in_channels_left=2*filters,
             out_channels_left=filters,
             in_channels_right=6*filters,
-            out_channels_right=filters)
-        self.cell_2 = NormalCell(
+            out_channels_right=filters))
+        self.features.add_module("cell_2", NormalCell(
             in_channels_left=6*filters,
             out_channels_left=filters,
             in_channels_right=6*filters,
-            out_channels_right=filters)
-        self.cell_3 = NormalCell(
+            out_channels_right=filters))
+        self.features.add_module("cell_3", NormalCell(
             in_channels_left=6*filters,
             out_channels_left=filters,
             in_channels_right=6*filters,
-            out_channels_right=filters)
+            out_channels_right=filters))
 
-        self.reduction_cell_0 = ReductionCell0(
+        self.features.add_module("reduction_cell_0", ReductionCell0(
             in_channels_left=6*filters,
             out_channels_left=2*filters,
             in_channels_right=6*filters,
-            out_channels_right=2*filters)
+            out_channels_right=2*filters))
 
-        self.cell_6 = FirstCell(
+        self.features.add_module("cell_6", FirstCell(
             in_channels_left=6*filters,
             out_channels_left=filters,
             in_channels_right=8*filters,
-            out_channels_right=2*filters)
-        self.cell_7 = NormalCell(
+            out_channels_right=2*filters))
+        self.features.add_module("cell_7", NormalCell(
             in_channels_left=8*filters,
             out_channels_left=2*filters,
             in_channels_right=12*filters,
-            out_channels_right=2*filters)
-        self.cell_8 = NormalCell(
+            out_channels_right=2*filters))
+        self.features.add_module("cell_8", NormalCell(
             in_channels_left=12*filters,
             out_channels_left=2*filters,
             in_channels_right=12*filters,
-            out_channels_right=2*filters)
-        self.cell_9 = NormalCell(
+            out_channels_right=2*filters))
+        self.features.add_module("cell_9", NormalCell(
             in_channels_left=12*filters,
             out_channels_left=2*filters,
             in_channels_right=12*filters,
-            out_channels_right=2*filters)
+            out_channels_right=2*filters))
 
-        self.reduction_cell_1 = ReductionCell1(
+        self.features.add_module("reduction_cell_1", ReductionCell1(
             in_channels_left=12*filters,
             out_channels_left=4*filters,
             in_channels_right=12*filters,
-            out_channels_right=4*filters)
+            out_channels_right=4*filters))
 
-        self.cell_12 = FirstCell(
+        self.features.add_module("cell_12", FirstCell(
             in_channels_left=12*filters,
             out_channels_left=2*filters,
             in_channels_right=16*filters,
-            out_channels_right=4*filters)
-        self.cell_13 = NormalCell(
+            out_channels_right=4*filters))
+        self.features.add_module("cell_13", NormalCell(
             in_channels_left=16*filters,
             out_channels_left=4*filters,
             in_channels_right=24*filters,
-            out_channels_right=4*filters)
-        self.cell_14 = NormalCell(
+            out_channels_right=4*filters))
+        self.features.add_module("cell_14", NormalCell(
             in_channels_left=24*filters,
             out_channels_left=4*filters,
             in_channels_right=24*filters,
-            out_channels_right=4*filters)
-        self.cell_15 = NormalCell(
+            out_channels_right=4*filters))
+        self.features.add_module("cell_15", NormalCell(
             in_channels_left=24*filters,
             out_channels_left=4*filters,
             in_channels_right=24*filters,
-            out_channels_right=4*filters)
+            out_channels_right=4*filters))
 
         self.relu = nn.ReLU()
         self.avg_pool = nn.AvgPool2d(
@@ -820,43 +963,14 @@ class NASNetAMobile(nn.Module):
             in_features=24*filters,
             out_features=num_classes)
 
-    def features(self, input):
-        x_conv0 = self.conv0(input)
-        x_stem_0 = self.cell_stem_0(x_conv0)
-        x_stem_1 = self.cell_stem_1(x_conv0, x_stem_0)
-
-        x_cell_0 = self.cell_0(x_stem_1, x_stem_0)
-        x_cell_1 = self.cell_1(x_cell_0, x_stem_1)
-        x_cell_2 = self.cell_2(x_cell_1, x_cell_0)
-        x_cell_3 = self.cell_3(x_cell_2, x_cell_1)
-
-        x_reduction_cell_0 = self.reduction_cell_0(x_cell_3, x_cell_2)
-
-        x_cell_6 = self.cell_6(x_reduction_cell_0, x_cell_3)
-        x_cell_7 = self.cell_7(x_cell_6, x_reduction_cell_0)
-        x_cell_8 = self.cell_8(x_cell_7, x_cell_6)
-        x_cell_9 = self.cell_9(x_cell_8, x_cell_7)
-
-        x_reduction_cell_1 = self.reduction_cell_1(x_cell_9, x_cell_8)
-
-        x_cell_12 = self.cell_12(x_reduction_cell_1, x_cell_9)
-        x_cell_13 = self.cell_13(x_cell_12, x_reduction_cell_1)
-        x_cell_14 = self.cell_14(x_cell_13, x_cell_12)
-        x_cell_15 = self.cell_15(x_cell_14, x_cell_13)
-        return x_cell_15
-
-    def logits(self, features):
-        x = self.relu(features)
+    def forward(self, x):
+        x = self.conv0(x)
+        x = self.features(x)
+        x = self.relu(x)
         x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.last_linear(x)
-        x = nn.Softmax(1)(x)
-        return x
-
-    def forward(self, input):
-        x = self.features(input)
-        x = self.logits(x)
         return x
 
 

@@ -21,11 +21,11 @@ def process_with_padding(x,
     return x
 
 
-def nasnet_batch_norm(in_channels):
+def nasnet_batch_norm(channels):
     return nn.BatchNorm(
         momentum=0.1,
         epsilon=0.001,
-        in_channels=in_channels)
+        in_channels=channels)
 
 
 class MaxPoolPad(HybridBlock):
@@ -121,7 +121,7 @@ class DwsConvBlock(HybridBlock):
                 strides=strides,
                 padding=padding,
                 use_bias=use_bias)
-            self.bn = nasnet_batch_norm(in_channels=out_channels)
+            self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
@@ -249,7 +249,7 @@ class ConvBlock(HybridBlock):
                 padding=padding,
                 use_bias=use_bias,
                 in_channels=in_channels)
-            self.bn = nasnet_batch_norm(in_channels=out_channels)
+            self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
@@ -409,7 +409,7 @@ class CellStem1(HybridBlock):
                 in_channels=stem_filters,
                 out_channels=(num_filters // 2))
 
-            self.final_path_bn = nasnet_batch_norm(in_channels=num_filters)
+            self.final_path_bn = nasnet_batch_norm(channels=num_filters)
 
             self.comb_iter_0_left = BranchSeparables(
                 in_channels=num_filters,
@@ -527,7 +527,7 @@ class FirstCell(HybridBlock):
                 in_channels=in_channels_left,
                 out_channels=out_channels_left)
 
-            self.final_path_bn = nasnet_batch_norm(in_channels=(2 * out_channels_left))
+            self.final_path_bn = nasnet_batch_norm(channels=(2 * out_channels_left))
 
             self.comb_iter_0_left = BranchSeparables(
                 in_channels=out_channels_right,

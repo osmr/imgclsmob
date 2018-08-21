@@ -434,7 +434,9 @@ class CellStem0(nn.Module):
 
 class CellStem1(nn.Module):
 
-    def __init__(self, stem_filters, num_filters):
+    def __init__(self,
+                 stem_filters,
+                 num_filters):
         super(CellStem1, self).__init__()
         self.num_filters = num_filters
         self.stem_filters = stem_filters
@@ -617,7 +619,11 @@ class FirstCell(nn.Module):
 
 class NormalCell(nn.Module):
 
-    def __init__(self, in_channels_left, out_channels_left, in_channels_right, out_channels_right):
+    def __init__(self,
+                 in_channels_left,
+                 out_channels_left,
+                 in_channels_right,
+                 out_channels_right):
         super(NormalCell, self).__init__()
         self.conv_prev_1x1 = nn.Sequential()
         self.conv_prev_1x1.add_module('relu', nn.ReLU())
@@ -684,7 +690,11 @@ class NormalCell(nn.Module):
 
 class ReductionCell0(nn.Module):
 
-    def __init__(self, in_channels_left, out_channels_left, in_channels_right, out_channels_right):
+    def __init__(self,
+                 in_channels_left,
+                 out_channels_left,
+                 in_channels_right,
+                 out_channels_right):
         super(ReductionCell0, self).__init__()
         self.conv_prev_1x1 = nn.Sequential()
         self.conv_prev_1x1.add_module('relu', nn.ReLU())
@@ -877,6 +887,11 @@ class NASNetAMobile(nn.Module):
         self.features.add_module("cell_stem_1", CellStem1(
             stem_filters=stem_filters,
             num_filters=filters // filters_multiplier))
+
+        channels = [[1], [2],
+                    [2, 1], [6, 1], [6, 1], [6, 1],
+                    [6, 2], [8, 2], [12, 2], [12, 2], [12, 2],
+                    [12, 4], [16, 4], [24, 4], [24, 4], [24, 4]]
 
         self.features.add_module("cell_0", FirstCell(
             in_channels_left=filters,

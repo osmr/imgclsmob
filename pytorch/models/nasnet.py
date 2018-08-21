@@ -576,26 +576,51 @@ class ReductionCell1(nn.Module):
         return x_out
 
 
+class NASNetInitBlock(nn.Module):
+
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(NASNetInitBlock, self).__init__()
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=3,
+            padding=0,
+            stride=2,
+            bias=False)
+        self.bn = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=0.001,
+            momentum=0.1,
+            affine=True)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        return x
+
+
 class NASNetAMobile(nn.Module):
     """NASNetAMobile (4 @ 1056) """
 
-    def __init__(self, num_classes=1000, stem_filters=32, penultimate_filters=1056, filters_multiplier=2):
+    def __init__(self,
+                 penultimate_filters,
+                 in_channels=3,
+                 num_classes=1000):
         super(NASNetAMobile, self).__init__()
-        self.num_classes = num_classes
-        self.stem_filters = stem_filters
-        self.penultimate_filters = penultimate_filters
-        self.filters_multiplier = filters_multiplier
 
-        filters = self.penultimate_filters // 24
-        # 24 is default value for the architecture
+        stem_filters = 32
+        filters = penultimate_filters // 24
+        filters_multiplier = 2
 
-        self.conv0 = nn.Sequential()
-        self.conv0.add_module('conv', nn.Conv2d(in_channels=3, out_channels=self.stem_filters, kernel_size=3, padding=0, stride=2,
-                                                bias=False))
-        self.conv0.add_module('bn', nn.BatchNorm2d(self.stem_filters, eps=0.001, momentum=0.1, affine=True))
+        self.conv0 = NASNetInitBlock(
+            in_channels=in_channels,
+            out_channels=stem_filters)
 
-        self.cell_stem_0 = CellStem0(self.stem_filters, num_filters=filters // (filters_multiplier ** 2))
-        self.cell_stem_1 = CellStem1(self.stem_filters, num_filters=filters // filters_multiplier)
+        self.cell_stem_0 = CellStem0(stem_filters, num_filters=filters // (filters_multiplier ** 2))
+        self.cell_stem_1 = CellStem1(stem_filters, num_filters=filters // filters_multiplier)
 
         self.cell_0 = FirstCell(in_channels_left=filters, out_channels_left=filters//2, # 1, 0.5
                                 in_channels_right=2*filters, out_channels_right=filters) # 2, 1
@@ -631,9 +656,14 @@ class NASNetAMobile(nn.Module):
                                   in_channels_right=24*filters, out_channels_right=4*filters) # 24, 4
 
         self.relu = nn.ReLU()
-        self.avg_pool = nn.AvgPool2d(7, stride=1, padding=0)
+        self.avg_pool = nn.AvgPool2d(
+            kernel_size=7,
+            stride=1,
+            padding=0)
         self.dropout = nn.Dropout()
-        self.last_linear = nn.Linear(24*filters, self.num_classes)
+        self.last_linear = nn.Linear(
+            in_features=24*filters,
+            out_features=num_classes)
 
     def features(self, input):
         x_conv0 = self.conv0(input)
@@ -684,6 +714,7 @@ def get_nasnet(cell_repeats,
         raise ValueError("Pretrained model is not supported")
 
     net = NASNetAMobile(
+        penultimate_filters=penultimate_filters,
         **kwargs)
     return net
 

@@ -355,71 +355,6 @@ def dws_branch_k7_s2_p3(in_channels,
         stem=stem)
 
 
-class CellStem0(nn.Module):
-    def __init__(self,
-                 stem_filters,
-                 num_filters=42):
-        super(CellStem0, self).__init__()
-        self.num_filters = num_filters
-        self.stem_filters = stem_filters
-
-        self.conv_1x1 = nas_conv1x1(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters)
-
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters,
-            stem=True)
-
-        self.comb1_left = nasnet_maxpool()
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters,
-            stem=True)
-
-        self.comb2_left = nasnet_avgpool3x3_s2()
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters,
-            stem=True)
-
-        self.comb3_right = nasnet_avgpool3x3_s1()
-
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters)
-        self.comb4_right = nasnet_maxpool()
-
-    def forward(self, x):
-        x1 = self.conv_1x1(x)
-
-        x_comb0_left = self.comb0_left(x1)
-        x_comb0_right = self.comb0_right(x)
-        x_comb0 = x_comb0_left + x_comb0_right
-
-        x_comb1_left = self.comb1_left(x1)
-        x_comb1_right = self.comb1_right(x)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x1)
-        x_comb2_right = self.comb2_right(x)
-        x_comb2 = x_comb2_left + x_comb2_right
-
-        x_comb3_right = self.comb3_right(x_comb0)
-        x_comb3 = x_comb3_right + x_comb1
-
-        x_comb4_left = self.comb4_left(x_comb0)
-        x_comb4_right = self.comb4_right(x1)
-        x_comb4 = x_comb4_left + x_comb4_right
-
-        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
-
-
 class NasPathBranch(nn.Module):
     """
     NASNet specific `path-branch` block.
@@ -490,90 +425,121 @@ class NasPathBlock(nn.Module):
         return x
 
 
+class CellStem0(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(CellStem0, self).__init__()
+        mid_channels = out_channels // 4
+
+        self.conv_1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+
+        self.comb0_left = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb0_right = dws_branch_k7_s2_p3(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
+
+        self.comb1_left = nasnet_maxpool()
+        self.comb1_right = dws_branch_k7_s2_p3(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
+
+        self.comb2_left = nasnet_avgpool3x3_s2()
+        self.comb2_right = dws_branch_k5_s2_p2(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
+
+        self.comb3_right = nasnet_avgpool3x3_s1()
+
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb4_right = nasnet_maxpool()
+
+    def forward(self, x):
+        x1 = self.conv_1x1(x)
+
+        x_comb0_left = self.comb0_left(x1)
+        x_comb0_right = self.comb0_right(x)
+        x_comb0 = x_comb0_left + x_comb0_right
+
+        x_comb1_left = self.comb1_left(x1)
+        x_comb1_right = self.comb1_right(x)
+        x_comb1 = x_comb1_left + x_comb1_right
+
+        x_comb2_left = self.comb2_left(x1)
+        x_comb2_right = self.comb2_right(x)
+        x_comb2 = x_comb2_left + x_comb2_right
+
+        x_comb3_right = self.comb3_right(x_comb0)
+        x_comb3 = x_comb3_right + x_comb1
+
+        x_comb4_left = self.comb4_left(x_comb0)
+        x_comb4_right = self.comb4_right(x1)
+        x_comb4 = x_comb4_left + x_comb4_right
+
+        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
+        return x_out
+
+
 class CellStem1(nn.Module):
 
     def __init__(self,
-                 stem_filters,
-                 num_filters):
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
         super(CellStem1, self).__init__()
-        self.num_filters = num_filters
-        self.stem_filters = stem_filters
+        mid_channels = out_channels // 4
 
         self.conv_1x1 = nas_conv1x1(
-            in_channels=2*self.num_filters,
-            out_channels=self.num_filters)
-
+            in_channels=in_channels,
+            out_channels=mid_channels)
         self.path = NasPathBlock(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters)
-        # self.relu = nn.ReLU()
-        #
-        # self.path_1 = NasPathBranch(
-        #     in_channels=self.stem_filters,
-        #     out_channels=self.num_filters//2)
-        # # self.path_1 = nn.Sequential()
-        # # self.path_1.add_module('avgpool', nasnet_avgpool1x1_s2())
-        # # self.path_1.add_module('conv', conv1x1(
-        # #     in_channels=self.stem_filters,
-        # #     out_channels=self.num_filters//2))
-        #
-        # self.path_2 = NasPathBranch(
-        #     in_channels=self.stem_filters,
-        #     out_channels=self.num_filters//2,
-        #     specific=True)
-        # # self.path_2 = nn.ModuleList()
-        # # self.path_2.add_module('pad', nn.ZeroPad2d((0, 1, 0, 1)))
-        # # self.path_2.add_module('avgpool', nasnet_avgpool1x1_s2())
-        # # self.path_2.add_module('conv', conv1x1(
-        # #     in_channels=self.stem_filters,
-        # #     out_channels=self.num_filters//2))
-        #
-        # self.final_path_bn = nasnet_batch_norm(channels=self.num_filters)
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
 
         self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb1_left = MaxPoolPad()
         self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb2_left = AvgPoolPad()
         self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=self.num_filters,
-            out_channels=self.num_filters,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb4_right = MaxPoolPad()
 
-    def forward(self, x_stem_0, x_conv0):
-        x_left = self.conv_1x1(x_stem_0)
+    def forward(self, x, x_prev):
+        # x == x_stem_0
+        # x_prev == x_conv0
 
-        # x_relu = self.relu(x_conv0)
-        # # path 1
-        # x_path1 = self.path_1(x_relu)
-        # # path 2
-        # x_path2 = self.path_2(x_relu)
-        # # x_path2 = self.path_2.pad(x_relu)
-        # # x_path2 = x_path2[:, :, 1:, 1:]
-        # # x_path2 = self.path_2.avgpool(x_path2)
-        # # x_path2 = self.path_2.conv(x_path2)
-        # # final path
-        # x_right = self.final_path_bn(torch.cat([x_path1, x_path2], 1))
-        x_right = self.path(x_conv0)
+        x_left = self.conv_1x1(x)
+        x_right = self.path(x_prev)
 
         x_comb0_left = self.comb0_left(x_left)
         x_comb0_right = self.comb0_right(x_right)
@@ -601,44 +567,33 @@ class CellStem1(nn.Module):
 class FirstCell(nn.Module):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right):
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
         super(FirstCell, self).__init__()
+        mid_channels = out_channels // 6
 
         self.conv_1x1 = nas_conv1x1(
-            in_channels=in_channels_right,
-            out_channels=out_channels_right)
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-        self.relu = nn.ReLU()
-        self.path_1 = nn.Sequential()
-        self.path_1.add_module('avgpool', nasnet_avgpool1x1_s2())
-        self.path_1.add_module('conv', conv1x1(
-            in_channels=in_channels_left,
-            out_channels=out_channels_left))
-        self.path_2 = nn.ModuleList()
-        self.path_2.add_module('pad', nn.ZeroPad2d((0, 1, 0, 1)))
-        self.path_2.add_module('avgpool', nasnet_avgpool1x1_s2())
-        self.path_2.add_module('conv', conv1x1(
-            in_channels=in_channels_left,
-            out_channels=out_channels_left))
-
-        self.final_path_bn = nasnet_batch_norm(channels=out_channels_left * 2)
+        self.path = NasPathBlock(
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
 
         self.comb0_left = dws_branch_k5_s1_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
         self.comb0_right = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
         self.comb1_left = dws_branch_k5_s1_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
         self.comb1_right = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
         self.comb2_left = nasnet_avgpool3x3_s1()
 
@@ -646,21 +601,11 @@ class FirstCell(nn.Module):
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
     def forward(self, x, x_prev):
-        x_relu = self.relu(x_prev)
-        # path 1
-        x_path1 = self.path_1(x_relu)
-        # path 2
-        x_path2 = self.path_2.pad(x_relu)
-        x_path2 = x_path2[:, :, 1:, 1:]
-        x_path2 = self.path_2.avgpool(x_path2)
-        x_path2 = self.path_2.conv(x_path2)
-        # final path
-        x_left = self.final_path_bn(torch.cat([x_path1, x_path2], 1))
-
+        x_left = self.path(x_prev)
         x_right = self.conv_1x1(x)
 
         x_comb0_left = self.comb0_left(x_right)
@@ -688,45 +633,32 @@ class FirstCell(nn.Module):
 class NormalCell(nn.Module):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right):
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
         super(NormalCell, self).__init__()
+        mid_channels = out_channels // 6
 
         self.conv_prev_1x1 = nas_conv1x1(
-            in_channels=in_channels_left,
-            out_channels=out_channels_left)
-        # self.conv_prev_1x1 = nn.Sequential()
-        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        # self.conv_prev_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_left,
-        #     out_channels=out_channels_left))
-        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
-
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
         self.conv_1x1 = nas_conv1x1(
-            in_channels=in_channels_right,
-            out_channels=out_channels_right)
-        # self.conv_1x1 = nn.Sequential()
-        # self.conv_1x1.add_module('relu', nn.ReLU())
-        # self.conv_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_right,
-        #     out_channels=out_channels_right))
-        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
         self.comb0_left = dws_branch_k5_s1_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
         self.comb0_right = dws_branch_k3_s1_p1(
-            in_channels=out_channels_left,
-            out_channels=out_channels_left)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
         self.comb1_left = dws_branch_k5_s1_p2(
-            in_channels=out_channels_left,
-            out_channels=out_channels_left)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
         self.comb1_right = dws_branch_k3_s1_p1(
-            in_channels=out_channels_left,
-            out_channels=out_channels_left)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
         self.comb2_left = nasnet_avgpool3x3_s1()
 
@@ -734,8 +666,8 @@ class NormalCell(nn.Module):
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
     def forward(self, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
@@ -766,58 +698,45 @@ class NormalCell(nn.Module):
 class ReductionCell0(nn.Module):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right):
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
         super(ReductionCell0, self).__init__()
+        mid_channels = out_channels // 4
 
         self.conv_prev_1x1 = nas_conv1x1(
-            in_channels=in_channels_left,
-            out_channels=out_channels_left)
-        # self.conv_prev_1x1 = nn.Sequential()
-        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        # self.conv_prev_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_left,
-        #     out_channels=out_channels_left))
-        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
-
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
         self.conv_1x1 = nas_conv1x1(
-            in_channels=in_channels_right,
-            out_channels=out_channels_right)
-        # self.conv_1x1 = nn.Sequential()
-        # self.conv_1x1.add_module('relu', nn.ReLU())
-        # self.conv_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_right,
-        #     out_channels=out_channels_right))
-        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
         self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb1_left = MaxPoolPad()
         self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb2_left = AvgPoolPad()
         self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb4_right = MaxPoolPad()
 
@@ -851,58 +770,45 @@ class ReductionCell0(nn.Module):
 class ReductionCell1(nn.Module):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right):
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
         super(ReductionCell1, self).__init__()
+        mid_channels = out_channels // 4
 
         self.conv_prev_1x1 = nas_conv1x1(
-            in_channels=in_channels_left,
-            out_channels=out_channels_left)
-        # self.conv_prev_1x1 = nn.Sequential()
-        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        # self.conv_prev_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_left,
-        #     out_channels=out_channels_left))
-        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
-
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
         self.conv_1x1 = nas_conv1x1(
-            in_channels=in_channels_right,
-            out_channels=out_channels_right)
-        # self.conv_1x1 = nn.Sequential()
-        # self.conv_1x1.add_module('relu', nn.ReLU())
-        # self.conv_1x1.add_module('conv', conv1x1(
-        #     in_channels=in_channels_right,
-        #     out_channels=out_channels_right))
-        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
         self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb1_left = MaxPoolPad()
         self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb2_left = AvgPoolPad()
         self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
 
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             specific=True)
         self.comb4_right =MaxPoolPad()
 
@@ -964,108 +870,146 @@ class NASNetAMobile(nn.Module):
                  in_channels=3,
                  num_classes=1000):
         super(NASNetAMobile, self).__init__()
-
-        #stem_filters = 32
         filters = penultimate_filters // 24
-        filters_multiplier = 2
 
         self.init_block = NASNetInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels)
         in_channels = init_block_channels
 
+        channels = [[1, 2],
+                    [6, 6, 6, 6],
+                    [8, 12, 12, 12, 12],
+                    [16, 24, 24, 24, 24]]
+
         self.features = DoubleLinkedSequential()
 
-        #in_channels = init_block_channels
-        #prev_in_channels = None
+        out_channels = filters
         self.features.add_module("cell_stem_0", CellStem0(
-            stem_filters=in_channels,
-            num_filters=filters // (filters_multiplier ** 2)))
+            in_channels=in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 2 * filters
         self.features.add_module("cell_stem_1", CellStem1(
-            stem_filters=in_channels,
-            num_filters=filters // filters_multiplier))
-        #in_channels = init_block_channels
-        #prev_in_channels = None
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
-        channels = [[1], [2],
-                    [2, 1], [6, 1], [6, 1], [6, 1],
-                    [6, 2], [8, 2], [12, 2], [12, 2], [12, 2],
-                    [12, 4], [16, 4], [24, 4], [24, 4], [24, 4]]
-
+        out_channels = 6 * filters
         self.features.add_module("cell_0", FirstCell(
-            in_channels_left=filters,
-            out_channels_left=filters//2,
-            in_channels_right=2*filters,
-            out_channels_right=filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 6 * filters
         self.features.add_module("cell_1", NormalCell(
-            in_channels_left=2*filters,
-            out_channels_left=filters,
-            in_channels_right=6*filters,
-            out_channels_right=filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 6 * filters
         self.features.add_module("cell_2", NormalCell(
-            in_channels_left=6*filters,
-            out_channels_left=filters,
-            in_channels_right=6*filters,
-            out_channels_right=filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 6 * filters
         self.features.add_module("cell_3", NormalCell(
-            in_channels_left=6*filters,
-            out_channels_left=filters,
-            in_channels_right=6*filters,
-            out_channels_right=filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
+        out_channels = 8 * filters
         self.features.add_module("reduction_cell_0", ReductionCell0(
-            in_channels_left=6*filters,
-            out_channels_left=2*filters,
-            in_channels_right=6*filters,
-            out_channels_right=2*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
+        out_channels = 12 * filters
         self.features.add_module("cell_6", FirstCell(
-            in_channels_left=6*filters,
-            out_channels_left=filters,
-            in_channels_right=8*filters,
-            out_channels_right=2*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 12 * filters
         self.features.add_module("cell_7", NormalCell(
-            in_channels_left=8*filters,
-            out_channels_left=2*filters,
-            in_channels_right=12*filters,
-            out_channels_right=2*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 12 * filters
         self.features.add_module("cell_8", NormalCell(
-            in_channels_left=12*filters,
-            out_channels_left=2*filters,
-            in_channels_right=12*filters,
-            out_channels_right=2*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 12 * filters
         self.features.add_module("cell_9", NormalCell(
-            in_channels_left=12*filters,
-            out_channels_left=2*filters,
-            in_channels_right=12*filters,
-            out_channels_right=2*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
+        out_channels = 16 * filters
         self.features.add_module("reduction_cell_1", ReductionCell1(
-            in_channels_left=12*filters,
-            out_channels_left=4*filters,
-            in_channels_right=12*filters,
-            out_channels_right=4*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
+        out_channels = 24 * filters
         self.features.add_module("cell_12", FirstCell(
-            in_channels_left=12*filters,
-            out_channels_left=2*filters,
-            in_channels_right=16*filters,
-            out_channels_right=4*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 24 * filters
         self.features.add_module("cell_13", NormalCell(
-            in_channels_left=16*filters,
-            out_channels_left=4*filters,
-            in_channels_right=24*filters,
-            out_channels_right=4*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 24 * filters
         self.features.add_module("cell_14", NormalCell(
-            in_channels_left=24*filters,
-            out_channels_left=4*filters,
-            in_channels_right=24*filters,
-            out_channels_right=4*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
+
+        out_channels = 24 * filters
         self.features.add_module("cell_15", NormalCell(
-            in_channels_left=24*filters,
-            out_channels_left=4*filters,
-            in_channels_right=24*filters,
-            out_channels_right=4*filters))
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels))
+        prev_in_channels = in_channels
+        in_channels = out_channels
 
         self.relu = nn.ReLU()
         self.avg_pool = nn.AvgPool2d(

@@ -122,134 +122,154 @@ class AvgPoolPad(nn.Module):
         return x
 
 
-class SeparableConv2d(nn.Module):
+class NasConv(nn.Module):
+    """
+    NASNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 groups):
+        super(NasConv, self).__init__()
+        self.activ = nn.ReLU()
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            groups=groups,
+            bias=False)
+        self.bn = nasnet_batch_norm(channels=out_channels)
+
+    def forward(self, x):
+        x = self.activ(x)
+        x = self.conv(x)
+        x = self.bn(x)
+        return x
+
+
+def nas_conv1x1(in_channels,
+                out_channels):
+    """
+    1x1 version of the NASNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    activate : bool
+        Whether activate the convolution block.
+    """
+    return NasConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=1,
+        padding=0,
+        groups=1)
+
+
+class DwsConv(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dw_kernel,
-                 dw_stride,
-                 dw_padding,
+                 kernel_size,
+                 stride,
+                 padding,
                  bias=False):
-        super(SeparableConv2d, self).__init__()
-        self.depthwise_conv2d = nn.Conv2d(
+        super(DwsConv, self).__init__()
+        self.dw_conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=in_channels,
-            kernel_size=dw_kernel,
-            stride=dw_stride,
-            padding=dw_padding,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
             groups=in_channels,
             bias=bias)
-        self.pointwise_conv2d = conv1x1(
+        self.pw_conv = conv1x1(
             in_channels=in_channels,
             out_channels=out_channels,
             bias=bias)
 
     def forward(self, x):
-        x = self.depthwise_conv2d(x)
-        x = self.pointwise_conv2d(x)
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
         return x
 
 
-class BranchSeparables(nn.Module):
+class NasDwsConv(nn.Module):
+    """
+    NASNet specific DWS convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride,
                  padding,
-                 name=None,
-                 bias=False):
-        super(BranchSeparables, self).__init__()
-        self.relu = nn.ReLU()
-        self.separable_1 = SeparableConv2d(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            dw_kernel=kernel_size,
-            dw_stride=stride,
-            dw_padding=padding,
-            bias=bias)
-        self.bn_sep_1 = nasnet_batch_norm(channels=in_channels)
-        self.relu1 = nn.ReLU()
-        self.separable_2 = SeparableConv2d(
+                 specific=False):
+        super(NasDwsConv, self).__init__()
+        self.specific = specific
+
+        self.activ = nn.ReLU()
+        self.conv = DwsConv(
             in_channels=in_channels,
             out_channels=out_channels,
-            dw_kernel=kernel_size,
-            dw_stride=1,
-            dw_padding=padding,
-            bias=bias)
-        self.bn_sep_2 = nasnet_batch_norm(channels=out_channels)
-        self.name = name
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            bias=False)
+        self.bn = nasnet_batch_norm(channels=out_channels)
+        if self.specific:
+            self.padding = nn.ZeroPad2d(padding=(1, 0, 1, 0))
 
     def forward(self, x):
-        x = self.relu(x)
-        if self.name == 'specific':
-            x = nn.ZeroPad2d((1, 0, 1, 0))(x)
-        x = self.separable_1(x)
-        if self.name == 'specific':
+        x = self.activ(x)
+        if self.specific:
+            x = self.padding(x)
+        x = self.conv(x)
+        if self.specific:
             x = x[:, :, 1:, 1:].contiguous()
-
-        x = self.bn_sep_1(x)
-        x = self.relu1(x)
-        x = self.separable_2(x)
-        x = self.bn_sep_2(x)
+        x = self.bn(x)
         return x
 
 
-def branch_separables_k3_s1_p1(in_channels,
-                               out_channels,
-                               name=None):
-    return BranchSeparables(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=1,
-        padding=1,
-        name=name,
-        bias=False)
-
-
-def branch_separables_k5_s1_p2(in_channels,
-                               out_channels,
-                               name=None):
-    return BranchSeparables(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=5,
-        stride=1,
-        padding=2,
-        name=name,
-        bias=False)
-
-
-def branch_separables_k5_s2_p2(in_channels,
-                               out_channels,
-                               name=None):
-    return BranchSeparables(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=5,
-        stride=2,
-        padding=2,
-        name=name,
-        bias=False)
-
-
-def branch_separables_k7_s2_p3(in_channels,
-                               out_channels,
-                               name=None):
-    return BranchSeparables(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=7,
-        stride=2,
-        padding=3,
-        name=name,
-        bias=False)
-
-
-class BranchSeparablesStem(nn.Module):
+class DwsBranch(nn.Module):
 
     def __init__(self,
                  in_channels,
@@ -257,115 +277,82 @@ class BranchSeparablesStem(nn.Module):
                  kernel_size,
                  stride,
                  padding,
-                 bias=False):
-        super(BranchSeparablesStem, self).__init__()
-        self.relu = nn.ReLU()
-        self.separable_1 = SeparableConv2d(
+                 specific=False,
+                 stem=False):
+        super(DwsBranch, self).__init__()
+        assert (not stem) or (not specific)
+        mid_channels = out_channels if stem else in_channels
+
+        self.conv1 = NasDwsConv(
             in_channels=in_channels,
+            out_channels=mid_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            specific=specific)
+        self.conv2 = NasDwsConv(
+            in_channels=mid_channels,
             out_channels=out_channels,
-            dw_kernel=kernel_size,
-            dw_stride=stride,
-            dw_padding=padding,
-            bias=bias)
-        self.bn_sep_1 = nasnet_batch_norm(channels=out_channels)
-        self.relu1 = nn.ReLU()
-        self.separable_2 = SeparableConv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            dw_kernel=kernel_size,
-            dw_stride=1,
-            dw_padding=padding,
-            bias=bias)
-        self.bn_sep_2 = nasnet_batch_norm(channels=out_channels)
+            kernel_size=kernel_size,
+            stride=1,
+            padding=padding)
 
     def forward(self, x):
-        x = self.relu(x)
-        x = self.separable_1(x)
-        x = self.bn_sep_1(x)
-        x = self.relu1(x)
-        x = self.separable_2(x)
-        x = self.bn_sep_2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         return x
 
 
-def branch_separables_stem_k5_s2_p2(in_channels,
-                                    out_channels):
-    return BranchSeparablesStem(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=5,
-        stride=2,
-        padding=2,
-        bias=False)
-
-
-def branch_separables_stem_k7_s2_p3(in_channels,
-                                    out_channels):
-    return BranchSeparablesStem(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=7,
-        stride=2,
-        padding=3,
-        bias=False)
-
-
-class BranchSeparablesReduction(BranchSeparables):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 z_padding=1,
-                 bias=False):
-        BranchSeparables.__init__(self, in_channels, out_channels, kernel_size, stride, padding, bias)
-        self.padding = nn.ZeroPad2d(padding=(z_padding, 0, z_padding, 0))
-
-    def forward(self, x):
-        x = self.relu(x)
-        x = self.padding(x)
-        x = self.separable_1(x)
-        x = x[:, :, 1:, 1:].contiguous()
-        x = self.bn_sep_1(x)
-        x = self.relu1(x)
-        x = self.separable_2(x)
-        x = self.bn_sep_2(x)
-        return x
-
-
-def branch_separables_reduction_k3_s1_p1(in_channels,
-                                         out_channels):
-    return BranchSeparablesReduction(
+def dws_branch_k3_s1_p1(in_channels,
+                        out_channels,
+                        specific=False):
+    return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         stride=1,
         padding=1,
-        bias=False)
+        specific=specific)
 
 
-def branch_separables_reduction_k5_s2_p2(in_channels,
-                                         out_channels):
-    return BranchSeparablesReduction(
+def dws_branch_k5_s1_p2(in_channels,
+                        out_channels,
+                        specific=False):
+    return DwsBranch(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=1,
+        padding=2,
+        specific=specific)
+
+
+def dws_branch_k5_s2_p2(in_channels,
+                        out_channels,
+                        specific=False,
+                        stem=False):
+    return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=5,
         stride=2,
         padding=2,
-        bias=False)
+        specific=specific,
+        stem=stem)
 
 
-def branch_separables_reduction_k7_s2_p3(in_channels,
-                                         out_channels):
-    return BranchSeparablesReduction(
+def dws_branch_k7_s2_p3(in_channels,
+                        out_channels,
+                        specific=False,
+                        stem=False):
+    return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=7,
         stride=2,
         padding=3,
-        bias=False)
+        specific=specific,
+        stem=stem)
 
 
 class CellStem0(nn.Module):
@@ -375,61 +362,132 @@ class CellStem0(nn.Module):
         super(CellStem0, self).__init__()
         self.num_filters = num_filters
         self.stem_filters = stem_filters
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=self.num_filters))
 
-        self.comb_iter_0_left = branch_separables_k5_s2_p2(
+        self.conv_1x1 = nas_conv1x1(
+            in_channels=self.stem_filters,
+            out_channels=self.num_filters)
+
+        self.comb0_left = dws_branch_k5_s2_p2(
             in_channels=self.num_filters,
             out_channels=self.num_filters)
-        self.comb_iter_0_right = branch_separables_stem_k7_s2_p3(
+        self.comb0_right = dws_branch_k7_s2_p3(
             in_channels=self.stem_filters,
-            out_channels=self.num_filters)
+            out_channels=self.num_filters,
+            stem=True)
 
-        self.comb_iter_1_left = nasnet_maxpool()
-        self.comb_iter_1_right = branch_separables_stem_k7_s2_p3(
+        self.comb1_left = nasnet_maxpool()
+        self.comb1_right = dws_branch_k7_s2_p3(
             in_channels=self.stem_filters,
-            out_channels=self.num_filters)
+            out_channels=self.num_filters,
+            stem=True)
 
-        self.comb_iter_2_left = nasnet_avgpool3x3_s2()
-        self.comb_iter_2_right = branch_separables_stem_k5_s2_p2(
+        self.comb2_left = nasnet_avgpool3x3_s2()
+        self.comb2_right = dws_branch_k5_s2_p2(
             in_channels=self.stem_filters,
-            out_channels=self.num_filters)
+            out_channels=self.num_filters,
+            stem=True)
 
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+        self.comb4_left = dws_branch_k3_s1_p1(
             in_channels=self.num_filters,
             out_channels=self.num_filters)
-        self.comb_iter_4_right = nasnet_maxpool()
+        self.comb4_right = nasnet_maxpool()
 
     def forward(self, x):
         x1 = self.conv_1x1(x)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x1)
-        x_comb_iter_0_right = self.comb_iter_0_right(x)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x1)
+        x_comb0_right = self.comb0_right(x)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x1)
-        x_comb_iter_1_right = self.comb_iter_1_right(x)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x1)
+        x_comb1_right = self.comb1_right(x)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x1)
-        x_comb_iter_2_right = self.comb_iter_2_right(x)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
+        x_comb2_left = self.comb2_left(x1)
+        x_comb2_right = self.comb2_right(x)
+        x_comb2 = x_comb2_left + x_comb2_right
 
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
+        x_comb3_right = self.comb3_right(x_comb0)
+        x_comb3 = x_comb3_right + x_comb1
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x1)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
+        x_comb4_left = self.comb4_left(x_comb0)
+        x_comb4_right = self.comb4_right(x1)
+        x_comb4 = x_comb4_left + x_comb4_right
 
-        x_out = torch.cat([x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
+
+
+class NasPathBranch(nn.Module):
+    """
+    NASNet specific `path-branch` block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 specific=False):
+        super(NasPathBranch, self).__init__()
+        self.specific = specific
+
+        self.avgpool = nasnet_avgpool1x1_s2()
+        self.conv = conv1x1(
+            in_channels=in_channels,
+            out_channels=out_channels)
+        if self.specific:
+            self.padding = nn.ZeroPad2d(padding=(0, 1, 0, 1))
+
+    def forward(self, x):
+        if self.specific:
+            x = self.padding(x)
+            x = x[:, :, 1:, 1:].contiguous()
+        x = self.avgpool(x)
+        x = self.conv(x)
+        return x
+
+
+class NasPathBlock(nn.Module):
+    """
+    NASNet specific `path-branch` block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(NasPathBlock, self).__init__()
+        mid_channels = out_channels // 2
+
+        self.relu = nn.ReLU()
+        self.path1 = NasPathBranch(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.path2 = NasPathBranch(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            specific=True)
+        self.bn = nasnet_batch_norm(channels=out_channels)
+
+    def forward(self, x):
+        x = self.relu(x)
+        x1 = self.path1(x)
+        x2 = self.path2(x)
+        x = torch.cat([x1, x2], 1)
+        x = self.bn(x)
+        return x
 
 
 class CellStem1(nn.Module):
@@ -440,91 +498,103 @@ class CellStem1(nn.Module):
         super(CellStem1, self).__init__()
         self.num_filters = num_filters
         self.stem_filters = stem_filters
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
+
+        self.conv_1x1 = nas_conv1x1(
             in_channels=2*self.num_filters,
-            out_channels=self.num_filters))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=self.num_filters))
+            out_channels=self.num_filters)
 
-        self.relu = nn.ReLU()
-        self.path_1 = nn.Sequential()
-        self.path_1.add_module('avgpool', nasnet_avgpool1x1_s2())
-        self.path_1.add_module('conv', conv1x1(
+        self.path = NasPathBlock(
             in_channels=self.stem_filters,
-            out_channels=self.num_filters//2))
-        self.path_2 = nn.ModuleList()
-        self.path_2.add_module('pad', nn.ZeroPad2d((0, 1, 0, 1)))
-        self.path_2.add_module('avgpool', nasnet_avgpool1x1_s2())
-        self.path_2.add_module('conv', conv1x1(
-            in_channels=self.stem_filters,
-            out_channels=self.num_filters//2))
+            out_channels=self.num_filters)
+        # self.relu = nn.ReLU()
+        #
+        # self.path_1 = NasPathBranch(
+        #     in_channels=self.stem_filters,
+        #     out_channels=self.num_filters//2)
+        # # self.path_1 = nn.Sequential()
+        # # self.path_1.add_module('avgpool', nasnet_avgpool1x1_s2())
+        # # self.path_1.add_module('conv', conv1x1(
+        # #     in_channels=self.stem_filters,
+        # #     out_channels=self.num_filters//2))
+        #
+        # self.path_2 = NasPathBranch(
+        #     in_channels=self.stem_filters,
+        #     out_channels=self.num_filters//2,
+        #     specific=True)
+        # # self.path_2 = nn.ModuleList()
+        # # self.path_2.add_module('pad', nn.ZeroPad2d((0, 1, 0, 1)))
+        # # self.path_2.add_module('avgpool', nasnet_avgpool1x1_s2())
+        # # self.path_2.add_module('conv', conv1x1(
+        # #     in_channels=self.stem_filters,
+        # #     out_channels=self.num_filters//2))
+        #
+        # self.final_path_bn = nasnet_batch_norm(channels=self.num_filters)
 
-        self.final_path_bn = nasnet_batch_norm(channels=self.num_filters)
-
-        self.comb_iter_0_left = branch_separables_k5_s2_p2(
+        self.comb0_left = dws_branch_k5_s2_p2(
             in_channels=self.num_filters,
             out_channels=self.num_filters,
-            name='specific')
-        self.comb_iter_0_right = branch_separables_k7_s2_p3(
+            specific=True)
+        self.comb0_right = dws_branch_k7_s2_p3(
             in_channels=self.num_filters,
             out_channels=self.num_filters,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = branch_separables_k7_s2_p3(
+        self.comb1_left = MaxPoolPad()
+        self.comb1_right = dws_branch_k7_s2_p3(
             in_channels=self.num_filters,
             out_channels=self.num_filters,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = branch_separables_k5_s2_p2(
+        self.comb2_left = AvgPoolPad()
+        self.comb2_right = dws_branch_k5_s2_p2(
             in_channels=self.num_filters,
             out_channels=self.num_filters,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+        self.comb4_left = dws_branch_k3_s1_p1(
             in_channels=self.num_filters,
             out_channels=self.num_filters,
-            name='specific')
-        self.comb_iter_4_right = MaxPoolPad()
+            specific=True)
+        self.comb4_right = MaxPoolPad()
 
     def forward(self, x_stem_0, x_conv0):
         x_left = self.conv_1x1(x_stem_0)
 
-        x_relu = self.relu(x_conv0)
-        # path 1
-        x_path1 = self.path_1(x_relu)
-        # path 2
-        x_path2 = self.path_2.pad(x_relu)
-        x_path2 = x_path2[:, :, 1:, 1:]
-        x_path2 = self.path_2.avgpool(x_path2)
-        x_path2 = self.path_2.conv(x_path2)
-        # final path
-        x_right = self.final_path_bn(torch.cat([x_path1, x_path2], 1))
+        # x_relu = self.relu(x_conv0)
+        # # path 1
+        # x_path1 = self.path_1(x_relu)
+        # # path 2
+        # x_path2 = self.path_2(x_relu)
+        # # x_path2 = self.path_2.pad(x_relu)
+        # # x_path2 = x_path2[:, :, 1:, 1:]
+        # # x_path2 = self.path_2.avgpool(x_path2)
+        # # x_path2 = self.path_2.conv(x_path2)
+        # # final path
+        # x_right = self.final_path_bn(torch.cat([x_path1, x_path2], 1))
+        x_right = self.path(x_conv0)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_left)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_right)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x_left)
+        x_comb0_right = self.comb0_right(x_right)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_right)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x_left)
+        x_comb1_right = self.comb1_right(x_right)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x_left)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
+        x_comb2_left = self.comb2_left(x_left)
+        x_comb2_right = self.comb2_right(x_right)
+        x_comb2 = x_comb2_left + x_comb2_right
 
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
+        x_comb3_right = self.comb3_right(x_comb0)
+        x_comb3 = x_comb3_right + x_comb1
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_left)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
+        x_comb4_left = self.comb4_left(x_comb0)
+        x_comb4_right = self.comb4_right(x_left)
+        x_comb4 = x_comb4_left + x_comb4_right
 
-        x_out = torch.cat([x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
 
 
@@ -536,12 +606,10 @@ class FirstCell(nn.Module):
                  in_channels_right,
                  out_channels_right):
         super(FirstCell, self).__init__()
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
+
+        self.conv_1x1 = nas_conv1x1(
             in_channels=in_channels_right,
-            out_channels=out_channels_right))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            out_channels=out_channels_right)
 
         self.relu = nn.ReLU()
         self.path_1 = nn.Sequential()
@@ -558,26 +626,26 @@ class FirstCell(nn.Module):
 
         self.final_path_bn = nasnet_batch_norm(channels=out_channels_left * 2)
 
-        self.comb_iter_0_left = branch_separables_k5_s1_p2(
+        self.comb0_left = dws_branch_k5_s1_p2(
             in_channels=out_channels_right,
             out_channels=out_channels_right)
-        self.comb_iter_0_right = branch_separables_k3_s1_p1(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
-
-        self.comb_iter_1_left = branch_separables_k5_s1_p2(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
-        self.comb_iter_1_right = branch_separables_k3_s1_p1(
+        self.comb0_right = dws_branch_k3_s1_p1(
             in_channels=out_channels_right,
             out_channels=out_channels_right)
 
-        self.comb_iter_2_left = nasnet_avgpool3x3_s1()
+        self.comb1_left = dws_branch_k5_s1_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+        self.comb1_right = dws_branch_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right)
+
+        self.comb2_left = nasnet_avgpool3x3_s1()
 
         self.comb_iter_3_left = nasnet_avgpool3x3_s1()
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+        self.comb4_left = dws_branch_k3_s1_p1(
             in_channels=out_channels_right,
             out_channels=out_channels_right)
 
@@ -595,25 +663,25 @@ class FirstCell(nn.Module):
 
         x_right = self.conv_1x1(x)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x_right)
+        x_comb0_right = self.comb0_right(x_left)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x_left)
+        x_comb1_right = self.comb1_right(x_left)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_left
+        x_comb2_left = self.comb2_left(x_right)
+        x_comb2 = x_comb2_left + x_left
 
-        x_comb_iter_3_left = self.comb_iter_3_left(x_left)
-        x_comb_iter_3_right = self.comb_iter_3_right(x_left)
-        x_comb_iter_3 = x_comb_iter_3_left + x_comb_iter_3_right
+        x_comb3_left = self.comb_iter_3_left(x_left)
+        x_comb3_right = self.comb3_right(x_left)
+        x_comb3 = x_comb3_left + x_comb3_right
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_right
+        x_comb4_left = self.comb4_left(x_right)
+        x_comb4 = x_comb4_left + x_right
 
-        x_out = torch.cat([x_left, x_comb_iter_0, x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_left, x_comb0, x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
 
 
@@ -625,40 +693,47 @@ class NormalCell(nn.Module):
                  in_channels_right,
                  out_channels_right):
         super(NormalCell, self).__init__()
-        self.conv_prev_1x1 = nn.Sequential()
-        self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        self.conv_prev_1x1.add_module('conv', conv1x1(
+
+        self.conv_prev_1x1 = nas_conv1x1(
             in_channels=in_channels_left,
-            out_channels=out_channels_left))
-        self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
+            out_channels=out_channels_left)
+        # self.conv_prev_1x1 = nn.Sequential()
+        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
+        # self.conv_prev_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_left,
+        #     out_channels=out_channels_left))
+        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
 
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
+        self.conv_1x1 = nas_conv1x1(
             in_channels=in_channels_right,
-            out_channels=out_channels_right))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            out_channels=out_channels_right)
+        # self.conv_1x1 = nn.Sequential()
+        # self.conv_1x1.add_module('relu', nn.ReLU())
+        # self.conv_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_right,
+        #     out_channels=out_channels_right))
+        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_0_left = branch_separables_k5_s1_p2(
+        self.comb0_left = dws_branch_k5_s1_p2(
             in_channels=out_channels_right,
             out_channels=out_channels_right)
-        self.comb_iter_0_right = branch_separables_k3_s1_p1(
+        self.comb0_right = dws_branch_k3_s1_p1(
             in_channels=out_channels_left,
             out_channels=out_channels_left)
 
-        self.comb_iter_1_left = branch_separables_k5_s1_p2(
+        self.comb1_left = dws_branch_k5_s1_p2(
             in_channels=out_channels_left,
             out_channels=out_channels_left)
-        self.comb_iter_1_right = branch_separables_k3_s1_p1(
+        self.comb1_right = dws_branch_k3_s1_p1(
             in_channels=out_channels_left,
             out_channels=out_channels_left)
 
-        self.comb_iter_2_left = nasnet_avgpool3x3_s1()
+        self.comb2_left = nasnet_avgpool3x3_s1()
 
         self.comb_iter_3_left = nasnet_avgpool3x3_s1()
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+        self.comb4_left = dws_branch_k3_s1_p1(
             in_channels=out_channels_right,
             out_channels=out_channels_right)
 
@@ -666,25 +741,25 @@ class NormalCell(nn.Module):
         x_left = self.conv_prev_1x1(x_prev)
         x_right = self.conv_1x1(x)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x_right)
+        x_comb0_right = self.comb0_right(x_left)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x_left)
+        x_comb1_right = self.comb1_right(x_left)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_left
+        x_comb2_left = self.comb2_left(x_right)
+        x_comb2 = x_comb2_left + x_left
 
-        x_comb_iter_3_left = self.comb_iter_3_left(x_left)
-        x_comb_iter_3_right = self.comb_iter_3_right(x_left)
-        x_comb_iter_3 = x_comb_iter_3_left + x_comb_iter_3_right
+        x_comb3_left = self.comb_iter_3_left(x_left)
+        x_comb3_right = self.comb3_right(x_left)
+        x_comb3 = x_comb3_left + x_comb3_right
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_right
+        x_comb4_left = self.comb4_left(x_right)
+        x_comb4 = x_comb4_left + x_right
 
-        x_out = torch.cat([x_left, x_comb_iter_0, x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_left, x_comb0, x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
 
 
@@ -696,68 +771,80 @@ class ReductionCell0(nn.Module):
                  in_channels_right,
                  out_channels_right):
         super(ReductionCell0, self).__init__()
-        self.conv_prev_1x1 = nn.Sequential()
-        self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        self.conv_prev_1x1.add_module('conv', conv1x1(
+
+        self.conv_prev_1x1 = nas_conv1x1(
             in_channels=in_channels_left,
-            out_channels=out_channels_left))
-        self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
+            out_channels=out_channels_left)
+        # self.conv_prev_1x1 = nn.Sequential()
+        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
+        # self.conv_prev_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_left,
+        #     out_channels=out_channels_left))
+        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
 
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
+        self.conv_1x1 = nas_conv1x1(
             in_channels=in_channels_right,
-            out_channels=out_channels_right))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
-
-        self.comb_iter_0_left = branch_separables_reduction_k5_s2_p2(
-            in_channels=out_channels_right,
             out_channels=out_channels_right)
-        self.comb_iter_0_right = branch_separables_reduction_k7_s2_p3(
-            in_channels=out_channels_right,
-            out_channels=out_channels_right)
+        # self.conv_1x1 = nn.Sequential()
+        # self.conv_1x1.add_module('relu', nn.ReLU())
+        # self.conv_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_right,
+        #     out_channels=out_channels_right))
+        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = branch_separables_reduction_k7_s2_p3(
+        self.comb0_left = dws_branch_k5_s2_p2(
             in_channels=out_channels_right,
-            out_channels=out_channels_right)
-
-        self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = branch_separables_reduction_k5_s2_p2(
+            out_channels=out_channels_right,
+            specific=True)
+        self.comb0_right = dws_branch_k7_s2_p3(
             in_channels=out_channels_right,
-            out_channels=out_channels_right)
+            out_channels=out_channels_right,
+            specific=True)
 
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
-
-        self.comb_iter_4_left = branch_separables_reduction_k3_s1_p1(
+        self.comb1_left = MaxPoolPad()
+        self.comb1_right = dws_branch_k7_s2_p3(
             in_channels=out_channels_right,
-            out_channels=out_channels_right)
-        self.comb_iter_4_right = MaxPoolPad()
+            out_channels=out_channels_right,
+            specific=True)
+
+        self.comb2_left = AvgPoolPad()
+        self.comb2_right = dws_branch_k5_s2_p2(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            specific=True)
+
+        self.comb3_right = nasnet_avgpool3x3_s1()
+
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=out_channels_right,
+            out_channels=out_channels_right,
+            specific=True)
+        self.comb4_right = MaxPoolPad()
 
     def forward(self, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
         x_right = self.conv_1x1(x)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x_right)
+        x_comb0_right = self.comb0_right(x_left)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_right)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x_right)
+        x_comb1_right = self.comb1_right(x_left)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_left)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
+        x_comb2_left = self.comb2_left(x_right)
+        x_comb2_right = self.comb2_right(x_left)
+        x_comb2 = x_comb2_left + x_comb2_right
 
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
+        x_comb3_right = self.comb3_right(x_comb0)
+        x_comb3 = x_comb3_right + x_comb1
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
+        x_comb4_left = self.comb4_left(x_comb0)
+        x_comb4_right = self.comb4_right(x_right)
+        x_comb4 = x_comb4_left + x_comb4_right
 
-        x_out = torch.cat([x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
 
 
@@ -770,73 +857,79 @@ class ReductionCell1(nn.Module):
                  out_channels_right):
         super(ReductionCell1, self).__init__()
 
-        self.conv_prev_1x1 = nn.Sequential()
-        self.conv_prev_1x1.add_module('relu', nn.ReLU())
-        self.conv_prev_1x1.add_module('conv', conv1x1(
+        self.conv_prev_1x1 = nas_conv1x1(
             in_channels=in_channels_left,
-            out_channels=out_channels_left))
-        self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
+            out_channels=out_channels_left)
+        # self.conv_prev_1x1 = nn.Sequential()
+        # self.conv_prev_1x1.add_module('relu', nn.ReLU())
+        # self.conv_prev_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_left,
+        #     out_channels=out_channels_left))
+        # self.conv_prev_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_left))
 
-        self.conv_1x1 = nn.Sequential()
-        self.conv_1x1.add_module('relu', nn.ReLU())
-        self.conv_1x1.add_module('conv', conv1x1(
+        self.conv_1x1 = nas_conv1x1(
             in_channels=in_channels_right,
-            out_channels=out_channels_right))
-        self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
+            out_channels=out_channels_right)
+        # self.conv_1x1 = nn.Sequential()
+        # self.conv_1x1.add_module('relu', nn.ReLU())
+        # self.conv_1x1.add_module('conv', conv1x1(
+        #     in_channels=in_channels_right,
+        #     out_channels=out_channels_right))
+        # self.conv_1x1.add_module('bn', nasnet_batch_norm(channels=out_channels_right))
 
-        self.comb_iter_0_left = branch_separables_k5_s2_p2(
+        self.comb0_left = dws_branch_k5_s2_p2(
             in_channels=out_channels_right,
             out_channels=out_channels_right,
-            name='specific')
-        self.comb_iter_0_right = branch_separables_k7_s2_p3(
+            specific=True)
+        self.comb0_right = dws_branch_k7_s2_p3(
             in_channels=out_channels_right,
             out_channels=out_channels_right,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_1_left = MaxPoolPad()
-        self.comb_iter_1_right = branch_separables_k7_s2_p3(
+        self.comb1_left = MaxPoolPad()
+        self.comb1_right = dws_branch_k7_s2_p3(
             in_channels=out_channels_right,
             out_channels=out_channels_right,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_2_left = AvgPoolPad()
-        self.comb_iter_2_right = branch_separables_k5_s2_p2(
+        self.comb2_left = AvgPoolPad()
+        self.comb2_right = dws_branch_k5_s2_p2(
             in_channels=out_channels_right,
             out_channels=out_channels_right,
-            name='specific')
+            specific=True)
 
-        self.comb_iter_3_right = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_4_left = branch_separables_k3_s1_p1(
+        self.comb4_left = dws_branch_k3_s1_p1(
             in_channels=out_channels_right,
             out_channels=out_channels_right,
-            name='specific')
-        self.comb_iter_4_right =MaxPoolPad()
+            specific=True)
+        self.comb4_right =MaxPoolPad()
 
     def forward(self, x, x_prev):
         x_left = self.conv_prev_1x1(x_prev)
         x_right = self.conv_1x1(x)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x_comb0_left = self.comb0_left(x_right)
+        x_comb0_right = self.comb0_right(x_left)
+        x_comb0 = x_comb0_left + x_comb0_right
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_right)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
+        x_comb1_left = self.comb1_left(x_right)
+        x_comb1_right = self.comb1_right(x_left)
+        x_comb1 = x_comb1_left + x_comb1_right
 
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_left)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
+        x_comb2_left = self.comb2_left(x_right)
+        x_comb2_right = self.comb2_right(x_left)
+        x_comb2 = x_comb2_left + x_comb2_right
 
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
+        x_comb3_right = self.comb3_right(x_comb0)
+        x_comb3 = x_comb3_right + x_comb1
 
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
+        x_comb4_left = self.comb4_left(x_comb0)
+        x_comb4_right = self.comb4_right(x_right)
+        x_comb4 = x_comb4_left + x_comb4_right
 
-        x_out = torch.cat([x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], 1)
+        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
         return x_out
 
 
@@ -866,27 +959,33 @@ class NASNetAMobile(nn.Module):
     """NASNetAMobile (4 @ 1056) """
 
     def __init__(self,
+                 init_block_channels,
                  penultimate_filters,
                  in_channels=3,
                  num_classes=1000):
         super(NASNetAMobile, self).__init__()
 
-        stem_filters = 32
+        #stem_filters = 32
         filters = penultimate_filters // 24
         filters_multiplier = 2
 
-        self.conv0 = NASNetInitBlock(
+        self.init_block = NASNetInitBlock(
             in_channels=in_channels,
-            out_channels=stem_filters)
+            out_channels=init_block_channels)
+        in_channels = init_block_channels
 
         self.features = DoubleLinkedSequential()
 
+        #in_channels = init_block_channels
+        #prev_in_channels = None
         self.features.add_module("cell_stem_0", CellStem0(
-            stem_filters=stem_filters,
+            stem_filters=in_channels,
             num_filters=filters // (filters_multiplier ** 2)))
         self.features.add_module("cell_stem_1", CellStem1(
-            stem_filters=stem_filters,
+            stem_filters=in_channels,
             num_filters=filters // filters_multiplier))
+        #in_channels = init_block_channels
+        #prev_in_channels = None
 
         channels = [[1], [2],
                     [2, 1], [6, 1], [6, 1], [6, 1],
@@ -979,7 +1078,7 @@ class NASNetAMobile(nn.Module):
             out_features=num_classes)
 
     def forward(self, x):
-        x = self.conv0(x)
+        x = self.init_block(x)
         x = self.features(x)
         x = self.relu(x)
         x = self.avg_pool(x)
@@ -994,10 +1093,13 @@ def get_nasnet(cell_repeats,
                pretrained=False,
                **kwargs):
 
+    init_block_channels = 32
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     net = NASNetAMobile(
+        init_block_channels=init_block_channels,
         penultimate_filters=penultimate_filters,
         **kwargs)
     return net

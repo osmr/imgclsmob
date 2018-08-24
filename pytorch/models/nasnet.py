@@ -10,18 +10,29 @@ import torch
 import torch.nn as nn
 
 
-class DoubleLinkedSequential(nn.Sequential):
+class DualPathSequential(nn.Sequential):
 
-    def __init__(self, *args):
-        super(DoubleLinkedSequential, self).__init__(*args)
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 *args):
+        super(DualPathSequential, self).__init__(*args)
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
 
     def forward(self, x, x_prev=None):
-        for module in self._modules.values():
-            if x_prev is None:
-                x_prev, x = x, module(x)
+        length = len(self._modules.values())
+        for i, module in enumerate(self._modules.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x, x_prev = module(x), x
             else:
-                x_prev, x = x, module(x, x_prev)
-        return x
+                x, x_prev = module(x, x_prev)
+        if self.return_two:
+            return x, x_prev
+        else:
+            return x
 
 
 def nasnet_batch_norm(channels):
@@ -425,14 +436,14 @@ class NasPathBlock(nn.Module):
         return x
 
 
-class CellStem0(nn.Module):
+class Stem0Unit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(CellStem0, self).__init__()
+        super(Stem0Unit, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv_1x1 = nas_conv1x1(
+        self.conv1x1 = nas_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels)
 
@@ -463,42 +474,30 @@ class CellStem0(nn.Module):
             out_channels=mid_channels)
         self.comb4_right = nasnet_maxpool()
 
-    def forward(self, x):
-        x1 = self.conv_1x1(x)
+    def forward(self, x, _):
+        x_left = self.conv1x1(x)
+        x_right = x
 
-        x_comb0_left = self.comb0_left(x1)
-        x_comb0_right = self.comb0_right(x)
-        x_comb0 = x_comb0_left + x_comb0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_comb1_left = self.comb1_left(x1)
-        x_comb1_right = self.comb1_right(x)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x1)
-        x_comb2_right = self.comb2_right(x)
-        x_comb2 = x_comb2_left + x_comb2_right
-
-        x_comb3_right = self.comb3_right(x_comb0)
-        x_comb3 = x_comb3_right + x_comb1
-
-        x_comb4_left = self.comb4_left(x_comb0)
-        x_comb4_right = self.comb4_right(x1)
-        x_comb4 = x_comb4_left + x_comb4_right
-
-        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
+        x_out = torch.cat((x1, x2, x3, x4), dim=1)
+        return x_out, x
 
 
-class CellStem1(nn.Module):
+class Stem1Unit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels):
-        super(CellStem1, self).__init__()
+        super(Stem1Unit, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv_1x1 = nas_conv1x1(
+        self.conv1x1 = nas_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels)
         self.path = NasPathBlock(
@@ -535,45 +534,29 @@ class CellStem1(nn.Module):
         self.comb4_right = MaxPoolPad()
 
     def forward(self, x, x_prev):
-        # x == x_stem_0
-        # x_prev == x_conv0
-
-        x_left = self.conv_1x1(x)
+        x_left = self.conv1x1(x)
         x_right = self.path(x_prev)
 
-        x_comb0_left = self.comb0_left(x_left)
-        x_comb0_right = self.comb0_right(x_right)
-        x_comb0 = x_comb0_left + x_comb0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_comb1_left = self.comb1_left(x_left)
-        x_comb1_right = self.comb1_right(x_right)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x_left)
-        x_comb2_right = self.comb2_right(x_right)
-        x_comb2 = x_comb2_left + x_comb2_right
-
-        x_comb3_right = self.comb3_right(x_comb0)
-        x_comb3 = x_comb3_right + x_comb1
-
-        x_comb4_left = self.comb4_left(x_comb0)
-        x_comb4_right = self.comb4_right(x_left)
-        x_comb4 = x_comb4_left + x_comb4_right
-
-        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
+        x_out = torch.cat((x1, x2, x3, x4), dim=1)
+        return x_out, x
 
 
-class FirstCell(nn.Module):
+class FirstUnit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels):
-        super(FirstCell, self).__init__()
+        super(FirstUnit, self).__init__()
         mid_channels = out_channels // 6
 
-        self.conv_1x1 = nas_conv1x1(
+        self.conv1x1 = nas_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels)
 
@@ -597,7 +580,7 @@ class FirstCell(nn.Module):
 
         self.comb2_left = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_3_left = nasnet_avgpool3x3_s1()
+        self.comb3_left = nasnet_avgpool3x3_s1()
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
@@ -605,44 +588,32 @@ class FirstCell(nn.Module):
             out_channels=mid_channels)
 
     def forward(self, x, x_prev):
-        x_left = self.path(x_prev)
-        x_right = self.conv_1x1(x)
+        x_left = self.conv1x1(x)
+        x_right = self.path(x_prev)
 
-        x_comb0_left = self.comb0_left(x_right)
-        x_comb0_right = self.comb0_right(x_left)
-        x_comb0 = x_comb0_left + x_comb0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_right) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + x_right
+        x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
+        x4 = self.comb4_left(x_left) + x_left
 
-        x_comb1_left = self.comb1_left(x_left)
-        x_comb1_right = self.comb1_right(x_left)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x_right)
-        x_comb2 = x_comb2_left + x_left
-
-        x_comb3_left = self.comb_iter_3_left(x_left)
-        x_comb3_right = self.comb3_right(x_left)
-        x_comb3 = x_comb3_left + x_comb3_right
-
-        x_comb4_left = self.comb4_left(x_right)
-        x_comb4 = x_comb4_left + x_right
-
-        x_out = torch.cat([x_left, x_comb0, x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
+        x_out = torch.cat((x_right, x0, x1, x2, x3, x4), dim=1)
+        return x_out, x
 
 
-class NormalCell(nn.Module):
+class NormalUnit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels):
-        super(NormalCell, self).__init__()
+        super(NormalUnit, self).__init__()
         mid_channels = out_channels // 6
 
-        self.conv_prev_1x1 = nas_conv1x1(
+        self.conv1x1_prev = nas_conv1x1(
             in_channels=prev_in_channels,
             out_channels=mid_channels)
-        self.conv_1x1 = nas_conv1x1(
+        self.conv1x1 = nas_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels)
 
@@ -662,7 +633,7 @@ class NormalCell(nn.Module):
 
         self.comb2_left = nasnet_avgpool3x3_s1()
 
-        self.comb_iter_3_left = nasnet_avgpool3x3_s1()
+        self.comb3_left = nasnet_avgpool3x3_s1()
         self.comb3_right = nasnet_avgpool3x3_s1()
 
         self.comb4_left = dws_branch_k3_s1_p1(
@@ -670,44 +641,32 @@ class NormalCell(nn.Module):
             out_channels=mid_channels)
 
     def forward(self, x, x_prev):
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
+        x_left = self.conv1x1(x)
+        x_right = self.conv1x1_prev(x_prev)
 
-        x_comb0_left = self.comb0_left(x_right)
-        x_comb0_right = self.comb0_right(x_left)
-        x_comb0 = x_comb0_left + x_comb0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_right) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + x_right
+        x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
+        x4 = self.comb4_left(x_left) + x_left
 
-        x_comb1_left = self.comb1_left(x_left)
-        x_comb1_right = self.comb1_right(x_left)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x_right)
-        x_comb2 = x_comb2_left + x_left
-
-        x_comb3_left = self.comb_iter_3_left(x_left)
-        x_comb3_right = self.comb3_right(x_left)
-        x_comb3 = x_comb3_left + x_comb3_right
-
-        x_comb4_left = self.comb4_left(x_right)
-        x_comb4 = x_comb4_left + x_right
-
-        x_out = torch.cat([x_left, x_comb0, x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
+        x_out = torch.cat((x_right, x0, x1, x2, x3, x4), dim=1)
+        return x_out, x
 
 
-class ReductionCell0(nn.Module):
+class ReductionUnit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels):
-        super(ReductionCell0, self).__init__()
+        super(ReductionUnit, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv_prev_1x1 = nas_conv1x1(
+        self.conv1x1_prev = nas_conv1x1(
             in_channels=prev_in_channels,
             out_channels=mid_channels)
-        self.conv_1x1 = nas_conv1x1(
+        self.conv1x1 = nas_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels)
 
@@ -741,102 +700,17 @@ class ReductionCell0(nn.Module):
         self.comb4_right = MaxPoolPad()
 
     def forward(self, x, x_prev):
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
+        x_left = self.conv1x1(x)
+        x_right = self.conv1x1_prev(x_prev)
 
-        x_comb0_left = self.comb0_left(x_right)
-        x_comb0_right = self.comb0_right(x_left)
-        x_comb0 = x_comb0_left + x_comb0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_comb1_left = self.comb1_left(x_right)
-        x_comb1_right = self.comb1_right(x_left)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x_right)
-        x_comb2_right = self.comb2_right(x_left)
-        x_comb2 = x_comb2_left + x_comb2_right
-
-        x_comb3_right = self.comb3_right(x_comb0)
-        x_comb3 = x_comb3_right + x_comb1
-
-        x_comb4_left = self.comb4_left(x_comb0)
-        x_comb4_right = self.comb4_right(x_right)
-        x_comb4 = x_comb4_left + x_comb4_right
-
-        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
-
-
-class ReductionCell1(nn.Module):
-
-    def __init__(self,
-                 in_channels,
-                 prev_in_channels,
-                 out_channels):
-        super(ReductionCell1, self).__init__()
-        mid_channels = out_channels // 4
-
-        self.conv_prev_1x1 = nas_conv1x1(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
-        self.conv_1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-
-        self.comb1_left = MaxPoolPad()
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-
-        self.comb2_left = AvgPoolPad()
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-
-        self.comb3_right = nasnet_avgpool3x3_s1()
-
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb4_right =MaxPoolPad()
-
-    def forward(self, x, x_prev):
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
-
-        x_comb0_left = self.comb0_left(x_right)
-        x_comb0_right = self.comb0_right(x_left)
-        x_comb0 = x_comb0_left + x_comb0_right
-
-        x_comb1_left = self.comb1_left(x_right)
-        x_comb1_right = self.comb1_right(x_left)
-        x_comb1 = x_comb1_left + x_comb1_right
-
-        x_comb2_left = self.comb2_left(x_right)
-        x_comb2_right = self.comb2_right(x_left)
-        x_comb2 = x_comb2_left + x_comb2_right
-
-        x_comb3_right = self.comb3_right(x_comb0)
-        x_comb3 = x_comb3_right + x_comb1
-
-        x_comb4_left = self.comb4_left(x_comb0)
-        x_comb4_right = self.comb4_right(x_right)
-        x_comb4 = x_comb4_left + x_comb4_right
-
-        x_out = torch.cat([x_comb1, x_comb2, x_comb3, x_comb4], 1)
-        return x_out
+        x_next = torch.cat((x1, x2, x3, x4), dim=1)
+        return x_next, x
 
 
 class NASNetInitBlock(nn.Module):
@@ -861,196 +735,103 @@ class NASNetInitBlock(nn.Module):
         return x
 
 
-class NASNetAMobile(nn.Module):
-    """NASNetAMobile (4 @ 1056) """
+class NASNet(nn.Module):
 
     def __init__(self,
                  init_block_channels,
-                 penultimate_filters,
+                 stem_blocks_channels,
+                 channels,
                  in_channels=3,
                  num_classes=1000):
-        super(NASNetAMobile, self).__init__()
-        filters = penultimate_filters // 24
+        super(NASNet, self).__init__()
 
-        self.init_block = NASNetInitBlock(
+        self.features = DualPathSequential(
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=2)
+        self.features.add_module("init_block", NASNetInitBlock(
             in_channels=in_channels,
-            out_channels=init_block_channels)
+            out_channels=init_block_channels))
         in_channels = init_block_channels
 
-        channels = [[1, 2],
-                    [6, 6, 6, 6],
-                    [8, 12, 12, 12, 12],
-                    [16, 24, 24, 24, 24]]
-
-        self.features = DoubleLinkedSequential()
-
-        out_channels = filters
-        self.features.add_module("cell_stem_0", CellStem0(
+        out_channels = stem_blocks_channels[0]
+        self.features.add_module("stem0_unit", Stem0Unit(
             in_channels=in_channels,
             out_channels=out_channels))
         prev_in_channels = in_channels
         in_channels = out_channels
 
-        out_channels = 2 * filters
-        self.features.add_module("cell_stem_1", CellStem1(
+        out_channels = stem_blocks_channels[1]
+        self.features.add_module("stem1_unit", Stem1Unit(
             in_channels=in_channels,
             prev_in_channels=prev_in_channels,
             out_channels=out_channels))
         prev_in_channels = in_channels
         in_channels = out_channels
 
-        out_channels = 6 * filters
-        self.features.add_module("cell_0", FirstCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = DualPathSequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                if (j == 0) and (i != 0):
+                    unit = ReductionUnit
+                elif ((i == 0) and (j == 0)) or ((i != 0) and (j == 1)):
+                    unit = FirstUnit
+                else:
+                    unit = NormalUnit
+                stage.add_module("unit{}".format(j + 1), unit(
+                    in_channels=in_channels,
+                    prev_in_channels=prev_in_channels,
+                    out_channels=out_channels))
+                prev_in_channels = in_channels
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
 
-        out_channels = 6 * filters
-        self.features.add_module("cell_1", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 6 * filters
-        self.features.add_module("cell_2", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 6 * filters
-        self.features.add_module("cell_3", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 8 * filters
-        self.features.add_module("reduction_cell_0", ReductionCell0(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 12 * filters
-        self.features.add_module("cell_6", FirstCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 12 * filters
-        self.features.add_module("cell_7", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 12 * filters
-        self.features.add_module("cell_8", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 12 * filters
-        self.features.add_module("cell_9", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 16 * filters
-        self.features.add_module("reduction_cell_1", ReductionCell1(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 24 * filters
-        self.features.add_module("cell_12", FirstCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 24 * filters
-        self.features.add_module("cell_13", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 24 * filters
-        self.features.add_module("cell_14", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        out_channels = 24 * filters
-        self.features.add_module("cell_15", NormalCell(
-            in_channels=in_channels,
-            prev_in_channels=prev_in_channels,
-            out_channels=out_channels))
-        prev_in_channels = in_channels
-        in_channels = out_channels
-
-        self.relu = nn.ReLU()
-        self.avg_pool = nn.AvgPool2d(
+        self.features.add_module("activ", nn.ReLU())
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
-            stride=1,
-            padding=0)
-        self.dropout = nn.Dropout()
-        self.last_linear = nn.Linear(
-            in_features=24*filters,
-            out_features=num_classes)
+            stride=1))
+
+        self.output = nn.Sequential()
+        self.output.add_module('dropout', nn.Dropout(p=0.5))
+        self.output.add_module('fc', nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes))
 
     def forward(self, x):
-        x = self.init_block(x)
         x = self.features(x)
-        x = self.relu(x)
-        x = self.avg_pool(x)
         x = x.view(x.size(0), -1)
-        x = self.dropout(x)
-        x = self.last_linear(x)
+        x = self.output(x)
         return x
 
 
-def get_nasnet(cell_repeats,
+def get_nasnet(repeat,
                penultimate_filters,
                pretrained=False,
                **kwargs):
 
     init_block_channels = 32
+    stem_blocks_channels = [1, 2]
+    channels = [[6, 6, 6, 6],
+                [8, 12, 12, 12, 12],
+                [16, 24, 24, 24, 24]]
+    base_channel_chunk = penultimate_filters // channels[-1][-1]
+
+    stem_blocks_channels = [(ci * base_channel_chunk) for ci in stem_blocks_channels]
+    channels = [[(cij * base_channel_chunk) for cij in ci] for ci in channels]
 
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
-    net = NASNetAMobile(
+    net = NASNet(
         init_block_channels=init_block_channels,
-        penultimate_filters=penultimate_filters,
+        stem_blocks_channels=stem_blocks_channels,
+        channels=channels,
         **kwargs)
     return net
 
 
 def nasnet_a_mobile(**kwargs):
-    return get_nasnet(4, 1056, **kwargs)
+    return get_nasnet(repeat=4, penultimate_filters=1056, **kwargs)
 
 
 def _test():

@@ -248,6 +248,12 @@ def parse_args():
         type=str,
         default='mxnet-cu92, gluoncv',
         help='list of pip packages for logging')
+
+    parser.add_argument(
+        '--tune-layers',
+        type=str,
+        default='',
+        help='list of layers for fine tuning')
     args = parser.parse_args()
     return args
 
@@ -405,6 +411,7 @@ def prepare_model(model_name,
                   use_se,
                   last_gamma,
                   dtype,
+                  tune_layers,
                   ctx):
     kwargs = {'ctx': ctx,
               'pretrained': use_pretrained,
@@ -440,6 +447,19 @@ def prepare_model(model_name,
             param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
     else:
         net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+
+    if tune_layers:
+        params = net._collect_params_with_prefix()
+        param_keys = list(params.keys())
+        for key in param_keys:
+            if not key.startswith(tuple(tune_layers)):
+                params[key].grad_req = 'null'
+            else:
+                logging.info('Fine-tune parameter: {}'.format(key))
+        for param in net.collect_params().values():
+            if param._data is not None:
+                continue
+            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
     return net
 
@@ -777,6 +797,7 @@ def main():
         use_se=args.use_se,
         last_gamma=args.last_gamma,
         dtype=args.dtype,
+        tune_layers=args.tune_layers,
         ctx=ctx)
 
     if args.use_rec:

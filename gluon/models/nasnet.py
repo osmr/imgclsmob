@@ -7,7 +7,7 @@ __all__ = ['nasnet_a_mobile']
 
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1
+from .common import conv1x1
 
 
 class DualPathSequential(nn.HybridSequential):
@@ -152,7 +152,7 @@ class NasConv(HybridBlock):
                 groups=groups,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
@@ -410,7 +410,6 @@ class NasPathBlock(HybridBlock):
         x = F.concat(x1, x2, dim=1)
         x = self.bn(x)
         return x
-
 
 
 class Stem1Unit(HybridBlock):

@@ -290,7 +290,9 @@ def main():
             f=args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            assert (dst_params[dst_key].shape == tuple(src_params[src_key].size()))
+            assert (dst_params[dst_key].shape == tuple(src_params[src_key].size())),\
+                "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                    src_key, dst_key, tuple(src_params[src_key].size()), dst_params[dst_key].shape)
             dst_params[dst_key]._load_init(mx.nd.array(src_params[src_key].numpy(), ctx), ctx)
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "mxnet" and args.dst_fwk == "gluon":

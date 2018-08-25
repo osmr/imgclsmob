@@ -9,7 +9,7 @@ __all__ = ['nasnet_a_mobile']
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv1x1
+from .common import conv1x1
 
 
 class DualPathSequential(nn.Sequential):

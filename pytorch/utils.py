@@ -12,8 +12,8 @@ from .models.shufflenetv2 import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
-
 from .models.nasnet import *
+
 from .models.others.NASNetAMobile import *
 
 __all__ = ['get_model']

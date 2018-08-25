@@ -8,6 +8,8 @@ __all__ = ['nasnet_a_mobile']
 
 import torch
 import torch.nn as nn
+import torch.nn.init as init
+from common import conv1x1
 
 
 class DualPathSequential(nn.Sequential):
@@ -71,32 +73,6 @@ def nasnet_avgpool3x3_s2():
         stride=2,
         padding=1,
         count_include_pad=False)
-
-
-def conv1x1(in_channels,
-            out_channels,
-            stride=1,
-            bias=False):
-    """
-    Convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        bias=bias)
 
 
 class MaxPoolPad(nn.Module):
@@ -189,8 +165,6 @@ def nas_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    activate : bool
-        Whether activate the convolution block.
     """
     return NasConv(
         in_channels=in_channels,
@@ -417,7 +391,7 @@ class NasPathBlock(nn.Module):
         super(NasPathBlock, self).__init__()
         mid_channels = out_channels // 2
 
-        self.relu = nn.ReLU()
+        self.activ = nn.ReLU()
         self.path1 = NasPathBranch(
             in_channels=in_channels,
             out_channels=mid_channels)
@@ -428,19 +402,19 @@ class NasPathBlock(nn.Module):
         self.bn = nasnet_batch_norm(channels=out_channels)
 
     def forward(self, x):
-        x = self.relu(x)
+        x = self.activ(x)
         x1 = self.path1(x)
         x2 = self.path2(x)
-        x = torch.cat([x1, x2], 1)
+        x = torch.cat((x1, x2), dim=1)
         x = self.bn(x)
         return x
 
 
-class Stem0Unit(nn.Module):
+class Stem1Unit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(Stem0Unit, self).__init__()
+        super(Stem1Unit, self).__init__()
         mid_channels = out_channels // 4
 
         self.conv1x1 = nas_conv1x1(
@@ -474,7 +448,7 @@ class Stem0Unit(nn.Module):
             out_channels=mid_channels)
         self.comb4_right = nasnet_maxpool()
 
-    def forward(self, x, _):
+    def forward(self, x, _=None):
         x_left = self.conv1x1(x)
         x_right = x
 
@@ -488,13 +462,13 @@ class Stem0Unit(nn.Module):
         return x_out, x
 
 
-class Stem1Unit(nn.Module):
+class Stem2Unit(nn.Module):
 
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels):
-        super(Stem1Unit, self).__init__()
+        super(Stem2Unit, self).__init__()
         mid_channels = out_channels // 4
 
         self.conv1x1 = nas_conv1x1(
@@ -719,13 +693,12 @@ class NASNetInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(NASNetInitBlock, self).__init__()
-
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=3,
-            padding=0,
             stride=2,
+            padding=0,
             bias=False)
         self.bn = nasnet_batch_norm(channels=out_channels)
 
@@ -755,14 +728,14 @@ class NASNet(nn.Module):
         in_channels = init_block_channels
 
         out_channels = stem_blocks_channels[0]
-        self.features.add_module("stem0_unit", Stem0Unit(
+        self.features.add_module("stem1_unit", Stem1Unit(
             in_channels=in_channels,
             out_channels=out_channels))
         prev_in_channels = in_channels
         in_channels = out_channels
 
         out_channels = stem_blocks_channels[1]
-        self.features.add_module("stem1_unit", Stem1Unit(
+        self.features.add_module("stem2_unit", Stem2Unit(
             in_channels=in_channels,
             prev_in_channels=prev_in_channels,
             out_channels=out_channels))
@@ -796,6 +769,15 @@ class NASNet(nn.Module):
         self.output.add_module('fc', nn.Linear(
             in_features=in_channels,
             out_features=num_classes))
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

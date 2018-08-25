@@ -3,22 +3,36 @@
     Original paper: 'Learning Transferable Architectures for Scalable Image Recognition.'
 """
 
+__all__ = ['nasnet_a_mobile']
 
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
+from common import conv1x1
 
 
-TESTING = False
+class DualPathSequential(nn.HybridSequential):
 
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 **kwargs):
+        super(DualPathSequential, self).__init__(**kwargs)
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
 
-def process_with_padding(x,
-                         F,
-                         process=(lambda x: x),
-                         z_padding=1):
-    x = F.pad(x, mode="constant", constant_value=0, pad_width=(0, 0, 0, 0, z_padding, 0, z_padding, 0))
-    x = process(x)
-    x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
-    return x
+    def hybrid_forward(self, F, x, x_prev=None):
+        length = len(self._children.values())
+        for i, block in enumerate(self._children.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x, x_prev = block(x), x
+            else:
+                x, x_prev = block(x, x_prev)
+        if self.return_two:
+            return x, x_prev
+        else:
+            return x
 
 
 def nasnet_batch_norm(channels):
@@ -28,16 +42,53 @@ def nasnet_batch_norm(channels):
         in_channels=channels)
 
 
+def nasnet_maxpool():
+    return nn.MaxPool2D(
+        pool_size=3,
+        strides=2,
+        padding=1)
+
+
+def nasnet_avgpool1x1_s2():
+    return nn.AvgPool2D(
+        pool_size=1,
+        strides=2,
+        count_include_pad=False)
+
+
+def nasnet_avgpool3x3_s1():
+    return nn.AvgPool2D(
+        pool_size=3,
+        strides=1,
+        padding=1,
+        count_include_pad=False)
+
+
+def nasnet_avgpool3x3_s2():
+    return nn.AvgPool2D(
+        pool_size=3,
+        strides=2,
+        padding=1,
+        count_include_pad=False)
+
+
+def process_with_padding(x,
+                         F,
+                         process=(lambda x: x),
+                         pad_width=(0, 0, 0, 0, 1, 0, 1, 0)):
+    x = F.pad(x, mode="constant", pad_width=pad_width, constant_value=0)
+    x = process(x)
+    x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
+    return x
+
+
 class MaxPoolPad(HybridBlock):
 
     def __init__(self,
                  **kwargs):
         super(MaxPoolPad, self).__init__(**kwargs)
         with self.name_scope():
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
+            self.pool = nasnet_maxpool()
 
     def hybrid_forward(self, F, x):
         x = process_with_padding(x, F, self.pool)
@@ -63,6 +114,74 @@ class AvgPoolPad(HybridBlock):
         return x
 
 
+class NasConv(HybridBlock):
+    """
+    NASNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 groups,
+                 **kwargs):
+        super(NasConv, self).__init__(**kwargs)
+        with self.name_scope():
+            self.activ = nn.Activation('relu')
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                groups=groups,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=in_channels)
+
+    def hybrid_forward(self, F, x):
+        x = self.activ(x)
+        x = self.conv(x)
+        x = self.bn(x)
+        return x
+
+
+def nas_conv1x1(in_channels,
+                out_channels):
+    """
+    1x1 version of the NASNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    return NasConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=1,
+        padding=0,
+        groups=1)
+
+
 class DwsConv(HybridBlock):
 
     def __init__(self,
@@ -74,7 +193,6 @@ class DwsConv(HybridBlock):
                  use_bias=False,
                  **kwargs):
         super(DwsConv, self).__init__(**kwargs)
-
         with self.name_scope():
             self.dw_conv = nn.Conv2D(
                 channels=in_channels,
@@ -84,11 +202,10 @@ class DwsConv(HybridBlock):
                 groups=in_channels,
                 use_bias=use_bias,
                 in_channels=in_channels)
-            self.pw_conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=1,
-                use_bias=use_bias,
-                in_channels=in_channels)
+            self.pw_conv = conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                use_bias=use_bias)
 
     def hybrid_forward(self, F, x):
         x = self.dw_conv(x)
@@ -96,44 +213,56 @@ class DwsConv(HybridBlock):
         return x
 
 
-class DwsConvBlock(HybridBlock):
+class NasDwsConv(HybridBlock):
+    """
+    NASNet specific DWS convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  strides,
                  padding,
-                 use_bias=False,
                  specific=False,
-                 z_padding=1,
                  **kwargs):
-        super(DwsConvBlock, self).__init__(**kwargs)
+        super(NasDwsConv, self).__init__(**kwargs)
         self.specific = specific
-        self.z_padding = z_padding
 
         with self.name_scope():
             self.activ = nn.Activation(activation='relu')
-            self.dws_conv = DwsConv(
+            self.conv = DwsConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
-                use_bias=use_bias)
+                use_bias=False)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
         if self.specific:
-            x = process_with_padding(x, F, self.dws_conv, self.z_padding)
+            x = process_with_padding(x, F, self.conv)
         else:
-            x = self.dws_conv(x)
+            x = self.conv(x)
         x = self.bn(x)
         return x
 
 
-class BranchSeparables(HybridBlock):
+class DwsBranch(HybridBlock):
 
     def __init__(self,
                  in_channels,
@@ -141,779 +270,429 @@ class BranchSeparables(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
-                 use_bias=False,
                  specific=False,
-                 z_padding=1,
+                 stem=False,
                  **kwargs):
-        super(BranchSeparables, self).__init__(**kwargs)
+        super(DwsBranch, self).__init__(**kwargs)
+        assert (not stem) or (not specific)
+        mid_channels = out_channels if stem else in_channels
 
         with self.name_scope():
-            self.dws_conv_block1 = DwsConvBlock(
+            self.conv1 = NasDwsConv(
                 in_channels=in_channels,
-                out_channels=in_channels,
+                out_channels=mid_channels,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
-                use_bias=use_bias,
-                specific=specific,
-                z_padding=z_padding)
-            self.dws_conv_block2 = DwsConvBlock(
-                in_channels=in_channels,
+                specific=specific)
+            self.conv2 = NasDwsConv(
+                in_channels=mid_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 strides=1,
-                padding=padding,
-                use_bias=use_bias)
+                padding=padding)
 
     def hybrid_forward(self, F, x):
-        x = self.dws_conv_block1(x)
-        x = self.dws_conv_block2(x)
+        x = self.conv1(x)
+        x = self.conv2(x)
         return x
 
 
-class BranchSeparablesStem(HybridBlock):
+def dws_branch_k3_s1_p1(in_channels,
+                        out_channels,
+                        specific=False):
+    return DwsBranch(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=1,
+        padding=1,
+        specific=specific)
+
+
+def dws_branch_k5_s1_p2(in_channels,
+                        out_channels,
+                        specific=False):
+    return DwsBranch(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        strides=1,
+        padding=2,
+        specific=specific)
+
+
+def dws_branch_k5_s2_p2(in_channels,
+                        out_channels,
+                        specific=False,
+                        stem=False):
+    return DwsBranch(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        strides=2,
+        padding=2,
+        specific=specific,
+        stem=stem)
+
+
+def dws_branch_k7_s2_p3(in_channels,
+                        out_channels,
+                        specific=False,
+                        stem=False):
+    return DwsBranch(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=2,
+        padding=3,
+        specific=specific,
+        stem=stem)
+
+
+class NasPathBranch(HybridBlock):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 use_bias=False,
+                 specific=False,
                  **kwargs):
-        super(BranchSeparablesStem, self).__init__(**kwargs)
+        super(NasPathBranch, self).__init__(**kwargs)
+        self.specific = specific
 
         with self.name_scope():
-            self.dws_conv_block1 = DwsConvBlock(
+            self.avgpool = nasnet_avgpool1x1_s2()
+            self.conv = conv1x1(
                 in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=use_bias)
-            self.dws_conv_block2 = DwsConvBlock(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=1,
-                padding=padding,
-                use_bias=use_bias)
+                out_channels=out_channels)
 
     def hybrid_forward(self, F, x):
-        x = self.dws_conv_block1(x)
-        x = self.dws_conv_block2(x)
+        if self.specific:
+            x = process_with_padding(x, F, pad_width=(0, 0, 0, 0, 0, 1, 0, 1))
+        x = self.avgpool(x)
+        x = self.conv(x)
         return x
 
 
-class BranchSeparablesReduction(BranchSeparables):
+class NasPathBlock(HybridBlock):
+    """
+    NASNet specific `path-branch` block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 use_bias=False,
-                 z_padding=1,
                  **kwargs):
-        super(BranchSeparablesReduction, self).__init__(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=padding,
-            use_bias=use_bias,
-            specific=True,
-            z_padding=z_padding,
-            **kwargs)
-
-
-class ConvBlock(HybridBlock):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding=0,
-                 use_bias=False,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
+        super(NasPathBlock, self).__init__(**kwargs)
+        mid_channels = out_channels // 2
 
         with self.name_scope():
-            self.activ = nn.Activation(activation='relu')
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=use_bias,
-                in_channels=in_channels)
+            self.activ = nn.Activation('relu')
+            self.path1 = NasPathBranch(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.path2 = NasPathBranch(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                specific=True)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
-        x = self.conv(x)
+        x1 = self.path1(x)
+        x2 = self.path2(x)
+        x = F.concat(x1, x2, dim=1)
         x = self.bn(x)
         return x
 
 
-class CellStem0(HybridBlock):
 
-    def __init__(self,
-                 stem_filters,
-                 num_filters=42,
-                 **kwargs):
-        super(CellStem0, self).__init__(**kwargs)
-
-        with self.name_scope():
-            self.conv_1x1 = ConvBlock(
-                in_channels=stem_filters,
-                out_channels=num_filters,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
-
-            self.comb_iter_0_left = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=5,
-                strides=2,
-                padding=2)
-            self.comb_iter_0_right = BranchSeparablesStem(
-                in_channels=stem_filters,
-                out_channels=num_filters,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                use_bias=False)
-
-            self.comb_iter_1_left = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-            self.comb_iter_1_right = BranchSeparablesStem(
-                in_channels=stem_filters,
-                out_channels=num_filters,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                use_bias=False)
-
-            self.comb_iter_2_left = nn.AvgPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-            self.comb_iter_2_right = BranchSeparablesStem(
-                in_channels=stem_filters,
-                out_channels=num_filters,
-                kernel_size=5,
-                strides=2,
-                padding=2,
-                use_bias=False)
-
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_4_left = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=3,
-                strides=1,
-                padding=1)
-            self.comb_iter_4_right = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 32, 111, 111))
-
-        x1 = self.conv_1x1(x)
-
-        x_comb_iter_0_left = self.comb_iter_0_left(x1)
-        x_comb_iter_0_right = self.comb_iter_0_right(x)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
-
-        x_comb_iter_1_left = self.comb_iter_1_left(x1)
-        x_comb_iter_1_right = self.comb_iter_1_right(x)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x1)
-        x_comb_iter_2_right = self.comb_iter_2_right(x)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
-
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x1)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
-
-        x_out = F.concat(*[x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
-
-
-class CellStemPathBlock(HybridBlock):
-
+class Stem1Unit(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
                  **kwargs):
-        super(CellStemPathBlock, self).__init__(**kwargs)
+        super(Stem1Unit, self).__init__(**kwargs)
+        mid_channels = out_channels // 4
 
-        with self.name_scope():
-            self.avg_pool = nn.AvgPool2D(
-                pool_size=1,
-                strides=2,
-                count_include_pad=False)
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=1,
-                strides=1,
-                use_bias=False,
-                in_channels=in_channels)
+        self.conv1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-    def hybrid_forward(self, F, x):
-        x = self.avg_pool(x)
-        x = self.conv(x)
-        return x
+        self.comb0_left = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb0_right = dws_branch_k7_s2_p3(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
 
+        self.comb1_left = nasnet_maxpool()
+        self.comb1_right = dws_branch_k7_s2_p3(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
 
-class CellStem1(HybridBlock):
+        self.comb2_left = nasnet_avgpool3x3_s2()
+        self.comb2_right = dws_branch_k5_s2_p2(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stem=True)
 
-    def __init__(self,
-                 stem_filters,
-                 num_filters,
-                 **kwargs):
-        super(CellStem1, self).__init__(**kwargs)
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-        with self.name_scope():
-            self.conv_1x1 = ConvBlock(
-                in_channels=(2 * num_filters),
-                out_channels=num_filters,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb4_right = nasnet_maxpool()
 
-            self.relu = nn.Activation('relu')
+    def hybrid_forward(self, F, x, _=None):
+        x_left = self.conv1x1(x)
+        x_right = x
 
-            self.path_1 = CellStemPathBlock(
-                in_channels=stem_filters,
-                out_channels=(num_filters // 2))
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-            self.path_2 = CellStemPathBlock(
-                in_channels=stem_filters,
-                out_channels=(num_filters // 2))
-
-            self.final_path_bn = nasnet_batch_norm(channels=num_filters)
-
-            self.comb_iter_0_left = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=5,
-                strides=2,
-                padding=2,
-                specific=True)
-            self.comb_iter_0_right = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                specific=True)
-
-            self.comb_iter_1_left = MaxPoolPad()
-            self.comb_iter_1_right = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                specific=True)
-
-            self.comb_iter_2_left = AvgPoolPad()
-            self.comb_iter_2_right = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=5,
-                strides=2,
-                padding=2,
-                specific=True)
-
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_4_left = BranchSeparables(
-                in_channels=num_filters,
-                out_channels=num_filters,
-                kernel_size=3,
-                strides=1,
-                padding=1,
-                specific=True)
-            self.comb_iter_4_right = MaxPoolPad()
-
-    def hybrid_forward(self, F, x_conv0, x_stem_0):
-        assert ((not TESTING) or x_conv0.shape == (1, 32, 111, 111))
-        assert ((not TESTING) or x_stem_0.shape == (1, 44, 56, 56))
-
-        x_left = self.conv_1x1(x_stem_0)
-
-        x_relu = self.relu(x_conv0)
-        # path 1
-        x_path1 = self.path_1(x_relu)
-
-        # path 2
-        x_path2 = process_with_padding(x_relu, F)
-        x_path2 = self.path_2(x_path2)
-
-        # final path
-        x_right = self.final_path_bn(F.concat(*[x_path1, x_path2], dim=1))
-
-        x_comb_iter_0_left = self.comb_iter_0_left(x_left)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_right)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
-
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_right)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x_left)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
-
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_left)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
-
-        x_out = F.concat(*[x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
+        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        return x_out, x
 
 
-class FirstCell(HybridBlock):
+class Stem2Unit(HybridBlock):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
                  **kwargs):
-        super(FirstCell, self).__init__(**kwargs)
+        super(Stem2Unit, self).__init__(**kwargs)
+        mid_channels = out_channels // 4
 
-        with self.name_scope():
-            self.conv_1x1 = ConvBlock(
-                in_channels=in_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.conv1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.path = NasPathBlock(
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
 
-            self.relu = nn.Activation(activation='relu')
+        self.comb0_left = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
+        self.comb0_right = dws_branch_k7_s2_p3(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.path_1 = CellStemPathBlock(
-                in_channels=in_channels_left,
-                out_channels=out_channels_left)
+        self.comb1_left = MaxPoolPad()
+        self.comb1_right = dws_branch_k7_s2_p3(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.path_2 = CellStemPathBlock(
-                in_channels=in_channels_left,
-                out_channels=out_channels_left)
+        self.comb2_left = AvgPoolPad()
+        self.comb2_right = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.final_path_bn = nasnet_batch_norm(channels=(2 * out_channels_left))
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_0_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=1,
-                padding=2)
-            self.comb_iter_0_right = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
-
-            self.comb_iter_1_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=1,
-                padding=2)
-            self.comb_iter_1_right = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
-
-            self.comb_iter_2_left = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_3_left = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_4_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
+        self.comb4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
-        assert ((not TESTING) or x.shape == (1, 88, 28, 28) or x.shape == (1, 352, 14, 14) or x.shape == (1, 704, 7, 7))
-        assert ((not TESTING) or x_prev.shape == (1, 44, 56, 56) or x_prev.shape == (1, 264, 28, 28) or x_prev.shape == (1, 528, 14, 14))
+        x_left = self.conv1x1(x)
+        x_right = self.path(x_prev)
 
-        x_relu = self.relu(x_prev)
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        # path 1
-        x_path1 = self.path_1(x_relu)
-
-        # path 2
-        x_path2 = process_with_padding(x_relu, F)
-        x_path2 = self.path_2(x_path2)
-
-        # final path
-        x_left = self.final_path_bn(F.concat(*[x_path1, x_path2], dim=1))
-
-        x_right = self.conv_1x1(x)
-
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
-
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_left
-
-        x_comb_iter_3_left = self.comb_iter_3_left(x_left)
-        x_comb_iter_3_right = self.comb_iter_3_right(x_left)
-        x_comb_iter_3 = x_comb_iter_3_left + x_comb_iter_3_right
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_right
-
-        x_out = F.concat(*[x_left, x_comb_iter_0, x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
+        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        return x_out, x
 
 
-class NormalCell(HybridBlock):
+class FirstUnit(HybridBlock):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
                  **kwargs):
-        super(NormalCell, self).__init__(**kwargs)
+        super(FirstUnit, self).__init__(**kwargs)
+        mid_channels = out_channels // 6
 
-        with self.name_scope():
-            self.conv_prev_1x1 = ConvBlock(
-                in_channels=in_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.conv1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-            self.conv_1x1 = ConvBlock(
-                in_channels=in_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.path = NasPathBlock(
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
 
-            self.comb_iter_0_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=1,
-                padding=2)
-            self.comb_iter_0_right = BranchSeparables(
-                in_channels=out_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=3,
-                strides=1,
-                padding=1)
+        self.comb0_left = dws_branch_k5_s1_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb0_right = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
-            self.comb_iter_1_left = BranchSeparables(
-                in_channels=out_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=5,
-                strides=1,
-                padding=2)
-            self.comb_iter_1_right = BranchSeparables(
-                in_channels=out_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=3,
-                strides=1,
-                padding=1)
+        self.comb1_left = dws_branch_k5_s1_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb1_right = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
-            self.comb_iter_2_left = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
+        self.comb2_left = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_3_left = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
+        self.comb3_left = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_4_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
     def hybrid_forward(self, F, x, x_prev):
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
+        x_left = self.conv1x1(x)
+        x_right = self.path(x_prev)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_right) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + x_right
+        x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
+        x4 = self.comb4_left(x_left) + x_left
 
-        x_comb_iter_1_left = self.comb_iter_1_left(x_left)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2 = x_comb_iter_2_left + x_left
-
-        x_comb_iter_3_left = self.comb_iter_3_left(x_left)
-        x_comb_iter_3_right = self.comb_iter_3_right(x_left)
-        x_comb_iter_3 = x_comb_iter_3_left + x_comb_iter_3_right
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_right
-
-        x_out = F.concat(*[x_left, x_comb_iter_0, x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
+        x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
+        return x_out, x
 
 
-class ReductionCell0(HybridBlock):
+class NormalUnit(HybridBlock):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
                  **kwargs):
-        super(ReductionCell0, self).__init__(**kwargs)
+        super(NormalUnit, self).__init__(**kwargs)
+        mid_channels = out_channels // 6
 
-        with self.name_scope():
-            self.conv_prev_1x1 = ConvBlock(
-                in_channels=in_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.conv1x1_prev = nas_conv1x1(
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
+        self.conv1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-            self.conv_1x1 = ConvBlock(
-                in_channels=in_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.comb0_left = dws_branch_k5_s1_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb0_right = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
-            self.comb_iter_0_left = BranchSeparablesReduction(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=2,
-                padding=2)
-            self.comb_iter_0_right = BranchSeparablesReduction(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=7,
-                strides=2,
-                padding=3)
+        self.comb1_left = dws_branch_k5_s1_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.comb1_right = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
-            self.comb_iter_1_left = MaxPoolPad()
-            self.comb_iter_1_right = BranchSeparablesReduction(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=7,
-                strides=2,
-                padding=3)
+        self.comb2_left = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_2_left = AvgPoolPad()
-            self.comb_iter_2_right = BranchSeparablesReduction(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=2,
-                padding=2)
+        self.comb3_left = nasnet_avgpool3x3_s1()
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_4_left = BranchSeparablesReduction(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
-            self.comb_iter_4_right = MaxPoolPad()
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
     def hybrid_forward(self, F, x, x_prev):
-        assert ((not TESTING) or x.shape == (1, 264, 28, 28))
-        assert ((not TESTING) or x_prev.shape == (1, 264, 28, 28))
+        x_left = self.conv1x1(x)
+        x_right = self.conv1x1_prev(x_prev)
 
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_right) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + x_right
+        x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
+        x4 = self.comb4_left(x_left) + x_left
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
-
-        x_comb_iter_1_left = self.comb_iter_1_left(x_right)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_left)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
-
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
-
-        x_out = F.concat(*[x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
+        x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
+        return x_out, x
 
 
-class ReductionCell1(HybridBlock):
+class ReductionUnit(HybridBlock):
 
     def __init__(self,
-                 in_channels_left,
-                 out_channels_left,
-                 in_channels_right,
-                 out_channels_right,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
                  **kwargs):
-        super(ReductionCell1, self).__init__(**kwargs)
+        super(ReductionUnit, self).__init__(**kwargs)
+        mid_channels = out_channels // 4
 
-        with self.name_scope():
-            self.conv_prev_1x1 = ConvBlock(
-                in_channels=in_channels_left,
-                out_channels=out_channels_left,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.conv1x1_prev = nas_conv1x1(
+            in_channels=prev_in_channels,
+            out_channels=mid_channels)
+        self.conv1x1 = nas_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-            self.conv_1x1 = ConvBlock(
-                in_channels=in_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=1,
-                strides=1,
-                use_bias=False)
+        self.comb0_left = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
+        self.comb0_right = dws_branch_k7_s2_p3(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.comb_iter_0_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=2,
-                padding=2)
-            self.comb_iter_0_right = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=7,
-                strides=2,
-                padding=3)
+        self.comb1_left = MaxPoolPad()
+        self.comb1_right = dws_branch_k7_s2_p3(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.comb_iter_1_left = MaxPoolPad()
-            self.comb_iter_1_right = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=7,
-                strides=2,
-                padding=3)
+        self.comb2_left = AvgPoolPad()
+        self.comb2_right = dws_branch_k5_s2_p2(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
 
-            self.comb_iter_2_left = AvgPoolPad()
-            self.comb_iter_2_right = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=5,
-                strides=2,
-                padding=2)
+        self.comb3_right = nasnet_avgpool3x3_s1()
 
-            self.comb_iter_3_right = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                count_include_pad=False)
-
-            self.comb_iter_4_left = BranchSeparables(
-                in_channels=out_channels_right,
-                out_channels=out_channels_right,
-                kernel_size=3,
-                strides=1,
-                padding=1)
-            self.comb_iter_4_right = MaxPoolPad()
+        self.comb4_left = dws_branch_k3_s1_p1(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            specific=True)
+        self.comb4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
-        assert ((not TESTING) or x.shape == (1, 528, 14, 14))
-        assert ((not TESTING) or x_prev.shape == (1, 528, 14, 14))
+        x_left = self.conv1x1(x)
+        x_right = self.conv1x1_prev(x_prev)
 
-        x_left = self.conv_prev_1x1(x_prev)
-        x_right = self.conv_1x1(x)
+        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
+        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
+        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
+        x3 = x1 + self.comb3_right(x0)
+        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_comb_iter_0_left = self.comb_iter_0_left(x_right)
-        x_comb_iter_0_right = self.comb_iter_0_right(x_left)
-        x_comb_iter_0 = x_comb_iter_0_left + x_comb_iter_0_right
-
-        x_comb_iter_1_left = self.comb_iter_1_left(x_right)
-        x_comb_iter_1_right = self.comb_iter_1_right(x_left)
-        x_comb_iter_1 = x_comb_iter_1_left + x_comb_iter_1_right
-
-        x_comb_iter_2_left = self.comb_iter_2_left(x_right)
-        x_comb_iter_2_right = self.comb_iter_2_right(x_left)
-        x_comb_iter_2 = x_comb_iter_2_left + x_comb_iter_2_right
-
-        x_comb_iter_3_right = self.comb_iter_3_right(x_comb_iter_0)
-        x_comb_iter_3 = x_comb_iter_3_right + x_comb_iter_1
-
-        x_comb_iter_4_left = self.comb_iter_4_left(x_comb_iter_0)
-        x_comb_iter_4_right = self.comb_iter_4_right(x_right)
-        x_comb_iter_4 = x_comb_iter_4_left + x_comb_iter_4_right
-
-        x_out = F.concat(*[x_comb_iter_1, x_comb_iter_2, x_comb_iter_3, x_comb_iter_4], dim=1)
-        return x_out
+        x_next = F.concat(x1, x2, x3, x4, dim=1)
+        return x_next, x
 
 
 class NASNetInitBlock(HybridBlock):
@@ -923,7 +702,6 @@ class NASNetInitBlock(HybridBlock):
                  out_channels,
                  **kwargs):
         super(NASNetInitBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.conv = nn.Conv2D(
                 channels=out_channels,
@@ -932,10 +710,7 @@ class NASNetInitBlock(HybridBlock):
                 padding=0,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                momentum=0.1,
-                epsilon=0.001,
-                in_channels=out_channels)
+            self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -946,186 +721,136 @@ class NASNetInitBlock(HybridBlock):
 class NASNet(HybridBlock):
 
     def __init__(self,
-                 cell_repeats,
-                 penultimate_filters,
+                 init_block_channels,
+                 stem_blocks_channels,
+                 channels,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
         super(NASNet, self).__init__(**kwargs)
 
-        stem_filters = 32
-        filters = penultimate_filters // 24
-        filters_multiplier = 2
-
         with self.name_scope():
-            self.conv0 = NASNetInitBlock(
+            self.features = DualPathSequential(
+                return_two=False,
+                first_ordinals=1,
+                last_ordinals=2)
+            self.features.add(NASNetInitBlock(
                 in_channels=in_channels,
-                out_channels=stem_filters)
+                out_channels=init_block_channels))
+            in_channels = init_block_channels
 
-            self.cell_stem_0 = CellStem0(
-                stem_filters=stem_filters,
-                num_filters=filters // (filters_multiplier ** 2))
-            self.cell_stem_1 = CellStem1(
-                stem_filters=stem_filters,
-                num_filters=filters // filters_multiplier)
+            out_channels = stem_blocks_channels[0]
+            self.features.add(Stem1Unit(
+                in_channels=in_channels,
+                out_channels=out_channels))
+            prev_in_channels = in_channels
+            in_channels = out_channels
 
-            self.cell_0 = FirstCell(in_channels_left=filters, out_channels_left=filters//2,  # 1, 0.5
-                                    in_channels_right=2*filters, out_channels_right=filters)  # 2, 1
-            self.cell_1 = NormalCell(in_channels_left=2*filters, out_channels_left=filters,  # 2, 1
-                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
-            self.cell_2 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
-            self.cell_3 = NormalCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                     in_channels_right=6*filters, out_channels_right=filters)  # 6, 1
+            out_channels = stem_blocks_channels[1]
+            self.features.add(Stem2Unit(
+                in_channels=in_channels,
+                prev_in_channels=prev_in_channels,
+                out_channels=out_channels))
+            prev_in_channels = in_channels
+            in_channels = out_channels
 
-            self.reduction_cell_0 = ReductionCell0(in_channels_left=6*filters, out_channels_left=2*filters,  # 6, 2
-                                                   in_channels_right=6*filters, out_channels_right=2*filters)  # 6, 2
+            for i, channels_per_stage in enumerate(channels):
+                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        if (j == 0) and (i != 0):
+                            unit = ReductionUnit
+                        elif ((i == 0) and (j == 0)) or ((i != 0) and (j == 1)):
+                            unit = FirstUnit
+                        else:
+                            unit = NormalUnit
+                        stage.add(unit(
+                            in_channels=in_channels,
+                            prev_in_channels=prev_in_channels,
+                            out_channels=out_channels))
+                        prev_in_channels = in_channels
+                        in_channels = out_channels
+                self.features.add(stage)
 
-            self.cell_6 = FirstCell(in_channels_left=6*filters, out_channels_left=filters,  # 6, 1
-                                    in_channels_right=8*filters, out_channels_right=2*filters)  # 8, 2
-            self.cell_7 = NormalCell(in_channels_left=8*filters, out_channels_left=2*filters,  # 8, 2
-                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
-            self.cell_8 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
-            self.cell_9 = NormalCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                     in_channels_right=12*filters, out_channels_right=2*filters)  # 12, 2
+            self.features.add(nn.Activation('relu'))
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-            self.reduction_cell_1 = ReductionCell1(in_channels_left=12*filters, out_channels_left=4*filters,  # 12, 4
-                                                   in_channels_right=12*filters, out_channels_right=4*filters)  # 12, 4
-
-            self.cell_12 = FirstCell(in_channels_left=12*filters, out_channels_left=2*filters,  # 12, 2
-                                     in_channels_right=16*filters, out_channels_right=4*filters)  # 16, 4
-            self.cell_13 = NormalCell(in_channels_left=16*filters, out_channels_left=4*filters,  # 16, 4
-                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-            self.cell_14 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
-                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-            self.cell_15 = NormalCell(in_channels_left=24*filters, out_channels_left=4*filters,  # 24, 4
-                                      in_channels_right=24*filters, out_channels_right=4*filters)  # 24, 4
-
-            self.activ = nn.Activation(activation='relu')
-            self.avg_pool = nn.AvgPool2D(pool_size=7, strides=1, padding=0)
-            self.flatten = nn.Flatten()
-            self.dropout = nn.Dropout(rate=0.5)
-            self.output = nn.Dense(
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dropout(rate=0.5))
+            self.output.add(nn.Dense(
                 units=classes,
-                in_units=penultimate_filters)
-
-    def features(self, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-
-        x_conv0 = self.conv0(x)
-        assert ((not TESTING) or x_conv0.shape == (1, 32, 111, 111))
-        x_stem_0 = self.cell_stem_0(x_conv0)
-        assert ((not TESTING) or x_stem_0.shape == (1, 44, 56, 56))
-        x_stem_1 = self.cell_stem_1(x_conv0, x_stem_0)
-        assert ((not TESTING) or x_stem_1.shape == (1, 88, 28, 28))
-
-        x_cell_0 = self.cell_0(x_stem_1, x_stem_0)
-        assert ((not TESTING) or x_cell_0.shape == (1, 264, 28, 28))
-        x_cell_1 = self.cell_1(x_cell_0, x_stem_1)
-        assert ((not TESTING) or x_cell_1.shape == (1, 264, 28, 28))
-        x_cell_2 = self.cell_2(x_cell_1, x_cell_0)
-        assert ((not TESTING) or x_cell_2.shape == (1, 264, 28, 28))
-        x_cell_3 = self.cell_3(x_cell_2, x_cell_1)
-        assert ((not TESTING) or x_cell_3.shape == (1, 264, 28, 28))
-
-        x_reduction_cell_0 = self.reduction_cell_0(x_cell_3, x_cell_2)
-        assert ((not TESTING) or x_reduction_cell_0.shape == (1, 352, 14, 14))
-
-        x_cell_6 = self.cell_6(x_reduction_cell_0, x_cell_3)
-        assert ((not TESTING) or x_cell_6.shape == (1, 528, 14, 14))
-        x_cell_7 = self.cell_7(x_cell_6, x_reduction_cell_0)
-        assert ((not TESTING) or x_cell_7.shape == (1, 528, 14, 14))
-        x_cell_8 = self.cell_8(x_cell_7, x_cell_6)
-        assert ((not TESTING) or x_cell_8.shape == (1, 528, 14, 14))
-        x_cell_9 = self.cell_9(x_cell_8, x_cell_7)
-        assert ((not TESTING) or x_cell_9.shape == (1, 528, 14, 14))
-
-        x_reduction_cell_1 = self.reduction_cell_1(x_cell_9, x_cell_8)
-        assert ((not TESTING) or x_reduction_cell_1.shape == (1, 704, 7, 7))
-
-        x_cell_12 = self.cell_12(x_reduction_cell_1, x_cell_9)
-        assert ((not TESTING) or x_cell_12.shape == (1, 1056, 7, 7))
-        x_cell_13 = self.cell_13(x_cell_12, x_reduction_cell_1)
-        assert ((not TESTING) or x_cell_13.shape == (1, 1056, 7, 7))
-        x_cell_14 = self.cell_14(x_cell_13, x_cell_12)
-        assert ((not TESTING) or x_cell_14.shape == (1, 1056, 7, 7))
-        x_cell_15 = self.cell_15(x_cell_14, x_cell_13)
-        assert ((not TESTING) or x_cell_15.shape == (1, 1056, 7, 7))
-
-        return x_cell_15
-
-    def classifier(self, x):
-        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
-
-        x = self.activ(x)
-        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
-        x = self.avg_pool(x)
-        assert ((not TESTING) or x.shape == (1, 1056, 1, 1))
-        x = self.flatten(x)
-        assert ((not TESTING) or x.shape == (1, 1056))
-        x = self.dropout(x)
-        assert ((not TESTING) or x.shape == (1, 1056))
-        x = self.output(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
-        return x
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
-        assert ((not TESTING) or x.shape == (1, 3, 224, 224))
-
         x = self.features(x)
-        assert ((not TESTING) or x.shape == (1, 1056, 7, 7))
-
-        x = self.classifier(x)
-        assert ((not TESTING) or x.shape == (1, 1000))
-
+        x = self.output(x)
         return x
 
 
-def get_nasnet(cell_repeats,
+def get_nasnet(repeat,
                penultimate_filters,
                pretrained=False,
                ctx=cpu(),
                **kwargs):
 
+    init_block_channels = 32
+    stem_blocks_channels = [1, 2]
+    channels = [[6, 6, 6, 6],
+                [8, 12, 12, 12, 12],
+                [16, 24, 24, 24, 24]]
+    base_channel_chunk = penultimate_filters // channels[-1][-1]
+
+    stem_blocks_channels = [(ci * base_channel_chunk) for ci in stem_blocks_channels]
+    channels = [[(cij * base_channel_chunk) for cij in ci] for ci in channels]
+
     if pretrained:
         raise ValueError("Pretrained model is not supported")
 
     net = NASNet(
-        cell_repeats=cell_repeats,
-        penultimate_filters=penultimate_filters,
+        init_block_channels=init_block_channels,
+        stem_blocks_channels=stem_blocks_channels,
+        channels=channels,
         **kwargs)
     return net
 
 
 def nasnet_a_mobile(**kwargs):
-    return get_nasnet(4, 1056, **kwargs)
+    return get_nasnet(repeat=4, penultimate_filters=1056, **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
 
-    global TESTING
-    TESTING = True
+    pretrained = False
 
-    net = nasnet_a_mobile()
+    models = [
+        nasnet_a_mobile,
+    ]
 
-    ctx = mx.cpu()
-    net.initialize(ctx=ctx)
+    for model in models:
 
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    assert (weight_count == 5289978)
+        net = model(pretrained=pretrained)
 
-    x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    y = net(x)
-    assert (y.shape == (1, 1000))
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != nasnet_a_mobile or weight_count == 5289978)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

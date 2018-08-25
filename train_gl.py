@@ -449,10 +449,11 @@ def prepare_model(model_name,
         net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
     if tune_layers:
+        tune_layers_ptrn = tuple(tune_layers.split(','))
         params = net._collect_params_with_prefix()
         param_keys = list(params.keys())
         for key in param_keys:
-            if not key.startswith(tuple(tune_layers)):
+            if not key.startswith(tune_layers_ptrn):
                 params[key].grad_req = 'null'
             else:
                 logging.info('Fine-tune parameter: {}'.format(key))

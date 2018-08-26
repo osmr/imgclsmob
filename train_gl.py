@@ -195,10 +195,6 @@ def parse_args():
         action='store_true',
         help='whether to initialize the gamma of the last BN layer in each bottleneck to zero')
     parser.add_argument(
-        '--use_se',
-        action='store_true',
-        help='use SE layers or not in resnext. default is false')
-    parser.add_argument(
         '--batch-norm',
         action='store_true',
         help='enable batch normalization or not in vgg. default is false')
@@ -408,7 +404,6 @@ def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
                   batch_norm,
-                  use_se,
                   last_gamma,
                   dtype,
                   tune_layers,
@@ -419,8 +414,6 @@ def prepare_model(model_name,
 
     if model_name.startswith('vgg'):
         kwargs['batch_norm'] = batch_norm
-    elif model_name.startswith('resnext'):
-        kwargs['use_se'] = use_se
 
     if last_gamma:
         kwargs['last_gamma'] = True
@@ -795,7 +788,6 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         batch_norm=args.batch_norm,
-        use_se=args.use_se,
         last_gamma=args.last_gamma,
         dtype=args.dtype,
         tune_layers=args.tune_layers,

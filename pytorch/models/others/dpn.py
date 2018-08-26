@@ -12,9 +12,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
+from torch.autograd import Variable
+import numpy as np
 from collections import OrderedDict
 
-__all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn92', 'dpn98', 'dpn131', 'dpn107']
+__all__ = ['DPN', 'oth_dpn68', 'dpn68b', 'dpn92', 'dpn98', 'dpn131', 'dpn107']
 
 pretrained_settings = {
     'dpn68': {
@@ -94,11 +96,13 @@ pretrained_settings = {
     }
 }
 
-def dpn68(num_classes=1000, pretrained='imagenet'):
+def oth_dpn68(num_classes=1000, pretrained='imagenet'):
     model = DPN(
         small=True, num_init_features=10, k_r=128, groups=32,
         k_sec=(3, 4, 12, 3), inc_sec=(16, 32, 32, 64),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn68'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -459,3 +463,21 @@ class AdaptiveAvgMaxPool2d(torch.nn.Module):
         return self.__class__.__name__ + ' (' \
                + 'output_size=' + str(self.output_size) \
                + ', pool_type=' + self.pool_type + ')'
+
+
+if __name__ == "__main__":
+
+    net = oth_dpn68(num_classes=1000)
+
+    input = Variable(torch.randn(1, 3, 224, 224))
+    output = net(input)
+    #print(output.size())
+    #print("net={}".format(net))
+
+    net.eval()
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    print("weight_count={}".format(weight_count))
+

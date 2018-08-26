@@ -305,13 +305,13 @@ def main():
         if args.src_model in ["preresnet200b"]:
             src_param_keys = [key for key in src_param_keys if (key.startswith("stage"))]
 
+            dst_params['features.0.conv.weight']._load_init(src_arg_params['conv0_weight'], ctx)
             dst_params['features.0.bn.beta']._load_init(src_arg_params['bn0_beta'], ctx)
             dst_params['features.0.bn.gamma']._load_init(src_arg_params['bn0_gamma'], ctx)
             dst_params['features.5.bn.beta']._load_init(src_arg_params['bn1_beta'], ctx)
             dst_params['features.5.bn.gamma']._load_init(src_arg_params['bn1_gamma'], ctx)
             dst_params['output.1.bias']._load_init(src_arg_params['fc1_bias'], ctx)
             dst_params['output.1.weight']._load_init(src_arg_params['fc1_weight'], ctx)
-            dst_params['features.0.conv.weight']._load_init(src_arg_params['conv0_weight'], ctx)
 
             dst_param_keys = [key for key in dst_param_keys if (not key.endswith("running_mean") and
                                                                 not key.endswith("running_var") and

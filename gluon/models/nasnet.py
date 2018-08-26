@@ -1,17 +1,31 @@
 """
     NASNet-A-Mobile, implemented in Gluon.
-    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition.'
+    Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
+    https://arxiv.org/abs/1707.07012.
 """
 
-__all__ = ['nasnet_a_mobile']
+__all__ = ['NASNet', 'nasnet_a_mobile']
 
+import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1
 
 
 class DualPathSequential(nn.HybridSequential):
+    """
+    A sequential container for hybrid blocks with dual inputs from the previous and two times previous nodes.
+    Blocks will be executed in the order they are added.
 
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first modules with single input/output.
+    last_ordinals : int, default 0
+        Number of the final modules with single input/output.
+    """
     def __init__(self,
                  return_two=True,
                  first_ordinals=0,
@@ -45,6 +59,9 @@ class DualPathSequential(nn.HybridSequential):
 
 
 def nasnet_batch_norm(channels):
+    """
+    NASNet specific Batch normalization layer.
+    """
     return nn.BatchNorm(
         momentum=0.1,
         epsilon=0.001,
@@ -52,6 +69,9 @@ def nasnet_batch_norm(channels):
 
 
 def nasnet_maxpool():
+    """
+    NASNet specific Max pooling layer.
+    """
     return nn.MaxPool2D(
         pool_size=3,
         strides=2,
@@ -59,6 +79,9 @@ def nasnet_maxpool():
 
 
 def nasnet_avgpool1x1_s2():
+    """
+    NASNet specific 1x1 Average pooling layer with stride 2.
+    """
     return nn.AvgPool2D(
         pool_size=1,
         strides=2,
@@ -66,6 +89,9 @@ def nasnet_avgpool1x1_s2():
 
 
 def nasnet_avgpool3x3_s1():
+    """
+    NASNet specific 3x3 Average pooling layer with stride 1.
+    """
     return nn.AvgPool2D(
         pool_size=3,
         strides=1,
@@ -74,6 +100,9 @@ def nasnet_avgpool3x3_s1():
 
 
 def nasnet_avgpool3x3_s2():
+    """
+    NASNet specific 3x3 Average pooling layer with stride 2.
+    """
     return nn.AvgPool2D(
         pool_size=3,
         strides=2,
@@ -85,6 +114,20 @@ def process_with_padding(x,
                          F,
                          process=(lambda x: x),
                          pad_width=(0, 0, 0, 0, 1, 0, 1, 0)):
+    """
+    Auxiliary decorator for layer with NASNet specific extra padding.
+
+    Parameters:
+    ----------
+    x : NDArray
+        Input tensor.
+    F : module
+        Gluon API module.
+    process : function, default (lambda x: x)
+        a decorated layer
+    pad_width : tuple of int, default (0, 0, 0, 0, 1, 0, 1, 0)
+        Whether the layer uses a bias vector.
+    """
     x = F.pad(x, mode="constant", pad_width=pad_width, constant_value=0)
     x = process(x)
     x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
@@ -92,7 +135,9 @@ def process_with_padding(x,
 
 
 class MaxPoolPad(HybridBlock):
-
+    """
+    NASNet specific Max pooling layer with extra padding.
+    """
     def __init__(self,
                  **kwargs):
         super(MaxPoolPad, self).__init__(**kwargs)
@@ -105,7 +150,9 @@ class MaxPoolPad(HybridBlock):
 
 
 class AvgPoolPad(HybridBlock):
-
+    """
+    NASNet specific 3x3 Average pooling layer with extra padding.
+    """
     def __init__(self,
                  strides=2,
                  padding=1,
@@ -192,7 +239,24 @@ def nas_conv1x1(in_channels,
 
 
 class DwsConv(HybridBlock):
+    """
+    Standard depthwise separable convolution block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    use_bias : bool, default False
+        Whether the layers use a bias vector.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -224,7 +288,7 @@ class DwsConv(HybridBlock):
 
 class NasDwsConv(HybridBlock):
     """
-    NASNet specific DWS convolution block.
+    NASNet specific depthwise separable convolution block.
 
     Parameters:
     ----------
@@ -234,10 +298,12 @@ class NasDwsConv(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    specific : bool, default False
+        Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
@@ -272,7 +338,26 @@ class NasDwsConv(HybridBlock):
 
 
 class DwsBranch(HybridBlock):
+    """
+    NASNet specific block with depthwise separable convolution layers.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    specific : bool, default False
+        Whether to use extra padding.
+    stem : bool, default False
+        Whether to use squeeze reduction if False.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -310,6 +395,18 @@ class DwsBranch(HybridBlock):
 def dws_branch_k3_s1_p1(in_channels,
                         out_channels,
                         specific=False):
+    """
+    3x3/1/1 version of the NASNet specific depthwise separable convolution branch.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    specific : bool, default False
+        Whether to use extra padding.
+    """
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -322,6 +419,18 @@ def dws_branch_k3_s1_p1(in_channels,
 def dws_branch_k5_s1_p2(in_channels,
                         out_channels,
                         specific=False):
+    """
+    5x5/1/2 version of the NASNet specific depthwise separable convolution branch.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    specific : bool, default False
+        Whether to use extra padding.
+    """
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -335,6 +444,20 @@ def dws_branch_k5_s2_p2(in_channels,
                         out_channels,
                         specific=False,
                         stem=False):
+    """
+    5x5/2/2 version of the NASNet specific depthwise separable convolution branch.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    specific : bool, default False
+        Whether to use extra padding.
+    stem : bool, default False
+        Whether to use squeeze reduction if False.
+    """
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -349,6 +472,20 @@ def dws_branch_k7_s2_p3(in_channels,
                         out_channels,
                         specific=False,
                         stem=False):
+    """
+    7x7/2/3 version of the NASNet specific depthwise separable convolution branch.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    specific : bool, default False
+        Whether to use extra padding.
+    stem : bool, default False
+        Whether to use squeeze reduction if False.
+    """
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -360,7 +497,18 @@ def dws_branch_k7_s2_p3(in_channels,
 
 
 class NasPathBranch(HybridBlock):
+    """
+    NASNet specific `path` branch (auxiliary block).
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    specific : bool, default False
+        Whether to use extra padding.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -385,7 +533,7 @@ class NasPathBranch(HybridBlock):
 
 class NasPathBlock(HybridBlock):
     """
-    NASNet specific `path-branch` block.
+    NASNet specific `path` block.
 
     Parameters:
     ----------
@@ -422,6 +570,16 @@ class NasPathBlock(HybridBlock):
 
 
 class Stem1Unit(HybridBlock):
+    """
+    NASNet Stem1 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -475,7 +633,18 @@ class Stem1Unit(HybridBlock):
 
 
 class Stem2Unit(HybridBlock):
+    """
+    NASNet Stem2 unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
@@ -535,7 +704,18 @@ class Stem2Unit(HybridBlock):
 
 
 class FirstUnit(HybridBlock):
+    """
+    NASNet First unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
@@ -590,7 +770,18 @@ class FirstUnit(HybridBlock):
 
 
 class NormalUnit(HybridBlock):
+    """
+    NASNet Normal unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
@@ -644,7 +835,18 @@ class NormalUnit(HybridBlock):
 
 
 class ReductionUnit(HybridBlock):
+    """
+    NASNet Reduction unit (there is only one reduction unit for NASNet-A-Mobile).
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
@@ -704,7 +906,16 @@ class ReductionUnit(HybridBlock):
 
 
 class NASNetInitBlock(HybridBlock):
+    """
+    NASNet specific initial block.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -727,11 +938,27 @@ class NASNetInitBlock(HybridBlock):
 
 
 class NASNet(HybridBlock):
+    """
+    NASNet (NASNet-A-Mobile) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
+    https://arxiv.org/abs/1707.07012.
 
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    stem_blocks_channels : list of 2 int
+        Number of output channels for the Stem units.
+    in_channels : int, default 3
+        Number of input channels.
+    classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
+                 channels,
                  init_block_channels,
                  stem_blocks_channels,
-                 channels,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -800,9 +1027,30 @@ class NASNet(HybridBlock):
 
 def get_nasnet(repeat,
                penultimate_filters,
+               model_name=None,
                pretrained=False,
                ctx=cpu(),
+               root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
+    """
+    Create NASNet (NASNet-A-Mobile) model with specific parameters.
+
+    Parameters:
+    ----------
+    repeat : int
+        NNumber of cell repeats.
+    penultimate_filters : int
+        Number of filters in the penultimate layer of the network.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    assert (repeat == 4)
 
     init_block_channels = 32
     stem_blocks_channels = [1, 2]
@@ -814,19 +1062,40 @@ def get_nasnet(repeat,
     stem_blocks_channels = [(ci * base_channel_chunk) for ci in stem_blocks_channels]
     channels = [[(cij * base_channel_chunk) for cij in ci] for ci in channels]
 
-    if pretrained:
-        raise ValueError("Pretrained model is not supported")
-
     net = NASNet(
+        channels=channels,
         init_block_channels=init_block_channels,
         stem_blocks_channels=stem_blocks_channels,
-        channels=channels,
         **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
+
     return net
 
 
 def nasnet_a_mobile(**kwargs):
-    return get_nasnet(repeat=4, penultimate_filters=1056, **kwargs)
+    """
+    NASNet-A-Mobile (NASNet 4x1056) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
+    https://arxiv.org/abs/1707.07012.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_nasnet(repeat=4, penultimate_filters=1056, model_name="nasnet_a_mobile", **kwargs)
 
 
 def _test():

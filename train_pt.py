@@ -53,6 +53,11 @@ def parse_args():
         dest='evaluate',
         action='store_true',
         help='only evaluate model on validation set')
+    parser.add_argument(
+        '--calc-flops',
+        dest='calc_flops',
+        action='store_true',
+        help='calculate FLOPs')
 
     parser.add_argument(
         '--num-gpus',
@@ -635,7 +640,7 @@ def main():
             use_cuda=use_cuda,
             #calc_weight_count=(not log_file_exist),
             calc_weight_count=True,
-            calc_flops=True,
+            calc_flops=args.calc_flops,
             extended_log=True)
     else:
         num_training_samples = 1281167

@@ -161,7 +161,7 @@ _models = {
 
     'nasnet_a_mobile': nasnet_a_mobile,
     'oth_nasnet_a_mobile': oth_nasnet_a_mobile,
-    
+
     'dpn68': dpn68,
     'oth_dpn68': oth_dpn68,
 }

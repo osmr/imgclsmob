@@ -298,42 +298,42 @@ def adaptive_avgmax_pool2d(x, pool_type='avg', padding=0, count_include_pad=Fals
     return x
 
 
-class AdaptiveAvgMaxPool2d(torch.nn.Module):
-    """Selectable global pooling layer with dynamic input kernel size
-    """
-    def __init__(self, output_size=1, pool_type='avg'):
-        super(AdaptiveAvgMaxPool2d, self).__init__()
-        self.output_size = output_size
-        self.pool_type = pool_type
-        if pool_type == 'avgmaxc' or pool_type == 'avgmax':
-            self.pool = nn.ModuleList([nn.AdaptiveAvgPool2d(output_size), nn.AdaptiveMaxPool2d(output_size)])
-        elif pool_type == 'max':
-            self.pool = nn.AdaptiveMaxPool2d(output_size)
-        else:
-            if pool_type != 'avg':
-                print('Invalid pool type %s specified. Defaulting to average pooling.' % pool_type)
-            self.pool = nn.AdaptiveAvgPool2d(output_size)
-
-    def forward(self, x):
-        if self.pool_type == 'avgmaxc':
-            x = torch.cat([p(x) for p in self.pool], dim=1)
-        elif self.pool_type == 'avgmax':
-            x = 0.5 * torch.sum(torch.stack([p(x) for p in self.pool]), 0).squeeze(dim=0)
-        else:
-            x = self.pool(x)
-        return x
-
-    def factor(self):
-        return self._pooling_factor(self.pool_type)
-
-    def __repr__(self):
-        return self.__class__.__name__ + ' (' \
-               + 'output_size=' + str(self.output_size) \
-               + ', pool_type=' + self.pool_type + ')'
-
-    @staticmethod
-    def _pooling_factor(pool_type='avg'):
-        return 2 if pool_type == 'avgmaxc' else 1
+# class AdaptiveAvgMaxPool2d(torch.nn.Module):
+#     """Selectable global pooling layer with dynamic input kernel size
+#     """
+#     def __init__(self, output_size=1, pool_type='avg'):
+#         super(AdaptiveAvgMaxPool2d, self).__init__()
+#         self.output_size = output_size
+#         self.pool_type = pool_type
+#         if pool_type == 'avgmaxc' or pool_type == 'avgmax':
+#             self.pool = nn.ModuleList([nn.AdaptiveAvgPool2d(output_size), nn.AdaptiveMaxPool2d(output_size)])
+#         elif pool_type == 'max':
+#             self.pool = nn.AdaptiveMaxPool2d(output_size)
+#         else:
+#             if pool_type != 'avg':
+#                 print('Invalid pool type %s specified. Defaulting to average pooling.' % pool_type)
+#             self.pool = nn.AdaptiveAvgPool2d(output_size)
+#
+#     def forward(self, x):
+#         if self.pool_type == 'avgmaxc':
+#             x = torch.cat([p(x) for p in self.pool], dim=1)
+#         elif self.pool_type == 'avgmax':
+#             x = 0.5 * torch.sum(torch.stack([p(x) for p in self.pool]), 0).squeeze(dim=0)
+#         else:
+#             x = self.pool(x)
+#         return x
+#
+#     def factor(self):
+#         return self._pooling_factor(self.pool_type)
+#
+#     def __repr__(self):
+#         return self.__class__.__name__ + ' (' \
+#                + 'output_size=' + str(self.output_size) \
+#                + ', pool_type=' + self.pool_type + ')'
+#
+#     @staticmethod
+#     def _pooling_factor(pool_type='avg'):
+#         return 2 if pool_type == 'avgmaxc' else 1
 
 
 class DPN(nn.Module):
@@ -356,9 +356,9 @@ class DPN(nn.Module):
                  init_block_channels,
                  init_block_kernel_size,
                  init_block_padding,
-                 bw_factor,
-                 inc_sec,
-                 k_r,
+                 rs,
+                 bws,
+                 incs,
                  groups,
                  b,
                  test_time_pool,
@@ -366,7 +366,6 @@ class DPN(nn.Module):
                  num_classes=1000):
         super(DPN, self).__init__()
         self.test_time_pool = test_time_pool
-        self.b = b
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", DPNInitBlock(
@@ -377,9 +376,9 @@ class DPN(nn.Module):
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
-            r = (2 ** i) * k_r
-            bw = (2 ** i) * 64 * bw_factor
-            inc = inc_sec[i]
+            r = rs[i]
+            bw = bws[i]
+            inc = incs[i]
             for j, out_channels in enumerate(channels_per_stage):
                 if j == 0:
                     if i == 0:
@@ -435,20 +434,16 @@ class DPN(nn.Module):
                 if module.bias is not None:
                     init.constant_(module.bias, 0)
 
-    def logits(self, features):
-        if not self.training and self.test_time_pool:
-            x = F.avg_pool2d(features, kernel_size=7, stride=1)
-            out = self.output(x)
-            # The extra test time pool should be pooling an img_size//32 - 6 size patch
-            out = adaptive_avgmax_pool2d(out, pool_type='avgmax')
-        else:
-            x = adaptive_avgmax_pool2d(features, pool_type='avg')
-            out = self.output(x)
-        return out.view(out.size(0), -1)
-
     def forward(self, x):
         x = self.features(x)
-        x = self.logits(x)
+        if not self.training and self.test_time_pool:
+            x = F.avg_pool2d(x, kernel_size=7, stride=1)
+            x = self.output(x)
+            x = adaptive_avgmax_pool2d(x, pool_type='avgmax')
+        else:
+            x = adaptive_avgmax_pool2d(x, pool_type='avg')
+            x = self.output(x)
+        x = x.view(x.size(0), -1)
         return x
 
 
@@ -474,14 +469,13 @@ def get_dpn(num_layers,
 
     if num_layers == 68:
         small = True
-        #num_init_features = 10
         init_block_channels = 10
         init_block_kernel_size = 3
         init_block_padding = 1
         k_r = 128
         groups = 32
         k_sec = (3, 4, 12, 3)
-        inc_sec = (16, 32, 32, 64)
+        incs = (16, 32, 32, 64)
         test_time_pool = True
         b = False
     else:
@@ -490,10 +484,13 @@ def get_dpn(num_layers,
     bw_factor = 1 if small else 4
 
     channels = [[0] * li for li in k_sec]
+    rs = [0 * li for li in k_sec]
+    bws = [0 * li for li in k_sec]
     for i in range(len(k_sec)):
-        bw = (2 ** i) * 64 * bw_factor
-        inc = inc_sec[i]
-        channels[i][0] = bw + 3 * inc
+        rs[i] = (2 ** i) * k_r
+        bws[i] = (2 ** i) * 64 * bw_factor
+        inc = incs[i]
+        channels[i][0] = bws[i] + 3 * inc
         for j in range(1, k_sec[i]):
             channels[i][j] = channels[i][j-1] + inc
 
@@ -502,9 +499,9 @@ def get_dpn(num_layers,
         init_block_channels=init_block_channels,
         init_block_kernel_size=init_block_kernel_size,
         init_block_padding=init_block_padding,
-        bw_factor=bw_factor,
-        inc_sec=inc_sec,
-        k_r=k_r,
+        rs=rs,
+        bws=bws,
+        incs=incs,
         groups=groups,
         b=b,
         test_time_pool=test_time_pool,

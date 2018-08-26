@@ -61,6 +61,11 @@ class DualPathSequential(nn.HybridSequential):
 def nasnet_batch_norm(channels):
     """
     NASNet specific Batch normalization layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels in input data.
     """
     return nn.BatchNorm(
         momentum=0.1,
@@ -127,6 +132,11 @@ def process_with_padding(x,
         a decorated layer
     pad_width : tuple of int, default (0, 0, 0, 0, 1, 0, 1, 0)
         Whether the layer uses a bias vector.
+
+    Returns
+    -------
+    NDArray
+        Resulted tensor.
     """
     x = F.pad(x, mode="constant", pad_width=pad_width, constant_value=0)
     x = process(x)
@@ -587,36 +597,37 @@ class Stem1Unit(HybridBlock):
         super(Stem1Unit, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
+        with self.name_scope():
+            self.conv1x1 = nas_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
 
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stem=True)
+            self.comb0_left = dws_branch_k5_s2_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb0_right = dws_branch_k7_s2_p3(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stem=True)
 
-        self.comb1_left = nasnet_maxpool()
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stem=True)
+            self.comb1_left = nasnet_maxpool()
+            self.comb1_right = dws_branch_k7_s2_p3(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stem=True)
 
-        self.comb2_left = nasnet_avgpool3x3_s2()
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stem=True)
+            self.comb2_left = nasnet_avgpool3x3_s2()
+            self.comb2_right = dws_branch_k5_s2_p2(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stem=True)
 
-        self.comb3_right = nasnet_avgpool3x3_s1()
+            self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb4_right = nasnet_maxpool()
+            self.comb4_left = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb4_right = nasnet_maxpool()
 
     def hybrid_forward(self, F, x, _=None):
         x_left = self.conv1x1(x)
@@ -653,41 +664,42 @@ class Stem2Unit(HybridBlock):
         super(Stem2Unit, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.path = NasPathBlock(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
+        with self.name_scope():
+            self.conv1x1 = nas_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.path = NasPathBlock(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
 
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb0_left = dws_branch_k5_s2_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
+            self.comb0_right = dws_branch_k7_s2_p3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb1_left = MaxPoolPad()
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb1_left = MaxPoolPad()
+            self.comb1_right = dws_branch_k7_s2_p3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb2_left = AvgPoolPad()
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb2_left = AvgPoolPad()
+            self.comb2_right = dws_branch_k5_s2_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb3_right = nasnet_avgpool3x3_s1()
+            self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb4_right = MaxPoolPad()
+            self.comb4_left = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
+            self.comb4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)
@@ -724,36 +736,37 @@ class FirstUnit(HybridBlock):
         super(FirstUnit, self).__init__(**kwargs)
         mid_channels = out_channels // 6
 
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
+        with self.name_scope():
+            self.conv1x1 = nas_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
 
-        self.path = NasPathBlock(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
+            self.path = NasPathBlock(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
 
-        self.comb0_left = dws_branch_k5_s1_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb0_right = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb0_left = dws_branch_k5_s1_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb0_right = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
-        self.comb1_left = dws_branch_k5_s1_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb1_right = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb1_left = dws_branch_k5_s1_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb1_right = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
-        self.comb2_left = nasnet_avgpool3x3_s1()
+            self.comb2_left = nasnet_avgpool3x3_s1()
 
-        self.comb3_left = nasnet_avgpool3x3_s1()
-        self.comb3_right = nasnet_avgpool3x3_s1()
+            self.comb3_left = nasnet_avgpool3x3_s1()
+            self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb4_left = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)
@@ -790,35 +803,36 @@ class NormalUnit(HybridBlock):
         super(NormalUnit, self).__init__(**kwargs)
         mid_channels = out_channels // 6
 
-        self.conv1x1_prev = nas_conv1x1(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
+        with self.name_scope():
+            self.conv1x1_prev = nas_conv1x1(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
+            self.conv1x1 = nas_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
 
-        self.comb0_left = dws_branch_k5_s1_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb0_right = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb0_left = dws_branch_k5_s1_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb0_right = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
-        self.comb1_left = dws_branch_k5_s1_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.comb1_right = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb1_left = dws_branch_k5_s1_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
+            self.comb1_right = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
-        self.comb2_left = nasnet_avgpool3x3_s1()
+            self.comb2_left = nasnet_avgpool3x3_s1()
 
-        self.comb3_left = nasnet_avgpool3x3_s1()
-        self.comb3_right = nasnet_avgpool3x3_s1()
+            self.comb3_left = nasnet_avgpool3x3_s1()
+            self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
+            self.comb4_left = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels)
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)
@@ -855,41 +869,42 @@ class ReductionUnit(HybridBlock):
         super(ReductionUnit, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        self.conv1x1_prev = nas_conv1x1(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
+        with self.name_scope():
+            self.conv1x1_prev = nas_conv1x1(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
+            self.conv1x1 = nas_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
 
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb0_left = dws_branch_k5_s2_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
+            self.comb0_right = dws_branch_k7_s2_p3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb1_left = MaxPoolPad()
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb1_left = MaxPoolPad()
+            self.comb1_right = dws_branch_k7_s2_p3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb2_left = AvgPoolPad()
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
+            self.comb2_left = AvgPoolPad()
+            self.comb2_right = dws_branch_k5_s2_p2(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
 
-        self.comb3_right = nasnet_avgpool3x3_s1()
+            self.comb3_right = nasnet_avgpool3x3_s1()
 
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            specific=True)
-        self.comb4_right = MaxPoolPad()
+            self.comb4_left = dws_branch_k3_s1_p1(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                specific=True)
+            self.comb4_right = MaxPoolPad()
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)

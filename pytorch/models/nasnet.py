@@ -62,6 +62,11 @@ class DualPathSequential(nn.Sequential):
 def nasnet_batch_norm(channels):
     """
     NASNet specific Batch normalization layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels in input data.
     """
     return nn.BatchNorm2d(
         num_features=channels,

@@ -30,11 +30,20 @@ class DualPathSequential(nn.Sequential):
             if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
                 x, x_prev = module(x), x
             else:
-                x, x_prev = module(x, x_prev)
+                x, x_prev = self._dual_path_response(module, x, x_prev)
         if self.return_two:
             return x, x_prev
         else:
             return x
+
+    @staticmethod
+    def _dual_path_response(module,
+                            x,
+                            x_prev):
+        x_next = module(x, x_prev)
+        if type(x_next) == tuple:
+            x_next, x = x_next
+        return x_next, x
 
 
 def nasnet_batch_norm(channels):
@@ -459,7 +468,7 @@ class Stem1Unit(nn.Module):
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
         x_out = torch.cat((x1, x2, x3, x4), dim=1)
-        return x_out, x
+        return x_out
 
 
 class Stem2Unit(nn.Module):
@@ -518,7 +527,7 @@ class Stem2Unit(nn.Module):
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
         x_out = torch.cat((x1, x2, x3, x4), dim=1)
-        return x_out, x
+        return x_out
 
 
 class FirstUnit(nn.Module):
@@ -572,7 +581,7 @@ class FirstUnit(nn.Module):
         x4 = self.comb4_left(x_left) + x_left
 
         x_out = torch.cat((x_right, x0, x1, x2, x3, x4), dim=1)
-        return x_out, x
+        return x_out
 
 
 class NormalUnit(nn.Module):
@@ -625,7 +634,7 @@ class NormalUnit(nn.Module):
         x4 = self.comb4_left(x_left) + x_left
 
         x_out = torch.cat((x_right, x0, x1, x2, x3, x4), dim=1)
-        return x_out, x
+        return x_out
 
 
 class ReductionUnit(nn.Module):
@@ -683,8 +692,8 @@ class ReductionUnit(nn.Module):
         x3 = x1 + self.comb3_right(x0)
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_next = torch.cat((x1, x2, x3, x4), dim=1)
-        return x_next, x
+        x_out = torch.cat((x1, x2, x3, x4), dim=1)
+        return x_out
 
 
 class NASNetInitBlock(nn.Module):

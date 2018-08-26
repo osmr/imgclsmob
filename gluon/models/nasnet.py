@@ -28,11 +28,20 @@ class DualPathSequential(nn.HybridSequential):
             if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
                 x, x_prev = block(x), x
             else:
-                x, x_prev = block(x, x_prev)
+                x, x_prev = self._dual_path_response(block, x, x_prev)
         if self.return_two:
             return x, x_prev
         else:
             return x
+
+    @staticmethod
+    def _dual_path_response(block,
+                            x,
+                            x_prev):
+        x_next = block(x, x_prev)
+        if type(x_next) == tuple:
+            x_next, x = x_next
+        return x_next, x
 
 
 def nasnet_batch_norm(channels):
@@ -462,7 +471,7 @@ class Stem1Unit(HybridBlock):
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
         x_out = F.concat(x1, x2, x3, x4, dim=1)
-        return x_out, x
+        return x_out
 
 
 class Stem2Unit(HybridBlock):
@@ -522,7 +531,7 @@ class Stem2Unit(HybridBlock):
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
         x_out = F.concat(x1, x2, x3, x4, dim=1)
-        return x_out, x
+        return x_out
 
 
 class FirstUnit(HybridBlock):
@@ -577,7 +586,7 @@ class FirstUnit(HybridBlock):
         x4 = self.comb4_left(x_left) + x_left
 
         x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
-        return x_out, x
+        return x_out
 
 
 class NormalUnit(HybridBlock):
@@ -631,7 +640,7 @@ class NormalUnit(HybridBlock):
         x4 = self.comb4_left(x_left) + x_left
 
         x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
-        return x_out, x
+        return x_out
 
 
 class ReductionUnit(HybridBlock):
@@ -690,8 +699,8 @@ class ReductionUnit(HybridBlock):
         x3 = x1 + self.comb3_right(x0)
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_next = F.concat(x1, x2, x3, x4, dim=1)
-        return x_next, x
+        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        return x_out
 
 
 class NASNetInitBlock(HybridBlock):

@@ -16,7 +16,7 @@ from torch.autograd import Variable
 import numpy as np
 from collections import OrderedDict
 
-__all__ = ['DPN', 'oth_dpn68', 'dpn68b', 'dpn92', 'dpn98', 'dpn131', 'dpn107']
+__all__ = ['DPN', 'oth_dpn68', 'oth_dpn68b', 'dpn92', 'oth_dpn98', 'oth_dpn131', 'oth_dpn107']
 
 pretrained_settings = {
     'dpn68': {
@@ -116,11 +116,13 @@ def oth_dpn68(num_classes=1000, pretrained='imagenet'):
         model.std = settings['std']
     return model
 
-def dpn68b(num_classes=1000, pretrained='imagenet+5k'):
+def oth_dpn68b(num_classes=1000, pretrained='imagenet+5k'):
     model = DPN(
         small=True, num_init_features=10, k_r=128, groups=32,
         b=True, k_sec=(3, 4, 12, 3), inc_sec=(16, 32, 32, 64),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn68b'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -139,6 +141,8 @@ def dpn92(num_classes=1000, pretrained='imagenet+5k'):
         num_init_features=64, k_r=96, groups=32,
         k_sec=(3, 4, 20, 3), inc_sec=(16, 32, 24, 128),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn92'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -152,11 +156,13 @@ def dpn92(num_classes=1000, pretrained='imagenet+5k'):
         model.std = settings['std']
     return model
 
-def dpn98(num_classes=1000, pretrained='imagenet'):
+def oth_dpn98(num_classes=1000, pretrained='imagenet'):
     model = DPN(
         num_init_features=96, k_r=160, groups=40,
         k_sec=(3, 6, 20, 3), inc_sec=(16, 32, 32, 128),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn98'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -170,11 +176,13 @@ def dpn98(num_classes=1000, pretrained='imagenet'):
         model.std = settings['std']
     return model
 
-def dpn131(num_classes=1000, pretrained='imagenet'):
+def oth_dpn131(num_classes=1000, pretrained='imagenet'):
     model = DPN(
         num_init_features=128, k_r=160, groups=40,
         k_sec=(4, 8, 28, 3), inc_sec=(16, 32, 32, 128),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn131'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -188,11 +196,13 @@ def dpn131(num_classes=1000, pretrained='imagenet'):
         model.std = settings['std']
     return model
 
-def dpn107(num_classes=1000, pretrained='imagenet+5k'):
+def oth_dpn107(num_classes=1000, pretrained='imagenet+5k'):
     model = DPN(
         num_init_features=128, k_r=200, groups=50,
         k_sec=(4, 8, 20, 3), inc_sec=(20, 64, 64, 128),
         num_classes=num_classes, test_time_pool=True)
+    if type(pretrained) == bool and pretrained:
+        pretrained = 'imagenet'
     if pretrained:
         settings = pretrained_settings['dpn107'][pretrained]
         assert num_classes == settings['num_classes'], \
@@ -467,7 +477,7 @@ class AdaptiveAvgMaxPool2d(torch.nn.Module):
 
 if __name__ == "__main__":
 
-    net = oth_dpn68(num_classes=1000)
+    net = oth_dpn131(num_classes=1000)
 
     input = Variable(torch.randn(1, 3, 224, 224))
     output = net(input)

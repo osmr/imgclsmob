@@ -46,6 +46,11 @@ def channel_shuffle(x,
         Input tensor.
     groups : int
         Number of groups.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
     """
     batch, channels, height, width = x.size()
     #assert (channels % groups == 0)

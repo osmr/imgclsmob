@@ -45,6 +45,11 @@ def channel_shuffle(x,
         Input tensor.
     groups : int
         Number of groups.
+
+    Returns
+    -------
+    NDArray
+        Resulted tensor.
     """
     return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
 

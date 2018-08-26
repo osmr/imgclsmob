@@ -47,7 +47,7 @@ Some remarks:
 bottleneck block. Respectively a network without b-suffix has the stride in the first convolution.
 - ResNet/PreResNet models do not use biasses in convolutions at all.
 - CondenseNet models are only so-called converted versions.
-- All models have input 244x244 with ordinary mean and standard deviation normalization.
+- All models have an input 224x224 with ordinary normalization.
 
 ### For Gluon
 

@@ -8,7 +8,7 @@ __all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn98', 'dpn107', 'dpn131']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1
+from common import conv1x1
 
 
 def adaptive_avgmax_pool2d(F,
@@ -251,8 +251,8 @@ class DPNUnit(HybridBlock):
         x_in = F.concat(*x, dim=1) if isinstance(x, tuple) else x
         if self.has_proj:
             x_s = self.conv_proj(x_in)
-            x_s1 = x_s[:, :self.bw, :, :]
-            x_s2 = x_s[:, self.bw:, :, :]
+            x_s1 = F.slice_axis(x_s, axis=1, begin=0, end=self.bw)
+            x_s2 = F.slice_axis(x_s, axis=1, begin=self.bw, end=None)
         else:
             x_s1 = x[0]
             x_s2 = x[1]
@@ -264,8 +264,8 @@ class DPNUnit(HybridBlock):
             y2 = self.conv3b(x_in)
         else:
             x_in = self.conv3(x_in)
-            y1 = x_in[:, :self.bw, :, :]
-            y2 = x_in[:, self.bw:, :, :]
+            y1 = F.slice_axis(x_in, axis=1, begin=0, end=self.bw)
+            y2 = F.slice_axis(x_in, axis=1, begin=self.bw, end=None)
         residual = x_s1 + y1
         dense = F.concat(x_s2, y2, dim=1)
         return residual, dense
@@ -366,38 +366,39 @@ class DPN(HybridBlock):
         self.test_time_pool = test_time_pool
 
         with self.name_scope():
-            self.features = nn.Sequential()
-            self.features.add_module("init_block", DPNInitBlock(
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(DPNInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 kernel_size=init_block_kernel_size,
                 padding=init_block_padding))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.Sequential()
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 r = rs[i]
                 bw = bws[i]
                 inc = incs[i]
-                for j, out_channels in enumerate(channels_per_stage):
-                    has_proj = (j == 0)
-                    key_stride = 2 if (j == 0) and (i != 0) else 1
-                    stage.add_module("unit{}".format(j + 1), DPNUnit(
-                        in_channels=in_channels,
-                        mid_channels=r,
-                        bw=bw,
-                        inc=inc,
-                        groups=groups,
-                        has_proj=has_proj,
-                        key_stride=key_stride,
-                        b_case=b_case))
-                    in_channels = out_channels
-                self.features.add_module("stage{}".format(i + 1), stage)
-            self.features.add_module('post_activ', CatBnActivation(channels=in_channels))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        has_proj = (j == 0)
+                        key_stride = 2 if (j == 0) and (i != 0) else 1
+                        stage.add(DPNUnit(
+                            in_channels=in_channels,
+                            mid_channels=r,
+                            bw=bw,
+                            inc=inc,
+                            groups=groups,
+                            has_proj=has_proj,
+                            key_stride=key_stride,
+                            b_case=b_case))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(CatBnActivation(channels=in_channels))
 
             self.output = conv1x1(
                 in_channels=in_channels,
                 out_channels=num_classes,
-                bias=True)
+                use_bias=True)
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -408,7 +409,7 @@ class DPN(HybridBlock):
         else:
             x = adaptive_avgmax_pool2d(x, pool_type='avg')
             x = self.output(x)
-        x = x.view(x.size(0), -1)
+        x = F.flatten(x)
         return x
 
 
@@ -416,7 +417,8 @@ def get_dpn(num_layers,
             b_case=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.torch', 'models'),
+            ctx=cpu(),
+            root=os.path.join('~', '.mxnet', 'models'),
             **kwargs):
     """
     Create DPN model with specific parameters.
@@ -431,7 +433,9 @@ def get_dpn(num_layers,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
 
@@ -505,11 +509,12 @@ def get_dpn(num_layers,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        import torch
         from .model_store import get_model_file
-        net.load_state_dict(torch.load(get_model_file(
-            model_name=model_name,
-            local_model_store_dir_path=root)))
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -522,7 +527,9 @@ def dpn68(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_dpn(num_layers=68, b_case=False, model_name="dpn68", **kwargs)
@@ -536,7 +543,9 @@ def dpn68b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_dpn(num_layers=68, b_case=True, model_name="dpn68b", **kwargs)
@@ -550,7 +559,9 @@ def dpn98(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_dpn(num_layers=98, b_case=False, model_name="dpn98", **kwargs)
@@ -564,7 +575,9 @@ def dpn107(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_dpn(num_layers=107, b_case=False, model_name="dpn107", **kwargs)
@@ -578,7 +591,9 @@ def dpn131(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_dpn(num_layers=131, b_case=False, model_name="dpn131", **kwargs)
@@ -586,8 +601,7 @@ def dpn131(**kwargs):
 
 def _test():
     import numpy as np
-    import torch
-    from torch.autograd import Variable
+    import mxnet as mx
 
     pretrained = False
 
@@ -603,11 +617,16 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
         weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != dpn68 or weight_count == 12611602)
         assert (model != dpn68b or weight_count == 12611602)
@@ -615,9 +634,10 @@ def _test():
         assert (model != dpn107 or weight_count == 86917800)
         assert (model != dpn131 or weight_count == 79254504)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        #net.hybridize()
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -628,14 +628,14 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
     for_training = False
 
     models = [
         dpn68,
-        dpn68b,
+        # dpn68b,
         dpn98,
-        dpn107,
+        # dpn107,
         dpn131,
     ]
 

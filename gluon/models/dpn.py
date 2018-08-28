@@ -8,7 +8,7 @@ __all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn98', 'dpn107', 'dpn131']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1, DualPathSequential
+from .common import conv1x1, DualPathSequential
 
 
 class GlobalAvgMaxPool2D(HybridBlock):

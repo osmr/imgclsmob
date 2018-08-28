@@ -13,6 +13,7 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
+from .models.dpn import *
 
 __all__ = ['get_model']
 
@@ -156,6 +157,12 @@ _models = {
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
     'nasnet_a_mobile': nasnet_a_mobile,
+
+    'dpn68': dpn68,
+    'dpn68b': dpn68b,
+    'dpn98': dpn98,
+    'dpn107': dpn107,
+    'dpn131': dpn131,
 }
 
 

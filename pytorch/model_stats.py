@@ -94,7 +94,7 @@ def measure_layer(layer, x):
         delta_ops = x.size()[0] * x.size()[1] * out_w * out_h * kernel_ops
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['AdaptiveAvgPool2d']:
+    elif type_name in ['AdaptiveAvgPool2d', 'AdaptiveMaxPool2d']:
         delta_ops = x.size()[0] * x.size()[1] * x.size()[2] * x.size()[3]
         delta_params = get_layer_param(layer)
 

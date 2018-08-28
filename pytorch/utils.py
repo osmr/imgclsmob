@@ -4,6 +4,7 @@ from .models.resnext import *
 from .models.senet import *
 from .models.densenet import *
 from .models.condensenet import *
+from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -13,10 +14,6 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
-from .models.dpn import *
-
-from .models.others.NASNetAMobile import *
-from .models.others.dpn import *
 
 __all__ = ['get_model']
 
@@ -101,6 +98,12 @@ _models = {
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,
 
+    'dpn68': dpn68,
+    'dpn68b': dpn68b,
+    'dpn98': dpn98,
+    'dpn107': dpn107,
+    'dpn131': dpn131,
+
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
@@ -160,19 +163,6 @@ _models = {
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
     'nasnet_a_mobile': nasnet_a_mobile,
-    'oth_nasnet_a_mobile': oth_nasnet_a_mobile,
-
-    'dpn68': dpn68,
-    'dpn68b': dpn68b,
-    'dpn98': dpn98,
-    'dpn107': dpn107,
-    'dpn131': dpn131,
-
-    'oth_dpn68': oth_dpn68,
-    'oth_dpn68b': oth_dpn68b,
-    'oth_dpn98': oth_dpn98,
-    'oth_dpn107': oth_dpn107,
-    'oth_dpn131': oth_dpn131,
 }
 
 

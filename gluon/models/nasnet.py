@@ -9,53 +9,75 @@ __all__ = ['NASNet', 'nasnet_a_mobile']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1
+from .common import conv1x1, DualPathSequential
 
 
-class DualPathSequential(nn.HybridSequential):
+def nasnet_dual_path_scheme(block,
+                            x,
+                            x_prev):
     """
-    A sequential container for hybrid blocks with dual inputs from the previous and two times previous nodes.
-    Blocks will be executed in the order they are added.
+    NASNet specific scheme of dual path response for a block in a DualPathSequential block.
 
     Parameters:
     ----------
-    return_two : bool, default True
-        Whether to return two output after execution.
-    first_ordinals : int, default 0
-        Number of the first modules with single input/output.
-    last_ordinals : int, default 0
-        Number of the final modules with single input/output.
+    block : nn.HybridBlock
+        A block.
+    x : Tensor
+        Current processed tensor.
+    x_prev : Tensor
+        Previous processed tensor.
+
+    Returns
+    -------
+    x_next : Tensor
+        Next processed tensor.
+    x : Tensor
+        Current processed tensor.
     """
-    def __init__(self,
-                 return_two=True,
-                 first_ordinals=0,
-                 last_ordinals=0,
-                 **kwargs):
-        super(DualPathSequential, self).__init__(**kwargs)
-        self.return_two = return_two
-        self.first_ordinals = first_ordinals
-        self.last_ordinals = last_ordinals
+    x_next = block(x, x_prev)
+    if type(x_next) == tuple:
+        x_next, x = x_next
+    return x_next, x
 
-    def hybrid_forward(self, F, x, x_prev=None):
-        length = len(self._children.values())
-        for i, block in enumerate(self._children.values()):
-            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
-                x, x_prev = block(x), x
-            else:
-                x, x_prev = self._dual_path_response(block, x, x_prev)
-        if self.return_two:
-            return x, x_prev
-        else:
-            return x
 
-    @staticmethod
-    def _dual_path_response(block,
-                            x,
-                            x_prev):
-        x_next = block(x, x_prev)
-        if type(x_next) == tuple:
-            x_next, x = x_next
-        return x_next, x
+def nasnet_dual_path_scheme_ordinal(block,
+                                    x,
+                                    _):
+    """
+    NASNet specific scheme of dual path response for an ordinal block with dual inputs/outputs in a DualPathSequential
+    block.
+
+    Parameters:
+    ----------
+    block : nn.HybridBlock
+        A block.
+    x : Tensor
+        Current processed tensor.
+
+    Returns
+    -------
+    x_next : Tensor
+        Next processed tensor.
+    x : Tensor
+        Current processed tensor.
+    """
+    return block(x), x
+
+
+def nasnet_dual_path_sequential(return_two=True,
+                                first_ordinals=0,
+                                last_ordinals=0,
+                                **kwargs):
+    """
+    NASNet specific dual path sequential container.
+    """
+    return DualPathSequential(
+        return_two=return_two,
+        first_ordinals=first_ordinals,
+        last_ordinals=last_ordinals,
+        dual_path_scheme=nasnet_dual_path_scheme,
+        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal,
+        **kwargs)
 
 
 def nasnet_batch_norm(channels):
@@ -980,10 +1002,11 @@ class NASNet(HybridBlock):
         super(NASNet, self).__init__(**kwargs)
 
         with self.name_scope():
-            self.features = DualPathSequential(
+            self.features = nasnet_dual_path_sequential(
                 return_two=False,
                 first_ordinals=1,
-                last_ordinals=2)
+                last_ordinals=2,
+                prefix='')
             self.features.add(NASNetInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
@@ -1005,7 +1028,7 @@ class NASNet(HybridBlock):
             in_channels = out_channels
 
             for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
+                stage = nasnet_dual_path_sequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         if (j == 0) and (i != 0):

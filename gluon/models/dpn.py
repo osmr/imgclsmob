@@ -8,42 +8,25 @@ __all__ = ['DPN', 'dpn68', 'dpn68b', 'dpn98', 'dpn107', 'dpn131']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1
+from common import conv1x1, DualPathSequential
 
 
-def adaptive_avgmax_pool2d(F,
-                           x,
-                           pool_type='avg',
-                           padding=0,
-                           count_include_pad=False):
+class GlobalAvgMaxPool2D(HybridBlock):
     """
-    Selectable global pooling function with dynamic input kernel size
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    pool_type : string, default 'avg'
-        Type of pooling.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value.
-    count_include_pad : bool, default False
-        When True, will include the zero-padding in the averaging calculation.
-
-    Returns
-    -------
-    x : Tensor
-        Resulted tensor.
+    Global average+max pooling operation for spatial data.
     """
-    if pool_type == 'avgmax':
-        x_avg = F.avg_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding,
-                             count_include_pad=count_include_pad)
-        x_max = F.max_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding)
+    def __init__(self,
+                 **kwargs):
+        super(GlobalAvgMaxPool2D, self).__init__(**kwargs)
+        with self.name_scope():
+            self.avg_pool = nn.GlobalAvgPool2D()
+            self.max_pool = nn.GlobalMaxPool2D()
+
+    def hybrid_forward(self, F, x):
+        x_avg = self.avg_pool(x)
+        x_max = self.max_pool(x)
         x = 0.5 * (x_avg + x_max)
-    else:
-        assert (pool_type == 'avg')
-        x = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
-    return x
+        return x
 
 
 def dpn_batch_norm(channels):
@@ -60,9 +43,9 @@ def dpn_batch_norm(channels):
         in_channels=channels)
 
 
-class CatBnActivation(HybridBlock):
+class PreActivation(HybridBlock):
     """
-    DPN final block, which performs the preactivation with cutting.
+    DPN specific block, which performs the preactivation like in RreResNet.
 
     Parameters:
     ----------
@@ -72,12 +55,12 @@ class CatBnActivation(HybridBlock):
     def __init__(self,
                  channels,
                  **kwargs):
-        super(CatBnActivation, self).__init__(**kwargs)
-        self.bn = dpn_batch_norm(channels=channels)
-        self.activ = nn.Activation('relu')
+        super(PreActivation, self).__init__(**kwargs)
+        with self.name_scope():
+            self.bn = dpn_batch_norm(channels=channels)
+            self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
-        x = F.concat(*x, dim=1) if isinstance(x, tuple) else x
         x = self.bn(x)
         x = self.activ(x)
         return x
@@ -111,16 +94,17 @@ class DPNConv(HybridBlock):
                  groups,
                  **kwargs):
         super(DPNConv, self).__init__(**kwargs)
-        self.bn = dpn_batch_norm(channels=in_channels)
-        self.activ = nn.Activation('relu')
-        self.conv = nn.Conv2D(
-            channels=out_channels,
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=padding,
-            groups=groups,
-            use_bias=False,
-            in_channels=in_channels)
+        with self.name_scope():
+            self.bn = dpn_batch_norm(channels=in_channels)
+            self.activ = nn.Activation('relu')
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                groups=groups,
+                use_bias=False,
+                in_channels=in_channels)
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -235,7 +219,7 @@ class DPNUnit(HybridBlock):
                 groups=groups)
 
             if b_case:
-                self.preactiv = CatBnActivation(channels=mid_channels)
+                self.preactiv = PreActivation(channels=mid_channels)
                 self.conv3a = conv1x1(
                     in_channels=mid_channels,
                     out_channels=bw)
@@ -247,15 +231,16 @@ class DPNUnit(HybridBlock):
                     in_channels=mid_channels,
                     out_channels=bw + inc)
 
-    def hybrid_forward(self, F, x):
-        x_in = F.concat(*x, dim=1) if isinstance(x, tuple) else x
+    def hybrid_forward(self, F, x1, x2=None):
+        x_in = F.concat(x1, x2, dim=1) if x2 is not None else x1
         if self.has_proj:
             x_s = self.conv_proj(x_in)
             x_s1 = F.slice_axis(x_s, axis=1, begin=0, end=self.bw)
             x_s2 = F.slice_axis(x_s, axis=1, begin=self.bw, end=None)
         else:
-            x_s1 = x[0]
-            x_s2 = x[1]
+            assert (x2 is not None)
+            x_s1 = x1
+            x_s2 = x2
         x_in = self.conv1(x_in)
         x_in = self.conv2(x_in)
         if self.b_case:
@@ -317,6 +302,29 @@ class DPNInitBlock(HybridBlock):
         return x
 
 
+class DPNFinalBlock(HybridBlock):
+    """
+    DPN final block, which performs the preactivation with cutting.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    """
+    def __init__(self,
+                 channels,
+                 **kwargs):
+        super(DPNFinalBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.activ = PreActivation(channels=channels)
+
+    def hybrid_forward(self, F, x1, x2):
+        assert (x2 is not None)
+        x = F.concat(x1, x2, dim=1)
+        x = self.activ(x)
+        return x, None
+
+
 class DPN(HybridBlock):
     """
     DPN model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
@@ -341,6 +349,8 @@ class DPN(HybridBlock):
         Number of groups in the units.
     b_case : bool
         Whether to use B-case model.
+    for_training : bool
+        Whether to use model for training.
     test_time_pool : bool
         Whether to use the avg-max pooling in the inference mode.
     in_channels : int, default 3
@@ -358,15 +368,19 @@ class DPN(HybridBlock):
                  incs,
                  groups,
                  b_case,
+                 for_training,
                  test_time_pool,
                  in_channels=3,
                  num_classes=1000,
                  **kwargs):
         super(DPN, self).__init__(**kwargs)
-        self.test_time_pool = test_time_pool
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = DualPathSequential(
+                return_two=False,
+                first_ordinals=1,
+                last_ordinals=0,
+                prefix='')
             self.features.add(DPNInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -374,7 +388,7 @@ class DPN(HybridBlock):
                 padding=init_block_padding))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
                 r = rs[i]
                 bw = bws[i]
                 inc = incs[i]
@@ -393,28 +407,36 @@ class DPN(HybridBlock):
                             b_case=b_case))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(CatBnActivation(channels=in_channels))
+            self.features.add(DPNFinalBlock(channels=in_channels))
 
-            self.output = conv1x1(
-                in_channels=in_channels,
-                out_channels=num_classes,
-                use_bias=True)
+            self.output = nn.HybridSequential(prefix='')
+            if for_training or not test_time_pool:
+                self.output.add(nn.GlobalAvgPool2D())
+                self.output.add(conv1x1(
+                    in_channels=in_channels,
+                    out_channels=num_classes,
+                    use_bias=True))
+                self.output.add(nn.Flatten())
+            else:
+                self.output.add(nn.AvgPool2D(
+                    pool_size=7,
+                    strides=1))
+                self.output.add(conv1x1(
+                    in_channels=in_channels,
+                    out_channels=num_classes,
+                    use_bias=True))
+                self.output.add(GlobalAvgMaxPool2D())
+                self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
-        if not self.training and self.test_time_pool:
-            x = F.avg_pool2d(x, kernel_size=7, stride=1)
-            x = self.output(x)
-            x = adaptive_avgmax_pool2d(x, pool_type='avgmax')
-        else:
-            x = adaptive_avgmax_pool2d(x, pool_type='avg')
-            x = self.output(x)
-        x = F.flatten(x)
+        x = self.output(x)
         return x
 
 
 def get_dpn(num_layers,
             b_case=False,
+            for_training=False,
             model_name=None,
             pretrained=False,
             ctx=cpu(),
@@ -429,6 +451,8 @@ def get_dpn(num_layers,
         Number of layers.
     b_case : bool, default False
         Whether to use B-case model.
+    for_training : bool
+        Whether to use model for training.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -503,6 +527,7 @@ def get_dpn(num_layers,
         incs=incs,
         groups=groups,
         b_case=b_case,
+        for_training=for_training,
         test_time_pool=test_time_pool,
         **kwargs)
 
@@ -604,6 +629,7 @@ def _test():
     import mxnet as mx
 
     pretrained = False
+    for_training = False
 
     models = [
         dpn68,
@@ -615,7 +641,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, for_training=for_training)
 
         ctx = mx.cpu()
         if not pretrained:

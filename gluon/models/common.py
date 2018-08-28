@@ -2,7 +2,7 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential']
 
 from mxnet.gluon import nn, HybridBlock
 
@@ -115,4 +115,49 @@ class SEBlock(HybridBlock):
         w = self.sigmoid(w)
         x = F.broadcast_mul(x, w)
         return x
+
+
+class DualPathSequential(nn.HybridSequential):
+    """
+    A sequential container for hybrid blocks with dual inputs/outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first blocks with single input/output.
+    last_ordinals : int, default 0
+        Number of the final blocks with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a block.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal block.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda block, x1, x2: block(x1, x2)),
+                 dual_path_scheme_ordinal=(lambda block, x1, x2: (block(x1), x2)),
+                 **kwargs):
+        super(DualPathSequential, self).__init__(**kwargs)
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def hybrid_forward(self, F, x1, x2=None):
+        length = len(self._children.values())
+        for i, block in enumerate(self._children.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(block, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(block, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
 

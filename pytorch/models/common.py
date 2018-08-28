@@ -2,7 +2,7 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential']
 
 import torch
 import torch.nn as nn
@@ -119,4 +119,48 @@ class SEBlock(nn.Module):
         w = self.sigmoid(w)
         x = x * w
         return x
+
+
+class DualPathSequential(nn.Sequential):
+    """
+    A sequential container for modules with dual inputs/outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first modules with single input/output.
+    last_ordinals : int, default 0
+        Number of the final modules with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a module.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal module.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda module, x1, x2: module(x1, x2)),
+                 dual_path_scheme_ordinal=(lambda module, x1, x2: (module(x1), x2))):
+        super(DualPathSequential, self).__init__()
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def forward(self, x1, x2=None):
+        length = len(self._modules.values())
+        for i, module in enumerate(self._modules.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(module, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(module, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
 

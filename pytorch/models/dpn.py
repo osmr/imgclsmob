@@ -9,62 +9,48 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-import torch.nn.functional as F
-from .common import conv1x1
+from common import conv1x1, DualPathSequential
 
 
-def adaptive_avgmax_pool2d(x,
-                           pool_type='avg',
-                           padding=0,
-                           count_include_pad=False):
+class GlobalAvgMaxPool2D(nn.Module):
     """
-    Selectable global pooling function with dynamic input kernel size
+    Global average+max pooling operation for spatial data.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
-    pool_type : string, default 'avg'
-        Type of pooling.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value.
-    count_include_pad : bool, default False
-        When True, will include the zero-padding in the averaging calculation.
-
-    Returns
-    -------
-    x : Tensor
-        Resulted tensor.
+    output_size : int, default 1
+        The target output size.
     """
-    if pool_type == 'avgmaxc':
-        x = torch.cat((
-            F.avg_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding, count_include_pad=count_include_pad),
-            F.max_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding)), dim=1)
-    elif pool_type == 'avgmax':
-        x_avg = F.avg_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding,
-                             count_include_pad=count_include_pad)
-        x_max = F.max_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding)
+    def __init__(self,
+                 output_size=1):
+        super(GlobalAvgMaxPool2D, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(output_size=output_size)
+        self.max_pool = nn.AdaptiveMaxPool2d(output_size=output_size)
+
+    def forward(self, x):
+        x_avg = self.avg_pool(x)
+        x_max = self.max_pool(x)
         x = 0.5 * (x_avg + x_max)
-    elif pool_type == 'max':
-        x = F.max_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding)
-    else:
-        assert (pool_type == 'avg')
-        x = F.avg_pool2d(x, kernel_size=(x.size(2), x.size(3)), padding=padding, count_include_pad=count_include_pad)
-    return x
+        return x
 
 
 def dpn_batch_norm(channels):
     """
     DPN specific Batch normalization layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels in input data.
     """
     return nn.BatchNorm2d(
         num_features=channels,
         eps=0.001)
 
 
-class CatBnActivation(nn.Module):
+class PreActivation(nn.Module):
     """
-    DPN final block, which performs the preactivation with cutting.
+    DPN specific block, which performs the preactivation like in RreResNet.
 
     Parameters:
     ----------
@@ -73,12 +59,11 @@ class CatBnActivation(nn.Module):
     """
     def __init__(self,
                  channels):
-        super(CatBnActivation, self).__init__()
+        super(PreActivation, self).__init__()
         self.bn = dpn_batch_norm(channels=channels)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = torch.cat(x, dim=1) if isinstance(x, tuple) else x
         x = self.bn(x)
         x = self.activ(x)
         return x
@@ -233,7 +218,7 @@ class DPNUnit(nn.Module):
             groups=groups)
 
         if b_case:
-            self.preactiv = CatBnActivation(channels=mid_channels)
+            self.preactiv = PreActivation(channels=mid_channels)
             self.conv3a = conv1x1(
                 in_channels=mid_channels,
                 out_channels=bw)
@@ -245,15 +230,16 @@ class DPNUnit(nn.Module):
                 in_channels=mid_channels,
                 out_channels=bw + inc)
 
-    def forward(self, x):
-        x_in = torch.cat(x, dim=1) if isinstance(x, tuple) else x
+    def forward(self, x1, x2=None):
+        x_in = torch.cat((x1, x2), dim=1) if x2 is not None else x1
         if self.has_proj:
             x_s = self.conv_proj(x_in)
             x_s1 = x_s[:, :self.bw, :, :]
             x_s2 = x_s[:, self.bw:, :, :]
         else:
-            x_s1 = x[0]
-            x_s2 = x[1]
+            assert (x2 is not None)
+            x_s1 = x1
+            x_s2 = x2
         x_in = self.conv1(x_in)
         x_in = self.conv2(x_in)
         if self.b_case:
@@ -312,6 +298,27 @@ class DPNInitBlock(nn.Module):
         return x
 
 
+class DPNFinalBlock(nn.Module):
+    """
+    DPN final block, which performs the preactivation with cutting.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    """
+    def __init__(self,
+                 channels):
+        super(DPNFinalBlock, self).__init__()
+        self.activ = PreActivation(channels=channels)
+
+    def forward(self, x1, x2):
+        assert (x2 is not None)
+        x = torch.cat((x1, x2), dim=1)
+        x = self.activ(x)
+        return x, None
+
+
 class DPN(nn.Module):
     """
     DPN model from 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
@@ -336,6 +343,8 @@ class DPN(nn.Module):
         Number of groups in the units.
     b_case : bool
         Whether to use B-case model.
+    for_training : bool
+        Whether to use model for training.
     test_time_pool : bool
         Whether to use the avg-max pooling in the inference mode.
     in_channels : int, default 3
@@ -353,13 +362,16 @@ class DPN(nn.Module):
                  incs,
                  groups,
                  b_case,
+                 for_training,
                  test_time_pool,
                  in_channels=3,
                  num_classes=1000):
         super(DPN, self).__init__()
-        self.test_time_pool = test_time_pool
 
-        self.features = nn.Sequential()
+        self.features = DualPathSequential(
+                return_two=False,
+                first_ordinals=1,
+                last_ordinals=0)
         self.features.add_module("init_block", DPNInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -367,7 +379,7 @@ class DPN(nn.Module):
             padding=init_block_padding))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
+            stage = DualPathSequential()
             r = rs[i]
             bw = bws[i]
             inc = incs[i]
@@ -385,12 +397,24 @@ class DPN(nn.Module):
                     b_case=b_case))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', CatBnActivation(channels=in_channels))
+        self.features.add_module('final_block', DPNFinalBlock(channels=in_channels))
 
-        self.output = conv1x1(
-            in_channels=in_channels,
-            out_channels=num_classes,
-            bias=True)
+        self.output = nn.Sequential()
+        if for_training or not test_time_pool:
+            self.output.add_module('final_pool', nn.AdaptiveAvgPool2d(output_size=1))
+            self.output.add_module('classifier', conv1x1(
+                in_channels=in_channels,
+                out_channels=num_classes,
+                bias=True))
+        else:
+            self.output.add_module('avg_pool', nn.AvgPool2d(
+                kernel_size=7,
+                stride=1))
+            self.output.add_module('classifier', conv1x1(
+                in_channels=in_channels,
+                out_channels=num_classes,
+                bias=True))
+            self.output.add_module('avgmax_pool', GlobalAvgMaxPool2D())
 
         self._init_params()
 
@@ -403,19 +427,14 @@ class DPN(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        if not self.training and self.test_time_pool:
-            x = F.avg_pool2d(x, kernel_size=7, stride=1)
-            x = self.output(x)
-            x = adaptive_avgmax_pool2d(x, pool_type='avgmax')
-        else:
-            x = adaptive_avgmax_pool2d(x, pool_type='avg')
-            x = self.output(x)
+        x = self.output(x)
         x = x.view(x.size(0), -1)
         return x
 
 
 def get_dpn(num_layers,
             b_case=False,
+            for_training=False,
             model_name=None,
             pretrained=False,
             root=os.path.join('~', '.torch', 'models'),
@@ -429,6 +448,8 @@ def get_dpn(num_layers,
         Number of layers.
     b_case : bool, default False
         Whether to use B-case model.
+    for_training : bool
+        Whether to use model for training.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -501,6 +522,7 @@ def get_dpn(num_layers,
         incs=incs,
         groups=groups,
         b_case=b_case,
+        for_training=for_training,
         test_time_pool=test_time_pool,
         **kwargs)
 
@@ -592,6 +614,7 @@ def _test():
     from torch.autograd import Variable
 
     pretrained = False
+    for_training = False
 
     models = [
         dpn68,
@@ -603,9 +626,10 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, for_training=for_training)
 
         net.train()
+        #net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

@@ -10,53 +10,75 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1
+from .common import conv1x1, DualPathSequential
 
 
-class DualPathSequential(nn.Sequential):
+def nasnet_dual_path_scheme(module,
+                            x,
+                            x_prev):
     """
-    A sequential container for modules with dual inputs from the previous and two times previous nodes.
-    Modules will be executed in the order they are added.
+    NASNet specific scheme of dual path response for a module in a DualPathSequential module.
 
     Parameters:
     ----------
-    return_two : bool, default True
-        Whether to return two output after execution.
-    first_ordinals : int, default 0
-        Number of the first modules with single input/output.
-    last_ordinals : int, default 0
-        Number of the final modules with single input/output.
+    module : nn.Module
+        A module.
+    x : Tensor
+        Current processed tensor.
+    x_prev : Tensor
+        Previous processed tensor.
+
+    Returns
+    -------
+    x_next : Tensor
+        Next processed tensor.
+    x : Tensor
+        Current processed tensor.
     """
-    def __init__(self,
-                 return_two=True,
-                 first_ordinals=0,
-                 last_ordinals=0,
-                 *args):
-        super(DualPathSequential, self).__init__(*args)
-        self.return_two = return_two
-        self.first_ordinals = first_ordinals
-        self.last_ordinals = last_ordinals
+    x_next = module(x, x_prev)
+    if type(x_next) == tuple:
+        x_next, x = x_next
+    return x_next, x
 
-    def forward(self, x, x_prev=None):
-        length = len(self._modules.values())
-        for i, module in enumerate(self._modules.values()):
-            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
-                x, x_prev = module(x), x
-            else:
-                x, x_prev = self._dual_path_response(module, x, x_prev)
-        if self.return_two:
-            return x, x_prev
-        else:
-            return x
 
-    @staticmethod
-    def _dual_path_response(module,
-                            x,
-                            x_prev):
-        x_next = module(x, x_prev)
-        if type(x_next) == tuple:
-            x_next, x = x_next
-        return x_next, x
+def nasnet_dual_path_scheme_ordinal(module,
+                                    x,
+                                    _):
+    """
+    NASNet specific scheme of dual path response for an ordinal module with dual inputs/outputs in a DualPathSequential
+    module.
+
+    Parameters:
+    ----------
+    module : nn.Module
+        A module.
+    x : Tensor
+        Current processed tensor.
+
+    Returns
+    -------
+    x_next : Tensor
+        Next processed tensor.
+    x : Tensor
+        Current processed tensor.
+    """
+    return module(x), x
+
+
+def nasnet_dual_path_sequential(return_two=True,
+                                first_ordinals=0,
+                                last_ordinals=0,
+                                **kwargs):
+    """
+    NASNet specific dual path sequential container.
+    """
+    return DualPathSequential(
+        return_two=return_two,
+        first_ordinals=first_ordinals,
+        last_ordinals=last_ordinals,
+        dual_path_scheme=nasnet_dual_path_scheme,
+        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal,
+        **kwargs)
 
 
 def nasnet_batch_norm(channels):
@@ -935,7 +957,7 @@ class NASNet(nn.Module):
                  num_classes=1000):
         super(NASNet, self).__init__()
 
-        self.features = DualPathSequential(
+        self.features = nasnet_dual_path_sequential(
             return_two=False,
             first_ordinals=1,
             last_ordinals=2)
@@ -960,7 +982,7 @@ class NASNet(nn.Module):
         in_channels = out_channels
 
         for i, channels_per_stage in enumerate(channels):
-            stage = DualPathSequential()
+            stage = nasnet_dual_path_sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 if (j == 0) and (i != 0):
                     unit = ReductionUnit

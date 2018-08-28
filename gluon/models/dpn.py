@@ -115,7 +115,7 @@ class DPNConv(HybridBlock):
 
 def dpn_conv1x1(in_channels,
                 out_channels,
-                stride=1):
+                strides=1):
     """
     1x1 version of the DPN specific convolution block.
 
@@ -125,21 +125,21 @@ def dpn_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     """
     return DPNConv(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        strides=stride,
+        strides=strides,
         padding=0,
         groups=1)
 
 
 def dpn_conv3x3(in_channels,
                 out_channels,
-                stride,
+                strides,
                 groups):
     """
     3x3 version of the DPN specific convolution block.
@@ -150,7 +150,7 @@ def dpn_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     groups : int
         Number of groups.
@@ -159,7 +159,7 @@ def dpn_conv3x3(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        strides=stride,
+        strides=strides,
         padding=1,
         groups=groups)
 
@@ -182,7 +182,7 @@ class DPNUnit(HybridBlock):
         Number of groups in the units.
     has_proj : bool
         Whether to use projection.
-    key_stride : int
+    key_strides : int
         Key strides of the convolutions.
     b_case : bool, default False
         Whether to use B-case model.
@@ -194,7 +194,7 @@ class DPNUnit(HybridBlock):
                  inc,
                  groups,
                  has_proj,
-                 key_stride,
+                 key_strides,
                  b_case=False,
                  **kwargs):
         super(DPNUnit, self).__init__(**kwargs)
@@ -207,7 +207,7 @@ class DPNUnit(HybridBlock):
                 self.conv_proj = dpn_conv1x1(
                     in_channels=in_channels,
                     out_channels=bw + 2 * inc,
-                    stride=key_stride)
+                    strides=key_strides)
 
             self.conv1 = dpn_conv1x1(
                 in_channels=in_channels,
@@ -215,7 +215,7 @@ class DPNUnit(HybridBlock):
             self.conv2 = dpn_conv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=key_stride,
+                strides=key_strides,
                 groups=groups)
 
             if b_case:
@@ -355,7 +355,7 @@ class DPN(HybridBlock):
         Whether to use the avg-max pooling in the inference mode.
     in_channels : int, default 3
         Number of input channels.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -371,7 +371,7 @@ class DPN(HybridBlock):
                  for_training,
                  test_time_pool,
                  in_channels=3,
-                 num_classes=1000,
+                 classes=1000,
                  **kwargs):
         super(DPN, self).__init__(**kwargs)
 
@@ -395,7 +395,7 @@ class DPN(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         has_proj = (j == 0)
-                        key_stride = 2 if (j == 0) and (i != 0) else 1
+                        key_strides = 2 if (j == 0) and (i != 0) else 1
                         stage.add(DPNUnit(
                             in_channels=in_channels,
                             mid_channels=r,
@@ -403,7 +403,7 @@ class DPN(HybridBlock):
                             inc=inc,
                             groups=groups,
                             has_proj=has_proj,
-                            key_stride=key_stride,
+                            key_strides=key_strides,
                             b_case=b_case))
                         in_channels = out_channels
                 self.features.add(stage)
@@ -414,7 +414,7 @@ class DPN(HybridBlock):
                 self.output.add(nn.GlobalAvgPool2D())
                 self.output.add(conv1x1(
                     in_channels=in_channels,
-                    out_channels=num_classes,
+                    out_channels=classes,
                     use_bias=True))
                 self.output.add(nn.Flatten())
             else:
@@ -423,7 +423,7 @@ class DPN(HybridBlock):
                     strides=1))
                 self.output.add(conv1x1(
                     in_channels=in_channels,
-                    out_channels=num_classes,
+                    out_channels=classes,
                     use_bias=True))
                 self.output.add(GlobalAvgMaxPool2D())
                 self.output.add(nn.Flatten())

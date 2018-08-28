@@ -1140,7 +1140,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
         nasnet_a_mobile,

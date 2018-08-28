@@ -1097,7 +1097,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
         nasnet_a_mobile,

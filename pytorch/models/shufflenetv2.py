@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv1x1, ChannelShuffle
+from .common import conv1x1, ChannelShuffle
 
 
 class ShuffleConv(nn.Module):

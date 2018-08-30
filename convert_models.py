@@ -229,6 +229,9 @@ def main():
         src_param_keys = list(src_params.keys())
         if args.dst_fwk != "pytorch":
             src_param_keys = [key for key in src_param_keys if not key.endswith("num_batches_tracked")]
+        if args.src_model in ["oth_shufflenetv2_wd2"]:
+            src_param_keys = [key for key in src_param_keys if
+                              not key.startswith("network.0.")]
 
     elif args.src_fwk == "mxnet":
         src_sym, src_arg_params, src_aux_params = prepare_model_mx(
@@ -278,11 +281,15 @@ def main():
         dst_net.save_parameters(args.dst_params)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size())),\
-                "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
-                    src_key, dst_key, tuple(src_params[src_key].size()), tuple(dst_params[dst_key].size()))
-            assert (dst_key.split('.')[-1] == src_key.split('.')[-1])
-            dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy())
+            if (args.src_model == "oth_shufflenetv2_wd2" and args.dst_model == "shufflenetv2_wd2") and\
+                    (src_key == "network.8.weight"):
+                dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy()[:,:,0,0])
+            else:
+                assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size())),\
+                    "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                        src_key, dst_key, tuple(src_params[src_key].size()), tuple(dst_params[dst_key].size()))
+                assert (dst_key.split('.')[-1] == src_key.split('.')[-1])
+                dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy())
         torch.save(
             obj=dst_params,
             f=args.dst_params)

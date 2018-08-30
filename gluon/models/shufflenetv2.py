@@ -9,7 +9,7 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, ChannelShuffle
+from .common import conv1x1, ChannelShuffle, SEBlock
 
 
 class ShuffleConv(HybridBlock):
@@ -57,7 +57,7 @@ class ShuffleConv(HybridBlock):
 
 
 def shuffle_conv1x1(in_channels,
-                   out_channels):
+                    out_channels):
     """
     1x1 version of the ShuffleNetV2 specific convolution block.
 
@@ -100,7 +100,7 @@ def depthwise_conv3x3(channels,
 
 class ShuffleUnit(HybridBlock):
     """
-    ShuffleNet unit.
+    ShuffleNetV2 unit.
 
     Parameters:
     ----------
@@ -110,14 +110,22 @@ class ShuffleUnit(HybridBlock):
         Number of output channels.
     downsample : bool
         Whether do downsample.
+    use_se : bool
+        Whether to use SE block.
+    use_residual : bool
+        Whether to use residual connection.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  downsample,
+                 use_se,
+                 use_residual,
                  **kwargs):
         super(ShuffleUnit, self).__init__(**kwargs)
         self.downsample = downsample
+        self.use_se = use_se
+        self.use_residual = use_residual
         mid_channels = out_channels // 2
 
         with self.name_scope():
@@ -133,6 +141,8 @@ class ShuffleUnit(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=mid_channels)
             self.expand_bn3 = nn.BatchNorm(in_channels=mid_channels)
+            if self.use_se:
+                self.se = SEBlock(channels=mid_channels)
             if downsample:
                 self.dw_conv4 = depthwise_conv3x3(
                     channels=in_channels,
@@ -166,6 +176,10 @@ class ShuffleUnit(HybridBlock):
         y2 = self.expand_conv3(y2)
         y2 = self.expand_bn3(y2)
         y2 = self.activ(y2)
+        if self.use_se:
+            y2 = self.se(y2)
+        if self.use_residual and not self.downsample:
+            y2 = y2 + x2
         x = F.concat(y1, y2, dim=1)
         x = self.c_shuffle(x)
         return x
@@ -197,7 +211,8 @@ class ShuffleInitBlock(HybridBlock):
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
-                padding=1)
+                padding=0,
+                ceil_mode=True)
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -218,6 +233,10 @@ class ShuffleNetV2(HybridBlock):
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    use_se : bool, default False
+        Whether to use SE block.
+    use_residual : bool, default False
+        Whether to use residual connections.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -227,6 +246,8 @@ class ShuffleNetV2(HybridBlock):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 use_se=False,
+                 use_residual=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -246,7 +267,9 @@ class ShuffleNetV2(HybridBlock):
                         stage.add(ShuffleUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
-                            downsample=downsample))
+                            downsample=downsample,
+                            use_se=use_se,
+                            use_residual=use_residual))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(shuffle_conv1x1(

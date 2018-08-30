@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, ChannelShuffle
+from .common import conv1x1, ChannelShuffle, SEBlock
 
 
 class ShuffleConv(nn.Module):
@@ -110,13 +110,21 @@ class ShuffleUnit(nn.Module):
         Number of output channels.
     downsample : bool
         Whether do downsample.
+    use_se : bool
+        Whether to use SE block.
+    use_residual : bool
+        Whether to use residual connection.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 downsample):
+                 downsample,
+                 use_se,
+                 use_residual):
         super(ShuffleUnit, self).__init__()
         self.downsample = downsample
+        self.use_se = use_se
+        self.use_residual = use_residual
         mid_channels = out_channels // 2
 
         self.compress_conv1 = conv1x1(
@@ -131,7 +139,8 @@ class ShuffleUnit(nn.Module):
             in_channels=mid_channels,
             out_channels=mid_channels)
         self.expand_bn3 = nn.BatchNorm2d(num_features=mid_channels)
-
+        if self.use_se:
+            self.se = SEBlock(channels=mid_channels)
         if downsample:
             self.dw_conv4 = depthwise_conv3x3(
                 channels=in_channels,
@@ -165,6 +174,10 @@ class ShuffleUnit(nn.Module):
         y2 = self.expand_conv3(y2)
         y2 = self.expand_bn3(y2)
         y2 = self.activ(y2)
+        if self.use_se:
+            y2 = self.se(y2)
+        if self.use_residual and not self.downsample:
+            y2 = y2 + x2
         x = torch.cat((y1, y2), dim=1)
         x = self.c_shuffle(x)
         return x
@@ -195,7 +208,8 @@ class ShuffleInitBlock(nn.Module):
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
-            padding=1)
+            padding=0,
+            ceil_mode=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -216,6 +230,10 @@ class ShuffleNetV2(nn.Module):
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    use_se : bool, default False
+        Whether to use SE block.
+    use_residual : bool, default False
+        Whether to use residual connections.
     in_channels : int, default 3
         Number of input channels.
     num_classes : int, default 1000
@@ -225,6 +243,8 @@ class ShuffleNetV2(nn.Module):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 use_se=False,
+                 use_residual=False,
                  in_channels=3,
                  num_classes=1000):
         super(ShuffleNetV2, self).__init__()
@@ -241,7 +261,9 @@ class ShuffleNetV2(nn.Module):
                 stage.add_module("unit{}".format(j + 1), ShuffleUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    downsample=downsample))
+                    downsample=downsample,
+                    use_se=use_se,
+                    use_residual=use_residual))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('final_block', shuffle_conv1x1(

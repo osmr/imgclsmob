@@ -9,7 +9,7 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle
+from common import conv1x1, ChannelShuffle
 
 
 class ShuffleConv(HybridBlock):
@@ -74,25 +74,6 @@ def shuffle_conv1x1(in_channels,
         kernel_size=1,
         strides=1,
         padding=0)
-
-
-def conv1x1(in_channels,
-            out_channels):
-    """
-    Convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        use_bias=False,
-        in_channels=in_channels)
 
 
 def depthwise_conv3x3(channels,
@@ -438,6 +419,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shufflenetv2_wd2 or weight_count == 1366792)
         assert (model != shufflenetv2_w1 or weight_count == 2278604)
         assert (model != shufflenetv2_w2d3 or weight_count == 4406098)

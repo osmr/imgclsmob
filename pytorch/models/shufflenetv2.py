@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ChannelShuffle
+from common import conv1x1, ChannelShuffle
 
 
 class ShuffleConv(nn.Module):
@@ -74,25 +74,6 @@ def shuffle_conv1x1(in_channels,
         kernel_size=1,
         stride=1,
         padding=0)
-
-
-def conv1x1(in_channels,
-            out_channels):
-    """
-    Convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        bias=False)
 
 
 def depthwise_conv3x3(channels,
@@ -424,6 +405,7 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shufflenetv2_wd2 or weight_count == 1366792)
         assert (model != shufflenetv2_w1 or weight_count == 2278604)
         assert (model != shufflenetv2_w2d3 or weight_count == 4406098)

@@ -171,15 +171,16 @@ _models = {
 
 
 def get_model(name, **kwargs):
-    try:
-        import torchvision.models as ptv_models
-        net = ptv_models.__dict__[name](**kwargs)
-        return net
-    except KeyError as e:
-        upstream_supported = str(e)
+    # try:
+    #     import torchvision.models as ptv_models
+    #     net = ptv_models.__dict__[name](**kwargs)
+    #     return net
+    # except KeyError as e:
+    #     upstream_supported = str(e)
     name = name.lower()
     if name not in _models:
-        raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
+        # raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
+        raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net
 

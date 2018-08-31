@@ -103,7 +103,8 @@ class LRScheduler(lr_scheduler.LRScheduler):
                 self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * \
                                      pow(T / self.warmup_N, self.power)
             elif self.warmup_mode == 'cosine':
-                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * cos(pi + pi * T / self.warmup_N)
+                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) *\
+                                     0.5 * (1.0 + cos(pi + pi * T / self.warmup_N))
             else:
                 raise NotImplementedError
         else:

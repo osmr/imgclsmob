@@ -66,10 +66,9 @@ class LRScheduler(lr_scheduler.LRScheduler):
                  warmup_mode='linear'):
         super(LRScheduler, self).__init__(base_lr=base_lr)
         assert(mode in ['step', 'poly', 'cosine'])
-        assert(warmup_mode in ['constant', 'linear', 'poly'])
+        assert(warmup_mode in ['constant', 'linear', 'poly', 'cosine'])
 
         self.mode = mode
-        #self.base_lr = base_lr
         self.learning_rate = self.base_lr
         self.n_iters = n_iters
 
@@ -94,7 +93,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
 
         T = float(T)
 
-        if self.warmup_epochs > epoch:
+        if epoch <= self.warmup_epochs:
             # Warm-up Stage
             if self.warmup_mode == 'constant':
                 self.learning_rate = self.warmup_lr
@@ -103,6 +102,8 @@ class LRScheduler(lr_scheduler.LRScheduler):
             elif self.warmup_mode == 'poly':
                 self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * \
                                      pow(T / self.warmup_N, self.power)
+            elif self.warmup_mode == 'cosine':
+                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * cos(pi + pi * T / self.warmup_N)
             else:
                 raise NotImplementedError
         else:

@@ -9,14 +9,14 @@ __all__ = ['oth_shufflenetv2_wd2']
 
 
 import torch
-import torch.nn as nn
+#import torch.nn as nn
 
-try:
-    import caffe
-    from caffe import layers as L
-    from caffe import params as P
-except ImportError:
-    pass
+# try:
+#     import caffe
+#     from caffe import layers as L
+#     from caffe import params as P
+# except ImportError:
+#     pass
 
 from .slim import *
 
@@ -63,19 +63,19 @@ class BasicBlock(nn.Module):
             x = torch.cat((self.conv0(x), self.conv(x)), 1)
         return self.shuffle(x)
 
-    def generate_caffe_prototxt(self, caffe_net, layer):
-        if self.stride == 1:
-            layer_x1, layer_x2 = L.Slice(layer, ntop=2, axis=1, slice_point=[self.in_channels//2])
-            caffe_net[self.g_name + '/slice1'] = layer_x1
-            caffe_net[self.g_name + '/slice2'] = layer_x2
-            layer_x2 = generate_caffe_prototxt(self.conv, caffe_net, layer_x2)
-        else:
-            layer_x1 = generate_caffe_prototxt(self.conv0, caffe_net, layer)
-            layer_x2 = generate_caffe_prototxt(self.conv, caffe_net, layer)
-        layer = L.Concat(layer_x1, layer_x2, axis=1)
-        caffe_net[self.g_name + '/concat'] = layer
-        layer = generate_caffe_prototxt(self.shuffle, caffe_net, layer)
-        return layer
+    # def generate_caffe_prototxt(self, caffe_net, layer):
+    #     if self.stride == 1:
+    #         layer_x1, layer_x2 = L.Slice(layer, ntop=2, axis=1, slice_point=[self.in_channels//2])
+    #         caffe_net[self.g_name + '/slice1'] = layer_x1
+    #         caffe_net[self.g_name + '/slice2'] = layer_x2
+    #         layer_x2 = generate_caffe_prototxt(self.conv, caffe_net, layer_x2)
+    #     else:
+    #         layer_x1 = generate_caffe_prototxt(self.conv0, caffe_net, layer)
+    #         layer_x2 = generate_caffe_prototxt(self.conv, caffe_net, layer)
+    #     layer = L.Concat(layer_x1, layer_x2, axis=1)
+    #     caffe_net[self.g_name + '/concat'] = layer
+    #     layer = generate_caffe_prototxt(self.shuffle, caffe_net, layer)
+    #     return layer
 
 
 class Network(nn.Module):
@@ -147,22 +147,22 @@ class Network(nn.Module):
         x = self.network(x)
         return x.reshape(x.shape[0], -1)
 
-    def generate_caffe_prototxt(self, caffe_net, layer):
-        data_layer = layer
-        network = generate_caffe_prototxt(self.network, caffe_net, data_layer)
-        return network
+    # def generate_caffe_prototxt(self, caffe_net, layer):
+    #     data_layer = layer
+    #     network = generate_caffe_prototxt(self.network, caffe_net, data_layer)
+    #     return network
 
-    def convert_to_caffe(self, name):
-        caffe_net = caffe.NetSpec()
-        layer = L.Input(shape=dict(dim=[1, 3, args.image_hw, args.image_hw]))
-        caffe_net.tops['data'] = layer
-        generate_caffe_prototxt(self, caffe_net, layer)
-        print(caffe_net.to_proto())
-        with open(name + '.prototxt', 'wb') as f:
-            f.write(str(caffe_net.to_proto()).encode())
-        caffe_net = caffe.Net(name + '.prototxt', caffe.TEST)
-        convert_pytorch_to_caffe(self, caffe_net)
-        caffe_net.save(name + '.caffemodel')
+    # def convert_to_caffe(self, name):
+    #     caffe_net = caffe.NetSpec()
+    #     layer = L.Input(shape=dict(dim=[1, 3, args.image_hw, args.image_hw]))
+    #     caffe_net.tops['data'] = layer
+    #     generate_caffe_prototxt(self, caffe_net, layer)
+    #     print(caffe_net.to_proto())
+    #     with open(name + '.prototxt', 'wb') as f:
+    #         f.write(str(caffe_net.to_proto()).encode())
+    #     caffe_net = caffe.Net(name + '.prototxt', caffe.TEST)
+    #     convert_pytorch_to_caffe(self, caffe_net)
+    #     caffe_net.save(name + '.caffemodel')
 
 
 def oth_shufflenetv2_wd2(pretrained=False, num_classes=1000):

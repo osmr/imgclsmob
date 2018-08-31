@@ -8,12 +8,12 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 
-try:
-    import caffe
-    from caffe import layers as L
-    from caffe import params as P
-except ImportError:
-    pass
+# try:
+#     import caffe
+#     from caffe import layers as L
+#     from caffe import params as P
+# except ImportError:
+#     pass
 
 
 def g_name(g_name, m):
@@ -32,10 +32,10 @@ class ChannelShuffle(nn.Module):
         x = x.reshape(x.shape[0], -1, x.shape[3], x.shape[4])
         return x
 
-    def generate_caffe_prototxt(self, caffe_net, layer):
-        layer = L.ShuffleChannel(layer, group=self.groups)
-        caffe_net[self.g_name] = layer
-        return layer
+    # def generate_caffe_prototxt(self, caffe_net, layer):
+    #     layer = L.ShuffleChannel(layer, group=self.groups)
+    #     caffe_net[self.g_name] = layer
+    #     return layer
 
 
 def channel_shuffle(name, groups):
@@ -51,10 +51,10 @@ class Permute(nn.Module):
         x = x.permute(*self.order).contiguous()
         return x
 
-    def generate_caffe_prototxt(self, caffe_net, layer):
-        layer = L.Permute(layer, order=list(self.order))
-        caffe_net[self.g_name] = layer
-        return layer
+    # def generate_caffe_prototxt(self, caffe_net, layer):
+    #     layer = L.Permute(layer, order=list(self.order))
+    #     caffe_net[self.g_name] = layer
+    #     return layer
 
 
 def permute(name, order):
@@ -71,161 +71,161 @@ class Flatten(nn.Module):
         x = x.reshape(x.shape[0], -1)
         return x
 
-    def generate_caffe_prototxt(self, caffe_net, layer):
-        layer = L.Flatten(layer, axis=self.axis)
-        caffe_net[self.g_name] = layer
-        return layer
+    # def generate_caffe_prototxt(self, caffe_net, layer):
+    #     layer = L.Flatten(layer, axis=self.axis)
+    #     caffe_net[self.g_name] = layer
+    #     return layer
 
 
 def flatten(name, axis):
     return g_name(name, Flatten(axis))
 
 
-def generate_caffe_prototxt(m, caffe_net, layer):
-    if hasattr(m, 'generate_caffe_prototxt'):
-        return m.generate_caffe_prototxt(caffe_net, layer)
-
-    if isinstance(m, nn.Sequential):
-        for module in m:
-            layer = generate_caffe_prototxt(module, caffe_net, layer)
-        return layer
-
-    if isinstance(m, nn.Conv2d):
-        if m.bias is None:
-            param=[dict(lr_mult=1, decay_mult=1)]
-        else:
-            param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=1, decay_mult=0)]
-        assert m.dilation[0] == m.dilation[1]
-        convolution_param=dict(
-            num_output=m.out_channels,
-            group=m.groups, bias_term=(m.bias is not None),
-            weight_filler=dict(type='msra'),
-            dilation=m.dilation[0],
-        )
-        if m.kernel_size[0] == m.kernel_size[1]:
-            convolution_param['kernel_size'] = m.kernel_size[0]
-        else:
-            convolution_param['kernel_h'] = m.kernel_size[0]
-            convolution_param['kernel_w'] = m.kernel_size[1]
-        if m.stride[0] == m.stride[1]:
-            convolution_param['stride'] = m.stride[0]
-        else:
-            convolution_param['stride_h'] = m.stride[0]
-            convolution_param['stride_w'] = m.stride[1]
-        if m.padding[0] == m.padding[1]:
-            convolution_param['pad'] = m.padding[0]
-        else:
-            convolution_param['pad_h'] = m.padding[0]
-            convolution_param['pad_w'] = m.padding[1]
-        layer = L.Convolution(
-            layer,
-            param=param,
-            convolution_param=convolution_param,
-        )
-        caffe_net.tops[m.g_name] = layer
-        return layer
-
-    if isinstance(m, nn.ConvTranspose2d):
-        if m.bias is None:
-            param=[dict(lr_mult=1, decay_mult=1)]
-        else:
-            param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=1, decay_mult=0)]
-        assert m.dilation[0] == m.dilation[1]
-        convolution_param=dict(
-            num_output=m.out_channels,
-            group=m.groups, bias_term=(m.bias is not None),
-            weight_filler=dict(type='msra'),
-            dilation=m.dilation[0],
-        )
-        if m.kernel_size[0] == m.kernel_size[1]:
-            convolution_param['kernel_size'] = m.kernel_size[0]
-        else:
-            convolution_param['kernel_h'] = m.kernel_size[0]
-            convolution_param['kernel_w'] = m.kernel_size[1]
-        if m.stride[0] == m.stride[1]:
-            convolution_param['stride'] = m.stride[0]
-        else:
-            convolution_param['stride_h'] = m.stride[0]
-            convolution_param['stride_w'] = m.stride[1]
-        if m.padding[0] == m.padding[1]:
-            convolution_param['pad'] = m.padding[0]
-        else:
-            convolution_param['pad_h'] = m.padding[0]
-            convolution_param['pad_w'] = m.padding[1]
-        layer = L.Deconvolution(
-            layer,
-            param=param,
-            convolution_param=convolution_param,
-        )
-        caffe_net.tops[m.g_name] = layer
-        return layer
-
-    if isinstance(m, nn.BatchNorm2d):
-        layer = L.BatchNorm(
-            layer, in_place=True,
-            param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)],
-        )
-        caffe_net[m.g_name] = layer
-        if m.affine:
-            layer = L.Scale(
-                layer, in_place=True, bias_term=True,
-                filler=dict(type='constant', value=1), bias_filler=dict(type='constant', value=0),
-                param=[dict(lr_mult=1, decay_mult=0), dict(lr_mult=1, decay_mult=0)],
-            )
-            caffe_net[m.g_name + '/scale'] = layer
-        return layer
-
-    if isinstance(m, nn.ReLU):
-        layer = L.ReLU(layer, in_place=True)
-        caffe_net.tops[m.g_name] = layer
-        return layer
-
-    if isinstance(m, nn.PReLU):
-        layer = L.PReLU(layer)
-        caffe_net.tops[m.g_name] = layer
-        return layer
-
-    if isinstance(m, nn.AvgPool2d) or isinstance(m, nn.MaxPool2d):
-        if isinstance(m, nn.AvgPool2d):
-            pooling_param = dict(pool=P.Pooling.AVE)
-        else:
-            pooling_param = dict(pool=P.Pooling.MAX)
-        if isinstance(m.kernel_size, tuple) or isinstance(m.kernel_size, list):
-            pooling_param['kernel_h'] = m.kernel_size[0]
-            pooling_param['kernel_w'] = m.kernel_size[1]
-        else:
-            pooling_param['kernel_size'] = m.kernel_size
-        if isinstance(m.stride, tuple) or isinstance(m.stride, list):
-            pooling_param['stride_h'] = m.stride[0]
-            pooling_param['stride_w'] = m.stride[1]
-        else:
-            pooling_param['stride'] = m.stride
-        if isinstance(m.padding, tuple) or isinstance(m.padding, list):
-            pooling_param['pad_h'] = m.padding[0]
-            pooling_param['pad_w'] = m.padding[1]
-        else:
-            pooling_param['pad'] = m.padding
-        layer = L.Pooling(layer, pooling_param=pooling_param)
-        caffe_net.tops[m.g_name] = layer
-        return layer
-    raise Exception("Unknow module '%s' to generate caffe prototxt." % m)
-
-
-def convert_pytorch_to_caffe(torch_net, caffe_net):
-    for name, m in torch_net.named_modules():
-        if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
-            print('convert conv:', name, m.g_name, m)
-            caffe_net.params[m.g_name][0].data[...] = m.weight.data.cpu().numpy()
-            if m.bias is not None:
-                caffe_net.params[m.g_name][1].data[...] = m.bias.data.cpu().numpy()
-        if isinstance(m, nn.BatchNorm2d):
-            print('convert bn:', name, m.g_name, m)
-            caffe_net.params[m.g_name][0].data[...] = m.running_mean.cpu().numpy()
-            caffe_net.params[m.g_name][1].data[...] = m.running_var.cpu().numpy()
-            caffe_net.params[m.g_name][2].data[...] = 1
-            if m.affine:
-                caffe_net.params[m.g_name + '/scale'][0].data[...] = m.weight.data.cpu().numpy()
-                caffe_net.params[m.g_name + '/scale'][1].data[...] = m.bias.data.cpu().numpy()
+# def generate_caffe_prototxt(m, caffe_net, layer):
+#     if hasattr(m, 'generate_caffe_prototxt'):
+#         return m.generate_caffe_prototxt(caffe_net, layer)
+#
+#     if isinstance(m, nn.Sequential):
+#         for module in m:
+#             layer = generate_caffe_prototxt(module, caffe_net, layer)
+#         return layer
+#
+#     if isinstance(m, nn.Conv2d):
+#         if m.bias is None:
+#             param=[dict(lr_mult=1, decay_mult=1)]
+#         else:
+#             param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=1, decay_mult=0)]
+#         assert m.dilation[0] == m.dilation[1]
+#         convolution_param=dict(
+#             num_output=m.out_channels,
+#             group=m.groups, bias_term=(m.bias is not None),
+#             weight_filler=dict(type='msra'),
+#             dilation=m.dilation[0],
+#         )
+#         if m.kernel_size[0] == m.kernel_size[1]:
+#             convolution_param['kernel_size'] = m.kernel_size[0]
+#         else:
+#             convolution_param['kernel_h'] = m.kernel_size[0]
+#             convolution_param['kernel_w'] = m.kernel_size[1]
+#         if m.stride[0] == m.stride[1]:
+#             convolution_param['stride'] = m.stride[0]
+#         else:
+#             convolution_param['stride_h'] = m.stride[0]
+#             convolution_param['stride_w'] = m.stride[1]
+#         if m.padding[0] == m.padding[1]:
+#             convolution_param['pad'] = m.padding[0]
+#         else:
+#             convolution_param['pad_h'] = m.padding[0]
+#             convolution_param['pad_w'] = m.padding[1]
+#         layer = L.Convolution(
+#             layer,
+#             param=param,
+#             convolution_param=convolution_param,
+#         )
+#         caffe_net.tops[m.g_name] = layer
+#         return layer
+#
+#     if isinstance(m, nn.ConvTranspose2d):
+#         if m.bias is None:
+#             param=[dict(lr_mult=1, decay_mult=1)]
+#         else:
+#             param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=1, decay_mult=0)]
+#         assert m.dilation[0] == m.dilation[1]
+#         convolution_param=dict(
+#             num_output=m.out_channels,
+#             group=m.groups, bias_term=(m.bias is not None),
+#             weight_filler=dict(type='msra'),
+#             dilation=m.dilation[0],
+#         )
+#         if m.kernel_size[0] == m.kernel_size[1]:
+#             convolution_param['kernel_size'] = m.kernel_size[0]
+#         else:
+#             convolution_param['kernel_h'] = m.kernel_size[0]
+#             convolution_param['kernel_w'] = m.kernel_size[1]
+#         if m.stride[0] == m.stride[1]:
+#             convolution_param['stride'] = m.stride[0]
+#         else:
+#             convolution_param['stride_h'] = m.stride[0]
+#             convolution_param['stride_w'] = m.stride[1]
+#         if m.padding[0] == m.padding[1]:
+#             convolution_param['pad'] = m.padding[0]
+#         else:
+#             convolution_param['pad_h'] = m.padding[0]
+#             convolution_param['pad_w'] = m.padding[1]
+#         layer = L.Deconvolution(
+#             layer,
+#             param=param,
+#             convolution_param=convolution_param,
+#         )
+#         caffe_net.tops[m.g_name] = layer
+#         return layer
+#
+#     if isinstance(m, nn.BatchNorm2d):
+#         layer = L.BatchNorm(
+#             layer, in_place=True,
+#             param=[dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0), dict(lr_mult=0, decay_mult=0)],
+#         )
+#         caffe_net[m.g_name] = layer
+#         if m.affine:
+#             layer = L.Scale(
+#                 layer, in_place=True, bias_term=True,
+#                 filler=dict(type='constant', value=1), bias_filler=dict(type='constant', value=0),
+#                 param=[dict(lr_mult=1, decay_mult=0), dict(lr_mult=1, decay_mult=0)],
+#             )
+#             caffe_net[m.g_name + '/scale'] = layer
+#         return layer
+#
+#     if isinstance(m, nn.ReLU):
+#         layer = L.ReLU(layer, in_place=True)
+#         caffe_net.tops[m.g_name] = layer
+#         return layer
+#
+#     if isinstance(m, nn.PReLU):
+#         layer = L.PReLU(layer)
+#         caffe_net.tops[m.g_name] = layer
+#         return layer
+#
+#     if isinstance(m, nn.AvgPool2d) or isinstance(m, nn.MaxPool2d):
+#         if isinstance(m, nn.AvgPool2d):
+#             pooling_param = dict(pool=P.Pooling.AVE)
+#         else:
+#             pooling_param = dict(pool=P.Pooling.MAX)
+#         if isinstance(m.kernel_size, tuple) or isinstance(m.kernel_size, list):
+#             pooling_param['kernel_h'] = m.kernel_size[0]
+#             pooling_param['kernel_w'] = m.kernel_size[1]
+#         else:
+#             pooling_param['kernel_size'] = m.kernel_size
+#         if isinstance(m.stride, tuple) or isinstance(m.stride, list):
+#             pooling_param['stride_h'] = m.stride[0]
+#             pooling_param['stride_w'] = m.stride[1]
+#         else:
+#             pooling_param['stride'] = m.stride
+#         if isinstance(m.padding, tuple) or isinstance(m.padding, list):
+#             pooling_param['pad_h'] = m.padding[0]
+#             pooling_param['pad_w'] = m.padding[1]
+#         else:
+#             pooling_param['pad'] = m.padding
+#         layer = L.Pooling(layer, pooling_param=pooling_param)
+#         caffe_net.tops[m.g_name] = layer
+#         return layer
+#     raise Exception("Unknow module '%s' to generate caffe prototxt." % m)
+#
+#
+# def convert_pytorch_to_caffe(torch_net, caffe_net):
+#     for name, m in torch_net.named_modules():
+#         if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
+#             print('convert conv:', name, m.g_name, m)
+#             caffe_net.params[m.g_name][0].data[...] = m.weight.data.cpu().numpy()
+#             if m.bias is not None:
+#                 caffe_net.params[m.g_name][1].data[...] = m.bias.data.cpu().numpy()
+#         if isinstance(m, nn.BatchNorm2d):
+#             print('convert bn:', name, m.g_name, m)
+#             caffe_net.params[m.g_name][0].data[...] = m.running_mean.cpu().numpy()
+#             caffe_net.params[m.g_name][1].data[...] = m.running_var.cpu().numpy()
+#             caffe_net.params[m.g_name][2].data[...] = 1
+#             if m.affine:
+#                 caffe_net.params[m.g_name + '/scale'][0].data[...] = m.weight.data.cpu().numpy()
+#                 caffe_net.params[m.g_name + '/scale'][1].data[...] = m.bias.data.cpu().numpy()
 
 
 def conv_bn_relu(name, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1):
@@ -282,14 +282,14 @@ if __name__ == '__main__':
             # x = self.relu(x)
             return x
 
-        def generate_caffe_prototxt(self, caffe_net, layer):
-            residual_layer = layer
-            layer = generate_caffe_prototxt(self.conv, caffe_net, layer)
-            if self.residual:
-                layer = L.Eltwise(residual_layer, layer, operation=P.Eltwise.SUM)
-                caffe_net[self.g_name + '/sum'] = layer
-            # layer = generate_caffe_prototxt(self.relu, caffe_net, layer)
-            return layer
+        # def generate_caffe_prototxt(self, caffe_net, layer):
+        #     residual_layer = layer
+        #     layer = generate_caffe_prototxt(self.conv, caffe_net, layer)
+        #     if self.residual:
+        #         layer = L.Eltwise(residual_layer, layer, operation=P.Eltwise.SUM)
+        #         caffe_net[self.g_name + '/sum'] = layer
+        #     # layer = generate_caffe_prototxt(self.relu, caffe_net, layer)
+        #     return layer
 
 
     class Network(nn.Module):
@@ -339,20 +339,20 @@ if __name__ == '__main__':
         def forward(self, x):
             return self.network(x).view(x.size(0), -1)
         
-        def generate_caffe_prototxt(self, caffe_net, layer):
-            return generate_caffe_prototxt(self.network, caffe_net, layer)
-
-        def convert_to_caffe(self, name):
-            caffe_net = caffe.NetSpec()
-            layer = L.Input(shape=dict(dim=[1, 3, 224, 224]))
-            caffe_net.tops['data'] = layer
-            generate_caffe_prototxt(self, caffe_net, layer)
-            print(caffe_net.to_proto())
-            with open(name + '.prototxt', 'wb') as f:
-                f.write(str(caffe_net.to_proto()))
-            caffe_net = caffe.Net(name + '.prototxt', caffe.TEST)
-            convert_pytorch_to_caffe(self, caffe_net)
-            caffe_net.save(name + '.caffemodel')
+        # def generate_caffe_prototxt(self, caffe_net, layer):
+        #     return generate_caffe_prototxt(self.network, caffe_net, layer)
+        #
+        # def convert_to_caffe(self, name):
+        #     caffe_net = caffe.NetSpec()
+        #     layer = L.Input(shape=dict(dim=[1, 3, 224, 224]))
+        #     caffe_net.tops['data'] = layer
+        #     generate_caffe_prototxt(self, caffe_net, layer)
+        #     print(caffe_net.to_proto())
+        #     with open(name + '.prototxt', 'wb') as f:
+        #         f.write(str(caffe_net.to_proto()))
+        #     caffe_net = caffe.Net(name + '.prototxt', caffe.TEST)
+        #     convert_pytorch_to_caffe(self, caffe_net)
+        #     caffe_net.save(name + '.caffemodel')
 
 
     network = Network(1000, 8)

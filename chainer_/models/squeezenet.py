@@ -7,12 +7,13 @@
 __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
 
 import os
-import chainer
 import chainer.functions as F
 import chainer.links as L
+from chainer import Chain, Sequential
+from functools import partial
 
 
-class FireConv(chainer.Chain):
+class FireConv(Chain):
     """
     SqueezeNet specific convolution block.
 
@@ -46,7 +47,7 @@ class FireConv(chainer.Chain):
         return x
 
 
-class FireUnit(chainer.Chain):
+class FireUnit(Chain):
     """
     SqueezeNet unit, so-called 'Fire' unit.
 
@@ -101,7 +102,7 @@ class FireUnit(chainer.Chain):
         return out
 
 
-class SqueezeInitBlock(chainer.Chain):
+class SqueezeInitBlock(Chain):
     """
     SqueezeNet specific initial block.
 
@@ -132,7 +133,7 @@ class SqueezeInitBlock(chainer.Chain):
         return x
 
 
-class SqueezeNet(chainer.Chain):
+class SqueezeNet(Chain):
     """
     SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
     https://arxiv.org/abs/1602.07360.
@@ -162,41 +163,46 @@ class SqueezeNet(chainer.Chain):
         super(SqueezeNet, self).__init__()
 
         with self.init_scope():
-            self.features = L.Sequential()
+            self.features = Sequential()
             self.features.append(SqueezeInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 ksize=init_block_kernel_size))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = L.Sequential()
-                with stage.name_scope():
-                    stage.add(F.max_pooling_2d(
-                        ksize=3,
-                        stride=2))
-                    for j, out_channels in enumerate(channels_per_stage):
-                        expand_channels = out_channels // 2
-                        squeeze_channels = out_channels // 8
-                        stage.append(FireUnit(
-                            in_channels=in_channels,
-                            squeeze_channels=squeeze_channels,
-                            expand1x1_channels=expand_channels,
-                            expand3x3_channels=expand_channels,
-                            residual=((residuals is not None) and (residuals[i][j] == 1))))
-                        in_channels = out_channels
+                stage = Sequential()
+                stage.append(partial(
+                    F.max_pooling_2d,
+                    ksize=3,
+                    stride=2))
+                for j, out_channels in enumerate(channels_per_stage):
+                    expand_channels = out_channels // 2
+                    squeeze_channels = out_channels // 8
+                    stage.append(FireUnit(
+                        in_channels=in_channels,
+                        squeeze_channels=squeeze_channels,
+                        expand1x1_channels=expand_channels,
+                        expand3x3_channels=expand_channels,
+                        residual=((residuals is not None) and (residuals[i][j] == 1))))
+                    in_channels = out_channels
                 self.features.append(stage)
-            self.features.append(L.Dropout(ratio=0.5))
+            self.features.append(partial(
+                F.dropout,
+                ratio=0.5))
 
-            self.output = L.Sequential()
+            self.output = Sequential()
             self.output.append(L.Convolution2D(
                 in_channels=in_channels,
                 out_channels=classes,
                 ksize=1))
             self.output.append(F.relu)
-            self.output.append(L.AveragePooling2D(
+            self.output.append(partial(
+                F.average_pooling_2d,
                 ksize=13,
                 stride=1))
-            self.output.append(F.flatten)
+            self.output.append(partial(
+                F.reshape,
+                shape=(-1, classes)))
 
     def __call__(self, x):
         x = self.features(x)
@@ -329,21 +335,30 @@ def squeezeresnet_v1_1(**kwargs):
 
 
 def _test():
+    import numpy as np
 
     pretrained = False
 
     models = [
         squeezenet_v1_0,
         squeezenet_v1_1,
-        # squeezeresnet_v1_0,
-        # squeezeresnet_v1_1,
+        squeezeresnet_v1_0,
+        squeezeresnet_v1_1,
     ]
 
     for model in models:
 
         net = model(pretrained=pretrained)
+        weight_count = net.count_params()
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != squeezenet_v1_0 or weight_count == 1248424)
+        assert (model != squeezenet_v1_1 or weight_count == 1235496)
+        assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
+        assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
         
-
+        x = np.zeros((1, 3, 224, 224), np.float32)
+        y = net(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

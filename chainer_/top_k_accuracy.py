@@ -1,8 +1,8 @@
 from chainer.backends import cuda
-from chainer import function
+from chainer.function import Function
 
 
-class TopKAccuracy(function.Function):
+class TopKAccuracy(Function):
 
     def __init__(self, k=1):
         self.k = k
@@ -11,8 +11,6 @@ class TopKAccuracy(function.Function):
         xp = cuda.get_array_module(*inputs)
         y, t = inputs
 
-        #print("-->TopKAccuracy")
-        #print("y.shape={}".format(y.shape))
         argsorted_pred = xp.argsort(y)[:, -self.k:]
         return xp.asarray(xp.any(argsorted_pred.T == t, axis=0).mean(dtype=xp.float32)),
 

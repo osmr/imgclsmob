@@ -1,4 +1,6 @@
 import argparse
+import time
+import logging
 import numpy as np
 
 from chainer import cuda
@@ -81,37 +83,23 @@ def parse_args():
     return args
 
 
-def main():
-    args = parse_args()
+def test(net,
+         val_iterator,
+         val_dataset_len,
+         use_cuda,
+         calc_weight_count=False,
+         extended_log=False):
+    tic = time.time()
 
-    _, log_file_exist = initialize_logging(
-        logging_dir_path=args.save_dir,
-        logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
-
-    num_classes = 1000
-    net = prepare_model(
-        model_name=args.model,
-        classes=num_classes,
-        use_pretrained=args.use_pretrained,
-        pretrained_model_file_path=args.resume.strip())
     predictor = ImagenetPredictor(base_model=net)
-    print("-->2")
 
-    val_iterator, val_dataset_len = get_data_iterator(
-        data_dir=args.data_dir,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        num_classes=num_classes)
-    print("-->3")
-
-    if args.gpu_num >= 0:
-        cuda.get_device(args.gpu_num).use()
+    if use_cuda:
         predictor.to_gpu()
 
-    print('Model has been prepared. Evaluation starts.')
+    if calc_weight_count:
+        weight_count = net.count_params()
+        logging.info('Model: {} trainable parameters'.format(weight_count))
+
     in_values, out_values, rest_values = apply_to_iterator(
         predictor.predict,
         val_iterator,
@@ -124,10 +112,6 @@ def main():
     y = np.array(list(pred_probs))
     t = np.array(list(gt_labels))
 
-    # print("type(y)={}".format(type(y)))
-    # print("y.shape={}".format(y.shape))
-    # print("t.shape={}".format(t.shape))
-
     top1_acc = F.accuracy(
         y=y,
         t=t).data
@@ -135,8 +119,54 @@ def main():
         y=y,
         t=t,
         k=5).data
-    print('Top 1 Error {}'.format(1. - top1_acc))
-    print('Top 5 Error {}'.format(1. - top5_acc))
+    err_top1_val = 1.0 - top1_acc
+    err_top5_val = 1.0 - top5_acc
+
+    if extended_log:
+        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            top1=err_top1_val, top5=err_top5_val))
+    else:
+        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            top1=err_top1_val, top5=err_top5_val))
+    logging.info('Time cost: {:.4f} sec'.format(
+        time.time() - tic))
+
+
+def main():
+    args = parse_args()
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=args.log_packages,
+        log_pip_packages=args.log_pip_packages)
+
+    use_cuda = args.gpu_num >= 0
+    if use_cuda:
+        cuda.get_device(args.gpu_num).use()
+
+    num_classes = 1000
+    net = prepare_model(
+        model_name=args.model,
+        classes=num_classes,
+        use_pretrained=args.use_pretrained,
+        pretrained_model_file_path=args.resume.strip())
+
+    val_iterator, val_dataset_len = get_data_iterator(
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        num_classes=num_classes)
+
+    assert (args.use_pretrained or args.resume.strip())
+    test(
+        net=net,
+        val_iterator=val_iterator,
+        val_dataset_len=val_dataset_len,
+        use_cuda=use_cuda,
+        calc_weight_count=True,
+        extended_log=True)
 
 
 if __name__ == '__main__':

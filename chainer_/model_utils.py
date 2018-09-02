@@ -1,4 +1,5 @@
 from .models.squeezenet import *
+from .models.mobilenet import *
 
 __all__ = ['get_model']
 
@@ -9,6 +10,16 @@ _models = {
 
     'squeezeresnet_v1_0': squeezeresnet_v1_0,
     'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+    'mobilenet_w1': mobilenet_w1,
+    'mobilenet_w3d4': mobilenet_w3d4,
+    'mobilenet_wd2': mobilenet_wd2,
+    'mobilenet_wd4': mobilenet_wd4,
+
+    'fdmobilenet_w1': fdmobilenet_w1,
+    'fdmobilenet_w3d4': fdmobilenet_w3d4,
+    'fdmobilenet_wd2': fdmobilenet_wd2,
+    'fdmobilenet_wd4': fdmobilenet_wd4,
 }
 
 

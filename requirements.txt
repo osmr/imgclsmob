@@ -2,3 +2,4 @@ mxnet
 gluoncv
 torch
 torchvision
+chainer

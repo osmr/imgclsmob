@@ -264,7 +264,7 @@ def get_squeezenet(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from model_store import get_model_file
+        from .model_store import get_model_file
         load_npz(
             file=get_model_file(
                 model_name=model_name,

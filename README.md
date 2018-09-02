@@ -1,5 +1,6 @@
 # Large-scale image classification networks for embedded systems
-This repository contains several classification models on MXNet/Gluon and PyTorch and scripts for trainig/converting models. All models are designed for using with ImageNet-1k dataset.
+This repository contains several classification models on MXNet/Gluon, PyTorch, and Chainer, with scripts for trainig/converting models.
+All models are designed for using with ImageNet-1k dataset.
 
 ## Requirements
 All models/scripts are on Python. Tested on Python 2.7 and 3.6.
@@ -18,6 +19,12 @@ gluoncv >= 0.2.0
 ```
 torch >= 0.4.1
 torchvision >= 0.2.1
+```
+
+### For Chainer way
+```
+chainer >= 5.0.0b4
+chainercv >= 0.10.0
 ```
 
 ## List of models
@@ -182,6 +189,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
 | NASNet-A-Mobile | 26.27 | 8.45 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.16/nasnet_a_mobile-0845-ccc5284e.pth.log)) |
+
+### For Chainer
+
+| Model | Top1 | Top5 | Params | FLOPs | Remarks |
+| --- | ---: | ---: | ---: | ---: | --- |
+| SqueezeNet v1.0 | 41.01 | 18.96 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.20/squeezenet_v1_0-1896-6cbb35ce.npz.log)) |
+| SqueezeNet v1.1 | 41.36 | 19.25 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.20/squeezenet_v1_1-1925-0ca73cf3.npz.log)) |
 
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
 [ShichenLiu/CondenseNet]: https://github.com/ShichenLiu/CondenseNet

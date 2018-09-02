@@ -11,8 +11,8 @@ class TopKAccuracy(function.Function):
         xp = cuda.get_array_module(*inputs)
         y, t = inputs
 
-        print("-->TopKAccuracy")
-        print("y.shape={}".format(y.shape))
+        #print("-->TopKAccuracy")
+        #print("y.shape={}".format(y.shape))
         argsorted_pred = xp.argsort(y)[:, -self.k:]
         return xp.asarray(xp.any(argsorted_pred.T == t, axis=0).mean(dtype=xp.float32)),
 

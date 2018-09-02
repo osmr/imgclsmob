@@ -1,20 +1,16 @@
-import os
 import argparse
 import numpy as np
 
-from chainer import iterators
 from chainer import cuda
 import chainer.functions as F
 
-from chainercv.datasets import directory_parsing_label_names
-from chainercv.datasets import DirectoryParsingLabelDataset
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.model_utils import get_model
 from chainer_.imagenet_predictor import ImagenetPredictor
 from chainer_.top_k_accuracy import top_k_accuracy
+from chainer_.utils import get_data_iterator, prepare_model
 
 
 def parse_args():
@@ -85,24 +81,6 @@ def parse_args():
     return args
 
 
-def get_data_iterator(data_dir,
-                      batch_size,
-                      num_workers,
-                      num_classes):
-    val_dir_path = os.path.join(data_dir, 'val')
-    val_dataset = DirectoryParsingLabelDataset(val_dir_path)
-    val_dataset_len = len(val_dataset)
-    assert(len(directory_parsing_label_names(val_dir_path)) == num_classes)
-    val_iterator = iterators.MultiprocessIterator(
-        dataset=val_dataset,
-        batch_size=batch_size,
-        repeat=False,
-        shuffle=False,
-        n_processes=num_workers,
-        shared_mem=300000000)
-    return val_iterator, val_dataset_len
-
-
 def main():
     args = parse_args()
 
@@ -113,10 +91,15 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
-    net = get_model(args.model)
-    predictor = ImagenetPredictor(base_model=net)
-
     num_classes = 1000
+    net = prepare_model(
+        model_name=args.model,
+        classes=num_classes,
+        use_pretrained=args.use_pretrained,
+        pretrained_model_file_path=args.resume.strip())
+    predictor = ImagenetPredictor(base_model=net)
+    print("-->2")
+
     val_iterator, val_dataset_len = get_data_iterator(
         data_dir=args.data_dir,
         batch_size=args.batch_size,

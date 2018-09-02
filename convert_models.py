@@ -8,11 +8,11 @@ import numpy as np
 import mxnet as mx
 import torch
 
-from common.env_stats import get_env_stats
+from common.logger_utils import initialize_logging
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/MXNet)',
+    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/Chainer/MXNet)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--src-fwk',
@@ -57,26 +57,6 @@ def parse_args():
         help='filename of training log')
     args = parser.parse_args()
     return args
-
-
-def prepare_logger(log_dir_path,
-                   logging_file_name):
-    logging.basicConfig()
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    log_file_exist = False
-    if log_dir_path is not None and log_dir_path:
-        log_file_path = os.path.join(log_dir_path, logging_file_name)
-        if not os.path.exists(log_dir_path):
-            os.makedirs(log_dir_path)
-            log_file_exist = False
-        else:
-            log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
-        fh = logging.FileHandler(log_file_path)
-        logger.addHandler(fh)
-        if log_file_exist:
-            logging.info('--------------------------------')
-    return logger, log_file_exist
 
 
 def prepare_model_gl(model_name,
@@ -155,6 +135,27 @@ def prepare_model_pt(model_name,
     return net
 
 
+def prepare_model_ch(model_name,
+                     classes,
+                     use_pretrained,
+                     pretrained_model_file_path):
+    kwargs = {'pretrained': use_pretrained,
+              'classes': classes}
+
+    from chainer_.model_utils import get_model
+    net = get_model(model_name, **kwargs)
+
+    if pretrained_model_file_path:
+        assert (os.path.isfile(pretrained_model_file_path))
+        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        from chainer.serializers import load_npz
+        load_npz(
+            file=pretrained_model_file_path,
+            obj=net)
+
+    return net
+
+
 def prepare_model_mx(pretrained_model_file_path,
                      ctx):
 
@@ -176,12 +177,6 @@ def prepare_model_mx(pretrained_model_file_path,
 def main():
     args = parse_args()
 
-    _, log_file_exist = prepare_logger(
-        log_dir_path=args.save_dir,
-        logging_file_name=args.logging_file_name)
-    logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
-    logging.info("Script arguments:\n{}".format(args))
-
     packages = []
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
@@ -189,9 +184,16 @@ def main():
         pip_packages += ['mxnet-cu92', 'gluoncv']
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ['torch', 'torchvision']
-    logging.info("Env_stats:\n{}".format(get_env_stats(
-        packages=packages,
-        pip_packages=pip_packages)))
+    if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
+        packages += ['chainer', 'chainercv']
+        pip_packages += ['cupy-cuda92', 'chainer', 'chainercv']
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=packages,
+        log_pip_packages=pip_packages)
 
     ctx = mx.cpu()
     use_cuda = False
@@ -265,6 +267,14 @@ def main():
         dst_param_keys = list(dst_params.keys())
         if args.src_fwk != "pytorch":
             dst_param_keys = [key for key in dst_param_keys if not key.endswith("num_batches_tracked")]
+    elif args.dst_fwk == "chainer":
+        dst_net = prepare_model_ch(
+            model_name=args.dst_model,
+            classes=num_classes,
+            use_pretrained=False,
+            pretrained_model_file_path="")
+        dst_params = [i[1] for i in dst_net.namedparams()]
+        dst_param_keys = [i[0] for i in dst_net.namedparams()]
     else:
         raise ValueError("Unsupported dst fwk: {}".format(args.dst_fwk))
 
@@ -300,6 +310,16 @@ def main():
         torch.save(
             obj=dst_params,
             f=args.dst_params)
+    elif args.src_fwk == "gluon" and args.dst_fwk == "chainer":
+        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            assert (dst_params[i].array.shape == src_params[src_key].shape),\
+                "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                    src_key, dst_key, src_params[src_key].shape, dst_params[i].array.shape)
+            dst_params[i].array = src_params[src_key]._data[0].asnumpy()
+        from chainer.serializers import save_npz
+        save_npz(
+            file=dst_params,
+            obj=dst_net)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             assert (dst_params[dst_key].shape == tuple(src_params[src_key].size())),\

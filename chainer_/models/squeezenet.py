@@ -11,6 +11,7 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain, Sequential
 from functools import partial
+from chainer.serializers import load_npz
 
 
 class FireConv(Chain):
@@ -170,22 +171,23 @@ class SqueezeNet(Chain):
                 ksize=init_block_kernel_size))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = Sequential()
-                stage.append(partial(
+                #stage = Sequential()
+                self.features.append(partial(
                     F.max_pooling_2d,
                     ksize=3,
                     stride=2))
                 for j, out_channels in enumerate(channels_per_stage):
                     expand_channels = out_channels // 2
                     squeeze_channels = out_channels // 8
-                    stage.append(FireUnit(
+                    self.features.append(FireUnit(
                         in_channels=in_channels,
                         squeeze_channels=squeeze_channels,
                         expand1x1_channels=expand_channels,
                         expand3x3_channels=expand_channels,
                         residual=((residuals is not None) and (residuals[i][j] == 1))))
                     in_channels = out_channels
-                self.features.append(stage)
+                #self.features.append(stage)
+                #self.features.extend(stage)
             self.features.append(partial(
                 F.dropout,
                 ratio=0.5))
@@ -214,6 +216,7 @@ def get_squeezenet(version,
                    residual=False,
                    model_name=None,
                    pretrained=False,
+                   root=os.path.join('~', '.chainer', 'models'),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.
@@ -228,6 +231,8 @@ def get_squeezenet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
     """
 
     if version == '1.0':
@@ -253,15 +258,15 @@ def get_squeezenet(version,
         init_block_channels=init_block_channels,
         **kwargs)
 
-    # if pretrained:
-    #     if (model_name is None) or (not model_name):
-    #         raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-    #     from .model_store import get_model_file
-    #     net.load_parameters(
-    #         filename=get_model_file(
-    #             model_name=model_name,
-    #             local_model_store_dir_path=root),
-    #         ctx=ctx)
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -277,7 +282,7 @@ def squeezenet_v1_0(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_squeezenet(version="1.0", residual=False, model_name="squeezenet_v1_0", **kwargs)
@@ -294,7 +299,7 @@ def squeezenet_v1_1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_squeezenet(version="1.1", residual=False, model_name="squeezenet_v1_1", **kwargs)
@@ -311,7 +316,7 @@ def squeezeresnet_v1_0(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_squeezenet(version="1.0", residual=True, model_name="squeezeresnet_v1_0", **kwargs)
@@ -328,7 +333,7 @@ def squeezeresnet_v1_1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_squeezenet(version="1.1", residual=True, model_name="squeezeresnet_v1_1", **kwargs)

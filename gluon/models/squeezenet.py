@@ -344,7 +344,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         squeezenet_v1_0,

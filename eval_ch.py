@@ -40,10 +40,10 @@ def parse_args():
         help='resume from previously saved parameters if not None')
 
     parser.add_argument(
-        '--gpu-num',
+        '--num-gpus',
         type=int,
         default=0,
-        help='number of GPU to use.')
+        help='number of gpus to use.')
     parser.add_argument(
         '-j',
         '--num-data-workers',
@@ -142,9 +142,9 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
-    use_cuda = args.gpu_num >= 0
+    use_cuda = args.args.num_gpus > 0
     if use_cuda:
-        cuda.get_device(args.gpu_num).use()
+        cuda.get_device(0).use()
 
     num_classes = 1000
     net = prepare_model(

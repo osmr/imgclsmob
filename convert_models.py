@@ -220,6 +220,10 @@ def main():
         if args.src_model in ["resnet18_v2", "resnet34_v2", "resnet50_v2", "resnet101_v2", "resnet152_v2"]:
             src_param_keys = src_param_keys[4:]
 
+        if args.dst_fwk == "chainer":
+            src_param_keys = [key for key in src_param_keys if (not key.endswith(".running_mean")) and
+                              (not key.endswith(".running_var"))]
+
     elif args.src_fwk == "pytorch":
         src_net = prepare_model_pt(
             model_name=args.src_model,

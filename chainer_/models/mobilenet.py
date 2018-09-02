@@ -15,7 +15,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .simple_sequential import SimpleSequential
+from .common import SimpleSequential
 
 
 class ConvBlock(Chain):

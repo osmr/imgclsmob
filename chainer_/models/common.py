@@ -1,5 +1,7 @@
 from chainer import Chain
 
+__all__ = ['SimpleSequential']
+
 
 class SimpleSequential(Chain):
 

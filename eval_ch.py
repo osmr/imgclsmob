@@ -142,7 +142,7 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
-    use_cuda = args.args.num_gpus > 0
+    use_cuda = args.num_gpus > 0
     if use_cuda:
         cuda.get_device(0).use()
 

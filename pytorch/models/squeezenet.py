@@ -182,7 +182,7 @@ class SqueezeNet(nn.Module):
                     expand3x3_channels=expand_channels,
                     residual=((residuals is not None) and (residuals[i][j] == 1))))
                 in_channels = out_channels
-                self.features.add_module("stage{}".format(i + 1), stage)
+            self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('dropout', nn.Dropout(p=0.5))
 
         self.output = nn.Sequential()
@@ -336,7 +336,7 @@ def _test():
     import numpy as np
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         squeezenet_v1_0,
@@ -354,6 +354,7 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != squeezenet_v1_0 or weight_count == 1248424)
         assert (model != squeezenet_v1_1 or weight_count == 1235496)
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)

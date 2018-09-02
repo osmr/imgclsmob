@@ -367,6 +367,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != squeezenet_v1_0 or weight_count == 1248424)
         assert (model != squeezenet_v1_1 or weight_count == 1235496)
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)

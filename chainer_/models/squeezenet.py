@@ -9,9 +9,10 @@ __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1
 import os
 import chainer.functions as F
 import chainer.links as L
-from chainer import Chain, Sequential
+from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
+from .simple_sequential import SimpleSequential
 
 
 class FireConv(Chain):
@@ -164,47 +165,49 @@ class SqueezeNet(Chain):
         super(SqueezeNet, self).__init__()
 
         with self.init_scope():
-            self.features = Sequential()
-            self.features.append(SqueezeInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                ksize=init_block_kernel_size))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                #stage = Sequential()
-                self.features.append(partial(
-                    F.max_pooling_2d,
-                    ksize=3,
-                    stride=2))
-                for j, out_channels in enumerate(channels_per_stage):
-                    expand_channels = out_channels // 2
-                    squeeze_channels = out_channels // 8
-                    self.features.append(FireUnit(
-                        in_channels=in_channels,
-                        squeeze_channels=squeeze_channels,
-                        expand1x1_channels=expand_channels,
-                        expand3x3_channels=expand_channels,
-                        residual=((residuals is not None) and (residuals[i][j] == 1))))
-                    in_channels = out_channels
-                #self.features.append(stage)
-                #self.features.extend(stage)
-            self.features.append(partial(
-                F.dropout,
-                ratio=0.5))
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", SqueezeInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
+                    ksize=init_block_kernel_size))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        setattr(stage, "pool{}".format(i + 1), partial(
+                            F.max_pooling_2d,
+                            ksize=3,
+                            stride=2))
+                        for j, out_channels in enumerate(channels_per_stage):
+                            expand_channels = out_channels // 2
+                            squeeze_channels = out_channels // 8
+                            setattr(stage, "unit{}".format(j + 1), FireUnit(
+                                in_channels=in_channels,
+                                squeeze_channels=squeeze_channels,
+                                expand1x1_channels=expand_channels,
+                                expand3x3_channels=expand_channels,
+                                residual=((residuals is not None) and (residuals[i][j] == 1))))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'dropout', partial(
+                    F.dropout,
+                    ratio=0.5))
 
-            self.output = Sequential()
-            self.output.append(L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=classes,
-                ksize=1))
-            self.output.append(F.relu)
-            self.output.append(partial(
-                F.average_pooling_2d,
-                ksize=13,
-                stride=1))
-            self.output.append(partial(
-                F.reshape,
-                shape=(-1, classes)))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'final_conv', L.Convolution2D(
+                    in_channels=in_channels,
+                    out_channels=classes,
+                    ksize=1))
+                setattr(self.output, 'final_activ', F.relu)
+                setattr(self.output, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=13,
+                    stride=1))
+                setattr(self.output, 'final_flatten', partial(
+                    F.reshape,
+                    shape=(-1, classes)))
 
     def __call__(self, x):
         x = self.features(x)

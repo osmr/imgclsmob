@@ -273,8 +273,8 @@ def main():
             classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="")
-        dst_params = [i[1] for i in dst_net.namedparams()]
-        dst_param_keys = [i[0] for i in dst_net.namedparams()]
+        dst_params = {i[0]: i[1] for i in dst_net.namedparams()}
+        dst_param_keys = list(dst_params.keys())
     else:
         raise ValueError("Unsupported dst fwk: {}".format(args.dst_fwk))
 
@@ -311,14 +311,26 @@ def main():
             obj=dst_params,
             f=args.dst_params)
     elif args.src_fwk == "gluon" and args.dst_fwk == "chainer":
+        dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
+
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        dst_param_keys.sort()
+        dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        dst_param_keys = [key.replace('/weight', '/W') for key in dst_param_keys]
+
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            assert (dst_params[i].array.shape == src_params[src_key].shape),\
+            assert (dst_params[dst_key].array.shape == src_params[src_key].shape),\
                 "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
-                    src_key, dst_key, src_params[src_key].shape, dst_params[i].array.shape)
-            dst_params[i].array = src_params[src_key]._data[0].asnumpy()
+                    src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].array.shape)
+            dst_params[dst_key].array = src_params[src_key]._data[0].asnumpy()
         from chainer.serializers import save_npz
         save_npz(
-            file=dst_params,
+            file=args.dst_params,
             obj=dst_net)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):

@@ -2,7 +2,6 @@ import argparse
 import time
 import logging
 import os
-import sys
 import warnings
 import random
 import numpy as np
@@ -10,13 +9,10 @@ import numpy as np
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
 import torch.utils.data
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
 
-from common.env_stats import get_env_stats
+from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
-from pytorch.utils import get_model
-from pytorch.model_stats import measure_model
+from pytorch.utils import prepare_pt_context, prepare_model, get_data_loader, validate, accuracy, AverageMeter
 
 
 def parse_args():
@@ -47,17 +43,6 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved optimizer state if not None')
-    parser.add_argument(
-        '-e',
-        '--evaluate',
-        dest='evaluate',
-        action='store_true',
-        help='only evaluate model on validation set')
-    parser.add_argument(
-        '--calc-flops',
-        dest='calc_flops',
-        action='store_true',
-        help='calculate FLOPs')
 
     parser.add_argument(
         '--num-gpus',
@@ -184,25 +169,6 @@ def parse_args():
     return args
 
 
-def prepare_logger(log_dir_path,
-                   logging_file_name):
-    logging.basicConfig()
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    if log_dir_path is not None and log_dir_path:
-        log_file_path = os.path.join(log_dir_path, logging_file_name)
-        if not os.path.exists(log_dir_path):
-            os.makedirs(log_dir_path)
-            log_file_exist = False
-        else:
-            log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
-        fh = logging.FileHandler(log_file_path)
-        logger.addHandler(fh)
-        if log_file_exist:
-            logging.info('--------------------------------')
-    return logger, log_file_exist
-
-
 def init_rand(seed):
     if seed <= 0:
         seed = np.random.randint(10000)
@@ -217,86 +183,6 @@ def init_rand(seed):
     np.random.seed(seed)
     torch.manual_seed(seed)
     return seed
-
-
-def prepare_pt_context(num_gpus,
-                       batch_size):
-    use_cuda = (num_gpus > 0)
-    batch_size *= max(1, num_gpus)
-    return use_cuda, batch_size
-
-
-def get_data_loader(data_dir,
-                    batch_size,
-                    num_workers):
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225])
-    jitter_param = 0.4
-
-    train_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'train'),
-            transform=transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(
-                    brightness=jitter_param,
-                    contrast=jitter_param,
-                    saturation=jitter_param),
-                transforms.ToTensor(),
-                normalize,
-            ])),
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True)
-
-    val_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'val'),
-            transform=transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                normalize,
-            ])),
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True)
-
-    return train_loader, val_loader
-
-
-def prepare_model(model_name,
-                  classes,
-                  use_pretrained,
-                  pretrained_model_file_path,
-                  use_cuda):
-    kwargs = {'pretrained': use_pretrained,
-              'num_classes': classes}
-
-    net = get_model(model_name, **kwargs)
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        checkpoint = torch.load(pretrained_model_file_path)
-        if type(checkpoint) == dict:
-            net.load_state_dict(checkpoint['state_dict'])
-        else:
-            net.load_state_dict(checkpoint)
-
-    if model_name.startswith('alexnet') or model_name.startswith('vgg'):
-        net.features = torch.nn.DataParallel(net.features)
-    else:
-        net = torch.nn.DataParallel(net)
-
-    if use_cuda:
-        net = net.cuda()
-
-    return net
 
 
 def prepare_trainer(net,
@@ -365,15 +251,6 @@ def prepare_trainer(net,
     return optimizer, lr_scheduler, start_epoch
 
 
-def calc_net_weight_count(net):
-    net.train()
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def save_params(file_stem,
                 state):
     torch.save(
@@ -382,95 +259,6 @@ def save_params(file_stem,
     torch.save(
         obj=state,
         f=(file_stem + '.states'))
-
-
-class AverageMeter(object):
-    """Computes and stores the average and current value"""
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-
-def accuracy(output, target, topk=(1,)):
-    """Computes the precision@k for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
-
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-        res = []
-        for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(1.0 / batch_size))
-        return res
-
-
-def validate(acc_top1,
-             acc_top5,
-             net,
-             val_data,
-             use_cuda):
-    net.eval()
-    acc_top1.reset()
-    acc_top5.reset()
-    with torch.no_grad():
-        for input, target in val_data:
-            if use_cuda:
-                target = target.cuda(non_blocking=True)
-            output = net(input)
-            prec1, prec5 = accuracy(output, target, topk=(1, 5))
-            acc_top1.update(prec1[0], input.size(0))
-            acc_top5.update(prec5[0], input.size(0))
-    top1 = acc_top1.avg.item()
-    top5 = acc_top5.avg.item()
-    return 1-top1, 1-top5
-
-
-def test(net,
-         val_data,
-         use_cuda,
-         calc_weight_count=False,
-         calc_flops=False,
-         extended_log=False):
-    acc_top1 = AverageMeter()
-    acc_top5 = AverageMeter()
-
-    tic = time.time()
-    err_top1_val, err_top5_val = validate(
-        acc_top1=acc_top1,
-        acc_top5=acc_top5,
-        net=net,
-        val_data=val_data,
-        use_cuda=use_cuda)
-    if calc_weight_count:
-        weight_count = calc_net_weight_count(net)
-        logging.info('Model: {} trainable parameters'.format(weight_count))
-    if calc_flops:
-        n_flops, n_params = measure_model(net, 224, 224)
-        logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(
-            n_params, n_params / 1e6, n_flops, n_flops / 1e6))
-    if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
-        time.time() - tic))
 
 
 def train_epoch(epoch,
@@ -606,14 +394,13 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    _, log_file_exist = prepare_logger(
-        log_dir_path=args.save_dir,
-        logging_file_name=args.logging_file_name)
-    logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
-    logging.info("Script arguments:\n{}".format(args))
-    logging.info("Env_stats:\n{}".format(get_env_stats(
-        packages=args.log_packages.replace(' ', '').split(','),
-        pip_packages=args.log_pip_packages.replace(' ', '').split(','))))
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=args.log_packages,
+        log_pip_packages=args.log_pip_packages)
 
     use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,
@@ -632,71 +419,60 @@ def main():
         batch_size=batch_size,
         num_workers=args.num_workers)
 
-    if args.evaluate:
-        assert (args.use_pretrained or args.resume.strip())
-        test(
-            net=net,
-            val_data=val_data,
-            use_cuda=use_cuda,
-            #calc_weight_count=(not log_file_exist),
-            calc_weight_count=True,
-            calc_flops=args.calc_flops,
-            extended_log=True)
+    num_training_samples = 1281167
+    optimizer, lr_scheduler, start_epoch = prepare_trainer(
+        net=net,
+        optimizer_name=args.optimizer_name,
+        wd=args.wd,
+        momentum=args.momentum,
+        lr_mode=args.lr_mode,
+        lr=args.lr,
+        lr_decay_period=args.lr_decay_period,
+        lr_decay_epoch=args.lr_decay_epoch,
+        lr_decay=args.lr_decay,
+        warmup_epochs=args.warmup_epochs,
+        batch_size=batch_size,
+        num_epochs=args.num_epochs,
+        num_training_samples=num_training_samples,
+        state_file_path=args.resume_state)
+    # if start_epoch is not None:
+    #     args.start_epoch = start_epoch
+
+    if args.save_dir and args.save_interval:
+        lp_saver = TrainLogParamSaver(
+            checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
+            last_checkpoint_file_name_suffix="last",
+            best_checkpoint_file_name_suffix=None,
+            last_checkpoint_dir_path=args.save_dir,
+            best_checkpoint_dir_path=None,
+            last_checkpoint_file_count=2,
+            best_checkpoint_file_count=2,
+            checkpoint_file_save_callback=save_params,
+            checkpoint_file_exts=['.pth', '.states'],
+            save_interval=args.save_interval,
+            num_epochs=args.num_epochs,
+            param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
+            acc_ind=2,
+            # bigger=[True],
+            # mask=None,
+            score_log_file_path=os.path.join(args.save_dir, 'score.log'),
+            score_log_attempt_value=args.attempt,
+            best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
     else:
-        num_training_samples = 1281167
-        optimizer, lr_scheduler, start_epoch = prepare_trainer(
-            net=net,
-            optimizer_name=args.optimizer_name,
-            wd=args.wd,
-            momentum=args.momentum,
-            lr_mode=args.lr_mode,
-            lr=args.lr,
-            lr_decay_period=args.lr_decay_period,
-            lr_decay_epoch=args.lr_decay_epoch,
-            lr_decay=args.lr_decay,
-            warmup_epochs=args.warmup_epochs,
-            batch_size=batch_size,
-            num_epochs=args.num_epochs,
-            num_training_samples=num_training_samples,
-            state_file_path=args.resume_state)
-        # if start_epoch is not None:
-        #     args.start_epoch = start_epoch
+        lp_saver = None
 
-        if args.save_dir and args.save_interval:
-            lp_saver = TrainLogParamSaver(
-                checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
-                last_checkpoint_file_name_suffix="last",
-                best_checkpoint_file_name_suffix=None,
-                last_checkpoint_dir_path=args.save_dir,
-                best_checkpoint_dir_path=None,
-                last_checkpoint_file_count=2,
-                best_checkpoint_file_count=2,
-                checkpoint_file_save_callback=save_params,
-                checkpoint_file_exts=['.pth', '.states'],
-                save_interval=args.save_interval,
-                num_epochs=args.num_epochs,
-                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
-                acc_ind=2,
-                # bigger=[True],
-                # mask=None,
-                score_log_file_path=os.path.join(args.save_dir, 'score.log'),
-                score_log_attempt_value=args.attempt,
-                best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
-        else:
-            lp_saver = None
-
-        train_net(
-            batch_size=batch_size,
-            num_epochs=args.num_epochs,
-            start_epoch1=args.start_epoch,
-            train_data=train_data,
-            val_data=val_data,
-            net=net,
-            optimizer=optimizer,
-            lr_scheduler=lr_scheduler,
-            lp_saver=lp_saver,
-            log_interval=args.log_interval,
-            use_cuda=use_cuda)
+    train_net(
+        batch_size=batch_size,
+        num_epochs=args.num_epochs,
+        start_epoch1=args.start_epoch,
+        train_data=train_data,
+        val_data=val_data,
+        net=net,
+        optimizer=optimizer,
+        lr_scheduler=lr_scheduler,
+        lp_saver=lp_saver,
+        log_interval=args.log_interval,
+        use_cuda=use_cuda)
 
 
 if __name__ == '__main__':

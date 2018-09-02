@@ -1,182 +1,222 @@
-from .models.resnet import *
-from .models.preresnet import *
-from .models.resnext import *
-from .models.senet import *
-from .models.densenet import *
-from .models.condensenet import *
-from .models.dpn import *
-from .models.darknet import *
-from .models.squeezenet import *
-from .models.squeezenext import *
-from .models.shufflenet import *
-from .models.shufflenetv2 import *
-from .models.menet import *
-from .models.mobilenet import *
-from .models.mobilenetv2 import *
-from .models.nasnet import *
+import logging
+import os
+import numpy as np
 
-__all__ = ['get_model']
+import mxnet as mx
+from mxnet import gluon
+from mxnet.gluon.data.vision import transforms
+
+from gluoncv.data import imagenet
+from gluoncv import utils as gutils
+
+from gluon.model_utils import get_model
 
 
-_models = {
-    'resnet10': resnet10,
-    'resnet12': resnet12,
-    'resnet14': resnet14,
-    'resnet16': resnet16,
-    'resnet18_wd4': resnet18_wd4,
-    'resnet18_wd2': resnet18_wd2,
-    'resnet18_w3d4': resnet18_w3d4,
-
-    'resnet18': resnet18,
-    'resnet34': resnet34,
-    'resnet50': resnet50,
-    'resnet50b': resnet50b,
-    'resnet101': resnet101,
-    'resnet101b': resnet101b,
-    'resnet152': resnet152,
-    'resnet152b': resnet152b,
-    'resnet200': resnet200,
-    'resnet200b': resnet200b,
-
-    'seresnet18': seresnet18,
-    'seresnet34': seresnet34,
-    'seresnet50': seresnet50,
-    'seresnet50b': seresnet50b,
-    'seresnet101': seresnet101,
-    'seresnet101b': seresnet101b,
-    'seresnet152': seresnet152,
-    'seresnet152b': seresnet152b,
-    'seresnet200': seresnet200,
-    'seresnet200b': seresnet200b,
-
-    'preresnet10': preresnet10,
-    'preresnet12': preresnet12,
-    'preresnet14': preresnet14,
-    'preresnet16': preresnet16,
-    'preresnet18_wd4': preresnet18_wd4,
-    'preresnet18_wd2': preresnet18_wd2,
-    'preresnet18_w3d4': preresnet18_w3d4,
-
-    'preresnet18': preresnet18,
-    'preresnet34': preresnet34,
-    'preresnet50': preresnet50,
-    'preresnet50b': preresnet50b,
-    'preresnet101': preresnet101,
-    'preresnet101b': preresnet101b,
-    'preresnet152': preresnet152,
-    'preresnet152b': preresnet152b,
-    'preresnet200': preresnet200,
-    'preresnet200b': preresnet200b,
-
-    'sepreresnet18': sepreresnet18,
-    'sepreresnet34': sepreresnet34,
-    'sepreresnet50': sepreresnet50,
-    'sepreresnet50b': sepreresnet50b,
-    'sepreresnet101': sepreresnet101,
-    'sepreresnet101b': sepreresnet101b,
-    'sepreresnet152': sepreresnet152,
-    'sepreresnet152b': sepreresnet152b,
-    'sepreresnet200': sepreresnet200,
-    'sepreresnet200b': sepreresnet200b,
-
-    'slk_resnext50_32x4d': resnext50_32x4d,
-    'slk_resnext101_32x4d': resnext101_32x4d,
-    'slk_resnext101_64x4d': resnext101_64x4d,
-    'seresnext50_32x4d': seresnext50_32x4d,
-    'seresnext101_32x4d': seresnext101_32x4d,
-    'seresnext101_64x4d': seresnext101_64x4d,
-
-    'senet52': senet52,
-    'senet103': senet103,
-    'senet154': senet154,
-
-    'slk_densenet121': densenet121,
-    'slk_densenet161': densenet161,
-    'slk_densenet169': densenet169,
-    'slk_densenet201': densenet201,
-
-    'condensenet74_c4_g4': condensenet74_c4_g4,
-    'condensenet74_c8_g8': condensenet74_c8_g8,
-
-    'dpn68': dpn68,
-    'dpn68b': dpn68b,
-    'dpn98': dpn98,
-    'dpn107': dpn107,
-    'dpn131': dpn131,
-
-    'darknet_ref': darknet_ref,
-    'darknet_tiny': darknet_tiny,
-    'darknet19': darknet19,
-
-    'squeezenet_v1_0': squeezenet_v1_0,
-    'squeezenet_v1_1': squeezenet_v1_1,
-
-    'squeezeresnet_v1_0': squeezeresnet_v1_0,
-    'squeezeresnet_v1_1': squeezeresnet_v1_1,
-
-    'sqnxt23_w1': sqnxt23_w1,
-    'sqnxt23_w3d2': sqnxt23_w3d2,
-    'sqnxt23_w2': sqnxt23_w2,
-    'sqnxt23v5_w1': sqnxt23v5_w1,
-    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
-    'sqnxt23v5_w2': sqnxt23v5_w2,
-
-    'shufflenet_g1_w1': shufflenet_g1_w1,
-    'shufflenet_g2_w1': shufflenet_g2_w1,
-    'shufflenet_g3_w1': shufflenet_g3_w1,
-    'shufflenet_g4_w1': shufflenet_g4_w1,
-    'shufflenet_g8_w1': shufflenet_g8_w1,
-    'shufflenet_g1_w3d4': shufflenet_g1_w3d4,
-    'shufflenet_g3_w3d4': shufflenet_g3_w3d4,
-    'shufflenet_g1_wd2': shufflenet_g1_wd2,
-    'shufflenet_g3_wd2': shufflenet_g3_wd2,
-    'shufflenet_g1_wd4': shufflenet_g1_wd4,
-    'shufflenet_g3_wd4': shufflenet_g3_wd4,
-
-    'shufflenetv2_wd2': shufflenetv2_wd2,
-    'shufflenetv2_w1': shufflenetv2_w1,
-    'shufflenetv2_w2d3': shufflenetv2_w2d3,
-    'shufflenetv2_w2': shufflenetv2_w2,
-
-    'menet108_8x1_g3': menet108_8x1_g3,
-    'menet128_8x1_g4': menet128_8x1_g4,
-    'menet160_8x1_g8': menet160_8x1_g8,
-    'menet228_12x1_g3': menet228_12x1_g3,
-    'menet256_12x1_g4': menet256_12x1_g4,
-    'menet348_12x1_g3': menet348_12x1_g3,
-    'menet352_12x1_g8': menet352_12x1_g8,
-    'menet456_24x1_g3': menet456_24x1_g3,
-
-    'mobilenet_w1': mobilenet_w1,
-    'mobilenet_w3d4': mobilenet_w3d4,
-    'mobilenet_wd2': mobilenet_wd2,
-    'mobilenet_wd4': mobilenet_wd4,
-
-    'fdmobilenet_w1': fdmobilenet_w1,
-    'fdmobilenet_w3d4': fdmobilenet_w3d4,
-    'fdmobilenet_wd2': fdmobilenet_wd2,
-    'fdmobilenet_wd4': fdmobilenet_wd4,
-
-    'mobilenetv2_w1': mobilenetv2_w1,
-    'mobilenetv2_w3d4': mobilenetv2_w3d4,
-    'mobilenetv2_wd2': mobilenetv2_wd2,
-    'mobilenetv2_wd4': mobilenetv2_wd4,
-
-    'nasnet_a_mobile': nasnet_a_mobile,
-}
+def prepare_mx_context(num_gpus,
+                       batch_size):
+    ctx = [mx.gpu(i) for i in range(num_gpus)] if num_gpus > 0 else [mx.cpu()]
+    batch_size *= max(1, num_gpus)
+    return ctx, batch_size
 
 
-def get_model(name, **kwargs):
-    # try:
-    #     from gluoncv.model_zoo import get_model as glcv_get_model
-    #     net = glcv_get_model(name, **kwargs)
-    #     return net
-    # except ValueError as e:
-    #     upstream_supported = str(e)
-    name = name.lower()
-    if name not in _models:
-        #raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
-        raise ValueError('Unsupported model: {}'.format(name))
-    net = _models[name](**kwargs)
+def get_data_rec(rec_train,
+                 rec_train_idx,
+                 rec_val,
+                 rec_val_idx,
+                 batch_size,
+                 num_workers):
+    rec_train = os.path.expanduser(rec_train)
+    rec_train_idx = os.path.expanduser(rec_train_idx)
+    rec_val = os.path.expanduser(rec_val)
+    rec_val_idx = os.path.expanduser(rec_val_idx)
+    jitter_param = 0.4
+    lighting_param = 0.1
+    mean_rgb = [123.68, 116.779, 103.939]
+    std_rgb = [58.393, 57.12, 57.375]
+
+    def batch_fn(batch, ctx):
+        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+        return data, label
+
+    train_data = mx.io.ImageRecordIter(
+        path_imgrec         = rec_train,
+        path_imgidx         = rec_train_idx,
+        preprocess_threads  = num_workers,
+        shuffle             = True,
+        batch_size          = batch_size,
+
+        data_shape          = (3, 224, 224),
+        mean_r              = mean_rgb[0],
+        mean_g              = mean_rgb[1],
+        mean_b              = mean_rgb[2],
+        std_r               = std_rgb[0],
+        std_g               = std_rgb[1],
+        std_b               = std_rgb[2],
+        rand_mirror         = True,
+        random_resized_crop = True,
+        max_aspect_ratio    = 4. / 3.,
+        min_aspect_ratio    = 3. / 4.,
+        max_random_area     = 1,
+        min_random_area     = 0.08,
+        brightness          = jitter_param,
+        saturation          = jitter_param,
+        contrast            = jitter_param,
+        pca_noise           = lighting_param,
+    )
+    val_data = mx.io.ImageRecordIter(
+        path_imgrec         = rec_val,
+        path_imgidx         = rec_val_idx,
+        preprocess_threads  = num_workers,
+        shuffle             = False,
+        batch_size          = batch_size,
+
+        resize              = 256,
+        data_shape          = (3, 224, 224),
+        mean_r              = mean_rgb[0],
+        mean_g              = mean_rgb[1],
+        mean_b              = mean_rgb[2],
+        std_r               = std_rgb[0],
+        std_g               = std_rgb[1],
+        std_b               = std_rgb[2],
+    )
+    return train_data, val_data, batch_fn
+
+
+def get_data_loader(data_dir,
+                    batch_size,
+                    num_workers):
+    normalize = transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225])
+    jitter_param = 0.4
+    lighting_param = 0.1
+
+    def batch_fn(batch, ctx):
+        data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+        label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+        return data, label
+
+    transform_train = transforms.Compose([
+        transforms.RandomResizedCrop(224),
+        transforms.RandomFlipLeftRight(),
+        transforms.RandomColorJitter(
+            brightness=jitter_param,
+            contrast=jitter_param,
+            saturation=jitter_param),
+        transforms.RandomLighting(lighting_param),
+        transforms.ToTensor(),
+        normalize
+    ])
+    transform_test = transforms.Compose([
+        transforms.Resize(256, keep_ratio=True),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        normalize
+    ])
+
+    train_data = gluon.data.DataLoader(
+        imagenet.classification.ImageNet(data_dir, train=True).transform_first(transform_train),
+        batch_size=batch_size,
+        shuffle=True,
+        last_batch='discard',
+        num_workers=num_workers)
+    val_data = gluon.data.DataLoader(
+        imagenet.classification.ImageNet(data_dir, train=False).transform_first(transform_test),
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers)
+
+    return train_data, val_data, batch_fn
+
+
+def prepare_model(model_name,
+                  classes,
+                  use_pretrained,
+                  pretrained_model_file_path,
+                  batch_norm,
+                  last_gamma,
+                  dtype,
+                  tune_layers,
+                  ctx):
+    kwargs = {'ctx': ctx,
+              'pretrained': use_pretrained,
+              'classes': classes}
+
+    if model_name.startswith('vgg'):
+        kwargs['batch_norm'] = batch_norm
+
+    if last_gamma:
+        kwargs['last_gamma'] = True
+
+    net = get_model(model_name, **kwargs)
+
+    if pretrained_model_file_path:
+        assert (os.path.isfile(pretrained_model_file_path))
+        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        net.load_parameters(
+            filename=pretrained_model_file_path,
+            ctx=ctx)
+
+    net.cast(dtype)
+
+    net.hybridize(
+        static_alloc=True,
+        static_shape=True)
+
+    if pretrained_model_file_path or use_pretrained:
+        for param in net.collect_params().values():
+            if param._data is not None:
+                continue
+            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+    else:
+        net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+
+    if tune_layers:
+        tune_layers_ptrn = tuple(tune_layers.split(','))
+        params = net._collect_params_with_prefix()
+        param_keys = list(params.keys())
+        for key in param_keys:
+            if not key.startswith(tune_layers_ptrn):
+                params[key].grad_req = 'null'
+            else:
+                logging.info('Fine-tune parameter: {}'.format(key))
+        for param in net.collect_params().values():
+            if param._data is not None:
+                continue
+            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+
     return net
+
+
+def calc_net_weight_count(net):
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    return weight_count
+
+
+def validate(acc_top1,
+             acc_top5,
+             net,
+             val_data,
+             batch_fn,
+             use_rec,
+             dtype,
+             ctx):
+    if use_rec:
+        val_data.reset()
+    acc_top1.reset()
+    acc_top5.reset()
+    for batch in val_data:
+        data_list, labels_list = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        acc_top1.update(labels_list, outputs_list)
+        acc_top5.update(labels_list, outputs_list)
+    _, top1 = acc_top1.get()
+    _, top5 = acc_top5.get()
+    return 1-top1, 1-top5
 

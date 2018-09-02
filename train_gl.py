@@ -2,22 +2,19 @@ import argparse
 import time
 import logging
 import os
-import sys
 import numpy as np
 
 import mxnet as mx
 from mxnet import gluon
 from mxnet import autograd as ag
-from mxnet.gluon.data.vision import transforms
 
-from gluoncv.data import imagenet
 from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
-from common.env_stats import get_env_stats
+from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import get_model
+from gluon.utils import prepare_mx_context, prepare_model, get_data_rec, get_data_loader, validate
 
 
 def parse_args():
@@ -77,18 +74,12 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved optimizer state if not None')
-    parser.add_argument(
-        '-e',
-        '--evaluate',
-        dest='evaluate',
-        action='store_true',
-        help='only evaluate model on validation set')
-    parser.add_argument(
-        '-mx',
-        '--mxnet',
-        dest='convert_to_mxnet',
-        action='store_true',
-        help='only convert model into MXnet format')
+    # parser.add_argument(
+    #     '-mx',
+    #     '--mxnet',
+    #     dest='convert_to_mxnet',
+    #     action='store_true',
+    #     help='only convert model into MXnet format')
 
     parser.add_argument(
         '--num-gpus',
@@ -254,208 +245,11 @@ def parse_args():
     return args
 
 
-def prepare_logger(log_dir_path,
-                   logging_file_name):
-    logging.basicConfig()
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    log_file_exist = False
-    if log_dir_path is not None and log_dir_path:
-        log_file_path = os.path.join(log_dir_path, logging_file_name)
-        if not os.path.exists(log_dir_path):
-            os.makedirs(log_dir_path)
-            log_file_exist = False
-        else:
-            log_file_exist = (os.path.exists(log_file_path) and os.path.getsize(log_file_path) > 0)
-        fh = logging.FileHandler(log_file_path)
-        logger.addHandler(fh)
-        if log_file_exist:
-            logging.info('--------------------------------')
-    return logger, log_file_exist
-
-
 def init_rand(seed):
     if seed <= 0:
         seed = np.random.randint(10000)
     gutils.random.seed(seed)
     return seed
-
-
-def prepare_mx_context(num_gpus,
-                       batch_size):
-    ctx = [mx.gpu(i) for i in range(num_gpus)] if num_gpus > 0 else [mx.cpu()]
-    batch_size *= max(1, num_gpus)
-    return ctx, batch_size
-
-
-def get_data_rec(rec_train,
-                 rec_train_idx,
-                 rec_val,
-                 rec_val_idx,
-                 batch_size,
-                 num_workers):
-    rec_train = os.path.expanduser(rec_train)
-    rec_train_idx = os.path.expanduser(rec_train_idx)
-    rec_val = os.path.expanduser(rec_val)
-    rec_val_idx = os.path.expanduser(rec_val_idx)
-    jitter_param = 0.4
-    lighting_param = 0.1
-    mean_rgb = [123.68, 116.779, 103.939]
-    std_rgb = [58.393, 57.12, 57.375]
-
-    def batch_fn(batch, ctx):
-        data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-        return data, label
-
-    train_data = mx.io.ImageRecordIter(
-        path_imgrec         = rec_train,
-        path_imgidx         = rec_train_idx,
-        preprocess_threads  = num_workers,
-        shuffle             = True,
-        batch_size          = batch_size,
-
-        data_shape          = (3, 224, 224),
-        mean_r              = mean_rgb[0],
-        mean_g              = mean_rgb[1],
-        mean_b              = mean_rgb[2],
-        std_r               = std_rgb[0],
-        std_g               = std_rgb[1],
-        std_b               = std_rgb[2],
-        rand_mirror         = True,
-        random_resized_crop = True,
-        max_aspect_ratio    = 4. / 3.,
-        min_aspect_ratio    = 3. / 4.,
-        max_random_area     = 1,
-        min_random_area     = 0.08,
-        brightness          = jitter_param,
-        saturation          = jitter_param,
-        contrast            = jitter_param,
-        pca_noise           = lighting_param,
-    )
-    val_data = mx.io.ImageRecordIter(
-        path_imgrec         = rec_val,
-        path_imgidx         = rec_val_idx,
-        preprocess_threads  = num_workers,
-        shuffle             = False,
-        batch_size          = batch_size,
-
-        resize              = 256,
-        data_shape          = (3, 224, 224),
-        mean_r              = mean_rgb[0],
-        mean_g              = mean_rgb[1],
-        mean_b              = mean_rgb[2],
-        std_r               = std_rgb[0],
-        std_g               = std_rgb[1],
-        std_b               = std_rgb[2],
-    )
-    return train_data, val_data, batch_fn
-
-
-def get_data_loader(data_dir,
-                    batch_size,
-                    num_workers):
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225])
-    jitter_param = 0.4
-    lighting_param = 0.1
-
-    def batch_fn(batch, ctx):
-        data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-        return data, label
-
-    transform_train = transforms.Compose([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomFlipLeftRight(),
-        transforms.RandomColorJitter(
-            brightness=jitter_param,
-            contrast=jitter_param,
-            saturation=jitter_param),
-        transforms.RandomLighting(lighting_param),
-        transforms.ToTensor(),
-        normalize
-    ])
-    transform_test = transforms.Compose([
-        transforms.Resize(256, keep_ratio=True),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        normalize
-    ])
-
-    train_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=True).transform_first(transform_train),
-        batch_size=batch_size,
-        shuffle=True,
-        last_batch='discard',
-        num_workers=num_workers)
-    val_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=False).transform_first(transform_test),
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers)
-
-    return train_data, val_data, batch_fn
-
-
-def prepare_model(model_name,
-                  classes,
-                  use_pretrained,
-                  pretrained_model_file_path,
-                  batch_norm,
-                  last_gamma,
-                  dtype,
-                  tune_layers,
-                  ctx):
-    kwargs = {'ctx': ctx,
-              'pretrained': use_pretrained,
-              'classes': classes}
-
-    if model_name.startswith('vgg'):
-        kwargs['batch_norm'] = batch_norm
-
-    if last_gamma:
-        kwargs['last_gamma'] = True
-
-    net = get_model(model_name, **kwargs)
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        net.load_parameters(
-            filename=pretrained_model_file_path,
-            ctx=ctx)
-
-    net.cast(dtype)
-
-    net.hybridize(
-        static_alloc=True,
-        static_shape=True)
-
-    if pretrained_model_file_path or use_pretrained:
-        for param in net.collect_params().values():
-            if param._data is not None:
-                continue
-            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-    else:
-        net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-
-    if tune_layers:
-        tune_layers_ptrn = tuple(tune_layers.split(','))
-        params = net._collect_params_with_prefix()
-        param_keys = list(params.keys())
-        for key in param_keys:
-            if not key.startswith(tune_layers_ptrn):
-                params[key].grad_req = 'null'
-            else:
-                logging.info('Fine-tune parameter: {}'.format(key))
-        for param in net.collect_params().values():
-            if param._data is not None:
-                continue
-            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-
-    return net
 
 
 def prepare_trainer(net,
@@ -520,80 +314,11 @@ def prepare_trainer(net,
     return trainer, lr_scheduler
 
 
-def calc_net_weight_count(net):
-    net_params = net.collect_params()
-    weight_count = 0
-    for param in net_params.values():
-        if (param.shape is None) or (not param._differentiable):
-            continue
-        weight_count += np.prod(param.shape)
-    return weight_count
-
-
 def save_params(file_stem,
                 net,
                 trainer):
     net.save_parameters(file_stem + '.params')
     trainer.save_states(file_stem + '.states')
-
-
-def validate(acc_top1,
-             acc_top5,
-             net,
-             val_data,
-             batch_fn,
-             use_rec,
-             dtype,
-             ctx):
-    if use_rec:
-        val_data.reset()
-    acc_top1.reset()
-    acc_top5.reset()
-    for batch in val_data:
-        data_list, labels_list = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        acc_top1.update(labels_list, outputs_list)
-        acc_top5.update(labels_list, outputs_list)
-    _, top1 = acc_top1.get()
-    _, top5 = acc_top5.get()
-    return 1-top1, 1-top5
-
-
-def test(net,
-         val_data,
-         batch_fn,
-         use_rec,
-         dtype,
-         ctx,
-         calc_weight_count=False,
-         extended_log=False):
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
-
-    tic = time.time()
-    err_top1_val, err_top5_val = validate(
-        acc_top1=acc_top1,
-        acc_top5=acc_top5,
-        net=net,
-        val_data=val_data,
-        batch_fn=batch_fn,
-        use_rec=use_rec,
-        dtype=dtype,
-        ctx=ctx)
-    if calc_weight_count:
-        weight_count = calc_net_weight_count(net)
-        logging.info('Model: {} trainable parameters'.format(weight_count))
-    if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
-        time.time() - tic))
-
-    # weight_count = calc_net_weight_count(net)
-    # logging.info('Model: {} trainable parameters'.format(weight_count))
 
 
 def train_epoch(epoch,
@@ -765,21 +490,20 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    _, log_file_exist = prepare_logger(
-        log_dir_path=args.save_dir,
-        logging_file_name=args.logging_file_name)
-    logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
-    logging.info("Script arguments:\n{}".format(args))
-    logging.info("Env_stats:\n{}".format(get_env_stats(
-        packages=args.log_packages.replace(' ', '').split(','),
-        pip_packages=args.log_pip_packages.replace(' ', '').split(','))))
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=args.log_packages,
+        log_pip_packages=args.log_pip_packages)
 
     ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    if args.convert_to_mxnet:
-        batch_size = 1
+    # if args.convert_to_mxnet:
+    #     batch_size = 1
 
     num_classes = 1000
     net = prepare_model(
@@ -807,90 +531,78 @@ def main():
             batch_size=batch_size,
             num_workers=args.num_workers)
 
-    if args.convert_to_mxnet:
-        assert args.save_dir and os.path.exists(args.save_dir)
-        assert (args.use_pretrained or args.resume.strip())
-        x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
-        net.forward(x)
-        export_checkpoint_file_path_prefix = os.path.join(args.save_dir, 'imagenet_{}'.format(args.model))
-        net.export(export_checkpoint_file_path_prefix)
-        logging.info('Convert model to MXNet format: {}'.format(export_checkpoint_file_path_prefix))
-    elif args.evaluate:
-        assert (args.use_pretrained or args.resume.strip())
-        test(
-            net=net,
-            val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=args.use_rec,
-            dtype=args.dtype,
-            ctx=ctx,
-            #calc_weight_count=(not log_file_exist),
-            calc_weight_count=True,
-            extended_log=True)
+    # if args.convert_to_mxnet:
+    #     assert args.save_dir and os.path.exists(args.save_dir)
+    #     assert (args.use_pretrained or args.resume.strip())
+    #     x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
+    #     net.forward(x)
+    #     export_checkpoint_file_path_prefix = os.path.join(args.save_dir, 'imagenet_{}'.format(args.model))
+    #     net.export(export_checkpoint_file_path_prefix)
+    #     logging.info('Convert model to MXNet format: {}'.format(export_checkpoint_file_path_prefix))
+
+    num_training_samples = 1281167
+    trainer, lr_scheduler = prepare_trainer(
+        net=net,
+        optimizer_name=args.optimizer_name,
+        wd=args.wd,
+        momentum=args.momentum,
+        lr_mode=args.lr_mode,
+        lr=args.lr,
+        lr_decay_period=args.lr_decay_period,
+        lr_decay_epoch=args.lr_decay_epoch,
+        lr_decay=args.lr_decay,
+        target_lr=args.target_lr,
+        poly_power=args.poly_power,
+        warmup_epochs=args.warmup_epochs,
+        warmup_lr=args.warmup_lr,
+        warmup_mode=args.warmup_mode,
+        batch_size=batch_size,
+        num_epochs=args.num_epochs,
+        num_training_samples=num_training_samples,
+        dtype=args.dtype,
+        state_file_path=args.resume_state)
+
+    if args.save_dir and args.save_interval:
+        lp_saver = TrainLogParamSaver(
+            checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
+            last_checkpoint_file_name_suffix="last",
+            best_checkpoint_file_name_suffix=None,
+            last_checkpoint_dir_path=args.save_dir,
+            best_checkpoint_dir_path=None,
+            last_checkpoint_file_count=2,
+            best_checkpoint_file_count=2,
+            checkpoint_file_save_callback=save_params,
+            checkpoint_file_exts=['.params', '.states'],
+            save_interval=args.save_interval,
+            num_epochs=args.num_epochs,
+            param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
+            acc_ind=2,
+            # bigger=[True],
+            # mask=None,
+            score_log_file_path=os.path.join(args.save_dir, 'score.log'),
+            score_log_attempt_value=args.attempt,
+            best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
     else:
-        num_training_samples = 1281167
-        trainer, lr_scheduler = prepare_trainer(
-            net=net,
-            optimizer_name=args.optimizer_name,
-            wd=args.wd,
-            momentum=args.momentum,
-            lr_mode=args.lr_mode,
-            lr=args.lr,
-            lr_decay_period=args.lr_decay_period,
-            lr_decay_epoch=args.lr_decay_epoch,
-            lr_decay=args.lr_decay,
-            target_lr=args.target_lr,
-            poly_power=args.poly_power,
-            warmup_epochs=args.warmup_epochs,
-            warmup_lr=args.warmup_lr,
-            warmup_mode=args.warmup_mode,
-            batch_size=batch_size,
-            num_epochs=args.num_epochs,
-            num_training_samples=num_training_samples,
-            dtype=args.dtype,
-            state_file_path=args.resume_state)
+        lp_saver = None
 
-        if args.save_dir and args.save_interval:
-            lp_saver = TrainLogParamSaver(
-                checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
-                last_checkpoint_file_name_suffix="last",
-                best_checkpoint_file_name_suffix=None,
-                last_checkpoint_dir_path=args.save_dir,
-                best_checkpoint_dir_path=None,
-                last_checkpoint_file_count=2,
-                best_checkpoint_file_count=2,
-                checkpoint_file_save_callback=save_params,
-                checkpoint_file_exts=['.params', '.states'],
-                save_interval=args.save_interval,
-                num_epochs=args.num_epochs,
-                param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
-                acc_ind=2,
-                # bigger=[True],
-                # mask=None,
-                score_log_file_path=os.path.join(args.save_dir, 'score.log'),
-                score_log_attempt_value=args.attempt,
-                best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
-        else:
-            lp_saver = None
-
-        train_net(
-            batch_size=batch_size,
-            num_epochs=args.num_epochs,
-            start_epoch1=args.start_epoch,
-            train_data=train_data,
-            val_data=val_data,
-            batch_fn=batch_fn,
-            use_rec=args.use_rec,
-            dtype=args.dtype,
-            net=net,
-            trainer=trainer,
-            lr_scheduler=lr_scheduler,
-            lp_saver=lp_saver,
-            log_interval=args.log_interval,
-            mixup=args.mixup,
-            mixup_epoch_tail=args.mixup_epoch_tail,
-            num_classes=num_classes,
-            ctx=ctx)
+    train_net(
+        batch_size=batch_size,
+        num_epochs=args.num_epochs,
+        start_epoch1=args.start_epoch,
+        train_data=train_data,
+        val_data=val_data,
+        batch_fn=batch_fn,
+        use_rec=args.use_rec,
+        dtype=args.dtype,
+        net=net,
+        trainer=trainer,
+        lr_scheduler=lr_scheduler,
+        lp_saver=lp_saver,
+        log_interval=args.log_interval,
+        mixup=args.mixup,
+        mixup_epoch_tail=args.mixup_epoch_tail,
+        num_classes=num_classes,
+        ctx=ctx)
 
 
 if __name__ == '__main__':

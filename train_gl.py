@@ -182,14 +182,6 @@ def parse_args():
         help='weight decay rate. default is 0.0001.')
 
     parser.add_argument(
-        '--last-gamma',
-        action='store_true',
-        help='whether to initialize the gamma of the last BN layer in each bottleneck to zero')
-    parser.add_argument(
-        '--batch-norm',
-        action='store_true',
-        help='enable batch normalization or not in vgg. default is false')
-    parser.add_argument(
         '--mixup',
         action='store_true',
         help='use mixup strategy')
@@ -511,8 +503,6 @@ def main():
         classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        batch_norm=args.batch_norm,
-        last_gamma=args.last_gamma,
         dtype=args.dtype,
         tune_layers=args.tune_layers,
         ctx=ctx)

@@ -160,8 +160,6 @@ def main():
         classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        batch_norm=args.batch_norm,
-        last_gamma=args.last_gamma,
         dtype=args.dtype,
         tune_layers=args.tune_layers,
         ctx=ctx)

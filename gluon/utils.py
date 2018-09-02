@@ -7,7 +7,6 @@ from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
 
 from gluoncv.data import imagenet
-from gluoncv import utils as gutils
 
 from gluon.model_utils import get_model
 
@@ -134,20 +133,12 @@ def prepare_model(model_name,
                   classes,
                   use_pretrained,
                   pretrained_model_file_path,
-                  batch_norm,
-                  last_gamma,
                   dtype,
                   tune_layers,
                   ctx):
     kwargs = {'ctx': ctx,
               'pretrained': use_pretrained,
               'classes': classes}
-
-    if model_name.startswith('vgg'):
-        kwargs['batch_norm'] = batch_norm
-
-    if last_gamma:
-        kwargs['last_gamma'] = True
 
     net = get_model(model_name, **kwargs)
 

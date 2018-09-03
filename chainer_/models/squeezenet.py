@@ -344,6 +344,9 @@ def squeezeresnet_v1_1(**kwargs):
 
 def _test():
     import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 

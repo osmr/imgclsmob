@@ -3,7 +3,7 @@ import time
 import logging
 import numpy as np
 
-from chainer import cuda
+from chainer import cuda, global_config
 import chainer.functions as F
 
 from chainercv.utils import apply_to_iterator
@@ -142,6 +142,8 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
+    global_config.train = False
+    
     use_cuda = args.num_gpus > 0
     if use_cuda:
         cuda.get_device(0).use()

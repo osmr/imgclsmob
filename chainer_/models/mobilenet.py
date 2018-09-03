@@ -50,8 +50,8 @@ class ConvBlock(Chain):
                 ksize=ksize,
                 stride=stride,
                 pad=pad,
-                groups=groups,
-                nobias=True)
+                nobias=True,
+                groups=groups)
             self.bn = L.BatchNormalization(size=out_channels)
             self.activ = F.relu
 
@@ -359,6 +359,9 @@ def fdmobilenet_wd4(**kwargs):
 
 def _test():
     import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 

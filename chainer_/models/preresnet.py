@@ -1,5 +1,5 @@
 """
-    PreResNet & SE-PreResNet, implemented in PyTorch.
+    PreResNet & SE-PreResNet, implemented in Chainer.
     Original papers:
     - 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -12,12 +12,15 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
-from .common import conv1x1, SEBlock
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import SimpleSequential, conv1x1, SEBlock
 
 
-class PreResConv(nn.Module):
+class PreResConv(Chain):
     """
     PreResNet specific convolution block, with pre-activation.
 
@@ -27,31 +30,32 @@ class PreResConv(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding):
+                 pad):
         super(PreResConv, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
+        with self.init_scope():
+            self.bn = L.BatchNormalization(size=in_channels)
+            self.activ = F.relu
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.bn(x)
         x = self.activ(x)
         x_pre_activ = x
@@ -72,14 +76,14 @@ def preres_conv1x1(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
+        ksize=1,
         stride=stride,
-        padding=0)
+        pad=0)
 
 
 def preres_conv3x3(in_channels,
@@ -95,21 +99,19 @@ def preres_conv3x3(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Stride of the convolution.
     """
     return PreResConv(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        ksize=3,
         stride=stride,
-        padding=1)
+        pad=1)
 
 
-class PreResBlock(nn.Module):
+class PreResBlock(Chain):
     """
-    Simple PreResNet block for residual path in ResNet unit.
+    Simple PreResNet block for residual path in PreResNet unit.
 
     Parameters:
     ----------
@@ -118,29 +120,30 @@ class PreResBlock(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride):
         super(PreResBlock, self).__init__()
-        self.conv1 = preres_conv3x3(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride)
-        self.conv2 = preres_conv3x3(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            stride=1)
+        with self.init_scope():
+            self.conv1 = preres_conv3x3(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride)
+            self.conv2 = preres_conv3x3(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                stride=1)
 
-    def forward(self, x):
+    def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
         x, _ = self.conv2(x)
         return x, x_pre_activ
 
 
-class PreResBottleneck(nn.Module):
+class PreResBottleneck(Chain):
     """
     PreResNet bottleneck block for residual path in PreResNet unit.
 
@@ -151,7 +154,7 @@ class PreResBottleneck(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
     """
@@ -163,27 +166,28 @@ class PreResBottleneck(nn.Module):
         super(PreResBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv1 = preres_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=(stride if conv1_stride else 1))
-        self.conv2 = preres_conv3x3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=(1 if conv1_stride else stride))
-        self.conv3 = preres_conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1)
+        with self.init_scope():
+            self.conv1 = preres_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=(stride if conv1_stride else 1))
+            self.conv2 = preres_conv3x3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=(1 if conv1_stride else stride))
+            self.conv3 = preres_conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                stride=1)
 
-    def forward(self, x):
+    def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
         x, _ = self.conv2(x)
         x, _ = self.conv3(x)
         return x, x_pre_activ
 
 
-class PreResUnit(nn.Module):
+class PreResUnit(Chain):
     """
     PreResNet unit with residual connection.
 
@@ -194,7 +198,7 @@ class PreResUnit(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
@@ -213,26 +217,27 @@ class PreResUnit(nn.Module):
         self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        if bottleneck:
-            self.body = PreResBottleneck(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                conv1_stride=conv1_stride)
-        else:
-            self.body = PreResBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride)
-        if self.use_se:
-            self.se = SEBlock(channels=out_channels)
-        if self.resize_identity:
-            self.identity_conv = conv1x1(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride)
+        with self.init_scope():
+            if bottleneck:
+                self.body = PreResBottleneck(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    conv1_stride=conv1_stride)
+            else:
+                self.body = PreResBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride)
+            if self.use_se:
+                self.se = SEBlock(channels=out_channels)
+            if self.resize_identity:
+                self.identity_conv = conv1x1(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride)
 
-    def forward(self, x):
+    def __call__(self, x):
         identity = x
         x, x_pre_activ = self.body(x)
         if self.use_se:
@@ -243,7 +248,7 @@ class PreResUnit(nn.Module):
         return x
 
 
-class PreResInitBlock(nn.Module):
+class PreResInitBlock(Chain):
     """
     PreResNet specific initial block.
 
@@ -258,21 +263,24 @@ class PreResInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(PreResInitBlock, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=7,
+                stride=2,
+                pad=3,
+                nobias=True)
+            self.bn = L.BatchNormalization(size=out_channels)
+            self.activ = F.relu
+            self.pool = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=1,
+                cover_all=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         x = self.activ(x)
@@ -280,7 +288,7 @@ class PreResInitBlock(nn.Module):
         return x
 
 
-class PreResActivation(nn.Module):
+class PreResActivation(Chain):
     """
     PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
@@ -292,16 +300,17 @@ class PreResActivation(nn.Module):
     def __init__(self,
                  in_channels):
         super(PreResActivation, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.bn = L.BatchNormalization(size=in_channels)
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.bn(x)
         x = self.activ(x)
         return x
 
 
-class PreResNet(nn.Module):
+class PreResNet(Chain):
     """
     PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027. Also this
     class implements SE-PreResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -320,7 +329,7 @@ class PreResNet(nn.Module):
         Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -330,48 +339,48 @@ class PreResNet(nn.Module):
                  conv1_stride,
                  use_se,
                  in_channels=3,
-                 num_classes=1000):
+                 classes=1000):
         super(PreResNet, self).__init__()
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", PreResInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 1 if (i == 0) or (j != 0) else 2
-                stage.add_module("unit{}".format(j + 1), PreResUnit(
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", PreResInitBlock(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride,
-                    bottleneck=bottleneck,
-                    conv1_stride=conv1_stride,
-                    use_se=use_se))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PreResActivation(in_channels=in_channels))
-        self.features.add_module('final_pool', nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            stride = 2 if (j == 0) and (i != 0) else 1
+                            setattr(stage, "unit{}".format(j + 1), PreResUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                bottleneck=bottleneck,
+                                conv1_stride=conv1_stride,
+                                use_se=use_se))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'post_activ', PreResActivation(
+                    in_channels=in_channels))
+                setattr(self.features, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=7,
+                    stride=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'flatten', partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, 'fc', L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -382,7 +391,7 @@ def get_preresnet(blocks,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join('~', '.chainer', 'models'),
                   **kwargs):
     """
     Create PreResNet or SE-PreResNet model with specific parameters.
@@ -401,7 +410,7 @@ def get_preresnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
@@ -454,11 +463,12 @@ def get_preresnet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        import torch
         from .model_store import get_model_file
-        net.load_state_dict(torch.load(get_model_file(
-            model_name=model_name,
-            local_model_store_dir_path=root)))
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -472,7 +482,9 @@ def preresnet10(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
@@ -487,7 +499,9 @@ def preresnet12(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
@@ -502,7 +516,9 @@ def preresnet14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
@@ -517,7 +533,9 @@ def preresnet16(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
@@ -532,7 +550,9 @@ def preresnet18_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
@@ -547,7 +567,9 @@ def preresnet18_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
@@ -562,7 +584,9 @@ def preresnet18_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
@@ -576,7 +600,9 @@ def preresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
@@ -590,7 +616,9 @@ def preresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
@@ -604,7 +632,9 @@ def preresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
@@ -619,7 +649,9 @@ def preresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
@@ -633,7 +665,9 @@ def preresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
@@ -648,7 +682,9 @@ def preresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
@@ -662,7 +698,9 @@ def preresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
@@ -677,7 +715,9 @@ def preresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
@@ -691,7 +731,9 @@ def preresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
@@ -706,7 +748,9 @@ def preresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
@@ -720,7 +764,9 @@ def sepreresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, use_se=True, model_name="sepreresnet18", **kwargs)
@@ -734,7 +780,9 @@ def sepreresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=34, use_se=True, model_name="sepreresnet34", **kwargs)
@@ -748,7 +796,9 @@ def sepreresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=50, use_se=True, model_name="sepreresnet50", **kwargs)
@@ -763,7 +813,9 @@ def sepreresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=50, conv1_stride=False, use_se=True, model_name="sepreresnet50b", **kwargs)
@@ -777,7 +829,9 @@ def sepreresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=101, use_se=True, model_name="sepreresnet101", **kwargs)
@@ -792,7 +846,9 @@ def sepreresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=101, conv1_stride=False, use_se=True, model_name="sepreresnet101b", **kwargs)
@@ -806,7 +862,9 @@ def sepreresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=152, use_se=True, model_name="sepreresnet152", **kwargs)
@@ -821,7 +879,9 @@ def sepreresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=152, conv1_stride=False, use_se=True, model_name="sepreresnet152b", **kwargs)
@@ -836,7 +896,9 @@ def sepreresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=200, use_se=True, model_name="sepreresnet200", **kwargs)
@@ -851,7 +913,9 @@ def sepreresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=200, conv1_stride=False, use_se=True, model_name="sepreresnet200b", **kwargs)
@@ -859,8 +923,9 @@ def sepreresnet200b(**kwargs):
 
 def _test():
     import numpy as np
-    import torch
-    from torch.autograd import Variable
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -900,11 +965,7 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet10 or weight_count == 5417128)
         assert (model != preresnet12 or weight_count == 5491112)
@@ -934,9 +995,9 @@ def _test():
         assert (model != sepreresnet200 or weight_count == 71828312)
         assert (model != sepreresnet200b or weight_count == 71828312)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

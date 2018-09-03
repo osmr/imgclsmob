@@ -2,7 +2,7 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['SimpleSequential', 'conv1x1', 'SEBlock']
+__all__ = ['SimpleSequential', 'conv1x1', 'ChannelShuffle', 'SEBlock']
 
 
 class SimpleSequential(Chain):
@@ -34,7 +34,7 @@ class SimpleSequential(Chain):
 def conv1x1(in_channels,
             out_channels,
             stride=1,
-            use_bias=True):
+            use_bias=False):
     """
     Convolution 1x1 layer.
 
@@ -55,6 +55,54 @@ def conv1x1(in_channels,
         ksize=1,
         stride=stride,
         nobias=(not use_bias))
+
+
+def channel_shuffle(x,
+                    groups):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    x : chainer.Variable or numpy.ndarray or cupy.ndarray
+        Input variable.
+    groups : int
+        Number of groups.
+
+    Returns
+    -------
+    chainer.Variable or numpy.ndarray or cupy.ndarray
+        Resulted variable.
+    """
+    batch, channels, height, width = x.shape
+    channels_per_group = channels // groups
+    x = F.reshape(x, shape=(batch, groups, channels_per_group, height, width))
+    x = F.swapaxes(x, axis1=1, axis2=2)
+    x = F.reshape(x, shape=(batch, channels, height, width))
+    return x
+
+
+class ChannelShuffle(Chain):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 channels,
+                 groups):
+        super(ChannelShuffle, self).__init__()
+        assert (channels % groups == 0)
+        self.groups = groups
+
+    def __call__(self, x):
+        return channel_shuffle(x, self.groups)
 
 
 class SEBlock(Chain):

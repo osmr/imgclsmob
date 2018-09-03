@@ -112,9 +112,6 @@ class MobileNet(Chain):
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -123,7 +120,6 @@ class MobileNet(Chain):
     def __init__(self,
                  channels,
                  first_stage_stride,
-                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000):
         super(MobileNet, self).__init__()
@@ -215,7 +211,6 @@ def get_mobilenet(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
         from .model_store import get_model_file
         load_npz(
             file=get_model_file(

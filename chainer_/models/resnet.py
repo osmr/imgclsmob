@@ -16,7 +16,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import SimpleSequential, SEBlock
+from .common import SimpleSequential, SEBlock
 
 
 class ResConv(Chain):
@@ -297,7 +297,8 @@ class ResInitBlock(Chain):
                 F.max_pooling_2d,
                 ksize=3,
                 stride=2,
-                pad=1)
+                pad=1,
+                cover_all=False)
 
     def __call__(self, x):
         x = self.conv(x)

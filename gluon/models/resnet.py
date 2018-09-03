@@ -13,7 +13,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import SEBlock
+from common import SEBlock
 
 
 class ResConv(HybridBlock):
@@ -959,7 +959,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         resnet10,
@@ -1007,6 +1007,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)

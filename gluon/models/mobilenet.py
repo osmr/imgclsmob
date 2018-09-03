@@ -372,7 +372,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         mobilenet_w1,
@@ -399,6 +399,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenet_w1 or weight_count == 4231976)
         assert (model != mobilenet_w3d4 or weight_count == 2585560)
         assert (model != mobilenet_wd2 or weight_count == 1331592)

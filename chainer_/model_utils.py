@@ -1,5 +1,6 @@
 from .models.resnet import *
 from .models.preresnet import *
+from .models.darknet import *
 from .models.squeezenet import *
 from .models.mobilenet import *
 
@@ -66,6 +67,10 @@ _models = {
     'sepreresnet152b': sepreresnet152b,
     'sepreresnet200': sepreresnet200,
     'sepreresnet200b': sepreresnet200b,
+
+    'darknet_ref': darknet_ref,
+    'darknet_tiny': darknet_tiny,
+    'darknet19': darknet19,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

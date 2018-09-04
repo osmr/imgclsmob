@@ -363,17 +363,17 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         mobilenet_w1,
         mobilenet_w3d4,
         mobilenet_wd2,
         mobilenet_wd4,
-        fdmobilenet_w1,
-        fdmobilenet_w3d4,
-        fdmobilenet_wd2,
-        fdmobilenet_wd4,
+        # fdmobilenet_w1,
+        # fdmobilenet_w3d4,
+        # fdmobilenet_wd2,
+        # fdmobilenet_wd4,
     ]
 
     for model in models:

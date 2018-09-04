@@ -967,7 +967,6 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet10 or weight_count == 5418792)

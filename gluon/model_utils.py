@@ -79,9 +79,9 @@ _models = {
     'sepreresnet200': sepreresnet200,
     'sepreresnet200b': sepreresnet200b,
 
-    'slk_resnext50_32x4d': resnext50_32x4d,
-    'slk_resnext101_32x4d': resnext101_32x4d,
-    'slk_resnext101_64x4d': resnext101_64x4d,
+    'resnext50_32x4d': resnext50_32x4d,
+    'resnext101_32x4d': resnext101_32x4d,
+    'resnext101_64x4d': resnext101_64x4d,
     'seresnext50_32x4d': seresnext50_32x4d,
     'seresnext101_32x4d': seresnext101_32x4d,
     'seresnext101_64x4d': seresnext101_64x4d,
@@ -90,10 +90,10 @@ _models = {
     'senet103': senet103,
     'senet154': senet154,
 
-    'slk_densenet121': densenet121,
-    'slk_densenet161': densenet161,
-    'slk_densenet169': densenet169,
-    'slk_densenet201': densenet201,
+    'densenet121': densenet121,
+    'densenet161': densenet161,
+    'densenet169': densenet169,
+    'densenet201': densenet201,
 
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,

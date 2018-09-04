@@ -2,6 +2,7 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
+from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.mobilenet import *
@@ -80,6 +81,11 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'densenet121': densenet121,
+    'densenet161': densenet161,
+    'densenet169': densenet169,
+    'densenet201': densenet201,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

@@ -319,6 +319,7 @@ def main():
             f=args.dst_params)
     elif args.src_fwk == "gluon" and args.dst_fwk == "chainer":
         dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
 
         src_param_keys.sort()
         src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
@@ -329,6 +330,7 @@ def main():
                                              x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
 
         dst_param_keys = [key.replace('/weight', '/W') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
 
         ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
         ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]
@@ -344,7 +346,9 @@ def main():
             for j, sub_path in enumerate(dst_path):
                 obj = getattr(obj, sub_path)
             if src_key1 == 'running_mean':
-                assert (obj.avg_mean.shape == src_params[src_key].shape)
+                assert (obj.avg_mean.shape == src_params[src_key].shape),\
+                "src_key={}, dst_path={}, src_shape={}, obj.avg_mean.shape={}".format(
+                    src_key, dst_path, src_params[src_key].shape, obj.avg_mean.shape)
                 obj.avg_mean = src_params[src_key]._data[0].asnumpy()
             elif src_key1 == 'running_var':
                 assert (obj.avg_var.shape == src_params[src_key].shape)

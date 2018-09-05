@@ -6,6 +6,7 @@ from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
+from .models.shufflenet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 
@@ -105,6 +106,18 @@ _models = {
     'sqnxt23v5_w1': sqnxt23v5_w1,
     'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
     'sqnxt23v5_w2': sqnxt23v5_w2,
+
+    'shufflenet_g1_w1': shufflenet_g1_w1,
+    'shufflenet_g2_w1': shufflenet_g2_w1,
+    'shufflenet_g3_w1': shufflenet_g3_w1,
+    'shufflenet_g4_w1': shufflenet_g4_w1,
+    'shufflenet_g8_w1': shufflenet_g8_w1,
+    'shufflenet_g1_w3d4': shufflenet_g1_w3d4,
+    'shufflenet_g3_w3d4': shufflenet_g3_w3d4,
+    'shufflenet_g1_wd2': shufflenet_g1_wd2,
+    'shufflenet_g3_wd2': shufflenet_g3_wd2,
+    'shufflenet_g1_wd4': shufflenet_g1_wd4,
+    'shufflenet_g3_wd4': shufflenet_g3_wd4,
 
     'mobilenet_w1': mobilenet_w1,
     'mobilenet_w3d4': mobilenet_w3d4,

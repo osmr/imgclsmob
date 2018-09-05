@@ -1,5 +1,5 @@
 """
-    ShuffleNet, implemented in Gluon.
+    ShuffleNet, implemented in Chainer.
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 """
@@ -9,13 +9,16 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
            'shufflenet_g1_wd4', 'shufflenet_g3_wd4']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import SimpleSequential, ChannelShuffle
 
 
 def depthwise_conv3x3(channels,
-                      strides):
+                      stride):
     """
     Depthwise convolution 3x3 layer.
 
@@ -23,17 +26,17 @@ def depthwise_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
     """
-    return nn.Conv2D(
-        channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        in_channels=channels)
+    return L.Convolution2D(
+        in_channels=channels,
+        out_channels=channels,
+        ksize=3,
+        stride=stride,
+        pad=1,
+        nobias=True,
+        groups=channels)
 
 
 def group_conv1x1(in_channels,
@@ -51,15 +54,15 @@ def group_conv1x1(in_channels,
     groups : int
         Number of groups.
     """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        use_bias=False,
-        in_channels=in_channels)
+    return L.Convolution2D(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=1,
+        nobias=True,
+        groups=groups)
 
 
-class ShuffleUnit(HybridBlock):
+class ShuffleUnit(Chain):
     """
     ShuffleNet unit.
 
@@ -81,41 +84,41 @@ class ShuffleUnit(HybridBlock):
                  out_channels,
                  groups,
                  downsample,
-                 ignore_group,
-                 **kwargs):
-        super(ShuffleUnit, self).__init__(**kwargs)
+                 ignore_group):
+        super(ShuffleUnit, self).__init__()
         self.downsample = downsample
         mid_channels = out_channels // 4
 
         if downsample:
             out_channels -= in_channels
 
-        with self.name_scope():
+        with self.init_scope():
             self.compress_conv1 = group_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
-            self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
+            self.compress_bn1 = L.BatchNormalization(size=mid_channels)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
                 groups=groups)
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
-                strides=(2 if self.downsample else 1))
-            self.dw_bn2 = nn.BatchNorm(in_channels=mid_channels)
+                stride=(2 if self.downsample else 1))
+            self.dw_bn2 = L.BatchNormalization(size=mid_channels)
             self.expand_conv3 = group_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups)
-            self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
+            self.expand_bn3 = L.BatchNormalization(size=out_channels)
             if downsample:
-                self.avgpool = nn.AvgPool2D(
-                    pool_size=3,
-                    strides=2,
-                    padding=1)
-            self.activ = nn.Activation('relu')
+                self.avgpool = partial(
+                    F.average_pooling_2d,
+                    ksize=3,
+                    stride=2,
+                    pad=1)
+            self.activ = F.relu
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         identity = x
         x = self.compress_conv1(x)
         x = self.compress_bn1(x)
@@ -127,14 +130,14 @@ class ShuffleUnit(HybridBlock):
         x = self.expand_bn3(x)
         if self.downsample:
             identity = self.avgpool(identity)
-            x = F.concat(x, identity, dim=1)
+            x = F.concat((x, identity), axis=1)
         else:
             x = x + identity
         x = self.activ(x)
         return x
 
 
-class ShuffleInitBlock(HybridBlock):
+class ShuffleInitBlock(Chain):
     """
     ShuffleNet specific initial block.
 
@@ -147,25 +150,26 @@ class ShuffleInitBlock(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 **kwargs):
-        super(ShuffleInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
+                 out_channels):
+        super(ShuffleInitBlock, self).__init__()
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=3,
+                stride=2,
+                pad=1,
+                nobias=True)
+            self.bn = L.BatchNormalization(size=out_channels)
+            self.activ = F.relu
+            self.pool = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=1,
+                cover_all=False)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         x = self.activ(x)
@@ -173,7 +177,7 @@ class ShuffleInitBlock(HybridBlock):
         return x
 
 
-class ShuffleNet(HybridBlock):
+class ShuffleNet(Chain):
     """
     ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
@@ -196,41 +200,45 @@ class ShuffleNet(HybridBlock):
                  init_block_channels,
                  groups,
                  in_channels=3,
-                 classes=1000,
-                 **kwargs):
-        super(ShuffleNet, self).__init__(**kwargs)
+                 classes=1000):
+        super(ShuffleNet, self).__init__()
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            self.features.add(ShuffleInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        downsample = (j == 0)
-                        ignore_group = (i == 0) and (j == 0)
-                        stage.add(ShuffleUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            groups=groups,
-                            downsample=downsample,
-                            ignore_group=ignore_group))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", ShuffleInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            downsample = (j == 0)
+                            ignore_group = (i == 0) and (j == 0)
+                            setattr(stage, "unit{}".format(j + 1), ShuffleUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                groups=groups,
+                                downsample=downsample,
+                                ignore_group=ignore_group))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=7,
+                    stride=1))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'flatten', partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, 'fc', L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x
@@ -240,8 +248,7 @@ def get_shufflenet(groups,
                    width_scale,
                    model_name=None,
                    pretrained=False,
-                   ctx=cpu(),
-                   root=os.path.join('~', '.mxnet', 'models'),
+                   root=os.path.join('~', '.chainer', 'models'),
                    **kwargs):
     """
     Create ShuffleNet model with specific parameters.
@@ -256,9 +263,7 @@ def get_shufflenet(groups,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
@@ -294,11 +299,11 @@ def get_shufflenet(groups,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        load_npz(
+            file=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            obj=net)
 
     return net
 
@@ -314,7 +319,7 @@ def shufflenet_g1_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=1, width_scale=1.0, model_name="shufflenet_g1_w1", **kwargs)
@@ -331,7 +336,7 @@ def shufflenet_g2_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=2, width_scale=1.0, model_name="shufflenet_g2_w1", **kwargs)
@@ -348,7 +353,7 @@ def shufflenet_g3_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=3, width_scale=1.0, model_name="shufflenet_g3_w1", **kwargs)
@@ -365,7 +370,7 @@ def shufflenet_g4_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=4, width_scale=1.0, model_name="shufflenet_g4_w1", **kwargs)
@@ -382,7 +387,7 @@ def shufflenet_g8_w1(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=8, width_scale=1.0, model_name="shufflenet_g8_w1", **kwargs)
@@ -399,7 +404,7 @@ def shufflenet_g1_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=1, width_scale=0.75, model_name="shufflenet_g1_w3d4", **kwargs)
@@ -416,7 +421,7 @@ def shufflenet_g3_w3d4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=3, width_scale=0.75, model_name="shufflenet_g3_w3d4", **kwargs)
@@ -433,7 +438,7 @@ def shufflenet_g1_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=1, width_scale=0.5, model_name="shufflenet_g1_wd2", **kwargs)
@@ -450,7 +455,7 @@ def shufflenet_g3_wd2(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=3, width_scale=0.5, model_name="shufflenet_g3_wd2", **kwargs)
@@ -467,7 +472,7 @@ def shufflenet_g1_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=1, width_scale=0.25, model_name="shufflenet_g1_wd4", **kwargs)
@@ -484,7 +489,7 @@ def shufflenet_g3_wd4(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_shufflenet(groups=3, width_scale=0.25, model_name="shufflenet_g3_wd4", **kwargs)
@@ -492,7 +497,9 @@ def shufflenet_g3_wd4(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -513,17 +520,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shufflenet_g1_w1 or weight_count == 1531936)
         assert (model != shufflenet_g2_w1 or weight_count == 1733848)
@@ -537,7 +534,7 @@ def _test():
         assert (model != shufflenet_g1_wd4 or weight_count == 209746)
         assert (model != shufflenet_g3_wd4 or weight_count == 305902)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
         assert (y.shape == (1, 1000))
 

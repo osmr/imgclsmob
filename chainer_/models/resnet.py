@@ -930,7 +930,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         resnet10,
@@ -949,19 +949,19 @@ def _test():
         resnet101b,
         resnet152,
         resnet152b,
-        resnet200,
-        resnet200b,
-
-        seresnet18,
-        seresnet34,
-        seresnet50,
-        seresnet50b,
-        seresnet101,
-        seresnet101b,
-        seresnet152,
-        seresnet152b,
-        seresnet200,
-        seresnet200b,
+        # resnet200,
+        # resnet200b,
+        #
+        # seresnet18,
+        # seresnet34,
+        # seresnet50,
+        # seresnet50b,
+        # seresnet101,
+        # seresnet101b,
+        # seresnet152,
+        # seresnet152b,
+        # seresnet200,
+        # seresnet200b,
     ]
 
     for model in models:

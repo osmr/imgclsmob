@@ -927,16 +927,16 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        preresnet10,
-        preresnet12,
-        preresnet14,
-        preresnet16,
-        preresnet18_wd4,
-        preresnet18_wd2,
-        preresnet18_w3d4,
+        # preresnet10,
+        # preresnet12,
+        # preresnet14,
+        # preresnet16,
+        # preresnet18_wd4,
+        # preresnet18_wd2,
+        # preresnet18_w3d4,
 
         preresnet18,
         preresnet34,
@@ -946,19 +946,19 @@ def _test():
         preresnet101b,
         preresnet152,
         preresnet152b,
-        preresnet200,
-        preresnet200b,
-
-        sepreresnet18,
-        sepreresnet34,
-        sepreresnet50,
-        sepreresnet50b,
-        sepreresnet101,
-        sepreresnet101b,
-        sepreresnet152,
-        sepreresnet152b,
-        sepreresnet200,
-        sepreresnet200b,
+        # preresnet200,
+        # preresnet200b,
+        #
+        # sepreresnet18,
+        # sepreresnet34,
+        # sepreresnet50,
+        # sepreresnet50b,
+        # sepreresnet101,
+        # sepreresnet101b,
+        # sepreresnet152,
+        # sepreresnet152b,
+        # sepreresnet200,
+        # sepreresnet200b,
     ]
 
     for model in models:

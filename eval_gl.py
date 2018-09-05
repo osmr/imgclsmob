@@ -161,7 +161,7 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
-        tune_layers=args.tune_layers,
+        tune_layers="",
         ctx=ctx)
 
     if args.use_rec:

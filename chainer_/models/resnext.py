@@ -523,15 +523,15 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        resnext50_32x4d,
+        # resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
-        seresnext50_32x4d,
-        seresnext101_32x4d,
-        seresnext101_64x4d,
+        # seresnext50_32x4d,
+        # seresnext101_32x4d,
+        # seresnext101_64x4d,
     ]
 
     for model in models:

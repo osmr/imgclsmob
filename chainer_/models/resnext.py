@@ -529,8 +529,8 @@ def _test():
         # resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
-        # seresnext50_32x4d,
-        # seresnext101_32x4d,
+        seresnext50_32x4d,
+        seresnext101_32x4d,
         # seresnext101_64x4d,
     ]
 

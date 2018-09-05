@@ -9,6 +9,7 @@ __all__ = ['CondenseNet', 'condensenet74_c4_g4', 'condensenet74_c8_g8']
 import os
 import chainer.functions as F
 import chainer.links as L
+from chainer import variable, initializers
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
@@ -127,13 +128,8 @@ class CondenseComplexConv(Chain):
                 channels=out_channels,
                 groups=groups)
 
-            self.index = self.params.get(
-                'index',
-                grad_req='null',
-                shape=(in_channels,),
-                init='zeros',
-                allow_deferred_init=True,
-                differentiable=False)
+            self.index = variable.Parameter(initializers._get_initializer(0))
+            self.index.initialize((in_channels,))
 
     def __call__(self, x):
         x = F.take(x, self.index, axis=1)

@@ -6,6 +6,7 @@ from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.mobilenet import *
+from .models.mobilenetv2 import *
 
 __all__ = ['get_model']
 
@@ -106,6 +107,11 @@ _models = {
     'fdmobilenet_w3d4': fdmobilenet_w3d4,
     'fdmobilenet_wd2': fdmobilenet_wd2,
     'fdmobilenet_wd4': fdmobilenet_wd4,
+
+    'mobilenetv2_w1': mobilenetv2_w1,
+    'mobilenetv2_w3d4': mobilenetv2_w3d4,
+    'mobilenetv2_wd2': mobilenetv2_wd2,
+    'mobilenetv2_wd4': mobilenetv2_wd4,
 }
 
 

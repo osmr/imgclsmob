@@ -374,11 +374,11 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        senet52,
-        senet103,
+        # senet52,
+        # senet103,
         senet154,
     ]
 

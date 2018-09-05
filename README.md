@@ -63,7 +63,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
 | ResNet-10 | 37.09 | 15.55 | 5,418,792 | 892.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet10-1555-cfb0a76d.params.log)) |
-| ResNet-12 | 37.62 | 15.56 | 5,492,776 | 1,124.23M | 1-stage training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet12-1556-6395e8b1.params.log)) |
+| ResNet-12 | 35.86 | 14.46 | 5,492,776 | 1,124.23M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1446-9ce715b0.params.log)) |
 | ResNet-14 | 36.17 | 14.52 | 5,788,200 | 1,355.64M | 1-stage training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet14-1452-70faeeaa.params.log)) |
 | ResNet-16 | 33.57 | 12.50 | 6,968,872 | 1,586.95M | 1-stage training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet16-1250-fc901840.params.log)) |
 | ResNet-18 x0.25 | 53.13 | 27.77 | 831,096 | 136.64M | 1-stage training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18_wd4-2777-42c5a34c.params.log)) |
@@ -129,7 +129,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
 | ResNet-10 | 37.46 | 15.85 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet10-1585-ef8a3ae3.pth.log)) |
-| ResNet-12 | 38.02 | 15.89 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet12-1589-9552d5a8.pth.log)) |
+| ResNet-12 | 36.18 | 14.80 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1480-c2263f73.pth.log)) |
 | ResNet-14 | 36.50 | 14.84 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet14-1484-542e6bd4.pth.log)) |
 | ResNet-16 | 33.73 | 12.87 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet16-1287-bdb0b7fa.pth.log)) |
 | ResNet-18 x0.25 | 53.37 | 28.06 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18_wd4-2806-d0cda855.pth.log)) |
@@ -195,7 +195,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | Model | Top1 | Top5 | Params | FLOPs | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
 | ResNet-10 | 37.12 | 15.49 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet10-1549-b31f1135.npz.log)) |
-| ResNet-12 | 37.62 | 15.56 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet12-1556-4b3d59a2.npz.log)) |
+| ResNet-12 | 35.86 | 14.48 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1448-11acb729.npz.log)) |
 | ResNet-14 | 36.20 | 14.54 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet14-1454-7c69aaa0.npz.log)) |
 | ResNet-16 | 33.61 | 12.53 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet16-1253-6e751065.npz.log)) |
 | ResNet-18 x0.25 | 53.17 | 27.70 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet18_wd4-2770-72465bfe.npz.log)) |

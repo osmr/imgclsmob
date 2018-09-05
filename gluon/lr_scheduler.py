@@ -93,7 +93,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
 
         T = float(T)
 
-        if epoch <= self.warmup_epochs:
+        if epoch < self.warmup_epochs:
             # Warm-up Stage
             if self.warmup_mode == 'constant':
                 self.learning_rate = self.warmup_lr

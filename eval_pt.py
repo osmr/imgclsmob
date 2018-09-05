@@ -32,17 +32,6 @@ def parse_args():
         default='',
         help='resume from previously saved parameters if not None')
     parser.add_argument(
-        '--resume-state',
-        type=str,
-        default='',
-        help='resume from previously saved optimizer state if not None')
-    parser.add_argument(
-        '-e',
-        '--evaluate',
-        dest='evaluate',
-        action='store_true',
-        help='only evaluate model on validation set')
-    parser.add_argument(
         '--calc-flops',
         dest='calc_flops',
         action='store_true',
@@ -66,83 +55,7 @@ def parse_args():
         type=int,
         default=32,
         help='training batch size per device (CPU/GPU).')
-    parser.add_argument(
-        '--num-epochs',
-        type=int,
-        default=3,
-        help='number of training epochs.')
-    parser.add_argument(
-        '--start-epoch',
-        type=int,
-        default=1,
-        help='starting epoch for resuming, default is 1 for new training')
-    parser.add_argument(
-        '--attempt',
-        type=int,
-        default=1,
-        help='current number of training')
 
-    parser.add_argument(
-        '--optimizer-name',
-        type=str,
-        default='nag',
-        help='optimizer name')
-    parser.add_argument(
-        '--lr',
-        type=float,
-        default=0.1,
-        help='learning rate. default is 0.1.')
-    parser.add_argument(
-        '--lr-mode',
-        type=str,
-        default='step',
-        help='learning rate scheduler mode. options are step, poly and cosine.')
-    parser.add_argument(
-        '--lr-decay',
-        type=float,
-        default=0.1,
-        help='decay rate of learning rate. default is 0.1.')
-    parser.add_argument(
-        '--lr-decay-period',
-        type=int,
-        default=0,
-        help='interval for periodic learning rate decays. default is 0 to disable.')
-    parser.add_argument(
-        '--lr-decay-epoch',
-        type=str,
-        default='40,60',
-        help='epoches at which learning rate decays. default is 40,60.')
-    parser.add_argument(
-        '--warmup-lr',
-        type=float,
-        default=0.0,
-        help='starting warmup learning rate. default is 0.0.')
-    parser.add_argument(
-        '--warmup-epochs',
-        type=int,
-        default=0,
-        help='number of warmup epochs.')
-    parser.add_argument(
-        '--momentum',
-        type=float,
-        default=0.9,
-        help='momentum value for optimizer, default is 0.9.')
-    parser.add_argument(
-        '--wd',
-        type=float,
-        default=0.0001,
-        help='weight decay rate. default is 0.0001.')
-
-    parser.add_argument(
-        '--log-interval',
-        type=int,
-        default=50,
-        help='number of batches to wait before logging.')
-    parser.add_argument(
-        '--save-interval',
-        type=int,
-        default=4,
-        help='saving parameters epoch interval, best model will always be saved')
     parser.add_argument(
         '--save-dir',
         type=str,
@@ -154,11 +67,6 @@ def parse_args():
         default='train.log',
         help='filename of training log')
 
-    parser.add_argument(
-        '--seed',
-        type=int,
-        default=-1,
-        help='Random seed to be fixed')
     parser.add_argument(
         '--log-packages',
         type=str,

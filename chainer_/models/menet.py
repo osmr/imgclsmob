@@ -13,7 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import SimpleSequential, conv1x1, ChannelShuffle
+from .common import SimpleSequential, conv1x1, ChannelShuffle
 
 
 def depthwise_conv3x3(channels,

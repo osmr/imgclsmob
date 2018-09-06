@@ -67,8 +67,7 @@ def nasnet_dual_path_scheme_ordinal(module,
 
 def nasnet_dual_path_sequential(return_two=True,
                                 first_ordinals=0,
-                                last_ordinals=0,
-                                **kwargs):
+                                last_ordinals=0):
     """
     NASNet specific dual path sequential container.
     """
@@ -77,8 +76,7 @@ def nasnet_dual_path_sequential(return_two=True,
         first_ordinals=first_ordinals,
         last_ordinals=last_ordinals,
         dual_path_scheme=nasnet_dual_path_scheme,
-        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal,
-        **kwargs)
+        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal)
 
 
 def nasnet_batch_norm(channels):
@@ -158,6 +156,13 @@ class MaxPoolPad(nn.Module):
 class AvgPoolPad(nn.Module):
     """
     NASNet specific 3x3 Average pooling layer with extra padding.
+
+    Parameters:
+    ----------
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
     """
     def __init__(self,
                  stride=2,

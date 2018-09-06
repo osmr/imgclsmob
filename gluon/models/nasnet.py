@@ -184,6 +184,13 @@ class MaxPoolPad(HybridBlock):
 class AvgPoolPad(HybridBlock):
     """
     NASNet specific 3x3 Average pooling layer with extra padding.
+
+    Parameters:
+    ----------
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
     """
     def __init__(self,
                  strides=2,
@@ -240,7 +247,7 @@ class NasConv(HybridBlock):
                 groups=groups,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+            self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)

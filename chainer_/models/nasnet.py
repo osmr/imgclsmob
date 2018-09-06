@@ -69,8 +69,7 @@ def nasnet_dual_path_scheme_ordinal(block,
 
 def nasnet_dual_path_sequential(return_two=True,
                                 first_ordinals=0,
-                                last_ordinals=0,
-                                **kwargs):
+                                last_ordinals=0):
     """
     NASNet specific dual path sequential container.
     """
@@ -79,8 +78,7 @@ def nasnet_dual_path_sequential(return_two=True,
         first_ordinals=first_ordinals,
         last_ordinals=last_ordinals,
         dual_path_scheme=nasnet_dual_path_scheme,
-        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal,
-        **kwargs)
+        dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal)
 
 
 def nasnet_batch_norm(channels):
@@ -92,52 +90,54 @@ def nasnet_batch_norm(channels):
     channels : int
         Number of channels in input data.
     """
-    return nn.BatchNorm(
-        momentum=0.1,
-        epsilon=0.001,
-        in_channels=channels)
+    return L.BatchNormalization(
+        size=channels,
+        decay=0.1,
+        eps=0.001)
 
 
 def nasnet_maxpool():
     """
     NASNet specific Max pooling layer.
     """
-    return nn.MaxPool2D(
-        pool_size=3,
-        strides=2,
-        padding=1)
+    return partial(
+        F.max_pooling_2d,
+        ksize=3,
+        stride=2,
+        pad=1,
+        cover_all=False)
 
 
 def nasnet_avgpool1x1_s2():
     """
     NASNet specific 1x1 Average pooling layer with stride 2.
     """
-    return nn.AvgPool2D(
-        pool_size=1,
-        strides=2,
-        count_include_pad=False)
+    return partial(
+        F.average_pooling_2d,
+        ksize=1,
+        stride=2)
 
 
 def nasnet_avgpool3x3_s1():
     """
     NASNet specific 3x3 Average pooling layer with stride 1.
     """
-    return nn.AvgPool2D(
-        pool_size=3,
-        strides=1,
-        padding=1,
-        count_include_pad=False)
+    return partial(
+        F.average_pooling_2d,
+        ksize=3,
+        stride=1,
+        pad=1)
 
 
 def nasnet_avgpool3x3_s2():
     """
     NASNet specific 3x3 Average pooling layer with stride 2.
     """
-    return nn.AvgPool2D(
-        pool_size=3,
-        strides=2,
-        padding=1,
-        count_include_pad=False)
+    return partial(
+        F.average_pooling_2d,
+        ksize=3,
+        stride=2,
+        pad=1)
 
 
 def process_with_padding(x,
@@ -163,49 +163,54 @@ def process_with_padding(x,
     NDArray
         Resulted tensor.
     """
-    x = F.pad(x, mode="constant", pad_width=pad_width, constant_value=0)
+    x = F.pad(x, pad_width=pad_width, mode="constant", constant_value=0)
     x = process(x)
     x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
     return x
 
 
-class MaxPoolPad(HybridBlock):
+class MaxPoolPad(Chain):
     """
     NASNet specific Max pooling layer with extra padding.
     """
-    def __init__(self,
-                 **kwargs):
-        super(MaxPoolPad, self).__init__(**kwargs)
-        with self.name_scope():
+    def __init__(self):
+        super(MaxPoolPad, self).__init__()
+        with self.init_scope():
             self.pool = nasnet_maxpool()
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = process_with_padding(x, F, self.pool)
         return x
 
 
-class AvgPoolPad(HybridBlock):
+class AvgPoolPad(Chain):
     """
     NASNet specific 3x3 Average pooling layer with extra padding.
+
+    Parameters:
+    ----------
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        Padding value for convolution layer.
     """
     def __init__(self,
-                 strides=2,
-                 padding=1,
-                 **kwargs):
-        super(AvgPoolPad, self).__init__(**kwargs)
-        with self.name_scope():
+                 stride=2,
+                 pad=1):
+        super(AvgPoolPad, self).__init__()
+        with self.init_scope():
             self.pool = nn.AvgPool2D(
                 pool_size=3,
-                strides=strides,
-                padding=padding,
+                strides=stride,
+                padding=pad,
                 count_include_pad=False)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = process_with_padding(x, F, self.pool)
         return x
 
 
-class NasConv(HybridBlock):
+class NasConv(Chain):
     """
     NASNet specific convolution block.
 
@@ -215,11 +220,11 @@ class NasConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     groups : int
         Number of groups.
@@ -227,25 +232,24 @@ class NasConv(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 groups,
-                 **kwargs):
-        super(NasConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.activ = nn.Activation('relu')
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
+                 ksize,
+                 stride,
+                 pad,
+                 groups):
+        super(NasConv, self).__init__()
+        with self.init_scope():
+            self.activ = F.relu
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True,
+                groups=groups)
+            self.bn = nasnet_batch_norm(channels=out_channels)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.activ(x)
         x = self.conv(x)
         x = self.bn(x)
@@ -267,13 +271,13 @@ def nas_conv1x1(in_channels,
     return NasConv(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
+        ksize=1,
+        stride=1,
+        pad=0,
         groups=1)
 
 
-class DwsConv(HybridBlock):
+class DwsConv(Chain):
     """
     Standard depthwise separable convolution block.
 
@@ -283,11 +287,11 @@ class DwsConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     use_bias : bool, default False
         Whether the layers use a bias vector.
@@ -295,33 +299,32 @@ class DwsConv(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 use_bias=False,
-                 **kwargs):
-        super(DwsConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.dw_conv = nn.Conv2D(
-                channels=in_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=in_channels,
-                use_bias=use_bias,
-                in_channels=in_channels)
+                 ksize,
+                 stride,
+                 pad,
+                 use_bias=False):
+        super(DwsConv, self).__init__()
+        with self.init_scope():
+            self.dw_conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=(not use_bias),
+                groups=in_channels)
             self.pw_conv = conv1x1(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 use_bias=use_bias)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.dw_conv(x)
         x = self.pw_conv(x)
         return x
 
 
-class NasDwsConv(HybridBlock):
+class NasDwsConv(Chain):
     """
     NASNet specific depthwise separable convolution block.
 
@@ -331,11 +334,11 @@ class NasDwsConv(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     specific : bool, default False
         Whether to use extra padding.
@@ -343,26 +346,25 @@ class NasDwsConv(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 specific=False,
-                 **kwargs):
-        super(NasDwsConv, self).__init__(**kwargs)
+                 ksize,
+                 stride,
+                 pad,
+                 specific=False):
+        super(NasDwsConv, self).__init__()
         self.specific = specific
 
-        with self.name_scope():
-            self.activ = nn.Activation(activation='relu')
+        with self.init_scope():
+            self.activ = F.relu
             self.conv = DwsConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
                 use_bias=False)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.activ(x)
         if self.specific:
             x = process_with_padding(x, F, self.conv)
@@ -372,7 +374,7 @@ class NasDwsConv(HybridBlock):
         return x
 
 
-class DwsBranch(HybridBlock):
+class DwsBranch(Chain):
     """
     NASNet specific block with depthwise separable convolution layers.
 
@@ -382,11 +384,11 @@ class DwsBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    ding : int or tuple/list of 2 int
         Padding value for convolution layer.
     specific : bool, default False
         Whether to use extra padding.
@@ -396,32 +398,31 @@ class DwsBranch(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
+                 ksize,
+                 stride,
+                 pad,
                  specific=False,
-                 stem=False,
-                 **kwargs):
-        super(DwsBranch, self).__init__(**kwargs)
+                 stem=False):
+        super(DwsBranch, self).__init__()
         assert (not stem) or (not specific)
         mid_channels = out_channels if stem else in_channels
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1 = NasDwsConv(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
                 specific=specific)
             self.conv2 = NasDwsConv(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                kernel_size=kernel_size,
-                strides=1,
-                padding=padding)
+                ksize=ksize,
+                stride=1,
+                pad=pad)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
@@ -445,9 +446,9 @@ def dws_branch_k3_s1_p1(in_channels,
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1,
+        ksize=3,
+        stride=1,
+        pad=1,
         specific=specific)
 
 
@@ -469,9 +470,9 @@ def dws_branch_k5_s1_p2(in_channels,
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=5,
-        strides=1,
-        padding=2,
+        ksize=5,
+        stride=1,
+        pad=2,
         specific=specific)
 
 
@@ -496,9 +497,9 @@ def dws_branch_k5_s2_p2(in_channels,
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=5,
-        strides=2,
-        padding=2,
+        ksize=5,
+        stride=2,
+        pad=2,
         specific=specific,
         stem=stem)
 
@@ -524,14 +525,14 @@ def dws_branch_k7_s2_p3(in_channels,
     return DwsBranch(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=7,
-        strides=2,
-        padding=3,
+        ksize=7,
+        stride=2,
+        pad=3,
         specific=specific,
         stem=stem)
 
 
-class NasPathBranch(HybridBlock):
+class NasPathBranch(Chain):
     """
     NASNet specific `path` branch (auxiliary block).
 
@@ -547,12 +548,11 @@ class NasPathBranch(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 specific=False,
-                 **kwargs):
-        super(NasPathBranch, self).__init__(**kwargs)
+                 specific=False):
+        super(NasPathBranch, self).__init__()
         self.specific = specific
 
-        with self.name_scope():
+        with self.init_scope():
             self.avgpool = nasnet_avgpool1x1_s2()
             self.conv = conv1x1(
                 in_channels=in_channels,
@@ -566,7 +566,7 @@ class NasPathBranch(HybridBlock):
         return x
 
 
-class NasPathBlock(HybridBlock):
+class NasPathBlock(Chain):
     """
     NASNet specific `path` block.
 
@@ -579,13 +579,12 @@ class NasPathBlock(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 **kwargs):
-        super(NasPathBlock, self).__init__(**kwargs)
+                 out_channels):
+        super(NasPathBlock, self).__init__()
         mid_channels = out_channels // 2
 
-        with self.name_scope():
-            self.activ = nn.Activation('relu')
+        with self.init_scope():
+            self.activ = F.relu
             self.path1 = NasPathBranch(
                 in_channels=in_channels,
                 out_channels=mid_channels)
@@ -595,16 +594,16 @@ class NasPathBlock(HybridBlock):
                 specific=True)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.activ(x)
         x1 = self.path1(x)
         x2 = self.path2(x)
-        x = F.concat(x1, x2, dim=1)
+        x = F.concat((x1, x2), axis=1)
         x = self.bn(x)
         return x
 
 
-class Stem1Unit(HybridBlock):
+class Stem1Unit(Chain):
     """
     NASNet Stem1 unit.
 
@@ -617,12 +616,11 @@ class Stem1Unit(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 **kwargs):
-        super(Stem1Unit, self).__init__(**kwargs)
+                 out_channels):
+        super(Stem1Unit, self).__init__()
         mid_channels = out_channels // 4
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1x1 = nas_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels)
@@ -654,7 +652,7 @@ class Stem1Unit(HybridBlock):
                 out_channels=mid_channels)
             self.comb4_right = nasnet_maxpool()
 
-    def hybrid_forward(self, F, x, _=None):
+    def __call__(self, x, _=None):
         x_left = self.conv1x1(x)
         x_right = x
 
@@ -664,11 +662,11 @@ class Stem1Unit(HybridBlock):
         x3 = x1 + self.comb3_right(x0)
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        x_out = F.concat((x1, x2, x3, x4), axis=1)
         return x_out
 
 
-class Stem2Unit(HybridBlock):
+class Stem2Unit(Chain):
     """
     NASNet Stem2 unit.
 
@@ -684,12 +682,11 @@ class Stem2Unit(HybridBlock):
     def __init__(self,
                  in_channels,
                  prev_in_channels,
-                 out_channels,
-                 **kwargs):
-        super(Stem2Unit, self).__init__(**kwargs)
+                 out_channels):
+        super(Stem2Unit, self).__init__()
         mid_channels = out_channels // 4
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1x1 = nas_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels)
@@ -726,7 +723,7 @@ class Stem2Unit(HybridBlock):
                 specific=True)
             self.comb4_right = MaxPoolPad()
 
-    def hybrid_forward(self, F, x, x_prev):
+    def __call__(self, x, x_prev):
         x_left = self.conv1x1(x)
         x_right = self.path(x_prev)
 
@@ -736,11 +733,11 @@ class Stem2Unit(HybridBlock):
         x3 = x1 + self.comb3_right(x0)
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        x_out = F.concat((x1, x2, x3, x4), axis=1)
         return x_out
 
 
-class FirstUnit(HybridBlock):
+class FirstUnit(Chain):
     """
     NASNet First unit.
 
@@ -756,12 +753,11 @@ class FirstUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  prev_in_channels,
-                 out_channels,
-                 **kwargs):
-        super(FirstUnit, self).__init__(**kwargs)
+                 out_channels):
+        super(FirstUnit, self).__init__()
         mid_channels = out_channels // 6
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1x1 = nas_conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels)
@@ -793,7 +789,7 @@ class FirstUnit(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=mid_channels)
 
-    def hybrid_forward(self, F, x, x_prev):
+    def __call__(self, x, x_prev):
         x_left = self.conv1x1(x)
         x_right = self.path(x_prev)
 
@@ -803,11 +799,11 @@ class FirstUnit(HybridBlock):
         x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
         x4 = self.comb4_left(x_left) + x_left
 
-        x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
+        x_out = F.concat((x_right, x0, x1, x2, x3, x4), axis=1)
         return x_out
 
 
-class NormalUnit(HybridBlock):
+class NormalUnit(Chain):
     """
     NASNet Normal unit.
 
@@ -823,12 +819,11 @@ class NormalUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  prev_in_channels,
-                 out_channels,
-                 **kwargs):
-        super(NormalUnit, self).__init__(**kwargs)
+                 out_channels):
+        super(NormalUnit, self).__init__()
         mid_channels = out_channels // 6
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1x1_prev = nas_conv1x1(
                 in_channels=prev_in_channels,
                 out_channels=mid_channels)
@@ -859,7 +854,7 @@ class NormalUnit(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=mid_channels)
 
-    def hybrid_forward(self, F, x, x_prev):
+    def __call__(self, x, x_prev):
         x_left = self.conv1x1(x)
         x_right = self.conv1x1_prev(x_prev)
 
@@ -869,11 +864,11 @@ class NormalUnit(HybridBlock):
         x3 = self.comb3_left(x_right) + self.comb3_right(x_right)
         x4 = self.comb4_left(x_left) + x_left
 
-        x_out = F.concat(x_right, x0, x1, x2, x3, x4, dim=1)
+        x_out = F.concat((x_right, x0, x1, x2, x3, x4), axis=1)
         return x_out
 
 
-class ReductionUnit(HybridBlock):
+class ReductionUnit(Chain):
     """
     NASNet Reduction unit (there is only one reduction unit for NASNet-A-Mobile).
 
@@ -889,12 +884,11 @@ class ReductionUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  prev_in_channels,
-                 out_channels,
-                 **kwargs):
-        super(ReductionUnit, self).__init__(**kwargs)
+                 out_channels):
+        super(ReductionUnit, self).__init__()
         mid_channels = out_channels // 4
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1x1_prev = nas_conv1x1(
                 in_channels=prev_in_channels,
                 out_channels=mid_channels)
@@ -931,7 +925,7 @@ class ReductionUnit(HybridBlock):
                 specific=True)
             self.comb4_right = MaxPoolPad()
 
-    def hybrid_forward(self, F, x, x_prev):
+    def __call__(self, x, x_prev):
         x_left = self.conv1x1(x)
         x_right = self.conv1x1_prev(x_prev)
 
@@ -941,11 +935,11 @@ class ReductionUnit(HybridBlock):
         x3 = x1 + self.comb3_right(x0)
         x4 = self.comb4_left(x0) + self.comb4_right(x_left)
 
-        x_out = F.concat(x1, x2, x3, x4, dim=1)
+        x_out = F.concat((x1, x2, x3, x4), axis=1)
         return x_out
 
 
-class NASNetInitBlock(HybridBlock):
+class NASNetInitBlock(Chain):
     """
     NASNet specific initial block.
 
@@ -958,26 +952,25 @@ class NASNetInitBlock(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 **kwargs):
-        super(NASNetInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=0,
-                use_bias=False,
-                in_channels=in_channels)
+                 out_channels):
+        super(NASNetInitBlock, self).__init__()
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=3,
+                stride=2,
+                pad=0,
+                nobias=True)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         return x
 
 
-class NASNet(HybridBlock):
+class NASNet(Chain):
     """
     NASNet (NASNet-A-Mobile) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
@@ -1000,16 +993,14 @@ class NASNet(HybridBlock):
                  init_block_channels,
                  stem_blocks_channels,
                  in_channels=3,
-                 classes=1000,
-                 **kwargs):
-        super(NASNet, self).__init__(**kwargs)
+                 classes=1000):
+        super(NASNet, self).__init__()
 
-        with self.name_scope():
+        with self.init_scope():
             self.features = nasnet_dual_path_sequential(
                 return_two=False,
                 first_ordinals=1,
-                last_ordinals=2,
-                prefix='')
+                last_ordinals=2)
             self.features.add(NASNetInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
@@ -1060,7 +1051,7 @@ class NASNet(HybridBlock):
                 units=classes,
                 in_units=in_channels))
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x

@@ -52,8 +52,8 @@ def dpn_batch_norm(channels):
         Number of channels in input data.
     """
     return L.BatchNormalization(
-        eps=0.001,
-        size=channels)
+        size=channels,
+        eps=0.001)
 
 
 class PreActivation(Chain):

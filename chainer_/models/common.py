@@ -2,33 +2,7 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['SimpleSequential', 'conv1x1', 'ChannelShuffle', 'SEBlock']
-
-
-class SimpleSequential(Chain):
-    """
-    A sequential chain that can be used instead of Sequential.
-    """
-    def __init__(self):
-        super(SimpleSequential, self).__init__()
-        self.layer_names = []
-
-    def __setattr__(self, name, value):
-        super(SimpleSequential, self).__setattr__(name, value)
-        if self.within_init_scope and callable(value):
-            self.layer_names.append(name)
-
-    def __delattr__(self, name):
-        super(SimpleSequential, self).__delattr__(name)
-        try:
-            self.layer_names.remove(name)
-        except ValueError:
-            pass
-
-    def __call__(self, x):
-        for name in self.layer_names:
-            x = self[name](x)
-        return x
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'SimpleSequential', 'DualPathSequential']
 
 
 def conv1x1(in_channels,
@@ -140,4 +114,74 @@ class SEBlock(Chain):
         w = F.sigmoid(w)
         x = x * w
         return x
+
+
+class SimpleSequential(Chain):
+    """
+    A sequential chain that can be used instead of Sequential.
+    """
+    def __init__(self):
+        super(SimpleSequential, self).__init__()
+        self.layer_names = []
+
+    def __setattr__(self, name, value):
+        super(SimpleSequential, self).__setattr__(name, value)
+        if self.within_init_scope and callable(value):
+            self.layer_names.append(name)
+
+    def __delattr__(self, name):
+        super(SimpleSequential, self).__delattr__(name)
+        try:
+            self.layer_names.remove(name)
+        except ValueError:
+            pass
+
+    def __call__(self, x):
+        for name in self.layer_names:
+            x = self[name](x)
+        return x
+
+
+class DualPathSequential(SimpleSequential):
+    """
+    A sequential container for hybrid blocks with dual inputs/outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first blocks with single input/output.
+    last_ordinals : int, default 0
+        Number of the final blocks with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a block.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal block.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda block, x1, x2: block(x1, x2)),
+                 dual_path_scheme_ordinal=(lambda block, x1, x2: (block(x1), x2))):
+        super(DualPathSequential, self).__init__()
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def __call__(self, x1, x2=None):
+        length = len(self._children.values())
+        for i, block in enumerate(self._children.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(block, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(block, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
 

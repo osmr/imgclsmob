@@ -286,8 +286,7 @@ class DPNInitBlock(HybridBlock):
                 padding=padding,
                 use_bias=False,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels)
+            self.bn = dpn_batch_norm(channels=out_channels)
             self.activ = nn.Activation('relu')
             self.pool = nn.MaxPool2D(
                 pool_size=3,

@@ -69,7 +69,7 @@ class PreActivation(Chain):
                  channels):
         super(PreActivation, self).__init__()
         with self.init_scope():
-            self.bn = L.BatchNormalization(size=channels)
+            self.bn = dpn_batch_norm(channels=channels)
             self.activ = F.relu
 
     def __call__(self, x):
@@ -295,7 +295,7 @@ class DPNInitBlock(Chain):
                 stride=2,
                 pad=pad,
                 nobias=True)
-            self.bn = L.BatchNormalization(size=out_channels)
+            self.bn = dpn_batch_norm(channels=out_channels)
             self.activ = F.relu
             self.pool = partial(
                 F.max_pooling_2d,

@@ -3,6 +3,7 @@ from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
 from .models.densenet import *
+from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -91,6 +92,12 @@ _models = {
     'densenet161': densenet161,
     'densenet169': densenet169,
     'densenet201': densenet201,
+
+    'dpn68': dpn68,
+    'dpn68b': dpn68b,
+    'dpn98': dpn98,
+    'dpn107': dpn107,
+    'dpn131': dpn131,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

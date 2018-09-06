@@ -174,8 +174,9 @@ class DualPathSequential(SimpleSequential):
         self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
 
     def __call__(self, x1, x2=None):
-        length = len(self._children.values())
-        for i, block in enumerate(self._children.values()):
+        length = len(self.layer_names)
+        for i, block_name in enumerate(self.layer_names):
+            block = self[block_name]
             if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
                 x1, x2 = self.dual_path_scheme_ordinal(block, x1, x2)
             else:

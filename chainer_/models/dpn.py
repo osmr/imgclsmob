@@ -11,7 +11,20 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import conv1x1, SimpleSequential, DualPathSequential
+from .common import conv1x1, SimpleSequential, DualPathSequential
+
+
+class GlobalAvgPool2D(Chain):
+    """
+    Global average pooling operation for spatial data.
+    """
+    def __init__(self):
+        super(GlobalAvgPool2D, self).__init__()
+
+    def __call__(self, x):
+        batch, channels, height, width = x.shape
+        x = F.average_pooling_2d(x, ksize=(height, width))
+        return x
 
 
 class GlobalAvgMaxPool2D(Chain):
@@ -20,13 +33,11 @@ class GlobalAvgMaxPool2D(Chain):
     """
     def __init__(self):
         super(GlobalAvgMaxPool2D, self).__init__()
-        with self.init_scope():
-            self.avg_pool = nn.GlobalAvgPool2D()
-            self.max_pool = nn.GlobalMaxPool2D()
 
     def __call__(self, x):
-        x_avg = self.avg_pool(x)
-        x_max = self.max_pool(x)
+        batch, channels, height, width = x.shape
+        x_avg = F.average_pooling_2d(x, ksize=(height, width))
+        x_max = F.max_pooling_2d(x, ksize=(height, width), cover_all=False)
         x = 0.5 * (x_avg + x_max)
         return x
 
@@ -40,9 +51,9 @@ def dpn_batch_norm(channels):
     channels : int
         Number of channels in input data.
     """
-    return nn.BatchNorm(
-        epsilon=0.001,
-        in_channels=channels)
+    return L.BatchNormalization(
+        eps=0.001,
+        size=channels)
 
 
 class PreActivation(Chain):
@@ -58,8 +69,8 @@ class PreActivation(Chain):
                  channels):
         super(PreActivation, self).__init__()
         with self.init_scope():
-            self.bn = dpn_batch_norm(channels=channels)
-            self.activ = nn.Activation('relu')
+            self.bn = L.BatchNormalization(size=channels)
+            self.activ = F.relu
 
     def __call__(self, x):
         x = self.bn(x)
@@ -95,16 +106,16 @@ class DPNConv(Chain):
                  groups):
         super(DPNConv, self).__init__()
         with self.init_scope():
-            self.bn = dpn_batch_norm(channels=in_channels)
-            self.activ = nn.Activation('relu')
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=ksize,
-                strides=stride,
-                padding=pad,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
+            self.bn = L.BatchNormalization(size=in_channels)
+            self.activ = F.relu
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True,
+                groups=groups)
 
     def __call__(self, x):
         x = self.bn(x)
@@ -234,8 +245,8 @@ class DPNUnit(Chain):
         x_in = F.concat((x1, x2), axis=1) if x2 is not None else x1
         if self.has_proj:
             x_s = self.conv_proj(x_in)
-            x_s1 = F.slice_axis(x_s, axis=1, begin=0, end=self.bw)
-            x_s2 = F.slice_axis(x_s, axis=1, begin=self.bw, end=None)
+            x_s1 = x_s[:, :self.bw, :, :]
+            x_s2 = x_s[:, self.bw:, :, :]
         else:
             assert (x2 is not None)
             x_s1 = x1
@@ -248,8 +259,8 @@ class DPNUnit(Chain):
             y2 = self.conv3b(x_in)
         else:
             x_in = self.conv3(x_in)
-            y1 = F.slice_axis(x_in, axis=1, begin=0, end=self.bw)
-            y2 = F.slice_axis(x_in, axis=1, begin=self.bw, end=None)
+            y1 = x_in[:, :self.bw, :, :]
+            y2 = x_in[:, self.bw:, :, :]
         residual = x_s1 + y1
         dense = F.concat((x_s2, y2), axis=1)
         return residual, dense
@@ -277,22 +288,23 @@ class DPNInitBlock(Chain):
                  pad):
         super(DPNInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=ksize,
-                strides=2,
-                padding=pad,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=2,
+                pad=pad,
+                nobias=True)
+            self.bn = L.BatchNormalization(size=out_channels)
+            self.activ = F.relu
+            self.pool = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=1,
+                cover_all=False)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         x = self.activ(x)
@@ -317,7 +329,7 @@ class DPNFinalBlock(Chain):
 
     def __call__(self, x1, x2):
         assert (x2 is not None)
-        x = F.concat(x1, x2, dim=1)
+        x = F.concat((x1, x2), axis=1)
         x = self.activ(x)
         return x, None
 
@@ -375,56 +387,62 @@ class DPN(Chain):
             self.features = DualPathSequential(
                 return_two=False,
                 first_ordinals=1,
-                last_ordinals=0,
-                prefix='')
-            self.features.add(DPNInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                ksize=init_block_kernel_size,
-                pad=init_block_padding))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
-                r = rs[i]
-                bw = bws[i]
-                inc = incs[i]
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        has_proj = (j == 0)
-                        key_strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(DPNUnit(
-                            in_channels=in_channels,
-                            mid_channels=r,
-                            bw=bw,
-                            inc=inc,
-                            groups=groups,
-                            has_proj=has_proj,
-                            key_strides=key_strides,
-                            b_case=b_case))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(DPNFinalBlock(channels=in_channels))
-
-            self.output = nn.HybridSequential(prefix='')
-            if for_training or not test_time_pool:
-                self.output.add(nn.GlobalAvgPool2D())
-                self.output.add(conv1x1(
+                last_ordinals=0)
+            with self.features.init_scope():
+                setattr(self.features, "init_block", DPNInitBlock(
                     in_channels=in_channels,
-                    out_channels=classes,
-                    use_bias=True))
-                self.output.add(nn.Flatten())
-            else:
-                self.output.add(nn.AvgPool2D(
-                    pool_size=7,
-                    strides=1))
-                self.output.add(conv1x1(
-                    in_channels=in_channels,
-                    out_channels=classes,
-                    use_bias=True))
-                self.output.add(GlobalAvgMaxPool2D())
-                self.output.add(nn.Flatten())
+                    out_channels=init_block_channels,
+                    ksize=init_block_kernel_size,
+                    pad=init_block_padding))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = DualPathSequential()
+                    r = rs[i]
+                    bw = bws[i]
+                    inc = incs[i]
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            has_proj = (j == 0)
+                            key_strides = 2 if (j == 0) and (i != 0) else 1
+                            setattr(stage, "unit{}".format(j + 1), DPNUnit(
+                                in_channels=in_channels,
+                                mid_channels=r,
+                                bw=bw,
+                                inc=inc,
+                                groups=groups,
+                                has_proj=has_proj,
+                                key_strides=key_strides,
+                                b_case=b_case))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'final_block', DPNFinalBlock(channels=in_channels))
 
-    def hybrid_forward(self, F, x):
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                if for_training or not test_time_pool:
+                    setattr(self.output, 'final_pool', GlobalAvgPool2D())
+                    setattr(self.output, 'final_conv', conv1x1(
+                        in_channels=in_channels,
+                        out_channels=classes,
+                        use_bias=True))
+                    setattr(self.output, 'final_flatten', partial(
+                        F.reshape,
+                        shape=(-1, classes)))
+                else:
+                    setattr(self.output, 'avg_pool', partial(
+                        F.average_pooling_2d,
+                        ksize=7,
+                        stride=1))
+                    setattr(self.output, 'final_conv', conv1x1(
+                        in_channels=in_channels,
+                        out_channels=classes,
+                        use_bias=True))
+                    setattr(self.output, 'avgmax_pool', GlobalAvgMaxPool2D())
+                    setattr(self.output, 'final_flatten', partial(
+                        F.reshape,
+                        shape=(-1, classes)))
+
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x

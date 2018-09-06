@@ -7,6 +7,7 @@
 __all__ = ['CondenseNet', 'condensenet74_c4_g4', 'condensenet74_c8_g8']
 
 import os
+import numpy as np
 import chainer.functions as F
 import chainer.links as L
 from chainer import variable, initializers
@@ -128,11 +129,15 @@ class CondenseComplexConv(Chain):
                 channels=out_channels,
                 groups=groups)
 
-            self.index = variable.Parameter(initializers._get_initializer(0))
-            self.index.initialize((in_channels,))
+            self.index = initializers.generate_array(
+                initializer=initializers._get_initializer(0),
+                shape=(in_channels,),
+                xp=self.xp,
+                dtype=np.int32)
+            self.register_persistent('index')
 
     def __call__(self, x):
-        x = F.take(x, self.index, axis=1)
+        x.array = np.take(x.array, self.index, axis=1)
         x = self.bn(x)
         x = self.activ(x)
         x = self.conv(x)
@@ -297,16 +302,16 @@ class CondenseLinear(Chain):
             self.dense = L.Linear(
                 in_size=drop_in_units,
                 out_size=units)
-            self.index = self.params.get(
-                'index',
-                grad_req='null',
+
+            self.index = initializers.generate_array(
+                initializer=initializers._get_initializer(0),
                 shape=(drop_in_units,),
-                init='zeros',
-                allow_deferred_init=True,
-                differentiable=False)
+                xp=self.xp,
+                dtype=np.int32)
+            self.register_persistent('index')
 
     def __call__(self, x):
-        x = F.take(x, self.index, axis=1)
+        x.array = np.take(x.array, self.index, axis=1)
         x = self.dense(x)
         return x
 

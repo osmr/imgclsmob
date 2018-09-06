@@ -106,7 +106,7 @@ class DPNConv(Chain):
                  groups):
         super(DPNConv, self).__init__()
         with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
+            self.bn = dpn_batch_norm(channels=in_channels)
             self.activ = F.relu
             self.conv = L.Convolution2D(
                 in_channels=in_channels,

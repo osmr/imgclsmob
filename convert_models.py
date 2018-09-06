@@ -321,6 +321,8 @@ def main():
         dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
         dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
         dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
 
         src_param_keys.sort()
         src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
@@ -333,6 +335,8 @@ def main():
         dst_param_keys = [key.replace('/weight', '/W') for key in dst_param_keys]
         dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
         dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
 
         ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
         ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]

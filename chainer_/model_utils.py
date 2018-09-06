@@ -3,6 +3,7 @@ from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
 from .models.densenet import *
+from .models.condensenet import *
 from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
@@ -12,6 +13,7 @@ from .models.shufflenetv2 import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.nasnet import *
 
 __all__ = ['get_model']
 
@@ -93,6 +95,9 @@ _models = {
     'densenet169': densenet169,
     'densenet201': densenet201,
 
+    'condensenet74_c4_g4': condensenet74_c4_g4,
+    'condensenet74_c8_g8': condensenet74_c8_g8,
+
     'dpn68': dpn68,
     'dpn68b': dpn68b,
     'dpn98': dpn98,
@@ -156,6 +161,8 @@ _models = {
     'mobilenetv2_w3d4': mobilenetv2_w3d4,
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
+
+    'nasnet_a_mobile': nasnet_a_mobile,
 }
 
 

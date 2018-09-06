@@ -141,18 +141,15 @@ def nasnet_avgpool3x3_s2():
 
 
 def process_with_padding(x,
-                         F,
                          process=(lambda x: x),
-                         pad_width=(0, 0, 0, 0, 1, 0, 1, 0)):
+                         pad_width=((0, 0), (0, 0), (1, 0), (1, 0))):
     """
     Auxiliary decorator for layer with NASNet specific extra padding.
 
     Parameters:
     ----------
-    x : NDArray
+    x : chainer.Variable or numpy.ndarray or cupy.ndarray
         Input tensor.
-    F : module
-        Gluon API module.
     process : function, default (lambda x: x)
         a decorated layer
     pad_width : tuple of int, default (0, 0, 0, 0, 1, 0, 1, 0)
@@ -160,12 +157,12 @@ def process_with_padding(x,
 
     Returns
     -------
-    NDArray
+    chainer.Variable or numpy.ndarray or cupy.ndarray
         Resulted tensor.
     """
-    x = F.pad(x, pad_width=pad_width, mode="constant", constant_value=0)
+    x = F.pad(x, pad_width=pad_width, mode="constant", constant_values=0)
     x = process(x)
-    x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
+    x = x[:, :, 1:, 1:]
     return x
 
 
@@ -179,7 +176,7 @@ class MaxPoolPad(Chain):
             self.pool = nasnet_maxpool()
 
     def __call__(self, x):
-        x = process_with_padding(x, F, self.pool)
+        x = process_with_padding(x, self.pool)
         return x
 
 
@@ -199,14 +196,14 @@ class AvgPoolPad(Chain):
                  pad=1):
         super(AvgPoolPad, self).__init__()
         with self.init_scope():
-            self.pool = nn.AvgPool2D(
-                pool_size=3,
-                strides=stride,
-                padding=pad,
-                count_include_pad=False)
+            self.pool = partial(
+                F.average_pooling_2d,
+                ksize=3,
+                stride=stride,
+                pad=pad)
 
     def __call__(self, x):
-        x = process_with_padding(x, F, self.pool)
+        x = process_with_padding(x, self.pool)
         return x
 
 
@@ -367,7 +364,7 @@ class NasDwsConv(Chain):
     def __call__(self, x):
         x = self.activ(x)
         if self.specific:
-            x = process_with_padding(x, F, self.conv)
+            x = process_with_padding(x, self.conv)
         else:
             x = self.conv(x)
         x = self.bn(x)
@@ -558,9 +555,9 @@ class NasPathBranch(Chain):
                 in_channels=in_channels,
                 out_channels=out_channels)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         if self.specific:
-            x = process_with_padding(x, F, pad_width=(0, 0, 0, 0, 0, 1, 0, 1))
+            x = process_with_padding(x, pad_width=((0, 0), (0, 0), (0, 1), (0, 1)))
         x = self.avgpool(x)
         x = self.conv(x)
         return x
@@ -1001,55 +998,63 @@ class NASNet(Chain):
                 return_two=False,
                 first_ordinals=1,
                 last_ordinals=2)
-            self.features.add(NASNetInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
+            with self.features.init_scope():
+                setattr(self.features, "init_block", NASNetInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
 
-            out_channels = stem_blocks_channels[0]
-            self.features.add(Stem1Unit(
-                in_channels=in_channels,
-                out_channels=out_channels))
-            prev_in_channels = in_channels
-            in_channels = out_channels
+                out_channels = stem_blocks_channels[0]
+                setattr(self.features, "stem1_unit", Stem1Unit(
+                    in_channels=in_channels,
+                    out_channels=out_channels))
+                prev_in_channels = in_channels
+                in_channels = out_channels
 
-            out_channels = stem_blocks_channels[1]
-            self.features.add(Stem2Unit(
-                in_channels=in_channels,
-                prev_in_channels=prev_in_channels,
-                out_channels=out_channels))
-            prev_in_channels = in_channels
-            in_channels = out_channels
+                out_channels = stem_blocks_channels[1]
+                setattr(self.features, "stem2_unit", Stem2Unit(
+                    in_channels=in_channels,
+                    prev_in_channels=prev_in_channels,
+                    out_channels=out_channels))
+                prev_in_channels = in_channels
+                in_channels = out_channels
 
-            for i, channels_per_stage in enumerate(channels):
-                stage = nasnet_dual_path_sequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        if (j == 0) and (i != 0):
-                            unit = ReductionUnit
-                        elif ((i == 0) and (j == 0)) or ((i != 0) and (j == 1)):
-                            unit = FirstUnit
-                        else:
-                            unit = NormalUnit
-                        stage.add(unit(
-                            in_channels=in_channels,
-                            prev_in_channels=prev_in_channels,
-                            out_channels=out_channels))
-                        prev_in_channels = in_channels
-                        in_channels = out_channels
-                self.features.add(stage)
+                for i, channels_per_stage in enumerate(channels):
+                    stage = nasnet_dual_path_sequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            if (j == 0) and (i != 0):
+                                unit = ReductionUnit
+                            elif ((i == 0) and (j == 0)) or ((i != 0) and (j == 1)):
+                                unit = FirstUnit
+                            else:
+                                unit = NormalUnit
+                            setattr(stage, "unit{}".format(j + 1), unit(
+                                in_channels=in_channels,
+                                prev_in_channels=prev_in_channels,
+                                out_channels=out_channels))
+                            prev_in_channels = in_channels
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
 
-            self.features.add(nn.Activation('relu'))
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+                setattr(self.features, "final_activ", F.relu)
+                setattr(self.features, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=7,
+                    stride=1))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dropout(rate=0.5))
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'flatten', partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, 'dropout', partial(
+                    F.dropout,
+                    ratio=0.5))
+                setattr(self.output, 'fc', L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
+
 
     def __call__(self, x):
         x = self.features(x)

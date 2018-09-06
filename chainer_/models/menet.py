@@ -525,7 +525,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         menet108_8x1_g3,

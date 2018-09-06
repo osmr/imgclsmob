@@ -309,12 +309,12 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        darknet_ref,
+        # darknet_ref,
         darknet_tiny,
-        darknet19,
+        # darknet19,
     ]
 
     for model in models:

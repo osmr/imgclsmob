@@ -295,9 +295,9 @@ def _test():
     pretrained = True
 
     models = [
-        darknet_ref,
+        # darknet_ref,
         darknet_tiny,
-        darknet19,
+        # darknet19,
     ]
 
     for model in models:

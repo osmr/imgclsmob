@@ -12,7 +12,7 @@ from chainercv.utils import ProgressHook
 from common.logger_utils import initialize_logging
 from chainer_.imagenet_predictor import ImagenetPredictor
 from chainer_.top_k_accuracy import top_k_accuracy
-from chainer_.utils import get_data_iterator, prepare_model
+from chainer_.utils import get_val_data_iterator, prepare_model
 
 
 def parse_args():
@@ -86,14 +86,14 @@ def parse_args():
 def test(net,
          val_iterator,
          val_dataset_len,
-         use_cuda,
+         num_gpus,
          calc_weight_count=False,
          extended_log=False):
     tic = time.time()
 
     predictor = ImagenetPredictor(base_model=net)
 
-    if use_cuda:
+    if num_gpus > 0:
         predictor.to_gpu()
 
     if calc_weight_count:
@@ -144,8 +144,8 @@ def main():
 
     global_config.train = False
     
-    use_cuda = args.num_gpus > 0
-    if use_cuda:
+    num_gpus = args.num_gpus
+    if num_gpus > 0:
         cuda.get_device(0).use()
 
     num_classes = 1000
@@ -153,9 +153,10 @@ def main():
         model_name=args.model,
         classes=num_classes,
         use_pretrained=args.use_pretrained,
-        pretrained_model_file_path=args.resume.strip())
+        pretrained_model_file_path=args.resume.strip(),
+        num_gpus=num_gpus)
 
-    val_iterator, val_dataset_len = get_data_iterator(
+    val_iterator, val_dataset_len = get_val_data_iterator(
         data_dir=args.data_dir,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
@@ -166,7 +167,7 @@ def main():
         net=net,
         val_iterator=val_iterator,
         val_dataset_len=val_dataset_len,
-        use_cuda=use_cuda,
+        num_gpus=num_gpus,
         calc_weight_count=True,
         extended_log=True)
 

@@ -10,7 +10,7 @@ import os
 import numpy as np
 import chainer.functions as F
 import chainer.links as L
-from chainer import variable, initializers
+from chainer import initializers
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
@@ -481,7 +481,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         condensenet74_c4_g4,

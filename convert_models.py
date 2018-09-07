@@ -366,7 +366,7 @@ def main():
 
         if args.src_model in ["condensenet74_c4_g4", "condensenet74_c8_g8"]:
             assert (dst_net.output.fc.index.shape == src_params["output.1.index"].shape)
-            dst_net.output.fc.index = src_params["output.1.index"]._data[0].asnumpy()
+            dst_net.output.fc.index = src_params["output.1.index"]._data[0].asnumpy().astype(np.int32)
             ext_src_param_keys2.remove("output.1.index")
 
             ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".conv1.conv.weight")]
@@ -384,7 +384,7 @@ def main():
                 assert (obj.index.shape == src_params[src_key].shape),\
                     "src_key={}, dst_path={}, src_shape={}, obj.index.shape={}".format(
                         src_key, dst_path, src_params[src_key].shape, obj.index.shape)
-                obj.index = src_params[src_key]._data[0].asnumpy()
+                obj.index = src_params[src_key]._data[0].asnumpy().astype(np.int32)
 
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             assert (dst_params[dst_key].array.shape == src_params[src_key].shape),\

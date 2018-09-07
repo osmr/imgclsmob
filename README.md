@@ -97,8 +97,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0689-281ec06b.params.log)) |
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0636-65b5d389.params.log)) |
-| CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c4_g4-0864-cde68fa2.params.log)) |
-| CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c8_g8-1049-4cf4a08e.params.log)) |
+| CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0864-cde68fa2.params.log)) |
+| CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1049-4cf4a08e.params.log)) |
 | DPN-68 | 23.57 | 7.00 | 12,611,602 | 2,338.71M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn68-0700-3114719d.params.log)) |
 | DPN-98 | 20.23 | 5.28 | 61,570,728 | 11,702.80M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn98-0528-fa5d6fca.params.log)) |
 | DPN-131 | 20.03 | 5.22 | 79,254,504 | 16,056.22M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0522-35ac2f82.params.log)) |
@@ -164,8 +164,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-161 | 22.86 | 6.44 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0644-c0fb22c8.pth.log)) |
 | DenseNet-169 | 24.40 | 7.19 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0719-27139105.pth.log)) |
 | DenseNet-201 | 23.10 | 6.63 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0663-71ece4ad.pth.log)) |
-| CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c4_g4-0828-5ba55049.pth.log)) |
-| CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenett74_c8_g8-1006-3574d874.pth.log)) |
+| CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0828-5ba55049.pth.log)) |
+| CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1006-3574d874.pth.log)) |
 | DPN-68 | 24.17 | 7.27 | 12,611,602 | 2,338.71M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn68-0727-43849233.pth.log)) |
 | DPN-98 | 20.81 | 5.53 | 61,570,728 | 11,702.80M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn98-0553-52c55969.pth.log)) |
 | DPN-131 | 20.54 | 5.48 | 79,254,504 | 16,056.22M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0548-0c53e5b3.pth.log)) |

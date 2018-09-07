@@ -137,7 +137,7 @@ class CondenseComplexConv(Chain):
             self.register_persistent('index')
 
     def __call__(self, x):
-        x.array = self.xp.take(x.array, self.index, axis=1)
+        x = self.xp.take(x.array, self.index, axis=1)
         x = self.bn(x)
         x = self.activ(x)
         x = self.conv(x)
@@ -311,7 +311,7 @@ class CondenseLinear(Chain):
             self.register_persistent('index')
 
     def __call__(self, x):
-        x.array = self.xp.take(x.array, self.index, axis=1)
+        x = self.xp.take(x.array, self.index, axis=1)
         x = self.dense(x)
         return x
 

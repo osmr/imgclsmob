@@ -1138,7 +1138,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         nasnet_a_mobile,

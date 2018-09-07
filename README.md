@@ -255,6 +255,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.96 | 14.98 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_wd2-1498-4b767a98.npz.log)) |
 | MobileNetV2 x0.75 | 31.28 | 11.48 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w3d4-1148-a6f852ea.npz.log)) |
 | MobileNetV2 x1.0 | 28.87 | 10.05 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w1-1005-3b6d1764.npz.log)) |
+| NASNet-A-Mobile | 26.39 | 8.49 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.35/nasnet_a_mobile-0849-c234bb7d.npz.log)) |
 
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
 [ShichenLiu/CondenseNet]: https://github.com/ShichenLiu/CondenseNet

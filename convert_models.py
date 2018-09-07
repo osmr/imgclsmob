@@ -226,6 +226,10 @@ def main():
                               (not key.endswith(".running_var"))]
             ext_src_param_keys = [key for key in src_param_keys_ if (key.endswith(".running_mean")) or
                                   (key.endswith(".running_var"))]
+            if args.src_model in ["condensenet74_c4_g4", "condensenet74_c8_g8"]:
+                src_param_keys_ = src_param_keys.copy()
+                src_param_keys = [key for key in src_param_keys_ if (not key.endswith(".index"))]
+                ext_src_param_keys2 = [key for key in src_param_keys_ if (key.endswith(".index"))]
 
     elif args.src_fwk == "pytorch":
         src_net = prepare_model_pt(
@@ -359,6 +363,28 @@ def main():
             elif src_key1 == 'running_var':
                 assert (obj.avg_var.shape == src_params[src_key].shape)
                 obj.avg_var = src_params[src_key]._data[0].asnumpy()
+
+        if args.src_model in ["condensenet74_c4_g4", "condensenet74_c8_g8"]:
+            assert (dst_net.output.fc.index.shape == src_params["output.1.index"].shape)
+            dst_net.output.fc.index = src_params["output.1.index"]._data[0].asnumpy()
+            ext_src_param_keys2.remove("output.1.index")
+
+            ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".conv1.conv.weight")]
+            ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/conv1/conv/W")]
+            ext3_src_param_keys = {".".join(v.split(".")[:-2]): i for i, v in enumerate(ext2_src_param_keys)}
+            ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-2], ext2_dst_param_keys))
+
+            for i, src_key in enumerate(ext_src_param_keys2):
+                src_key2 = ".".join(src_key.split(".")[:-1])
+                dst_ind = ext3_src_param_keys[src_key2]
+                dst_path = ext3_dst_param_keys[dst_ind]
+                obj = dst_net
+                for j, sub_path in enumerate(dst_path):
+                    obj = getattr(obj, sub_path)
+                assert (obj.index.shape == src_params[src_key].shape),\
+                    "src_key={}, dst_path={}, src_shape={}, obj.index.shape={}".format(
+                        src_key, dst_path, src_params[src_key].shape, obj.index.shape)
+                obj.index = src_params[src_key]._data[0].asnumpy()
 
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             assert (dst_params[dst_key].array.shape == src_params[src_key].shape),\

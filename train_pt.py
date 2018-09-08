@@ -419,7 +419,7 @@ def main():
         batch_size=batch_size,
         num_workers=args.num_workers)
 
-    num_training_samples = 1281167
+    # num_training_samples = 1281167
     optimizer, lr_scheduler, start_epoch = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,

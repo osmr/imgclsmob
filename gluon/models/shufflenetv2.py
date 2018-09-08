@@ -360,7 +360,7 @@ def shufflenetv2_wd2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2(width_scale=(12.0/29.0), model_name="shufflenetv2_wd2", **kwargs)
+    return get_shufflenetv2(width_scale=(12.0 / 29.0), model_name="shufflenetv2_wd2", **kwargs)
 
 
 def shufflenetv2_w1(**kwargs):
@@ -394,7 +394,7 @@ def shufflenetv2_w2d3(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2(width_scale=(44.0/29.0), model_name="shufflenetv2_w2d3", **kwargs)
+    return get_shufflenetv2(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w2d3", **kwargs)
 
 
 def shufflenetv2_w2(**kwargs):
@@ -411,7 +411,7 @@ def shufflenetv2_w2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2(width_scale=(61.0/29.0), model_name="shufflenetv2_w2", **kwargs)
+    return get_shufflenetv2(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
 
 
 def _test():

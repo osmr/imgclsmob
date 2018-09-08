@@ -209,4 +209,4 @@ def validate(acc_top1,
         acc_top5.update(labels_list, outputs_list)
     _, top1 = acc_top1.get()
     _, top5 = acc_top5.get()
-    return 1-top1, 1-top5
+    return 1.0 - top1, 1.0 - top5

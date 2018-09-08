@@ -187,9 +187,9 @@ class SqueezeNet(nn.Module):
 
         self.output = nn.Sequential()
         self.output.add_module('final_conv', nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=num_classes,
-                kernel_size=1))
+            in_channels=in_channels,
+            out_channels=num_classes,
+            kernel_size=1))
         self.output.add_module('final_activ', nn.ReLU(inplace=True))
         self.output.add_module('final_pool', nn.AvgPool2d(
             kernel_size=13,

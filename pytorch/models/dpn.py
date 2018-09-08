@@ -369,9 +369,9 @@ class DPN(nn.Module):
         super(DPN, self).__init__()
 
         self.features = DualPathSequential(
-                return_two=False,
-                first_ordinals=1,
-                last_ordinals=0)
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=0)
         self.features.add_module("init_block", DPNInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -510,7 +510,7 @@ def get_dpn(num_layers,
         inc = incs[i]
         channels[i][0] = bws[i] + 3 * inc
         for j in range(1, k_sec[i]):
-            channels[i][j] = channels[i][j-1] + inc
+            channels[i][j] = channels[i][j - 1] + inc
 
     net = DPN(
         channels=channels,

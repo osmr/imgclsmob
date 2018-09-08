@@ -31,7 +31,6 @@ def get_pip_versions(package_list,
         except (subprocess.CalledProcessError, OSError):
             out_text = None
         module_versions[module] = out_text
-    
     return module_versions
 
 
@@ -91,7 +90,7 @@ def get_pyenv_info(packages,
     # get versions from __version__ string
     modules_versions = get_package_versions(packages)
     pyenv_info.update(modules_versions)
-    
+
     # get versions from pip
     if type(pip_packages) == list and len(pip_packages) > 0 and pip_packages[0]:
         modules_versions_pip = get_pip_versions(pip_packages, python_version)
@@ -101,7 +100,7 @@ def get_pyenv_info(packages,
         # set python version
         try:
             pyenv_info["python"] = "{0}.{1}.{2}".format(*sys.version_info[0:3])
-        except:
+        except BaseException:
             pyenv_info["python"] = "unknown"
 
     if pwd:
@@ -117,10 +116,10 @@ def get_pyenv_info(packages,
                 command = ['cd {}; git log -n 1'.format(pyenv_info['pwd'])]
             out_bytes = subprocess.check_output(command, shell=True)
             out_text = out_bytes.decode('utf-8')
-        except:
+        except BaseException:
             out_text = 'unknown'
         pyenv_info["git"] = out_text.strip()
-    
+
     return pyenv_info
 
 

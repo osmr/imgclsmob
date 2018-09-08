@@ -100,7 +100,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
             elif self.warmup_mode == 'linear':
                 self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * T / self.warmup_N
             elif self.warmup_mode == 'poly':
-                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * \
+                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) *\
                                      pow(T / self.warmup_N, self.power)
             elif self.warmup_mode == 'cosine':
                 self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) *\

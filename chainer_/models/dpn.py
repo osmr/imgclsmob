@@ -526,7 +526,7 @@ def get_dpn(num_layers,
         inc = incs[i]
         channels[i][0] = bws[i] + 3 * inc
         for j in range(1, k_sec[i]):
-            channels[i][j] = channels[i][j-1] + inc
+            channels[i][j] = channels[i][j - 1] + inc
 
     net = DPN(
         channels=channels,

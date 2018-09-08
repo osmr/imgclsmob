@@ -27,7 +27,6 @@ def get_layer_param(model):
     return sum([reduce(operator.mul, i.size(), 1) for i in model.parameters()])
 
 
-### The input batch size should be 1 to call this function
 def measure_layer(layer, x):
     global count_ops, count_params
     delta_ops = 0
@@ -38,8 +37,8 @@ def measure_layer(layer, x):
     if type_name in ['Conv2d']:
         out_h = int((x.size()[2] + 2 * layer.padding[0] - layer.kernel_size[0]) / layer.stride[0] + 1)
         out_w = int((x.size()[3] + 2 * layer.padding[1] - layer.kernel_size[1]) / layer.stride[1] + 1)
-        delta_ops = layer.in_channels * layer.out_channels * layer.kernel_size[0] *  \
-                layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
+        delta_ops = layer.in_channels * layer.out_channels * layer.kernel_size[0] *\
+                    layer.kernel_size[1] * out_h * out_w / layer.groups * multi_add
         delta_params = get_layer_param(layer)
 
     elif type_name in ['ChannelShuffle']:  # NB: Fake!

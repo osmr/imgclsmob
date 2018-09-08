@@ -53,7 +53,7 @@ def channel_shuffle(x,
         Resulted tensor.
     """
     batch, channels, height, width = x.size()
-    #assert (channels % groups == 0)
+    # assert (channels % groups == 0)
     channels_per_group = channels // groups
     x = x.view(batch, groups, channels_per_group, height, width)
     x = torch.transpose(x, 1, 2).contiguous()
@@ -76,7 +76,7 @@ class ChannelShuffle(nn.Module):
                  channels,
                  groups):
         super(ChannelShuffle, self).__init__()
-        #assert (channels % groups == 0)
+        # assert (channels % groups == 0)
         if channels % groups != 0:
             raise ValueError('channels must be divisible by groups')
         self.groups = groups
@@ -163,4 +163,3 @@ class DualPathSequential(nn.Sequential):
             return x1, x2
         else:
             return x1
-

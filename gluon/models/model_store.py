@@ -136,4 +136,3 @@ def get_model_file(model_name,
         return file_path
     else:
         raise ValueError('Downloaded file has different hash. Please try again.')
-

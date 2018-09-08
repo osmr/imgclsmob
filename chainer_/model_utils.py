@@ -1,3 +1,4 @@
+# pylint: disable=F405
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -172,4 +173,3 @@ def get_model(name, **kwargs):
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net
-

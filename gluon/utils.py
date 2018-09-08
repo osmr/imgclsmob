@@ -86,8 +86,8 @@ def get_data_loader(data_dir,
                     batch_size,
                     num_workers):
     normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225])
+        mean=(0.485, 0.456, 0.406),
+        std=(0.229, 0.224, 0.225))
     jitter_param = 0.4
     lighting_param = 0.1
 
@@ -210,4 +210,3 @@ def validate(acc_top1,
     _, top1 = acc_top1.get()
     _, top5 = acc_top5.get()
     return 1-top1, 1-top5
-

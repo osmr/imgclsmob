@@ -39,7 +39,7 @@ class DarkConv(nn.Module):
             padding=padding,
             bias=False)
         self.bn = nn.BatchNorm2d(num_features=out_channels)
-        #self.bn = nn.BatchNorm2d(num_features=out_channels, momentum=0.01)
+        # self.bn = nn.BatchNorm2d(num_features=out_channels, momentum=0.01)
         self.activ = nn.LeakyReLU(
             negative_slope=0.1,
             inplace=True)
@@ -164,8 +164,8 @@ class DarkNet(nn.Module):
             kernel_size=1))
         if cls_activ:
             self.output.add_module('final_activ', nn.LeakyReLU(
-            negative_slope=0.1,
-            inplace=True))
+                negative_slope=0.1,
+                inplace=True))
         self.output.add_module('final_pool', nn.AvgPool2d(
             kernel_size=avg_pool_size,
             stride=1))
@@ -220,7 +220,8 @@ def get_darknet(version,
         avg_pool_size = 14
         cls_activ = False
     elif version == '19':
-        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512], [1024, 512, 1024, 512, 1024]]
+        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512],
+                    [1024, 512, 1024, 512, 1024]]
         odd_pointwise = False
         avg_pool_size = 7
         cls_activ = False
@@ -320,4 +321,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

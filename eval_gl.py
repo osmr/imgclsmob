@@ -186,11 +186,10 @@ def main():
         use_rec=args.use_rec,
         dtype=args.dtype,
         ctx=ctx,
-        #calc_weight_count=(not log_file_exist),
+        # calc_weight_count=(not log_file_exist),
         calc_weight_count=True,
         extended_log=True)
 
 
 if __name__ == '__main__':
     main()
-

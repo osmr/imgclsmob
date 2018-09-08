@@ -220,7 +220,8 @@ def get_darknet(version,
         avg_pool_size = 14
         cls_activ = False
     elif version == '19':
-        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512], [1024, 512, 1024, 512, 1024]]
+        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512],
+                    [1024, 512, 1024, 512, 1024]]
         odd_pointwise = False
         avg_pool_size = 7
         cls_activ = False
@@ -333,4 +334,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

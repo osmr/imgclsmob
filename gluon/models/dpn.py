@@ -659,7 +659,7 @@ def _test():
         assert (model != dpn107 or weight_count == 86917800)
         assert (model != dpn131 or weight_count == 79254504)
 
-        #net.hybridize()
+        # net.hybridize()
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
         assert (y.shape == (1, 1000))
@@ -667,4 +667,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

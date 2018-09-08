@@ -476,7 +476,6 @@ def condensenet74_c8_g8(**kwargs):
 
 
 def _test():
-    import numpy as np
     import chainer
 
     chainer.global_config.train = False
@@ -503,4 +502,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

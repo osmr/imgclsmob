@@ -17,4 +17,3 @@ class TopKAccuracy(Function):
 
 def top_k_accuracy(y, t, k=1):
     return TopKAccuracy(k=k)(y, t)
-

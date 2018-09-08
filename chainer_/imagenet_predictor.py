@@ -13,8 +13,8 @@ class ImagenetPredictor(Chain):
                  base_model,
                  scale_size=256,
                  crop_size=224,
-                 mean=[0.485, 0.456, 0.406],
-                 std=[0.229, 0.224, 0.225]):
+                 mean=(0.485, 0.456, 0.406),
+                 std=(0.229, 0.224, 0.225)):
         super(ImagenetPredictor, self).__init__()
         self.scale_size = scale_size
         if isinstance(crop_size, int):
@@ -42,4 +42,3 @@ class ImagenetPredictor(Chain):
 
         output = chainer.backends.cuda.to_cpu(predictions.array)
         return output
-

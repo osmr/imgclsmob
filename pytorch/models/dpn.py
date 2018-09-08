@@ -629,7 +629,7 @@ def _test():
         net = model(pretrained=pretrained, for_training=for_training)
 
         net.train()
-        #net.eval()
+        # net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:
@@ -648,4 +648,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

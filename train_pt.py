@@ -268,7 +268,7 @@ def train_epoch(epoch,
                 use_cuda,
                 L,
                 optimizer,
-                #lr_scheduler,
+                # lr_scheduler,
                 batch_size,
                 log_interval):
 
@@ -278,11 +278,11 @@ def train_epoch(epoch,
     train_loss = 0.0
 
     btic = time.time()
-    for i, (input, target) in enumerate(train_data):
+    for i, (data, target) in enumerate(train_data):
         if use_cuda:
-            input = input.cuda(non_blocking=True)
+            data = data.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
-        output = net(input)
+        output = net(data)
         loss = L(output, target)
         optimizer.zero_grad()
         loss.backward()
@@ -290,7 +290,7 @@ def train_epoch(epoch,
 
         train_loss += loss.item()
         prec1 = accuracy(output, target, topk=(1, ))
-        acc_top1.update(prec1[0], input.size(0))
+        acc_top1.update(prec1[0], data.size(0))
 
         if log_interval and not (i + 1) % log_interval:
             top1 = acc_top1.avg.item()
@@ -359,7 +359,7 @@ def train_net(batch_size,
             use_cuda,
             L,
             optimizer,
-            #lr_scheduler,
+            # lr_scheduler,
             batch_size,
             log_interval)
 
@@ -448,7 +448,7 @@ def main():
             last_checkpoint_file_count=2,
             best_checkpoint_file_count=2,
             checkpoint_file_save_callback=save_params,
-            checkpoint_file_exts=['.pth', '.states'],
+            checkpoint_file_exts=('.pth', '.states'),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
             param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss'],
@@ -477,4 +477,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

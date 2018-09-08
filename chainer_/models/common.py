@@ -185,4 +185,3 @@ class DualPathSequential(SimpleSequential):
             return x1, x2
         else:
             return x1
-

@@ -175,8 +175,7 @@ def get_model(name, **kwargs):
     #     upstream_supported = str(e)
     name = name.lower()
     if name not in _models:
-        #raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
+        # raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net
-

@@ -42,4 +42,3 @@ def initialize_logging(logging_dir_path,
             packages=packages,
             pip_packages=pip_packages)))
     return logger, log_file_exist
-

@@ -21,8 +21,8 @@ class PreprocessedDataset(DatasetMixin):
                  root,
                  scale_size=256,
                  crop_size=224,
-                 mean=[0.485, 0.456, 0.406],
-                 std=[0.229, 0.224, 0.225]):
+                 mean=(0.485, 0.456, 0.406),
+                 std=(0.229, 0.224, 0.225)):
         self.base = DirectoryParsingLabelDataset(root)
         self.scale_size = scale_size
         if isinstance(crop_size, int):
@@ -118,4 +118,3 @@ def prepare_model(model_name,
         net.to_gpu()
 
     return net
-

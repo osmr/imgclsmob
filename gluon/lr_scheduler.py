@@ -119,4 +119,3 @@ class LRScheduler(lr_scheduler.LRScheduler):
                                      (1 + cos(pi * (T - self.warmup_N) / (self.N - self.warmup_N))) / 2
             else:
                 raise NotImplementedError
-

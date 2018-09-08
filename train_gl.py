@@ -300,7 +300,7 @@ def prepare_trainer(net,
         if trainer._optimizer.wd != wd:
             trainer._optimizer.wd = wd
             logging.info('Reset the weight decay: {}'.format(wd))
-        #lr_scheduler = trainer._optimizer.lr_scheduler
+        # lr_scheduler = trainer._optimizer.lr_scheduler
         trainer._optimizer.lr_scheduler = lr_scheduler
 
     return trainer, lr_scheduler
@@ -562,7 +562,7 @@ def main():
             last_checkpoint_file_count=2,
             best_checkpoint_file_count=2,
             checkpoint_file_save_callback=save_params,
-            checkpoint_file_exts=['.params', '.states'],
+            checkpoint_file_exts=('.params', '.states'),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
             param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
@@ -597,4 +597,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

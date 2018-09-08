@@ -8,11 +8,18 @@ def get_pip_versions(package_list,
                      python_version=''):
     """
     Get packages information by using 'pip show' command.
-    
-    :param package_list: list of package names
-    :param python_version: python version ('2', '3', '') appended to 'pip'
-    command.
-    :return: dict of module: version_info pairs
+
+    Parameters:
+    ----------
+    package_list : list of str
+        List of package names.
+    python_version : str
+        Python version ('2', '3', '') appended to 'pip' command.
+
+    Returns
+    -------
+    dict of module
+        Version_info pairs.
     """
     module_versions = {}
     for module in package_list:
@@ -31,9 +38,16 @@ def get_pip_versions(package_list,
 def get_package_versions(package_list):
     """
     Get packages information by inspecting __version__ attribute.
-    
-    :param package_list: list of package names
-    :return: dict of module: version_info pairs
+
+    Parameters:
+    ----------
+    package_list : list of str
+        List of package names.
+
+    Returns
+    -------
+    dict of module
+        Version_info pairs.
     """
     module_versions = {}
     for module in package_list:
@@ -52,13 +66,22 @@ def get_pyenv_info(packages,
                    pwd,
                    git):
     """
-    Get all available information about Python environment: packages
-    information, Python version, current path, git revision
-    
-    :param packages: list of package names to inspect only __version__
-    attributes.
-    :param pip_packages: list of package names to inspect by 'pip show'.
-    :return: dictionary attribute: version_info
+    Get all available information about Python environment: packages information, Python version, current path,
+    git revision.
+
+    Parameters:
+    ----------
+    packages : list of str
+        list of package names to inspect only __version__.
+    pip_packages : list of str
+        List of package names to inspect by 'pip show'.
+    python_version : str
+        Python version ('2', '3', '') appended to 'pip' command.
+
+    Returns
+    -------
+    dictionary attribute
+        Version_info.
     """
 
     pyenv_info = {}
@@ -119,9 +142,3 @@ def get_env_stats(packages,
     """
     package_versions = get_pyenv_info(packages, pip_packages, python_ver, pwd, git)
     return pretty_print_dict2str(package_versions)
-
-
-if __name__ == "__main__":
-    out_text = get_env_stats()
-    print(out_text)
-

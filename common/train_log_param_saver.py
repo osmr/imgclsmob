@@ -29,7 +29,7 @@ class TrainLogParamSaver(object):
         count of the best checkpoint files
     checkpoint_file_save_callback : function or None
         Callback for real saving of checkpoint file
-    checkpoint_file_exts : list of string
+    checkpoint_file_exts : tuple of str
         List of checkpoint file extensions
     save_interval : int
         Interval of checkpoint file saving
@@ -56,7 +56,7 @@ class TrainLogParamSaver(object):
                  last_checkpoint_file_count=2,
                  best_checkpoint_file_count=2,
                  checkpoint_file_save_callback=None,
-                 checkpoint_file_exts=['.params'],
+                 checkpoint_file_exts=('.params',),
                  save_interval=1,
                  num_epochs=-1,
                  param_names=None,
@@ -233,4 +233,3 @@ class TrainLogParamSaver(object):
 
     def _get_best_checkpoint_params_file_stem(self, epoch, acc):
         return self._get_checkpoint_params_file_stem(self.best_checkpoints_prefix, epoch, acc)
-

@@ -1055,7 +1055,6 @@ class NASNet(Chain):
                     in_size=in_channels,
                     out_size=classes))
 
-
     def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
@@ -1158,4 +1157,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

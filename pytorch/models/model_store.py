@@ -8,7 +8,6 @@ import os
 import zipfile
 import logging
 import hashlib
-#from torch.utils.model_zoo import load_url
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('resnet10', '1585', 'ef8a3ae358543fbce38088ac4955f41ce860e45b', 'v0.0.1'),
@@ -198,18 +197,18 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
             # Disable pyling too broad Exception
             # pylint: disable=W0703
             try:
-                print('Downloading %s from %s...'%(fname, url))
+                print('Downloading {} from {}...'.format(fname, url))
                 r = requests.get(url, stream=True, verify=verify_ssl)
                 if r.status_code != 200:
-                    raise RuntimeError("Failed downloading url %s"%url)
+                    raise RuntimeError("Failed downloading url {}".format(url))
                 with open(fname, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=1024):
-                        if chunk: # filter out keep-alive new chunks
+                        if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
                 if sha1_hash and not _check_sha1(fname, sha1_hash):
-                    raise UserWarning('File {} is downloaded but the content hash does not match.'\
-                                      ' The repo may be outdated or download may be incomplete. '\
-                                      'If the "repo_url" is overridden, consider switching to '\
+                    raise UserWarning('File {} is downloaded but the content hash does not match.'
+                                      ' The repo may be outdated or download may be incomplete. '
+                                      'If the "repo_url" is overridden, consider switching to '
                                       'the default repo.'.format(fname))
                 break
             except Exception as e:
@@ -247,4 +246,3 @@ def _check_sha1(filename, sha1_hash):
             sha1.update(data)
 
     return sha1.hexdigest() == sha1_hash
-

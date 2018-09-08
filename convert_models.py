@@ -1,7 +1,6 @@
 import argparse
 import logging
 import os
-import sys
 import re
 import numpy as np
 
@@ -304,7 +303,7 @@ def main():
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             if (args.src_model == "oth_shufflenetv2_wd2" and args.dst_model == "shufflenetv2_wd2") and\
                     (src_key == "network.8.weight"):
-                dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy()[:,:,0,0])
+                dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy()[:, :, 0, 0])
             else:
                 assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size())),\
                     "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
@@ -357,8 +356,8 @@ def main():
                 obj = getattr(obj, sub_path)
             if src_key1 == 'running_mean':
                 assert (obj.avg_mean.shape == src_params[src_key].shape),\
-                "src_key={}, dst_path={}, src_shape={}, obj.avg_mean.shape={}".format(
-                    src_key, dst_path, src_params[src_key].shape, obj.avg_mean.shape)
+                    "src_key={}, dst_path={}, src_shape={}, obj.avg_mean.shape={}".format(
+                        src_key, dst_path, src_params[src_key].shape, obj.avg_mean.shape)
                 obj.avg_mean = src_params[src_key]._data[0].asnumpy()
             elif src_key1 == 'running_var':
                 assert (obj.avg_var.shape == src_params[src_key].shape)
@@ -464,4 +463,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

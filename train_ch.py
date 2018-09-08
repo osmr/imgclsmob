@@ -1,7 +1,4 @@
 import argparse
-import time
-import logging
-import os
 import numpy as np
 
 import chainer
@@ -9,14 +6,12 @@ from chainer import training
 from chainer.training import extensions
 
 from chainer.serializers import save_npz
-from chainer import cuda, global_config
-import chainer.functions as F
+from chainer import cuda
 
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from common.train_log_param_saver import TrainLogParamSaver
 from chainer_.utils import get_data_iterators, prepare_model
 
 
@@ -192,7 +187,7 @@ def prepare_trainer(net,
         raise Exception('Unsupported optimizer: {}'.format(optimizer_name))
     optimizer.setup(net)
 
-    #devices = tuple(range(num_gpus)) if num_gpus > 0 else (-1, )
+    # devices = tuple(range(num_gpus)) if num_gpus > 0 else (-1, )
     devices = (0,) if num_gpus > 0 else (-1,)
 
     updater = training.updaters.StandardUpdater(

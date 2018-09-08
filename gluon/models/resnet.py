@@ -978,8 +978,8 @@ def _test():
         resnet101b,
         resnet152,
         resnet152b,
-        #resnet200,
-        #resnet200b,
+        # resnet200,
+        # resnet200b,
 
         # seresnet18,
         # seresnet34,
@@ -1043,4 +1043,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

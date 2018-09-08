@@ -142,13 +142,13 @@ def validate(acc_top1,
     acc_top1.reset()
     acc_top5.reset()
     with torch.no_grad():
-        for input, target in val_data:
+        for data, target in val_data:
             if use_cuda:
                 target = target.cuda(non_blocking=True)
-            output = net(input)
+            output = net(data)
             prec1, prec5 = accuracy(output, target, topk=(1, 5))
-            acc_top1.update(prec1[0], input.size(0))
-            acc_top5.update(prec5[0], input.size(0))
+            acc_top1.update(prec1[0], data.size(0))
+            acc_top5.update(prec5[0], data.size(0))
     top1 = acc_top1.avg.item()
     top5 = acc_top5.avg.item()
     return 1-top1, 1-top5

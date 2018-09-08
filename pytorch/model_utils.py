@@ -183,4 +183,3 @@ def get_model(name, **kwargs):
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net
-

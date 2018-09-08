@@ -45,7 +45,7 @@ class DarkConv(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
-            #self.bn = nn.BatchNorm(in_channels=out_channels, momentum=0.01)
+            # self.bn = nn.BatchNorm(in_channels=out_channels, momentum=0.01)
             self.activ = nn.LeakyReLU(alpha=0.1)
 
     def hybrid_forward(self, F, x):
@@ -234,7 +234,8 @@ def get_darknet(version,
         avg_pool_size = 14
         cls_activ = False
     elif version == '19':
-        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512], [1024, 512, 1024, 512, 1024]]
+        channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512],
+                    [1024, 512, 1024, 512, 1024]]
         odd_pointwise = False
         avg_pool_size = 7
         cls_activ = False
@@ -354,4 +355,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

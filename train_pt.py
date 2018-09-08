@@ -194,10 +194,10 @@ def prepare_trainer(net,
                     lr_decay_period,
                     lr_decay_epoch,
                     lr_decay,
-                    warmup_epochs,
-                    batch_size,
+                    # warmup_epochs,
+                    # batch_size,
                     num_epochs,
-                    num_training_samples,
+                    # num_training_samples,
                     state_file_path):
 
     optimizer_name = optimizer_name.lower()
@@ -430,10 +430,10 @@ def main():
         lr_decay_period=args.lr_decay_period,
         lr_decay_epoch=args.lr_decay_epoch,
         lr_decay=args.lr_decay,
-        warmup_epochs=args.warmup_epochs,
-        batch_size=batch_size,
+        # warmup_epochs=args.warmup_epochs,
+        # batch_size=batch_size,
         num_epochs=args.num_epochs,
-        num_training_samples=num_training_samples,
+        # num_training_samples=num_training_samples,
         state_file_path=args.resume_state)
     # if start_epoch is not None:
     #     args.start_epoch = start_epoch

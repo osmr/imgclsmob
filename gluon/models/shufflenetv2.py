@@ -435,7 +435,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        #net.hybridize()
+        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():

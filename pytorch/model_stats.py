@@ -125,8 +125,8 @@ def measure_model(model, H, W):
     def should_measure(x):
         return is_leaf(x)
 
-    def modify_forward(model):
-        for child in model.children():
+    def modify_forward(a_model):
+        for child in a_model.children():
             if should_measure(child):
                 def new_forward(m):
                     def lambda_forward(x):
@@ -138,8 +138,8 @@ def measure_model(model, H, W):
             else:
                 modify_forward(child)
 
-    def restore_forward(model):
-        for child in model.children():
+    def restore_forward(a_model):
+        for child in a_model.children():
             # leaf node
             if is_leaf(child) and hasattr(child, 'old_forward'):
                 child.forward = child.old_forward

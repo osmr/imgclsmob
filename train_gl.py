@@ -8,7 +8,6 @@ import mxnet as mx
 from mxnet import gluon
 from mxnet import autograd as ag
 
-from gluoncv.utils import LRScheduler
 from gluoncv import utils as gutils
 
 from common.logger_utils import initialize_logging

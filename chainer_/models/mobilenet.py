@@ -1,6 +1,6 @@
 """
     MobileNet & FD-MobileNet, implemented in Chainer.
-    Original papers: 
+    Original papers:
     - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
        https://arxiv.org/abs/1704.04861.
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.

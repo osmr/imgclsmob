@@ -151,4 +151,4 @@ def validate(acc_top1,
             acc_top5.update(prec5[0], data.size(0))
     top1 = acc_top1.avg.item()
     top5 = acc_top5.avg.item()
-    return 1-top1, 1-top5
+    return 1.0 - top1, 1.0 - top5

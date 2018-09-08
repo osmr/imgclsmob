@@ -1,4 +1,7 @@
 # Large-scale image classification networks for embedded systems
+
+[![Build Status](https://travis-ci.org/osmr/imgclsmob.svg?branch=master)](https://travis-ci.org/osmr/imgclsmob)
+
 This repository contains several classification models on MXNet/Gluon, PyTorch, and Chainer, with scripts for trainig/converting models.
 All models are designed for using with ImageNet-1k dataset.
 

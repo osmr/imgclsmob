@@ -152,4 +152,3 @@ def validate(acc_top1,
     top1 = acc_top1.avg.item()
     top5 = acc_top5.avg.item()
     return 1-top1, 1-top5
-

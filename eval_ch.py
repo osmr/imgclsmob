@@ -143,7 +143,7 @@ def main():
         log_pip_packages=args.log_pip_packages)
 
     global_config.train = False
-    
+
     num_gpus = args.num_gpus
     if num_gpus > 0:
         cuda.get_device(0).use()

@@ -1,4 +1,4 @@
-# pylint: disable=F405
+# pylint: disable=F403
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -19,6 +19,7 @@ from .models.nasnet import *
 __all__ = ['get_model']
 
 
+# pylint: disable=F405
 _models = {
     'resnet10': resnet10,
     'resnet12': resnet12,

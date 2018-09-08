@@ -8,8 +8,8 @@ from chainer.training import extensions
 from chainer.serializers import save_npz
 from chainer import cuda
 
-from chainercv.utils import apply_to_iterator
-from chainercv.utils import ProgressHook
+# from chainercv.utils import apply_to_iterator
+# from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import get_data_iterators, prepare_model
@@ -307,4 +307,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

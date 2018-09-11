@@ -8,7 +8,7 @@ from mxnet.gluon.data.vision import transforms
 
 from gluoncv.data import imagenet
 
-from .model_utils import get_model
+from .model_provider import get_model
 
 
 def prepare_mx_context(num_gpus,

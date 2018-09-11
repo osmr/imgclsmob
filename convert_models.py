@@ -79,7 +79,7 @@ def prepare_model_gl(model_name,
     if last_gamma:
         kwargs['last_gamma'] = True
 
-    from gluon.model_utils import get_model
+    from gluon.model_provider import get_model
     net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
@@ -114,7 +114,7 @@ def prepare_model_pt(model_name,
     kwargs = {'pretrained': use_pretrained,
               'num_classes': classes}
 
-    from pytorch.model_utils import get_model
+    from pytorch.model_provider import get_model
     net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
@@ -141,7 +141,7 @@ def prepare_model_ch(model_name,
     kwargs = {'pretrained': use_pretrained,
               'classes': classes}
 
-    from chainer_.model_utils import get_model
+    from chainer_.model_provider import get_model
     net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:

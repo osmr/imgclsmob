@@ -1,4 +1,3 @@
-# pylint: disable=F403
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -21,7 +20,6 @@ from .models.others.shufflenet_v2 import *
 __all__ = ['get_model']
 
 
-# pylint: disable=F405
 _models = {
     'resnet10': resnet10,
     'resnet12': resnet12,
@@ -173,15 +171,21 @@ _models = {
 
 
 def get_model(name, **kwargs):
-    # try:
-    #     import torchvision.models as ptv_models
-    #     net = ptv_models.__dict__[name](**kwargs)
-    #     return net
-    # except KeyError as e:
-    #     upstream_supported = str(e)
+    """
+    Get supported model.
+
+    Parameters:
+    ----------
+    name : str
+        Name of model.
+
+    Returns
+    -------
+    Module
+        Resulted model.
+    """
     name = name.lower()
     if name not in _models:
-        # raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net

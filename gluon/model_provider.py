@@ -1,4 +1,3 @@
-# pylint: disable=F403
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -19,7 +18,6 @@ from .models.nasnet import *
 __all__ = ['get_model']
 
 
-# pylint: disable=F405
 _models = {
     'resnet10': resnet10,
     'resnet12': resnet12,
@@ -169,15 +167,21 @@ _models = {
 
 
 def get_model(name, **kwargs):
-    # try:
-    #     from gluoncv.model_zoo import get_model as glcv_get_model
-    #     net = glcv_get_model(name, **kwargs)
-    #     return net
-    # except ValueError as e:
-    #     upstream_supported = str(e)
+    """
+    Get supported model.
+
+    Parameters:
+    ----------
+    name : str
+        Name of model.
+
+    Returns
+    -------
+    HybridBlock
+        Resulted model.
+    """
     name = name.lower()
     if name not in _models:
-        # raise ValueError('{}\n\t{}'.format(upstream_supported, '\n\t'.join(sorted(_models.keys()))))
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net

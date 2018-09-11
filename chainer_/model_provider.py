@@ -1,4 +1,3 @@
-# pylint: disable=F403
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -19,7 +18,6 @@ from .models.nasnet import *
 __all__ = ['get_model']
 
 
-# pylint: disable=F405
 _models = {
     'resnet10': resnet10,
     'resnet12': resnet12,
@@ -169,6 +167,19 @@ _models = {
 
 
 def get_model(name, **kwargs):
+    """
+    Get supported model.
+
+    Parameters:
+    ----------
+    name : str
+        Name of model.
+
+    Returns
+    -------
+    Chain
+        Resulted model.
+    """
     name = name.lower()
     if name not in _models:
         raise ValueError('Unsupported model: {}'.format(name))

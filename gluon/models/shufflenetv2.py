@@ -418,13 +418,13 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
         shufflenetv2_wd2,
-        shufflenetv2_w1,
-        shufflenetv2_w2d3,
-        shufflenetv2_w2,
+        # shufflenetv2_w1,
+        # shufflenetv2_w2d3,
+        # shufflenetv2_w2,
     ]
 
     for model in models:

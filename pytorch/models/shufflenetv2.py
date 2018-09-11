@@ -409,13 +409,13 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
         shufflenetv2_wd2,
-        shufflenetv2_w1,
-        shufflenetv2_w2d3,
-        shufflenetv2_w2,
+        # shufflenetv2_w1,
+        # shufflenetv2_w2d3,
+        # shufflenetv2_w2,
     ]
 
     for model in models:

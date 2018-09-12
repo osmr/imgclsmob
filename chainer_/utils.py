@@ -12,7 +12,7 @@ from chainercv.datasets import DirectoryParsingLabelDataset
 from chainercv.transforms import scale
 from chainercv.transforms import center_crop
 
-from .model_provider import get_model
+from .chainercv2.model_provider import get_model
 
 
 class PreprocessedDataset(DatasetMixin):

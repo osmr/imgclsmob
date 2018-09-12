@@ -7,9 +7,9 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='gluoncv2',
-    version='0.0.2',
-    description='Image classification models for Gluon',
+    name='chainercv2',
+    version='0.0.1',
+    description='Image classification models for Chainer',
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -24,8 +24,8 @@ setup(
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
-    keywords='machine-learning deep-learning neuralnetwork image-classification imagenet mxnet gluon',
+    keywords='machine-learning deep-learning neuralnetwork image-classification chainer',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
-    install_requires=['numpy'],
+    install_requires=['numpy', 'chainer'],
 )

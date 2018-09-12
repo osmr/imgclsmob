@@ -15,7 +15,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 
-from .models.others.shufflenet_v2 import *
+#from .models.others.shufflenet_v2 import *
 
 __all__ = ['get_model']
 
@@ -166,7 +166,7 @@ _models = {
 
     'nasnet_a_mobile': nasnet_a_mobile,
 
-    'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
+    # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
 }
 
 

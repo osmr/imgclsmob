@@ -5,29 +5,80 @@
 This repository contains several classification models on MXNet/Gluon, PyTorch, and Chainer, with scripts for trainig/converting models.
 All models are designed for using with ImageNet-1k dataset.
 
-## Requirements
-All models/scripts are on Python. Tested on Python 2.7 and 3.6.
+##Installation
 
 ### For Gluon way
-If you only want to use models:
+
+To use only Gluon models in your project, simply install the `gluoncv2` package with `mxnet`:
 ```
-mxnet >= 1.2.1
+pip install gluoncv2 mxnet>=1.2.1
 ```
-If you want also training models:
+To enable different hardware supports such as GPUs, check out [mxnet variants](https://pypi.org/project/mxnet/).
+For example, you can install with cuda-9.2 supported mxnet:
 ```
-gluoncv >= 0.2.0
+pip install gluoncv2 mxnet-cu92>=1.2.1
 ```
 
 ### For PyTorch way
+
+To use only PyTorch models in your project, simply install the `pytorchcv` package with `torch`:
 ```
-torch >= 0.4.1
-torchvision >= 0.2.1
+pip install pytorchcv torch>=0.4.1
+```
+To enable/disable different hardware supports such as GPUs, check out PyTorch installation [instructions](https://pytorch.org/).
+
+### For Chainer way
+
+To use only Chainer models in your project, simply install the `chainercv2` package:
+```
+pip install chainercv2
+```
+
+### For research
+
+To use the repository for training/validation/converting models:
+```
+git clone git@github.com:osmr/imgclsmob.git
+pip install -r requirements.txt
+```
+
+##Usage
+
+### For Gluon way
+
+Example of using the pretrained ResNet-18 model on Gluon:
+```
+from gluoncv2.model_provider import get_model as glcv2_get_model
+import mxnet as mx
+
+net = glcv2_get_model("resnet18", pretrained=True)
+x = mx.nd.zeros((1, 3, 224, 224), ctx=mx.cpu())
+y = net(x)
+```
+
+### For PyTorch way
+
+Example of using the pretrained ResNet-18 model on PyTorch:
+```
+from pytorchcv.model_provider import get_model as ptcv_get_model
+import torch
+from torch.autograd import Variable
+
+net = ptcv_get_model("resnet18", pretrained=True)
+x = Variable(torch.randn(1, 3, 224, 224))
+y = net(x)
 ```
 
 ### For Chainer way
+
+Example of using the pretrained ResNet-18 model on Chainer:
 ```
-chainer >= 5.0.0b4
-chainercv >= 0.10.0
+from chainercv2.model_provider import get_model as chcv2_get_model
+import numpy as np
+
+net = chcv2_get_model("resnet18", pretrained=True)
+x = np.zeros((1, 3, 224, 224), np.float32)
+y = net(x)
 ```
 
 ## List of models

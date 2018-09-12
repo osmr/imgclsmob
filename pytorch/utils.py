@@ -6,7 +6,7 @@ import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
-from .model_provider import get_model
+from .pytorchcv.model_provider import get_model
 
 
 def prepare_pt_context(num_gpus,

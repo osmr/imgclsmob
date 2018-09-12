@@ -137,7 +137,7 @@ _models = {
 
     'shufflenetv2_wd2': shufflenetv2_wd2,
     'shufflenetv2_w1': shufflenetv2_w1,
-    'shufflenetv2_w2d3': shufflenetv2_w2d3,
+    'shufflenetv2_w3d2': shufflenetv2_w3d2,
     'shufflenetv2_w2': shufflenetv2_w2,
 
     'menet108_8x1_g3': menet108_8x1_g3,

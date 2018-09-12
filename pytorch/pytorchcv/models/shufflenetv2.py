@@ -413,7 +413,7 @@ def _test():
 
     models = [
         shufflenetv2_wd2,
-        # shufflenetv2_w1,
+        shufflenetv2_w1,
         # shufflenetv2_w3d2,
         # shufflenetv2_w2,
     ]

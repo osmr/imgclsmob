@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_w3d2', 'shufflenetv2_w2']
+__all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_w2d3', 'shufflenetv2_w2']
 
 import os
 import chainer.functions as F
@@ -381,7 +381,7 @@ def shufflenetv2_w1(**kwargs):
     return get_shufflenetv2(width_scale=1.0, model_name="shufflenetv2_w1", **kwargs)
 
 
-def shufflenetv2_w3d2(**kwargs):
+def shufflenetv2_w2d3(**kwargs):
     """
     ShuffleNetV2 1.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
@@ -395,7 +395,7 @@ def shufflenetv2_w3d2(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w3d2", **kwargs)
+    return get_shufflenetv2(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w2d3", **kwargs)
 
 
 def shufflenetv2_w2(**kwargs):
@@ -425,8 +425,8 @@ def _test():
 
     models = [
         shufflenetv2_wd2,
-        # shufflenetv2_w1,
-        # shufflenetv2_w3d2,
+        shufflenetv2_w1,
+        # shufflenetv2_w2d3,
         # shufflenetv2_w2,
     ]
 
@@ -437,7 +437,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shufflenetv2_wd2 or weight_count == 1366792)
         assert (model != shufflenetv2_w1 or weight_count == 2278604)
-        assert (model != shufflenetv2_w3d2 or weight_count == 4406098)
+        assert (model != shufflenetv2_w2d3 or weight_count == 4406098)
         assert (model != shufflenetv2_w2 or weight_count == 7601686)
 
         x = np.zeros((1, 3, 224, 224), np.float32)

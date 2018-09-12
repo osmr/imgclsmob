@@ -2,7 +2,7 @@
 
 Several large-scale image classification models on PyTorch, trained on the ImageNet-1k dataset.
 
-##Installation
+## Installation
 
 To install, use:
 ```
@@ -10,7 +10,7 @@ pip install pytorchcv torch>=0.4.1
 ```
 To enable/disable different hardware supports such as GPUs, check out PyTorch installation [instructions](https://pytorch.org/).
 
-##Usage
+## Usage
 
 Example of using the pretrained ResNet-18 model:
 ```

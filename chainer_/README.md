@@ -2,14 +2,14 @@
 
 Several large-scale image classification models on Chainer, trained on the ImageNet-1k dataset.
 
-##Installation
+## Installation
 
 To install, use:
 ```
 pip install chainercv2
 ```
 
-##Usage
+## Usage
 
 Example of using the pretrained ResNet-18 model:
 ```

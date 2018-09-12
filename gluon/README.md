@@ -2,7 +2,7 @@
 
 Several large-scale image classification models on MXNet/Gluon, trained on the ImageNet-1k dataset.
 
-##Installation
+## Installation
 
 To install, use:
 ```
@@ -14,7 +14,7 @@ For example, you can install with cuda-9.2 supported mxnet:
 pip install gluoncv2 mxnet-cu92>=1.2.1
 ```
 
-##Usage
+## Usage
 
 Example of using the pretrained ResNet-18 model:
 ```

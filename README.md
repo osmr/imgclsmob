@@ -5,7 +5,7 @@
 This repository contains several classification models on MXNet/Gluon, PyTorch, and Chainer, with scripts for trainig/converting models.
 All models are designed for using with ImageNet-1k dataset.
 
-##Installation
+## Installation
 
 ### For Gluon way
 
@@ -42,7 +42,7 @@ git clone git@github.com:osmr/imgclsmob.git
 pip install -r requirements.txt
 ```
 
-##Usage
+## Usage
 
 ### For Gluon way
 

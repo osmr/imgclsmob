@@ -5,22 +5,53 @@ import numpy as np
 
 def add_data_args(parser):
     data = parser.add_argument_group('Data', 'the input images')
-    data.add_argument('--data-train', type=str, help='the training data')
-    data.add_argument('--data-val', type=str, help='the validation data')
-    data.add_argument('--rgb-mean', type=str, default='123.68,116.779,103.939',
-                      help='a tuple of size 3 for the mean rgb')
-    data.add_argument('--pad-size', type=int, default=0,
-                      help='padding the input image')
-    data.add_argument('--image-shape', type=str,
-                      help='the image shape feed into the network, e.g. (3,224,224)')
-    data.add_argument('--num-classes', type=int, help='the number of classes')
-    data.add_argument('--num-examples', type=int, help='the number of training examples')
-    data.add_argument('--data-nthreads', type=int, default=4,
-                      help='number of threads for data decoding')
-    data.add_argument('--benchmark', type=int, default=0,
-                      help='if 1, then feed the network with synthetic data')
-    data.add_argument('--dtype', type=str, default='float32',
-                      help='data type: float32 or float16')
+    data.add_argument(
+        '--data-train',
+        type=str,
+        default='../imgclsmob_data/imagenet/rec/train.rec',
+        help='the training data')
+    data.add_argument(
+        '--data-val',
+        type=str,
+        default='../imgclsmob_data/imagenet/rec/val.rec',
+        help='the validation data')
+    data.add_argument(
+        '--rgb-mean',
+        type=str,
+        default='123.68,116.779,103.939',
+        help='a tuple of size 3 for the mean rgb')
+    data.add_argument(
+        '--pad-size',
+        type=int,
+        default=0,
+        help='padding the input image')
+    data.add_argument(
+        '--image-shape',
+        type=str,
+        help='the image shape feed into the network, e.g. (3,224,224)')
+    data.add_argument(
+        '--num-classes',
+        type=int,
+        help='the number of classes')
+    data.add_argument(
+        '--num-examples',
+        type=int,
+        help='the number of training examples')
+    data.add_argument(
+        '--data-nthreads',
+        type=int,
+        default=4,
+        help='number of threads for data decoding')
+    data.add_argument(
+        '--benchmark',
+        type=int,
+        default=0,
+        help='if 1, then feed the network with synthetic data')
+    data.add_argument(
+        '--dtype',
+        type=str,
+        default='float32',
+        help='data type: float32 or float16')
     return data
 
 def add_data_aug_args(parser):

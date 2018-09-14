@@ -16,10 +16,18 @@
 import argparse
 
 import keras
-from keras.applications import ResNet50, VGG16, imagenet_utils
-from keras.callbacks import ModelCheckpoint
-from keras.preprocessing import image
-from keras.utils.np_utils import to_categorical
+#from keras.applications import ResNet50, VGG16, imagenet_utils
+#from keras.callbacks import ModelCheckpoint
+#from keras.preprocessing import image
+#from keras.utils.np_utils import to_categorical
+
+print("---->1")
+from keras.models import Sequential
+from keras.layers import Dense
+model = Sequential()
+model.add(Dense(units=64, activation='relu', input_dim=100))
+model.add(Dense(units=10, activation='softmax'))
+print("---->2")
 
 import math
 import multiprocessing
@@ -91,8 +99,16 @@ parser = argparse.ArgumentParser(description="train_resnet50",
 data.add_data_args(parser)
 data.add_data_aug_args(parser)
 parser.add_argument_group('gpu_config', 'gpu config')
-parser.add_argument('--num-gpus', type=int, default=8, help='Number of GPUs to use during training')
-parser.add_argument('--batch-per-gpu', type=int, default=64, help='Batch size per GPU')
+parser.add_argument(
+    '--num-gpus',
+    type=int,
+    default=1,
+    help='Number of GPUs to use during training')
+parser.add_argument(
+    '--batch-per-gpu',
+    type=int,
+    default=64,
+    help='Batch size per GPU')
 
 # Use a large augmentation level (needed by ResNet-50)
 data.set_data_aug_level(parser, 3)
@@ -132,7 +148,13 @@ print("Using %d GPUs, batch size per GPU: %d, total batch size: %d" % (args.num_
 
 gpu_list = ["gpu(%d)" % i for i in range(args.num_gpus)] 
 
-model = ResNet50(weights = None)
+# print("---->1")
+# #from keras import applications
+# import keras
+# from keras.applications import vgg16
+# from keras.applications.resnet50 import ResNet50
+# print("---->2")
+# model = ResNet50(weights=None)
 
 # Print model summary to console
 model.summary()

@@ -1,33 +1,9 @@
-# Copyright 2016 Google Inc. All Rights Reserved.
-# Copyright 2017 NVIDIA Corp. All Rights Reserved.  
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
 import argparse
 
 import keras
-#from keras.applications import ResNet50, VGG16, imagenet_utils
-#from keras.callbacks import ModelCheckpoint
-#from keras.preprocessing import image
-#from keras.utils.np_utils import to_categorical
-
-print("---->1")
-from keras.models import Sequential
-from keras.layers import Dense
-model = Sequential()
-model.add(Dense(units=64, activation='relu', input_dim=100))
-model.add(Dense(units=10, activation='softmax'))
-print("---->2")
+from keras.applications import ResNet50
+from keras.callbacks import ModelCheckpoint
+from keras.utils.np_utils import to_categorical
 
 import math
 import multiprocessing
@@ -44,7 +20,7 @@ def backend_agnostic_compile(model, loss, optimizer, metrics, args):
         model.compile(loss=loss,
             optimizer=optimizer,
             metrics=metrics, 
-            context = gpu_list)
+            context=gpu_list)
     else:
         if args.num_gpus > 1:
             print("Warning: num_gpus > 1 but not using MxNet backend")
@@ -61,7 +37,7 @@ def get_data(it, batch_size, report_speed=False, warm_batches_up_for_reporting=1
 
     # Need to feed data as NumPy arrays to Keras
     def get_arrays(db):
-        return db.data[0].asnumpy(), to_categorical(db.label[0].asnumpy(), nb_classes=args.num_classes)
+        return db.data[0].asnumpy(), to_categorical(db.label[0].asnumpy(), num_classes=args.num_classes)
 
     # repeat for as long as training is to proceed, reset iterator if need be
     while True:
@@ -107,7 +83,7 @@ parser.add_argument(
 parser.add_argument(
     '--batch-per-gpu',
     type=int,
-    default=64,
+    default=4,
     help='Batch size per GPU')
 
 # Use a large augmentation level (needed by ResNet-50)
@@ -148,13 +124,8 @@ print("Using %d GPUs, batch size per GPU: %d, total batch size: %d" % (args.num_
 
 gpu_list = ["gpu(%d)" % i for i in range(args.num_gpus)] 
 
-# print("---->1")
-# #from keras import applications
-# import keras
-# from keras.applications import vgg16
-# from keras.applications.resnet50 import ResNet50
-# print("---->2")
-# model = ResNet50(weights=None)
+model = ResNet50(weights=None)
+#model = ResNet50()
 
 # Print model summary to console
 model.summary()
@@ -167,9 +138,30 @@ backend_agnostic_compile(
     optimizer=opt, metrics=['accuracy'], args=args)
 
 # Model checkpointer
-checkpointer = ModelCheckpoint(filepath='./resnet_50_weights.hdf5', verbose=1, save_best_only=True)
+checkpointer = ModelCheckpoint(
+    filepath='./resnet_50_weights.hdf5',
+    verbose=1,
+    save_best_only=True)
 
-model.fit_generator(generator=train_gen, samples_per_epoch=args.num_examples,
-    nb_epoch=args.num_epochs, verbose=True, callbacks=[checkpointer],
-    validation_data=val_gen, nb_val_samples=args.validation_ex, class_weight=None, max_q_size=2,
-    nb_worker=1, pickle_safe=False, initial_epoch=0) 
+val_size = 50000
+score = model.evaluate_generator(
+    generator=val_gen,
+    steps=(val_size // global_batch_size),
+    verbose=True)
+print('score::', score)
+print('Test score:', score[0])
+print('Test accuracy:', score[1])
+
+# model.fit_generator(
+#     generator=train_gen,
+#     samples_per_epoch=args.num_examples,
+#     nb_epoch=args.num_epochs,
+#     verbose=True,
+#     callbacks=[checkpointer],
+#     validation_data=val_gen,
+#     nb_val_samples=args.validation_ex,
+#     class_weight=None,
+#     max_q_size=2,
+#     nb_worker=1,
+#     pickle_safe=False,
+#     initial_epoch=0)

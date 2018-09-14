@@ -15,7 +15,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 
-#from .models.others.shufflenet_v2 import *
+# from .models.others.shufflenet_v2 import *
 
 __all__ = ['get_model']
 

@@ -26,10 +26,12 @@ class ConvBlock(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
     """
     def __init__(self,
                  in_channels,

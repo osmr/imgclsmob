@@ -1,9 +1,9 @@
 import argparse
 
-import keras
-from keras.applications import ResNet50
-from keras.callbacks import ModelCheckpoint
-from keras.utils.np_utils import to_categorical
+import keras_
+from keras_.applications import ResNet50
+from keras_.callbacks import ModelCheckpoint
+from keras_.utils.np_utils import to_categorical
 
 import math
 import multiprocessing
@@ -15,7 +15,7 @@ from time import time
 import data
 
 def backend_agnostic_compile(model, loss, optimizer, metrics, args):
-    if keras.backend._backend == 'mxnet':
+    if keras_.backend._backend == 'mxnet':
         gpu_list = ["gpu(%d)" % i for i in range(args.num_gpus)]
         model.compile(loss=loss,
             optimizer=optimizer,
@@ -131,7 +131,7 @@ model = ResNet50(weights=None)
 model.summary()
 
 # Optimizer (note: we'll be using a learning rate scheduler, see below) 
-opt = keras.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
+opt = keras_.optimizers.SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
 backend_agnostic_compile(
     model=model, loss='categorical_crossentropy', 

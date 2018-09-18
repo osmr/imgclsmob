@@ -30,10 +30,12 @@ class ConvBlock(Chain):
         Number of output channels.
     ksize : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
-    pad : int or tuple/list of 2 int
+    pad : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
     """
     def __init__(self,
                  in_channels,

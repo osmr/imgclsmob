@@ -12,7 +12,7 @@ import hashlib
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('resnet10', '1585', 'ef8a3ae358543fbce38088ac4955f41ce860e45b', 'v0.0.1'),
     ('resnet12', '1480', 'c2263f735b9af6e692bccbacfbe7d7f357e7f57d', 'v0.0.30'),
-    ('resnet14', '1484', '542e6bd4eb7316d12a42225f3d88d4813e700fda', 'v0.0.1'),
+    ('resnet14', '1271', '568c392e3e94041dd589d1b8164e337f90440d06', 'v0.0.40'),
     ('resnet16', '1287', 'bdb0b7fa741ddab726bb85fb8311fa90bd80a859', 'v0.0.1'),
     ('resnet18_wd4', '2806', 'd0cda855f8772dddf3efef5cbd6ac5874d166ab4', 'v0.0.1'),
     ('resnet18_wd2', '1679', '12f81d7315e798ec944bb52bd492bdfed667fca4', 'v0.0.1'),

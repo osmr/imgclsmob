@@ -74,7 +74,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenetv2_wd2', '1464', '02fe7ff2b176f9c2056ba3bf28d1a116cd1ecc95', 'v0.0.9'),
     ('mobilenetv2_w3d4', '1126', '152672f558b4f350f82056b4d09e6c79f54eaca9', 'v0.0.9'),
     ('mobilenetv2_w1', '0990', '4e1a3878e588fc84e6317e14f3437a018223b10a', 'v0.0.9'),
-    ('nasnet_a_mobile', '0826', '1871d8e7f3a3a4f3059070fe8ebd89b298214334', 'v0.0.16')]}
+    ('nasnet_a_mobile', '0795', '5c78908e38c531283d86f9cbe7e14c2afd85a7ce', 'v0.0.43')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

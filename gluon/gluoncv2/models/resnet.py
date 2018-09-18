@@ -959,7 +959,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
         resnet10,

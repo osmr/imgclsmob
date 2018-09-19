@@ -11,7 +11,7 @@ from common.logger_utils import initialize_logging
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/Chainer/MXNet)',
+    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/Chainer/MXNet/Keras)',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--src-fwk',
@@ -58,103 +58,6 @@ def parse_args():
     return args
 
 
-def prepare_model_gl(model_name,
-                     classes,
-                     use_pretrained,
-                     pretrained_model_file_path,
-                     batch_norm,
-                     use_se,
-                     last_gamma,
-                     dtype,
-                     ctx):
-    kwargs = {'ctx': ctx,
-              'pretrained': use_pretrained,
-              'classes': classes}
-
-    if model_name.startswith('vgg'):
-        kwargs['batch_norm'] = batch_norm
-    elif model_name.startswith('resnext'):
-        kwargs['use_se'] = use_se
-
-    if last_gamma:
-        kwargs['last_gamma'] = True
-
-    from gluon.gluoncv2.model_provider import get_model
-    net = get_model(model_name, **kwargs)
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        net.load_parameters(
-            filename=pretrained_model_file_path,
-            ctx=ctx)
-
-    net.cast(dtype)
-
-    net.hybridize(
-        static_alloc=True,
-        static_shape=True)
-
-    if pretrained_model_file_path or use_pretrained:
-        for param in net.collect_params().values():
-            if param._data is not None:
-                continue
-            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-    else:
-        net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
-
-    return net
-
-
-def prepare_model_pt(model_name,
-                     classes,
-                     use_pretrained,
-                     pretrained_model_file_path,
-                     use_cuda):
-    kwargs = {'pretrained': use_pretrained,
-              'num_classes': classes}
-
-    from pytorch.pytorchcv.model_provider import get_model
-    net = get_model(model_name, **kwargs)
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        checkpoint = torch.load(
-            pretrained_model_file_path,
-            map_location=(None if use_cuda else 'cpu'))
-        if type(checkpoint) == dict:
-            net.load_state_dict(checkpoint['state_dict'])
-        else:
-            net.load_state_dict(checkpoint)
-
-    if use_cuda:
-        net = net.cuda()
-
-    return net
-
-
-def prepare_model_ch(model_name,
-                     classes,
-                     use_pretrained,
-                     pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
-
-    from chainer_.chainercv2.model_provider import get_model
-    net = get_model(model_name, **kwargs)
-
-    if pretrained_model_file_path:
-        assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        from chainer.serializers import load_npz
-        load_npz(
-            file=pretrained_model_file_path,
-            obj=net)
-
-    return net
-
-
 def prepare_model_mx(pretrained_model_file_path,
                      ctx):
 
@@ -186,15 +89,14 @@ def prepare_src_model(src_fwk,
     src_arg_params = None
 
     if src_fwk == "gluon":
+        from gluon.utils import prepare_model as prepare_model_gl
         src_net = prepare_model_gl(
             model_name=src_model,
             classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path=src_params_file_path,
-            batch_norm=False,
-            use_se=False,
-            last_gamma=False,
             dtype=np.float32,
+            tune_layers="",
             ctx=ctx)
         src_params = src_net._collect_params_with_prefix()
         src_param_keys = list(src_params.keys())
@@ -218,12 +120,14 @@ def prepare_src_model(src_fwk,
                 ext_src_param_keys2 = [key for key in src_param_keys_ if (key.endswith(".index"))]
 
     elif src_fwk == "pytorch":
+        from pytorch.utils import prepare_model as prepare_model_pt
         src_net = prepare_model_pt(
             model_name=src_model,
             classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path=src_params_file_path,
-            use_cuda=use_cuda)
+            use_cuda=use_cuda,
+            use_data_parallel=False)
         src_params = src_net.state_dict()
         src_param_keys = list(src_params.keys())
         if dst_fwk != "pytorch":
@@ -252,30 +156,32 @@ def prepare_dst_model(dst_fwk,
                       use_cuda):
 
     if dst_fwk == "gluon":
+        from gluon.utils import prepare_model as prepare_model_gl
         dst_net = prepare_model_gl(
             model_name=dst_model,
             classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="",
-            batch_norm=False,
-            use_se=False,
-            last_gamma=False,
             dtype=np.float32,
+            tune_layers="",
             ctx=ctx)
         dst_params = dst_net._collect_params_with_prefix()
         dst_param_keys = list(dst_params.keys())
     elif dst_fwk == "pytorch":
+        from pytorch.utils import prepare_model as prepare_model_pt
         dst_net = prepare_model_pt(
             model_name=dst_model,
             classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="",
-            use_cuda=use_cuda)
+            use_cuda=use_cuda,
+            use_data_parallel=False)
         dst_params = dst_net.state_dict()
         dst_param_keys = list(dst_params.keys())
         if src_fwk != "pytorch":
             dst_param_keys = [key for key in dst_param_keys if not key.endswith("num_batches_tracked")]
     elif dst_fwk == "chainer":
+        from chainer_.utils import prepare_model as prepare_model_ch
         dst_net = prepare_model_ch(
             model_name=dst_model,
             classes=num_classes,

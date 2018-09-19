@@ -63,7 +63,8 @@ def prepare_model(model_name,
                   classes,
                   use_pretrained,
                   pretrained_model_file_path,
-                  use_cuda):
+                  use_cuda,
+                  use_data_parallel=True):
     kwargs = {'pretrained': use_pretrained,
               'num_classes': classes}
 
@@ -72,15 +73,15 @@ def prepare_model(model_name,
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
-        checkpoint = torch.load(pretrained_model_file_path)
+        checkpoint = torch.load(
+            pretrained_model_file_path,
+            map_location=(None if use_cuda else 'cpu'))
         if type(checkpoint) == dict:
             net.load_state_dict(checkpoint['state_dict'])
         else:
             net.load_state_dict(checkpoint)
 
-    if model_name.startswith('alexnet') or model_name.startswith('vgg'):
-        net.features = torch.nn.DataParallel(net.features)
-    else:
+    if use_data_parallel:
         net = torch.nn.DataParallel(net)
 
     if use_cuda:

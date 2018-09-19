@@ -189,6 +189,21 @@ def prepare_dst_model(dst_fwk,
             pretrained_model_file_path="")
         dst_params = {i[0]: i[1] for i in dst_net.namedparams()}
         dst_param_keys = list(dst_params.keys())
+    elif dst_fwk == "keras":
+        from keras_.utils import prepare_model as prepare_model_ke
+        dst_net = prepare_model_ke(
+            model_name=dst_model,
+            classes=num_classes,
+            use_pretrained=False,
+            pretrained_model_file_path="")
+        dst_param_keys = list(dst_net._arg_names) + list(dst_net._aux_names)
+        dst_params = {}
+        for layer in dst_net.layers:
+            if layer.name:
+                for weight in layer.weights:
+                    if weight.name:
+                        dst_params.setdefault(weight.name, []).append(weight)
+                        dst_params[weight.name] = (layer, weight)
     else:
         raise ValueError("Unsupported dst fwk: {}".format(dst_fwk))
 
@@ -357,6 +372,40 @@ def convert_gl2gl(dst_net,
     dst_net.save_parameters(dst_params_file_path)
 
 
+def convert_gl2ke(dst_net,
+                  dst_params_file_path,
+                  dst_params,
+                  dst_param_keys,
+                  src_params,
+                  src_param_keys):
+    src_param_keys.sort()
+    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys.sort()
+    dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+        dst_layer = dst_params[dst_key][0]
+        dst_weight = dst_params[dst_key][1]
+        src_weight = src_params[src_key]._data[0].asnumpy()
+        if (dst_layer.__class__.__name__ in ['Conv2D']) and dst_key.endswith("kernel1") and\
+                (dst_layer.data_format == 'channels_last'):
+            src_weight = np.transpose(src_weight, (2, 3, 1, 0))
+        if (dst_layer.__class__.__name__ in ['DepthwiseConv2D']) and dst_key.endswith("kernel1") and\
+                (dst_layer.data_format == 'channels_last'):
+            src_weight = np.transpose(src_weight, (2, 3, 0, 1))
+        if (dst_layer.__class__.__name__ in ['Dense']) and dst_key.endswith("kernel1"):
+            src_weight = np.transpose(src_weight, (1, 0))
+        assert (dst_weight._get_shape() == src_weight.shape), \
+            "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                src_key, dst_key, src_weight.shape, dst_weight._get_shape())
+        dst_weight.bind(mx.nd.array(src_weight))
+        pass
+    dst_net.save_weights(dst_params_file_path)
+
+
 def convert_pt2pt(dst_params_file_path,
                   dst_params,
                   dst_param_keys,
@@ -490,7 +539,14 @@ def main():
             ext_src_param_keys=ext_src_param_keys,
             ext_src_param_keys2=ext_src_param_keys2,
             src_model=args.src_model)
-
+    elif args.src_fwk == "gluon" and args.dst_fwk == "keras":
+        convert_gl2ke(
+            dst_net=dst_net,
+            dst_params_file_path=args.dst_params,
+            dst_params=dst_params,
+            dst_param_keys=dst_param_keys,
+            src_params=src_params,
+            src_param_keys=src_param_keys)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         convert_pt2gl(
             dst_net=dst_net,

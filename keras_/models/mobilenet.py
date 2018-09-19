@@ -125,7 +125,7 @@ def mobilenet(channels,
         kernel_size=3,
         strides=2,
         padding=1,
-        name="init_block")
+        name="features/init_block")
     in_channels = init_block_channels
     for i, channels_per_stage in enumerate(channels[1:]):
         for j, out_channels in enumerate(channels_per_stage):
@@ -135,12 +135,12 @@ def mobilenet(channels,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                name="stage{}/unit{}".format(i + 1, j + 1))
+                name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
     x = nn.AvgPool2D(
         pool_size=7,
         strides=1,
-        name="final_pool")(x)
+        name="features/final_pool")(x)
 
     x = nn.Flatten()(x)
     x = nn.Dense(
@@ -194,12 +194,16 @@ def get_mobilenet(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from keras.models import load_model
         from .model_store import get_model_file
-        net = load_model(
+        net.load_weights(
             filepath=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root))
+        #from keras.models import load_model
+        # net = load_model(
+        #     filepath=get_model_file(
+        #         model_name=model_name,
+        #         local_model_store_dir_path=root))
 
     return net
 

@@ -6,22 +6,26 @@
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.
 """
 
-__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
+__all__ = ['mobilenet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
            'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
-from keras.models import Model, Sequential
+from keras.models import Model
 from keras import layers as nn
 
 
-class ConvBlock(Model):
+def conv_block(x,
+               out_channels,
+               kernel_size,
+               strides=1,
+               padding=0,
+               depthwise=False,
+               name="conv_block"):
     """
     Standard enough convolution block with BatchNorm and activation.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -32,41 +36,35 @@ class ConvBlock(Model):
         Padding value for convolution layer.
     depthwise : bool, default False
         Whether depthwise convolution is used.
+    name : str, default 'conv_block'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides=1,
-                 padding=0,
-                 depthwise=False,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
-        ke_padding = 'valid' if padding == 0 else 'same'
-        if depthwise:
-            self.conv = nn.DepthwiseConv2D(
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=ke_padding,
-                use_bias=False)
-        else:
-            self.conv = nn.Conv2D(
-                filters=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=ke_padding,
-                use_bias=False)
-        self.bn = nn.BatchNormalization()
-        self.activ = nn.Activation('relu')
-
-    def call(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
+    ke_padding = 'valid' if padding == 0 else 'same'
+    if depthwise:
+        x = nn.DepthwiseConv2D(
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=ke_padding,
+            use_bias=False,
+            name=name+'/conv')(x)
+    else:
+        x = nn.Conv2D(
+            filters=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=ke_padding,
+            use_bias=False,
+            name=name+'/conv')(x)
+    x = nn.BatchNormalization(name=name+'/bn')(x)
+    x = nn.Activation('relu', name=name+'/activ')(x)
+    return x
 
 
-class DwsConvBlock(Model):
+def dws_conv_block(x,
+                   in_channels,
+                   out_channels,
+                   strides,
+                   name="dws_conv_block"):
     """
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
     a MobileNet unit.
@@ -79,32 +77,29 @@ class DwsConvBlock(Model):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    name : str, default 'dws_conv_block'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 **kwargs):
-        super(DwsConvBlock, self).__init__(**kwargs)
-        self.dw_conv = ConvBlock(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            kernel_size=3,
-            strides=strides,
-            padding=1,
-            depthwise=True)
-        self.pw_conv = ConvBlock(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=1)
-
-    def call(self, x):
-        x = self.dw_conv(x)
-        x = self.pw_conv(x)
-        return x
+    x = conv_block(
+        x=x,
+        out_channels=in_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        depthwise=True,
+        name=name+"/dw_conv")
+    x = conv_block(
+        x=x,
+        out_channels=out_channels,
+        kernel_size=1,
+        name=name+"/pw_conv")
+    return x
 
 
-class MobileNet(Model):
+def mobilenet(channels,
+              first_stage_stride,
+              in_channels=3,
+              classes=1000):
     """
     MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861. Also this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet
@@ -121,60 +116,39 @@ class MobileNet(Model):
     classes : int, default 1000
         Number of classification classes.
     """
-    def __init__(self,
-                 channels,
-                 first_stage_stride,
-                 in_channels=3,
-                 classes=1000,
-                 **kwargs):
-        super(MobileNet, self).__init__(**kwargs)
+    input = nn.Input(shape=(224, 224, in_channels))
 
-        self.features = Sequential()
-        init_block_channels = channels[0][0]
-        # self.features.add(ConvBlock(
-        #     in_channels=in_channels,
-        #     out_channels=init_block_channels,
-        #     kernel_size=3,
-        #     strides=2,
-        #     padding=1))
-        # in_channels = init_block_channels
-        # for i, channels_per_stage in enumerate(channels[1:]):
-        #     stage = Sequential()
-        #     for j, out_channels in enumerate(channels_per_stage):
-        #         strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
-        #         stage.add(DwsConvBlock(
-        #             in_channels=in_channels,
-        #             out_channels=out_channels,
-        #             strides=strides))
-        #         in_channels = out_channels
-        #     self.features.add(stage)
+    init_block_channels = channels[0][0]
+    x = conv_block(
+        x=input,
+        out_channels=init_block_channels,
+        kernel_size=3,
+        strides=2,
+        padding=1,
+        name="init_block")
+    in_channels = init_block_channels
+    for i, channels_per_stage in enumerate(channels[1:]):
+        for j, out_channels in enumerate(channels_per_stage):
+            strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
+            x = dws_conv_block(
+                x=x,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                name="stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
+    x = nn.AvgPool2D(
+        pool_size=7,
+        strides=1,
+        name="final_pool")(x)
 
-        # self.features.add(nn.Conv2D(
-        #     filters=init_block_channels,
-        #     kernel_size=3,
-        #     strides=2,
-        #     padding='same',
-        #     use_bias=False))
-        # self.features.add(nn.BatchNormalization())
-        # self.features.add(nn.Activation('relu'))
-        self.features.add(ConvBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            kernel_size=3,
-            strides=2,
-            padding=1))
-        self.features.add(nn.AvgPool2D(
-            pool_size=7,
-            strides=1))
+    x = nn.Flatten()(x)
+    x = nn.Dense(
+        units=classes,
+        name="output")(x)
 
-        self.classifier = Sequential()
-        self.classifier.add(nn.Flatten())
-        self.classifier.add(nn.Dense(units=classes))
-
-    def call(self, x):
-        x = self.features(x)
-        x = self.classifier(x)
-        return x
+    model = Model(input, x)
+    return model
 
 
 def get_mobilenet(version,
@@ -212,21 +186,20 @@ def get_mobilenet(version,
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
-    net = MobileNet(
+    net = mobilenet(
         channels=channels,
         first_stage_stride=first_stage_stride,
         **kwargs)
 
     if pretrained:
-        raise ValueError("Pretrained model doesn't supported")
-        # if (model_name is None) or (not model_name):
-        #     raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        # from .model_store import get_model_file
-        # net.load_parameters(
-        #     filename=get_model_file(
-        #         model_name=model_name,
-        #         local_model_store_dir_path=root),
-        #     ctx=ctx)
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from keras.models import load_model
+        from .model_store import get_model_file
+        net = load_model(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 
@@ -373,81 +346,35 @@ def _test():
 
     pretrained = False
 
-    # class SimpleMLP(keras.Model):
-    #
-    #     def __init__(self, use_bn=False, use_dp=False, num_classes=1000):
-    #         super(SimpleMLP, self).__init__(name='mlp')
-    #         self.use_bn = use_bn
-    #         self.use_dp = use_dp
-    #         self.num_classes = num_classes
-    #
-    #         self.fl = nn.Flatten()
-    #         self.dense1 = keras.layers.Dense(32, activation='relu')
-    #         self.dense2 = keras.layers.Dense(num_classes, activation='softmax')
-    #         if self.use_dp:
-    #             self.dp = keras.layers.Dropout(0.5)
-    #         if self.use_bn:
-    #             self.bn = keras.layers.BatchNormalization(axis=-1)
-    #
-    #     def call(self, inputs):
-    #         x = self.fl(inputs)
-    #         x = self.dense1(x)
-    #         if self.use_dp:
-    #             x = self.dp(x)
-    #         if self.use_bn:
-    #             x = self.bn(x)
-    #         return self.dense2(x)
-    # model = SimpleMLP()
+    models = [
+        mobilenet_w1,
+        mobilenet_w3d4,
+        mobilenet_wd2,
+        mobilenet_wd4,
+        fdmobilenet_w1,
+        fdmobilenet_w3d4,
+        fdmobilenet_wd2,
+        fdmobilenet_wd4,
+    ]
 
-    # model = Sequential()
-    # model.add(nn.Dense(512, activation='relu', input_shape=(3,,)))
-    # model.add(nn.Dropout(0.2))
-    # model.add(nn.Dense(512, activation='relu'))
-    # model.add(nn.Dropout(0.2))
-    # model.add(nn.Dense(1000, activation='softmax'))
+    for model in models:
 
-    model = mobilenet_wd4()
-    model.compile(
-        optimizer='rmsprop',
-        loss='categorical_crossentropy',
-        metrics=['accuracy'])
-    data = np.random.random((20, 3, 224, 224)).astype(np.float32)
-    labels = keras.utils.to_categorical(np.random.randint(1000, size=(20, 1)), num_classes=1000)
-    model.fit(data, labels, epochs=2, batch_size=10)
-    model.summary()
-    weight_count = model.count_params()
-    print("{}".format(weight_count))
+        net = model(pretrained=pretrained)
+        #net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != mobilenet_w1 or weight_count == 4231976)
+        assert (model != mobilenet_w3d4 or weight_count == 2585560)
+        assert (model != mobilenet_wd2 or weight_count == 1331592)
+        assert (model != mobilenet_wd4 or weight_count == 470072)
+        assert (model != fdmobilenet_w1 or weight_count == 2901288)
+        assert (model != fdmobilenet_w3d4 or weight_count == 1833304)
+        assert (model != fdmobilenet_wd2 or weight_count == 993928)
+        assert (model != fdmobilenet_wd4 or weight_count == 383160)
 
-    # models = [
-    #     mobilenet_w1,
-    #     mobilenet_w3d4,
-    #     mobilenet_wd2,
-    #     mobilenet_wd4,
-    #     fdmobilenet_w1,
-    #     fdmobilenet_w3d4,
-    #     fdmobilenet_wd2,
-    #     fdmobilenet_wd4,
-    # ]
-    #
-    # for model in models:
-    #
-    #     net = model(pretrained=pretrained)
-    #     net.predict(np.zeros((1, 3, 224, 224), np.float32))
-    #     #net.build(input_shape=(1, 3, 224, 224))
-    #     weight_count = net.count_params()
-    #     print("m={}, {}".format(model.__name__, weight_count))
-    #     assert (model != mobilenet_w1 or weight_count == 4231976)
-    #     assert (model != mobilenet_w3d4 or weight_count == 2585560)
-    #     assert (model != mobilenet_wd2 or weight_count == 1331592)
-    #     assert (model != mobilenet_wd4 or weight_count == 470072)
-    #     assert (model != fdmobilenet_w1 or weight_count == 2901288)
-    #     assert (model != fdmobilenet_w3d4 or weight_count == 1833304)
-    #     assert (model != fdmobilenet_wd2 or weight_count == 993928)
-    #     assert (model != fdmobilenet_wd4 or weight_count == 383160)
-    #
-    #     x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-    #     y = net(x)
-    #     assert (y.shape == (1, 1000))
+        x = np.zeros((1, 224, 224, 3), np.float32)
+        y = net.predict(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -98,44 +98,20 @@ def parse_args():
 
 
 def get_data(it,
-             batch_size,
-             num_classes,
-             report_speed=False,
-             warm_batches_up_for_reporting=100):
-    ctr = 0
-    warm_up_done = False
-    last_time = None
+             num_classes):
 
-    # Need to feed data as NumPy arrays to Keras
     def get_arrays(db):
         return db.data[0].asnumpy().transpose((0, 2, 3, 1)),\
                to_categorical(
                    y=db.label[0].asnumpy(),
                    num_classes=num_classes)
 
-    # repeat for as long as training is to proceed, reset iterator if need be
     while True:
         try:
-            ctr += 1
             db = it.next()
 
-            # Skip this if samples/second reporting is not desired
-            if report_speed:
-
-                # Report only after warm-up is done to prevent downward bias
-                if warm_up_done:
-                    curr_time = time()
-                    elapsed = curr_time - last_time
-                    ss = float(batch_size * ctr) / elapsed
-                    print(" Batch: %d, Samples per sec: %.2f" % (ctr, ss))
-
-                if ctr > warm_batches_up_for_reporting and not warm_up_done:
-                    ctr = 0
-                    last_time = time()
-                    warm_up_done = True
-
         except StopIteration as e:
-            print("get_data exception due to end of data - resetting iterator")
+            logging.warning("get_data exception due to end of data - resetting iterator")
             it.reset()
             db = it.next()
 
@@ -159,7 +135,7 @@ def test(net,
             momentum=0.0,
             decay=0.0,
             nesterov=False),
-        metrics=['accuracy'],
+        metrics=[keras.metrics.categorical_accuracy, keras.metrics.top_k_categorical_accuracy],
         num_gpus=num_gpus)
 
     #net.summary()
@@ -168,20 +144,20 @@ def test(net,
         generator=val_gen,
         steps=(val_size // batch_size),
         verbose=True)
+    err_top1_val = 1.0 - score[1]
+    err_top5_val = 1.0 - score[2]
+
     if calc_weight_count:
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         logging.info('Model: {} trainable parameters'.format(weight_count))
-    # if extended_log:
-    #     logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-    #         top1=err_top1_val, top5=err_top5_val))
-    # else:
-    #     logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-    #         top1=err_top1_val, top5=err_top5_val))
+    if extended_log:
+        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            top1=err_top1_val, top5=err_top5_val))
+    else:
+        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            top1=err_top1_val, top5=err_top5_val))
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
-    logging.info('score: {}'.format(score))
-    logging.info('Test score: {}'.format(score[0]))
-    logging.info('Test accuracy: {}'.format(score[1]))
 
 
 def main():
@@ -215,14 +191,10 @@ def main():
 
     # train_gen = get_data(
     #     it=train_data,
-    #     batch_size=batch_size,
-    #     num_classes=num_classes,
-    #     report_speed=True)
+    #     num_classes=num_classes)
     val_gen = get_data(
         it=val_data,
-        batch_size=batch_size,
-        num_classes=num_classes,
-        report_speed=True)
+        num_classes=num_classes)
     val_size = 50000
 
     assert (args.use_pretrained or args.resume.strip())

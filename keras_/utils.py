@@ -94,7 +94,12 @@ def backend_agnostic_compile(model,
                              optimizer,
                              metrics,
                              num_gpus):
-    if keras.backend._backend == 'mxnet':
+    keras_backend_exist = True
+    try:
+        _ = keras.backend._backend
+    except NameError:
+        keras_backend_exist = False
+    if keras_backend_exist and (keras.backend._backend == 'mxnet'):
         gpu_list = ["gpu(%d)" % i for i in range(num_gpus)]
         model.compile(
             loss=loss,

@@ -393,11 +393,16 @@ def convert_gl2ke(dst_net,
         if (dst_layer.__class__.__name__ in ['Conv2D']) and dst_key.endswith("kernel1") and\
                 (dst_layer.data_format == 'channels_last'):
             src_weight = np.transpose(src_weight, (2, 3, 1, 0))
+            #src_weight = np.transpose(src_weight, (3, 2, 1, 0))
+            #pass
         if (dst_layer.__class__.__name__ in ['DepthwiseConv2D']) and dst_key.endswith("kernel1") and\
                 (dst_layer.data_format == 'channels_last'):
             src_weight = np.transpose(src_weight, (2, 3, 0, 1))
+            #src_weight = np.transpose(src_weight, (3, 2, 0, 1))
+            #pass
         if (dst_layer.__class__.__name__ in ['Dense']) and dst_key.endswith("kernel1"):
             src_weight = np.transpose(src_weight, (1, 0))
+            #pass
         assert (dst_weight._get_shape() == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_weight.shape, dst_weight._get_shape())

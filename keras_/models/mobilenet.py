@@ -55,7 +55,11 @@ def conv_block(x,
             padding=ke_padding,
             use_bias=False,
             name=name+'/conv')(x)
-    x = nn.BatchNormalization(name=name+'/bn')(x)
+    x = nn.BatchNormalization(
+        axis=-1,
+        momentum=0.9,
+        epsilon=1e-5,
+        name=name+'/bn')(x)
     x = nn.Activation('relu', name=name+'/activ')(x)
     return x
 
@@ -351,14 +355,14 @@ def _test():
     pretrained = False
 
     models = [
-        mobilenet_w1,
-        mobilenet_w3d4,
-        mobilenet_wd2,
+        # mobilenet_w1,
+        # mobilenet_w3d4,
+        # mobilenet_wd2,
         mobilenet_wd4,
-        fdmobilenet_w1,
-        fdmobilenet_w3d4,
-        fdmobilenet_wd2,
-        fdmobilenet_wd4,
+        # fdmobilenet_w1,
+        # fdmobilenet_w3d4,
+        # fdmobilenet_wd2,
+        # fdmobilenet_wd4,
     ]
 
     for model in models:

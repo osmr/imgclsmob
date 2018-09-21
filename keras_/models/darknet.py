@@ -9,6 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
+from .common import GluonBatchNormalization
 
 
 def dark_conv(x,
@@ -39,7 +40,7 @@ def dark_conv(x,
         padding=ke_padding,
         use_bias=False,
         name=name + "/conv")
-    bn = nn.BatchNormalization(
+    bn = GluonBatchNormalization(
         axis=(1 if K.image_data_format() == 'channels_first' else 3),
         momentum=0.9,
         epsilon=1e-5,
@@ -253,8 +254,6 @@ def darknet_ref(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -269,8 +268,6 @@ def darknet_tiny(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -285,8 +282,6 @@ def darknet19(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """

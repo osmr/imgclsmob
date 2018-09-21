@@ -10,8 +10,10 @@ __all__ = ['mobilenet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
            'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
-from keras.models import Model
+from keras import backend as K
 from keras import layers as nn
+from keras.models import Model
+from common import GluonBatchNormalization
 
 
 def conv_block(x,
@@ -41,26 +43,30 @@ def conv_block(x,
     """
     ke_padding = 'valid' if padding == 0 else 'same'
     if depthwise:
-        x = nn.DepthwiseConv2D(
+        conv = nn.DepthwiseConv2D(
             kernel_size=kernel_size,
             strides=strides,
             padding=ke_padding,
             use_bias=False,
-            name=name+"/conv")(x)
+            name=name+"/conv")
     else:
-        x = nn.Conv2D(
+        conv = nn.Conv2D(
             filters=out_channels,
             kernel_size=kernel_size,
             strides=strides,
             padding=ke_padding,
             use_bias=False,
-            name=name+"/conv")(x)
-    x = nn.BatchNormalization(
-        axis=-1,
+            name=name+"/conv")
+    bn = GluonBatchNormalization(
+        axis=(1 if K.image_data_format() == 'channels_first' else 3),
         momentum=0.9,
         epsilon=1e-5,
-        name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name+"/bn")
+    activ = nn.Activation("relu", name=name+"/activ")
+
+    x = conv(x)
+    x = bn(x)
+    x = activ(x)
     return x
 
 
@@ -120,7 +126,8 @@ def mobilenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input = nn.Input(shape=(224, 224, in_channels))
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input = nn.Input(shape=input_shape)
 
     init_block_channels = channels[0][0]
     x = conv_block(
@@ -149,6 +156,7 @@ def mobilenet(channels,
     x = nn.Flatten()(x)
     x = nn.Dense(
         units=classes,
+        input_dim=in_channels,
         name="output")(x)
 
     model = Model(input, x)
@@ -221,8 +229,6 @@ def mobilenet_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -238,8 +244,6 @@ def mobilenet_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -255,8 +259,6 @@ def mobilenet_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -272,8 +274,6 @@ def mobilenet_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -289,8 +289,6 @@ def fdmobilenet_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -306,8 +304,6 @@ def fdmobilenet_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -323,8 +319,6 @@ def fdmobilenet_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -340,8 +334,6 @@ def fdmobilenet_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
@@ -380,7 +372,7 @@ def _test():
         assert (model != fdmobilenet_wd2 or weight_count == 993928)
         assert (model != fdmobilenet_wd4 or weight_count == 383160)
 
-        x = np.zeros((1, 224, 224, 3), np.float32)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

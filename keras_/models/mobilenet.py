@@ -13,7 +13,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from common import GluonBatchNormalization
+from .common import GluonBatchNormalization
 
 
 def conv_block(x,
@@ -58,9 +58,6 @@ def conv_block(x,
             use_bias=False,
             name=name+"/conv")
     bn = GluonBatchNormalization(
-        axis=(1 if K.image_data_format() == 'channels_first' else 3),
-        momentum=0.9,
-        epsilon=1e-5,
         name=name+"/bn")
     activ = nn.Activation("relu", name=name+"/activ")
 

@@ -11,19 +11,24 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
            'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
 
 import os
-from keras import cpu
-from keras.gluon import nn, HybridBlock
-from .common import SEBlock
+from keras import backend as K
+from keras import layers as nn
+from keras.models import Model
+from .common import GluonBatchNormalization
 
 
-class ResConv(HybridBlock):
+def res_conv(x,
+             out_channels,
+             kernel_size,
+             strides,
+             padding,
+             activate,
+             name="res_conv"):
     """
     ResNet specific convolution block.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -32,105 +37,81 @@ class ResConv(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 bn_use_global_stats,
-                 activate,
-                 **kwargs):
-        super(ResConv, self).__init__(**kwargs)
-        self.activate = activate
+    ke_padding = 'valid' if padding == 0 else 'same'
+    conv = nn.Conv2D(
+        filters=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=ke_padding,
+        use_bias=False,
+        name=name + "/conv")
+    bn = GluonBatchNormalization(
+        name=name+"/bn")
+    if activate:
+        activ = nn.Activation("relu", name=name+"/activ")
 
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
+    x = conv(x)
+    x = bn(x)
+    if activate:
+        x = activ(x)
+    return x
 
 
-def res_conv1x1(in_channels,
+def res_conv1x1(x,
                 out_channels,
                 strides,
-                bn_use_global_stats,
-                activate):
+                activate,
+                name="res_conv1x1"):
     """
     1x1 version of the ResNet specific convolution block.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
     """
-    return ResConv(
-        in_channels=in_channels,
+    return res_conv(
+        x=x,
         out_channels=out_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+        activate=activate,
+        name=name)
 
 
-def res_conv3x3(in_channels,
+def res_conv3x3(x,
                 out_channels,
                 strides,
-                bn_use_global_stats,
-                activate):
+                activate,
+                name="res_conv3x3"):
     """
     3x3 version of the ResNet specific convolution block.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
     """
-    return ResConv(
-        in_channels=in_channels,
+    return res_conv(
+        x=x,
         out_channels=out_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+        activate=activate,
+        name=name)
 
 
 class ResBlock(HybridBlock):
@@ -145,14 +126,11 @@ class ResBlock(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -160,13 +138,11 @@ class ResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv2 = res_conv3x3(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=1,
-                bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -187,8 +163,6 @@ class ResBottleneck(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
     """
@@ -196,7 +170,6 @@ class ResBottleneck(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
                  conv1_stride,
                  **kwargs):
         super(ResBottleneck, self).__init__(**kwargs)
@@ -207,19 +180,16 @@ class ResBottleneck(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
-                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv2 = res_conv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
-                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.conv3 = res_conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=1,
-                bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -241,8 +211,6 @@ class ResUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
@@ -284,7 +252,6 @@ class ResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
                     activate=False)
             self.activ = nn.Activation('relu')
 
@@ -311,13 +278,10 @@ class ResInitBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_use_global_stats,
                  **kwargs):
         super(ResInitBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -327,7 +291,6 @@ class ResInitBlock(HybridBlock):
                 kernel_size=7,
                 strides=2,
                 padding=3,
-                bn_use_global_stats=bn_use_global_stats,
                 activate=True)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
@@ -357,9 +320,6 @@ class ResNet(HybridBlock):
         Whether to use stride in the first or the second convolution layer in units.
     use_se : bool
         Whether to use SE block.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -371,7 +331,6 @@ class ResNet(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  use_se,
-                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
@@ -381,8 +340,7 @@ class ResNet(HybridBlock):
             self.features = nn.HybridSequential(prefix='')
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats))
+                out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -393,7 +351,6 @@ class ResNet(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride,
                             use_se=use_se))
@@ -421,7 +378,6 @@ def get_resnet(blocks,
                width_scale=1.0,
                model_name=None,
                pretrained=False,
-               ctx=cpu(),
                root=os.path.join('~', '.keras', 'models'),
                **kwargs):
     """
@@ -441,8 +397,6 @@ def get_resnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """

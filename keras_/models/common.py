@@ -44,7 +44,6 @@ def gluon_batchnorm(x,
 
 class GluonBatchNormalization(BatchNormalization):
     def __init__(self,
-                 axis=1,
                  momentum=0.9,
                  epsilon=1e-5,
                  center=True,
@@ -60,7 +59,7 @@ class GluonBatchNormalization(BatchNormalization):
                  fix_gamma=False,
                  **kwargs):
         super(GluonBatchNormalization, self).__init__(
-            axis=axis,
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
             momentum=momentum,
             epsilon=epsilon,
             center=center,

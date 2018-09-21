@@ -46,7 +46,7 @@ def conv_block(x,
             strides=strides,
             padding=ke_padding,
             use_bias=False,
-            name=name+'/conv')(x)
+            name=name+"/conv")(x)
     else:
         x = nn.Conv2D(
             filters=out_channels,
@@ -54,13 +54,13 @@ def conv_block(x,
             strides=strides,
             padding=ke_padding,
             use_bias=False,
-            name=name+'/conv')(x)
+            name=name+"/conv")(x)
     x = nn.BatchNormalization(
         axis=-1,
         momentum=0.9,
         epsilon=1e-5,
-        name=name+'/bn')(x)
-    x = nn.Activation('relu', name=name+'/activ')(x)
+        name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
     return x
 
 

@@ -100,12 +100,12 @@ def backend_agnostic_compile(model,
     except NameError:
         keras_backend_exist = False
     if keras_backend_exist and (keras.backend._backend == 'mxnet'):
-        gpu_list = ["gpu(%d)" % i for i in range(num_gpus)]
+        mx_ctx = ["gpu(%d)" % i for i in range(num_gpus)] if num_gpus > 0 else ["cpu()"]
         model.compile(
             loss=loss,
             optimizer=optimizer,
             metrics=metrics,
-            context=gpu_list)
+            context=mx_ctx)
     else:
         if num_gpus > 1:
             print("Warning: num_gpus > 1 but not using MxNet backend")

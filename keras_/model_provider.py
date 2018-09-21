@@ -1,9 +1,14 @@
+from .models.darknet import *
 from .models.mobilenet import *
 
 __all__ = ['get_model']
 
 
 _models = {
+    'darknet_ref': darknet_ref,
+    'darknet_tiny': darknet_tiny,
+    'darknet19': darknet19,
+
     'mobilenet_w1': mobilenet_w1,
     'mobilenet_w3d4': mobilenet_w3d4,
     'mobilenet_wd2': mobilenet_wd2,

@@ -6,8 +6,9 @@
 __all__ = ['darknet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 
 import os
-from keras.models import Model
+from keras import backend as K
 from keras import layers as nn
+from keras.models import Model
 
 
 def dark_conv(x,
@@ -31,19 +32,23 @@ def dark_conv(x,
         Block name.
     """
     ke_padding = 'valid' if padding == 0 else 'same'
-    x = nn.Conv2D(
+    conv = nn.Conv2D(
         filters=out_channels,
         kernel_size=kernel_size,
         strides=strides,
         padding=ke_padding,
         use_bias=False,
-        name=name + "/conv")(x)
-    x = nn.BatchNormalization(
-        axis=-1,
+        name=name + "/conv")
+    bn = nn.BatchNormalization(
+        axis=(1 if K.image_data_format() == 'channels_first' else 3),
         momentum=0.9,
         epsilon=1e-5,
-        name=name+"/bn")(x)
-    x = nn.LeakyReLU(alpha=0.1, name=name+"/activ")(x)
+        name=name+"/bn")
+    activ = nn.LeakyReLU(alpha=0.1, name=name+"/activ")
+
+    x = conv(x)
+    x = bn(x)
+    x = activ(x)
     return x
 
 
@@ -141,7 +146,8 @@ def darknet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input = nn.Input(shape=(224, 224, in_channels))
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input = nn.Input(shape=input_shape)
 
     x = input
     for i, channels_per_stage in enumerate(channels):
@@ -169,7 +175,7 @@ def darknet(channels,
         name="output/final_pool")(x)
     x = nn.Flatten()(x)
 
-    model = Model(input, x)
+    model = Model(inputs=input, outputs=x)
     return model
 
 
@@ -292,6 +298,7 @@ def _test():
     import keras
 
     pretrained = False
+    keras.backend.set_learning_phase(0)
 
     models = [
         darknet_ref,
@@ -309,7 +316,7 @@ def _test():
         assert (model != darknet_tiny or weight_count == 1042104)
         assert (model != darknet19 or weight_count == 20842376)
 
-        x = np.zeros((1, 224, 224, 3), np.float32)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

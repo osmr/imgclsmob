@@ -3,6 +3,7 @@ import time
 import logging
 
 import keras
+from keras import backend as K
 from keras.utils.np_utils import to_categorical
 
 from common.logger_utils import initialize_logging
@@ -101,10 +102,13 @@ def get_data(it,
              num_classes):
 
     def get_arrays(db):
-        return db.data[0].asnumpy().transpose((0, 2, 3, 1)),\
-               to_categorical(
-                   y=db.label[0].asnumpy(),
-                   num_classes=num_classes)
+        data = db.data[0].asnumpy()
+        if K.image_data_format() == 'channels_last':
+            data = data.transpose((0, 2, 3, 1))
+        labels = to_categorical(
+            y=db.label[0].asnumpy(),
+            num_classes=num_classes)
+        return data, labels
 
     while True:
         try:
@@ -126,6 +130,8 @@ def test(net,
          num_gpus,
          calc_weight_count=False,
          extended_log=False):
+
+    keras.backend.set_learning_phase(0)
 
     backend_agnostic_compile(
         model=net,

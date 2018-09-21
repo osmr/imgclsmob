@@ -1,7 +1,7 @@
 import logging
 import os
 
-import keras
+from keras import backend as K
 import mxnet as mx
 
 from .model_provider import get_model
@@ -96,10 +96,10 @@ def backend_agnostic_compile(model,
                              num_gpus):
     keras_backend_exist = True
     try:
-        _ = keras.backend._backend
+        _ = K._backend
     except NameError:
         keras_backend_exist = False
-    if keras_backend_exist and (keras.backend._backend == 'mxnet'):
+    if keras_backend_exist and (K._backend == 'mxnet'):
         mx_ctx = ["gpu(%d)" % i for i in range(num_gpus)] if num_gpus > 0 else ["cpu()"]
         model.compile(
             loss=loss,
@@ -108,7 +108,7 @@ def backend_agnostic_compile(model,
             context=mx_ctx)
     else:
         if num_gpus > 1:
-            print("Warning: num_gpus > 1 but not using MxNet backend")
+            logging.info("Warning: num_gpus > 1 but not using MxNet backend")
         model.compile(
             loss=loss,
             optimizer=optimizer,

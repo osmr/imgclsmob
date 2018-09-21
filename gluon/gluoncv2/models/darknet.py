@@ -322,12 +322,12 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
-        # darknet_ref,
+        darknet_ref,
         darknet_tiny,
-        # darknet19,
+        darknet19,
     ]
 
     for model in models:

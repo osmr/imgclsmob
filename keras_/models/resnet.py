@@ -14,7 +14,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from common import conv2d, se_block, GluonBatchNormalization
+from .common import conv2d, se_block, GluonBatchNormalization
 
 
 def res_conv(x,

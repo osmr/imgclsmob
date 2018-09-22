@@ -2,6 +2,8 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.darknet import *
+from .models.squeezenet import *
+from .models.squeezenext import *
 from .models.mobilenet import *
 
 __all__ = ['get_model']
@@ -78,6 +80,19 @@ _models = {
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
+
+    'squeezenet_v1_0': squeezenet_v1_0,
+    'squeezenet_v1_1': squeezenet_v1_1,
+
+    'squeezeresnet_v1_0': squeezeresnet_v1_0,
+    'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+    'sqnxt23_w1': sqnxt23_w1,
+    'sqnxt23_w3d2': sqnxt23_w3d2,
+    'sqnxt23_w2': sqnxt23_w2,
+    'sqnxt23v5_w1': sqnxt23v5_w1,
+    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+    'sqnxt23v5_w2': sqnxt23v5_w2,
 
     'mobilenet_w1': mobilenet_w1,
     'mobilenet_w3d4': mobilenet_w3d4,

@@ -316,8 +316,7 @@ def res_unit(x,
 
     x = nn.add([x, identity], name=name+"/add")
 
-    activ = nn.Activation('relu', name=name+"/activ")
-    x = activ(x)
+    x = nn.Activation('relu', name=name+"/activ")(x)
     return x
 
 

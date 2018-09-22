@@ -407,7 +407,7 @@ def convert_gl2ke(dst_net,
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_weight.shape, dst_weight._get_shape())
         dst_weight.bind(mx.nd.array(src_weight))
-        pass
+        #pass
     dst_net.save_weights(dst_params_file_path)
 
 

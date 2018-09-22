@@ -62,6 +62,7 @@ def conv2d(x,
         x = nn.ZeroPadding2D(
             padding=padding,
             name=name+"/pad")(x)
+        name = name + "/conv"
         ke_padding = 'valid'
 
     if groups == 1:

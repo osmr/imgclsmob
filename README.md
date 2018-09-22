@@ -36,6 +36,15 @@ To use only Chainer models in your project, simply install the `chainercv2` pack
 pip install chainercv2
 ```
 
+### For Keras way
+
+To use Keras models:
+```
+git clone git@github.com:osmr/imgclsmob.git
+pip install mxnet>=1.2.1 keras-mxnet>=2.2.2
+```
+After that change the value of the field `image_data_format` to `channels_first` in the file `~/.keras/keras.json`. 
+
 ### For research
 
 To use the repository for training/validation/converting models:
@@ -122,7 +131,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-12 | 35.86 | 14.46 | 5,492,776 | 1,124.23M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1446-9ce715b0.params.log)) |
 | ResNet-14 | 32.85 | 12.41 | 5,788,200 | 1,355.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.40/resnet14-1241-a8955ff3.params.log)) |
 | ResNet-16 | 30.68 | 11.10 | 6,968,872 | 1,586.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.41/resnet16-1110-1be996d1.params.log)) |
-| ResNet-18 x0.25 | 53.13 | 27.77 | 831,096 | 136.64M | 1-stage training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18_wd4-2777-42c5a34c.params.log)) |
+| ResNet-18 x0.25 | 49.16 | 24.45 | 831,096 | 136.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2445-28d15cf4.params)) |
 | ResNet-18 x0.5 | 36.54 | 14.96 | 3,055,880 | 485.22M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1496-d839c509.params.log)) |
 | ResNet-18 x0.75 | 33.25 | 12.54 | 6,675,352 | 1,045.75M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.18/resnet18_w3d4-1254-d6548612.params.log)) |
 | ResNet-18 | 29.13 | 9.94 | 11,689,512 | 1,818.21M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18-0994-ae25f2b2.params.log)) |
@@ -192,7 +201,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-12 | 36.18 | 14.80 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1480-c2263f73.pth.log)) |
 | ResNet-14 | 33.17 | 12.71 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.40/resnet14-1271-568c392e.pth.log)) |
 | ResNet-16 | 30.90 | 11.38 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.41/resnet16-1138-3a5aa7c0.pth.log)) |
-| ResNet-18 x0.25 | 53.37 | 28.06 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18_wd4-2806-d0cda855.pth.log)) |
+| ResNet-18 x0.25 | 49.50 | 24.83 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2483-6ef2515c.pth.log)) |
 | ResNet-18 x0.5 | 37.04 | 15.38 | 3,055,880 | 485.22M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1538-671466b5.pth.log)) |
 | ResNet-18 x0.75 | 33.61 | 12.85 | 6,675,352 | 1,045.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.18/resnet18_w3d4-1285-94713e0e.pth.log)) |
 | ResNet-18 | 29.52 | 10.21 | 11,689,512 | 1,818.21M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet18-1021-b0d7daea.pth.log)) |
@@ -262,7 +271,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-12 | 35.86 | 14.48 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1448-11acb729.npz.log)) |
 | ResNet-14 | 32.84 | 12.42 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.40/resnet14-1242-4e65746b.npz.log)) |
 | ResNet-16 | 30.66 | 11.07 | 6,968,872 | 1,586.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.41/resnet16-1107-b1d7fb7d.npz.log)) |
-| ResNet-18 x0.25 | 53.17 | 27.70 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet18_wd4-2770-72465bfe.npz.log)) |
+| ResNet-18 x0.25 | 49.08 | 24.48 | 831,096 | 136.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2448-58c4a007.npz)) |
 | ResNet-18 x0.5 | 36.55 | 14.99 | 3,055,880 | 485.22M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1499-542ed773.npz.log)) |
 | ResNet-18 x0.75 | 33.27 | 12.56 | 6,675,352 | 1,045.75M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet18_w3d4-1256-ce2011df.npz.log)) |
 | ResNet-18 | 29.08 | 9.97 | 11,689,512 | 1,818.21M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet18-0997-9862a84f.npz.log)) |

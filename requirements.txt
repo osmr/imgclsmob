@@ -5,4 +5,4 @@ torch>=0.4.1
 torchvision>=0.2.1
 chainer>=5.0.0b4
 chainercv>=0.10.0
-keras-mxnet
+keras-mxnet>=2.2.2

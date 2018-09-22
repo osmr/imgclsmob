@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/osmr/imgclsmob.svg?branch=master)](https://travis-ci.org/osmr/imgclsmob)
 
 This repository contains several classification models on MXNet/Gluon, PyTorch, Chainer, and Keras, with scripts
-for trainig/validating/converting models. All models are designed for using with ImageNet-1k dataset.
+for training/validating/converting models. All models are designed for using with ImageNet-1k dataset.
 
 ## Installation
 

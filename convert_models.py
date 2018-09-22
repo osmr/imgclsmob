@@ -474,6 +474,9 @@ def main():
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
         packages += ['chainer', 'chainercv']
         pip_packages += ['cupy-cuda92', 'chainer', 'chainercv']
+    if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
+        packages += ['keras']
+        pip_packages += ['keras', 'keras-mxnet', 'keras-applications', 'keras-preprocessing']
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,

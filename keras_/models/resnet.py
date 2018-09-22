@@ -14,7 +14,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, se_block, GluonBatchNormalization
+from common import conv2d, se_block, GluonBatchNormalization
 
 
 def res_conv(x,
@@ -314,9 +314,9 @@ def res_unit(x,
             channels=out_channels,
             name=name+"/se")
 
-    x = nn.add([x, identity])
+    x = nn.add([x, identity], name=name+"/add")
 
-    activ = nn.Activation('relu')
+    activ = nn.Activation('relu', name=name+"/activ")
     x = activ(x)
     return x
 

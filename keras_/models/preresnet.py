@@ -296,7 +296,7 @@ def preres_unit(x,
             strides=strides,
             name=name+"/identity_conv")(x_pre_activ)
 
-    x = nn.add([x, identity])
+    x = nn.add([x, identity], name=name+"/add")
     return x
 
 

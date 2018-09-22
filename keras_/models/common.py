@@ -138,22 +138,24 @@ def se_block(x,
     conv1 = conv1x1(
         out_channels=mid_cannels,
         use_bias=True,
-        name=name + "/conv1")
-    relu = nn.Activation('relu')
+        name=name+"/conv1")
+    relu = nn.Activation('relu', name=name+"/relu")
     conv2 = conv1x1(
         out_channels=channels,
         use_bias=True,
-        name=name + "/conv2")
-    sigmoid = nn.Activation('sigmoid')
+        name=name+"/conv2")
+    sigmoid = nn.Activation('sigmoid', name=name+"/sigmoid")
 
     assert(len(x.shape) == 4)
     pool_size = x.shape[2:4] if K.image_data_format() == 'channels_first' else x.shape[1:3]
-    w = nn.AvgPool2D(pool_size=pool_size)(x)
+    w = nn.AvgPool2D(
+        pool_size=pool_size,
+        name=name+"/pool")(x)
     w = conv1(w)
     w = relu(w)
     w = conv2(w)
     w = sigmoid(w)
-    x = nn.multiply([x, w])
+    x = nn.multiply([x, w], name=name+"/mul")
     return x
 
 

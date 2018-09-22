@@ -15,14 +15,15 @@ from .common import GluonBatchNormalization
 def dark_conv(x,
               out_channels,
               kernel_size,
-              strides=1,
-              padding=0,
+              padding,
               name="dark_conv"):
     """
     DarkNet specific convolution block.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -31,12 +32,16 @@ def dark_conv(x,
         Padding value for convolution layer.
     name : str, default 'dark_conv'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     ke_padding = 'valid' if padding == 0 else 'same'
     conv = nn.Conv2D(
         filters=out_channels,
         kernel_size=kernel_size,
-        strides=strides,
         padding=ke_padding,
         use_bias=False,
         name=name + "/conv")
@@ -58,10 +63,17 @@ def dark_conv1x1(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     out_channels : int
         Number of output channels.
     name : str, default 'dark_conv1x1'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     return dark_conv(
         x=x,
@@ -79,10 +91,17 @@ def dark_conv3x3(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     out_channels : int
         Number of output channels.
     name : str, default 'dark_conv3x3'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     return dark_conv(
         x=x,
@@ -101,12 +120,19 @@ def dark_convYxY(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     out_channels : int
         Number of output channels.
     pointwise : bool
         Whether use 1x1 (pointwise) convolution or 3x3 convolution.
     name : str, default 'dark_convYxY'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     if pointwise:
         return dark_conv1x1(

@@ -28,6 +28,8 @@ def conv_block(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -40,6 +42,11 @@ def conv_block(x,
         Whether depthwise convolution is used.
     name : str, default 'conv_block'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     ke_padding = 'valid' if padding == 0 else 'same'
     if depthwise:
@@ -78,6 +85,8 @@ def dws_conv_block(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
@@ -86,6 +95,11 @@ def dws_conv_block(x,
         Strides of the convolution.
     name : str, default 'dws_conv_block'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     x = conv_block(
         x=x,
@@ -208,11 +222,6 @@ def get_mobilenet(version,
             filepath=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root))
-        #from keras.models import load_model
-        # net = load_model(
-        #     filepath=get_model_file(
-        #         model_name=model_name,
-        #         local_model_store_dir_path=root))
 
     return net
 

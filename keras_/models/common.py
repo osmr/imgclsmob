@@ -27,7 +27,7 @@ def conv1x1(out_channels,
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     name : str, default 'conv1x1'
-        Block name.
+        Layer name.
     """
     return nn.Conv2D(
         filters=out_channels,
@@ -46,12 +46,19 @@ def se_block(x,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     channels : int
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
     name : str, default 'se_block'
         Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
     mid_cannels = channels // reduction
 
@@ -87,6 +94,37 @@ def gluon_batchnorm(x,
                     axis=1,
                     epsilon=1e-5,
                     fix_gamma=False):
+    """
+    Apply native MXNet/Gluon batch normalization on x with given moving_mean, moving_var, beta and gamma.
+
+
+    Parameters
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    gamma : keras.backend tensor/variable/symbol
+        Tensor by which to scale the input.
+    beta : keras.backend tensor/variable/symbol
+        Tensor by which to center the input.
+    moving_mean : keras.backend tensor/variable/symbol
+        Moving mean.
+    moving_var : keras.backend tensor/variable/symbol
+        Moving variance.
+    momentum : float, default 0.9
+        Momentum for the moving average.
+    axis : int, default 1
+        Axis along which BatchNorm is applied. Axis usually represent axis of 'channels'. MXNet follows
+        'channels_first'.
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    fix_gamma : bool, default False
+        Fix gamma while training.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
     if isinstance(x, KerasSymbol):
         x = x.symbol
     if isinstance(moving_mean, KerasSymbol):
@@ -110,6 +148,42 @@ def gluon_batchnorm(x,
 
 
 class GluonBatchNormalization(BatchNormalization):
+    """
+    Batch normalization layer wrapper for implementation of the Gluon type of BatchNorm default parameters.
+
+    Parameters
+    ----------
+    momentum : float, default 0.9
+        Momentum for the moving average.
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    center : bool, default True
+        If True, add offset of `beta` to normalized tensor.
+        If False, `beta` is ignored.
+    scale : bool, default True
+        If True, multiply by `gamma`. If False, `gamma` is not used.
+        When the next layer is linear (also e.g. `nn.relu`),
+        this can be disabled since the scaling
+        will be done by the next layer.
+    beta_initializer : str, default 'zeros'
+        Initializer for the beta weight.
+    gamma_initializer : str, default 'ones'
+        Initializer for the gamma weight.
+    moving_mean_initializer : str, default 'zeros'
+        Initializer for the moving mean.
+    moving_variance_initializer : str, default 'ones'
+        Initializer for the moving variance.
+    beta_regularizer : str or None, default None
+        Optional regularizer for the beta weight.
+    gamma_regularizer : str or None, default None
+        Optional regularizer for the gamma weight.
+    beta_constraint : str or None, default None
+        Optional constraint for the beta weight.
+    gamma_constraint : str or None, default None
+        Optional constraint for the gamma weight.
+    fix_gamma : bool, default False
+        Fix gamma while training.
+    """
     def __init__(self,
                  momentum=0.9,
                  epsilon=1e-5,

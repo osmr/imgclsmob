@@ -2,13 +2,62 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'se_block', 'GluonBatchNormalization']
+__all__ = ['max_pool2d_ceil', 'conv2d', 'conv1x1', 'se_block', 'GluonBatchNormalization']
 
+import math
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
 import mxnet as mx
+
+
+def max_pool2d_ceil(x,
+                    pool_size,
+                    strides,
+                    padding,
+                    **kwargs):
+    """
+    Max pooling 2D layer wrapper with ceil mode supporting.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    pool_size : int or tuple/list of 2 int
+        Size of the max pooling windows.
+    strides : int or tuple/list of 2 int
+        Strides of the pooling.
+    padding : int or tuple/list of 2 int
+        Padding value for pooling layer.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if isinstance(pool_size, int):
+        pool_size = (pool_size, pool_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
+
+    assert (pool_size[0] == pool_size[1])
+    assert (strides[0] == strides[1])
+
+    padding0 = 0 if padding == "valid" else strides[0] // 2
+
+    height = x.shape[2 if K.image_data_format() == 'channels_first' else 1]
+    out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
+    if math.ceil(out_height) > math.floor(out_height):
+        assert (strides[0] <= 3)
+        padding = "same"
+
+    x = nn.MaxPool2D(
+        pool_size=pool_size,
+        strides=strides,
+        padding=padding,
+        **kwargs)(x)
+    return x
 
 
 def conv2d(x,
@@ -18,7 +67,7 @@ def conv2d(x,
            strides=1,
            padding=0,
            groups=1,
-           use_bias=False,
+           use_bias=True,
            name="conv2d"):
     """
     Convolution 2D layer wrapper.
@@ -49,6 +98,8 @@ def conv2d(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
+    if isinstance(kernel_size, int):
+        kernel_size = (kernel_size, kernel_size)
     if isinstance(strides, int):
         strides = (strides, strides)
     if isinstance(padding, int):
@@ -57,7 +108,7 @@ def conv2d(x,
     extra_pad = False
     if (padding[0] == padding[1]) and (padding[0] == 0):
         ke_padding = "valid"
-    elif (padding[0] == padding[1]) and (strides[0] == strides[1]) and (strides[0] // 2 == padding[0]):
+    elif (padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and (kernel_size[0] // 2 == padding[0]):
         ke_padding = "same"
     else:
         x = nn.ZeroPadding2D(

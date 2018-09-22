@@ -1,32 +1,32 @@
 """
-    ResNet & SE-ResNet, implemented in Keras.
+    PreResNet & SE-PreResNet, implemented in Keras.
     Original papers:
-    - 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    - 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
-           'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
-           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+__all__ = ['preresnet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
+           'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
+           'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
+           'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
+           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
 
 import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, se_block, GluonBatchNormalization
+from .common import conv2d, conv1x1, se_block, GluonBatchNormalization
 
 
-def res_conv(x,
-             in_channels,
-             out_channels,
-             kernel_size,
-             strides,
-             padding,
-             activate,
-             name="res_conv"):
+def preres_conv(x,
+                in_channels,
+                out_channels,
+                kernel_size,
+                strides,
+                padding,
+                name="preres_conv"):
     """
-    ResNet specific convolution block.
+    PreResNet specific convolution block, with pre-activation.
 
     Parameters:
     ----------
@@ -42,16 +42,17 @@ def res_conv(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv'
+    name : str, default 'preres_conv'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
     """
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
+    x_pre_activ = x
     x = conv2d(
         x=x,
         in_channels=in_channels,
@@ -61,20 +62,16 @@ def res_conv(x,
         padding=padding,
         use_bias=False,
         name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    if activate:
-        x = nn.Activation("relu", name=name+"/activ")(x)
-    return x
+    return x, x_pre_activ
 
 
-def res_conv1x1(x,
-                in_channels,
-                out_channels,
-                strides,
-                activate,
-                name="res_conv1x1"):
+def preres_conv1x1(x,
+                   in_channels,
+                   out_channels,
+                   strides,
+                   name="preres_conv1x1"):
     """
-    1x1 version of the ResNet specific convolution block.
+    1x1 version of the PreResNet specific convolution block.
 
     Parameters:
     ----------
@@ -86,35 +83,31 @@ def res_conv1x1(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv1x1'
+    name : str, default 'preres_conv1x1'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
     """
-    return res_conv(
+    return preres_conv(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
-        activate=activate,
         name=name)
 
 
-def res_conv3x3(x,
-                in_channels,
-                out_channels,
-                strides,
-                activate,
-                name="res_conv3x3"):
+def preres_conv3x3(x,
+                   in_channels,
+                   out_channels,
+                   strides,
+                   name="preres_conv3x3"):
     """
-    3x3 version of the ResNet specific convolution block.
+    3x3 version of the PreResNet specific convolution block.
 
     Parameters:
     ----------
@@ -126,34 +119,31 @@ def res_conv3x3(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv3x3'
+    name : str, default 'preres_conv3x3'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
     """
-    return res_conv(
+    return preres_conv(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
-        activate=activate,
         name=name)
 
 
-def res_block(x,
-              in_channels,
-              out_channels,
-              strides,
-              name="res_block"):
+def preres_block(x,
+                 in_channels,
+                 out_channels,
+                 strides,
+                 name="preres_block"):
     """
-    Simple ResNet block for residual path in ResNet unit.
+    Simple PreResNet block for residual path in PreResNet unit.
 
     Parameters:
     ----------
@@ -165,39 +155,37 @@ def res_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    name : str, default 'res_block'
+    name : str, default 'preres_block'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
     """
-    x = res_conv3x3(
+    x, x_pre_activ = preres_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=strides,
-        activate=True,
         name=name+"/conv1")
-    x = res_conv3x3(
+    x, _ = preres_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
-        activate=False,
         name=name+"/conv2")
-    return x
+    return x, x_pre_activ
 
 
-def res_bottleneck_block(x,
-                         in_channels,
-                         out_channels,
-                         strides,
-                         conv1_stride,
-                         name="res_bottleneck_block"):
+def preres_bottleneck_block(x,
+                            in_channels,
+                            out_channels,
+                            strides,
+                            conv1_stride,
+                            name="preres_bottleneck_block"):
     """
-    ResNet bottleneck block for residual path in ResNet unit.
+    PreResNet bottleneck block for residual path in PreResNet unit.
 
     Parameters:
     ----------
@@ -211,48 +199,45 @@ def res_bottleneck_block(x,
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
-    name : str, default 'res_bottleneck_block'
+    name : str, default 'preres_bottleneck_block'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
     """
     mid_channels = out_channels // 4
 
-    x = res_conv1x1(
+    x, x_pre_activ = preres_conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
-        activate=True,
         name=name+"/conv1")
-    x = res_conv3x3(
+    x, _ = preres_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
-        activate=True,
         name=name+"/conv2")
-    x = res_conv1x1(
+    x, _ = preres_conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
-        activate=False,
         name=name+"/conv3")
-    return x
+    return x, x_pre_activ
 
 
-def res_unit(x,
-             in_channels,
-             out_channels,
-             strides,
-             bottleneck,
-             conv1_stride,
-             use_se,
-             name="res_unit"):
+def preres_unit(x,
+                in_channels,
+                out_channels,
+                strides,
+                bottleneck,
+                conv1_stride,
+                use_se,
+                name="preres_unit"):
     """
     ResNet unit with residual connection.
 
@@ -272,28 +257,18 @@ def res_unit(x,
         Whether to use stride in the first or the second convolution layer of the block.
     use_se : bool
         Whether to use SE block.
-    name : str, default 'res_unit'
+    name : str, default 'preres_unit'
         Unit name.
 
     Returns
     -------
     keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+        Resulted tensor.
     """
-    resize_identity = (in_channels != out_channels) or (strides != 1)
-    if resize_identity:
-        identity = res_conv1x1(
-            x=x,
-            in_channels=in_channels,
-            out_channels=out_channels,
-            strides=strides,
-            activate=False,
-            name=name+"/identity_conv")
-    else:
-        identity = x
+    identity = x
 
     if bottleneck:
-        x = res_bottleneck_block(
+        x, x_pre_activ = preres_bottleneck_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
@@ -301,7 +276,7 @@ def res_unit(x,
             conv1_stride=conv1_stride,
             name=name+"/body")
     else:
-        x = res_block(
+        x, x_pre_activ = preres_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
@@ -314,19 +289,23 @@ def res_unit(x,
             channels=out_channels,
             name=name+"/se")
 
-    x = nn.add([x, identity])
+    resize_identity = (in_channels != out_channels) or (strides != 1)
+    if resize_identity:
+        identity = conv1x1(
+            out_channels=out_channels,
+            strides=strides,
+            name=name+"/identity_conv")(x_pre_activ)
 
-    activ = nn.Activation('relu')
-    x = activ(x)
+    x = nn.add([x, identity])
     return x
 
 
-def res_init_block(x,
-                   in_channels,
-                   out_channels,
-                   name="res_init_block"):
+def preres_init_block(x,
+                      in_channels,
+                      out_channels,
+                      name="preres_init_block"):
     """
-    ResNet specific initial block.
+    PreResNet specific initial block.
 
     Parameters:
     ----------
@@ -336,7 +315,7 @@ def res_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    name : str, default 'res_init_block'
+    name : str, default 'preres_init_block'
         Block name.
 
     Returns
@@ -344,15 +323,17 @@ def res_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = res_conv(
+    x = conv2d(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=7,
         strides=2,
         padding=3,
-        activate=True,
+        use_bias=False,
         name=name+"/conv")
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
@@ -361,16 +342,38 @@ def res_init_block(x,
     return x
 
 
-def resnet(channels,
-           init_block_channels,
-           bottleneck,
-           conv1_stride,
-           use_se,
-           in_channels=3,
-           classes=1000):
+def preres_activation(x,
+                      name="preres_activation"):
     """
-    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
-    implements SE-ResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    name : str, default 'preres_activation'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
+    return x
+
+
+def preresnet(channels,
+              init_block_channels,
+              bottleneck,
+              conv1_stride,
+              use_se,
+              in_channels=3,
+              classes=1000):
+    """
+    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027. Also this
+    class implements SE-PreResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -392,7 +395,7 @@ def resnet(channels,
     input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
-    x = res_init_block(
+    x = preres_init_block(
         x=input,
         in_channels=in_channels,
         out_channels=init_block_channels,
@@ -401,7 +404,7 @@ def resnet(channels,
     for i, channels_per_stage in enumerate(channels):
         for j, out_channels in enumerate(channels_per_stage):
             strides = 2 if (j == 0) and (i != 0) else 1
-            x = res_unit(
+            x = preres_unit(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -411,6 +414,9 @@ def resnet(channels,
                 use_se=use_se,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
+    x = preres_activation(
+        x=x,
+        name="features/post_activ")
     x = nn.AvgPool2D(
         pool_size=7,
         strides=1,
@@ -426,16 +432,16 @@ def resnet(channels,
     return model
 
 
-def get_resnet(blocks,
-               conv1_stride=True,
-               use_se=False,
-               width_scale=1.0,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join('~', '.keras', 'models'),
-               **kwargs):
+def get_preresnet(blocks,
+                  conv1_stride=True,
+                  use_se=False,
+                  width_scale=1.0,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join('~', '.keras', 'models'),
+                  **kwargs):
     """
-    Create ResNet or SE-ResNet model with specific parameters.
+    Create PreResNet or SE-PreResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -493,7 +499,7 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    net = resnet(
+    net = preresnet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -513,9 +519,9 @@ def get_resnet(blocks,
     return net
 
 
-def resnet10(**kwargs):
+def preresnet10(**kwargs):
     """
-    ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-10 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -525,12 +531,12 @@ def resnet10(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
+    return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
 
 
-def resnet12(**kwargs):
+def preresnet12(**kwargs):
     """
-    ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-12 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -540,12 +546,12 @@ def resnet12(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
+    return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
 
 
-def resnet14(**kwargs):
+def preresnet14(**kwargs):
     """
-    ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-14 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -555,12 +561,12 @@ def resnet14(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+    return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
 
 
-def resnet16(**kwargs):
+def preresnet16(**kwargs):
     """
-    ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-16 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -570,13 +576,13 @@ def resnet16(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
+    return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def preresnet18_wd4(**kwargs):
     """
-    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -585,13 +591,13 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
 
-def resnet18_wd2(**kwargs):
+def preresnet18_wd2(**kwargs):
     """
-    ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.5 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -600,13 +606,13 @@ def resnet18_wd2(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
 
-def resnet18_w3d4(**kwargs):
+def preresnet18_w3d4(**kwargs):
     """
-    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -615,12 +621,12 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
 
 
-def resnet18(**kwargs):
+def preresnet18(**kwargs):
     """
-    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -629,12 +635,12 @@ def resnet18(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
+    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
 
-def resnet34(**kwargs):
+def preresnet34(**kwargs):
     """
-    ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-34 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -643,12 +649,12 @@ def resnet34(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
+    return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
 
-def resnet50(**kwargs):
+def preresnet50(**kwargs):
     """
-    ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-50 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -657,13 +663,13 @@ def resnet50(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
+    return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
 
 
-def resnet50b(**kwargs):
+def preresnet50b(**kwargs):
     """
-    ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-50 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -672,12 +678,12 @@ def resnet50b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
 
 
-def resnet101(**kwargs):
+def preresnet101(**kwargs):
     """
-    ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-101 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -686,13 +692,13 @@ def resnet101(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
+    return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
 
 
-def resnet101b(**kwargs):
+def preresnet101b(**kwargs):
     """
-    ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-101 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -701,12 +707,12 @@ def resnet101b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
 
 
-def resnet152(**kwargs):
+def preresnet152(**kwargs):
     """
-    ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-152 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -715,13 +721,13 @@ def resnet152(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
+    return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
 
 
-def resnet152b(**kwargs):
+def preresnet152b(**kwargs):
     """
-    ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-152 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -730,13 +736,12 @@ def resnet152b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
 
 
-def resnet200(**kwargs):
+def preresnet200(**kwargs):
     """
-    ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    PreResNet-200 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -745,13 +750,13 @@ def resnet200(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
+    return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
 
 
-def resnet200b(**kwargs):
+def preresnet200b(**kwargs):
     """
-    ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-200 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -760,12 +765,12 @@ def resnet200b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
-def seresnet18(**kwargs):
+def sepreresnet18(**kwargs):
     """
-    SE-ResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    SE-PreResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -774,12 +779,12 @@ def seresnet18(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, use_se=True, model_name="seresnet18", **kwargs)
+    return get_preresnet(blocks=18, use_se=True, model_name="sepreresnet18", **kwargs)
 
 
-def seresnet34(**kwargs):
+def sepreresnet34(**kwargs):
     """
-    SE-ResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    SE-PreResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -788,12 +793,12 @@ def seresnet34(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, use_se=True, model_name="seresnet34", **kwargs)
+    return get_preresnet(blocks=34, use_se=True, model_name="sepreresnet34", **kwargs)
 
 
-def seresnet50(**kwargs):
+def sepreresnet50(**kwargs):
     """
-    SE-ResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    SE-PreResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -802,12 +807,12 @@ def seresnet50(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, use_se=True, model_name="seresnet50", **kwargs)
+    return get_preresnet(blocks=50, use_se=True, model_name="sepreresnet50", **kwargs)
 
 
-def seresnet50b(**kwargs):
+def sepreresnet50b(**kwargs):
     """
-    SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    SE-PreResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
@@ -817,12 +822,12 @@ def seresnet50b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, use_se=True, model_name="seresnet50b", **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, use_se=True, model_name="sepreresnet50b", **kwargs)
 
 
-def seresnet101(**kwargs):
+def sepreresnet101(**kwargs):
     """
-    SE-ResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    SE-PreResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -831,12 +836,12 @@ def seresnet101(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, use_se=True, model_name="seresnet101", **kwargs)
+    return get_preresnet(blocks=101, use_se=True, model_name="sepreresnet101", **kwargs)
 
 
-def seresnet101b(**kwargs):
+def sepreresnet101b(**kwargs):
     """
-    SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    SE-PreResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
@@ -846,12 +851,12 @@ def seresnet101b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, use_se=True, model_name="seresnet101b", **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, use_se=True, model_name="sepreresnet101b", **kwargs)
 
 
-def seresnet152(**kwargs):
+def sepreresnet152(**kwargs):
     """
-    SE-ResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    SE-PreResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -860,12 +865,12 @@ def seresnet152(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, use_se=True, model_name="seresnet152", **kwargs)
+    return get_preresnet(blocks=152, use_se=True, model_name="sepreresnet152", **kwargs)
 
 
-def seresnet152b(**kwargs):
+def sepreresnet152b(**kwargs):
     """
-    SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    SE-PreResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
@@ -875,13 +880,13 @@ def seresnet152b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, use_se=True, model_name="seresnet152b", **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, use_se=True, model_name="sepreresnet152b", **kwargs)
 
 
-def seresnet200(**kwargs):
+def sepreresnet200(**kwargs):
     """
-    SE-ResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-    It's an experimental model.
+    SE-PreResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507. It's an
+    experimental model.
 
     Parameters:
     ----------
@@ -890,12 +895,12 @@ def seresnet200(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, use_se=True, model_name="seresnet200", **kwargs)
+    return get_preresnet(blocks=200, use_se=True, model_name="sepreresnet200", **kwargs)
 
 
-def seresnet200b(**kwargs):
+def sepreresnet200b(**kwargs):
     """
-    SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
+    SE-PreResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
     Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
 
     Parameters:
@@ -905,7 +910,7 @@ def seresnet200b(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, use_se=True, model_name="seresnet200b", **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, use_se=True, model_name="sepreresnet200b", **kwargs)
 
 
 def _test():
@@ -915,35 +920,35 @@ def _test():
     pretrained = False
 
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnet16,
-        resnet18_wd4,
-        resnet18_wd2,
-        resnet18_w3d4,
+        preresnet10,
+        preresnet12,
+        preresnet14,
+        preresnet16,
+        preresnet18_wd4,
+        preresnet18_wd2,
+        preresnet18_w3d4,
 
-        resnet18,
-        resnet34,
-        resnet50,
-        resnet50b,
-        resnet101,
-        resnet101b,
-        resnet152,
-        resnet152b,
-        resnet200,
-        resnet200b,
+        preresnet18,
+        preresnet34,
+        preresnet50,
+        preresnet50b,
+        preresnet101,
+        preresnet101b,
+        preresnet152,
+        preresnet152b,
+        preresnet200,
+        preresnet200b,
 
-        seresnet18,
-        seresnet34,
-        seresnet50,
-        seresnet50b,
-        seresnet101,
-        seresnet101b,
-        seresnet152,
-        seresnet152b,
-        seresnet200,
-        seresnet200b,
+        sepreresnet18,
+        sepreresnet34,
+        sepreresnet50,
+        sepreresnet50b,
+        sepreresnet101,
+        sepreresnet101b,
+        sepreresnet152,
+        sepreresnet152b,
+        sepreresnet200,
+        sepreresnet200b,
     ]
 
     for model in models:
@@ -952,33 +957,33 @@ def _test():
         #net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet10 or weight_count == 5418792)
-        assert (model != resnet12 or weight_count == 5492776)
-        assert (model != resnet14 or weight_count == 5788200)
-        assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 831096)
-        assert (model != resnet18_wd2 or weight_count == 3055880)
-        assert (model != resnet18_w3d4 or weight_count == 6675352)
-        assert (model != resnet18 or weight_count == 11689512)
-        assert (model != resnet34 or weight_count == 21797672)
-        assert (model != resnet50 or weight_count == 25557032)
-        assert (model != resnet50b or weight_count == 25557032)
-        assert (model != resnet101 or weight_count == 44549160)
-        assert (model != resnet101b or weight_count == 44549160)
-        assert (model != resnet152 or weight_count == 60192808)
-        assert (model != resnet152b or weight_count == 60192808)
-        assert (model != resnet200 or weight_count == 64673832)
-        assert (model != resnet200b or weight_count == 64673832)
-        assert (model != seresnet18 or weight_count == 11778592)
-        assert (model != seresnet34 or weight_count == 21958868)
-        assert (model != seresnet50 or weight_count == 28088024)
-        assert (model != seresnet50b or weight_count == 28088024)
-        assert (model != seresnet101 or weight_count == 49326872)
-        assert (model != seresnet101b or weight_count == 49326872)
-        assert (model != seresnet152 or weight_count == 66821848)
-        assert (model != seresnet152b or weight_count == 66821848)
-        assert (model != seresnet200 or weight_count == 71835864)
-        assert (model != seresnet200b or weight_count == 71835864)
+        assert (model != preresnet10 or weight_count == 5417128)
+        assert (model != preresnet12 or weight_count == 5491112)
+        assert (model != preresnet14 or weight_count == 5786536)
+        assert (model != preresnet16 or weight_count == 6967208)
+        assert (model != preresnet18_wd4 or weight_count == 830680)
+        assert (model != preresnet18_wd2 or weight_count == 3055048)
+        assert (model != preresnet18_w3d4 or weight_count == 6674104)
+        assert (model != preresnet18 or weight_count == 11687848)
+        assert (model != preresnet34 or weight_count == 21796008)
+        assert (model != preresnet50 or weight_count == 25549480)
+        assert (model != preresnet50b or weight_count == 25549480)
+        assert (model != preresnet101 or weight_count == 44541608)
+        assert (model != preresnet101b or weight_count == 44541608)
+        assert (model != preresnet152 or weight_count == 60185256)
+        assert (model != preresnet152b or weight_count == 60185256)
+        assert (model != preresnet200 or weight_count == 64666280)
+        assert (model != preresnet200b or weight_count == 64666280)
+        assert (model != sepreresnet18 or weight_count == 11776928)
+        assert (model != sepreresnet34 or weight_count == 21957204)
+        assert (model != sepreresnet50 or weight_count == 28080472)
+        assert (model != sepreresnet50b or weight_count == 28080472)
+        assert (model != sepreresnet101 or weight_count == 49319320)
+        assert (model != sepreresnet101b or weight_count == 49319320)
+        assert (model != sepreresnet152 or weight_count == 66814296)
+        assert (model != sepreresnet152b or weight_count == 66814296)
+        assert (model != sepreresnet200 or weight_count == 71828312)
+        assert (model != sepreresnet200b or weight_count == 71828312)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net.predict(x)

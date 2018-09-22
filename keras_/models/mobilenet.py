@@ -13,15 +13,16 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import GluonBatchNormalization
+from .common import conv2d, GluonBatchNormalization
 
 
 def conv_block(x,
+               in_channels,
                out_channels,
                kernel_size,
                strides=1,
                padding=0,
-               depthwise=False,
+               groups=1,
                name="conv_block"):
     """
     Standard enough convolution block with BatchNorm and activation.
@@ -30,6 +31,8 @@ def conv_block(x,
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -38,8 +41,8 @@ def conv_block(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    depthwise : bool, default False
-        Whether depthwise convolution is used.
+    groups : int, default 1
+        Number of groups.
     name : str, default 'conv_block'
         Block name.
 
@@ -48,29 +51,18 @@ def conv_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    ke_padding = 'valid' if padding == 0 else 'same'
-    if depthwise:
-        conv = nn.DepthwiseConv2D(
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=ke_padding,
-            use_bias=False,
-            name=name+"/conv")
-    else:
-        conv = nn.Conv2D(
-            filters=out_channels,
-            kernel_size=kernel_size,
-            strides=strides,
-            padding=ke_padding,
-            use_bias=False,
-            name=name+"/conv")
-    bn = GluonBatchNormalization(
-        name=name+"/bn")
-    activ = nn.Activation("relu", name=name+"/activ")
-
-    x = conv(x)
-    x = bn(x)
-    x = activ(x)
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        groups=groups,
+        use_bias=False,
+        name=name+"/conv")
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
     return x
 
 
@@ -103,14 +95,16 @@ def dws_conv_block(x,
     """
     x = conv_block(
         x=x,
+        in_channels=in_channels,
         out_channels=in_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
-        depthwise=True,
+        groups=in_channels,
         name=name+"/dw_conv")
     x = conv_block(
         x=x,
+        in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         name=name+"/pw_conv")
@@ -143,6 +137,7 @@ def mobilenet(channels,
     init_block_channels = channels[0][0]
     x = conv_block(
         x=input,
+        in_channels=in_channels,
         out_channels=init_block_channels,
         kernel_size=3,
         strides=2,
@@ -353,14 +348,14 @@ def _test():
     pretrained = False
 
     models = [
-        # mobilenet_w1,
-        # mobilenet_w3d4,
-        # mobilenet_wd2,
+        mobilenet_w1,
+        mobilenet_w3d4,
+        mobilenet_wd2,
         mobilenet_wd4,
-        # fdmobilenet_w1,
-        # fdmobilenet_w3d4,
-        # fdmobilenet_wd2,
-        # fdmobilenet_wd4,
+        fdmobilenet_w1,
+        fdmobilenet_w3d4,
+        fdmobilenet_wd2,
+        fdmobilenet_wd4,
     ]
 
     for model in models:

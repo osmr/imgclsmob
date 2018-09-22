@@ -9,10 +9,11 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import GluonBatchNormalization
+from .common import conv2d, GluonBatchNormalization
 
 
 def dark_conv(x,
+              in_channels,
               out_channels,
               kernel_size,
               padding,
@@ -24,6 +25,8 @@ def dark_conv(x,
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
@@ -38,24 +41,21 @@ def dark_conv(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    ke_padding = 'valid' if padding == 0 else 'same'
-    conv = nn.Conv2D(
-        filters=out_channels,
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=kernel_size,
-        padding=ke_padding,
+        padding=padding,
         use_bias=False,
         name=name + "/conv")
-    bn = GluonBatchNormalization(
-        name=name+"/bn")
-    activ = nn.LeakyReLU(alpha=0.1, name=name+"/activ")
-
-    x = conv(x)
-    x = bn(x)
-    x = activ(x)
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.LeakyReLU(alpha=0.1, name=name+"/activ")(x)
     return x
 
 
 def dark_conv1x1(x,
+                 in_channels,
                  out_channels,
                  name="dark_conv1x1"):
     """
@@ -65,6 +65,8 @@ def dark_conv1x1(x,
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     name : str, default 'dark_conv1x1'
@@ -77,6 +79,7 @@ def dark_conv1x1(x,
     """
     return dark_conv(
         x=x,
+        in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         padding=0,
@@ -84,6 +87,7 @@ def dark_conv1x1(x,
 
 
 def dark_conv3x3(x,
+                 in_channels,
                  out_channels,
                  name="dark_conv3x3"):
     """
@@ -93,6 +97,8 @@ def dark_conv3x3(x,
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     name : str, default 'dark_conv3x3'
@@ -105,6 +111,7 @@ def dark_conv3x3(x,
     """
     return dark_conv(
         x=x,
+        in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         padding=1,
@@ -112,6 +119,7 @@ def dark_conv3x3(x,
 
 
 def dark_convYxY(x,
+                 in_channels,
                  out_channels,
                  pointwise=True,
                  name="dark_convYxY"):
@@ -122,6 +130,8 @@ def dark_convYxY(x,
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     pointwise : bool
@@ -137,11 +147,13 @@ def dark_convYxY(x,
     if pointwise:
         return dark_conv1x1(
             x=x,
+            in_channels=in_channels,
             out_channels=out_channels,
             name=name)
     else:
         return dark_conv3x3(
             x=x,
+            in_channels=in_channels,
             out_channels=out_channels,
             name=name)
 
@@ -178,9 +190,11 @@ def darknet(channels,
         for j, out_channels in enumerate(channels_per_stage):
             x = dark_convYxY(
                 x=x,
+                in_channels=in_channels,
                 out_channels=out_channels,
                 pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise),
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
         if i != len(channels) - 1:
             x = nn.MaxPool2D(
                 pool_size=2,

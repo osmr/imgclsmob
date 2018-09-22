@@ -2,13 +2,86 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv1x1', 'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'se_block', 'GluonBatchNormalization']
 
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
 import mxnet as mx
+
+
+def conv2d(x,
+           in_channels,
+           out_channels,
+           kernel_size,
+           strides=1,
+           padding=0,
+           groups=1,
+           use_bias=False,
+           name="conv2d"):
+    """
+    Convolution 2D layer wrapper.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    name : str, default 'conv2d'
+        Layer name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if isinstance(strides, int):
+        strides = (strides, strides)
+    if isinstance(padding, int):
+        padding = (padding, padding)
+
+    if (padding[0] == padding[1]) and (padding[0] == 0):
+        ke_padding = 'valid'
+    elif (padding[0] == padding[1]) and (strides[0] == strides[1]) and (strides[0] // 2 == padding[0]):
+        ke_padding = 'same'
+    else:
+        x = nn.ZeroPadding2D(
+            padding=padding,
+            name=name+"/pad")(x)
+        ke_padding = 'valid'
+
+    if groups == 1:
+        x = nn.Conv2D(
+            filters=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=ke_padding,
+            use_bias=use_bias,
+            name=name)(x)
+    elif (groups == out_channels) and (out_channels == in_channels):
+        x = nn.DepthwiseConv2D(
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=ke_padding,
+            use_bias=use_bias,
+            name=name)(x)
+    else:
+        raise NotImplementedError()
+    return x
 
 
 def conv1x1(out_channels,

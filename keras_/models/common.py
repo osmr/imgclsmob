@@ -54,18 +54,21 @@ def conv2d(x,
     if isinstance(padding, int):
         padding = (padding, padding)
 
+    extra_pad = False
     if (padding[0] == padding[1]) and (padding[0] == 0):
-        ke_padding = 'valid'
+        ke_padding = "valid"
     elif (padding[0] == padding[1]) and (strides[0] == strides[1]) and (strides[0] // 2 == padding[0]):
-        ke_padding = 'same'
+        ke_padding = "same"
     else:
         x = nn.ZeroPadding2D(
             padding=padding,
             name=name+"/pad")(x)
-        name = name + "/conv"
-        ke_padding = 'valid'
+        ke_padding = "valid"
+        extra_pad = True
 
     if groups == 1:
+        if extra_pad:
+            name = name + "/conv"
         x = nn.Conv2D(
             filters=out_channels,
             kernel_size=kernel_size,
@@ -74,6 +77,8 @@ def conv2d(x,
             use_bias=use_bias,
             name=name)(x)
     elif (groups == out_channels) and (out_channels == in_channels):
+        if extra_pad:
+            name = name + "/conv"
         x = nn.DepthwiseConv2D(
             kernel_size=kernel_size,
             strides=strides,
@@ -81,7 +86,25 @@ def conv2d(x,
             use_bias=use_bias,
             name=name)(x)
     else:
-        raise NotImplementedError()
+        assert (out_channels % groups == 0)
+        group_channels = out_channels // groups
+        group_list = []
+        channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+        for gi in range(groups):
+            xi = nn.Lambda(
+                lambda z: z[:, gi * group_channels:(gi + 1) * group_channels, :, :]
+                if K.image_data_format() == 'channels_first' else
+                lambda z: z[:, :, :, gi * group_channels:(gi + 1) * group_channels])(x)
+            xi = nn.Conv2D(
+                filters=group_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=ke_padding,
+                use_bias=use_bias,
+                name=name+"/group{}".format(gi))(xi)
+            group_list.append(xi)
+        x = nn.concatenate(group_list, axis=channel_axis, name=name+"/concat")
+
     return x
 
 

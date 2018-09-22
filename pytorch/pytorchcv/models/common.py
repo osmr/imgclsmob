@@ -93,11 +93,14 @@ class SEBlock(nn.Module):
     ----------
     channels : int
         Number of channels.
+    reduction : int, default 16
+        Squeeze reduction value.
     """
     def __init__(self,
-                 channels):
+                 channels,
+                 reduction=16):
         super(SEBlock, self).__init__()
-        mid_cannels = channels // 16
+        mid_cannels = channels // reduction
 
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.conv1 = conv1x1(

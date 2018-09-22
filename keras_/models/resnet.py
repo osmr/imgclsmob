@@ -5,7 +5,7 @@
     - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
+__all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
            'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
@@ -14,7 +14,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import GluonBatchNormalization
+from .common import se_block, GluonBatchNormalization
 
 
 def res_conv(x,
@@ -114,92 +114,87 @@ def res_conv3x3(x,
         name=name)
 
 
-class ResBlock(HybridBlock):
+def res_block(x,
+              out_channels,
+              strides,
+              name="res_block"):
     """
     Simple ResNet block for residual path in ResNet unit.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    name : str, default 'res_block'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 **kwargs):
-        super(ResBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv1 = res_conv3x3(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                activate=True)
-            self.conv2 = res_conv3x3(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                strides=1,
-                activate=False)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        return x
+    x = res_conv3x3(
+        x=x,
+        out_channels=out_channels,
+        strides=strides,
+        activate=True,
+        name=name + "/conv1")
+    x = res_conv3x3(
+        x=x,
+        out_channels=out_channels,
+        strides=1,
+        activate=False,
+        name=name + "/conv2")
+    return x
 
 
-class ResBottleneck(HybridBlock):
+def res_bottleneck_block(x,
+                         out_channels,
+                         strides,
+                         conv1_stride,
+                         name="res_bottleneck_block"):
     """
     ResNet bottleneck block for residual path in ResNet unit.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    name : str, default 'res_block'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 conv1_stride,
-                 **kwargs):
-        super(ResBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // 4
+    mid_channels = out_channels // 4
 
-        with self.name_scope():
-            self.conv1 = res_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                strides=(strides if conv1_stride else 1),
-                activate=True)
-            self.conv2 = res_conv3x3(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                strides=(1 if conv1_stride else strides),
-                activate=True)
-            self.conv3 = res_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                strides=1,
-                activate=False)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        return x
+    x = res_conv1x1(
+        x=x,
+        out_channels=mid_channels,
+        strides=(strides if conv1_stride else 1),
+        activate=True,
+        name=name + "/conv1")
+    x = res_conv3x3(
+        x=x,
+        out_channels=mid_channels,
+        strides=(1 if conv1_stride else strides),
+        activate=True,
+        name=name + "/conv2")
+    x = res_conv1x1(
+        x=x,
+        out_channels=out_channels,
+        strides=1,
+        activate=False,
+        name=name + "/conv3")
+    return x
 
 
-class ResUnit(HybridBlock):
+def res_unit(x,
+             in_channels,
+             out_channels,
+             strides,
+             bottleneck,
+             conv1_stride,
+             use_se,
+             name="res_unit"):
     """
     ResNet unit with residual connection.
 
@@ -217,93 +212,83 @@ class ResUnit(HybridBlock):
         Whether to use stride in the first or the second convolution layer of the block.
     use_se : bool
         Whether to use SE block.
+    name : str, default 'res_unit'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 bn_use_global_stats,
-                 bottleneck,
-                 conv1_stride,
-                 use_se,
-                 **kwargs):
-        super(ResUnit, self).__init__(**kwargs)
-        self.use_se = use_se
-        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+    resize_identity = (in_channels != out_channels) or (strides != 1)
+    if resize_identity:
+        identity = res_conv1x1(
+            x=x,
+            out_channels=out_channels,
+            strides=strides,
+            activate=False,
+            name=name + "/identity_conv")
+    else:
+        identity = x
 
-        with self.name_scope():
-            if bottleneck:
-                self.body = ResBottleneck(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
-                    conv1_stride=conv1_stride)
-            else:
-                self.body = ResBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats)
-            if self.use_se:
-                self.se = SEBlock(channels=out_channels)
-            if self.resize_identity:
-                self.identity_conv = res_conv1x1(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    activate=False)
-            self.activ = nn.Activation('relu')
+    if bottleneck:
+        x = res_bottleneck_block(
+            x=x,
+            out_channels=out_channels,
+            strides=strides,
+            conv1_stride=conv1_stride,
+            name=name + "/body")
+    else:
+        x = res_block(
+            x=x,
+            out_channels=out_channels,
+            strides=strides,
+            name=name + "/body")
 
-    def hybrid_forward(self, F, x):
-        if self.resize_identity:
-            identity = self.identity_conv(x)
-        else:
-            identity = x
-        x = self.body(x)
-        if self.use_se:
-            x = self.se(x)
-        x = x + identity
-        x = self.activ(x)
-        return x
+    if use_se:
+        x = se_block(
+            x=x,
+            channels=out_channels,
+            name=name + "/se")
+
+    x = nn.add([x, identity])
+
+    activ = nn.Activation('relu')
+    x = activ(x)
+    return x
 
 
-class ResInitBlock(HybridBlock):
+def res_init_block(x,
+                   out_channels,
+                   name="res_init_block"):
     """
     ResNet specific initial block.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
+    name : str, default 'res_init_block'
+        Block name.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 **kwargs):
-        super(ResInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = ResConv(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                activate=True)
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
+    x = res_conv(
+        x=x,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=2,
+        padding=3,
+        activate=True,
+        name=name + "/conv")
+    x = nn.MaxPool2D(
+        pool_size=3,
+        strides=2,
+        padding='same',
+        name=name + "/pool")(x)
+    return x
 
 
-class ResNet(HybridBlock):
+def resnet(channels,
+           init_block_channels,
+           bottleneck,
+           conv1_stride,
+           use_se,
+           in_channels=3,
+           classes=1000):
     """
     ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
     implements SE-ResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -325,51 +310,40 @@ class ResNet(HybridBlock):
     classes : int, default 1000
         Number of classification classes.
     """
-    def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 conv1_stride,
-                 use_se,
-                 in_channels=3,
-                 classes=1000,
-                 **kwargs):
-        super(ResNet, self).__init__(**kwargs)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input = nn.Input(shape=input_shape)
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            self.features.add(ResInitBlock(
+    x = res_init_block(
+        x=input,
+        out_channels=init_block_channels,
+        name="features/init_block")
+    in_channels = init_block_channels
+    for i, channels_per_stage in enumerate(channels):
+        for j, out_channels in enumerate(channels_per_stage):
+            strides = 2 if (j == 0) and (i != 0) else 1
+            x = res_unit(
+                x=x,
                 in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride,
-                            use_se=use_se))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+                out_channels=out_channels,
+                strides=strides,
+                bottleneck=bottleneck,
+                conv1_stride=conv1_stride,
+                use_se=use_se,
+                name="features/stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
+    x = nn.AvgPool2D(
+        pool_size=7,
+        strides=1,
+        name="features/final_pool")(x)
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+    x = nn.Flatten()(x)
+    x = nn.Dense(
+        units=classes,
+        input_dim=in_channels,
+        name="output")(x)
 
-    def hybrid_forward(self, F, x):
-        x = self.features(x)
-        x = self.output(x)
-        return x
+    model = Model(inputs=input, outputs=x)
+    return model
 
 
 def get_resnet(blocks,
@@ -439,7 +413,7 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    net = ResNet(
+    net = resnet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -451,11 +425,10 @@ def get_resnet(blocks,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        net.load_weights(
+            filepath=get_model_file(
                 model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+                local_model_store_dir_path=root))
 
     return net
 
@@ -857,9 +830,9 @@ def seresnet200b(**kwargs):
 
 def _test():
     import numpy as np
-    import keras as mx
+    import keras
 
-    pretrained = True
+    pretrained = False
 
     models = [
         resnet10,
@@ -896,17 +869,8 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        #net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)
@@ -925,19 +889,19 @@ def _test():
         assert (model != resnet152b or weight_count == 60192808)
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
-        assert (model != seresnet18 or weight_count == 11778592)  # 11776552
-        assert (model != seresnet34 or weight_count == 21958868)  # 21954856
-        assert (model != seresnet50 or weight_count == 28088024)  # 28071976
-        assert (model != seresnet50b or weight_count == 28088024)  # 28071976
-        assert (model != seresnet101 or weight_count == 49326872)  # 49292328
-        assert (model != seresnet101b or weight_count == 49326872)  # 49292328
-        assert (model != seresnet152 or weight_count == 66821848)  # 66770984
-        assert (model != seresnet152b or weight_count == 66821848)  # 66770984
-        assert (model != seresnet200 or weight_count == 71835864)  # 71776296
-        assert (model != seresnet200b or weight_count == 71835864)  # 71776296
+        assert (model != seresnet18 or weight_count == 11778592)
+        assert (model != seresnet34 or weight_count == 21958868)
+        assert (model != seresnet50 or weight_count == 28088024)
+        assert (model != seresnet50b or weight_count == 28088024)
+        assert (model != seresnet101 or weight_count == 49326872)
+        assert (model != seresnet101b or weight_count == 49326872)
+        assert (model != seresnet152 or weight_count == 66821848)
+        assert (model != seresnet152b or weight_count == 66821848)
+        assert (model != seresnet200 or weight_count == 71835864)
+        assert (model != seresnet200b or weight_count == 71835864)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-        y = net(x)
+        x = np.zeros((1, 3, 224, 224), np.float32)
+        y = net.predict(x)
         assert (y.shape == (1, 1000))
 
 

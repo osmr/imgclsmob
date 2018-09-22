@@ -2,12 +2,79 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['GluonBatchNormalization']
+__all__ = ['conv1x1', 'se_block', 'GluonBatchNormalization']
 
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
 from keras.layers import BatchNormalization
 from keras import backend as K
+from keras import layers as nn
 import mxnet as mx
+
+
+def conv1x1(out_channels,
+            strides=1,
+            use_bias=False,
+            name="conv1x1"):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    name : str, default 'conv1x1'
+        Block name.
+    """
+    return nn.Conv2D(
+        filters=out_channels,
+        kernel_size=1,
+        strides=strides,
+        use_bias=use_bias,
+        name=name + "/conv")
+
+
+def se_block(x,
+             channels,
+             reduction=16,
+             name="se_block"):
+    """
+    Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    reduction : int, default 16
+        Squeeze reduction value.
+    name : str, default 'se_block'
+        Block name.
+    """
+    mid_cannels = channels // reduction
+
+    conv1 = conv1x1(
+        out_channels=mid_cannels,
+        use_bias=True,
+        name=name + "/conv1")
+    relu = nn.Activation('relu')
+    conv2 = conv1x1(
+        out_channels=channels,
+        use_bias=True,
+        name=name + "/conv2")
+    sigmoid = nn.Activation('sigmoid')
+
+    assert(len(x.shape) == 4)
+    pool_size = x.shape[2:4] if K.image_data_format() == 'channels_first' else x.shape[1:3]
+    w = nn.AvgPool2D(pool_size=pool_size)(x)
+    w = conv1(w)
+    w = relu(w)
+    w = conv2(w)
+    w = sigmoid(w)
+    x = nn.multiply([x, w])
+    return x
 
 
 @keras_mxnet_symbol

@@ -156,7 +156,7 @@ def mobilenet(channels,
         input_dim=in_channels,
         name="output")(x)
 
-    model = Model(input, x)
+    model = Model(inputs=input, outputs=x)
     return model
 
 

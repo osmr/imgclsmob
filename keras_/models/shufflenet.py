@@ -157,13 +157,10 @@ def shuffle_unit(x,
     x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
 
     if downsample:
-        identity = nn.ZeroPadding2D(
-            padding=1,
-            name=name+"/pad")(identity)
         identity = nn.AvgPool2D(
             pool_size=3,
             strides=2,
-            padding="valid",
+            padding="same",
             name=name + "/avgpool")(identity)
 
         channel_axis = 1 if K.image_data_format() == 'channels_first' else -1

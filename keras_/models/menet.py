@@ -1,93 +1,142 @@
 """
-    MENet, implemented in Gluon.
+    MENet, implemented in Keras.
     Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
     https://arxiv.org/abs/1803.09127.
 """
 
-__all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
+__all__ = ['menet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'menet228_12x1_g3', 'menet256_12x1_g4',
            'menet348_12x1_g3', 'menet352_12x1_g8', 'menet456_24x1_g3']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, ChannelShuffle
+from keras import backend as K
+from keras import layers as nn
+from keras.models import Model
+from .common import conv2d, conv1x1, channel_shuffle_lambda, GluonBatchNormalization
 
 
-def depthwise_conv3x3(channels,
-                      strides):
+def depthwise_conv3x3(x,
+                      channels,
+                      strides,
+                      name="depthwise_conv3x3"):
     """
     Depthwise convolution 3x3 layer. This is exactly the same layer as in ShuffleNet.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     channels : int
         Number of input/output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    name : str, default 'depthwise_conv3x3'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    return nn.Conv2D(
-        channels=channels,
+    return conv2d(
+        x=x,
+        in_channels=channels,
+        out_channels=channels,
         kernel_size=3,
         strides=strides,
         padding=1,
         groups=channels,
         use_bias=False,
-        in_channels=channels)
+        name=name)
 
 
-def group_conv1x1(in_channels,
+def group_conv1x1(x,
+                  in_channels,
                   out_channels,
-                  groups):
+                  groups,
+                  name="group_conv1x1"):
     """
     Group convolution 1x1 layer. This is exactly the same layer as in ShuffleNet.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
     groups : int
         Number of groups.
+    name : str, default 'depthwise_conv3x3'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    return nn.Conv2D(
-        channels=out_channels,
+    return conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=1,
         groups=groups,
         use_bias=False,
-        in_channels=in_channels)
+        name=name)
 
 
-def conv3x3(in_channels,
+def conv3x3(x,
+            in_channels,
             out_channels,
-            strides):
+            strides,
+            name="conv3x3"):
     """
     Convolution 3x3 layer.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    name : str, default 'conv3x3'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    return nn.Conv2D(
-        channels=out_channels,
+    return conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
         use_bias=False,
-        in_channels=in_channels)
+        name=name)
 
 
-class MEUnit(HybridBlock):
+def me_unit(x,
+            in_channels,
+            out_channels,
+            side_channels,
+            groups,
+            downsample,
+            ignore_group,
+            name="me_unit"):
     """
     MENet unit.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
@@ -100,138 +149,147 @@ class MEUnit(HybridBlock):
         Whether do downsample.
     ignore_group : bool
         Whether ignore group value in the first convolution layer.
+    name : str, default 'me_unit'
+        Unit name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 side_channels,
-                 groups,
-                 downsample,
-                 ignore_group,
-                 **kwargs):
-        super(MEUnit, self).__init__(**kwargs)
-        self.downsample = downsample
-        mid_channels = out_channels // 4
+    mid_channels = out_channels // 4
 
-        if downsample:
-            out_channels -= in_channels
+    if downsample:
+        out_channels -= in_channels
 
-        with self.name_scope():
-            # residual branch
-            self.compress_conv1 = group_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                groups=(1 if ignore_group else groups))
-            self.compress_bn1 = nn.BatchNorm(in_channels=mid_channels)
-            self.c_shuffle = ChannelShuffle(
-                channels=mid_channels,
-                groups=groups)
-            self.dw_conv2 = depthwise_conv3x3(
-                channels=mid_channels,
-                strides=(2 if self.downsample else 1))
-            self.dw_bn2 = nn.BatchNorm(in_channels=mid_channels)
-            self.expand_conv3 = group_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                groups=groups)
-            self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
-            if downsample:
-                self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
-            self.activ = nn.Activation('relu')
+    identity = x
 
-            # fusion branch
-            self.s_merge_conv = conv1x1(
-                in_channels=mid_channels,
-                out_channels=side_channels)
-            self.s_merge_bn = nn.BatchNorm(in_channels=side_channels)
-            self.s_conv = conv3x3(
-                in_channels=side_channels,
-                out_channels=side_channels,
-                strides=(2 if self.downsample else 1))
-            self.s_conv_bn = nn.BatchNorm(in_channels=side_channels)
-            self.s_evolve_conv = conv1x1(
-                in_channels=side_channels,
-                out_channels=mid_channels)
-            self.s_evolve_bn = nn.BatchNorm(in_channels=mid_channels)
+    # pointwise group convolution 1
+    x = group_conv1x1(
+        x=x,
+        in_channels=in_channels,
+        out_channels=mid_channels,
+        groups=(1 if ignore_group else groups),
+        name=name + "/compress_conv1")
+    x = GluonBatchNormalization(name=name + "/compress_bn1")(x)
+    x = nn.Activation("relu", name=name + "/compress_activ")(x)
 
-    def hybrid_forward(self, F, x):
-        identity = x
-        # pointwise group convolution 1
-        x = self.compress_conv1(x)
-        x = self.compress_bn1(x)
-        x = self.activ(x)
-        x = self.c_shuffle(x)
-        # merging
-        y = self.s_merge_conv(x)
-        y = self.s_merge_bn(y)
-        y = self.activ(y)
-        # depthwise convolution (bottleneck)
-        x = self.dw_conv2(x)
-        x = self.dw_bn2(x)
-        # evolution
-        y = self.s_conv(y)
-        y = self.s_conv_bn(y)
-        y = self.activ(y)
-        y = self.s_evolve_conv(y)
-        y = self.s_evolve_bn(y)
-        y = F.sigmoid(y)
-        x = x * y
-        # pointwise group convolution 2
-        x = self.expand_conv3(x)
-        x = self.expand_bn3(x)
-        # identity branch
-        if self.downsample:
-            identity = self.avgpool(identity)
-            x = F.concat(x, identity, dim=1)
-        else:
-            x = x + identity
-        x = self.activ(x)
-        return x
+    x = channel_shuffle_lambda(
+        channels=mid_channels,
+        groups=groups,
+        name=name + "/c_shuffle")(x)
+
+    # merging
+    y = conv1x1(
+        out_channels=side_channels,
+        name=name + "/s_merge_conv")(x)
+    y = GluonBatchNormalization(name=name + "/s_merge_bn")(y)
+    y = nn.Activation("relu", name=name + "/s_merge_activ")(y)
+
+    # depthwise convolution (bottleneck)
+    x = depthwise_conv3x3(
+        x=x,
+        channels=mid_channels,
+        strides=(2 if downsample else 1),
+        name=name + "/dw_conv2")
+    x = GluonBatchNormalization(name=name + "/dw_bn2")(x)
+
+    # evolution
+    y = conv3x3(
+        x=y,
+        in_channels=side_channels,
+        out_channels=side_channels,
+        strides=(2 if downsample else 1),
+        name=name + "/s_conv")
+    y = GluonBatchNormalization(name=name + "/s_conv_bn")(y)
+    y = nn.Activation("relu", name=name + "/s_conv_activ")(y)
+
+    y = conv1x1(
+        out_channels=mid_channels,
+        name=name + "/s_evolve_conv")(y)
+    y = GluonBatchNormalization(name=name + "/s_evolve_bn")(y)
+    y = nn.Activation('sigmoid', name=name + "/s_evolve_activ")(y)
+
+    x = nn.multiply([x, y], name=name + "/mul")
+
+    # pointwise group convolution 2
+    x = group_conv1x1(
+        x=x,
+        in_channels=mid_channels,
+        out_channels=out_channels,
+        groups=groups,
+        name=name + "/expand_conv3")
+    x = GluonBatchNormalization(name=name + "/expand_bn3")(x)
+
+    x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
+
+    if downsample:
+        identity = nn.AvgPool2D(
+            pool_size=3,
+            strides=2,
+            padding="same",
+            name=name + "/avgpool")(identity)
+
+        channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+        x = nn.concatenate([x, identity], axis=channel_axis, name=name + "/concat")
+    else:
+        x = nn.add([x, identity], name=name + "/add")
+
+    x = nn.Activation("relu", name=name + "/final_activ")(x)
+    return x
 
 
-class MEInitBlock(HybridBlock):
+def me_init_block(x,
+                  in_channels,
+                  out_channels,
+                  name="me_init_block"):
     """
     MENet specific initial block.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
+    name : str, default 'shuffle_init_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 **kwargs):
-        super(MEInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.pool(x)
-        return x
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=2,
+        padding=1,
+        use_bias=False,
+        name=name+"/conv")
+    x = GluonBatchNormalization(name=name+"/bn")(x)
+    x = nn.Activation("relu", name=name+"/activ")(x)
+    x = nn.MaxPool2D(
+        pool_size=3,
+        strides=2,
+        padding="same",
+        name=name+"/pool")(x)
+    return x
 
 
-class MENet(HybridBlock):
+def menet(channels,
+          init_block_channels,
+          side_channels,
+          groups,
+          in_channels=3,
+          classes=1000):
     """
-    MENet model from 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
-    https://arxiv.org/abs/1803.09127.
+    ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
 
     Parameters:
     ----------
@@ -248,51 +306,42 @@ class MENet(HybridBlock):
     classes : int, default 1000
         Number of classification classes.
     """
-    def __init__(self,
-                 channels,
-                 init_block_channels,
-                 side_channels,
-                 groups,
-                 in_channels=3,
-                 classes=1000,
-                 **kwargs):
-        super(MENet, self).__init__(**kwargs)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input = nn.Input(shape=input_shape)
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            self.features.add(MEInitBlock(
+    x = me_init_block(
+        x=input,
+        in_channels=in_channels,
+        out_channels=init_block_channels,
+        name="features/init_block")
+    in_channels = init_block_channels
+    for i, channels_per_stage in enumerate(channels):
+        for j, out_channels in enumerate(channels_per_stage):
+            downsample = (j == 0)
+            ignore_group = (i == 0) and (j == 0)
+            x = me_unit(
+                x=x,
                 in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        downsample = (j == 0)
-                        ignore_group = (i == 0) and (j == 0)
-                        stage.add(MEUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            side_channels=side_channels,
-                            groups=groups,
-                            downsample=downsample,
-                            ignore_group=ignore_group))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+                out_channels=out_channels,
+                side_channels=side_channels,
+                groups=groups,
+                downsample=downsample,
+                ignore_group=ignore_group,
+                name="features/stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
+    x = nn.AvgPool2D(
+        pool_size=7,
+        strides=1,
+        name="features/final_pool")(x)
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+    x = nn.Flatten()(x)
+    x = nn.Dense(
+        units=classes,
+        input_dim=in_channels,
+        name="output")(x)
 
-    def hybrid_forward(self, F, x):
-        x = self.features(x)
-        x = self.output(x)
-        return x
+    model = Model(inputs=input, outputs=x)
+    return model
 
 
 def get_menet(first_stage_channels,
@@ -300,8 +349,7 @@ def get_menet(first_stage_channels,
               groups,
               model_name=None,
               pretrained=False,
-              ctx=cpu(),
-              root=os.path.join('~', '.mxnet', 'models'),
+              root=os.path.join('~', '.keras', 'models'),
               **kwargs):
     """
     Create MENet model with specific parameters.
@@ -318,9 +366,7 @@ def get_menet(first_stage_channels,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
 
@@ -355,7 +401,7 @@ def get_menet(first_stage_channels,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = MENet(
+    net = menet(
         channels=channels,
         init_block_channels=init_block_channels,
         side_channels=side_channels,
@@ -366,11 +412,10 @@ def get_menet(first_stage_channels,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        net.load_weights(
+            filepath=get_model_file(
                 model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+                local_model_store_dir_path=root))
 
     return net
 
@@ -384,9 +429,7 @@ def menet108_8x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=108, side_channels=8, groups=3, model_name="menet108_8x1_g3", **kwargs)
@@ -401,9 +444,7 @@ def menet128_8x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=128, side_channels=8, groups=4, model_name="menet128_8x1_g4", **kwargs)
@@ -418,9 +459,7 @@ def menet160_8x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=160, side_channels=8, groups=8, model_name="menet160_8x1_g8", **kwargs)
@@ -435,9 +474,7 @@ def menet228_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=228, side_channels=12, groups=3, model_name="menet228_12x1_g3", **kwargs)
@@ -452,9 +489,7 @@ def menet256_12x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=256, side_channels=12, groups=4, model_name="menet256_12x1_g4", **kwargs)
@@ -469,9 +504,7 @@ def menet348_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=348, side_channels=12, groups=3, model_name="menet348_12x1_g3", **kwargs)
@@ -486,9 +519,7 @@ def menet352_12x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=352, side_channels=12, groups=8, model_name="menet352_12x1_g8", **kwargs)
@@ -503,9 +534,7 @@ def menet456_24x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_menet(first_stage_channels=456, side_channels=24, groups=3, model_name="menet456_24x1_g3", **kwargs)
@@ -513,14 +542,14 @@ def menet456_24x1_g3(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import keras
 
     pretrained = False
 
     models = [
         menet108_8x1_g3,
         menet128_8x1_g4,
-        # menet160_8x1_g8,
+        menet160_8x1_g8,
         menet228_12x1_g3,
         menet256_12x1_g4,
         menet348_12x1_g3,
@@ -531,17 +560,8 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != menet108_8x1_g3 or weight_count == 654516)
         assert (model != menet128_8x1_g4 or weight_count == 750796)
@@ -552,8 +572,8 @@ def _test():
         assert (model != menet352_12x1_g8 or weight_count == 2272872)
         assert (model != menet456_24x1_g3 or weight_count == 5304784)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-        y = net(x)
+        x = np.zeros((1, 3, 224, 224), np.float32)
+        y = net.predict(x)
         assert (y.shape == (1, 1000))
 
 

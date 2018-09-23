@@ -1,6 +1,5 @@
 import argparse
 import logging
-import os
 import re
 import numpy as np
 
@@ -378,6 +377,12 @@ def convert_gl2ke(dst_net,
                   dst_param_keys,
                   src_params,
                   src_param_keys):
+
+    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
@@ -385,6 +390,11 @@ def convert_gl2ke(dst_net,
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         dst_layer = dst_params[dst_key][0]

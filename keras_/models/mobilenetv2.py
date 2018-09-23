@@ -406,7 +406,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenetv2_w1 or weight_count == 3504960)

@@ -1,6 +1,7 @@
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
+from .models.senet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -76,6 +77,10 @@ _models = {
     'seresnext50_32x4d': seresnext50_32x4d,
     'seresnext101_32x4d': seresnext101_32x4d,
     'seresnext101_64x4d': seresnext101_64x4d,
+
+    'senet52': senet52,
+    'senet103': senet103,
+    'senet154': senet154,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

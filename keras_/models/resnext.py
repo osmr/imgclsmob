@@ -331,7 +331,6 @@ def resnext(channels,
             cardinality,
             bottleneck_width,
             use_se,
-            bn_use_global_stats=False,
             in_channels=3,
             classes=1000):
     """

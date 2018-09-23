@@ -137,17 +137,19 @@ def conv2d(x,
             use_bias=use_bias,
             name=name)(x)
     else:
+        assert (in_channels % groups == 0)
         assert (out_channels % groups == 0)
-        group_channels = out_channels // groups
+        in_group_channels = in_channels // groups
+        out_group_channels = out_channels // groups
         group_list = []
         channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
         for gi in range(groups):
             xi = nn.Lambda(
-                lambda z: z[:, gi * group_channels:(gi + 1) * group_channels, :, :]
+                lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :]
                 if K.image_data_format() == 'channels_first' else
-                lambda z: z[:, :, :, gi * group_channels:(gi + 1) * group_channels])(x)
+                lambda z: z[:, :, :, gi * in_group_channels:(gi + 1) * in_group_channels])(x)
             xi = nn.Conv2D(
-                filters=group_channels,
+                filters=out_group_channels,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=ke_padding,

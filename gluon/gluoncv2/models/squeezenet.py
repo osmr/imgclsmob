@@ -100,7 +100,6 @@ class FireUnit(HybridBlock):
         out = F.concat(y1, y2, dim=1)
         if self.residual:
             out = out + identity
-        print(out.shape)
         return out
 
 
@@ -134,7 +133,6 @@ class SqueezeInitBlock(HybridBlock):
     def hybrid_forward(self, F, x):
         x = self.conv(x)
         x = self.activ(x)
-        print(x.shape)
         return x
 
 

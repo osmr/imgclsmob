@@ -2,7 +2,7 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['max_pool2d_ceil', 'conv2d', 'conv1x1', 'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
 
 import math
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
@@ -10,54 +10,6 @@ from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
 import mxnet as mx
-
-
-def max_pool2d_ceil(x,
-                    pool_size,
-                    strides,
-                    padding,
-                    **kwargs):
-    """
-    Max pooling 2D layer wrapper with ceil mode supporting.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    pool_size : int or tuple/list of 2 int
-        Size of the max pooling windows.
-    strides : int or tuple/list of 2 int
-        Strides of the pooling.
-    padding : int or tuple/list of 2 int
-        Padding value for pooling layer.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    if isinstance(pool_size, int):
-        pool_size = (pool_size, pool_size)
-    if isinstance(strides, int):
-        strides = (strides, strides)
-
-    assert (pool_size[0] == pool_size[1])
-    assert (strides[0] == strides[1])
-
-    padding0 = 0 if padding == "valid" else strides[0] // 2
-
-    height = x.shape[2 if K.image_data_format() == 'channels_first' else 1]
-    out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
-    if math.ceil(out_height) > math.floor(out_height):
-        assert (strides[0] <= 3)
-        padding = "same"
-
-    x = nn.MaxPool2D(
-        pool_size=pool_size,
-        strides=strides,
-        padding=padding,
-        **kwargs)(x)
-    return x
 
 
 def conv2d(x,
@@ -185,6 +137,119 @@ def conv1x1(out_channels,
         strides=strides,
         use_bias=use_bias,
         name=name + "/conv")
+
+
+def max_pool2d_ceil(x,
+                    pool_size,
+                    strides,
+                    padding,
+                    **kwargs):
+    """
+    Max pooling 2D layer wrapper with ceil mode supporting.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    pool_size : int or tuple/list of 2 int
+        Size of the max pooling windows.
+    strides : int or tuple/list of 2 int
+        Strides of the pooling.
+    padding : int or tuple/list of 2 int
+        Padding value for pooling layer.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if isinstance(pool_size, int):
+        pool_size = (pool_size, pool_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
+
+    assert (pool_size[0] == pool_size[1])
+    assert (strides[0] == strides[1])
+
+    padding0 = 0 if padding == "valid" else strides[0] // 2
+
+    height = x.shape[2 if K.image_data_format() == 'channels_first' else 1]
+    out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
+    if math.ceil(out_height) > math.floor(out_height):
+        assert (strides[0] <= 3)
+        padding = "same"
+
+    x = nn.MaxPool2D(
+        pool_size=pool_size,
+        strides=strides,
+        padding=padding,
+        **kwargs)(x)
+    return x
+
+
+def channel_shuffle(x,
+                    groups):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    groups : int
+        Number of groups.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+
+    is_channels_first = (K.image_data_format() == 'channels_first')
+    if is_channels_first:
+        batch, channels, height, width = x.shape
+    else:
+        batch, height, width, channels = x.shape
+
+    #assert (channels % groups == 0)
+    channels_per_group = channels // groups
+
+    if is_channels_first:
+        x = K.reshape(x, shape=(-1, groups, channels_per_group, height, width))
+        x = K.permute_dimensions(x, pattern=(0, 2, 1, 3, 4))
+        x = K.reshape(x, shape=(-1, channels, height, width))
+    else:
+        x = K.reshape(x, shape=(batch, height, width, groups, channels_per_group))
+        x = K.permute_dimensions(x, pattern=(0, 1, 2, 4, 3))
+        x = K.reshape(x, shape=(batch, height, width, channels))
+
+    if not hasattr(x, '_keras_shape'):
+        x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
+    return x
+
+
+def channel_shuffle_lambda(channels,
+                           groups,
+                           **kwargs):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+
+    Returns
+    -------
+    Layer
+        Channel shuffle layer.
+    """
+    assert (channels % groups == 0)
+
+    return nn.Lambda(channel_shuffle, arguments={'groups': groups}, **kwargs)
 
 
 def se_block(x,

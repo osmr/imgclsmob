@@ -337,7 +337,7 @@ def preres_init_block(x,
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
-        padding='same',
+        padding="same",
         name=name+"/pool")(x)
     return x
 

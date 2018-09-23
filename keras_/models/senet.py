@@ -268,7 +268,7 @@ def senet(channels,
     x = nn.Flatten()(x)
     x = nn.Dropout(
         rate=0.2,
-        name="dropout/dropout")(x)
+        name="output/dropout")(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

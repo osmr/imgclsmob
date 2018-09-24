@@ -9,7 +9,23 @@ import zipfile
 import logging
 import hashlib
 
-_model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in []}
+_model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
+    ('resnet10', '1554', '294a0786be0cb61ed9add17f85917949423648ba', 'v0.0.49'),
+    ('resnet12', '1445', '285da75beb82032d5a71e0accf589f2912559020', 'v0.0.49'),
+    ('resnet14', '1242', 'e2ffca6eeace503f514bfd0af07cc2d40dc0814e', 'v0.0.49'),
+    ('resnet16', '1109', '8f70f97e26f2a03df33670a8c23e514f6d1af196', 'v0.0.49'),
+    ('resnet18_wd4', '2445', 'dd6ba54d866c896de0355ab01a062ef0539cb9ae', 'v0.0.49'),
+    ('resnet18_wd2', '1496', '9bc78e3b04db804290ce654d067d9bec3aec3a0f', 'v0.0.49'),
+    ('resnet18_w3d4', '1254', 'f6374cc3b848ce71e1b0d99e07aa30c8bf9c4bdb', 'v0.0.49'),
+    ('resnet18', '0994', '3ff2352af4e192a23fc37fc4a919a5f0a500c788', 'v0.0.49'),
+    ('resnet34', '0792', '3ea662f5aeb33d60b762204f7b00d2f08979a356', 'v0.0.49'),
+    ('resnet50', '0687', '9eb5e8d7e75568a16b9d1f50a0d148a8c2baa13a', 'v0.0.49'),
+    ('resnet50b', '0644', 'fd813b71426e03d863e3cbfc4d057cb9dafaba88', 'v0.0.49'),
+    ('resnet101', '0599', 'ab4289478d017d3b929011c26fbcf8b54dd8ce07', 'v0.0.49'),
+    ('resnet101b', '0560', '241918fa75a8fb44b3e5ee90061859c0764b8202', 'v0.0.49'),
+    ('resnet152', '0561', '001efbfffb6907bafdf5e54794f8ecb8ab831ce0', 'v0.0.49'),
+    ('resnet152b', '0537', '8870623c9bdfbf0a9b69df350cbdb19dabd3958c', 'v0.0.49'),
+]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

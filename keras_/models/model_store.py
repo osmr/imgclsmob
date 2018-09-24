@@ -42,6 +42,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('seresnext50_32x4d', '0557', '997ef4dd811c2f126f685d91af61a0dad96a7d26', 'v0.0.53'),
     ('seresnext101_32x4d', '0499', '59e4e5846d8e78601c255102f302c89b2d9402e7', 'v0.0.53'),
     ('senet154', '0465', '962aeede627d5196eaf0cf8c25b6f7281f62e9ea', 'v0.0.54'),
+    ('densenet121', '0780', '52b0611c336904038764ed777ccad356ede89b21', 'v0.0.55'),
+    ('densenet161', '0618', '070fcb455db45c45aeb67fa4fb0fda4a89b7ef45', 'v0.0.55'),
+    ('densenet169', '0689', 'ae41b4a6e3008020b71ec75705cefe35b244dc80', 'v0.0.55'),
+    ('densenet201', '0635', 'cf3afbb259163bb76eee519f9d43ddbdf0a583b9', 'v0.0.55'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

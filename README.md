@@ -363,6 +363,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-200b | 21.09 | 5.64 | 64,666,280 | 15,040.27M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.50/preresnet200b-0564-9172d4c0.h5.log)) |
 | ResNeXt-101 (32x4d) | 21.30 | 5.78 | 44,177,704 | 7,991.62M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.51/resnext101_32x4d-0578-7623f640.h5.log)) |
 | ResNeXt-101 (64x4d) | 20.59 | 5.41 | 83,455,272 | 15,491.88M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.51/resnext101_64x4d-0541-7b58eaae.h5.log)) |
+| SE-ResNet-50 | 22.50 | 6.43 | 28,088,024 | 3,877.01M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.52/seresnet50-0643-fabfa406.h5.log)) |
+| SE-ResNet-101 | 21.92 | 5.88 | 49,326,872 | 7,600.01M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.52/seresnet101-0588-933d3415.h5.log)) |
+| SE-ResNet-152 | 21.46 | 5.77 | 66,821,848 | 11,324.62M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.52/seresnet152-0577-d25ced7d.h5.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

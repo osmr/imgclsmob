@@ -398,7 +398,9 @@ def convert_gl2ke(dst_net,
 
     dst_param_keys_orig = dst_param_keys.copy()
     dst_param_keys = [s[:(s.find("convgroup")+9)]+"/"+s.split('/')[-1] if s.find("convgroup") >= 0 else s for s in dst_param_keys]
-    dst_param_keys = list(np.unique(dst_param_keys))
+    dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
+    dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
+    #dst_param_keys = list(np.unique(dst_param_keys))
 
     assert (len(src_param_keys) == len(dst_param_keys))
 

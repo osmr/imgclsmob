@@ -172,7 +172,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 40.97 | 18.96 | 1,248,424 | 828.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.19/squeezenet_v1_0-1896-b69a4607.params.log)) |
 | SqueezeNet v1.1 | 41.37 | 19.20 | 1,235,496 | 354.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.15/squeezenet_v1_1-1920-6d01104e.params.log)) |
 | ShuffleNetV2 x0.5 | 41.20 | 18.90 | 1,366,792 | 42.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.37/shufflenetv2_wd2-1890-9c617398.params.log)) |
-| ShuffleNetV2 x1.0 | 34.24 | 13.54 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.44/shufflenetv2_w1-1354-b2ce3b34.params.log)) |
+| ShuffleNetV2 x1.0 | 33.97 | 13.41 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1341-275f1d2e.params.log)) |
 | 108-MENet-8x1 (g=3) | 46.11 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2237-d3bb5a4f.params.log)) |
 | 128-MENet-8x1 (g=4) | 45.80 | 21.93 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet128_8x1_g4-2193-fe760f0d.params.log)) |
 | 228-MENet-12x1 (g=3) | 35.03 | 13.99 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet228_12x1_g3-1399-8c28d22f.params.log)) |
@@ -242,7 +242,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.31 | 19.32 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.19/squeezenet_v1_0-1932-e4017303.pth.log)) |
 | SqueezeNet v1.1 | 41.82 | 19.38 | 1,235,496 | 354.88M | Converted from TorchVision ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.5/squeezenet_v1_1-1938-8dcd1cc5.pth.log)) |
 | ShuffleNetV2 x0.5 | 41.66 | 19.38 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.37/shufflenetv2_wd2-1938-d7b48d82.pth.log)) |
-| ShuffleNetV2 x1.0 | 34.55 | 13.85 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.44/shufflenetv2_w1-1385-13fa9f76.pth.log)) |
+| ShuffleNetV2 x1.0 | 34.39 | 13.78 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1378-dc6a33c9.pth.log)) |
 | 108-MENet-8x1 (g=3) | 43.92 | 20.76 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2076-7f47b37e.pth.log)) |
 | 128-MENet-8x1 (g=4) | 43.95 | 20.62 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet128_8x1_g4-2062-dd4531fd.pth.log)) |
 | 228-MENet-12x1 (g=3) | 33.57 | 13.28 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet228_12x1_g3-1328-27991387.pth.log)) |
@@ -312,7 +312,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.01 | 18.96 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.20/squeezenet_v1_0-1896-6cbb35ce.npz.log)) |
 | SqueezeNet v1.1 | 41.36 | 19.25 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.20/squeezenet_v1_1-1925-0ca73cf3.npz.log)) |
 | ShuffleNetV2 x0.5 | 43.77 | 21.17 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.37/shufflenetv2_wd2-2117-b19589d8.npz.log)) |
-| ShuffleNetV2 x1.0 | 36.64 | 15.27 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.44/shufflenetv2_w1-1527-38ffffaa.npz.log)) |
+| ShuffleNetV2 x1.0 | 36.48 | 15.19 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1519-2156e7df.npz.log)) |
 | 108-MENet-8x1 (g=3) | 46.07 | 22.42 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet108_8x1_g3-2242-7c1b69e0.npz.log)) |
 | 128-MENet-8x1 (g=4) | 45.82 | 21.91 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet128_8x1_g4-2191-4d64040c.npz.log)) |
 | 228-MENet-12x1 (g=3) | 34.93 | 14.01 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet228_12x1_g3-1401-07a0ace2.npz.log)) |

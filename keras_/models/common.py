@@ -106,7 +106,7 @@ def conv2d(x,
                 strides=strides,
                 padding=ke_padding,
                 use_bias=use_bias,
-                name=name+"/group{}".format(gi))(xi)
+                name=name+"/convgroup{}".format(gi + 1))(xi)
             group_list.append(xi)
         x = nn.concatenate(group_list, axis=channel_axis, name=name+"/concat")
 

@@ -396,28 +396,47 @@ def convert_gl2ke(dst_net,
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
 
-    for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+    dst_param_keys_orig = dst_param_keys.copy()
+    dst_param_keys = [s[:(s.find("convgroup")+9)]+"/"+s.split('/')[-1] if s.find("convgroup") >= 0 else s for s in dst_param_keys]
+    dst_param_keys = list(np.unique(dst_param_keys))
+
+    assert (len(src_param_keys) == len(dst_param_keys))
+
+    def process_width(src_key, dst_key, src_weight):
         dst_layer = dst_params[dst_key][0]
         dst_weight = dst_params[dst_key][1]
-        src_weight = src_params[src_key]._data[0].asnumpy()
         if (dst_layer.__class__.__name__ in ['Conv2D']) and dst_key.endswith("kernel1") and\
                 (dst_layer.data_format == 'channels_last'):
             src_weight = np.transpose(src_weight, (2, 3, 1, 0))
-            #src_weight = np.transpose(src_weight, (3, 2, 1, 0))
-            #pass
         if (dst_layer.__class__.__name__ in ['DepthwiseConv2D']) and dst_key.endswith("kernel1") and\
                 (dst_layer.data_format == 'channels_last'):
             src_weight = np.transpose(src_weight, (2, 3, 0, 1))
-            #src_weight = np.transpose(src_weight, (3, 2, 0, 1))
-            #pass
         if (dst_layer.__class__.__name__ in ['Dense']) and dst_key.endswith("kernel1"):
             src_weight = np.transpose(src_weight, (1, 0))
-            #pass
         assert (dst_weight._get_shape() == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_weight.shape, dst_weight._get_shape())
         dst_weight.bind(mx.nd.array(src_weight))
-        #pass
+
+    for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+        if dst_key.find("convgroup") >= 0:
+            dst_key_stem = dst_key[:(dst_key.find("convgroup")+9)]
+            dst_keys = [s for s in dst_param_keys_orig if s.startswith(dst_key_stem)]
+            if src_key.endswith("weight"):
+                dst_keys = [s for s in dst_keys if s.endswith("kernel1")]
+            elif src_key.endswith("bias"):
+                dst_keys = [s for s in dst_keys if s.endswith("bias1")]
+            groups = len(dst_keys)
+            src_weight0 = src_params[src_key]._data[0]
+            src_weight0_list = mx.nd.split(src_weight0, axis=0, num_outputs=groups)
+            for gi in range(groups):
+                src_weight_gi = src_weight0_list[gi].asnumpy()
+                dst_key_gi = dst_keys[gi]
+                process_width(src_key, dst_key_gi, src_weight_gi)
+        else:
+            src_weight = src_params[src_key]._data[0].asnumpy()
+            process_width(src_key, dst_key, src_weight)
+
     dst_net.save_weights(dst_params_file_path)
 
 
@@ -517,6 +536,8 @@ def main():
         use_cuda=use_cuda)
 
     if (args.src_fwk == "mxnet") and (args.src_model in ["preresnet200b"]):
+        assert (len(src_param_keys) <= len(dst_param_keys))
+    elif (args.dst_fwk == "keras") and any([s.find("convgroup") >= 0 for s in dst_param_keys]):
         assert (len(src_param_keys) <= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

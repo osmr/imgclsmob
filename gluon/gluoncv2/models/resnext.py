@@ -578,7 +578,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        # print("m={}, {}".format(model.__name__, weight_count))
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)

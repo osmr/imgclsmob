@@ -2,7 +2,7 @@
     Model store which provides pretrained models.
 """
 
-__all__ = ['get_model_file']
+__all__ = ['get_model_file', 'load_model', 'download_model']
 
 import os
 import zipfile
@@ -142,7 +142,8 @@ def get_model_file(model_name,
 
 
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
-    """Download an given URL
+    """
+    Download an given URL
 
     Parameters
     ----------
@@ -225,12 +226,13 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     return fname
 
 
-def _check_sha1(filename, sha1_hash):
-    """Check whether the sha1 hash of the file content matches the expected hash.
+def _check_sha1(file_name, sha1_hash):
+    """
+    Check whether the sha1 hash of the file content matches the expected hash.
 
     Parameters
     ----------
-    filename : str
+    file_name : str
         Path to the file.
     sha1_hash : str
         Expected sha1 hash in hexadecimal digits.
@@ -241,7 +243,7 @@ def _check_sha1(filename, sha1_hash):
         Whether the file content matches the expected hash.
     """
     sha1 = hashlib.sha1()
-    with open(filename, 'rb') as f:
+    with open(file_name, 'rb') as f:
         while True:
             data = f.read(1048576)
             if not data:
@@ -249,3 +251,55 @@ def _check_sha1(filename, sha1_hash):
             sha1.update(data)
 
     return sha1.hexdigest() == sha1_hash
+
+
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
+
+
+def download_model(net,
+                   model_name,
+                   local_model_store_dir_path=os.path.join('~', '.torch', 'models'),
+                   ignore_extra=True):
+    """
+    Load model state dictionary from a file with downloading it if necessary.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    model_name : str
+        Name of the model.
+    local_model_store_dir_path : str, default $TORCH_HOME/models
+        Location for keeping the model parameters.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    load_model(
+        net=net,
+        file_path=get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=local_model_store_dir_path),
+        ignore_extra=ignore_extra)

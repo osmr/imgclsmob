@@ -335,11 +335,11 @@ def get_shufflenetv2(width_scale,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        import torch
-        from .model_store import get_model_file
-        net.load_state_dict(torch.load(get_model_file(
+        from .model_store import download_model
+        download_model(
+            net=net,
             model_name=model_name,
-            local_model_store_dir_path=root)))
+            local_model_store_dir_path=root)
 
     return net
 

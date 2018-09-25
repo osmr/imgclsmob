@@ -422,11 +422,11 @@ def get_condensenet(num_layers,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        import torch
-        from .model_store import get_model_file
-        net.load_state_dict(torch.load(get_model_file(
+        from .model_store import download_model
+        download_model(
+            net=net,
             model_name=model_name,
-            local_model_store_dir_path=root)))
+            local_model_store_dir_path=root)
 
     return net
 
@@ -466,7 +466,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = False
+    pretrained = True
 
     models = [
         condensenet74_c4_g4,
@@ -483,6 +483,7 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != condensenet74_c4_g4 or weight_count == 4773944)
         assert (model != condensenet74_c8_g8 or weight_count == 2935416)
 

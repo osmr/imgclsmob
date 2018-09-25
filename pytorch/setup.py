@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pytorchcv',
-    version='0.0.5',
+    version='0.0.6',
     description='Image classification models for PyTorch',
     license='MIT',
     long_description=long_description,
@@ -27,5 +27,5 @@ setup(
     keywords='machine-learning deep-learning neuralnetwork image-classification imagenet pytorch',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
-    install_requires=['numpy'],
+    install_requires=['numpy', 'requests'],
 )

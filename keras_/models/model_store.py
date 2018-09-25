@@ -49,6 +49,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('darknet_tiny', '1946', '4a38281c6436e0d4d0199f3fd77f967ce614883e', 'v0.0.56'),
     ('squeezenet_v1_0', '1904', 'c2c87509293fa4dc4de21877d389ff01d5b6bf4e', 'v0.0.57'),
     ('squeezenet_v1_1', '1920', '5557ef36f64d84c6343378f36773b245c14cd6a0', 'v0.0.57'),
+    ('menet108_8x1_g3', '2237', 'beb28c9bd24cc1c8864f1475df78937978fcf5d2', 'v0.0.58'),
+    ('menet128_8x1_g4', '2193', '0a0193f2666aeb91f25deb1525d8bebd57f36b84', 'v0.0.58'),
+    ('menet228_12x1_g3', '1401', '954b3ba0cd681c3b63b03f77d4ff1dea03207664', 'v0.0.58'),
+    ('menet256_12x1_g4', '1391', 'a63a606a2f344aa322f21d46f1192fd9d927294e', 'v0.0.58'),
+    ('menet348_12x1_g3', '1142', '0715c86612e932522c3c4911104d941a77fd53b7', 'v0.0.58'),
+    ('menet352_12x1_g8', '1375', '9007c933f9e4d1d78bd88e84aa892c127288ca2d', 'v0.0.58'),
+    ('menet456_24x1_g3', '1044', 'c090af591e6b0a996d92fe4bc3332bb271046785', 'v0.0.58'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

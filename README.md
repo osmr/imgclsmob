@@ -23,9 +23,9 @@ pip install gluoncv2 mxnet-cu92>=1.2.1
 
 ### For PyTorch way
 
-To use only PyTorch models in your project, simply install the `pytorchcv` package with `torch`:
+To use only PyTorch models in your project, simply install the `pytorchcv` package with `torch` (>=0.4.1 is recommended):
 ```
-pip install pytorchcv torch>=0.4.1
+pip install pytorchcv torch>=0.4.0
 ```
 To enable/disable different hardware supports such as GPUs, check out PyTorch installation [instructions](https://pytorch.org/).
 

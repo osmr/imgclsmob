@@ -2,7 +2,7 @@ numpy
 requests
 mxnet>=1.2.1
 gluoncv>=0.2.0
-torch>=0.4.1
+torch>=0.4.0
 torchvision>=0.2.1
 chainer>=5.0.0b4
 chainercv>=0.10.0

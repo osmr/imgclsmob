@@ -4,7 +4,7 @@ import os
 from keras import backend as K
 import mxnet as mx
 
-from .model_provider import get_model
+from keras_.kerascv.model_provider import get_model
 
 
 def prepare_ke_context(num_gpus,

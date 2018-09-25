@@ -16,7 +16,7 @@ To use only Gluon models in your project, simply install the `gluoncv2` package 
 pip install gluoncv2 mxnet>=1.2.1
 ```
 To enable different hardware supports such as GPUs, check out [MXNet variants](https://pypi.org/project/mxnet/).
-For example, you can install with cuda-9.2 supported mxnet:
+For example, you can install with CUDA-9.2 supported MXNet:
 ```
 pip install gluoncv2 mxnet-cu92>=1.2.1
 ```
@@ -38,12 +38,16 @@ pip install chainercv2
 
 ### For Keras way
 
-To use Keras models:
+To use only Keras models in your project, simply install the `kerascv` package with `mxnet`:
 ```
-git clone git@github.com:osmr/imgclsmob.git
-pip install mxnet>=1.2.1 keras-mxnet>=2.2.2
+pip install kerascv mxnet>=1.2.1
 ```
-After that change the value of the field `image_data_format` to `channels_first` in the file `~/.keras/keras.json`. 
+To enable different hardware supports such as GPUs, check out [MXNet variants](https://pypi.org/project/mxnet/).
+For example, you can install with CUDA-9.2 supported MXNet:
+```
+pip install kerascv mxnet-cu92>=1.2.1
+```
+After installation change the value of the field `image_data_format` to `channels_first` in the file `~/.keras/keras.json`. 
 
 ### For research
 
@@ -90,6 +94,18 @@ import numpy as np
 net = chcv2_get_model("resnet18", pretrained=True)
 x = np.zeros((1, 3, 224, 224), np.float32)
 y = net(x)
+```
+
+### For Keras way
+
+Example of using the pretrained ResNet-18 model on Keras:
+```
+from kerascv.model_provider import get_model as kecv_get_model
+import numpy as np
+
+net = kecv_get_model("resnet18", pretrained=True)
+x = np.zeros((1, 3, 224, 224), np.float32)
+y = net.predict(x)
 ```
 
 ## List of models

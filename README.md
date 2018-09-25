@@ -374,6 +374,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-169 | 23.88 | 6.89 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.55/densenet169-0689-ae41b4a6.h5.log)) |
 | DenseNet-201 | 22.69 | 6.35 | 20,013,928 | 4,318.75M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.55/densenet201-0635-cf3afbb2.h5.log)) |
 | DarkNet Tiny | 43.35 | 19.46 | 1,042,104 | 496.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.56/darknet_tiny-1946-4a38281c.h5.log)) |
+| SqueezeNet v1.0 | 41.07 | 19.04 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.57/squeezenet_v1_0-1904-c2c87509.h5.log)) |
+| SqueezeNet v1.1 | 41.37 | 19.20 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.57/squeezenet_v1_1-1920-5557ef36.h5.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

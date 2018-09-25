@@ -390,6 +390,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | FD-MobileNet x0.25 | 56.71 | 31.98 | 383,160 | 12.44M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.60/fdmobilenet_wd4-3198-cc9996f9.h5.log)) |
 | FD-MobileNet x0.5 | 44.64 | 21.08 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.60/fdmobilenet_wd2-2108-465aeef2.h5.log)) |
 | FD-MobileNet x1.0 | 35.95 | 14.73 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.60/fdmobilenet_w1-1473-680e603f.h5.log)) |
+| MobileNetV2 x0.25 | 48.86 | 25.24 | 1,516,392 | 32.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_wd4-2524-a8ea2889.h5.log)) |
+| MobileNetV2 x0.5 | 35.51 | 14.65 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_wd2-1465-774d5bca.h5.log)) |
+| MobileNetV2 x0.75 | 30.81 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w3d4-1126-f2f664da.h5.log)) |
+| MobileNetV2 x1.0 | 28.50 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w1-0990-cbb8be96.h5.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

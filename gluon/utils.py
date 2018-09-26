@@ -4,11 +4,35 @@ import numpy as np
 
 import mxnet as mx
 from mxnet import gluon
+from mxnet.gluon.data.vision import ImageFolderDataset
 from mxnet.gluon.data.vision import transforms
 
-from gluoncv.data import imagenet
-
 from .gluoncv2.model_provider import get_model
+
+
+class ImageNet(ImageFolderDataset):
+    """
+    Load the ImageNet classification dataset.
+
+    Refer to :doc:`../build/examples_datasets/imagenet` for the description of
+    this dataset and how to prepare it.
+
+    Parameters
+    ----------
+    root : str, default '~/.mxnet/datasets/imagenet'
+        Path to the folder stored the dataset.
+    train : bool, default True
+        Whether to load the training or validation set.
+    transform : function, default None
+        A function that takes data and label and transforms them.
+    """
+    def __init__(self,
+                 root=os.path.join('~', '.mxnet', 'datasets', 'imagenet'),
+                 train=True,
+                 transform=None):
+        split = 'train' if train else 'val'
+        root = os.path.join(root, split)
+        super(ImageNet, self).__init__(root=root, flag=1, transform=transform)
 
 
 def prepare_mx_context(num_gpus,
@@ -115,13 +139,13 @@ def get_data_loader(data_dir,
     ])
 
     train_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=True).transform_first(transform_train),
+        ImageNet(data_dir, train=True).transform_first(transform_train),
         batch_size=batch_size,
         shuffle=True,
         last_batch='discard',
         num_workers=num_workers)
     val_data = gluon.data.DataLoader(
-        imagenet.classification.ImageNet(data_dir, train=False).transform_first(transform_test),
+        ImageNet(data_dir, train=False).transform_first(transform_test),
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers)

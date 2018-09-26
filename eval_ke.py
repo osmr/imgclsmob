@@ -3,11 +3,9 @@ import time
 import logging
 
 import keras
-from keras import backend as K
-from keras.utils.np_utils import to_categorical
 
 from common.logger_utils import initialize_logging
-from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, backend_agnostic_compile
+from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
 def parse_args():
@@ -98,31 +96,6 @@ def parse_args():
     return args
 
 
-def get_data(it,
-             num_classes):
-
-    def get_arrays(db):
-        data = db.data[0].asnumpy()
-        if K.image_data_format() == 'channels_last':
-            data = data.transpose((0, 2, 3, 1))
-        labels = to_categorical(
-            y=db.label[0].asnumpy(),
-            num_classes=num_classes)
-        return data, labels
-
-    while True:
-        try:
-            db = it.next()
-
-        except StopIteration as e:
-            logging.warning("get_data exception due to end of data - resetting iterator")
-            it.reset()
-            db = it.next()
-
-        finally:
-            yield get_arrays(db)
-
-
 def test(net,
          val_gen,
          val_size,
@@ -194,15 +167,11 @@ def main():
         rec_val_idx=args.rec_val_idx,
         batch_size=batch_size,
         num_workers=args.num_workers)
-
-    # train_gen = get_data(
-    #     it=train_data,
-    #     num_classes=num_classes)
-    val_gen = get_data(
-        it=val_data,
+    val_gen = get_data_generator(
+        data_iterator=val_data,
         num_classes=num_classes)
-    val_size = 50000
 
+    val_size = 50000
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,

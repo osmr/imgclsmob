@@ -3,12 +3,11 @@ import time
 import logging
 import os
 import numpy as np
+import random
 
 import mxnet as mx
 from mxnet import gluon
 from mxnet import autograd as ag
-
-from gluoncv import utils as gutils
 
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
@@ -239,7 +238,9 @@ def parse_args():
 def init_rand(seed):
     if seed <= 0:
         seed = np.random.randint(10000)
-    gutils.random.seed(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    mx.random.seed(seed)
     return seed
 
 

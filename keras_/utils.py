@@ -2,6 +2,7 @@ import logging
 import os
 
 from keras import backend as K
+from keras.utils.np_utils import to_categorical
 import mxnet as mx
 
 from keras_.kerascv.model_provider import get_model
@@ -70,6 +71,30 @@ def get_data_rec(rec_train,
         std_b=std_rgb[2],
     )
     return train_data, val_data
+
+
+def get_data_generator(data_iterator,
+                       num_classes):
+    def get_arrays(db):
+        data = db.data[0].asnumpy()
+        if K.image_data_format() == 'channels_last':
+            data = data.transpose((0, 2, 3, 1))
+        labels = to_categorical(
+            y=db.label[0].asnumpy(),
+            num_classes=num_classes)
+        return data, labels
+
+    while True:
+        try:
+            db = data_iterator.next()
+
+        except StopIteration as e:
+            # logging.warning("get_data exception due to end of data - resetting iterator")
+            data_iterator.reset()
+            db = data_iterator.next()
+
+        finally:
+            yield get_arrays(db)
 
 
 def prepare_model(model_name,

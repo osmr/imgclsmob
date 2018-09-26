@@ -499,7 +499,7 @@ def main():
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
         packages += ['mxnet']
-        pip_packages += ['mxnet-cu92', 'gluoncv']
+        pip_packages += ['mxnet-cu92']
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ['torch', 'torchvision']
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):

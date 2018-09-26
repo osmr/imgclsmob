@@ -110,11 +110,6 @@ def prepare_model(model_name,
         assert (os.path.isfile(pretrained_model_file_path))
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
         net.load_weights(filepath=pretrained_model_file_path)
-        #from keras.models import load_model
-        # net = load_model(
-        #     filepath=get_model_file(
-        #         model_name=model_name,
-        #         local_model_store_dir_path=root))
 
     return net
 

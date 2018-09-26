@@ -6,10 +6,12 @@ import numpy as np
 import random
 
 import keras
+from keras.models import load_model, save_model
+from keras.callbacks import ModelCheckpoint
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-from common.train_log_param_saver import TrainLogParamSaver
+#from common.train_log_param_saver import TrainLogParamSaver
 from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
@@ -166,199 +168,74 @@ def init_rand(seed):
     return seed
 
 
-# def prepare_trainer(net,
-#                     optimizer_name,
-#                     wd,
-#                     momentum,
-#                     lr,
-#                     batch_size,
-#                     num_epochs,
-#                     dtype,
-#                     state_file_path=None):
-#
-#     backend_agnostic_compile(
-#         model=net,
-#         loss='categorical_crossentropy',
-#         optimizer=keras.optimizers.SGD(
-#             lr=lr,
-#             momentum=momentum,
-#             decay=wd,
-#             nesterov=False),
-#         metrics=[keras.metrics.categorical_accuracy, keras.metrics.top_k_categorical_accuracy],
-#         num_gpus=num_gpus)
+def prepare_trainer(net,
+                    optimizer_name,
+                    wd,
+                    momentum,
+                    lr,
+                    num_gpus,
+                    state_file_path=None):
+
+    optimizer_name = optimizer_name.lower()
+    if (optimizer_name == 'sgd') or (optimizer_name == 'nag'):
+        optimizer = keras.optimizers.SGD(
+            lr=lr,
+            momentum=momentum,
+            nesterov=(optimizer_name == 'nag'))
+    else:
+        raise ValueError("Usupported optimizer: {}".format(optimizer_name))
+
+    backend_agnostic_compile(
+        model=net,
+        loss='categorical_crossentropy',
+        optimizer=optimizer,
+        metrics=[keras.metrics.categorical_accuracy, keras.metrics.top_k_categorical_accuracy],
+        num_gpus=num_gpus)
+
+    if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
+        net = load_model(filepath=state_file_path)
+    return net
 
 
-def save_params(file_stem,
-                net,
-                trainer):
-    net.save_parameters(file_stem + '.params')
-    trainer.save_states(file_stem + '.states')
+# def save_params(file_stem,
+#                 net):
+#     net.save_weights(file_stem + '.h5')
+#     save_model(net, filepath=(file_stem + '.h5states'))
 
 
-# def train_epoch(epoch,
-#                 net,
-#                 acc_top1_train,
-#                 train_data,
-#                 batch_fn,
-#                 use_rec,
-#                 dtype,
-#                 ctx,
-#                 loss_func,
-#                 trainer,
-#                 lr_scheduler,
-#                 batch_size,
-#                 log_interval,
-#                 mixup,
-#                 mixup_epoch_tail,
-#                 num_classes,
-#                 num_epochs):
-#
-#     labels_list_inds = None
-#     tic = time.time()
-#     if use_rec:
-#         train_data.reset()
-#     acc_top1_train.reset()
-#     train_loss = 0.0
-#
-#     btic = time.time()
-#     for i, batch in enumerate(train_data):
-#         data_list, labels_list = batch_fn(batch, ctx)
-#
-#         if mixup:
-#             labels_list_inds = labels_list
-#             labels_list = [mx.nd.one_hot(Y, depth=num_classes) for Y in labels_list]
-#             if epoch < num_epochs - mixup_epoch_tail:
-#                 alpha = 1
-#                 lam = np.random.beta(alpha, alpha)
-#                 data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
-#                 labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
-#
-#         with ag.record():
-#             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-#             loss_list = [loss_func(yhat, y) for yhat, y in zip(outputs_list, labels_list)]
-#         for loss in loss_list:
-#             loss.backward()
-#         lr_scheduler.update(i, epoch)
-#         trainer.step(batch_size)
-#
-#         # if epoch == 0 and i == 0:
-#         #     weight_count = calc_net_weight_count(net)
-#         #     logging.info('Model: {} trainable parameters'.format(weight_count))
-#         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
-#
-#         acc_top1_train.update(
-#             labels=(labels_list if not mixup else labels_list_inds),
-#             preds=outputs_list)
-#
-#         if log_interval and not (i + 1) % log_interval:
-#             speed = batch_size * log_interval / (time.time() - btic)
-#             btic = time.time()
-#             _, top1 = acc_top1_train.get()
-#             err_top1_train = 1.0 - top1
-#             logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.5f}'.format(
-#                 epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
-#
-#     throughput = int(batch_size * (i + 1) / (time.time() - tic))
-#     logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
-#         epoch + 1, throughput, time.time() - tic))
-#
-#     train_loss /= (i + 1)
-#     _, top1 = acc_top1_train.get()
-#     err_top1_train = 1.0 - top1
-#     logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
-#         epoch + 1, err_top1_train, train_loss))
-#
-#     return err_top1_train, train_loss
-#
-#
-# def train_net(batch_size,
-#               num_epochs,
-#               start_epoch1,
-#               train_data,
-#               val_data,
-#               batch_fn,
-#               use_rec,
-#               dtype,
-#               net,
-#               trainer,
-#               lr_scheduler,
-#               lp_saver,
-#               log_interval,
-#               mixup,
-#               mixup_epoch_tail,
-#               num_classes,
-#               ctx):
-#
-#     if isinstance(ctx, mx.Context):
-#         ctx = [ctx]
-#
-#     acc_top1_val = mx.metric.Accuracy()
-#     acc_top5_val = mx.metric.TopKAccuracy(5)
-#     acc_top1_train = mx.metric.Accuracy()
-#
-#     loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not mixup))
-#
-#     assert (type(start_epoch1) == int)
-#     assert (start_epoch1 >= 1)
-#     if start_epoch1 > 1:
-#         logging.info('Start training from [Epoch {}]'.format(start_epoch1))
-#         err_top1_val, err_top5_val = validate(
-#             acc_top1=acc_top1_val,
-#             acc_top5=acc_top5_val,
-#             net=net,
-#             val_data=val_data,
-#             batch_fn=batch_fn,
-#             use_rec=use_rec,
-#             dtype=dtype,
-#             ctx=ctx)
-#         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
-#             start_epoch1 - 1, err_top1_val, err_top5_val))
-#
-#     gtic = time.time()
-#     for epoch in range(start_epoch1 - 1, num_epochs):
-#         err_top1_train, train_loss = train_epoch(
-#             epoch=epoch,
-#             net=net,
-#             acc_top1_train=acc_top1_train,
-#             train_data=train_data,
-#             batch_fn=batch_fn,
-#             use_rec=use_rec,
-#             dtype=dtype,
-#             ctx=ctx,
-#             loss_func=loss_func,
-#             trainer=trainer,
-#             lr_scheduler=lr_scheduler,
-#             batch_size=batch_size,
-#             log_interval=log_interval,
-#             mixup=mixup,
-#             mixup_epoch_tail=mixup_epoch_tail,
-#             num_classes=num_classes,
-#             num_epochs=num_epochs)
-#
-#         err_top1_val, err_top5_val = validate(
-#             acc_top1=acc_top1_val,
-#             acc_top5=acc_top5_val,
-#             net=net,
-#             val_data=val_data,
-#             batch_fn=batch_fn,
-#             use_rec=use_rec,
-#             dtype=dtype,
-#             ctx=ctx)
-#
-#         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
-#             epoch + 1, err_top1_val, err_top5_val))
-#
-#         if lp_saver is not None:
-#             lp_saver_kwargs = {'net': net, 'trainer': trainer}
-#             lp_saver.epoch_test_end_callback(
-#                 epoch1=(epoch + 1),
-#                 params=[err_top1_val, err_top1_train, err_top5_val, train_loss, trainer.learning_rate],
-#                 **lp_saver_kwargs)
-#
-#     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
-#     if lp_saver is not None:
-#         logging.info('Best err-top5: {:.4f} at {} epoch'.format(
-#             lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
+def train_net(net,
+              train_gen,
+              val_gen,
+              train_num_examples,
+              val_num_examples,
+              num_epochs,
+              checkpoint_filepath,
+              start_epoch1):
+
+    checkpointer = ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        verbose=1,
+        save_best_only=True)
+
+    tic = time.time()
+
+    net.fit_generator(
+        generator=train_gen,
+        samples_per_epoch=train_num_examples,
+        epochs=num_epochs,
+        verbose=True,
+        callbacks=[checkpointer],
+        validation_data=val_gen,
+        validation_steps=val_num_examples,
+        class_weight=None,
+        max_queue_size=10,
+        workers=1,
+        use_multiprocessing=False,
+        shuffle=True,
+        initial_epoch=(start_epoch1 - 1))
+
+    logging.info('Time cost: {:.4f} sec'.format(
+        time.time() - tic))
 
 
 def main():
@@ -397,18 +274,15 @@ def main():
         data_iterator=val_data,
         num_classes=num_classes)
 
-    # num_training_samples = 1281167
-    # prepare_trainer(
-    #     net=net,
-    #     optimizer_name=args.optimizer_name,
-    #     wd=args.wd,
-    #     momentum=args.momentum,
-    #     lr=args.lr,
-    #     batch_size=batch_size,
-    #     num_epochs=args.num_epochs,
-    #     dtype=args.dtype,
-    #     state_file_path=args.resume_state)
-    #
+    net = prepare_trainer(
+        net=net,
+        optimizer_name=args.optimizer_name,
+        wd=args.wd,
+        momentum=args.momentum,
+        lr=args.lr,
+        num_gpus=args.num_gpus,
+        state_file_path=args.resume_state)
+
     # if args.save_dir and args.save_interval:
     #     lp_saver = TrainLogParamSaver(
     #         checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
@@ -419,7 +293,7 @@ def main():
     #         last_checkpoint_file_count=2,
     #         best_checkpoint_file_count=2,
     #         checkpoint_file_save_callback=save_params,
-    #         checkpoint_file_exts=('.params', '.states'),
+    #         checkpoint_file_exts=('.h5', '.h5states'),
     #         save_interval=args.save_interval,
     #         num_epochs=args.num_epochs,
     #         param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
@@ -431,25 +305,16 @@ def main():
     #         best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
     # else:
     #     lp_saver = None
-    #
-    # train_net(
-    #     batch_size=batch_size,
-    #     num_epochs=args.num_epochs,
-    #     start_epoch1=args.start_epoch,
-    #     train_data=train_data,
-    #     val_data=val_data,
-    #     batch_fn=batch_fn,
-    #     use_rec=args.use_rec,
-    #     dtype=args.dtype,
-    #     net=net,
-    #     trainer=trainer,
-    #     lr_scheduler=lr_scheduler,
-    #     lp_saver=lp_saver,
-    #     log_interval=args.log_interval,
-    #     mixup=args.mixup,
-    #     mixup_epoch_tail=args.mixup_epoch_tail,
-    #     num_classes=num_classes,
-    #     ctx=ctx)
+
+    train_net(
+        net=net,
+        train_gen=train_gen,
+        val_gen=val_gen,
+        train_num_examples=1281167,
+        val_num_examples=50048,
+        num_epochs=args.num_epochs,
+        checkpoint_filepath=os.path.join(args.save_dir, 'imagenet_{}.h5'.format(args.model)),
+        start_epoch1=args.start_epoch)
 
 
 if __name__ == '__main__':

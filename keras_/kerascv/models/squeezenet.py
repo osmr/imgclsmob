@@ -95,21 +95,21 @@ def fire_unit(x,
         out_channels=squeeze_channels,
         kernel_size=1,
         padding=0,
-        name=name+"/squeeze")
+        name=name + "/squeeze")
     y1 = fire_conv(
         x=x,
         in_channels=squeeze_channels,
         out_channels=expand1x1_channels,
         kernel_size=1,
         padding=0,
-        name=name+"/expand1x1")
+        name=name + "/expand1x1")
     y2 = fire_conv(
         x=x,
         in_channels=squeeze_channels,
         out_channels=expand3x3_channels,
         kernel_size=3,
         padding=1,
-        name=name+"/expand3x3")
+        name=name + "/expand3x3")
 
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
     out = nn.concatenate([y1, y2], axis=channel_axis, name=name + "/concat")
@@ -365,7 +365,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != squeezenet_v1_0 or weight_count == 1248424)

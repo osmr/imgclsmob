@@ -52,9 +52,9 @@ def sqnxt_conv(x,
         strides=strides,
         padding=padding,
         use_bias=True,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 
@@ -101,7 +101,7 @@ def sqnxt_unit(x,
             out_channels=out_channels,
             kernel_size=1,
             strides=strides,
-            name=name+"/identity_conv")
+            name=name + "/identity_conv")
     else:
         identity = x
 
@@ -111,14 +111,14 @@ def sqnxt_unit(x,
         out_channels=(in_channels // reduction_den),
         kernel_size=1,
         strides=strides,
-        name=name+"/conv1")
+        name=name + "/conv1")
     x = sqnxt_conv(
         x=x,
         in_channels=(in_channels // reduction_den),
         out_channels=(in_channels // (2 * reduction_den)),
         kernel_size=1,
         strides=1,
-        name=name+"/conv2")
+        name=name + "/conv2")
     x = sqnxt_conv(
         x=x,
         in_channels=(in_channels // (2 * reduction_den)),
@@ -126,7 +126,7 @@ def sqnxt_unit(x,
         kernel_size=(1, 3),
         strides=1,
         padding=(0, 1),
-        name=name+"/conv3")
+        name=name + "/conv3")
     x = sqnxt_conv(
         x=x,
         in_channels=(in_channels // reduction_den),
@@ -134,17 +134,17 @@ def sqnxt_unit(x,
         kernel_size=(3, 1),
         strides=1,
         padding=(1, 0),
-        name=name+"/conv4")
+        name=name + "/conv4")
     x = sqnxt_conv(
         x=x,
         in_channels=(in_channels // reduction_den),
         out_channels=out_channels,
         kernel_size=1,
         strides=1,
-        name=name+"/conv5")
+        name=name + "/conv5")
 
     x = nn.add([x, identity], name=name + "/add")
-    x = nn.Activation('relu', name=name+"/activ")(x)
+    x = nn.Activation('relu', name=name + "/activ")(x)
     return x
 
 
@@ -178,13 +178,13 @@ def sqnxt_init_block(x,
         kernel_size=7,
         strides=2,
         padding=1,
-        name=name+"/conv")
+        name=name + "/conv")
     x = max_pool2d_ceil(
         x=x,
         pool_size=3,
         strides=2,
         padding="valid",
-        name=name+"/pool")
+        name=name + "/pool")
     return x
 
 
@@ -411,7 +411,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sqnxt23_w1 or weight_count == 724056)

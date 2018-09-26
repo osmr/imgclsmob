@@ -121,7 +121,7 @@ def senet_unit(x,
                 strides=strides,
                 groups=1,
                 activate=False,
-                name=name+"/identity_conv")
+                name=name + "/identity_conv")
         else:
             identity = resnext_conv1x1(
                 x=x,
@@ -147,11 +147,11 @@ def senet_unit(x,
         x = se_block(
             x=x,
             channels=out_channels,
-            name=name+"/se")
+            name=name + "/se")
 
-    x = nn.add([x, identity], name=name+"/add")
+    x = nn.add([x, identity], name=name + "/add")
 
-    activ = nn.Activation('relu', name=name+"/activ")
+    activ = nn.Activation('relu', name=name + "/activ")
     x = activ(x)
     return x
 
@@ -209,7 +209,7 @@ def senet_init_block(x,
         pool_size=3,
         strides=2,
         padding='same',
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 
@@ -392,7 +392,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != senet52 or weight_count == 44659416)  # 22623272

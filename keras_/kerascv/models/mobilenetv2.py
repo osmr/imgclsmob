@@ -59,10 +59,10 @@ def mobnet_conv(x,
         padding=padding,
         groups=groups,
         use_bias=False,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
     if activate:
-        x = nn.ReLU(max_value=6.0, name=name+"/activ")(x)
+        x = nn.ReLU(max_value=6.0, name=name + "/activ")(x)
     return x
 
 
@@ -201,7 +201,7 @@ def linear_bottleneck(x,
         name=name + "/conv3")
 
     if residual:
-        x = nn.add([x, identity], name=name+"/add")
+        x = nn.add([x, identity], name=name + "/add")
 
     return x
 

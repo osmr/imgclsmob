@@ -65,7 +65,7 @@ def conv2d(x,
     else:
         x = nn.ZeroPadding2D(
             padding=padding,
-            name=name+"/pad")(x)
+            name=name + "/pad")(x)
         ke_padding = "valid"
         extra_pad = True
 
@@ -106,9 +106,9 @@ def conv2d(x,
                 strides=strides,
                 padding=ke_padding,
                 use_bias=use_bias,
-                name=name+"/convgroup{}".format(gi + 1))(xi)
+                name=name + "/convgroup{}".format(gi + 1))(xi)
             group_list.append(xi)
-        x = nn.concatenate(group_list, axis=channel_axis, name=name+"/concat")
+        x = nn.concatenate(group_list, axis=channel_axis, name=name + "/concat")
 
     return x
 
@@ -212,7 +212,7 @@ def channel_shuffle(x,
     else:
         batch, height, width, channels = x.shape
 
-    #assert (channels % groups == 0)
+    # assert (channels % groups == 0)
     channels_per_group = channels // groups
 
     if is_channels_first:
@@ -280,24 +280,24 @@ def se_block(x,
     conv1 = conv1x1(
         out_channels=mid_cannels,
         use_bias=True,
-        name=name+"/conv1")
-    relu = nn.Activation('relu', name=name+"/relu")
+        name=name + "/conv1")
+    relu = nn.Activation('relu', name=name + "/relu")
     conv2 = conv1x1(
         out_channels=channels,
         use_bias=True,
-        name=name+"/conv2")
-    sigmoid = nn.Activation('sigmoid', name=name+"/sigmoid")
+        name=name + "/conv2")
+    sigmoid = nn.Activation('sigmoid', name=name + "/sigmoid")
 
     assert(len(x.shape) == 4)
     pool_size = x.shape[2:4] if K.image_data_format() == 'channels_first' else x.shape[1:3]
     w = nn.AvgPool2D(
         pool_size=pool_size,
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     w = conv1(w)
     w = relu(w)
     w = conv2(w)
     w = sigmoid(w)
-    x = nn.multiply([x, w], name=name+"/mul")
+    x = nn.multiply([x, w], name=name + "/mul")
     return x
 
 

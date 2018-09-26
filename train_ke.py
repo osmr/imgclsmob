@@ -6,12 +6,13 @@ import numpy as np
 import random
 
 import keras
-from keras.models import load_model, save_model
+from keras.models import load_model
+# from keras.models import save_model
 from keras.callbacks import ModelCheckpoint
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-#from common.train_log_param_saver import TrainLogParamSaver
+# from common.train_log_param_saver import TrainLogParamSaver
 from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
@@ -170,7 +171,6 @@ def init_rand(seed):
 
 def prepare_trainer(net,
                     optimizer_name,
-                    wd,
                     momentum,
                     lr,
                     num_gpus,
@@ -277,7 +277,6 @@ def main():
     net = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
-        wd=args.wd,
         momentum=args.momentum,
         lr=args.lr,
         num_gpus=args.num_gpus,

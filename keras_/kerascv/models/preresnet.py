@@ -50,8 +50,8 @@ def preres_conv(x,
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     x_pre_activ = x
     x = conv2d(
         x=x,
@@ -61,7 +61,7 @@ def preres_conv(x,
         strides=strides,
         padding=padding,
         use_bias=False,
-        name=name+"/conv")
+        name=name + "/conv")
     return x, x_pre_activ
 
 
@@ -168,13 +168,13 @@ def preres_block(x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=strides,
-        name=name+"/conv1")
+        name=name + "/conv1")
     x, _ = preres_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
-        name=name+"/conv2")
+        name=name + "/conv2")
     return x, x_pre_activ
 
 
@@ -214,19 +214,19 @@ def preres_bottleneck_block(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
-        name=name+"/conv1")
+        name=name + "/conv1")
     x, _ = preres_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
-        name=name+"/conv2")
+        name=name + "/conv2")
     x, _ = preres_conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
-        name=name+"/conv3")
+        name=name + "/conv3")
     return x, x_pre_activ
 
 
@@ -274,29 +274,29 @@ def preres_unit(x,
             out_channels=out_channels,
             strides=strides,
             conv1_stride=conv1_stride,
-            name=name+"/body")
+            name=name + "/body")
     else:
         x, x_pre_activ = preres_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            name=name+"/body")
+            name=name + "/body")
 
     if use_se:
         x = se_block(
             x=x,
             channels=out_channels,
-            name=name+"/se")
+            name=name + "/se")
 
     resize_identity = (in_channels != out_channels) or (strides != 1)
     if resize_identity:
         identity = conv1x1(
             out_channels=out_channels,
             strides=strides,
-            name=name+"/identity_conv")(x_pre_activ)
+            name=name + "/identity_conv")(x_pre_activ)
 
-    x = nn.add([x, identity], name=name+"/add")
+    x = nn.add([x, identity], name=name + "/add")
     return x
 
 
@@ -331,14 +331,14 @@ def preres_init_block(x,
         strides=2,
         padding=3,
         use_bias=False,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
         padding="same",
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 
@@ -359,8 +359,8 @@ def preres_activation(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 
@@ -954,7 +954,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet10 or weight_count == 5417128)

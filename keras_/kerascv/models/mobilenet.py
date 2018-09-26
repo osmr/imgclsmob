@@ -60,9 +60,9 @@ def conv_block(x,
         padding=padding,
         groups=groups,
         use_bias=False,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 
@@ -101,13 +101,13 @@ def dws_conv_block(x,
         strides=strides,
         padding=1,
         groups=in_channels,
-        name=name+"/dw_conv")
+        name=name + "/dw_conv")
     x = conv_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        name=name+"/pw_conv")
+        name=name + "/pw_conv")
     return x
 
 
@@ -361,7 +361,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenet_w1 or weight_count == 4231976)

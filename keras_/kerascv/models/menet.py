@@ -270,14 +270,14 @@ def me_init_block(x,
         strides=2,
         padding=1,
         use_bias=False,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
         padding="same",
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 

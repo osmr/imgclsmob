@@ -197,7 +197,7 @@ def resnext_bottleneck(x,
         out_channels=group_width,
         strides=1,
         activate=True,
-        name=name+"/conv1")
+        name=name + "/conv1")
     x = resnext_conv3x3(
         x=x,
         in_channels=group_width,
@@ -205,14 +205,14 @@ def resnext_bottleneck(x,
         strides=strides,
         groups=cardinality,
         activate=True,
-        name=name+"/conv2")
+        name=name + "/conv2")
     x = resnext_conv1x1(
         x=x,
         in_channels=group_width,
         out_channels=out_channels,
         strides=1,
         activate=False,
-        name=name+"/conv3")
+        name=name + "/conv3")
     return x
 
 
@@ -259,7 +259,7 @@ def resnext_unit(x,
             out_channels=out_channels,
             strides=strides,
             activate=False,
-            name=name+"/identity_conv")
+            name=name + "/identity_conv")
     else:
         identity = x
 
@@ -276,11 +276,11 @@ def resnext_unit(x,
         x = se_block(
             x=x,
             channels=out_channels,
-            name=name+"/se")
+            name=name + "/se")
 
-    x = nn.add([x, identity], name=name+"/add")
+    x = nn.add([x, identity], name=name + "/add")
 
-    activ = nn.Activation('relu', name=name+"/activ")
+    activ = nn.Activation('relu', name=name + "/activ")
     x = activ(x)
     return x
 
@@ -317,12 +317,12 @@ def resnext_init_block(x,
         padding=3,
         groups=1,
         activate=True,
-        name=name+"/conv")
+        name=name + "/conv")
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
         padding='same',
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 
@@ -560,7 +560,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        #net.summary()
+        # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnext50_32x4d or weight_count == 25028904)

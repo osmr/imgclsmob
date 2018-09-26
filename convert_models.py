@@ -397,10 +397,11 @@ def convert_gl2ke(dst_net,
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
-    dst_param_keys = [s[:(s.find("convgroup")+9)]+"/"+s.split('/')[-1] if s.find("convgroup") >= 0 else s for s in dst_param_keys]
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+                      for s in dst_param_keys]
     dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
     dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
-    #dst_param_keys = list(np.unique(dst_param_keys))
+    # dst_param_keys = list(np.unique(dst_param_keys))
 
     assert (len(src_param_keys) == len(dst_param_keys))
 
@@ -422,7 +423,7 @@ def convert_gl2ke(dst_net,
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if dst_key.find("convgroup") >= 0:
-            dst_key_stem = dst_key[:(dst_key.find("convgroup")+9)]
+            dst_key_stem = dst_key[:(dst_key.find("convgroup") + 9)]
             dst_keys = [s for s in dst_param_keys_orig if s.startswith(dst_key_stem)]
             if src_key.endswith("weight"):
                 dst_keys = [s for s in dst_keys if s.endswith("kernel1")]

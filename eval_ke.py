@@ -117,7 +117,7 @@ def test(net,
         metrics=[keras.metrics.categorical_accuracy, keras.metrics.top_k_categorical_accuracy],
         num_gpus=num_gpus)
 
-    #net.summary()
+    # net.summary()
     tic = time.time()
     score = net.evaluate_generator(
         generator=val_gen,

@@ -44,8 +44,8 @@ def dense_conv(x,
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     x = conv2d(
         x=x,
         in_channels=in_channels,
@@ -54,7 +54,7 @@ def dense_conv(x,
         strides=strides,
         padding=padding,
         use_bias=False,
-        name=name+"/conv")
+        name=name + "/conv")
     return x
 
 
@@ -211,7 +211,7 @@ def transition_block(x,
         pool_size=2,
         strides=2,
         padding="valid",
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 
@@ -246,14 +246,14 @@ def dense_init_block(x,
         strides=2,
         padding=3,
         use_bias=False,
-        name=name+"/conv")
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
         strides=2,
         padding="same",
-        name=name+"/pool")(x)
+        name=name + "/pool")(x)
     return x
 
 
@@ -274,8 +274,8 @@ def post_activation(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = GluonBatchNormalization(name=name+"/bn")(x)
-    x = nn.Activation("relu", name=name+"/activ")(x)
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 

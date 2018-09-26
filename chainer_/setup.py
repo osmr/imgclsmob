@@ -27,5 +27,5 @@ setup(
     keywords='machine-learning deep-learning neuralnetwork image-classification chainer',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
-    install_requires=['requests', 'chainer'],
+    install_requires=['requests', 'chainer>=5.0.0b4'],
 )

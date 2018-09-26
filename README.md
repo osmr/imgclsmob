@@ -196,7 +196,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 348-MENet-12x1 (g=3) | 31.17 | 11.41 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet348_12x1_g3-1141-ac69b246.params.log)) |
 | 352-MENet-12x1 (g=8) | 34.70 | 13.75 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1375-85779b8a.params.log)) |
 | 456-MENet-24x1 (g=3) | 29.57 | 10.43 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-1043-6e777068.params.log)) |
-| MobileNet x0.25 | 48.37 | 24.10 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_wd4-2410-db312a26.params.log)) |
+| MobileNet x0.25 | 45.78 | 22.18 | 470,072 | 42.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2218-3185cdd2.params.log)) |
 | MobileNet x0.5 | 37.37 | 15.37 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_wd2-1537-5419ccc2.params.log)) |
 | MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_w3d4-1228-dc11727a.params.log)) |
 | MobileNet x1.0 | 29.25 | 10.03 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_w1-1003-b4fb8f1b.params.log)) |
@@ -266,7 +266,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 348-MENet-12x1 (g=3) | 30.10 | 10.92 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet348_12x1_g3-1092-66be1a18.pth.log)) |
 | 352-MENet-12x1 (g=8) | 33.31 | 13.08 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1308-e91ec72c.pth.log)) |
 | 456-MENet-24x1 (g=3) | 28.40 | 9.93 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-0993-cb9fd376.pth.log)) |
-| MobileNet x0.25 | 49.13 | 24.93 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_wd4-2493-c05b5fab.pth.log)) |
+| MobileNet x0.25 | 46.26 | 22.49 | 470,072 | 42.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2249-1ad5e8fe.pth.log)) |
 | MobileNet x0.5 | 38.12 | 15.99 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_wd2-1599-5883b38d.pth.log)) |
 | MobileNet x0.75 | 33.54 | 12.85 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_w3d4-1285-b8022fae.pth.log)) |
 | MobileNet x1.0 | 29.86 | 10.36 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.7/mobilenet_w1-1036-34f7a0cb.pth.log)) |
@@ -336,7 +336,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 348-MENet-12x1 (g=3) | 31.14 | 11.40 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet348_12x1_g3-1140-49feaea7.npz.log)) |
 | 352-MENet-12x1 (g=8) | 34.62 | 13.68 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet352_12x1_g8-1368-2d523fac.npz.log)) |
 | 456-MENet-24x1 (g=3) | 29.55 | 10.39 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet456_24x1_g3-1039-f68c36a2.npz.log)) |
-| MobileNet x0.25 | 48.60 | 24.28 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_wd4-2428-21ddc10d.npz.log)) |
+| MobileNet x0.25 | 45.85 | 22.16 | 470,072 | 42.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2216-09c50ab8.npz.log)) |
 | MobileNet x0.5 | 37.64 | 15.66 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_wd2-1566-d398ee98.npz.log)) |
 | MobileNet x0.75 | 33.24 | 12.52 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_w3d4-1252-6675b58c.npz.log)) |
 | MobileNet x1.0 | 29.71 | 10.31 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_w1-1031-3ecb405b.npz.log)) |
@@ -399,7 +399,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 348-MENet-12x1 (g=3) | 31.17 | 11.42 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet348_12x1_g3-1142-0715c866.h5.log)) |
 | 352-MENet-12x1 (g=8) | 34.69 | 13.75 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet352_12x1_g8-1375-9007c933.h5.log)) |
 | 456-MENet-24x1 (g=3) | 29.55 | 10.44 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet456_24x1_g3-1044-c090af59.h5.log)) |
-| MobileNet x0.25 | 48.36 | 24.09 | 470,072 | 42.30M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_wd4-2409-4dce6f98.h5.log)) |
+| MobileNet x0.25 | 45.80 | 22.17 | 470,072 | 42.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2217-fb7abda8.h5.log)) |
 | MobileNet x0.5 | 37.36 | 15.37 | 1,331,592 | 152.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_wd2-1537-042100af.h5.log)) |
 | MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_w3d4-1228-09a1eb55.h5.log)) |
 | MobileNet x1.0 | 29.24 | 10.03 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_w1-1003-ec69d89b.h5.log)) |

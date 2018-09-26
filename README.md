@@ -392,6 +392,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DarkNet Tiny | 43.35 | 19.46 | 1,042,104 | 496.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.56/darknet_tiny-1946-4a38281c.h5.log)) |
 | SqueezeNet v1.0 | 41.07 | 19.04 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.57/squeezenet_v1_0-1904-c2c87509.h5.log)) |
 | SqueezeNet v1.1 | 41.37 | 19.20 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.57/squeezenet_v1_1-1920-5557ef36.h5.log)) |
+| ShuffleNetV2 x0.5 | 41.43 | 18.85 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.63/shufflenetv2_wd2-1885-aa64e676.h5.log)) |
+| ShuffleNetV2 x1.0 | 33.82 | 13.49 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.63/shufflenetv2_w1-1349-f42e0113.h5.log)) |
 | 108-MENet-8x1 (g=3) | 46.09 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet108_8x1_g3-2237-beb28c9b.h5.log)) |
 | 128-MENet-8x1 (g=4) | 45.78 | 21.93 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet128_8x1_g4-2193-0a0193f2.h5.log)) |
 | 228-MENet-12x1 (g=3) | 35.02 | 14.01 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet228_12x1_g3-1401-954b3ba0.h5.log)) |

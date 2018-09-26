@@ -68,7 +68,7 @@ def group_conv1x1(x,
         Number of output channels.
     groups : int
         Number of groups.
-    name : str, default 'depthwise_conv3x3'
+    name : str, default 'group_conv1x1'
         Block name.
 
     Returns

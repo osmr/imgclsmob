@@ -155,7 +155,7 @@ def max_pool2d_ceil(x,
         Size of the max pooling windows.
     strides : int or tuple/list of 2 int
         Strides of the pooling.
-    padding : int or tuple/list of 2 int
+    padding : 'valid' or 'same'
         Padding value for pooling layer.
 
     Returns

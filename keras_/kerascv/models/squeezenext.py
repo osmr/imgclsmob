@@ -235,6 +235,7 @@ def squeezenext(channels,
         kernel_size=1,
         strides=1,
         name="features/final_block")
+    in_channels = final_block_channels
     x = nn.AvgPool2D(
         pool_size=7,
         strides=1,

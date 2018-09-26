@@ -41,7 +41,7 @@ def dense_conv(x,
 
     Returns
     -------
-    tuple of two keras.backend tensor/variable/symbol
+    keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
     x = GluonBatchNormalization(name=name + "/bn")(x)
@@ -78,7 +78,7 @@ def dense_conv1x1(x,
 
     Returns
     -------
-    tuple of two keras.backend tensor/variable/symbol
+    keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
     return dense_conv(
@@ -111,7 +111,7 @@ def dense_conv3x3(x,
 
     Returns
     -------
-    tuple of two keras.backend tensor/variable/symbol
+    keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
     return dense_conv(

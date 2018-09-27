@@ -60,9 +60,9 @@ def shuffle_conv(x,
 
 
 def shuffle_conv1x1(x,
-                  in_channels,
-                  out_channels,
-                  name="shuffle_conv1x1"):
+                    in_channels,
+                    out_channels,
+                    name="shuffle_conv1x1"):
     """
     1x1 version of the ShuffleNetV2 specific convolution block.
 

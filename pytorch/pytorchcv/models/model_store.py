@@ -57,6 +57,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('squeezenet_v1_1', '1938', '8dcd1cc5d955f3d154bfa5be20cd278f3e77f21b', 'v0.0.5'),
     ('shufflenetv2_wd2', '1938', 'd7b48d8226e74912afcb8b8327d94bc17172bdf9', 'v0.0.37'),
     ('shufflenetv2_w1', '1378', 'dc6a33c9d34e54e7f12eac4f731b20493bc0c57e', 'v0.0.48'),
+    ('shufflenetv2_w3d2', '1269', '536ad5b11bc169022ea6752cc288fb468b2856bf', 'v0.0.65'),
     ('menet108_8x1_g3', '2076', '7f47b37e10912a55ea85fefa616f822fc6b32859', 'v0.0.6'),
     ('menet128_8x1_g4', '2062', 'dd4531fdbabf464ffd3a7145ef7f3628871395ca', 'v0.0.6'),
     ('menet228_12x1_g3', '1328', '27991387c8fa27f98785d1910a76e9a9a19f42c5', 'v0.0.6'),

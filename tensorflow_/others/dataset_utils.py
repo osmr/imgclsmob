@@ -7,7 +7,7 @@ import sys
 import tarfile
 
 from six.moves import urllib
-import tensorflow as tf
+import tensorflow_ as tf
 
 LABELS_FILENAME = 'labels.txt'
 

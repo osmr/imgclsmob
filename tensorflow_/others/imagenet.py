@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import os
 from six.moves import urllib
-import tensorflow as tf
+import tensorflow_ as tf
 
 from .dataset_utils import *
 
@@ -53,11 +53,11 @@ def create_readable_names_for_imagenet_labels():
   (since 0 is reserved for the background class).
 
   Code is based on
-  https://github.com/tensorflow/models/blob/master/research/inception/inception/data/build_imagenet_data.py#L463
+  https://github.com/tensorflow_/models/blob/master/research/inception/inception/data/build_imagenet_data.py#L463
   """
 
   # pylint: disable=g-line-too-long
-  base_url = 'https://raw.githubusercontent.com/tensorflow/models/master/research/inception/inception/data/'
+  base_url = 'https://raw.githubusercontent.com/tensorflow_/models/master/research/inception/inception/data/'
   synset_url = '{}/imagenet_lsvrc_2015_synsets.txt'.format(base_url)
   synset_to_human_url = '{}/imagenet_metadata.txt'.format(base_url)
 

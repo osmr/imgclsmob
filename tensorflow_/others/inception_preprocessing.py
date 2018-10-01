@@ -18,9 +18,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import tensorflow as tf
+import tensorflow_ as tf
 
-from tensorflow.python.ops import control_flow_ops
+from tensorflow_.python.ops import control_flow_ops
 
 
 def apply_with_random_selector(x, func, num_cases):

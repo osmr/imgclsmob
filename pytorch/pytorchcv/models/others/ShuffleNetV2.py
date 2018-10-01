@@ -11,7 +11,7 @@ def _make_divisible(v, divisor, min_value=None):
     This function is taken from the original tf repo.
     It ensures that all layers have a channel number that is divisible by 8
     It can be seen here:
-    https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet.py
+    https://github.com/tensorflow_/models/blob/master/research/slim/nets/mobilenet/mobilenet.py
     :param v:
     :param divisor:
     :param min_value:

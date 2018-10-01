@@ -6,7 +6,7 @@ from __future__ import print_function
 from collections import namedtuple
 import functools
 
-import tensorflow as tf
+import tensorflow_ as tf
 
 slim = tf.contrib.slim
 

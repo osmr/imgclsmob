@@ -6,7 +6,7 @@ from .imagenet import get_split
 from .inception_preprocessing import preprocess_image
 from .mobilenet_v1 import *
 
-import tensorflow as tf
+import tensorflow_ as tf
 slim = tf.contrib.slim
 flags = tf.app.flags
 

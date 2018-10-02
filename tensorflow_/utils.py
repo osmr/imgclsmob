@@ -15,7 +15,7 @@ def prepare_tf_context(num_gpus,
 def prepare_model(model_name,
                   pretrained_model_file_path):
 
-    net = get_model(model_name, **kwargs)
+    net = get_model(model_name)
 
     inputs_desc = None
     if pretrained_model_file_path:

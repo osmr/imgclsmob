@@ -5,7 +5,7 @@ import logging
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-from tensorflow_.utils import prepare_tf_context, prepare_model, get_data_rec, get_data_loader, calc_net_weight_count,\
+from tensorflow_.utils import prepare_tf_context, prepare_model, get_data_loader, calc_net_weight_count,\
     validate
 
 
@@ -141,7 +141,7 @@ def main():
         batch_fn=batch_fn,
         use_rec=args.use_rec,
         dtype=args.dtype,
-        ctx=ctx,
+        # ctx=ctx,
         # calc_weight_count=(not log_file_exist),
         calc_weight_count=True,
         extended_log=True)

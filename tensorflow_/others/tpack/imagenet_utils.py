@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-# File: imagenet_utils.py
-
-
 import cv2
 import numpy as np
 import tqdm

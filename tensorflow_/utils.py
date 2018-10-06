@@ -4,8 +4,11 @@ import multiprocessing
 import numpy as np
 import cv2
 
-from tensorpack.tfutils import get_model_loader
+import tensorflow as tf
+from tensorpack import InputDesc, PlaceholderInput, TowerContext
+from tensorpack.tfutils import get_model_loader, model_utils
 from tensorpack.dataflow import imgaug, dataset, AugmentImageComponent, PrefetchDataZMQ, MultiThreadMapData, BatchData
+from tensorpack.utils import logger
 
 from .model_provider import get_model
 
@@ -126,3 +129,24 @@ def get_data(is_train,
         is_train=is_train,
         batch_size=batch_size,
         augmentors=augmentors)
+
+
+def calc_flops(model):
+    # manually build the graph with batch=1
+    input_desc = [
+        InputDesc(tf.float32, [1, 224, 224, 3], 'input'),
+        InputDesc(tf.int32, [1], 'label')
+    ]
+    input = PlaceholderInput()
+    input.setup(input_desc)
+    with TowerContext('', is_training=False):
+        model.build_graph(*input.get_input_tensors())
+    model_utils.describe_trainable_vars()
+
+    tf.profiler.profile(
+        tf.get_default_graph(),
+        cmd='op',
+        options=tf.profiler.ProfileOptionBuilder.float_operation())
+    logger.info("Note that TensorFlow counts flops in a different way from the paper.")
+    logger.info("TensorFlow counts multiply+add as two flops, however the paper counts them "
+                "as 1 flop because it can be executed in one instruction.")

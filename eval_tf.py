@@ -8,7 +8,7 @@ from tensorpack.utils.stats import RatioCounter
 from tensorpack.input_source import QueueInput, StagingInput
 
 from common.logger_utils import initialize_logging
-from tensorflow_.utils import prepare_tf_context, prepare_model, get_data
+from tensorflow_.utils import prepare_tf_context, prepare_model, get_data, calc_flops
 
 
 def parse_args():
@@ -34,6 +34,11 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved parameters if not None')
+    parser.add_argument(
+        '--calc-flops',
+        dest='calc_flops',
+        action='store_true',
+        help='calculate FLOPs')
 
     parser.add_argument(
         '--num-gpus',
@@ -82,6 +87,7 @@ def parse_args():
 def test(net,
          session_init,
          val_dataflow,
+         do_calc_flops=False,
          extended_log=False):
 
     pred_config = PredictConfig(
@@ -113,6 +119,9 @@ def test(net,
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
+    if do_calc_flops:
+        calc_flops(model=net)
+
 
 def main():
     args = parse_args()
@@ -142,6 +151,7 @@ def main():
         net=net,
         session_init=inputs_desc,
         val_dataflow=val_dataflow,
+        do_calc_flops=args.calc_flops,
         extended_log=True)
 
 

@@ -1,10 +1,11 @@
-from .models.shufflenet import *
+# from .models.shufflenet import *
+from .models.shufflenetv2 import *
 
 __all__ = ['get_model']
 
 
 _models = {
-    'shufflenet': ShufflenetModel,
+    'shufflenetv2_wd2': shufflenetv2_wd2,
 }
 
 

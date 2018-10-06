@@ -227,7 +227,7 @@ def get_config(model, nr_tower):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--gpu', default='0', help='comma separated list of GPU(s) to use.')
-    parser.add_argument('--data', default='../../imgclsmob_data/imagenet/', help='ILSVRC dataset dir')
+    parser.add_argument('--data', default='../imgclsmob_data/imagenet/', help='ILSVRC dataset dir')
     parser.add_argument('-r', '--ratio', type=float, default=0.5, choices=[1., 0.5])
     parser.add_argument('--group', type=int, default=8, choices=[3, 4, 8],
                         help="Number of groups for ShuffleNetV1")

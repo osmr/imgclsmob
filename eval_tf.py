@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument(
         '--data-dir',
         type=str,
-        default='../imgclsmob_data/imagenet2',
+        default='../imgclsmob_data/imagenet',
         help='training and validation pictures to use.')
 
     parser.add_argument(
@@ -68,12 +68,12 @@ def parse_args():
     parser.add_argument(
         '--log-packages',
         type=str,
-        default='tensorflow',
+        default='tensorflow-gpu',
         help='list of python packages for logging')
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='tensorflow, tensorpack',
+        default='tensorflow-gpu, tensorpack',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args

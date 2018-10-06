@@ -5,6 +5,7 @@ __all__ = ['ShufflenetModel']
 import math
 from abc import abstractmethod
 
+import tensorflow as tf
 from tensorpack import *
 from tensorpack.tfutils import argscope
 from tensorpack.tfutils.scope_utils import under_name_scope
@@ -47,12 +48,12 @@ class ImageNetModel(ModelDesc):
         """
         Scale the loss, for whatever reasons (e.g., gradient averaging, fp16 training, etc)
         """
-        self.loss_scale = 1.
+        self.loss_scale = 1.0
 
         """
         Label smoothing (See tf.losses.softmax_cross_entropy)
         """
-        self.label_smoothing = 0.
+        self.label_smoothing = 0.0
 
     def inputs(self):
         return [tf.placeholder(self.image_dtype, [None, self.image_shape, self.image_shape, 3], 'input'),
@@ -114,8 +115,12 @@ class ImageNetModel(ModelDesc):
             return image
 
     @staticmethod
-    def compute_loss_and_error(logits, label, label_smoothing=0.):
-        if label_smoothing == 0.:
+    def compute_loss_and_error(
+            logits,
+            label,
+            label_smoothing=0.0):
+
+        if label_smoothing == 0.0:
             loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=label)
         else:
             nclass = logits.shape[-1]
@@ -296,6 +301,14 @@ class ShufflenetModel(ImageNetModel):
             xl = GlobalAvgPooling('gap', xl)
             logits = FullyConnected('linear', xl, 1000)
             return logits
+
+
+def shufflenetv2_wd2(**kwargs):
+    return ShufflenetModel(
+        v2=True,
+        ratio=0.5,
+        group=8,
+        **kwargs)
 
 
 if __name__ == '__main__':

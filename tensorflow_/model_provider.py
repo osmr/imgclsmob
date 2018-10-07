@@ -1,4 +1,3 @@
-# from .models.shufflenet import *
 from .models.shufflenetv2 import *
 
 __all__ = ['get_model']

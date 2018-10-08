@@ -2,14 +2,116 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['depthwise_conv', 'channel_shuffle', 'ImageNetModel']
+__all__ = ['conv2d', 'se_block', 'depthwise_conv', 'channel_shuffle', 'ImageNetModel']
 
 from abc import abstractmethod
 import tensorflow as tf
-from tensorpack import ModelDesc, regularize_cost, layer_register
+from tensorpack import ModelDesc
+from tensorpack.models import Conv2D, AvgPooling, regularize_cost, layer_register
 from tensorpack.tfutils.summary import add_moving_summary
 from tensorpack.tfutils.scope_utils import under_name_scope
 from tensorpack.utils import logger
+
+
+def conv2d(x,
+           in_channels,
+           out_channels,
+           kernel_size,
+           strides=1,
+           padding=0,
+           groups=1,
+           use_bias=True,
+           name="conv2d"):
+    """
+    Convolution 2D layer wrapper.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    name : str, default 'conv2d'
+        Layer name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    if isinstance(kernel_size, int):
+        kernel_size = (kernel_size, kernel_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
+    if isinstance(padding, int):
+        padding = (padding, padding)
+
+    if (padding[0] == padding[1]) and (padding[0] == 0):
+        ke_padding = "valid"
+    elif (padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and (kernel_size[0] // 2 == padding[0]):
+        ke_padding = "same"
+    else:
+        raise NotImplementedError
+
+    x = Conv2D(
+        name,
+        x,
+        filters=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=ke_padding,
+        use_bias=use_bias,
+        split=groups)
+
+    return x
+
+
+def conv1x1(x,
+            out_channels,
+            strides=1,
+            use_bias=False,
+            name="conv1x1"):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    name : str, default 'conv1x1'
+        Layer name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return Conv2D(
+        name,
+        x,
+        filters=out_channels,
+        kernel_size=1,
+        strides=strides,
+        use_bias=use_bias,
+        name=name + "/conv")
 
 
 @layer_register(log_shape=True)
@@ -56,6 +158,53 @@ def channel_shuffle(x,
     x = tf.reshape(x, [-1, channels // groups, groups] + x_shape[-2:])
     x = tf.transpose(x, [0, 2, 1, 3, 4])
     x = tf.reshape(x, [-1, channels] + x_shape[-2:])
+    return x
+
+
+@layer_register(log_shape=True)
+def se_block(x,
+             channels,
+             reduction=16):
+    """
+    Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    channels : int
+        Number of channels.
+    reduction : int, default 16
+        Squeeze reduction value.
+    name : str, default 'se_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    assert(len(x.shape) == 4)
+    mid_cannels = channels // reduction
+    pool_size = x.shape[2:4]
+
+    w = AvgPooling(
+        "pool",
+        x,
+        pool_size=pool_size)
+    w = conv1x1(
+        w,
+        out_channels=mid_cannels,
+        use_bias=True,
+        name="conv1")
+    w = tf.nn.relu(w, name="actreluv")
+    w = conv1x1(
+        w,
+        out_channels=channels,
+        use_bias=True,
+        name="conv2")
+    w = tf.sigmoid(w, name="sigmoid")
+    x = x * w
     return x
 
 

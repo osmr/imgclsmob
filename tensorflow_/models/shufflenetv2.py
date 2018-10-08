@@ -4,9 +4,9 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2']
 
 import os
 import tensorflow as tf
-from tensorpack import *
+from tensorpack.models import Conv2D, BNReLU, BatchNorm, MaxPooling, AvgPooling, GlobalAvgPooling, FullyConnected,\
+    layer_register
 from tensorpack.tfutils import argscope
-
 from .common import ImageNetModel, depthwise_conv, channel_shuffle
 
 

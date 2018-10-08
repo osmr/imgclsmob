@@ -88,34 +88,36 @@ class LRScheduler(lr_scheduler.LRScheduler):
         return self.learning_rate
 
     def update(self, i, epoch):
-        T = epoch * self.n_iters + i
-        assert (T >= 0) and (T <= self.N)
+        t = epoch * self.n_iters + i
+        assert (t >= 0) and (t <= self.N)
 
-        T = float(T)
+        t = float(t)
 
         if epoch < self.warmup_epochs:
             # Warm-up Stage
             if self.warmup_mode == 'constant':
                 self.learning_rate = self.warmup_lr
-            elif self.warmup_mode == 'linear':
-                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) * T / self.warmup_N
-            elif self.warmup_mode == 'poly':
-                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) *\
-                                     pow(T / self.warmup_N, self.power)
-            elif self.warmup_mode == 'cosine':
-                self.learning_rate = self.warmup_lr + (self.base_lr - self.warmup_lr) *\
-                                     0.5 * (1.0 + cos(pi + pi * T / self.warmup_N))
             else:
-                raise NotImplementedError
+                base_lr_real = self.base_lr - self.warmup_lr
+                t_rel = t / self.warmup_N
+                if self.warmup_mode == 'linear':
+                    self.learning_rate = self.warmup_lr + base_lr_real * t_rel
+                elif self.warmup_mode == 'poly':
+                    self.learning_rate = self.warmup_lr + base_lr_real * pow(t_rel, self.power)
+                elif self.warmup_mode == 'cosine':
+                    self.learning_rate = self.warmup_lr + base_lr_real * 0.5 * (1.0 + cos(pi + pi * t_rel))
+                else:
+                    raise NotImplementedError
         else:
             if self.mode == 'step':
                 count = sum([1 for s in self.step if s <= epoch])
                 self.learning_rate = self.base_lr * pow(self.step_factor, count)
-            elif self.mode == 'poly':
-                self.learning_rate = self.target_lr + (self.base_lr - self.target_lr) * \
-                                     pow(1 - (T - self.warmup_N) / (self.N - self.warmup_N), self.power)
-            elif self.mode == 'cosine':
-                self.learning_rate = self.target_lr + (self.base_lr - self.target_lr) * \
-                                     (1 + cos(pi * (T - self.warmup_N) / (self.N - self.warmup_N))) / 2
             else:
-                raise NotImplementedError
+                base_lr_real = self.base_lr - self.target_lr
+                t_rel = (t - self.warmup_N) / (self.N - self.warmup_N)
+                if self.mode == 'poly':
+                    self.learning_rate = self.target_lr + base_lr_real * pow(1 - t_rel, self.power)
+                elif self.mode == 'cosine':
+                    self.learning_rate = self.target_lr + base_lr_real * (1 + cos(pi * t_rel)) / 2
+                else:
+                    raise NotImplementedError

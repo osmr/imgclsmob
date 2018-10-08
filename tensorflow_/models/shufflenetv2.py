@@ -93,8 +93,8 @@ class ShuffleNetV2(ImageNetModel):
 
     def get_logits(self, x):
 
-        with argscope([Conv2D, MaxPooling, AvgPooling, GlobalAvgPooling, BatchNorm], data_format='channels_first'),\
-             argscope(Conv2D, use_bias=False):
+        with argscope([Conv2D, MaxPooling, AvgPooling, GlobalAvgPooling, BatchNorm],
+                      data_format='channels_first'), argscope(Conv2D, use_bias=False):
 
             x = Conv2D(
                 'conv1',

@@ -59,9 +59,9 @@ def dense_conv(x,
 
 
 def dense_conv1x1(x,
-                   in_channels,
-                   out_channels,
-                   name="dense_conv1x1"):
+                  in_channels,
+                  out_channels,
+                  name="dense_conv1x1"):
     """
     1x1 version of the DenseNet specific convolution block.
 
@@ -92,9 +92,9 @@ def dense_conv1x1(x,
 
 
 def dense_conv3x3(x,
-                   in_channels,
-                   out_channels,
-                   name="dense_conv3x3"):
+                  in_channels,
+                  out_channels,
+                  name="dense_conv3x3"):
     """
     3x3 version of the DenseNet specific convolution block.
 

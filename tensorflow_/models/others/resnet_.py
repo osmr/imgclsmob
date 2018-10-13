@@ -5,24 +5,29 @@
     - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
+__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
            'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
 
 import os
 import tensorflow as tf
-from .common import conv2d, se_block
+# import tensorflow.layers as nn
+from tensorpack.models import Conv2D, BatchNorm, MaxPooling, AvgPooling, GlobalAvgPooling, FullyConnected,\
+    layer_register
+from tensorpack.tfutils import argscope
+import tensorflow.contrib.slim as slim
+from tensorflow_.models.common import ImageNetModel, conv2d, se_block
 
 
+@layer_register(log_shape=True)
 def res_conv(x,
              in_channels,
              out_channels,
              kernel_size,
              strides,
              padding,
-             activate,
-             name="res_conv"):
+             activate):
     """
     ResNet specific convolution block.
 
@@ -58,14 +63,14 @@ def res_conv(x,
         strides=strides,
         padding=padding,
         use_bias=False,
-        name=name + "/conv")
+        name="conv")
+    #x = BatchNorm("bn", x)
     x = tf.layers.batch_normalization(
         inputs=x,
         axis=1,
-        training=False,
-        name=name + "/bn")
+        name="bn")
     if activate:
-        x = tf.nn.relu(x, name=name + "/activ")
+        x = tf.nn.relu(x, name="activ")
     return x
 
 
@@ -99,14 +104,14 @@ def res_conv1x1(x,
         Resulted tensor.
     """
     return res_conv(
-        x=x,
+        name,
+        x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
-        activate=activate,
-        name=name)
+        activate=activate)
 
 
 def res_conv3x3(x,
@@ -139,21 +144,21 @@ def res_conv3x3(x,
         Resulted tensor.
     """
     return res_conv(
-        x=x,
+        name,
+        x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
-        activate=activate,
-        name=name)
+        activate=activate)
 
 
+@layer_register(log_shape=True)
 def res_block(x,
               in_channels,
               out_channels,
-              strides,
-              name="res_block"):
+              strides):
     """
     Simple ResNet block for residual path in ResNet unit.
 
@@ -181,23 +186,23 @@ def res_block(x,
         out_channels=out_channels,
         strides=strides,
         activate=True,
-        name=name + "/conv1")
+        name="conv1")
     x = res_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
         activate=False,
-        name=name + "/conv2")
+        name="conv2")
     return x
 
 
+@layer_register(log_shape=True)
 def res_bottleneck_block(x,
                          in_channels,
                          out_channels,
                          strides,
-                         conv1_stride,
-                         name="res_bottleneck_block"):
+                         conv1_stride):
     """
     ResNet bottleneck block for residual path in ResNet unit.
 
@@ -229,32 +234,32 @@ def res_bottleneck_block(x,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
         activate=True,
-        name=name + "/conv1")
+        name="conv1")
     x = res_conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
         activate=True,
-        name=name + "/conv2")
+        name="conv2")
     x = res_conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=1,
         activate=False,
-        name=name + "/conv3")
+        name="conv3")
     return x
 
 
+@layer_register(log_shape=True)
 def res_unit(x,
              in_channels,
              out_channels,
              strides,
              bottleneck,
              conv1_stride,
-             use_se,
-             name="res_unit"):
+             use_se):
     """
     ResNet unit with residual connection.
 
@@ -290,35 +295,35 @@ def res_unit(x,
             out_channels=out_channels,
             strides=strides,
             activate=False,
-            name=name + "/identity_conv")
+            name="identity_conv")
     else:
         identity = x
 
     if bottleneck:
         x = res_bottleneck_block(
-            x=x,
+            "body",
+            x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            conv1_stride=conv1_stride,
-            name=name + "/body")
+            conv1_stride=conv1_stride)
     else:
         x = res_block(
-            x=x,
+            "body",
+            x,
             in_channels=in_channels,
             out_channels=out_channels,
-            strides=strides,
-            name=name + "/body")
+            strides=strides)
 
     if use_se:
         x = se_block(
-            x=x,
-            channels=out_channels,
-            name=name + "/se")
+            "se",
+            x,
+            channels=out_channels)
 
     x = x + identity
 
-    x = tf.nn.relu(x, name=name + "activ")
+    x = tf.nn.relu(x, name="activ")
     return x
 
 
@@ -346,14 +351,20 @@ def res_init_block(x,
         Resulted tensor.
     """
     x = res_conv(
-        x=x,
+        name+"/conv",
+        x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=7,
         strides=2,
         padding=3,
-        activate=True,
-        name=name + "/conv")
+        activate=True)
+    # x = MaxPooling(
+    #     name+"/pool",
+    #     x,
+    #     pool_size=3,
+    #     strides=2,
+    #     padding='SAME')
     x = tf.layers.max_pooling2d(
         inputs=x,
         pool_size=3,
@@ -361,25 +372,23 @@ def res_init_block(x,
         padding='same',
         data_format='channels_first',
         name=name + "/pool")
+    # x = slim.layers.max_pool2d(
+    #     inputs=x,
+    #     kernel_size=[3, 3],
+    #     stride=2,
+    #     padding='SAME',
+    #     data_format=slim.layers.DATA_FORMAT_NCHW,
+    #     scope=name + "/pool")
     return x
 
 
-def resnet(x,
-           channels,
-           init_block_channels,
-           bottleneck,
-           conv1_stride,
-           use_se,
-           in_channels=3,
-           classes=1000):
+class ResNet(ImageNetModel):
     """
     ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
     implements SE-ResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
@@ -394,45 +403,60 @@ def resnet(x,
         Number of input channels.
     classes : int, default 1000
         Number of classification classes.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = res_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        for j, out_channels in enumerate(channels_per_stage):
-            strides = 2 if (j == 0) and (i != 0) else 1
-            x = res_unit(
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 bottleneck,
+                 conv1_stride,
+                 use_se,
+                 in_channels=3,
+                 classes=1000):
+        super(ResNet, self).__init__()
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.bottleneck = bottleneck
+        self.conv1_stride = conv1_stride
+        self.use_se = use_se
+        self.in_channels = in_channels
+        self.classes = classes
+        self.weight_decay = 4e-5
+
+    def get_logits(self, x):
+        with argscope([Conv2D, MaxPooling, AvgPooling, GlobalAvgPooling, BatchNorm], data_format='channels_first'):
+
+            x = res_init_block(
                 x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                bottleneck=bottleneck,
-                conv1_stride=conv1_stride,
-                use_se=use_se,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+                in_channels=self.in_channels,
+                out_channels=self.init_block_channels,
+                name="features/init_block")
+            in_channels = self.init_block_channels
+            for i, channels_per_stage in enumerate(self.channels):
+                for j, out_channels in enumerate(channels_per_stage):
+                    strides = 2 if (j == 0) and (i != 0) else 1
+                    x = res_unit(
+                        "features/stage{}/unit{}".format(i + 1, j + 1),
+                        x,
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        strides=strides,
+                        bottleneck=self.bottleneck,
+                        conv1_stride=self.conv1_stride,
+                        use_se=self.use_se)
+                    in_channels = out_channels
+            # x = AvgPooling(
+            #     "final_pool",
+            #     x,
+            #     pool_size=7,
+            #     strides=1)
+            x = GlobalAvgPooling("features/final_pool", x)
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output")
+            x = FullyConnected(
+                "output",
+                x,
+                units=self.classes)
 
-    return x
+            return x
 
 
 def get_resnet(blocks,
@@ -502,16 +526,13 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    def net_lambda(x):
-        return resnet(
-            x=x,
-            channels=channels,
-            init_block_channels=init_block_channels,
-            bottleneck=bottleneck,
-            conv1_stride=conv1_stride,
-            use_se=use_se,
-            **kwargs)
-    net = net_lambda
+    net = ResNet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        bottleneck=bottleneck,
+        conv1_stride=conv1_stride,
+        use_se=use_se,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -922,6 +943,8 @@ def seresnet200b(**kwargs):
 
 def _test():
     import numpy as np
+    # from tensorpack.tfutils import TowerContext
+    from tensorpack import PredictConfig, OfflinePredictor
 
     pretrained = False
 
@@ -961,47 +984,57 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        x = tf.placeholder(
-            dtype=tf.float32,
-            shape=(None, 3, 224, 224),
-            name='xx')
-        y_net = net(x)
+        pred_config = PredictConfig(
+            session_init=None,
+            model=net,
+            input_names=['input'],
+            output_names=['label'])
 
-        weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
-        print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet10 or weight_count == 5418792)
-        assert (model != resnet12 or weight_count == 5492776)
-        assert (model != resnet14 or weight_count == 5788200)
-        assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 831096)
-        assert (model != resnet18_wd2 or weight_count == 3055880)
-        assert (model != resnet18_w3d4 or weight_count == 6675352)
-        assert (model != resnet18 or weight_count == 11689512)
-        assert (model != resnet34 or weight_count == 21797672)
-        assert (model != resnet50 or weight_count == 25557032)
-        assert (model != resnet50b or weight_count == 25557032)
-        assert (model != resnet101 or weight_count == 44549160)
-        assert (model != resnet101b or weight_count == 44549160)
-        assert (model != resnet152 or weight_count == 60192808)
-        assert (model != resnet152b or weight_count == 60192808)
-        assert (model != resnet200 or weight_count == 64673832)
-        assert (model != resnet200b or weight_count == 64673832)
-        assert (model != seresnet18 or weight_count == 11778592)
-        assert (model != seresnet34 or weight_count == 21958868)
-        assert (model != seresnet50 or weight_count == 28088024)
-        assert (model != seresnet50b or weight_count == 28088024)
-        assert (model != seresnet101 or weight_count == 49326872)
-        assert (model != seresnet101b or weight_count == 49326872)
-        assert (model != seresnet152 or weight_count == 66821848)
-        assert (model != seresnet152b or weight_count == 66821848)
-        assert (model != seresnet200 or weight_count == 71835864)
-        assert (model != seresnet200b or weight_count == 71835864)
+        pred = OfflinePredictor(pred_config)
+        img = np.zeros((224, 224, 3), np.uint8)
+        prediction = pred([img])[0]
+        print(prediction)
+        pass
 
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
-            y = sess.run(y_net, feed_dict={x: np.zeros((1, 3, 224, 224), np.float32)})
-            assert (y.shape == (1, 1000))
-        tf.reset_default_graph()
+        # x = tf.placeholder(tf.float32, shape=(1, 224, 224, 3))
+        # y = tf.placeholder(tf.int32, shape=(1, ))
+        # with TowerContext('', is_training=False):
+        #     net.build_graph(x, y)
+        #     pass
+
+        # weight_count = ...
+        # print("m={}, {}".format(model.__name__, weight_count))
+        # assert (model != resnet10 or weight_count == 5418792)
+        # assert (model != resnet12 or weight_count == 5492776)
+        # assert (model != resnet14 or weight_count == 5788200)
+        # assert (model != resnet16 or weight_count == 6968872)
+        # assert (model != resnet18_wd4 or weight_count == 831096)
+        # assert (model != resnet18_wd2 or weight_count == 3055880)
+        # assert (model != resnet18_w3d4 or weight_count == 6675352)
+        # assert (model != resnet18 or weight_count == 11689512)
+        # assert (model != resnet34 or weight_count == 21797672)
+        # assert (model != resnet50 or weight_count == 25557032)
+        # assert (model != resnet50b or weight_count == 25557032)
+        # assert (model != resnet101 or weight_count == 44549160)
+        # assert (model != resnet101b or weight_count == 44549160)
+        # assert (model != resnet152 or weight_count == 60192808)
+        # assert (model != resnet152b or weight_count == 60192808)
+        # assert (model != resnet200 or weight_count == 64673832)
+        # assert (model != resnet200b or weight_count == 64673832)
+        # assert (model != seresnet18 or weight_count == 11778592)
+        # assert (model != seresnet34 or weight_count == 21958868)
+        # assert (model != seresnet50 or weight_count == 28088024)
+        # assert (model != seresnet50b or weight_count == 28088024)
+        # assert (model != seresnet101 or weight_count == 49326872)
+        # assert (model != seresnet101b or weight_count == 49326872)
+        # assert (model != seresnet152 or weight_count == 66821848)
+        # assert (model != seresnet152b or weight_count == 66821848)
+        # assert (model != seresnet200 or weight_count == 71835864)
+        # assert (model != seresnet200b or weight_count == 71835864)
+
+        # x = np.zeros((1, 3, 224, 224), np.float32)
+        # y = net.predict(x)
+        # assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from .models.resnet import *
-from .models.shufflenetv2 import *
+from tensorflow_.models.others.shufflenetv2 import *
 
 __all__ = ['get_model']
 

@@ -203,6 +203,15 @@ def prepare_dst_model(dst_fwk,
                     if weight.name:
                         dst_params.setdefault(weight.name, []).append(weight)
                         dst_params[weight.name] = (layer, weight)
+    elif dst_fwk == "tensorflow":
+        import tensorflow as tf
+        from tensorflow_.utils import prepare_model as prepare_model_tf
+        dst_net = prepare_model_tf(
+            model_name=dst_model,
+            classes=num_classes,
+            use_pretrained=False)
+        dst_param_keys = [v.name for v in tf.global_variables()]
+        dst_params = {v.name: v for v in tf.global_variables()}
     else:
         raise ValueError("Unsupported dst fwk: {}".format(dst_fwk))
 
@@ -443,6 +452,50 @@ def convert_gl2ke(dst_net,
     dst_net.save_weights(dst_params_file_path)
 
 
+def convert_gl2tf(dst_net,
+                  dst_params_file_path,
+                  dst_params,
+                  dst_param_keys,
+                  src_params,
+                  src_param_keys):
+    dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
+
+    src_param_keys.sort()
+    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys.sort()
+    dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
+
+    import tensorflow as tf
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            # assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape)
+            src_value = src_params[src_key]._data[0].asnumpy()
+            if len(src_value.shape) == 4:
+                # if not (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape):
+                #     a = 1
+                assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
+                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(3, 2, 1, 0))
+            elif len(src_value.shape) == 2:
+                assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
+                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(1, 0))
+            else:
+                # if not (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape):
+                #     a = 1
+                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape)
+            sess.run(dst_params[dst_key].assign(src_value))
+            # print(dst_params[dst_key].eval(sess))
+        saver = tf.train.Saver()
+        saver.save(
+            sess=sess,
+            save_path=dst_params_file_path)
+
+
 def convert_pt2pt(dst_params_file_path,
                   dst_params,
                   dst_param_keys,
@@ -589,6 +642,14 @@ def main():
             dst_param_keys=dst_param_keys,
             src_params=src_params,
             src_param_keys=src_param_keys)
+    elif args.src_fwk == "gluon" and args.dst_fwk == "tensorflow":
+        convert_gl2tf(
+            dst_net=dst_net,
+            dst_params_file_path=args.dst_params,
+            dst_params=dst_params,
+            dst_param_keys=dst_param_keys,
+            src_params=src_params,
+            src_param_keys=src_param_keys)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         convert_pt2gl(
             dst_net=dst_net,
@@ -608,6 +669,8 @@ def main():
             src_arg_params=src_arg_params,
             src_model=args.src_model,
             ctx=ctx)
+    else:
+        raise NotImplementedError
 
     logging.info('Convert {}-model {} into {}-model {}'.format(
         args.src_fwk, args.src_model, args.dst_fwk, args.dst_model))

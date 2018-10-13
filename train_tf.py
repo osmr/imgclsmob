@@ -9,7 +9,7 @@ from tensorpack import ModelSaver, ScheduledHyperParamSetter, EstimatedTimeLeft,
     DataParallelInferenceRunner, TrainConfig, SyncMultiGPUTrainerParameterServer, launch_train_with_config
 
 from common.logger_utils import initialize_logging
-from tensorflow_.utils import prepare_tf_context, prepare_model, get_data
+from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data
 
 
 def parse_args():

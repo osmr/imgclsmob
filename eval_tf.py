@@ -8,7 +8,7 @@ from tensorpack.utils.stats import RatioCounter
 from tensorpack.input_source import QueueInput, StagingInput
 
 from common.logger_utils import initialize_logging
-from tensorflow_.utils import prepare_tf_context, prepare_model, get_data, calc_flops
+from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data, calc_flops
 
 
 def parse_args():

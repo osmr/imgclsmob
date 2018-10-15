@@ -220,6 +220,8 @@ def load_model(sess,
             sess.run(dst_params[src_key].assign(src_params[src_key]))
         elif not ignore_extra:
             raise Exception("The file `{}` is incompatible with the model".format(file_path))
+        else:
+            print("Key `{}` is ignored".format(src_key))
 
 
 def download_model(sess,

@@ -72,6 +72,29 @@ def conv2d(x,
         use_bias=use_bias,
         name=name)
 
+    # import numpy as np
+    # if tf_padding == 'same':
+    #     tf_padding = 'SAME'
+    # elif tf_padding == 'valid':
+    #     tf_padding = 'VALID'
+    # else:
+    #     raise ValueError('Invalid padding: ' + str(tf_padding))
+    # x = tf.nn.convolution(
+    #     input=x,
+    #     filter=tf.Variable(np.zeros(kernel_size + (int(x.shape[1]), out_channels), np.float32),
+    #                        dtype=tf.float32, name=name + "/kernel"),
+    #     dilation_rate=(1, 1),
+    #     strides=strides,
+    #     padding=tf_padding,
+    #     # name=name + "/kernel1",
+    #     data_format='NCHW')
+    # if use_bias:
+    #     x = tf.nn.bias_add(
+    #         value=x,
+    #         bias=tf.Variable(np.zeros((out_channels,), np.float32), dtype=tf.float32, name=name + "/bias"),
+    #         data_format='NCHW')
+    #         # name=name + "/bias1")
+
     return x
 
 

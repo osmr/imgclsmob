@@ -999,40 +999,40 @@ def _test():
     pretrained = False
 
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnet16,
-        resnet18_wd4,
-        resnet18_wd2,
-        resnet18_w3d4,
+        # resnet10,
+        # resnet12,
+        # resnet14,
+        # resnet16,
+        # resnet18_wd4,
+        # resnet18_wd2,
+        # resnet18_w3d4,
 
         resnet18,
-        resnet34,
-        resnet50,
-        resnet50b,
-        resnet101,
-        resnet101b,
-        resnet152,
-        resnet152b,
-        resnet200,
-        resnet200b,
-
-        seresnet18,
-        seresnet34,
-        seresnet50,
-        seresnet50b,
-        seresnet101,
-        seresnet101b,
-        seresnet152,
-        seresnet152b,
-        seresnet200,
-        seresnet200b,
+        # resnet34,
+        # resnet50,
+        # resnet50b,
+        # resnet101,
+        # resnet101b,
+        # resnet152,
+        # resnet152b,
+        # resnet200,
+        # resnet200b,
+        #
+        # seresnet18,
+        # seresnet34,
+        # seresnet50,
+        # seresnet50b,
+        # seresnet101,
+        # seresnet101b,
+        # seresnet152,
+        # seresnet152b,
+        # seresnet200,
+        # seresnet200b,
     ]
 
     for model in models:
 
-        net, _ = model(pretrained=pretrained)
+        net = model(pretrained=pretrained)
 
         x = tf.placeholder(
             dtype=tf.float32,
@@ -1072,7 +1072,8 @@ def _test():
 
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            y = sess.run(y_net, feed_dict={x: np.zeros((1, 3, 224, 224), np.float32)})
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()
 

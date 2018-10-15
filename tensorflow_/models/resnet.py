@@ -462,6 +462,13 @@ def get_resnet(blocks,
         Whether to load the pretrained weights for model.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    Function
+        Model script.
+    Dict or None
+        Model parameter dict.
     """
 
     if blocks == 10:
@@ -513,16 +520,18 @@ def get_resnet(blocks,
             **kwargs)
     net = net_lambda
 
+    param_dict = None
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         # from .model_store import get_model_file
+        # param_dict =
         # net.load_weights(
         #     filepath=get_model_file(
         #         model_name=model_name,
         #         local_model_store_dir_path=root))
 
-    return net
+    return net, param_dict
 
 
 def resnet10(**kwargs):
@@ -959,7 +968,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net, _ = model(pretrained=pretrained)
 
         x = tf.placeholder(
             dtype=tf.float32,

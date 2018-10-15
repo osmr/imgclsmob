@@ -41,7 +41,7 @@ def get_model_file(model_name,
     """
     error, sha1_hash, repo_release_tag = get_model_name_suffix_data(model_name)
     short_sha1 = sha1_hash[:8]
-    file_name = '{name}-{error}-{short_sha1}.tfm'.format(
+    file_name = '{name}-{error}-{short_sha1}.tf.npz'.format(
         name=model_name,
         error=error,
         short_sha1=short_sha1)

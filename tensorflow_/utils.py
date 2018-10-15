@@ -3,6 +3,20 @@ import tensorflow as tf
 from .model_provider import get_model
 
 
+def load_model_params(net,
+                      param_dict,
+                      sess,
+                      ignore_missing=False):
+    for param_name, param_data in param_dict:
+        with tf.variable_scope(param_name, reuse=True):
+            try:
+                var = tf.get_variable(param_name)
+                sess.run(var.assign(param_data))
+            except ValueError:
+                if not ignore_missing:
+                    raise
+
+
 def prepare_model(model_name,
                   classes,
                   use_pretrained):

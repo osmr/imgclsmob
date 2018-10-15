@@ -137,8 +137,11 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
+    classes = 1000
     net, inputs_desc = prepare_model(
         model_name=args.model,
+        classes=classes,
+        use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip())
 
     val_dataflow = get_data(

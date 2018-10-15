@@ -1,6 +1,14 @@
+import numpy as np
 import tensorflow as tf
 
 from .model_provider import get_model
+
+
+def save_model_params(sess,
+                      file_path):
+    # assert file_path.endswith('.npz')
+    param_dict = {v.name: v.eval(sess) for v in tf.global_variables()}
+    np.savez_compressed(file_path, **param_dict)
 
 
 def load_model_params(net,

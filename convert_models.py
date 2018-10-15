@@ -480,7 +480,7 @@ def convert_gl2tf(dst_net,
                 # if not (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape):
                 #     a = 1
                 assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
-                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(3, 2, 1, 0))
+                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 1, 0))
             elif len(src_value.shape) == 2:
                 assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
                 src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(1, 0))
@@ -490,10 +490,14 @@ def convert_gl2tf(dst_net,
                 assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape)
             sess.run(dst_params[dst_key].assign(src_value))
             # print(dst_params[dst_key].eval(sess))
-        saver = tf.train.Saver()
-        saver.save(
+        # saver = tf.train.Saver()
+        # saver.save(
+        #     sess=sess,
+        #     save_path=dst_params_file_path)
+        from tensorflow_.utils import save_model_params
+        save_model_params(
             sess=sess,
-            save_path=dst_params_file_path)
+            file_path=dst_params_file_path)
 
 
 def convert_pt2pt(dst_params_file_path,

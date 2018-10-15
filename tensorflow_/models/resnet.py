@@ -441,6 +441,7 @@ def get_resnet(blocks,
                width_scale=1.0,
                model_name=None,
                pretrained=False,
+               sess=None,
                root=os.path.join('~', '.tensorflow', 'models'),
                **kwargs):
     """
@@ -460,6 +461,8 @@ def get_resnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
@@ -509,8 +512,20 @@ def get_resnet(blocks,
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         init_block_channels = int(init_block_channels * width_scale)
 
-    def net_lambda(x):
-        return resnet(
+    if pretrained and ((model_name is None) or (not model_name)):
+        raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+
+    def net_lambda(x,
+                   channels=channels,
+                   init_block_channels=init_block_channels,
+                   bottleneck=bottleneck,
+                   conv1_stride=conv1_stride,
+                   use_se=use_se,
+                   pretrained=pretrained,
+                   sess=sess,
+                   model_name=model_name,
+                   root=root):
+        y_net = resnet(
             x=x,
             channels=channels,
             init_block_channels=init_block_channels,
@@ -518,20 +533,15 @@ def get_resnet(blocks,
             conv1_stride=conv1_stride,
             use_se=use_se,
             **kwargs)
-    net = net_lambda
+        if pretrained:
+            from .model_store import download_model
+            download_model(
+                sess=sess,
+                model_name=model_name,
+                local_model_store_dir_path=root)
+        return y_net
 
-    param_dict = None
-    if pretrained:
-        if (model_name is None) or (not model_name):
-            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        # from .model_store import get_model_file
-        # param_dict =
-        # net.load_weights(
-        #     filepath=get_model_file(
-        #         model_name=model_name,
-        #         local_model_store_dir_path=root))
-
-    return net, param_dict
+    return net_lambda
 
 
 def resnet10(**kwargs):
@@ -543,6 +553,8 @@ def resnet10(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -558,6 +570,8 @@ def resnet12(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -573,6 +587,8 @@ def resnet14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -588,6 +604,8 @@ def resnet16(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -603,6 +621,8 @@ def resnet18_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -618,6 +638,8 @@ def resnet18_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -633,6 +655,8 @@ def resnet18_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -647,6 +671,8 @@ def resnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -661,6 +687,8 @@ def resnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -675,6 +703,8 @@ def resnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -690,6 +720,8 @@ def resnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -704,6 +736,8 @@ def resnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -719,6 +753,8 @@ def resnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -733,6 +769,8 @@ def resnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -748,6 +786,8 @@ def resnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -763,6 +803,8 @@ def resnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -778,6 +820,8 @@ def resnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -792,6 +836,8 @@ def seresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -806,6 +852,8 @@ def seresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -820,6 +868,8 @@ def seresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -835,6 +885,8 @@ def seresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -849,6 +901,8 @@ def seresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -864,6 +918,8 @@ def seresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -878,6 +934,8 @@ def seresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -893,6 +951,8 @@ def seresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -908,6 +968,8 @@ def seresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
@@ -923,6 +985,8 @@ def seresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    sess: Session or None, default None
+        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """

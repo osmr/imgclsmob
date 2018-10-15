@@ -2,7 +2,7 @@
     Model store which provides pretrained models.
 """
 
-__all__ = ['get_model_file']
+__all__ = ['get_model_file', 'load_model', 'download_model']
 
 import os
 import zipfile
@@ -31,7 +31,7 @@ def get_model_file(model_name,
     ----------
     model_name : str
         Name of the model.
-    local_model_store_dir_path : str, default $KERAS_HOME/models
+    local_model_store_dir_path : str, default $TENSORFLOW_HOME/models
         Location for keeping the model parameters.
 
     Returns
@@ -183,3 +183,66 @@ def _check_sha1(filename, sha1_hash):
             sha1.update(data)
 
     return sha1.hexdigest() == sha1_hash
+
+
+def load_model(sess,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    sess: Session or None, default None
+        A Session to use to load the weights.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import numpy as np
+    import tensorflow as tf
+
+    assert os.path.exists(file_path) and os.path.isfile(file_path)
+    if file_path.endswith('.npy'):
+        src_params = np.load(file_path, encoding='latin1').item()
+    elif file_path.endswith('.npz'):
+        src_params = dict(np.load(file_path))
+    else:
+        raise NotImplementedError
+    dst_params = {v.name: v for v in tf.global_variables()}
+    if sess is None:
+        sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    for src_key in src_params.keys():
+        if src_key in dst_params.keys():
+            assert (src_params[src_key].shape == tuple(dst_params[src_key].get_shape().as_list()))
+            sess.run(dst_params[src_key].assign(src_params[src_key]))
+        elif not ignore_extra:
+            raise Exception("The file `{}` is incompatible with the model".format(file_path))
+
+
+def download_model(sess,
+                   model_name,
+                   local_model_store_dir_path=os.path.join('~', '.tensorflow', 'models'),
+                   ignore_extra=True):
+    """
+    Load model state dictionary from a file with downloading it if necessary.
+
+    Parameters
+    ----------
+    sess: Session or None, default None
+        A Session to use to load the weights.
+    model_name : str
+        Name of the model.
+    local_model_store_dir_path : str, default $TENSORFLOW_HOME/models
+        Location for keeping the model parameters.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    load_model(
+        sess=sess,
+        file_path=get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=local_model_store_dir_path),
+        ignore_extra=ignore_extra)

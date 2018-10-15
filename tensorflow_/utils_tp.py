@@ -224,9 +224,13 @@ def prepare_tf_context(num_gpus,
 
 
 def prepare_model(model_name,
+                  classes,
+                  use_pretrained,
                   pretrained_model_file_path):
+    kwargs = {'pretrained': use_pretrained,
+              'classes': classes}
 
-    net = get_model(model_name)
+    net = get_model(model_name, **kwargs)
     net = ImageNetModel(model_lambda=net)
 
     inputs_desc = None

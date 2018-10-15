@@ -17,7 +17,7 @@ from tensorpack.models import Conv2D, BatchNorm, MaxPooling, AvgPooling, GlobalA
     layer_register
 from tensorpack.tfutils import argscope
 import tensorflow.contrib.slim as slim
-from tensorflow_.models.common import ImageNetModel, conv2d, se_block
+from .common_ import ImageNetModel, conv2d, se_block
 
 
 @layer_register(log_shape=True)

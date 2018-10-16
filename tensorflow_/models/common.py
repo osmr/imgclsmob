@@ -2,8 +2,9 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'se_block', 'channel_shuffle']
+__all__ = ['conv2d', 'conv1x1', 'maxpool2d', 'se_block', 'channel_shuffle']
 
+import math
 import tensorflow as tf
 
 
@@ -52,49 +53,20 @@ def conv2d(x,
     if isinstance(padding, int):
         padding = (padding, padding)
 
-    if (padding[0] == padding[1]) and (padding[0] == 0):
-        tf_padding = "valid"
-    elif (padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and (kernel_size[0] // 2 == padding[0]):
-        tf_padding = "same"
-    else:
-        raise NotImplementedError
-
     if groups != 1:
         raise NotImplementedError
 
+    if (padding[0] > 0) or (padding[1] > 0):
+        x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
     x = tf.layers.conv2d(
         inputs=x,
         filters=out_channels,
         kernel_size=kernel_size,
         strides=strides,
-        padding=tf_padding,
+        padding='valid',
         data_format='channels_first',
         use_bias=use_bias,
         name=name)
-
-    # import numpy as np
-    # if tf_padding == 'same':
-    #     tf_padding = 'SAME'
-    # elif tf_padding == 'valid':
-    #     tf_padding = 'VALID'
-    # else:
-    #     raise ValueError('Invalid padding: ' + str(tf_padding))
-    # x = tf.nn.convolution(
-    #     input=x,
-    #     filter=tf.Variable(np.zeros(kernel_size + (int(x.shape[1]), out_channels), np.float32),
-    #                        dtype=tf.float32, name=name + "/kernel"),
-    #     dilation_rate=(1, 1),
-    #     strides=strides,
-    #     padding=tf_padding,
-    #     # name=name + "/kernel1",
-    #     data_format='NCHW')
-    # if use_bias:
-    #     x = tf.nn.bias_add(
-    #         value=x,
-    #         bias=tf.Variable(np.zeros((out_channels,), np.float32), dtype=tf.float32, name=name + "/bias"),
-    #         data_format='NCHW')
-    #         # name=name + "/bias1")
-
     return x
 
 
@@ -135,6 +107,61 @@ def conv1x1(x,
         strides=strides,
         use_bias=use_bias,
         name=name + "/conv")
+
+
+def maxpool2d(x,
+              pool_size,
+              strides,
+              padding,
+              ceil_mode=False,
+              name=None):
+    """
+    Max pooling operation for two dimensional (spatial) data.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    pool_size : int or tuple/list of 2 int
+        Size of the max pooling windows.
+    strides : int or tuple/list of 2 int
+        Strides of the pooling.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    ceil_mode : bool, default False
+        When `True`, will use ceil instead of floor to compute the output shape.
+    name : str, default 'conv2d'
+        Layer name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    if isinstance(padding, int):
+        padding = (padding, padding)
+
+    if ceil_mode:
+        height = x.shape[2]
+        out_height = float(height + 2 * padding[0] - pool_size[0]) / strides[0] + 1.0
+        if math.ceil(out_height) > math.floor(out_height):
+            padding[0] += 1
+        width = x.shape[3]
+        out_width = float(width + 2 * padding[1] - pool_size[1]) / strides[1] + 1.0
+        if math.ceil(out_width) > math.floor(out_width):
+            padding[1] += 1
+
+    if (padding[0] > 0) or (padding[1] > 0):
+        x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
+
+    x = tf.layers.max_pooling2d(
+        inputs=x,
+        pool_size=pool_size,
+        strides=strides,
+        padding='valid',
+        data_format='channels_first',
+        name=name)
+    return x
 
 
 def channel_shuffle(x,

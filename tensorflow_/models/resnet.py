@@ -12,7 +12,7 @@ __all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
 
 import os
 import tensorflow as tf
-from .common import conv2d, se_block
+from .common import conv2d, maxpool2d, se_block
 
 
 def res_conv(x,
@@ -354,12 +354,11 @@ def res_init_block(x,
         padding=3,
         activate=True,
         name=name + "/conv")
-    x = tf.layers.max_pooling2d(
-        inputs=x,
+    x = maxpool2d(
+        x=x,
         pool_size=3,
         strides=2,
-        padding='same',
-        data_format='channels_first',
+        padding=1,
         name=name + "/pool")
     return x
 

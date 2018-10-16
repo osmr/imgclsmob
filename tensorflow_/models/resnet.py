@@ -12,7 +12,7 @@ __all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
 
 import os
 import tensorflow as tf
-from .common import conv2d, maxpool2d, se_block
+from .common import conv2d, batchnorm, maxpool2d, se_block
 
 
 def res_conv(x,
@@ -59,9 +59,8 @@ def res_conv(x,
         padding=padding,
         use_bias=False,
         name=name + "/conv")
-    x = tf.layers.batch_normalization(
-        inputs=x,
-        axis=1,
+    x = batchnorm(
+        x=x,
         training=False,
         name=name + "/bn")
     if activate:

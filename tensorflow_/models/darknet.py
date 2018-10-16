@@ -7,7 +7,7 @@ __all__ = ['darknet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 
 import os
 import tensorflow as tf
-from .common import conv2d, maxpool2d
+from .common import conv2d, batchnorm, maxpool2d
 
 
 def dark_conv(x,
@@ -47,9 +47,8 @@ def dark_conv(x,
         padding=padding,
         use_bias=False,
         name=name + "/conv")
-    x = tf.layers.batch_normalization(
-        inputs=x,
-        axis=1,
+    x = batchnorm(
+        x=x,
         training=False,
         name=name + "/bn")
     x = tf.nn.leaky_relu(x, alpha=0.1, name=name + "/activ")

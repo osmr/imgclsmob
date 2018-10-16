@@ -2,7 +2,7 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'maxpool2d', 'se_block', 'channel_shuffle']
+__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'se_block', 'channel_shuffle']
 
 import math
 import tensorflow as tf
@@ -109,6 +109,42 @@ def conv1x1(x,
         name=name + "/conv")
 
 
+def batchnorm(x,
+              momentum=0.9,
+              epsilon=1e-5,
+              training=False,
+              name=None):
+    """
+    Batch normalization layer.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    momentum : float, default 0.9
+        Momentum for the moving average.
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'conv2d'
+        Layer name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    x = tf.layers.batch_normalization(
+        inputs=x,
+        axis=1,
+        momentum=momentum,
+        epsilon=epsilon,
+        training=training,
+        name=name)
+    return x
+
+
 def maxpool2d(x,
               pool_size,
               strides,
@@ -152,7 +188,7 @@ def maxpool2d(x,
             padding[1] += 1
 
     if (padding[0] > 0) or (padding[1] > 0):
-        x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
+        x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT")
 
     x = tf.layers.max_pooling2d(
         inputs=x,

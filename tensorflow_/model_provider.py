@@ -1,4 +1,5 @@
 from .models.resnet import *
+from .models.darknet import *
 # from tensorflow_.models.others.shufflenetv2 import *
 
 __all__ = ['get_model']
@@ -34,6 +35,10 @@ _models = {
     'seresnet152b': seresnet152b,
     'seresnet200': seresnet200,
     'seresnet200b': seresnet200b,
+
+    'darknet_ref': darknet_ref,
+    'darknet_tiny': darknet_tiny,
+    'darknet19': darknet19,
 
     # 'shufflenetv2_wd2': shufflenetv2_wd2,
 }

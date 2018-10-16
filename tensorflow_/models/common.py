@@ -112,7 +112,7 @@ def conv1x1(x,
 def maxpool2d(x,
               pool_size,
               strides,
-              padding,
+              padding=0,
               ceil_mode=False,
               name=None):
     """
@@ -126,7 +126,7 @@ def maxpool2d(x,
         Size of the max pooling windows.
     strides : int or tuple/list of 2 int
         Strides of the pooling.
-    padding : int or tuple/list of 2 int
+    padding : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
     ceil_mode : bool, default False
         When `True`, will use ceil instead of floor to compute the output shape.

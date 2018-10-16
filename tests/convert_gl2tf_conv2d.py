@@ -16,7 +16,7 @@ class GluonModel(HybridBlock):
                 kernel_size=7,
                 strides=2,
                 padding=3,
-                use_bias=False,
+                use_bias=True,
                 in_channels=3)
 
     def hybrid_forward(self, F, x):
@@ -111,7 +111,7 @@ def tensorflow_model(x):
         kernel_size=7,
         strides=2,
         padding=3,
-        use_bias=False,
+        use_bias=True,
         name="conv")
     return x
 
@@ -123,6 +123,7 @@ def main():
         # w = np.random.randint(10, size=(64, 3, 7, 7)).astype(np.float32)
         # x = np.random.randint(10, size=(1, 3, 224, 224)).astype(np.float32)
         w = np.random.randn(64, 3, 7, 7).astype(np.float32)
+        b = np.random.randn(64, ).astype(np.float32)
         x = np.random.randn(10, 3, 224, 224).astype(np.float32)
 
         gl_model = GluonModel()
@@ -130,6 +131,7 @@ def main():
         ctx = mx.cpu()
         gl_params = gl_model._collect_params_with_prefix()
         gl_params['conv.weight']._load_init(mx.nd.array(w, ctx), ctx)
+        gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
 
         gl_x = mx.nd.array(x, ctx)
         gl_y = gl_model(gl_x).asnumpy()
@@ -143,6 +145,7 @@ def main():
         with tf.Session() as sess:
             tf_w = np.transpose(w, axes=(2, 3, 1, 0))
             sess.run(tf_params['conv/kernel:0'].assign(tf_w))
+            sess.run(tf_params['conv/bias:0'].assign(b))
 
             tf_y = sess.run(tf_model, feed_dict={xx: x})
         tf.reset_default_graph()

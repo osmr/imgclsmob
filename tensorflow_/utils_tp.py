@@ -33,7 +33,7 @@ class ImageNetModel(ModelDesc):
         """
         Whether the image is BGR or RGB. If using DataFlow, then it should be BGR.
         """
-        self.image_bgr = True
+        self.image_bgr = False
 
         """
         To apply on normalization parameters, use '.*/W|.*/gamma|.*/beta'
@@ -93,13 +93,13 @@ class ImageNetModel(ModelDesc):
         with tf.name_scope('image_preprocess'):
             if image.dtype.base_dtype != tf.float32:
                 image = tf.cast(image, tf.float32)
-            mean = [0.485, 0.456, 0.406]    # rgb
-            std = [0.229, 0.224, 0.225]
+            mean = np.array([0.485, 0.456, 0.406], np.float32) * 255.0    # rgb
+            std = np.array([0.229, 0.224, 0.225], np.float32) * 255.0
             if self.image_bgr:
                 mean = mean[::-1]
                 std = std[::-1]
-            image_mean = tf.constant(mean, dtype=tf.float32) * 255.0
-            image_std = tf.constant(std, dtype=tf.float32) * 255.0
+            image_mean = tf.constant(mean, dtype=tf.float32)
+            image_std = tf.constant(std, dtype=tf.float32)
             image = (image - image_mean) / image_std
             return image
 
@@ -122,7 +122,7 @@ class ImageNetModel(ModelDesc):
 
         def prediction_incorrect(logits, label, topk=1, name='incorrect_vector'):
             with tf.name_scope('prediction_incorrect'):
-                x = tf.logical_not(tf.nn.in_top_k(logits, label, topk))
+                x = tf.logical_not(tf.nn.in_top_k(predictions=logits, targets=label, k=topk))
             return tf.cast(x, tf.float32, name=name)
 
         error_top1 = prediction_incorrect(logits, label, topk=1, name='wrong-top1')
@@ -191,6 +191,7 @@ def get_imagenet_dataflow(datadir,
         def mapf(dp):
             fname, cls = dp
             im = cv2.imread(fname, cv2.IMREAD_COLOR)
+            # print("fname={}".format(fname))
             im = aug.augment(im)
             return im, cls
         ds = MultiThreadMapData(ds, parallel, mapf, buffer_size=2000, strict=True)

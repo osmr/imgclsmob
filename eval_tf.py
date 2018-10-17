@@ -106,6 +106,8 @@ def test(net,
         batch_size = err_top1_val.shape[0]
         err_top1.feed(err_top1_val.sum(), batch_size)
         err_top5.feed(err_top5_val.sum(), batch_size)
+        # print("err_top1_val={}".format(err_top1_val.sum() / batch_size))
+        # print("err_top5_val={}".format(err_top5_val.sum() / batch_size))
 
     err_top1_val = err_top1.ratio
     err_top5_val = err_top5.ratio

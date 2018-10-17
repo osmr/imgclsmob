@@ -91,7 +91,7 @@ class ShuffleNetV2(ImageNetModel):
         self.classes = classes
         self.weight_decay = 4e-5
 
-    def get_logits(self, x):
+    def get_logits(self, x, training=False):
 
         with argscope([Conv2D, MaxPooling, AvgPooling, GlobalAvgPooling, BatchNorm],
                       data_format='channels_first'), argscope(Conv2D, use_bias=False):
@@ -159,7 +159,7 @@ def get_shufflenetv2(ratio,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
         **kwargs)
-    return net
+    return net.get_logits
 
 
 def shufflenetv2_wd2(**kwargs):

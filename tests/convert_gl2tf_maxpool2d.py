@@ -105,7 +105,7 @@ def main():
 
     success = True
     for i in range(10):
-        x = np.random.randn(1, 1, 224, 224).astype(np.float32)
+        x = np.random.randn(10, 10, 224, 224).astype(np.float32)
 
         gl_model = GluonModel()
 
@@ -117,7 +117,7 @@ def main():
 
         xx = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 1, 224, 224),
+            shape=(None, 10, 224, 224),
             name='xx')
         tf_model = tensorflow_model(xx)
         with tf.Session() as sess:

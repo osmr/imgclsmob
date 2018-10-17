@@ -15,6 +15,7 @@ def dark_conv(x,
               out_channels,
               kernel_size,
               padding,
+              training,
               name="dark_conv"):
     """
     DarkNet specific convolution block.
@@ -31,6 +32,8 @@ def dark_conv(x,
         Convolution window size.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv'
         Block name.
 
@@ -49,7 +52,7 @@ def dark_conv(x,
         name=name + "/conv")
     x = batchnorm(
         x=x,
-        training=False,
+        training=training,
         name=name + "/bn")
     x = tf.nn.leaky_relu(x, alpha=0.1, name=name + "/activ")
     return x
@@ -58,6 +61,7 @@ def dark_conv(x,
 def dark_conv1x1(x,
                  in_channels,
                  out_channels,
+                 training,
                  name="dark_conv1x1"):
     """
     1x1 version of the DarkNet specific convolution block.
@@ -70,6 +74,8 @@ def dark_conv1x1(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv1x1'
         Block name.
 
@@ -84,12 +90,14 @@ def dark_conv1x1(x,
         out_channels=out_channels,
         kernel_size=1,
         padding=0,
+        training=training,
         name=name)
 
 
 def dark_conv3x3(x,
                  in_channels,
                  out_channels,
+                 training,
                  name="dark_conv3x3"):
     """
     3x3 version of the DarkNet specific convolution block.
@@ -102,6 +110,8 @@ def dark_conv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv3x3'
         Block name.
 
@@ -116,6 +126,7 @@ def dark_conv3x3(x,
         out_channels=out_channels,
         kernel_size=3,
         padding=1,
+        training=training,
         name=name)
 
 
@@ -123,6 +134,7 @@ def dark_convYxY(x,
                  in_channels,
                  out_channels,
                  pointwise=True,
+                 training=False,
                  name="dark_convYxY"):
     """
     DarkNet unit.
@@ -137,6 +149,8 @@ def dark_convYxY(x,
         Number of output channels.
     pointwise : bool
         Whether use 1x1 (pointwise) convolution or 3x3 convolution.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_convYxY'
         Block name.
 
@@ -150,12 +164,14 @@ def dark_convYxY(x,
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
+            training=training,
             name=name)
     else:
         return dark_conv3x3(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
+            training=training,
             name=name)
 
 
@@ -165,7 +181,8 @@ def darknet(x,
             avg_pool_size,
             cls_activ,
             in_channels=3,
-            classes=1000):
+            classes=1000,
+            training=False):
     """
     DarkNet model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
@@ -185,6 +202,8 @@ def darknet(x,
         Number of input channels.
     classes : int, default 1000
         Number of classification classes.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
 
     Returns
     -------
@@ -198,6 +217,7 @@ def darknet(x,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise),
+                training=training,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
         if i != len(channels) - 1:
@@ -280,6 +300,7 @@ def get_darknet(version,
         raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
 
     def net_lambda(x,
+                   training=False,
                    channels=channels,
                    odd_pointwise=odd_pointwise,
                    avg_pool_size=avg_pool_size,
@@ -294,6 +315,7 @@ def get_darknet(version,
             odd_pointwise=odd_pointwise,
             avg_pool_size=avg_pool_size,
             cls_activ=cls_activ,
+            training=training,
             **kwargs)
         if pretrained:
             from .model_store import download_model

@@ -452,8 +452,7 @@ def convert_gl2ke(dst_net,
     dst_net.save_weights(dst_params_file_path)
 
 
-def convert_gl2tf(dst_net,
-                  dst_params_file_path,
+def convert_gl2tf(dst_params_file_path,
                   dst_params,
                   dst_param_keys,
                   src_params,
@@ -648,7 +647,6 @@ def main():
             src_param_keys=src_param_keys)
     elif args.src_fwk == "gluon" and args.dst_fwk == "tensorflow":
         convert_gl2tf(
-            dst_net=dst_net,
             dst_params_file_path=args.dst_params,
             dst_params=dst_params,
             dst_param_keys=dst_param_keys,

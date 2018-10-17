@@ -22,6 +22,7 @@ def res_conv(x,
              strides,
              padding,
              activate,
+             training,
              name="res_conv"):
     """
     ResNet specific convolution block.
@@ -42,6 +43,8 @@ def res_conv(x,
         Padding value for convolution layer.
     activate : bool
         Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv'
         Block name.
 
@@ -61,7 +64,7 @@ def res_conv(x,
         name=name + "/conv")
     x = batchnorm(
         x=x,
-        training=False,
+        training=training,
         name=name + "/bn")
     if activate:
         x = tf.nn.relu(x, name=name + "/activ")
@@ -73,6 +76,7 @@ def res_conv1x1(x,
                 out_channels,
                 strides,
                 activate,
+                training,
                 name="res_conv1x1"):
     """
     1x1 version of the ResNet specific convolution block.
@@ -89,6 +93,8 @@ def res_conv1x1(x,
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv1x1'
         Block name.
 
@@ -105,6 +111,7 @@ def res_conv1x1(x,
         strides=strides,
         padding=0,
         activate=activate,
+        training=training,
         name=name)
 
 
@@ -113,6 +120,7 @@ def res_conv3x3(x,
                 out_channels,
                 strides,
                 activate,
+                training,
                 name="res_conv3x3"):
     """
     3x3 version of the ResNet specific convolution block.
@@ -129,6 +137,8 @@ def res_conv3x3(x,
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv3x3'
         Block name.
 
@@ -145,6 +155,7 @@ def res_conv3x3(x,
         strides=strides,
         padding=1,
         activate=activate,
+        training=training,
         name=name)
 
 
@@ -152,6 +163,7 @@ def res_block(x,
               in_channels,
               out_channels,
               strides,
+              training,
               name="res_block"):
     """
     Simple ResNet block for residual path in ResNet unit.
@@ -166,6 +178,8 @@ def res_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_block'
         Block name.
 
@@ -180,6 +194,7 @@ def res_block(x,
         out_channels=out_channels,
         strides=strides,
         activate=True,
+        training=training,
         name=name + "/conv1")
     x = res_conv3x3(
         x=x,
@@ -187,6 +202,7 @@ def res_block(x,
         out_channels=out_channels,
         strides=1,
         activate=False,
+        training=training,
         name=name + "/conv2")
     return x
 
@@ -196,6 +212,7 @@ def res_bottleneck_block(x,
                          out_channels,
                          strides,
                          conv1_stride,
+                         training,
                          name="res_bottleneck_block"):
     """
     ResNet bottleneck block for residual path in ResNet unit.
@@ -212,6 +229,8 @@ def res_bottleneck_block(x,
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_bottleneck_block'
         Block name.
 
@@ -228,6 +247,7 @@ def res_bottleneck_block(x,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
         activate=True,
+        training=training,
         name=name + "/conv1")
     x = res_conv3x3(
         x=x,
@@ -235,6 +255,7 @@ def res_bottleneck_block(x,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
         activate=True,
+        training=training,
         name=name + "/conv2")
     x = res_conv1x1(
         x=x,
@@ -242,6 +263,7 @@ def res_bottleneck_block(x,
         out_channels=out_channels,
         strides=1,
         activate=False,
+        training=training,
         name=name + "/conv3")
     return x
 
@@ -253,6 +275,7 @@ def res_unit(x,
              bottleneck,
              conv1_stride,
              use_se,
+             training,
              name="res_unit"):
     """
     ResNet unit with residual connection.
@@ -273,6 +296,8 @@ def res_unit(x,
         Whether to use stride in the first or the second convolution layer of the block.
     use_se : bool
         Whether to use SE block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_unit'
         Unit name.
 
@@ -289,6 +314,7 @@ def res_unit(x,
             out_channels=out_channels,
             strides=strides,
             activate=False,
+            training=training,
             name=name + "/identity_conv")
     else:
         identity = x
@@ -300,6 +326,7 @@ def res_unit(x,
             out_channels=out_channels,
             strides=strides,
             conv1_stride=conv1_stride,
+            training=training,
             name=name + "/body")
     else:
         x = res_block(
@@ -307,6 +334,7 @@ def res_unit(x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            training=training,
             name=name + "/body")
 
     if use_se:
@@ -324,6 +352,7 @@ def res_unit(x,
 def res_init_block(x,
                    in_channels,
                    out_channels,
+                   training,
                    name):
     """
     ResNet specific initial block.
@@ -336,6 +365,8 @@ def res_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'res_init_block'
         Block name.
 
@@ -352,6 +383,7 @@ def res_init_block(x,
         strides=2,
         padding=3,
         activate=True,
+        training=training,
         name=name + "/conv")
     x = maxpool2d(
         x=x,
@@ -369,7 +401,8 @@ def resnet(x,
            conv1_stride,
            use_se,
            in_channels=3,
-           classes=1000):
+           classes=1000,
+           training=False):
     """
     ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
     implements SE-ResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -392,6 +425,8 @@ def resnet(x,
         Number of input channels.
     classes : int, default 1000
         Number of classification classes.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
 
     Returns
     -------
@@ -402,6 +437,7 @@ def resnet(x,
         x=x,
         in_channels=in_channels,
         out_channels=init_block_channels,
+        training=training,
         name="features/init_block")
     in_channels = init_block_channels
     for i, channels_per_stage in enumerate(channels):
@@ -415,6 +451,7 @@ def resnet(x,
                 bottleneck=bottleneck,
                 conv1_stride=conv1_stride,
                 use_se=use_se,
+                training=training,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
     x = tf.layers.average_pooling2d(
@@ -514,6 +551,7 @@ def get_resnet(blocks,
         raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
 
     def net_lambda(x,
+                   training=False,
                    channels=channels,
                    init_block_channels=init_block_channels,
                    bottleneck=bottleneck,
@@ -530,6 +568,7 @@ def get_resnet(blocks,
             bottleneck=bottleneck,
             conv1_stride=conv1_stride,
             use_se=use_se,
+            training=training,
             **kwargs)
         if pretrained:
             from .model_store import download_model

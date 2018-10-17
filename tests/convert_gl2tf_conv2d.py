@@ -1,17 +1,16 @@
 import numpy as np
 import mxnet as mx
-from mxnet.gluon import nn, HybridBlock
 import tensorflow as tf
 
 
-class GluonModel(HybridBlock):
+class GluonModel(mx.gluon.HybridBlock):
 
     def __init__(self,
                  **kwargs):
         super(GluonModel, self).__init__(**kwargs)
 
         with self.name_scope():
-            self.conv = nn.Conv2D(
+            self.conv = mx.gluon.nn.Conv2D(
                 channels=64,
                 kernel_size=7,
                 strides=2,
@@ -128,7 +127,8 @@ def main():
 
         gl_model = GluonModel()
 
-        ctx = mx.cpu()
+        # ctx = mx.cpu()
+        ctx = mx.gpu(0)
         gl_params = gl_model._collect_params_with_prefix()
         gl_params['conv.weight']._load_init(mx.nd.array(w, ctx), ctx)
         gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)

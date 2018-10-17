@@ -1,17 +1,17 @@
 import numpy as np
 import mxnet as mx
-from mxnet.gluon import nn, HybridBlock
 import tensorflow as tf
+# import tensorflow.contrib.slim as slim
 
 
-class GluonModel(HybridBlock):
+class GluonModel(mx.gluon.HybridBlock):
 
     def __init__(self,
                  **kwargs):
         super(GluonModel, self).__init__(**kwargs)
 
         with self.name_scope():
-            self.dense = nn.Dense(
+            self.dense = mx.gluon.nn.Dense(
                 units=1000,
                 use_bias=False,
                 flatten=True,
@@ -24,6 +24,11 @@ class GluonModel(HybridBlock):
 
 def tensorflow_model(x):
 
+    # x = slim.fully_connected(
+    #     inputs=x,
+    #     num_outputs=1000,
+    #     activation_fn=None,
+    #     scope='dense')
     x = tf.layers.dense(
         inputs=x,
         units=1000,
@@ -42,7 +47,8 @@ def main():
 
         gl_model = GluonModel()
 
-        ctx = mx.cpu()
+        # ctx = mx.cpu()
+        ctx = mx.gpu(0)
         gl_params = gl_model._collect_params_with_prefix()
         gl_params['dense.weight']._load_init(mx.nd.array(w, ctx), ctx)
         # gl_params['dense.bias']._load_init(mx.nd.array(b, ctx), ctx)
@@ -60,6 +66,8 @@ def main():
             tf_w = np.transpose(w, axes=(1, 0))
             sess.run(tf_params['dense/kernel:0'].assign(tf_w))
             # sess.run(tf_params['dense/bias:0'].assign(b))
+            # sess.run(tf_params['dense/weights:0'].assign(tf_w))
+            # sess.run(tf_params['dense/biases:0'].assign(b))
 
             tf_y = sess.run(tf_model, feed_dict={xx: x})
         tf.reset_default_graph()

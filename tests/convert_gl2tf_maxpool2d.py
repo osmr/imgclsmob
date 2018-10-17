@@ -1,18 +1,17 @@
 import math
 import numpy as np
 import mxnet as mx
-from mxnet.gluon import nn, HybridBlock
 import tensorflow as tf
 
 
-class GluonModel(HybridBlock):
+class GluonModel(mx.gluon.HybridBlock):
 
     def __init__(self,
                  **kwargs):
         super(GluonModel, self).__init__(**kwargs)
 
         with self.name_scope():
-            self.pool = nn.MaxPool2D(
+            self.pool = mx.gluon.nn.MaxPool2D(
                 pool_size=2,
                 strides=2,
                 padding=0)
@@ -110,7 +109,8 @@ def main():
 
         gl_model = GluonModel()
 
-        ctx = mx.cpu()
+        # ctx = mx.cpu()
+        ctx = mx.gpu(0)
 
         gl_x = mx.nd.array(x, ctx)
         gl_y = gl_model(gl_x).asnumpy()

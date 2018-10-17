@@ -174,18 +174,22 @@ def maxpool2d(x,
     Tensor
         Resulted tensor.
     """
+    if isinstance(pool_size, int):
+        pool_size = (pool_size, pool_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
     if isinstance(padding, int):
         padding = (padding, padding)
 
     if ceil_mode:
-        height = x.shape[2]
+        height = int(x.shape[2])
         out_height = float(height + 2 * padding[0] - pool_size[0]) / strides[0] + 1.0
         if math.ceil(out_height) > math.floor(out_height):
-            padding[0] += 1
-        width = x.shape[3]
+            padding = (padding[0] + 1, padding[1])
+        width = int(x.shape[3])
         out_width = float(width + 2 * padding[1] - pool_size[1]) / strides[1] + 1.0
         if math.ceil(out_width) > math.floor(out_width):
-            padding[1] += 1
+            padding = (padding[0], padding[1] + 1)
 
     if (padding[0] > 0) or (padding[1] > 0):
         x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT")

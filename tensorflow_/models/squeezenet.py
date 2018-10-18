@@ -245,7 +245,6 @@ def get_squeezenet(version,
                    residual=False,
                    model_name=None,
                    pretrained=False,
-                   sess=None,
                    root=os.path.join('~', '.tensorflow', 'models'),
                    **kwargs):
     """
@@ -261,10 +260,15 @@ def get_squeezenet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
 
     if version == '1.0':
@@ -283,19 +287,12 @@ def get_squeezenet(version,
     if not residual:
         residuals = None
 
-    if pretrained and ((model_name is None) or (not model_name)):
-        raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-
     def net_lambda(x,
                    training=False,
                    channels=channels,
                    residuals=residuals,
                    init_block_kernel_size=init_block_kernel_size,
-                   init_block_channels=init_block_channels,
-                   pretrained=pretrained,
-                   sess=sess,
-                   model_name=model_name,
-                   root=root):
+                   init_block_channels=init_block_channels):
         y_net = squeezenet(
             x=x,
             channels=channels,
@@ -304,15 +301,19 @@ def get_squeezenet(version,
             init_block_channels=init_block_channels,
             training=training,
             **kwargs)
-        if pretrained:
-            from .model_store import download_model
-            download_model(
-                sess=sess,
-                model_name=model_name,
-                local_model_store_dir_path=root)
         return y_net
 
-    return net_lambda
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net_file_path = get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)
+    else:
+        net_file_path = None
+
+    return net_lambda, net_file_path
 
 
 def squeezenet_v1_0(**kwargs):
@@ -324,10 +325,15 @@ def squeezenet_v1_0(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_squeezenet(version="1.0", residual=False, model_name="squeezenet_v1_0", **kwargs)
 
@@ -341,10 +347,15 @@ def squeezenet_v1_1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_squeezenet(version="1.1", residual=False, model_name="squeezenet_v1_1", **kwargs)
 
@@ -358,10 +369,15 @@ def squeezeresnet_v1_0(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_squeezenet(version="1.0", residual=True, model_name="squeezeresnet_v1_0", **kwargs)
 
@@ -375,35 +391,41 @@ def squeezeresnet_v1_1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_squeezenet(version="1.1", residual=True, model_name="squeezeresnet_v1_1", **kwargs)
 
 
 def _test():
     import numpy as np
+    from .model_store import load_model
 
     pretrained = False
 
     models = [
-        squeezenet_v1_0,
+        # squeezenet_v1_0,
         squeezenet_v1_1,
-        squeezeresnet_v1_0,
-        squeezeresnet_v1_1,
+        # squeezeresnet_v1_0,
+        # squeezeresnet_v1_1,
     ]
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net_lambda, net_file_path = model(pretrained=pretrained)
 
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net(x)
+        y_net = net_lambda(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -413,7 +435,10 @@ def _test():
         assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
         with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+            if pretrained:
+                load_model(sess=sess, file_path=net_file_path)
+            else:
+                sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))

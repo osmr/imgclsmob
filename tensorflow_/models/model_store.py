@@ -193,7 +193,7 @@ def load_model(sess,
 
     Parameters
     ----------
-    sess: Session or None, default None
+    sess: Session
         A Session to use to load the weights.
     file_path : str
         Path to the file.
@@ -203,6 +203,7 @@ def load_model(sess,
     import numpy as np
     import tensorflow as tf
 
+    assert sess is not None
     assert os.path.exists(file_path) and os.path.isfile(file_path)
     if file_path.endswith('.npy'):
         src_params = np.load(file_path, encoding='latin1').item()
@@ -211,8 +212,6 @@ def load_model(sess,
     else:
         raise NotImplementedError
     dst_params = {v.name: v for v in tf.global_variables()}
-    if sess is None:
-        sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     for src_key in src_params.keys():
         if src_key in dst_params.keys():
@@ -233,7 +232,7 @@ def download_model(sess,
 
     Parameters
     ----------
-    sess: Session or None, default None
+    sess: Session
         A Session to use to load the weights.
     model_name : str
         Name of the model.

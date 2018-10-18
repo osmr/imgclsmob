@@ -249,7 +249,6 @@ def darknet(x,
 def get_darknet(version,
                 model_name=None,
                 pretrained=False,
-                sess=None,
                 root=os.path.join('~', '.tensorflow', 'models'),
                 **kwargs):
     """
@@ -263,10 +262,15 @@ def get_darknet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
 
     if version == 'ref':
@@ -304,11 +308,7 @@ def get_darknet(version,
                    channels=channels,
                    odd_pointwise=odd_pointwise,
                    avg_pool_size=avg_pool_size,
-                   cls_activ=cls_activ,
-                   pretrained=pretrained,
-                   sess=sess,
-                   model_name=model_name,
-                   root=root):
+                   cls_activ=cls_activ):
         y_net = darknet(
             x=x,
             channels=channels,
@@ -317,15 +317,19 @@ def get_darknet(version,
             cls_activ=cls_activ,
             training=training,
             **kwargs)
-        if pretrained:
-            from .model_store import download_model
-            download_model(
-                sess=sess,
-                model_name=model_name,
-                local_model_store_dir_path=root)
         return y_net
 
-    return net_lambda
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net_file_path = get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=root)
+    else:
+        net_file_path = None
+
+    return net_lambda, net_file_path
 
 
 def darknet_ref(**kwargs):
@@ -336,10 +340,15 @@ def darknet_ref(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_darknet(version="ref", model_name="darknet_ref", **kwargs)
 
@@ -352,10 +361,15 @@ def darknet_tiny(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_darknet(version="tiny", model_name="darknet_tiny", **kwargs)
 
@@ -368,16 +382,22 @@ def darknet19(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    sess: Session or None, default None
-        A Session to use to load the weights.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_darknet(version="19", model_name="darknet19", **kwargs)
 
 
 def _test():
     import numpy as np
+    from .model_store import load_model
 
     pretrained = False
 
@@ -389,13 +409,13 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net_lambda, net_file_path = model(pretrained=pretrained)
 
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net(x)
+        y_net = net_lambda(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -404,7 +424,10 @@ def _test():
         assert (model != darknet19 or weight_count == 20842376)
 
         with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+            if pretrained:
+                load_model(sess=sess, file_path=net_file_path)
+            else:
+                sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))

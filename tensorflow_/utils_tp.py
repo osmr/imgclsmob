@@ -11,12 +11,35 @@ from tensorpack.tfutils.summary import add_moving_summary
 from tensorpack import ModelDesc, get_current_tower_context
 from tensorpack import InputDesc, PlaceholderInput, TowerContext
 from tensorpack.tfutils import get_model_loader, model_utils
+# from tensorpack.tfutils import get_default_sess_config
 from tensorpack.dataflow import imgaug, dataset, AugmentImageComponent, PrefetchDataZMQ, BatchData
 from tensorpack.dataflow import MultiThreadMapData
 # from tensorpack.dataflow import MapData
 from tensorpack.utils import logger
 
 from .model_provider import get_model
+
+
+class CachedChiefSessionCreator(tf.train.ChiefSessionCreator):
+
+    def __init__(self,
+                 scaffold=None,
+                 master='',
+                 config=None,
+                 checkpoint_dir=None,
+                 checkpoint_filename_with_path=None):
+        super(CachedChiefSessionCreator, self).__init__(
+            scaffold=scaffold,
+            master=master,
+            config=config,
+            checkpoint_dir=checkpoint_dir,
+            checkpoint_filename_with_path=checkpoint_filename_with_path)
+        self.cached_sess = None
+
+    def create_session(self):
+        if self.cached_sess is None:
+            self.cached_sess = super(CachedChiefSessionCreator, self).create_session()
+        return self.cached_sess
 
 
 class ImageNetModel(ModelDesc):
@@ -223,8 +246,11 @@ def prepare_model(model_name,
     kwargs = {'pretrained': use_pretrained,
               'classes': classes}
 
-    net = get_model(model_name, **kwargs)
-    net = ImageNetModel(model_lambda=net)
+    net_lambda, net_file_path = get_model(model_name, **kwargs)
+    net = ImageNetModel(model_lambda=net_lambda)
+
+    if use_pretrained and not pretrained_model_file_path:
+        pretrained_model_file_path = net_file_path
 
     inputs_desc = None
     if pretrained_model_file_path:

@@ -235,7 +235,7 @@ def squeezenet(x,
         pool_size=13,
         strides=1,
         data_format='channels_first',
-        name="features/final_pool")
+        name="output/final_pool")
     x = tf.layers.flatten(x)
 
     return x

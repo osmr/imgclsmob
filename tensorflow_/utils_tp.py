@@ -10,7 +10,9 @@ from tensorpack.tfutils.summary import add_moving_summary
 from tensorpack import ModelDesc, get_current_tower_context
 from tensorpack import InputDesc, PlaceholderInput, TowerContext
 from tensorpack.tfutils import get_model_loader, model_utils
-from tensorpack.dataflow import imgaug, dataset, AugmentImageComponent, PrefetchDataZMQ, MultiThreadMapData, BatchData
+from tensorpack.dataflow import imgaug, dataset, AugmentImageComponent, PrefetchDataZMQ, BatchData
+from tensorpack.dataflow import MultiThreadMapData
+# from tensorpack.dataflow import MapData
 from tensorpack.utils import logger
 
 from .model_provider import get_model
@@ -33,7 +35,7 @@ class ImageNetModel(ModelDesc):
         """
         Whether the image is BGR or RGB. If using DataFlow, then it should be BGR.
         """
-        self.image_bgr = False
+        self.image_bgr = True
 
         """
         To apply on normalization parameters, use '.*/W|.*/gamma|.*/beta'
@@ -52,6 +54,8 @@ class ImageNetModel(ModelDesc):
         assert self.data_format in ['NCHW', 'NHWC']
         if self.data_format == 'NCHW':
             image = tf.transpose(image, [0, 3, 1, 2])
+
+        tf.summary.image('input_image_', image)
 
         is_training = get_current_tower_context().is_training
         logits = self.model_lambda(
@@ -195,6 +199,7 @@ def get_imagenet_dataflow(datadir,
             im = aug.augment(im)
             return im, cls
         ds = MultiThreadMapData(ds, parallel, mapf, buffer_size=2000, strict=True)
+        # ds = MapData(ds, mapf)
         ds = BatchData(ds, batch_size, remainder=True)
         ds = PrefetchDataZMQ(ds, 1)
     return ds
@@ -247,8 +252,10 @@ def get_data(is_train,
             imgaug.Flip(horiz=True)]
     else:
         augmentors = [
-            imgaug.ResizeShortestEdge(256, cv2.INTER_CUBIC),
-            imgaug.CenterCrop((224, 224))]
+            # imgaug.ResizeShortestEdge(256, cv2.INTER_CUBIC),
+            imgaug.ResizeShortestEdge(256, cv2.INTER_LINEAR),
+            imgaug.CenterCrop((224, 224))
+        ]
 
     return get_imagenet_dataflow(
         datadir=data_dir_path,

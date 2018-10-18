@@ -66,6 +66,7 @@ def conv2d(x,
         padding='valid',
         data_format='channels_first',
         use_bias=use_bias,
+        kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
         name=name)
     return x
 

@@ -101,6 +101,10 @@ def test(net,
 
     tic = time.time()
     pred = FeedfreePredictor(pred_config, StagingInput(QueueInput(val_dataflow), device='/gpu:0'))
+
+    # import tensorflow as tf
+    # summ_writer = tf.summary.FileWriter("/home/semery/projects/imgclsmob_data/gl-squeezenet_v1_1/", pred._sess.graph)
+
     for _ in tqdm.trange(val_dataflow.size()):
         err_top1_val, err_top5_val = pred()
         batch_size = err_top1_val.shape[0]

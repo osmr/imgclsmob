@@ -4,7 +4,6 @@ import re
 import numpy as np
 
 import mxnet as mx
-import torch
 
 from common.logger_utils import initialize_logging
 
@@ -506,6 +505,7 @@ def convert_pt2pt(dst_params_file_path,
                   src_param_keys,
                   src_model,
                   dst_model):
+    import torch
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if (src_model == "oth_shufflenetv2_wd2" and dst_model == "shufflenetv2_wd2") and \
                 (src_key == "network.8.weight"):
@@ -526,6 +526,7 @@ def convert_gl2pt(dst_params_file_path,
                   dst_param_keys,
                   src_params,
                   src_param_keys):
+    import torch
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         assert (tuple(dst_params[dst_key].size()) == src_params[src_key].shape)
         dst_params[dst_key] = torch.from_numpy(src_params[src_key]._data[0].asnumpy())
@@ -565,6 +566,9 @@ def main():
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ['keras']
         pip_packages += ['keras', 'keras-mxnet', 'keras-applications', 'keras-preprocessing']
+    if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
+        packages += ['tensorflow-gpu']
+        pip_packages += ['tensorflow-gpu', 'tensorpack', 'mxnet-cu90']
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,

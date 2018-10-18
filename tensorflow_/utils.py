@@ -31,12 +31,17 @@ def prepare_model(model_name,
     kwargs = {'pretrained': use_pretrained,
               'classes': classes}
 
-    net = get_model(model_name, **kwargs)
+    net_lambda, net_file_path = get_model(model_name, **kwargs)
 
     x = tf.placeholder(
         dtype=tf.float32,
         shape=(None, 3, 224, 224),
         name='xx')
-    y_net = net(x)
+    y_net = net_lambda(x)
+
+    if use_pretrained:
+        from .models.model_store import load_model
+        with tf.Session() as sess:
+            load_model(sess=sess, file_path=net_file_path)
 
     return y_net

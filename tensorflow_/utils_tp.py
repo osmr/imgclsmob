@@ -7,6 +7,7 @@ import cv2
 import tensorflow as tf
 from tensorpack.models import regularize_cost
 from tensorpack.tfutils.summary import add_moving_summary
+# from tensorpack.tfutils.summary import add_tensor_summary
 from tensorpack import ModelDesc, get_current_tower_context
 from tensorpack import InputDesc, PlaceholderInput, TowerContext
 from tensorpack.tfutils import get_model_loader, model_utils
@@ -35,7 +36,7 @@ class ImageNetModel(ModelDesc):
         """
         Whether the image is BGR or RGB. If using DataFlow, then it should be BGR.
         """
-        self.image_bgr = True
+        self.image_bgr = False
 
         """
         To apply on normalization parameters, use '.*/W|.*/gamma|.*/beta'
@@ -53,9 +54,12 @@ class ImageNetModel(ModelDesc):
         image = self.image_preprocess(image)
         assert self.data_format in ['NCHW', 'NHWC']
         if self.data_format == 'NCHW':
-            image = tf.transpose(image, [0, 3, 1, 2])
+            image = tf.transpose(image, [0, 3, 1, 2], name="image_transpose")
 
-        tf.summary.image('input_image_', image)
+        # tf.summary.image('input_image_', image)
+        # tf.summary.tensor_summary('input_tensor_', image)
+        # with tf.name_scope('tmp1_summaries'):
+        #     add_tensor_summary(image, ['histogram', 'rms', 'sparsity'], name='tmp1_tensor')
 
         is_training = get_current_tower_context().is_training
         logits = self.model_lambda(
@@ -195,6 +199,7 @@ def get_imagenet_dataflow(datadir,
         def mapf(dp):
             fname, cls = dp
             im = cv2.imread(fname, cv2.IMREAD_COLOR)
+            im = np.flip(im, axis=2)
             # print("fname={}".format(fname))
             im = aug.augment(im)
             return im, cls

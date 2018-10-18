@@ -108,9 +108,10 @@ x = np.zeros((1, 3, 224, 224), np.float32)
 y = net.predict(x)
 ```
 
-### For Keras way
+### For TensorFlow way
 
 Coming soon...
+Note that the models on TensorFlow use NCHW data format. Therefore, they can not be used on CPU.
 
 ## List of models
 

@@ -4,8 +4,8 @@
 [![GitHub License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-2.7%2C3.6-lightgrey.svg)](https://github.com/osmr/imgclsmob)
 
-This repository contains several classification models on MXNet/Gluon, PyTorch, Chainer, and Keras, with scripts
-for training/validating/converting models. All models are designed for using with ImageNet-1k dataset.
+This repository contains several classification models on MXNet/Gluon, PyTorch, Chainer, Keras, and TensorFlow, with
+scripts for training/validating/converting models. All models are designed for using with ImageNet-1k dataset.
 
 ## Installation
 
@@ -107,6 +107,10 @@ net = kecv_get_model("resnet18", pretrained=True)
 x = np.zeros((1, 3, 224, 224), np.float32)
 y = net.predict(x)
 ```
+
+### For Keras way
+
+Coming soon...
 
 ## List of models
 
@@ -424,6 +428,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.51 | 14.65 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_wd2-1465-774d5bca.h5.log)) |
 | MobileNetV2 x0.75 | 30.81 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w3d4-1126-f2f664da.h5.log)) |
 | MobileNetV2 x1.0 | 28.50 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w1-0990-cbb8be96.h5.log)) |
+
+### For TensorFlow
+
+| Model | Top1 | Top5 | Params | FLOPs | Remarks |
+| --- | ---: | ---: | ---: | ---: | --- |
+| DarkNet Tiny | 40.35 | 17.51 | 1,042,104 | 496.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_tiny-1751-750ff8d9.tf.npz.log)) |
+| DarkNet Ref | 37.99 | 16.72 | 7,319,416 | 365.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_ref-1672-3c8ed62a.tf.npz.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

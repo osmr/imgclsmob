@@ -9,7 +9,9 @@ import zipfile
 import logging
 import hashlib
 
-_model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in []}
+_model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
+    ('darknet_tiny', '1751', '750ff8d9b17beb5ab88200aa787dfcb5b6ca8b36', 'v0.0.71'),
+    ('darknet_ref', '1672', '3c8ed62a43b9e8934b4beb7c47ce4c7b2cdb7a64', 'v0.0.71')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

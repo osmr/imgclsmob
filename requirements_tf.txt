@@ -1,4 +1,0 @@
-tensorflow-gpu
-git+https://github.com/tensorpack/tensorpack.git
-opencv-python
-python-prctl

@@ -1,5 +1,6 @@
 from .models.resnet import *
 from .models.preresnet import *
+from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from tensorflow_.models.others.shufflenetv2 import *
@@ -67,6 +68,11 @@ _models = {
     'sepreresnet152b': sepreresnet152b,
     'sepreresnet200': sepreresnet200,
     'sepreresnet200b': sepreresnet200b,
+
+    'densenet121': densenet121,
+    'densenet161': densenet161,
+    'densenet169': densenet169,
+    'densenet201': densenet201,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

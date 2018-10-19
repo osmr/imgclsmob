@@ -80,8 +80,29 @@ def conv2d(x,
             rate=(1, 1),
             name=name,
             data_format='NCHW')
+        if use_bias:
+            raise NotImplementedError
     else:
-        raise NotImplementedError
+        assert (in_channels % groups == 0)
+        assert (out_channels % groups == 0)
+        in_group_channels = in_channels // groups
+        out_group_channels = out_channels // groups
+        group_list = []
+        for gi in range(groups):
+            xi = x[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :]
+            xi = tf.layers.conv2d(
+                inputs=xi,
+                filters=out_group_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding='valid',
+                data_format='channels_first',
+                use_bias=use_bias,
+                kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
+                name=name + "/convgroup{}".format(gi + 1))
+            group_list.append(xi)
+        x = tf.concat(group_list, axis=1, name=name + "/concat")
+
     return x
 
 

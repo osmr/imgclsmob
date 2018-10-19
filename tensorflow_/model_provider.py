@@ -1,5 +1,6 @@
 from .models.resnet import *
 from .models.preresnet import *
+from .models.resnext import *
 from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
@@ -71,6 +72,13 @@ _models = {
     'sepreresnet152b': sepreresnet152b,
     'sepreresnet200': sepreresnet200,
     'sepreresnet200b': sepreresnet200b,
+
+    'resnext50_32x4d': resnext50_32x4d,
+    'resnext101_32x4d': resnext101_32x4d,
+    'resnext101_64x4d': resnext101_64x4d,
+    'seresnext50_32x4d': seresnext50_32x4d,
+    'seresnext101_32x4d': seresnext101_32x4d,
+    'seresnext101_64x4d': seresnext101_64x4d,
 
     'densenet121': densenet121,
     'densenet161': densenet161,

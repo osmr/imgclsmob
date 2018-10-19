@@ -483,12 +483,12 @@ def densenet121(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
 
@@ -504,12 +504,12 @@ def densenet161(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
 
@@ -525,12 +525,12 @@ def densenet169(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
 
@@ -546,12 +546,12 @@ def densenet201(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
 
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
     """
     return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
 

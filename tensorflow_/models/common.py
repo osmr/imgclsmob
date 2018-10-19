@@ -53,21 +53,35 @@ def conv2d(x,
     if isinstance(padding, int):
         padding = (padding, padding)
 
-    if groups != 1:
-        raise NotImplementedError
-
     if (padding[0] > 0) or (padding[1] > 0):
         x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
-    x = tf.layers.conv2d(
-        inputs=x,
-        filters=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding='valid',
-        data_format='channels_first',
-        use_bias=use_bias,
-        kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
-        name=name)
+
+    if groups == 1:
+        x = tf.layers.conv2d(
+            inputs=x,
+            filters=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding='valid',
+            data_format='channels_first',
+            use_bias=use_bias,
+            kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
+            name=name)
+    elif (groups == out_channels) and (out_channels == in_channels):
+        kernel = tf.get_variable(
+            name=name + '/dw_kernel',
+            shape=kernel_size + (in_channels, 1),
+            initializer=tf.variance_scaling_initializer(2.0))
+        x = tf.nn.depthwise_conv2d(
+            input=x,
+            filter=kernel,
+            strides=(1, 1) + strides,
+            padding='VALID',
+            rate=(1, 1),
+            name=name,
+            data_format='NCHW')
+    else:
+        raise NotImplementedError
     return x
 
 

@@ -457,6 +457,7 @@ def convert_gl2tf(dst_params_file_path,
                   src_params,
                   src_param_keys):
     dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/dw_kernel:', '/weight_dw:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
@@ -471,6 +472,7 @@ def convert_gl2tf(dst_params_file_path,
                                          x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
 
     dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/weight_dw:', '/dw_kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
@@ -482,8 +484,11 @@ def convert_gl2tf(dst_params_file_path,
         for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
             src_value = src_params[src_key]._data[0].asnumpy()
             if len(src_value.shape) == 4:
-                assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
-                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 1, 0))
+                if dst_key.split("/")[-1][:-2] == "dw_kernel":
+                    src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 0, 1))
+                else:
+                    src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 1, 0))
+                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_value.shape)
             elif len(src_value.shape) == 2:
                 assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
                 src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(1, 0))

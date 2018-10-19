@@ -300,9 +300,6 @@ def get_darknet(version,
     else:
         raise ValueError("Unsupported DarkNet version {}".format(version))
 
-    if pretrained and ((model_name is None) or (not model_name)):
-        raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-
     def net_lambda(x,
                    training=False,
                    channels=channels,

@@ -3,6 +3,7 @@ from .models.preresnet import *
 from .models.densenet import *
 from .models.darknet import *
 from .models.squeezenet import *
+from .models.squeezenext import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from tensorflow_.models.others.shufflenetv2 import *
@@ -85,6 +86,13 @@ _models = {
 
     'squeezeresnet_v1_0': squeezeresnet_v1_0,
     'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+    'sqnxt23_w1': sqnxt23_w1,
+    'sqnxt23_w3d2': sqnxt23_w3d2,
+    'sqnxt23_w2': sqnxt23_w2,
+    'sqnxt23v5_w1': sqnxt23v5_w1,
+    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+    'sqnxt23v5_w2': sqnxt23v5_w2,
 
     'mobilenet_w1': mobilenet_w1,
     'mobilenet_w3d4': mobilenet_w3d4,

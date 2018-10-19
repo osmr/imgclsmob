@@ -478,24 +478,51 @@ def convert_gl2tf(dst_params_file_path,
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
 
+    dst_param_keys_orig = dst_param_keys.copy()
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+                      for s in dst_param_keys]
+    dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
+    dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
+
+    assert (len(src_param_keys) == len(dst_param_keys))
+
     import tensorflow as tf
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-            src_value = src_params[src_key]._data[0].asnumpy()
-            if len(src_value.shape) == 4:
+
+        def process_width(src_key, dst_key, src_weight):
+            if len(src_weight.shape) == 4:
                 if dst_key.split("/")[-1][:-2] == "dw_kernel":
-                    src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 0, 1))
+                    src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
                 else:
-                    src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(2, 3, 1, 0))
-                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_value.shape)
-            elif len(src_value.shape) == 2:
+                    src_weight = np.transpose(src_weight, axes=(2, 3, 1, 0))
+                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_weight.shape)
+            elif len(src_weight.shape) == 2:
                 assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
-                src_value = np.transpose(src_params[src_key]._data[0].asnumpy(), axes=(1, 0))
+                src_weight = np.transpose(src_weight, axes=(1, 0))
             else:
                 assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape)
-            sess.run(dst_params[dst_key].assign(src_value))
+            sess.run(dst_params[dst_key].assign(src_weight))
             # print(dst_params[dst_key].eval(sess))
+
+        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            if dst_key.find("convgroup") >= 0:
+                dst_key_stem = dst_key[:(dst_key.find("convgroup") + 9)]
+                dst_keys = [s for s in dst_param_keys_orig if s.startswith(dst_key_stem)]
+                if src_key.endswith("weight"):
+                    dst_keys = [s for s in dst_keys if s.endswith("kernel:0")]
+                elif src_key.endswith("bias"):
+                    dst_keys = [s for s in dst_keys if s.endswith("bias:0")]
+                groups = len(dst_keys)
+                src_weight0 = src_params[src_key]._data[0]
+                src_weight0_list = mx.nd.split(src_weight0, axis=0, num_outputs=groups)
+                for gi in range(groups):
+                    src_weight_gi = src_weight0_list[gi].asnumpy()
+                    dst_key_gi = dst_keys[gi]
+                    process_width(src_key, dst_key_gi, src_weight_gi)
+            else:
+                src_weight = src_params[src_key]._data[0].asnumpy()
+                process_width(src_key, dst_key, src_weight)
         # saver = tf.train.Saver()
         # saver.save(
         #     sess=sess,
@@ -608,7 +635,7 @@ def main():
 
     if (args.src_fwk == "mxnet") and (args.src_model in ["preresnet200b"]):
         assert (len(src_param_keys) <= len(dst_param_keys))
-    elif (args.dst_fwk == "keras") and any([s.find("convgroup") >= 0 for s in dst_param_keys]):
+    elif (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]):
         assert (len(src_param_keys) <= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

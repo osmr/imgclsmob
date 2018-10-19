@@ -1,4 +1,5 @@
 from .models.resnet import *
+from .models.preresnet import *
 from .models.darknet import *
 from .models.squeezenet import *
 from tensorflow_.models.others.shufflenetv2 import *
@@ -36,6 +37,36 @@ _models = {
     'seresnet152b': seresnet152b,
     'seresnet200': seresnet200,
     'seresnet200b': seresnet200b,
+
+    'preresnet10': preresnet10,
+    'preresnet12': preresnet12,
+    'preresnet14': preresnet14,
+    'preresnet16': preresnet16,
+    'preresnet18_wd4': preresnet18_wd4,
+    'preresnet18_wd2': preresnet18_wd2,
+    'preresnet18_w3d4': preresnet18_w3d4,
+
+    'preresnet18': preresnet18,
+    'preresnet34': preresnet34,
+    'preresnet50': preresnet50,
+    'preresnet50b': preresnet50b,
+    'preresnet101': preresnet101,
+    'preresnet101b': preresnet101b,
+    'preresnet152': preresnet152,
+    'preresnet152b': preresnet152b,
+    'preresnet200': preresnet200,
+    'preresnet200b': preresnet200b,
+
+    'sepreresnet18': sepreresnet18,
+    'sepreresnet34': sepreresnet34,
+    'sepreresnet50': sepreresnet50,
+    'sepreresnet50b': sepreresnet50b,
+    'sepreresnet101': sepreresnet101,
+    'sepreresnet101b': sepreresnet101b,
+    'sepreresnet152': sepreresnet152,
+    'sepreresnet152b': sepreresnet152b,
+    'sepreresnet200': sepreresnet200,
+    'sepreresnet200b': sepreresnet200b,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

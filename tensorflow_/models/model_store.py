@@ -10,6 +10,21 @@ import logging
 import hashlib
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
+    ('resnet10', '1552', 'e2c1184863c05df5512c0747c7bcbffcb0e7bf2d', 'v0.0.72'),
+    ('resnet12', '1450', '8865f58bd3daecc3a30e1f002790719f2f3f0c58', 'v0.0.72'),
+    ('resnet14', '1245', '8596c8f1c48b91998456419e68e58de20d75f0d1', 'v0.0.72'),
+    ('resnet16', '1105', '8ee84db280879e366e26c626cf33a47b0298a9f6', 'v0.0.72'),
+    ('resnet18_wd4', '2450', 'b536eea54c6e7b93aee7c6c39bfe75cf6b985fa1', 'v0.0.72'),
+    ('resnet18_wd2', '1493', 'dfb5d150464d1d0feb49755dbaa02f59cca2f4b9', 'v0.0.72'),
+    ('resnet18_w3d4', '1250', '2040e339471119d43b5368ad1b050f6ee7cecaf6', 'v0.0.72'),
+    ('resnet18', '0999', 'b2422403ae5b209f71b6d800491b76876ddde6d6', 'v0.0.72'),
+    ('resnet34', '0793', 'aaf4f066bc0aedb131f73c52d75ca5740c96ccaa', 'v0.0.72'),
+    ('resnet50', '0687', '3fd48a1afbe57e1c002bb7e9a9bc8eb341a88165', 'v0.0.72'),
+    ('resnet50b', '0648', '6a8d5eda288391855996ecbea16c692aadc7a1bc', 'v0.0.72'),
+    ('resnet101', '0601', '3fc260bc67ab133b39f087862f5bc70cf6aa9442', 'v0.0.72'),
+    ('resnet101b', '0557', '8731697ca0ad66278cd950e93cd939cd321e7f00', 'v0.0.72'),
+    ('resnet152', '0559', 'd3c4d7b20d0f5365d82149478373465414187d53', 'v0.0.72'),
+    ('resnet152b', '0535', 'bcccd3d79b1528fcfffff8f8db3b6b0c2559e83a', 'v0.0.72'),
     ('darknet_tiny', '1751', '750ff8d9b17beb5ab88200aa787dfcb5b6ca8b36', 'v0.0.71'),
     ('darknet_ref', '1672', '3c8ed62a43b9e8934b4beb7c47ce4c7b2cdb7a64', 'v0.0.71')]}
 

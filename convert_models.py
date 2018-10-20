@@ -496,12 +496,9 @@ def convert_gl2tf(dst_params_file_path,
                     src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
                 else:
                     src_weight = np.transpose(src_weight, axes=(2, 3, 1, 0))
-                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_weight.shape)
             elif len(src_weight.shape) == 2:
-                assert (tuple(dst_params[dst_key].get_shape().as_list()[::-1]) == src_params[src_key].shape)
                 src_weight = np.transpose(src_weight, axes=(1, 0))
-            else:
-                assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_params[src_key].shape)
+            assert (tuple(dst_params[dst_key].get_shape().as_list()) == src_weight.shape)
             sess.run(dst_params[dst_key].assign(src_weight))
             # print(dst_params[dst_key].eval(sess))
 

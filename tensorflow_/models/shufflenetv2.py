@@ -194,9 +194,7 @@ def shuffle_unit(x,
         y1 = tf.nn.relu(y1, name=name + "/expand_activ5")
         x2 = x
     else:
-        in_split2_channels = in_channels // 2
-        y1 = x[:, 0:in_split2_channels, :, :]
-        x2 = x[:, in_split2_channels:, :, :]
+        y1, x2 = tf.split(x, num_or_size_splits=2, axis=1)
 
     y2 = conv1x1(
         x=x2,
@@ -228,12 +226,12 @@ def shuffle_unit(x,
         x=y2,
         training=training,
         name=name + "/expand_bn3")
-    y2 = tf.nn.relu(y2, name=name + "/compress_activ3")
+    y2 = tf.nn.relu(y2, name=name + "/expand_activ3")
 
     if use_se:
         y2 = se_block(
             x=y2,
-            channels=out_channels,
+            channels=mid_channels,
             name=name + "/se")
 
     if use_residual and not downsample:
@@ -241,6 +239,7 @@ def shuffle_unit(x,
 
     x = tf.concat([y1, y2], axis=1, name=name + "/concat")
 
+    assert (mid_channels % 2 == 0)
     x = channel_shuffle(
         x=x,
         groups=2)

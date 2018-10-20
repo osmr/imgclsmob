@@ -196,12 +196,12 @@ def shuffle_unit(x,
         out_channels=mid_channels,
         name=name + "/expand_conv3")(y2)
     y2 = GluonBatchNormalization(name=name + "/expand_bn3")(y2)
-    y2 = nn.Activation("relu", name=name + "/compress_activ3")(y2)
+    y2 = nn.Activation("relu", name=name + "/expand_activ3")(y2)
 
     if use_se:
         y2 = se_block(
             x=y2,
-            channels=out_channels,
+            channels=mid_channels,
             name=name + "/se")
 
     if use_residual and not downsample:

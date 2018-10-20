@@ -8,7 +8,7 @@ __all__ = ['shufflenetv2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 
 import os
 import tensorflow as tf
-from common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d, se_block
+from .common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d, se_block
 
 
 def shuffle_conv(x,
@@ -529,7 +529,7 @@ def shufflenetv2_w2(**kwargs):
 
 def _test():
     import numpy as np
-    from model_store import load_model
+    from .model_store import load_model
 
     pretrained = False
 
@@ -557,14 +557,14 @@ def _test():
         assert (model != shufflenetv2_w3d2 or weight_count == 4406098)
         assert (model != shufflenetv2_w2 or weight_count == 7601686)
 
-        # with tf.Session() as sess:
-        #     if pretrained:
-        #         load_model(sess=sess, file_path=net_file_path)
-        #     else:
-        #         sess.run(tf.global_variables_initializer())
-        #     x_value = np.zeros((1, 3, 224, 224), np.float32)
-        #     y = sess.run(y_net, feed_dict={x: x_value})
-        #     assert (y.shape == (1, 1000))
+        with tf.Session() as sess:
+            if pretrained:
+                load_model(sess=sess, file_path=net_file_path)
+            else:
+                sess.run(tf.global_variables_initializer())
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
+            assert (y.shape == (1, 1000))
         tf.reset_default_graph()
 
 

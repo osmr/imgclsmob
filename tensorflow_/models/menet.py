@@ -178,6 +178,7 @@ def me_unit(x,
         name=name + "/compress_bn1")
     x = tf.nn.relu(x, name=name + "/compress_activ")
 
+    assert (mid_channels % groups == 0)
     x = channel_shuffle(
         x=x,
         groups=groups)
@@ -251,7 +252,6 @@ def me_unit(x,
             padding='same',
             data_format='channels_first',
             name=name + "/avgpool")
-
         x = tf.concat([x, identity], axis=1, name=name + "/concat")
     else:
         x = x + identity

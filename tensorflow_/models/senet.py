@@ -140,7 +140,7 @@ def senet_unit(x,
                 training=training,
                 name=name + "/identity_conv")
     else:
-        identity = tf.identity(x)
+        identity = x
 
     x = senet_bottleneck(
         x=x,

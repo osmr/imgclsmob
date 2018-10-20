@@ -449,6 +449,15 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-101b | 21.22 | 5.57 | 44,549,160 | 7,818.04M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet101b-0557-8731697c.tf.npz.log)) |
 | ResNet-152 | 20.99 | 5.59 | 60,192,808 | 11,304.85M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet152-0559-d3c4d7b2.tf.npz.log)) |
 | ResNet-152b | 20.55 | 5.35 | 60,192,808 | 11,536.58M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet152b-0535-bcccd3d7.tf.npz.log)) |
+| PreResNet-18 | 28.75 | 9.88 | 11,687,848 | 1,818.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet18-0988-3295cbda.tf.npz.log)) |
+| PreResNet-34 | 25.82 | 8.08 | 21,796,008 | 3,669.36M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet34-0808-ceab73cc.tf.npz.log)) |
+| PreResNet-50 | 23.42 | 6.68 | 25,549,480 | 3,869.16M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet50-0668-822837cf.tf.npz.log)) |
+| PreResNet-50b | 23.12 | 6.61 | 25,549,480 | 4,100.90M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet50b-0661-49f158a2.tf.npz.log)) |
+| PreResNet-101 | 21.49 | 5.72 | 44,541,608 | 7,586.50M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet101-0572-cd61594e.tf.npz.log)) |
+| PreResNet-101b | 21.70 | 5.91 | 44,541,608 | 7,818.24M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet101b-0591-93ae5e69.tf.npz.log)) |
+| PreResNet-152 | 20.63 | 5.29 | 60,185,256 | 11,305.05M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet152-0529-b761f286.tf.npz.log)) |
+| PreResNet-152b | 20.95 | 5.76 | 60,185,256 | 11,536.78M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet152b-0576-c036165c.tf.npz.log)) |
+| PreResNet-200b | 21.12 | 5.60 | 64,666,280 | 15,040.27M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet200b-0560-881e0e28.tf.npz.log)) |
 | DarkNet Tiny | 40.35 | 17.51 | 1,042,104 | 496.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_tiny-1751-750ff8d9.tf.npz.log)) |
 | DarkNet Ref | 37.99 | 16.72 | 7,319,416 | 365.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_ref-1672-3c8ed62a.tf.npz.log)) |
 

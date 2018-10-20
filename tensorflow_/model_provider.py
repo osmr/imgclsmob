@@ -7,9 +7,11 @@ from .models.darknet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
+from .models.shufflenetv2 import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+
 from tensorflow_.models.others.shufflenetv2 import *
 
 __all__ = ['get_model']
@@ -121,6 +123,11 @@ _models = {
     'shufflenet_g1_wd4': shufflenet_g1_wd4,
     'shufflenet_g3_wd4': shufflenet_g3_wd4,
 
+    'shufflenetv2_wd2': shufflenetv2_wd2,
+    'shufflenetv2_w1': shufflenetv2_w1,
+    'shufflenetv2_w3d2': shufflenetv2_w3d2,
+    'shufflenetv2_w2': shufflenetv2_w2,
+
     'menet108_8x1_g3': menet108_8x1_g3,
     'menet128_8x1_g4': menet128_8x1_g4,
     'menet160_8x1_g8': menet160_8x1_g8,
@@ -145,7 +152,7 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
-    'shufflenetv2_wd2': shufflenetv2_wd2,
+    'shufflenetv2_wd2_oth': shufflenetv2_wd2_oth,
 }
 
 

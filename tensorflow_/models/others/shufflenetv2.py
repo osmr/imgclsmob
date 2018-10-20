@@ -1,5 +1,5 @@
 
-__all__ = ['ShuffleNetV2', 'shufflenetv2_wd2']
+__all__ = ['ShuffleNetV2', 'shufflenetv2_wd2_oth']
 
 
 import os
@@ -162,7 +162,7 @@ def get_shufflenetv2(ratio,
     return net.get_logits
 
 
-def shufflenetv2_wd2(**kwargs):
+def shufflenetv2_wd2_oth(**kwargs):
     """
     ShuffleNetV2 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.

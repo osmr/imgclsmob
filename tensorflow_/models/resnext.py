@@ -303,7 +303,7 @@ def resnext_unit(x,
 
     x = x + identity
 
-    x = tf.nn.relu(x, name=name + "activ")
+    x = tf.nn.relu(x, name=name + "/activ")
     return x
 
 

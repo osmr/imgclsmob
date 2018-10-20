@@ -140,7 +140,7 @@ def senet_unit(x,
                 training=training,
                 name=name + "/identity_conv")
     else:
-        identity = x
+        identity = tf.identity(x)
 
     x = senet_bottleneck(
         x=x,
@@ -152,12 +152,10 @@ def senet_unit(x,
         training=training,
         name=name + "/body")
 
-    use_se = True
-    if use_se:
-        x = se_block(
-            x=x,
-            channels=out_channels,
-            name=name + "/se")
+    x = se_block(
+        x=x,
+        channels=out_channels,
+        name=name + "/se")
 
     x = x + identity
 

@@ -105,7 +105,6 @@ class SENetUnit(HybridBlock):
                  identity_conv3x3,
                  **kwargs):
         super(SENetUnit, self).__init__(**kwargs)
-        self.use_se = True
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
@@ -116,8 +115,7 @@ class SENetUnit(HybridBlock):
                 cardinality=cardinality,
                 bottleneck_width=bottleneck_width,
                 bn_use_global_stats=bn_use_global_stats)
-            if self.use_se:
-                self.se = SEBlock(channels=out_channels)
+            self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 if identity_conv3x3:
                     self.identity_conv = resnext_conv3x3(
@@ -142,8 +140,7 @@ class SENetUnit(HybridBlock):
         else:
             identity = x
         x = self.body(x)
-        if self.use_se:
-            x = self.se(x)
+        x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x

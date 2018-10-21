@@ -4,6 +4,7 @@ import tensorflow as tf
 
 GROUPS = 8
 
+
 class GluonModel(mx.gluon.HybridBlock):
 
     def __init__(self,

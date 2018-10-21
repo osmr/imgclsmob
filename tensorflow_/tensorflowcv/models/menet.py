@@ -228,7 +228,7 @@ def me_unit(x,
         x=y,
         training=training,
         name=name + "/s_evolve_bn")
-    y = tf.nn.relu(y, name=name + "/s_evolve_activ")
+    y = tf.nn.sigmoid(y, name=name + "/s_evolve_activ")
 
     x = x * y
 

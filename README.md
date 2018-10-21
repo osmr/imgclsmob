@@ -49,6 +49,16 @@ pip install kerascv mxnet-cu92>=1.2.1
 ```
 After installation change the value of the field `image_data_format` to `channels_first` in the file `~/.keras/keras.json`. 
 
+### For TensorFlow way
+
+To use only TensorFlow models in your project, simply install the `tensorflowcv` package with `tensorflow-gpu`:
+```
+pip install tensorflowcv tensorflow-gpu>=1.11.0
+```
+To enable/disable different hardware supports, check out TensorFlow installation [instructions](https://www.tensorflow.org/).
+
+Note that the models use NCHW data format. The current version of TensorFlow cannot work with them on CPU.
+
 ### For research
 
 To use the repository for training/validation/converting models:
@@ -110,8 +120,22 @@ y = net.predict(x)
 
 ### For TensorFlow way
 
-Coming soon...
-Note that the models on TensorFlow use NCHW data format. Therefore, they can not be used on CPU.
+Example of using the pretrained ResNet-18 model on TensorFlow:
+```
+from tensorflowcv.model_provider import get_model as tfcv_get_model
+from tensorflowcv.model_provider import load_model as tfcv_load_model
+import tensorflow as tf
+import numpy as np
+
+net_lambda, net_file_path = tfcv_get_model("resnet18", pretrained=True)
+x = tf.placeholder(dtype=tf.float32, shape=(None, 3, 224, 224), name='xx')
+y_net = net_lambda(x)
+
+with tf.Session() as sess:
+    tfcv_load_model(sess=sess, file_path=net_file_path)
+    x_value = np.zeros((1, 3, 224, 224), np.float32)
+    y = sess.run(y_net, feed_dict={x: x_value})
+```
 
 ## List of models
 

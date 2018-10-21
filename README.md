@@ -197,6 +197,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x0.5 | 40.98 | 18.53 | 1,366,792 | 42.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1853-3f6182b6.params.log)) |
 | ShuffleNetV2 x1.0 | 33.97 | 13.41 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1341-275f1d2e.params.log)) |
 | ShuffleNetV2 x1.5 | 32.38 | 12.37 | 4,406,098 | 318.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1237-08c01388.params.log)) |
+| ShuffleNetV2 x2.0 | 32.04 | 12.10 | 7,601,686 | 593.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1210-544b55d9.params.log)) |
 | 108-MENet-8x1 (g=3) | 46.11 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2237-d3bb5a4f.params.log)) |
 | 128-MENet-8x1 (g=4) | 45.80 | 21.93 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet128_8x1_g4-2193-fe760f0d.params.log)) |
 | 228-MENet-12x1 (g=3) | 35.03 | 13.99 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet228_12x1_g3-1399-8c28d22f.params.log)) |
@@ -270,6 +271,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x0.5 | 41.48 | 19.02 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1902-75dbfcc1.pth.log)) |
 | ShuffleNetV2 x1.0 | 34.39 | 13.78 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1378-dc6a33c9.pth.log)) |
 | ShuffleNetV2 x1.5 | 32.82 | 12.69 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1269-536ad5b1.pth.log)) |
+| ShuffleNetV2 x2.0 | 32.45 | 12.49 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1249-b9f9e84c.pth.log)) |
 | 108-MENet-8x1 (g=3) | 43.92 | 20.76 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet108_8x1_g3-2076-7f47b37e.pth.log)) |
 | 128-MENet-8x1 (g=4) | 43.95 | 20.62 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet128_8x1_g4-2062-dd4531fd.pth.log)) |
 | 228-MENet-12x1 (g=3) | 33.57 | 13.28 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet228_12x1_g3-1328-27991387.pth.log)) |
@@ -343,6 +345,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x0.5 | 43.80 | 20.87 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-2087-1b600e1d.npz.log)) |
 | ShuffleNetV2 x1.0 | 36.48 | 15.19 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1519-2156e7df.npz.log)) |
 | ShuffleNetV2 x1.5 | 33.96 | 13.37 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1337-66c1d6ed.npz.log)) |
+| ShuffleNetV2 x2.0 | 33.21 | 13.03 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1303-349e42b5.npz.log)) |
 | 108-MENet-8x1 (g=3) | 46.07 | 22.42 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet108_8x1_g3-2242-7c1b69e0.npz.log)) |
 | 128-MENet-8x1 (g=4) | 45.82 | 21.91 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet128_8x1_g4-2191-4d64040c.npz.log)) |
 | 228-MENet-12x1 (g=3) | 34.93 | 14.01 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet228_12x1_g3-1401-07a0ace2.npz.log)) |
@@ -411,6 +414,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x0.5 | 41.00 | 18.68 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1868-d86e9c2e.h5.log)) |
 | ShuffleNetV2 x1.0 | 33.82 | 13.49 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.63/shufflenetv2_w1-1349-f42e0113.h5.log)) |
 | ShuffleNetV2 x1.5 | 32.46 | 12.47 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1247-f7f813b4.h5.log)) |
+| ShuffleNetV2 x2.0 | 31.91 | 12.23 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1223-63291468.h5.log)) |
 | 108-MENet-8x1 (g=3) | 46.09 | 22.37 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet108_8x1_g3-2237-beb28c9b.h5.log)) |
 | 128-MENet-8x1 (g=4) | 45.78 | 21.93 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet128_8x1_g4-2193-0a0193f2.h5.log)) |
 | 228-MENet-12x1 (g=3) | 35.02 | 14.01 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet228_12x1_g3-1401-954b3ba0.h5.log)) |

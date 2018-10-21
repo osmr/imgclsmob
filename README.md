@@ -493,6 +493,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNet-152 | 21.48 | 5.78 | 66,821,848 | 11,324.62M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.75/seresnet152-0578-d06ab6d9.tf.npz.log)) |
 | SE-ResNeXt-50 (32x4d) | 21.01 | 5.53 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.76/seresnext50_32x4d-0553-20723214.tf.npz.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.99 | 4.97 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.76/seresnext101_32x4d-0497-268d7d22.tf.npz.log)) |
+| SENet-154 | 18.77 | 4.63 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.86/senet154-0463-c86eaaed.tf.npz.log)) |
 | DenseNet-121 | 25.16 | 7.82 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.77/densenet121-0782-1bfa61d4.tf.npz.log)) |
 | DenseNet-161 | 22.40 | 6.17 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.77/densenet161-0617-9deca33a.tf.npz.log)) |
 | DenseNet-169 | 23.93 | 6.87 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.77/densenet169-0687-23910539.tf.npz.log)) |

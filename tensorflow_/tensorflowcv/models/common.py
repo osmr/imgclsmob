@@ -311,13 +311,13 @@ def se_block(x,
         out_channels=mid_cannels,
         use_bias=True,
         name=name + "/conv1")
-    w = tf.nn.relu(w, name=name + "relu")
+    w = tf.nn.relu(w, name=name + "/relu")
     w = conv1x1(
         x=w,
         in_channels=mid_cannels,
         out_channels=channels,
         use_bias=True,
         name=name + "/conv2")
-    w = tf.nn.sigmoid(w, name=name + "sigmoid")
+    w = tf.nn.sigmoid(w, name=name + "/sigmoid")
     x = x * w
     return x

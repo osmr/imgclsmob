@@ -258,13 +258,17 @@ def channel_shuffle(x,
     keras.Tensor
         Resulted tensor.
     """
-
     x_shape = x.get_shape().as_list()
     channels = x_shape[1]
-    assert channels % groups == 0, channels
-    x = tf.reshape(x, [-1, channels // groups, groups] + x_shape[-2:])
-    x = tf.transpose(x, [0, 2, 1, 3, 4])
-    x = tf.reshape(x, [-1, channels] + x_shape[-2:])
+    height = x_shape[2]
+    width = x_shape[3]
+
+    assert (channels % groups == 0)
+    channels_per_group = channels // groups
+
+    x = tf.reshape(x, shape=(-1, groups, channels_per_group, height, width))
+    x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
+    x = tf.reshape(x, shape=(-1, channels, height, width))
     return x
 
 

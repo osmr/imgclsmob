@@ -163,6 +163,7 @@ def me_unit(x,
     if downsample:
         out_channels -= in_channels
 
+    # identity = tf.identity(x)
     identity = x
 
     # pointwise group convolution 1
@@ -231,6 +232,7 @@ def me_unit(x,
     y = tf.nn.sigmoid(y, name=name + "/s_evolve_activ")
 
     x = x * y
+    # x = tf.multiply(x, y, name=name + "/mul")
 
     # pointwise group convolution 2
     x = group_conv1x1(

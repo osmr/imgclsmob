@@ -354,7 +354,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 36.15 | 14.86 | 1,331,592 | 152.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.66/mobilenet_wd2-1486-90e62dd6.npz.log)) |
 | MobileNet x0.75 | 33.24 | 12.52 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_w3d4-1252-6675b58c.npz.log)) |
 | MobileNet x1.0 | 29.71 | 10.31 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.21/mobilenet_w1-1031-3ecb405b.npz.log)) |
-| FD-MobileNet x0.25 | 56.11 | 31.45 | 383,160 | 12.44M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3145-6718fb07.npz.log)) |
+| FD-MobileNet x0.25 | 56.11 | 31.45 | 383,160 | 12.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3145-6718fb07.npz.log)) |
 | FD-MobileNet x0.5 | 44.67 | 21.09 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.25/fdmobilenet_wd2-2109-cc9bd695.npz.log)) |
 | FD-MobileNet x1.0 | 35.94 | 14.70 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.25/fdmobilenet_w1-1470-b40709cb.npz.log)) |
 | MobileNetV2 x0.25 | 49.11 | 25.49 | 1,516,392 | 32.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_wd4-2549-b5ff8bfd.npz.log)) |
@@ -422,7 +422,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 36.11 | 14.81 | 1,331,592 | 152.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.66/mobilenet_wd2-1481-b78fec33.h5.log)) |
 | MobileNet x0.75 | 32.71 | 12.28 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_w3d4-1228-09a1eb55.h5.log)) |
 | MobileNet x1.0 | 29.24 | 10.03 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.59/mobilenet_w1-1003-ec69d89b.h5.log)) |
-| FD-MobileNet x0.25 | 56.17 | 31.37 | 383,160 | 12.44M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3137-153934e4.h5.log)) |
+| FD-MobileNet x0.25 | 56.17 | 31.37 | 383,160 | 12.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3137-153934e4.h5.log)) |
 | FD-MobileNet x0.5 | 44.64 | 21.08 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.60/fdmobilenet_wd2-2108-465aeef2.h5.log)) |
 | FD-MobileNet x1.0 | 35.95 | 14.73 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.60/fdmobilenet_w1-1473-680e603f.h5.log)) |
 | MobileNetV2 x0.25 | 48.86 | 25.24 | 1,516,392 | 32.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_wd4-2524-a8ea2889.h5.log)) |
@@ -478,6 +478,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 36.18 | 14.84 | 1,331,592 | 152.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd2-1484-84d1de07.tf.npz.log)) |
 | MobileNet x0.75 | 32.70 | 12.27 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_w3d4-1227-7f3f25dc.tf.npz.log)) |
 | MobileNet x1.0 | 29.30 | 10.04 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_w1-1004-fa4fdc2e.tf.npz.log)) |
+| FD-MobileNet x0.25 | 56.08 | 31.44 | 383,160 | 12.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.81/fdmobilenet_wd4-3144-3febaec9.tf.npz.log)) |
+| FD-MobileNet x0.5 | 44.62 | 21.08 | 993,928 | 40.93M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.81/fdmobilenet_wd2-2108-641b5d02.tf.npz.log)) |
+| FD-MobileNet x1.0 | 36.02 | 14.76 | 2,901,288 | 146.08M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.81/fdmobilenet_w1-1476-4db4956b.tf.npz.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

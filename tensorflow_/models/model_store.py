@@ -53,7 +53,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenet_wd4', '2221', '15ee9820a315d20c732c085a4cd1edd0e3c0658a', 'v0.0.80'),
     ('mobilenet_wd2', '1484', '84d1de07c3d939c08bf1bdd4583c6b739aca0b04', 'v0.0.80'),
     ('mobilenet_w3d4', '1227', '7f3f25dc1e01ca59df627fbab0fadef7a9b9b14c', 'v0.0.80'),
-    ('mobilenet_w1', '1004', 'fa4fdc2eca16d14f2e013b97d78934f7da98202b', 'v0.0.80')]}
+    ('mobilenet_w1', '1004', 'fa4fdc2eca16d14f2e013b97d78934f7da98202b', 'v0.0.80'),
+    ('fdmobilenet_wd4', '3144', '3febaec9763ae1c65b5b96c3ad2da678d31ce54d', 'v0.0.81'),
+    ('fdmobilenet_wd2', '2108', '641b5d028712638cb40a26171c1926b1c31f40cb', 'v0.0.81'),
+    ('fdmobilenet_w1', '1476', '4db4956bdb94e14ca0b2d0d2c73dc55dbe51c8d2', 'v0.0.81')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

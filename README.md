@@ -474,6 +474,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.13 | 19.02 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.78/squeezenet_v1_0-1902-694730ac.tf.npz.log)) |
 | SqueezeNet v1.1 | 41.39 | 19.23 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.78/squeezenet_v1_1-1923-9f63fc60.tf.npz.log)) |
 | SqueezeResNet v1.1 | 39.75 | 17.92 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.79/squeezeresnet_v1_1-1792-44c17928.tf.npz.log)) |
+| MobileNet x0.25 | 45.78 | 22.21 | 470,072 | 42.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd4-2221-15ee9820.tf.npz.log)) |
+| MobileNet x0.5 | 36.18 | 14.84 | 1,331,592 | 152.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd2-1484-84d1de07.tf.npz.log)) |
+| MobileNet x0.75 | 32.70 | 12.27 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_w3d4-1227-7f3f25dc.tf.npz.log)) |
+| MobileNet x1.0 | 29.30 | 10.04 | 4,231,976 | 573.83M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_w1-1004-fa4fdc2e.tf.npz.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

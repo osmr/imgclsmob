@@ -49,7 +49,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('darknet_ref', '1672', '3c8ed62a43b9e8934b4beb7c47ce4c7b2cdb7a64', 'v0.0.71'),
     ('squeezenet_v1_0', '1902', '694730ac41bb9698b5337aca99addb47d8e5b5aa', 'v0.0.78'),
     ('squeezenet_v1_1', '1923', '9f63fc6053e2dd2ccb49f99cac3fc1fc58429836', 'v0.0.78'),
-    ('squeezeresnet_v1_1', '1792', '44c1792845488013cb3b9286c9cb7f868d590ab9', 'v0.0.79')]}
+    ('squeezeresnet_v1_1', '1792', '44c1792845488013cb3b9286c9cb7f868d590ab9', 'v0.0.79'),
+    ('mobilenet_wd4', '2221', '15ee9820a315d20c732c085a4cd1edd0e3c0658a', 'v0.0.80'),
+    ('mobilenet_wd2', '1484', '84d1de07c3d939c08bf1bdd4583c6b739aca0b04', 'v0.0.80'),
+    ('mobilenet_w3d4', '1227', '7f3f25dc1e01ca59df627fbab0fadef7a9b9b14c', 'v0.0.80'),
+    ('mobilenet_w1', '1004', 'fa4fdc2eca16d14f2e013b97d78934f7da98202b', 'v0.0.80')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

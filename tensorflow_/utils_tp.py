@@ -17,7 +17,7 @@ from tensorpack.dataflow import MultiThreadMapData
 # from tensorpack.dataflow import MapData
 from tensorpack.utils import logger
 
-from .model_provider import get_model
+from .tensorflowcv.model_provider import get_model
 
 
 class CachedChiefSessionCreator(tf.train.ChiefSessionCreator):

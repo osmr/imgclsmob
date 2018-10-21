@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorpack.models import Conv2D, BNReLU, BatchNorm, MaxPooling, AvgPooling, GlobalAvgPooling, FullyConnected,\
     layer_register
 from tensorpack.tfutils import argscope
-from tensorflow_.models.others.common_ import ImageNetModel, depthwise_conv, channel_shuffle
+from tensorflow_.tensorflowcv.models import ImageNetModel, depthwise_conv, channel_shuffle
 
 
 @layer_register()

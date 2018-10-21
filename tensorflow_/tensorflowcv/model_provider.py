@@ -11,10 +11,9 @@ from .models.shufflenetv2 import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
-
 # from tensorflow_.models.others.shufflenetv2 import *
 
-__all__ = ['get_model']
+__all__ = ['get_model', 'load_model']
 
 
 _models = {
@@ -175,3 +174,25 @@ def get_model(name, **kwargs):
         raise ValueError('Unsupported model: {}'.format(name))
     net = _models[name](**kwargs)
     return net
+
+
+def load_model(sess,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    sess: Session
+        A Session to use to load the weights.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    from .models.model_store import load_model
+    load_model(
+        sess=sess,
+        file_path=file_path,
+        ignore_extra=ignore_extra)

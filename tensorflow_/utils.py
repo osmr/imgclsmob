@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from .model_provider import get_model
+from .tensorflowcv.model_provider import get_model
 
 
 def save_model_params(sess,
@@ -40,7 +40,7 @@ def prepare_model(model_name,
     y_net = net_lambda(x)
 
     if use_pretrained:
-        from .models.model_store import load_model
+        from tensorflow_.tensorflowcv.models import load_model
         with tf.Session() as sess:
             load_model(sess=sess, file_path=net_file_path)
 

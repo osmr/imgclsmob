@@ -56,7 +56,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenet_w1', '1004', 'fa4fdc2eca16d14f2e013b97d78934f7da98202b', 'v0.0.80'),
     ('fdmobilenet_wd4', '3144', '3febaec9763ae1c65b5b96c3ad2da678d31ce54d', 'v0.0.81'),
     ('fdmobilenet_wd2', '2108', '641b5d028712638cb40a26171c1926b1c31f40cb', 'v0.0.81'),
-    ('fdmobilenet_w1', '1476', '4db4956bdb94e14ca0b2d0d2c73dc55dbe51c8d2', 'v0.0.81')]}
+    ('fdmobilenet_w1', '1476', '4db4956bdb94e14ca0b2d0d2c73dc55dbe51c8d2', 'v0.0.81'),
+    ('mobilenetv2_wd4', '2526', 'b16970032bda2300297a06bda6e0b531f820c1ee', 'v0.0.82'),
+    ('mobilenetv2_wd2', '1460', '12376d2486b9409e0b41c2d46a9689c47ac32cb9', 'v0.0.82'),
+    ('mobilenetv2_w3d4', '1124', '3531c997eb6a2052a715f2a37673151a1a0a075d', 'v0.0.82'),
+    ('mobilenetv2_w1', '0990', 'e80f9fe41d03eed8734b7434e788e4230de42465', 'v0.0.82')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

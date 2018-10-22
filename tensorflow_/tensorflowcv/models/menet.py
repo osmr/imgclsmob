@@ -9,7 +9,7 @@ __all__ = ['menet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d
+from .common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d, avgpool2d
 
 
 def depthwise_conv3x3(x,
@@ -247,13 +247,19 @@ def me_unit(x,
         name=name + "/expand_bn3")
 
     if downsample:
-        identity = tf.layers.average_pooling2d(
-            inputs=identity,
+        identity = avgpool2d(
+            x=identity,
             pool_size=3,
             strides=2,
-            padding='same',
-            data_format='channels_first',
+            padding=1,
             name=name + "/avgpool")
+        # identity = tf.layers.average_pooling2d(
+        #     inputs=identity,
+        #     pool_size=3,
+        #     strides=2,
+        #     padding='same',
+        #     data_format='channels_first',
+        #     name=name + "/avgpool")
         x = tf.concat([x, identity], axis=1, name=name + "/concat")
     else:
         x = x + identity

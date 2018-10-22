@@ -163,7 +163,6 @@ def me_unit(x,
     if downsample:
         out_channels -= in_channels
 
-    # identity = tf.identity(x)
     identity = x
 
     # pointwise group convolution 1
@@ -232,7 +231,6 @@ def me_unit(x,
     y = tf.nn.sigmoid(y, name=name + "/s_evolve_activ")
 
     x = x * y
-    # x = tf.multiply(x, y, name=name + "/mul")
 
     # pointwise group convolution 2
     x = group_conv1x1(
@@ -253,13 +251,6 @@ def me_unit(x,
             strides=2,
             padding=1,
             name=name + "/avgpool")
-        # identity = tf.layers.average_pooling2d(
-        #     inputs=identity,
-        #     pool_size=3,
-        #     strides=2,
-        #     padding='same',
-        #     data_format='channels_first',
-        #     name=name + "/avgpool")
         x = tf.concat([x, identity], axis=1, name=name + "/concat")
     else:
         x = x + identity

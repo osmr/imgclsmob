@@ -507,6 +507,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x1.0 | 33.80 | 13.48 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w1-1348-7fd0afe5.tf.npz.log)) |
 | ShuffleNetV2 x1.5 | 32.51 | 12.50 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w3d2-1250-5dd7b5b1.tf.npz.log)) |
 | ShuffleNetV2 x2.0 | 31.99 | 12.26 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w2-1226-f66f6987.tf.npz.log)) |
+| 108-MENet-8x1 (g=3) | 46.11 | 22.32 | 654,516 | 40.64M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet108_8x1_g3-2232-372c412f.tf.npz.log)) |
+| 128-MENet-8x1 (g=4) | 45.86 | 21.94 | 750,796 | 43.58M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet128_8x1_g4-2194-d4f6a78e.tf.npz.log)) |
+| 228-MENet-12x1 (g=3) | 35.01 | 14.05 | 1,806,568 | 148.93M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet228_12x1_g3-1405-724b4422.tf.npz.log)) |
+| 256-MENet-12x1 (g=4) | 34.48 | 13.95 | 1,888,240 | 146.11M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet256_12x1_g4-1395-d0ce72b1.tf.npz.log)) |
+| 348-MENet-12x1 (g=3) | 31.19 | 11.41 | 3,368,128 | 306.31M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet348_12x1_g3-1141-f90f3c12.tf.npz.log)) |
+| 352-MENet-12x1 (g=8) | 34.65 | 13.71 | 2,272,872 | 151.03M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet352_12x1_g8-1371-3621d3c0.tf.npz.log)) |
+| 456-MENet-24x1 (g=3) | 29.56 | 10.46 | 5,304,784 | 560.72M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet456_24x1_g3-1046-6d70fb21.tf.npz.log)) |
 | MobileNet x0.25 | 45.78 | 22.21 | 470,072 | 42.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd4-2221-15ee9820.tf.npz.log)) |
 | MobileNet x0.5 | 36.18 | 14.84 | 1,331,592 | 152.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd2-1484-84d1de07.tf.npz.log)) |
 | MobileNet x0.75 | 32.70 | 12.27 | 2,585,560 | 329.22M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_w3d4-1227-7f3f25dc.tf.npz.log)) |

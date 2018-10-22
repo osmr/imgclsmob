@@ -2,7 +2,7 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'se_block', 'channel_shuffle']
+__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'se_block', 'channel_shuffle']
 
 import math
 import tensorflow as tf

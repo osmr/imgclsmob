@@ -659,7 +659,6 @@ def convert_tf2gl(dst_net,
     src_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in src_param_keys]
     src_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in src_param_keys]
 
-
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])

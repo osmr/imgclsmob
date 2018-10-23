@@ -122,7 +122,8 @@ def main():
 
     success = True
     for i in range(10):
-        w = np.random.randn(32, 1, 7, 7).astype(np.float32)
+        # gl_w = np.random.randn(32, 1, 7, 7).astype(np.float32)
+        tf_w = np.random.randn(7, 7, 32, 1).astype(np.float32)
         x = np.random.randn(10, 32, 224, 224).astype(np.float32)
 
         gl_model = GluonModel()
@@ -130,7 +131,8 @@ def main():
         # ctx = mx.cpu()
         ctx = mx.gpu(0)
         gl_params = gl_model._collect_params_with_prefix()
-        gl_params['dw_conv.weight']._load_init(mx.nd.array(w, ctx), ctx)
+        gl_w = np.transpose(tf_w, axes=(2, 3, 0, 1))
+        gl_params['dw_conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
 
         gl_x = mx.nd.array(x, ctx)
         gl_y = gl_model(gl_x).asnumpy()
@@ -142,7 +144,7 @@ def main():
         tf_model = tensorflow_model(xx)
         tf_params = {v.name: v for v in tf.global_variables()}
         with tf.Session() as sess:
-            tf_w = np.transpose(w, axes=(2, 3, 0, 1))
+            # tf_w = np.transpose(gl_w, axes=(2, 3, 0, 1))
             sess.run(tf_params['dw_conv/dw_kernel:0'].assign(tf_w))
 
             tf_y = sess.run(tf_model, feed_dict={xx: x})

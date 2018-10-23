@@ -119,9 +119,8 @@ def main():
 
     success = True
     for i in range(10):
-        # w = np.random.randint(10, size=(64, 3, 7, 7)).astype(np.float32)
-        # x = np.random.randint(10, size=(1, 3, 224, 224)).astype(np.float32)
-        w = np.random.randn(64, 3, 7, 7).astype(np.float32)
+        # gl_w = np.random.randn(64, 3, 7, 7).astype(np.float32)
+        tf_w = np.random.randn(7, 7, 3, 64).astype(np.float32)
         b = np.random.randn(64, ).astype(np.float32)
         x = np.random.randn(10, 3, 224, 224).astype(np.float32)
 
@@ -130,7 +129,8 @@ def main():
         # ctx = mx.cpu()
         ctx = mx.gpu(0)
         gl_params = gl_model._collect_params_with_prefix()
-        gl_params['conv.weight']._load_init(mx.nd.array(w, ctx), ctx)
+        gl_w = np.transpose(tf_w, axes=(3, 2, 0, 1))
+        gl_params['conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
         gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
 
         gl_x = mx.nd.array(x, ctx)
@@ -143,7 +143,7 @@ def main():
         tf_model = tensorflow_model(xx)
         tf_params = {v.name: v for v in tf.global_variables()}
         with tf.Session() as sess:
-            tf_w = np.transpose(w, axes=(2, 3, 1, 0))
+            # tf_w = np.transpose(gl_w, axes=(2, 3, 1, 0))
             sess.run(tf_params['conv/kernel:0'].assign(tf_w))
             sess.run(tf_params['conv/bias:0'].assign(b))
 

@@ -682,7 +682,7 @@ def convert_tf2gl(dst_net,
             if src_key.split("/")[-1][:-2] == "dw_kernel":
                 src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
             else:
-                src_weight = np.transpose(src_weight, axes=(3, 2, 1, 0))
+                src_weight = np.transpose(src_weight, axes=(3, 2, 0, 1))
         elif len(src_weight.shape) == 2:
             src_weight = np.transpose(src_weight, axes=(1, 0))
         assert (src_weight.shape == dst_params[dst_key].shape), \

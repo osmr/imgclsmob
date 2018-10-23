@@ -140,6 +140,20 @@ def prepare_src_model(src_fwk,
             ctx=ctx)
         src_params = None
         src_param_keys = list(src_arg_params.keys())
+    elif src_fwk == "tensorflow":
+        # import tensorflow as tf
+        # from tensorflow_.utils import prepare_model as prepare_model_tf
+        # src_net = prepare_model_tf(
+        #     model_name=src_model,
+        #     classes=num_classes,
+        #     use_pretrained=False,
+        #     pretrained_model_file_path=src_params_file_path)
+        # src_param_keys = [v.name for v in tf.global_variables()]
+        # src_params = {v.name: v for v in tf.global_variables()}
+
+        src_net = None
+        src_params = dict(np.load(src_params_file_path))
+        src_param_keys = list(src_params.keys())
     else:
         raise ValueError("Unsupported src fwk: {}".format(src_fwk))
 
@@ -208,7 +222,8 @@ def prepare_dst_model(dst_fwk,
         dst_net = prepare_model_tf(
             model_name=dst_model,
             classes=num_classes,
-            use_pretrained=False)
+            use_pretrained=False,
+            pretrained_model_file_path="")
         dst_param_keys = [v.name for v in tf.global_variables()]
         dst_params = {v.name: v for v in tf.global_variables()}
     else:
@@ -582,6 +597,103 @@ def convert_pt2gl(dst_net,
     dst_net.save_parameters(dst_params_file_path)
 
 
+def convert_tf2tf(dst_params_file_path,
+                  dst_params,
+                  dst_param_keys,
+                  src_params,
+                  src_param_keys):
+    import re
+
+    src_param_keys = [key.replace('/W:', '/kernel:') for key in src_param_keys]
+    src_param_keys = [key.replace('/b:', '/bias:') for key in src_param_keys]
+    src_param_keys = [key.replace('linear/', 'output/') for key in src_param_keys]
+    src_param_keys = [key.replace('stage', 'features/stage') for key in src_param_keys]
+    src_param_keys = [re.sub('^conv1/', 'features/init_block/conv/', key) for key in src_param_keys]
+    src_param_keys = [re.sub('^conv5/', 'features/final_block/conv/', key) for key in src_param_keys]
+    src_param_keys = [key.replace('/dconv_bn/', '/dconv/bn/') for key in src_param_keys]
+    src_param_keys = [key.replace('/shortcut_dconv_bn/', '/shortcut_dconv/bn/') for key in src_param_keys]
+
+    src_param_keys.sort()
+    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys.sort()
+    dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    src_param_keys = [key.replace('/kernel:', '/W:') for key in src_param_keys]
+    src_param_keys = [key.replace('/bias:', '/b:') for key in src_param_keys]
+    src_param_keys = [key.replace('output/', 'linear/') for key in src_param_keys]
+    src_param_keys = [key.replace('features/stage', 'stage') for key in src_param_keys]
+    src_param_keys = [key.replace('features/init_block/conv/', 'conv1/') for key in src_param_keys]
+    src_param_keys = [key.replace('features/final_block/conv/', 'conv5/') for key in src_param_keys]
+    src_param_keys = [key.replace('/dconv/bn/', '/dconv_bn/') for key in src_param_keys]
+    src_param_keys = [key.replace('/shortcut_dconv/bn/', '/shortcut_dconv_bn/') for key in src_param_keys]
+
+    assert (len(src_param_keys) == len(dst_param_keys))
+
+    import tensorflow as tf
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+            assert (src_params[src_key].shape == tuple(dst_params[dst_key].get_shape().as_list()))
+            sess.run(dst_params[dst_key].assign(src_params[src_key]))
+
+        from tensorflow_.utils import save_model_params
+        save_model_params(
+            sess=sess,
+            file_path=dst_params_file_path)
+
+
+def convert_tf2gl(dst_net,
+                  dst_params_file_path,
+                  dst_params,
+                  dst_param_keys,
+                  src_params,
+                  src_param_keys,
+                  ctx):
+    src_param_keys = [key.replace('/kernel:', '/weight:') for key in src_param_keys]
+    src_param_keys = [key.replace('/dw_kernel:', '/weight_dw:') for key in src_param_keys]
+    src_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in src_param_keys]
+    src_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in src_param_keys]
+    src_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in src_param_keys]
+    src_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in src_param_keys]
+
+
+    src_param_keys.sort()
+    src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    dst_param_keys.sort()
+    dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                         x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+    src_param_keys = [key.replace('/weight:', '/kernel:') for key in src_param_keys]
+    src_param_keys = [key.replace('/weight_dw:', '/dw_kernel:') for key in src_param_keys]
+    src_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in src_param_keys]
+    src_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in src_param_keys]
+    src_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in src_param_keys]
+    src_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in src_param_keys]
+
+    assert (len(src_param_keys) == len(dst_param_keys))
+
+    for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+        src_weight = src_params[src_key]
+        if len(src_weight.shape) == 4:
+            if src_key.split("/")[-1][:-2] == "dw_kernel":
+                src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
+            else:
+                src_weight = np.transpose(src_weight, axes=(3, 2, 1, 0))
+        elif len(src_weight.shape) == 2:
+            src_weight = np.transpose(src_weight, axes=(1, 0))
+        assert (src_weight.shape == dst_params[dst_key].shape), \
+            "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                src_key, dst_key, src_weight.shape, dst_params[dst_key].shape)
+        dst_params[dst_key]._load_init(mx.nd.array(src_weight, ctx), ctx)
+
+    dst_net.save_parameters(dst_params_file_path)
+
+
 def main():
     args = parse_args()
 
@@ -706,6 +818,22 @@ def main():
             src_param_keys=src_param_keys,
             src_arg_params=src_arg_params,
             src_model=args.src_model,
+            ctx=ctx)
+    elif args.src_fwk == "tensorflow" and args.dst_fwk == "tensorflow":
+        convert_tf2tf(
+            dst_params_file_path=args.dst_params,
+            dst_params=dst_params,
+            dst_param_keys=dst_param_keys,
+            src_params=src_params,
+            src_param_keys=src_param_keys)
+    elif args.src_fwk == "tensorflow" and args.dst_fwk == "gluon":
+        convert_tf2gl(
+            dst_net=dst_net,
+            dst_params_file_path=args.dst_params,
+            dst_params=dst_params,
+            dst_param_keys=dst_param_keys,
+            src_params=src_params,
+            src_param_keys=src_param_keys,
             ctx=ctx)
     else:
         raise NotImplementedError

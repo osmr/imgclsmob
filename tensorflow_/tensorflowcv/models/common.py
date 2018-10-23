@@ -2,7 +2,8 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'se_block', 'channel_shuffle']
+__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'se_block', 'channel_shuffle',
+           'channel_shuffle2']
 
 import math
 import tensorflow as tf
@@ -335,6 +336,39 @@ def channel_shuffle(x,
     channels_per_group = channels // groups
 
     x = tf.reshape(x, shape=(-1, groups, channels_per_group, height, width))
+    x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
+    x = tf.reshape(x, shape=(-1, channels, height, width))
+    return x
+
+
+def channel_shuffle2(x,
+                     groups):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+    The alternative version.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    groups : int
+        Number of groups.
+
+    Returns
+    -------
+    keras.Tensor
+        Resulted tensor.
+    """
+    x_shape = x.get_shape().as_list()
+    channels = x_shape[1]
+    height = x_shape[2]
+    width = x_shape[3]
+
+    assert (channels % groups == 0)
+    channels_per_group = channels // groups
+
+    x = tf.reshape(x, shape=(-1, channels_per_group, groups, height, width))
     x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
     x = tf.reshape(x, shape=(-1, channels, height, width))
     return x

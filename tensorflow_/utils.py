@@ -27,7 +27,8 @@ def load_model_params(net,
 
 def prepare_model(model_name,
                   classes,
-                  use_pretrained):
+                  use_pretrained,
+                  pretrained_model_file_path):
     kwargs = {'pretrained': use_pretrained,
               'classes': classes}
 
@@ -39,9 +40,12 @@ def prepare_model(model_name,
         name='xx')
     y_net = net_lambda(x)
 
+    if use_pretrained and not pretrained_model_file_path:
+        pretrained_model_file_path = net_file_path
+
     if use_pretrained:
-        from tensorflow_.tensorflowcv.models import load_model
+        from .tensorflowcv.model_provider import load_model
         with tf.Session() as sess:
-            load_model(sess=sess, file_path=net_file_path)
+            load_model(sess=sess, file_path=pretrained_model_file_path)
 
     return y_net

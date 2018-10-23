@@ -2,7 +2,7 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential']
+__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential']
 
 from mxnet.gluon import nn, HybridBlock
 
@@ -75,6 +75,52 @@ class ChannelShuffle(HybridBlock):
 
     def hybrid_forward(self, F, x):
         return channel_shuffle(x, self.groups)
+
+
+def channel_shuffle2(x,
+                     channels_per_group):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
+    The alternative version.
+
+    Parameters:
+    ----------
+    x : NDArray
+        Input tensor.
+    channels_per_group : int
+        Number of channels per group.
+
+    Returns
+    -------
+    NDArray
+        Resulted tensor.
+    """
+    return x.reshape((0, -4, channels_per_group, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
+
+
+class ChannelShuffle2(HybridBlock):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
+    The alternative version.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 channels,
+                 groups,
+                 **kwargs):
+        super(ChannelShuffle2, self).__init__(**kwargs)
+        assert (channels % groups == 0)
+        self.channels_per_group = channels // groups
+
+    def hybrid_forward(self, F, x):
+        return channel_shuffle2(x, self.channels_per_group)
 
 
 class SEBlock(HybridBlock):

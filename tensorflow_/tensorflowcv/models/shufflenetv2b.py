@@ -1,14 +1,14 @@
 """
-    ShuffleNet V2, implemented in TensorFlow.
+    ShuffleNet V2, implemented in TensorFlow. The second variant.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['shufflenetv2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_w3d2', 'shufflenetv2_w2']
+__all__ = ['shufflenetv2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d, se_block
+from .common import conv2d, batchnorm, channel_shuffle2, maxpool2d, se_block
 
 
 def shuffle_conv(x,
@@ -20,7 +20,7 @@ def shuffle_conv(x,
                  training,
                  name="shuffle_conv"):
     """
-    ShuffleNetV2 specific convolution block.
+    ShuffleNetV2(b) specific convolution block.
 
     Parameters:
     ----------
@@ -69,7 +69,7 @@ def shuffle_conv1x1(x,
                     training,
                     name="shuffle_conv1x1"):
     """
-    1x1 version of the ShuffleNetV2 specific convolution block.
+    1x1 version of the ShuffleNetV2(b) specific convolution block.
 
     Parameters:
     ----------
@@ -100,12 +100,13 @@ def shuffle_conv1x1(x,
         name=name)
 
 
-def depthwise_conv3x3(x,
-                      channels,
-                      strides,
-                      name="depthwise_conv3x3"):
+def shuffle_depthwise_conv3x3(x,
+                              channels,
+                              strides,
+                              training,
+                              name="shuffle_depthwise_conv3x3"):
     """
-    Depthwise convolution 3x3 layer.
+    ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
 
     Parameters:
     ----------
@@ -115,7 +116,9 @@ def depthwise_conv3x3(x,
         Number of input/output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    name : str, default 'depthwise_conv3x3'
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'shuffle_depthwise_conv3x3'
         Block name.
 
     Returns
@@ -123,7 +126,7 @@ def depthwise_conv3x3(x,
     Tensor
         Resulted tensor.
     """
-    return conv2d(
+    x = conv2d(
         x=x,
         in_channels=channels,
         out_channels=channels,
@@ -133,6 +136,11 @@ def depthwise_conv3x3(x,
         groups=channels,
         use_bias=False,
         name=name)
+    x = batchnorm(
+        x=x,
+        training=training,
+        name=name + "/bn")
+    return x
 
 
 def shuffle_unit(x,
@@ -144,7 +152,7 @@ def shuffle_unit(x,
                  training,
                  name="shuffle_unit"):
     """
-    ShuffleNetV2 unit.
+    ShuffleNetV2(b) unit.
 
     Parameters:
     ----------
@@ -171,76 +179,62 @@ def shuffle_unit(x,
         Resulted tensor.
     """
     mid_channels = out_channels // 2
+    in_channels2 = in_channels // 2
+    assert (in_channels % 2 == 0)
 
     if downsample:
-        y1 = depthwise_conv3x3(
+        y1 = shuffle_depthwise_conv3x3(
             x=x,
             channels=in_channels,
             strides=2,
-            name=name + "/dw_conv4")
-        y1 = batchnorm(
-            x=y1,
             training=training,
-            name=name + "/dw_bn4")
-        y1 = conv1x1(
+            name=name + "/shortcut_dconv")
+        y1 = shuffle_conv1x1(
             x=y1,
             in_channels=in_channels,
-            out_channels=mid_channels,
-            name=name + "/expand_conv5")
-        y1 = batchnorm(
-            x=y1,
+            out_channels=in_channels,
             training=training,
-            name=name + "/expand_bn5")
-        y1 = tf.nn.relu(y1, name=name + "/expand_activ5")
+            name=name + "/shortcut_conv")
         x2 = x
     else:
         y1, x2 = tf.split(x, num_or_size_splits=2, axis=1)
 
-    y2 = conv1x1(
-        x=x2,
-        in_channels=(in_channels if downsample else mid_channels),
-        out_channels=mid_channels,
-        name=name + "/compress_conv1")
-    y2 = batchnorm(
-        x=y2,
-        training=training,
-        name=name + "/compress_bn1")
-    y2 = tf.nn.relu(y2, name=name + "/compress_activ1")
+    y2_in_channels = (in_channels if downsample else in_channels2)
+    y2_out_channels = out_channels - y2_in_channels
 
-    y2 = depthwise_conv3x3(
+    y2 = shuffle_conv1x1(
+        x=x2,
+        in_channels=y2_in_channels,
+        out_channels=mid_channels,
+        training=training,
+        name=name + "/conv1")
+    y2 = shuffle_depthwise_conv3x3(
         x=y2,
         channels=mid_channels,
         strides=(2 if downsample else 1),
-        name=name + "/dw_conv2")
-    y2 = batchnorm(
-        x=y2,
         training=training,
-        name=name + "/dw_bn2")
-
-    y2 = conv1x1(
+        name=name + "/dconv")
+    y2 = shuffle_conv1x1(
         x=y2,
         in_channels=mid_channels,
-        out_channels=mid_channels,
-        name=name + "/expand_conv3")
-    y2 = batchnorm(
-        x=y2,
+        out_channels=y2_out_channels,
         training=training,
-        name=name + "/expand_bn3")
-    y2 = tf.nn.relu(y2, name=name + "/expand_activ3")
+        name=name + "/conv2")
 
     if use_se:
         y2 = se_block(
             x=y2,
-            channels=mid_channels,
+            channels=y2_out_channels,
             name=name + "/se")
 
     if use_residual and not downsample:
+        assert (y2_out_channels == in_channels2)
         y2 = y2 + x2
 
     x = tf.concat([y1, y2], axis=1, name=name + "/concat")
 
     assert (mid_channels % 2 == 0)
-    x = channel_shuffle(
+    x = channel_shuffle2(
         x=x,
         groups=2)
 
@@ -253,7 +247,7 @@ def shuffle_init_block(x,
                        training,
                        name="shuffle_init_block"):
     """
-    ShuffleNetV2 specific initial block.
+    ShuffleNetV2(b) specific initial block.
 
     Parameters:
     ----------
@@ -286,23 +280,23 @@ def shuffle_init_block(x,
         x=x,
         pool_size=3,
         strides=2,
-        padding=0,
-        ceil_mode=True,
+        padding=1,
+        ceil_mode=False,
         name=name + "/pool")
     return x
 
 
-def shufflenetv2(x,
-                 channels,
-                 init_block_channels,
-                 final_block_channels,
-                 use_se=False,
-                 use_residual=False,
-                 in_channels=3,
-                 classes=1000,
-                 training=False):
+def shufflenetv2b(x,
+                  channels,
+                  init_block_channels,
+                  final_block_channels,
+                  use_se=False,
+                  use_residual=False,
+                  in_channels=3,
+                  classes=1000,
+                  training=False):
     """
-    ShuffleNetV2 model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    ShuffleNetV2(b) model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
@@ -373,13 +367,13 @@ def shufflenetv2(x,
     return x
 
 
-def get_shufflenetv2(width_scale,
-                     model_name=None,
-                     pretrained=False,
-                     root=os.path.join('~', '.tensorflow', 'models'),
-                     **kwargs):
+def get_shufflenetv2b(width_scale,
+                      model_name=None,
+                      pretrained=False,
+                      root=os.path.join('~', '.tensorflow', 'models'),
+                      **kwargs):
     """
-    Create ShuffleNetV2 model with specific parameters.
+    Create ShuffleNetV2(b) model with specific parameters.
 
     Parameters:
     ----------
@@ -417,7 +411,7 @@ def get_shufflenetv2(width_scale,
                    channels=channels,
                    init_block_channels=init_block_channels,
                    final_block_channels=final_block_channels):
-        y_net = shufflenetv2(
+        y_net = shufflenetv2b(
             x=x,
             channels=channels,
             init_block_channels=init_block_channels,
@@ -439,9 +433,9 @@ def get_shufflenetv2(width_scale,
     return net_lambda, net_file_path
 
 
-def shufflenetv2_wd2(**kwargs):
+def shufflenetv2b_wd2(**kwargs):
     """
-    ShuffleNetV2 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    ShuffleNetV2(b) 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
@@ -458,12 +452,12 @@ def shufflenetv2_wd2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2(width_scale=(12.0 / 29.0), model_name="shufflenetv2_wd2", **kwargs)
+    return get_shufflenetv2b(width_scale=(12.0 / 29.0), model_name="shufflenetv2_wd2", **kwargs)
 
 
-def shufflenetv2_w1(**kwargs):
+def shufflenetv2b_w1(**kwargs):
     """
-    ShuffleNetV2 1x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    ShuffleNetV2(b) 1x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
@@ -480,12 +474,12 @@ def shufflenetv2_w1(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2(width_scale=1.0, model_name="shufflenetv2_w1", **kwargs)
+    return get_shufflenetv2b(width_scale=1.0, model_name="shufflenetv2_w1", **kwargs)
 
 
-def shufflenetv2_w3d2(**kwargs):
+def shufflenetv2b_w3d2(**kwargs):
     """
-    ShuffleNetV2 1.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    ShuffleNetV2(b) 1.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
@@ -502,12 +496,12 @@ def shufflenetv2_w3d2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w3d2", **kwargs)
+    return get_shufflenetv2b(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w3d2", **kwargs)
 
 
-def shufflenetv2_w2(**kwargs):
+def shufflenetv2b_w2(**kwargs):
     """
-    ShuffleNetV2 2x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    ShuffleNetV2(b) 2x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
@@ -524,7 +518,7 @@ def shufflenetv2_w2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
+    return get_shufflenetv2b(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
 
 
 def _test():
@@ -534,10 +528,10 @@ def _test():
     pretrained = False
 
     models = [
-        shufflenetv2_wd2,
-        shufflenetv2_w1,
-        shufflenetv2_w3d2,
-        shufflenetv2_w2,
+        shufflenetv2b_wd2,
+        shufflenetv2b_w1,
+        shufflenetv2b_w3d2,
+        shufflenetv2b_w2,
     ]
 
     for model in models:
@@ -552,10 +546,10 @@ def _test():
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != shufflenetv2_wd2 or weight_count == 1366792)
-        assert (model != shufflenetv2_w1 or weight_count == 2278604)
-        assert (model != shufflenetv2_w3d2 or weight_count == 4406098)
-        assert (model != shufflenetv2_w2 or weight_count == 7601686)
+        assert (model != shufflenetv2b_wd2 or weight_count == 1366792)
+        assert (model != shufflenetv2b_w1 or weight_count == 2279760)
+        assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
+        assert (model != shufflenetv2b_w2 or weight_count == 7611290)
 
         with tf.Session() as sess:
             if pretrained:

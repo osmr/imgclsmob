@@ -1,5 +1,5 @@
 
-__all__ = ['ShuffleNetV2', 'oth_shufflenetv2_wd2']
+__all__ = ['ShuffleNetV2', 'oth_shufflenetv2_wd2', 'oth_shufflenetv2_w1']
 
 
 import os
@@ -185,6 +185,23 @@ def oth_shufflenetv2_wd2(**kwargs):
         Location for keeping the model parameters.
     """
     return get_shufflenetv2(ratio=0.5, model_name="shufflenetv2_wd2", **kwargs)
+
+
+def oth_shufflenetv2_w1(**kwargs):
+    """
+    ShuffleNetV2 1.0x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    https://arxiv.org/abs/1807.11164.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_shufflenetv2(ratio=1.0, model_name="shufflenetv2_w1", **kwargs)
 
 
 def _load_model(sess,

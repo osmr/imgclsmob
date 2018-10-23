@@ -159,6 +159,7 @@ _models = {
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
     'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
+    'oth_shufflenetv2_w1': oth_shufflenetv2_w1,
 }
 
 

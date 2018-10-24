@@ -9,7 +9,7 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1, ChannelShuffle, SEBlock
+from .common import conv1x1, ChannelShuffle, SEBlock
 
 
 class ShuffleConv(HybridBlock):

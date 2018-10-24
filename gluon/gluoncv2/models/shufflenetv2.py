@@ -9,7 +9,7 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, ChannelShuffle, SEBlock
+from common import conv1x1, ChannelShuffle, SEBlock
 
 
 class ShuffleConv(HybridBlock):
@@ -155,7 +155,7 @@ class ShuffleUnit(HybridBlock):
 
             self.activ = nn.Activation('relu')
             self.c_shuffle = ChannelShuffle(
-                channels=mid_channels,
+                channels=out_channels,
                 groups=2)
 
     def hybrid_forward(self, F, x):
@@ -418,7 +418,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         shufflenetv2_wd2,

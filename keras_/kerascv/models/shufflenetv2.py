@@ -211,7 +211,7 @@ def shuffle_unit(x,
     x = nn.concatenate([y1, y2], axis=channel_axis, name=name + "/concat")
 
     x = channel_shuffle_lambda(
-        channels=mid_channels,
+        channels=out_channels,
         groups=2,
         name=name + "/c_shuffle")(x)
 

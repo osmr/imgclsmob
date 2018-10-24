@@ -166,7 +166,7 @@ class ShuffleUnit(HybridBlock):
                     out_channels=in_channels)
 
             self.c_shuffle = ChannelShuffle2(
-                channels=mid_channels,
+                channels=out_channels,
                 groups=2)
 
     def hybrid_forward(self, F, x):

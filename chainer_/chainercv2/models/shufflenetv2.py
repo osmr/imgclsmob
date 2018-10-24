@@ -155,7 +155,7 @@ class ShuffleUnit(Chain):
 
             self.activ = F.relu
             self.c_shuffle = ChannelShuffle(
-                channels=mid_channels,
+                channels=out_channels,
                 groups=2)
 
     def __call__(self, x):

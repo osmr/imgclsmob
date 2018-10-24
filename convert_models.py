@@ -680,15 +680,17 @@ def convert_tf2gl(dst_net,
         src_weight = src_params[src_key]
         if len(src_weight.shape) == 4:
             if src_key.split("/")[-1][:-2] == "dw_kernel":
-                src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
+                dst_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
             else:
-                src_weight = np.transpose(src_weight, axes=(3, 2, 0, 1))
+                dst_weight = np.transpose(src_weight, axes=(3, 2, 0, 1))
         elif len(src_weight.shape) == 2:
-            src_weight = np.transpose(src_weight, axes=(1, 0))
-        assert (src_weight.shape == dst_params[dst_key].shape), \
+            dst_weight = np.transpose(src_weight, axes=(1, 0))
+        else:
+            dst_weight = src_weight
+        assert (dst_weight.shape == dst_params[dst_key].shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
-                src_key, dst_key, src_weight.shape, dst_params[dst_key].shape)
-        dst_params[dst_key]._load_init(mx.nd.array(src_weight, ctx), ctx)
+                src_key, dst_key, dst_weight.shape, dst_params[dst_key].shape)
+        dst_params[dst_key]._load_init(mx.nd.array(dst_weight, ctx), ctx)
 
     dst_net.save_parameters(dst_params_file_path)
 

@@ -47,7 +47,8 @@ def get_data_rec(rec_train,
                  rec_val,
                  rec_val_idx,
                  batch_size,
-                 num_workers):
+                 num_workers,
+                 input_image_size=(224, 224)):
     rec_train = os.path.expanduser(rec_train)
     rec_train_idx = os.path.expanduser(rec_train_idx)
     rec_val = os.path.expanduser(rec_val)
@@ -56,6 +57,8 @@ def get_data_rec(rec_train,
     lighting_param = 0.1
     mean_rgb = [123.68, 116.779, 103.939]
     std_rgb = [58.393, 57.12, 57.375]
+    data_shape = (3,) + input_image_size
+    resize_value = input_image_size[0] + 32
 
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
@@ -69,7 +72,7 @@ def get_data_rec(rec_train,
         shuffle=True,
         batch_size=batch_size,
 
-        data_shape=(3, 224, 224),
+        data_shape=data_shape,
         mean_r=mean_rgb[0],
         mean_g=mean_rgb[1],
         mean_b=mean_rgb[2],
@@ -94,8 +97,8 @@ def get_data_rec(rec_train,
         shuffle=False,
         batch_size=batch_size,
 
-        resize=256,
-        data_shape=(3, 224, 224),
+        resize=resize_value,
+        data_shape=data_shape,
         mean_r=mean_rgb[0],
         mean_g=mean_rgb[1],
         mean_b=mean_rgb[2],
@@ -108,12 +111,14 @@ def get_data_rec(rec_train,
 
 def get_data_loader(data_dir,
                     batch_size,
-                    num_workers):
+                    num_workers,
+                    input_image_size=(224, 224)):
     normalize = transforms.Normalize(
         mean=(0.485, 0.456, 0.406),
         std=(0.229, 0.224, 0.225))
     jitter_param = 0.4
     lighting_param = 0.1
+    resize_value = input_image_size[0] + 32
 
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
@@ -121,7 +126,7 @@ def get_data_loader(data_dir,
         return data, label
 
     transform_train = transforms.Compose([
-        transforms.RandomResizedCrop(224),
+        transforms.RandomResizedCrop(input_image_size),
         transforms.RandomFlipLeftRight(),
         transforms.RandomColorJitter(
             brightness=jitter_param,
@@ -132,8 +137,8 @@ def get_data_loader(data_dir,
         normalize
     ])
     transform_test = transforms.Compose([
-        transforms.Resize(256, keep_ratio=True),
-        transforms.CenterCrop(224),
+        transforms.Resize(resize_value, keep_ratio=True),
+        transforms.CenterCrop(input_image_size),
         transforms.ToTensor(),
         normalize
     ])
@@ -154,15 +159,13 @@ def get_data_loader(data_dir,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path,
                   dtype,
                   tune_layers,
                   ctx):
     kwargs = {'ctx': ctx,
-              'pretrained': use_pretrained,
-              'classes': classes}
+              'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
 

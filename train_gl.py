@@ -497,15 +497,15 @@ def main():
     # if args.convert_to_mxnet:
     #     batch_size = 1
 
-    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
         tune_layers=args.tune_layers,
         ctx=ctx)
+    num_classes = net.classes if hasattr(net, 'classes') else 1000
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (224, 224)
 
     if args.use_rec:
         train_data, val_data, batch_fn = get_data_rec(
@@ -514,12 +514,14 @@ def main():
             rec_val=args.rec_val,
             rec_val_idx=args.rec_val_idx,
             batch_size=batch_size,
-            num_workers=args.num_workers)
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
     else:
         train_data, val_data, batch_fn = get_data_loader(
             data_dir=args.data_dir,
             batch_size=batch_size,
-            num_workers=args.num_workers)
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
 
     # if args.convert_to_mxnet:
     #     assert args.save_dir and os.path.exists(args.save_dir)

@@ -154,15 +154,14 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
         tune_layers="",
         ctx=ctx)
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (224, 224)
 
     if args.use_rec:
         train_data, val_data, batch_fn = get_data_rec(
@@ -171,12 +170,14 @@ def main():
             rec_val=args.rec_val,
             rec_val_idx=args.rec_val_idx,
             batch_size=batch_size,
-            num_workers=args.num_workers)
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
     else:
         train_data, val_data, batch_fn = get_data_loader(
             data_dir=args.data_dir,
             batch_size=batch_size,
-            num_workers=args.num_workers)
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
 
     assert (args.use_pretrained or args.resume.strip())
     test(

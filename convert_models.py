@@ -90,7 +90,6 @@ def prepare_src_model(src_fwk,
         from gluon.utils import prepare_model as prepare_model_gl
         src_net = prepare_model_gl(
             model_name=src_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path=src_params_file_path,
             dtype=np.float32,
@@ -171,7 +170,6 @@ def prepare_dst_model(dst_fwk,
         from gluon.utils import prepare_model as prepare_model_gl
         dst_net = prepare_model_gl(
             model_name=dst_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="",
             dtype=np.float32,

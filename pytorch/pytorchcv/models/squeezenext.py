@@ -112,21 +112,22 @@ class SqnxtUnit(nn.Module):
                 out_channels=out_channels,
                 kernel_size=1,
                 stride=stride)
-        self.activ = nn.ReLU(inplace=True)
+        self.identity_activ = nn.ReLU(inplace=False)
+        self.final_activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
-            identity = x.clone()
-        identity = self.activ(identity)
+            identity = x
+        identity = self.identity_activ(identity)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.conv4(x)
         x = self.conv5(x)
         x = x + identity
-        x = self.activ(x)
+        x = self.final_activ(x)
         return x
 
 

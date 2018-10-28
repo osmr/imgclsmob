@@ -125,7 +125,6 @@ class SqnxtUnit(Chain):
             identity = self.identity_conv(x)
         else:
             identity = x
-        identity = self.activ(identity)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)

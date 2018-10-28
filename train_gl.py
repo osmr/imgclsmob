@@ -72,12 +72,17 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved optimizer state if not None')
-    # parser.add_argument(
-    #     '-mx',
-    #     '--mxnet',
-    #     dest='convert_to_mxnet',
-    #     action='store_true',
-    #     help='only convert model into MXnet format')
+
+    parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
 
     parser.add_argument(
         '--num-gpus',
@@ -178,6 +183,10 @@ def parse_args():
         type=float,
         default=0.0001,
         help='weight decay rate. default is 0.0001.')
+    parser.add_argument(
+        '--no-wd',
+        action='store_true',
+        help='whether to remove weight decay on bias, and beta/gamma for batchnorm layers.')
 
     parser.add_argument(
         '--mixup',
@@ -262,7 +271,12 @@ def prepare_trainer(net,
                     num_epochs,
                     num_training_samples,
                     dtype,
+                    no_wd=False,
                     state_file_path=None):
+
+    if no_wd:
+        for k, v in net.collect_params('.*beta|.*gamma|.*bias').items():
+            v.wd_mult = 0.0
 
     if lr_decay_period > 0:
         lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
@@ -359,9 +373,6 @@ def train_epoch(epoch,
         lr_scheduler.update(i, epoch)
         trainer.step(batch_size)
 
-        # if epoch == 0 and i == 0:
-        #     weight_count = calc_net_weight_count(net)
-        #     logging.info('Model: {} trainable parameters'.format(weight_count))
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
         acc_top1_train.update(
@@ -494,9 +505,6 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    # if args.convert_to_mxnet:
-    #     batch_size = 1
-
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
@@ -523,15 +531,6 @@ def main():
             num_workers=args.num_workers,
             input_image_size=input_image_size)
 
-    # if args.convert_to_mxnet:
-    #     assert args.save_dir and os.path.exists(args.save_dir)
-    #     assert (args.use_pretrained or args.resume.strip())
-    #     x = mx.nd.array(np.zeros((1, 3, 224, 224), np.float32), ctx)
-    #     net.forward(x)
-    #     export_checkpoint_file_path_prefix = os.path.join(args.save_dir, 'imagenet_{}'.format(args.model))
-    #     net.export(export_checkpoint_file_path_prefix)
-    #     logging.info('Convert model to MXNet format: {}'.format(export_checkpoint_file_path_prefix))
-
     num_training_samples = 1281167
     trainer, lr_scheduler = prepare_trainer(
         net=net,
@@ -552,6 +551,7 @@ def main():
         num_epochs=args.num_epochs,
         num_training_samples=num_training_samples,
         dtype=args.dtype,
+        no_wd=args.no_wd,
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:

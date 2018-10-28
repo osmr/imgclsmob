@@ -63,6 +63,17 @@ def parse_args():
         help='resume from previously saved parameters if not None')
 
     parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
+
+    parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,

@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 import numpy as np
@@ -48,7 +49,11 @@ def get_data_rec(rec_train,
                  rec_val_idx,
                  batch_size,
                  num_workers,
-                 input_image_size=(224, 224)):
+                 input_image_size=(224, 224),
+                 resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    if isinstance(input_image_size, int):
+        input_image_size = (input_image_size, input_image_size)
     rec_train = os.path.expanduser(rec_train)
     rec_train_idx = os.path.expanduser(rec_train_idx)
     rec_val = os.path.expanduser(rec_val)
@@ -58,7 +63,7 @@ def get_data_rec(rec_train,
     mean_rgb = [123.68, 116.779, 103.939]
     std_rgb = [58.393, 57.12, 57.375]
     data_shape = (3,) + input_image_size
-    resize_value = input_image_size[0] + 32
+    resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
@@ -112,13 +117,17 @@ def get_data_rec(rec_train,
 def get_data_loader(data_dir,
                     batch_size,
                     num_workers,
-                    input_image_size=(224, 224)):
+                    input_image_size=(224, 224),
+                    resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    if isinstance(input_image_size, int):
+        input_image_size = (input_image_size, input_image_size)
     normalize = transforms.Normalize(
         mean=(0.485, 0.456, 0.406),
         std=(0.229, 0.224, 0.225))
     jitter_param = 0.4
     lighting_param = 0.1
-    resize_value = input_image_size[0] + 32
+    resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)

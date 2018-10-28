@@ -144,6 +144,8 @@ _models = {
     'shufflenetv2b_w3d2': shufflenetv2b_w3d2,
     'shufflenetv2b_w2': shufflenetv2b_w2,
 
+    'shufflenetv2c_wd2': shufflenetv2c_wd2,
+
     'menet108_8x1_g3': menet108_8x1_g3,
     'menet128_8x1_g4': menet128_8x1_g4,
     'menet160_8x1_g8': menet160_8x1_g8,

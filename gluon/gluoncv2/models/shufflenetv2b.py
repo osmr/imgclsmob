@@ -1,15 +1,16 @@
 """
-    ShuffleNet V2, implemented in Gluon. The second variant.
+    ShuffleNet V2, implemented in Gluon. The alternative version.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['ShuffleNetV2', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
+__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2',
+           'shufflenetv2c_wd2']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle2, SEBlock
+from .common import ChannelShuffle, ChannelShuffle2, SEBlock
 
 
 class ShuffleConv(HybridBlock):
@@ -126,6 +127,8 @@ class ShuffleUnit(HybridBlock):
         Whether to use SE block.
     use_residual : bool
         Whether to use residual connection.
+    shuffle_group_first : bool
+        Whether to use channel shuffle in group first mode.
     """
     def __init__(self,
                  in_channels,
@@ -133,6 +136,7 @@ class ShuffleUnit(HybridBlock):
                  downsample,
                  use_se,
                  use_residual,
+                 shuffle_group_first,
                  **kwargs):
         super(ShuffleUnit, self).__init__(**kwargs)
         self.downsample = downsample
@@ -165,9 +169,14 @@ class ShuffleUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=in_channels)
 
-            self.c_shuffle = ChannelShuffle2(
-                channels=out_channels,
-                groups=2)
+            if shuffle_group_first:
+                self.c_shuffle = ChannelShuffle(
+                    channels=out_channels,
+                    groups=2)
+            else:
+                self.c_shuffle = ChannelShuffle2(
+                    channels=out_channels,
+                    groups=2)
 
     def hybrid_forward(self, F, x):
         if self.downsample:
@@ -223,7 +232,7 @@ class ShuffleInitBlock(HybridBlock):
         return x
 
 
-class ShuffleNetV2(HybridBlock):
+class ShuffleNetV2b(HybridBlock):
     """
     ShuffleNetV2(b) model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
@@ -240,6 +249,8 @@ class ShuffleNetV2(HybridBlock):
         Whether to use SE block.
     use_residual : bool, default False
         Whether to use residual connections.
+    shuffle_group_first : bool, default True
+        Whether to use channel shuffle in group first mode.
     in_channels : int, default 3
         Number of input channels.
     classes : int, default 1000
@@ -251,10 +262,11 @@ class ShuffleNetV2(HybridBlock):
                  final_block_channels,
                  use_se=False,
                  use_residual=False,
+                 shuffle_group_first=True,
                  in_channels=3,
                  classes=1000,
                  **kwargs):
-        super(ShuffleNetV2, self).__init__(**kwargs)
+        super(ShuffleNetV2b, self).__init__(**kwargs)
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -272,7 +284,8 @@ class ShuffleNetV2(HybridBlock):
                             out_channels=out_channels,
                             downsample=downsample,
                             use_se=use_se,
-                            use_residual=use_residual))
+                            use_residual=use_residual,
+                            shuffle_group_first=shuffle_group_first))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(shuffle_conv1x1(
@@ -296,6 +309,7 @@ class ShuffleNetV2(HybridBlock):
 
 
 def get_shufflenetv2b(width_scale,
+                      shuffle_group_first=True,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
@@ -308,6 +322,8 @@ def get_shufflenetv2b(width_scale,
     ----------
     width_scale : float
         Scale factor for width of layers.
+    shuffle_group_first : bool, default True
+        Whether to use channel shuffle in group first mode.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -330,10 +346,11 @@ def get_shufflenetv2b(width_scale,
         if width_scale > 1.5:
             final_block_channels = int(final_block_channels * width_scale)
 
-    net = ShuffleNetV2(
+    net = ShuffleNetV2b(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
+        shuffle_group_first=shuffle_group_first,
         **kwargs)
 
     if pretrained:
@@ -363,7 +380,11 @@ def shufflenetv2b_wd2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2b(width_scale=(12.0 / 29.0), model_name="shufflenetv2_wd2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(12.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_wd2",
+        **kwargs)
 
 
 def shufflenetv2b_w1(**kwargs):
@@ -380,7 +401,11 @@ def shufflenetv2b_w1(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2b(width_scale=1.0, model_name="shufflenetv2_w1", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=1.0,
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w1",
+        **kwargs)
 
 
 def shufflenetv2b_w3d2(**kwargs):
@@ -397,7 +422,11 @@ def shufflenetv2b_w3d2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2b(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w3d2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(44.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w3d2",
+        **kwargs)
 
 
 def shufflenetv2b_w2(**kwargs):
@@ -414,7 +443,32 @@ def shufflenetv2b_w2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_shufflenetv2b(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(61.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w2",
+        **kwargs)
+
+
+def shufflenetv2c_wd2(**kwargs):
+    """
+    ShuffleNetV2(c) 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    https://arxiv.org/abs/1807.11164.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_shufflenetv2b(
+        width_scale=(12.0 / 29.0),
+        shuffle_group_first=True,
+        model_name="shufflenetv2_wd2",
+        **kwargs)
 
 
 def _test():
@@ -428,6 +482,7 @@ def _test():
         shufflenetv2b_w1,
         shufflenetv2b_w3d2,
         shufflenetv2b_w2,
+        shufflenetv2c_wd2,
     ]
 
     for model in models:
@@ -450,6 +505,7 @@ def _test():
         assert (model != shufflenetv2b_w1 or weight_count == 2279760)
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
+        assert (model != shufflenetv2c_wd2 or weight_count == 1366792)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

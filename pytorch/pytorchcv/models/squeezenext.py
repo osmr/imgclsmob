@@ -381,7 +381,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         sqnxt23_w1,

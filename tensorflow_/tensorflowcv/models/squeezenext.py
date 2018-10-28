@@ -113,6 +113,7 @@ def sqnxt_unit(x,
     else:
         identity = x
 
+    x = tf.nn.relu(x, name=name + "/identity_activ")
     x = sqnxt_conv(
         x=x,
         in_channels=in_channels,
@@ -157,7 +158,7 @@ def sqnxt_unit(x,
         name=name + "/conv5")
 
     x = x + identity
-    x = tf.nn.relu(x, name=name + "/activ")
+    x = tf.nn.relu(x, name=name + "/final_activ")
     return x
 
 

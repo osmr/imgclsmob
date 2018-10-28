@@ -105,6 +105,7 @@ def sqnxt_unit(x,
     else:
         identity = x
 
+    x = nn.Activation('relu', name=name + "/identity_activ")(x)
     x = sqnxt_conv(
         x=x,
         in_channels=in_channels,
@@ -144,7 +145,7 @@ def sqnxt_unit(x,
         name=name + "/conv5")
 
     x = nn.add([x, identity], name=name + "/add")
-    x = nn.Activation('relu', name=name + "/activ")(x)
+    x = nn.Activation('relu', name=name + "/final_activ")(x)
     return x
 
 

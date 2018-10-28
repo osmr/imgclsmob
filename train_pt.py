@@ -241,6 +241,8 @@ def prepare_trainer(net,
             gamma=lr_decay,
             last_epoch=-1)
     elif lr_mode == 'cosine':
+        for group in optimizer.param_groups:
+            group.setdefault('initial_lr', group['lr'])
         lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer=optimizer,
             T_max=num_epochs,

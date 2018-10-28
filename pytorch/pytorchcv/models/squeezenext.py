@@ -118,7 +118,7 @@ class SqnxtUnit(nn.Module):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
-            identity = x
+            identity = x.clone()
         identity = self.activ(identity)
         x = self.conv1(x)
         x = self.conv2(x)
@@ -382,7 +382,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         sqnxt23_w1,
@@ -397,11 +397,13 @@ def _test():
 
         net = model(pretrained=pretrained)
 
+        # net.eval()
         net.train()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sqnxt23_w1 or weight_count == 724056)
         assert (model != sqnxt23_w3d2 or weight_count == 1511824)
         assert (model != sqnxt23_w2 or weight_count == 2583752)

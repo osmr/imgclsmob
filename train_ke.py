@@ -266,7 +266,6 @@ def main():
 
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip())
     num_classes = net.classes if hasattr(net, 'classes') else 1000

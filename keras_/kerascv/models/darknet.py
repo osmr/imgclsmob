@@ -163,6 +163,7 @@ def darknet(channels,
             avg_pool_size,
             cls_activ,
             in_channels=3,
+            in_size=(224, 224),
             classes=1000):
     """
     DarkNet model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
@@ -179,6 +180,8 @@ def darknet(channels,
         Whether classification convolution layer uses an activation.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -214,6 +217,8 @@ def darknet(channels,
     x = nn.Flatten()(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

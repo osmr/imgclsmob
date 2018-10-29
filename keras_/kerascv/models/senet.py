@@ -218,6 +218,7 @@ def senet(channels,
           cardinality,
           bottleneck_width,
           in_channels=3,
+          in_size=(224, 224),
           classes=1000):
     """
     SENet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -234,6 +235,8 @@ def senet(channels,
         Width of bottleneck block.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -275,6 +278,8 @@ def senet(channels,
         name="output/fc")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

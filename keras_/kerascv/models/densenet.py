@@ -283,6 +283,7 @@ def densenet(channels,
              init_block_channels,
              dropout_rate=0.0,
              in_channels=3,
+             in_size=(224, 224),
              classes=1000):
     """
     DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
@@ -297,6 +298,8 @@ def densenet(channels,
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -340,6 +343,8 @@ def densenet(channels,
         name="output")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

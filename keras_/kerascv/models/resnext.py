@@ -332,6 +332,7 @@ def resnext(channels,
             bottleneck_width,
             use_se,
             in_channels=3,
+            in_size=(224, 224),
             classes=1000):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
@@ -351,6 +352,8 @@ def resnext(channels,
         Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -388,6 +391,8 @@ def resnext(channels,
         name="output")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

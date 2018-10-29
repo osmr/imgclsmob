@@ -218,6 +218,7 @@ def shufflenet(channels,
                init_block_channels,
                groups,
                in_channels=3,
+               in_size=(224, 224),
                classes=1000):
     """
     ShuffleNet model from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
@@ -233,6 +234,8 @@ def shufflenet(channels,
         Number of groups in convolution layers.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -270,6 +273,8 @@ def shufflenet(channels,
         name="output")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

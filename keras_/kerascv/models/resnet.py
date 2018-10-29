@@ -366,6 +366,7 @@ def resnet(channels,
            conv1_stride,
            use_se,
            in_channels=3,
+           in_size=(224, 224),
            classes=1000):
     """
     ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385. Also this class
@@ -385,6 +386,8 @@ def resnet(channels,
         Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -422,6 +425,8 @@ def resnet(channels,
         name="output")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

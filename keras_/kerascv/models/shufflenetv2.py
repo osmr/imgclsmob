@@ -264,6 +264,7 @@ def shufflenetv2(channels,
                  use_se=False,
                  use_residual=False,
                  in_channels=3,
+                 in_size=(224, 224),
                  classes=1000):
     """
     ShuffleNetV2 model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
@@ -283,6 +284,8 @@ def shufflenetv2(channels,
         Whether to use residual connections.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -325,6 +328,8 @@ def shufflenetv2(channels,
         name="output")(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

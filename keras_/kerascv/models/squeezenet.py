@@ -163,6 +163,7 @@ def squeezenet(channels,
                init_block_kernel_size,
                init_block_channels,
                in_channels=3,
+               in_size=(224, 224),
                classes=1000):
     """
     SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
@@ -180,6 +181,8 @@ def squeezenet(channels,
         Number of output channels for the initial unit.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -228,6 +231,8 @@ def squeezenet(channels,
     x = nn.Flatten()(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

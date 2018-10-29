@@ -210,6 +210,7 @@ def mobilenetv2(channels,
                 init_block_channels,
                 final_block_channels,
                 in_channels=3,
+                in_size=(224, 224),
                 classes=1000):
     """
     MobileNetV2 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
@@ -224,6 +225,8 @@ def mobilenetv2(channels,
         Number of output channels for the final block of the feature extractor.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -273,6 +276,8 @@ def mobilenetv2(channels,
     x = nn.Flatten()(x)
 
     model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
     return model
 
 

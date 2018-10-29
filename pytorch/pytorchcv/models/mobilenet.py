@@ -110,6 +110,8 @@ class MobileNet(nn.Module):
         Whether stride is used at the first stage.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
     """
@@ -117,8 +119,11 @@ class MobileNet(nn.Module):
                  channels,
                  first_stage_stride,
                  in_channels=3,
+                 in_size=(224, 224),
                  num_classes=1000):
         super(MobileNet, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         self.features = nn.Sequential()
         init_block_channels = channels[0][0]

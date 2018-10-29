@@ -951,6 +951,8 @@ class NASNet(nn.Module):
         Number of output channels for the Stem units.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
     """
@@ -959,8 +961,11 @@ class NASNet(nn.Module):
                  stem_blocks_channels,
                  channels,
                  in_channels=3,
+                 in_size=(224, 224),
                  num_classes=1000):
         super(NASNet, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         self.features = nasnet_dual_path_sequential(
             return_two=False,

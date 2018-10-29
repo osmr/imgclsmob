@@ -236,6 +236,8 @@ class ShuffleNetV2(nn.Module):
         Whether to use residual connections.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     num_classes : int, default 1000
         Number of classification classes.
     """
@@ -246,8 +248,11 @@ class ShuffleNetV2(nn.Module):
                  use_se=False,
                  use_residual=False,
                  in_channels=3,
+                 in_size=(224, 224),
                  num_classes=1000):
         super(ShuffleNetV2, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", ShuffleInitBlock(

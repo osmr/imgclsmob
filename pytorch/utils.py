@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 import numpy as np
@@ -18,7 +19,12 @@ def prepare_pt_context(num_gpus,
 
 def get_data_loader(data_dir,
                     batch_size,
-                    num_workers):
+                    num_workers,
+                    input_image_size=224,
+                    resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
+
     normalize = transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225])
@@ -28,7 +34,7 @@ def get_data_loader(data_dir,
         dataset=datasets.ImageFolder(
             root=os.path.join(data_dir, 'train'),
             transform=transforms.Compose([
-                transforms.RandomResizedCrop(224),
+                transforms.RandomResizedCrop(input_image_size),
                 transforms.RandomHorizontalFlip(),
                 transforms.ColorJitter(
                     brightness=jitter_param,
@@ -46,8 +52,8 @@ def get_data_loader(data_dir,
         dataset=datasets.ImageFolder(
             root=os.path.join(data_dir, 'val'),
             transform=transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
+                transforms.Resize(resize_value),
+                transforms.CenterCrop(input_image_size),
                 transforms.ToTensor(),
                 normalize,
             ])),
@@ -60,13 +66,11 @@ def get_data_loader(data_dir,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path,
                   use_cuda,
                   use_data_parallel=True):
-    kwargs = {'pretrained': use_pretrained,
-              'num_classes': classes}
+    kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
 

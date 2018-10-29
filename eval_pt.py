@@ -38,6 +38,17 @@ def parse_args():
         help='calculate FLOPs')
 
     parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
+
+    parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,
@@ -128,18 +139,19 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
+    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
     train_data, val_data = get_data_loader(
         data_dir=args.data_dir,
         batch_size=batch_size,
-        num_workers=args.num_workers)
+        num_workers=args.num_workers,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
     assert (args.use_pretrained or args.resume.strip())
     test(

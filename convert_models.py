@@ -78,7 +78,6 @@ def prepare_src_model(src_fwk,
                       src_model,
                       src_params_file_path,
                       dst_fwk,
-                      num_classes,
                       ctx,
                       use_cuda):
 
@@ -120,7 +119,6 @@ def prepare_src_model(src_fwk,
         from pytorch.utils import prepare_model as prepare_model_pt
         src_net = prepare_model_pt(
             model_name=src_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path=src_params_file_path,
             use_cuda=use_cuda,
@@ -181,7 +179,6 @@ def prepare_dst_model(dst_fwk,
         from pytorch.utils import prepare_model as prepare_model_pt
         dst_net = prepare_model_pt(
             model_name=dst_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="",
             use_cuda=use_cuda,
@@ -729,7 +726,6 @@ def main():
         src_model=args.src_model,
         src_params_file_path=args.src_params,
         dst_fwk=args.dst_fwk,
-        num_classes=num_classes,
         ctx=ctx,
         use_cuda=use_cuda)
 

@@ -18,7 +18,8 @@
 # coding: utf-8
 # pylint: disable= arguments-differ,unused-argument
 """Inception, implemented in Gluon."""
-__all__ = ['Inception3', 'inception_v3']
+# __all__ = ['Inception3', 'oth_inception_v3']
+__all__ = ['oth_inception_v3']
 
 from mxnet.context import cpu
 from mxnet.gluon.block import HybridBlock
@@ -196,7 +197,7 @@ class Inception3(HybridBlock):
         return x
 
 # Constructor
-def inception_v3(pretrained=False, ctx=cpu(),
+def oth_inception_v3(pretrained=False, ctx=cpu(),
                  root='~/.mxnet/models', **kwargs):
     r"""Inception v3 model from
     `"Rethinking the Inception Architecture for Computer Vision"
@@ -223,3 +224,38 @@ def inception_v3(pretrained=False, ctx=cpu(),
         net.classes = attrib.classes
         net.classes_long = attrib.classes_long
     return net
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_inception_v3,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 299, 299), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+
+
+if __name__ == "__main__":
+    _test()

@@ -15,6 +15,8 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
+from .models.inceptionv3 import *
+from .models.others.oth_inceptionv3 import *
 
 __all__ = ['get_model']
 
@@ -171,6 +173,10 @@ _models = {
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
     'nasnet_a_mobile': nasnet_a_mobile,
+
+    'inceptionv3': inceptionv3,
+
+    'oth_inceptionv3': oth_inception_v3,
 }
 
 

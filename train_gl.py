@@ -513,7 +513,7 @@ def main():
         tune_layers=args.tune_layers,
         ctx=ctx)
     num_classes = net.classes if hasattr(net, 'classes') else 1000
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (224, 224)
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     if args.use_rec:
         train_data, val_data, batch_fn = get_data_rec(
@@ -523,13 +523,15 @@ def main():
             rec_val_idx=args.rec_val_idx,
             batch_size=batch_size,
             num_workers=args.num_workers,
-            input_image_size=input_image_size)
+            input_image_size=input_image_size,
+            resize_inv_factor=args.resize_inv_factor)
     else:
         train_data, val_data, batch_fn = get_data_loader(
             data_dir=args.data_dir,
             batch_size=batch_size,
             num_workers=args.num_workers,
-            input_image_size=input_image_size)
+            input_image_size=input_image_size,
+            resize_inv_factor=args.resize_inv_factor)
 
     num_training_samples = 1281167
     trainer, lr_scheduler = prepare_trainer(

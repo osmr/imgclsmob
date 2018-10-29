@@ -10,8 +10,8 @@ def prepare_logger(logging_dir_path,
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    sh = logging.StreamHandler()
-    logger.addHandler(sh)
+    # sh = logging.StreamHandler()
+    # logger.addHandler(sh)
     log_file_exist = False
     if logging_dir_path is not None and logging_dir_path:
         log_file_path = os.path.join(logging_dir_path, logging_file_name)

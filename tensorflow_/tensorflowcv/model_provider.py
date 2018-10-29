@@ -199,8 +199,8 @@ def load_model(sess,
     ignore_extra : bool, default True
         Whether to silently ignore parameters from the file that are not present in this Module.
     """
-    from .models.model_store import load_model
-    load_model(
+    from .models.model_store import init_variables_from_state_dict
+    init_variables_from_state_dict(
         sess=sess,
         file_path=file_path,
         ignore_extra=ignore_extra)

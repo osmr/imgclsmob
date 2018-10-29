@@ -482,7 +482,7 @@ def sqnxt23v5_w2(**kwargs):
 
 def _test():
     import numpy as np
-    from .model_store import load_model
+    from .model_store import init_variables_from_state_dict
 
     pretrained = False
 
@@ -516,7 +516,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                load_model(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

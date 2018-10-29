@@ -30,20 +30,22 @@ def prepare_model(model_name,
                   pretrained_model_file_path):
     kwargs = {'pretrained': use_pretrained}
 
-    net_lambda, net_file_path = get_model(model_name, **kwargs)
-
+    net = get_model(model_name, **kwargs)
     x = tf.placeholder(
         dtype=tf.float32,
         shape=(None, 3, 224, 224),
         name='xx')
-    y_net = net_lambda(x)
+    y_net = net(x)
 
-    if use_pretrained and not pretrained_model_file_path:
-        pretrained_model_file_path = net_file_path
-
-    if use_pretrained:
-        from .tensorflowcv.model_provider import load_model
+    if use_pretrained or pretrained_model_file_path:
+        from .tensorflowcv.model_provider import init_variables_from_state_dict
         with tf.Session() as sess:
-            load_model(sess=sess, file_path=pretrained_model_file_path)
+            from .tensorflowcv.model_provider import load_state_dict
+            if pretrained_model_file_path:
+                init_variables_from_state_dict(
+                    sess=sess,
+                    state_dict=load_state_dict(file_path=pretrained_model_file_path))
+            else:
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
 
     return y_net

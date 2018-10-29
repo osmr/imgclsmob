@@ -2,7 +2,7 @@
     Model store which provides pretrained models.
 """
 
-__all__ = ['get_model_file', 'load_model', 'download_model']
+__all__ = ['get_model_file', 'load_state_dict', 'download_state_dict', 'init_variables_from_state_dict']
 
 import os
 import zipfile
@@ -248,65 +248,83 @@ def _check_sha1(filename, sha1_hash):
     return sha1.hexdigest() == sha1_hash
 
 
-def load_model(sess,
-               file_path,
-               ignore_extra=True):
+def load_state_dict(file_path):
     """
     Load model state dictionary from a file.
 
     Parameters
     ----------
-    sess: Session
-        A Session to use to load the weights.
     file_path : str
         Path to the file.
-    ignore_extra : bool, default True
-        Whether to silently ignore parameters from the file that are not present in this Module.
+
+    Returns
+    -------
+    state_dict : dict
+        Dictionary with values of model variables.
     """
     import numpy as np
-    import tensorflow as tf
-
-    assert sess is not None
     assert os.path.exists(file_path) and os.path.isfile(file_path)
     if file_path.endswith('.npy'):
-        src_params = np.load(file_path, encoding='latin1').item()
+        state_dict = np.load(file_path, encoding='latin1').item()
     elif file_path.endswith('.npz'):
-        src_params = dict(np.load(file_path))
+        state_dict = dict(np.load(file_path))
     else:
         raise NotImplementedError
-    dst_params = {v.name: v for v in tf.global_variables()}
-    sess.run(tf.global_variables_initializer())
-    for src_key in src_params.keys():
-        if src_key in dst_params.keys():
-            assert (src_params[src_key].shape == tuple(dst_params[src_key].get_shape().as_list()))
-            sess.run(dst_params[src_key].assign(src_params[src_key]))
-        elif not ignore_extra:
-            raise Exception("The file `{}` is incompatible with the model".format(file_path))
-        else:
-            print("Key `{}` is ignored".format(src_key))
+    return state_dict
 
 
-def download_model(sess,
-                   model_name,
-                   local_model_store_dir_path=os.path.join('~', '.tensorflow', 'models'),
-                   ignore_extra=True):
+def download_state_dict(model_name,
+                        local_model_store_dir_path=os.path.join('~', '.tensorflow', 'models')):
     """
     Load model state dictionary from a file with downloading it if necessary.
 
     Parameters
     ----------
-    sess: Session
-        A Session to use to load the weights.
     model_name : str
         Name of the model.
     local_model_store_dir_path : str, default $TENSORFLOW_HOME/models
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    state_dict : dict
+        Dictionary with values of model variables.
+    file_path : str
+        Path to the file.
+    """
+    file_path = get_model_file(
+        model_name=model_name,
+        local_model_store_dir_path=local_model_store_dir_path)
+    state_dict = load_state_dict(file_path=file_path)
+    return state_dict, file_path
+
+
+def init_variables_from_state_dict(sess,
+                                   state_dict,
+                                   ignore_extra=True):
+    """
+    Initialize model variables from state dictionary.
+
+    Parameters
+    ----------
+    sess: Session
+        A Session to use to load the weights.
+    state_dict : dict
+        Dictionary with values of model variables.
     ignore_extra : bool, default True
         Whether to silently ignore parameters from the file that are not present in this Module.
     """
-    load_model(
-        sess=sess,
-        file_path=get_model_file(
-            model_name=model_name,
-            local_model_store_dir_path=local_model_store_dir_path),
-        ignore_extra=ignore_extra)
+    import tensorflow as tf
+    assert sess is not None
+    if state_dict is None:
+        raise Exception("The state dict is empty")
+    dst_params = {v.name: v for v in tf.global_variables()}
+    sess.run(tf.global_variables_initializer())
+    for src_key in state_dict.keys():
+        if src_key in dst_params.keys():
+            assert (state_dict[src_key].shape == tuple(dst_params[src_key].get_shape().as_list()))
+            sess.run(dst_params[src_key].assign(state_dict[src_key]))
+        elif not ignore_extra:
+            raise Exception("The state dict is incompatible with the model")
+        else:
+            print("Key `{}` is ignored".format(src_key))

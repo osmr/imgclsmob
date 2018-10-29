@@ -3,7 +3,7 @@
     Original source: 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 """
 
-__all__ = ['darknet', 'darknet_ref', 'darknet_tiny', 'darknet19']
+__all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 
 import os
 import tensorflow as tf
@@ -175,21 +175,12 @@ def dark_convYxY(x,
             name=name)
 
 
-def darknet(x,
-            channels,
-            odd_pointwise,
-            avg_pool_size,
-            cls_activ,
-            in_channels=3,
-            classes=1000,
-            training=False):
+class DarkNet(object):
     """
     DarkNet model from 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     odd_pointwise : bool
@@ -198,52 +189,89 @@ def darknet(x,
         Window size of the final average pooling.
     cls_activ : bool
         Whether classification convolution layer uses an activation.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    for i, channels_per_stage in enumerate(channels):
-        for j, out_channels in enumerate(channels_per_stage):
-            x = dark_convYxY(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise),
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-        if i != len(channels) - 1:
-            x = maxpool2d(
-                x=x,
-                pool_size=2,
-                strides=2,
-                name="features/pool{}".format(i + 1))
+    def __init__(self,
+                 channels,
+                 odd_pointwise,
+                 avg_pool_size,
+                 cls_activ,
+                 bn_use_global_stats=False,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(DarkNet, self).__init__(**kwargs)
+        self.channels = channels
+        self.odd_pointwise = odd_pointwise
+        self.avg_pool_size = avg_pool_size
+        self.cls_activ = cls_activ
+        self.bn_use_global_stats = bn_use_global_stats
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=classes,
-        kernel_size=1,
-        name="output/final_conv")
-    if cls_activ:
-        x = tf.nn.leaky_relu(x, alpha=0.1, name="output/final_activ")
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=avg_pool_size,
-        strides=1,
-        data_format='channels_first',
-        name="output/final_pool")
-    x = tf.layers.flatten(x)
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    return x
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            for j, out_channels in enumerate(channels_per_stage):
+                x = dark_convYxY(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    pointwise=(len(channels_per_stage) > 1) and not (((j + 1) % 2 == 1) ^ self.odd_pointwise),
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+            if i != len(self.channels) - 1:
+                x = maxpool2d(
+                    x=x,
+                    pool_size=2,
+                    strides=2,
+                    name="features/pool{}".format(i + 1))
+
+        x = conv2d(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.classes,
+            kernel_size=1,
+            name="output/final_conv")
+        if self.cls_activ:
+            x = tf.nn.leaky_relu(x, alpha=0.1, name="output/final_activ")
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=self.avg_pool_size,
+            strides=1,
+            data_format='channels_first',
+            name="output/final_pool")
+        x = tf.layers.flatten(x)
+
+        return x
 
 
 def get_darknet(version,
@@ -300,33 +328,25 @@ def get_darknet(version,
     else:
         raise ValueError("Unsupported DarkNet version {}".format(version))
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   odd_pointwise=odd_pointwise,
-                   avg_pool_size=avg_pool_size,
-                   cls_activ=cls_activ):
-        y_net = darknet(
-            x=x,
-            channels=channels,
-            odd_pointwise=odd_pointwise,
-            avg_pool_size=avg_pool_size,
-            cls_activ=cls_activ,
-            training=training,
-            **kwargs)
-        return y_net
+    net = DarkNet(
+        channels=channels,
+        odd_pointwise=odd_pointwise,
+        avg_pool_size=avg_pool_size,
+        cls_activ=cls_activ,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def darknet_ref(**kwargs):
@@ -394,7 +414,7 @@ def darknet19(**kwargs):
 
 def _test():
     import numpy as np
-    from .model_store import load_model
+    from .model_store import init_variables_from_state_dict
 
     pretrained = False
 
@@ -406,13 +426,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -422,7 +441,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                load_model(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

@@ -247,11 +247,11 @@ def prepare_model(model_name,
                   pretrained_model_file_path):
     kwargs = {'pretrained': use_pretrained}
 
-    net_lambda, net_file_path = get_model(model_name, **kwargs)
-    net = ImageNetModel(model_lambda=net_lambda)
+    raw_net = get_model(model_name, **kwargs)
+    net = ImageNetModel(model_lambda=raw_net)
 
     if use_pretrained and not pretrained_model_file_path:
-        pretrained_model_file_path = net_file_path
+        pretrained_model_file_path = raw_net.file_path
 
     inputs_desc = None
     if pretrained_model_file_path:

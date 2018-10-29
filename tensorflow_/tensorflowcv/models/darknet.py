@@ -189,9 +189,6 @@ class DarkNet(object):
         Window size of the final average pooling.
     cls_activ : bool
         Whether classification convolution layer uses an activation.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -204,7 +201,6 @@ class DarkNet(object):
                  odd_pointwise,
                  avg_pool_size,
                  cls_activ,
-                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -214,7 +210,6 @@ class DarkNet(object):
         self.odd_pointwise = odd_pointwise
         self.avg_pool_size = avg_pool_size
         self.cls_activ = cls_activ
-        self.bn_use_global_stats = bn_use_global_stats
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes

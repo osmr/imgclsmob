@@ -6,7 +6,7 @@
     - 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,' https://arxiv.org/abs/1802.03750.
 """
 
-__all__ = ['mobilenet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
+__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
            'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
@@ -120,12 +120,7 @@ def dws_conv_block(x,
     return x
 
 
-def mobilenet(x,
-              channels,
-              first_stage_stride,
-              in_channels=3,
-              classes=1000,
-              training=False):
+class MobileNet(object):
     """
     MobileNet model from 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
     https://arxiv.org/abs/1704.04861. Also this class implements FD-MobileNet from 'FD-MobileNet: Improved MobileNet
@@ -133,61 +128,86 @@ def mobilenet(x,
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
+    def __init__(self,
+                 channels,
+                 first_stage_stride,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(MobileNet, self).__init__(**kwargs)
+        self.channels = channels
+        self.first_stage_stride = first_stage_stride
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    init_block_channels = channels[0][0]
-    x = conv_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        kernel_size=3,
-        strides=2,
-        padding=1,
-        training=training,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels[1:]):
-        for j, out_channels in enumerate(channels_per_stage):
-            strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
-            x = dws_conv_block(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output")
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
 
-    return x
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        init_block_channels = self.channels[0][0]
+        x = conv_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=init_block_channels,
+            kernel_size=3,
+            strides=2,
+            padding=1,
+            training=training,
+            name="features/init_block")
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(self.channels[1:]):
+            for j, out_channels in enumerate(channels_per_stage):
+                strides = 2 if (j == 0) and ((i != 0) or self.first_stage_stride) else 1
+                x = dws_conv_block(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=7,
+            strides=1,
+            data_format='channels_first',
+            name="features/final_pool")
+
+        x = tf.layers.flatten(x)
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output")
+
+        return x
 
 
 def get_mobilenet(version,
@@ -232,29 +252,23 @@ def get_mobilenet(version,
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   first_stage_stride=first_stage_stride):
-        y_net = mobilenet(
-            x=x,
-            channels=channels,
-            first_stage_stride=first_stage_stride,
-            training=training,
-            **kwargs)
-        return y_net
+    net = MobileNet(
+        channels=channels,
+        first_stage_stride=first_stage_stride,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def mobilenet_w1(**kwargs):
@@ -452,13 +466,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -473,7 +486,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

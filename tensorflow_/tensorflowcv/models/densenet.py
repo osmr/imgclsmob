@@ -3,7 +3,7 @@
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['densenet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
+__all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
 
 import os
 import tensorflow as tf
@@ -315,20 +315,12 @@ def post_activation(x,
     return x
 
 
-def densenet(x,
-             channels,
-             init_block_channels,
-             dropout_rate=0.0,
-             in_channels=3,
-             classes=1000,
-             training=False):
+class DenseNet(object):
     """
     DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
@@ -337,59 +329,89 @@ def densenet(x,
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = dense_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        training=training,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        if i != 0:
-            x = transition_block(
-                x=x,
-                in_channels=in_channels,
-                out_channels=(in_channels // 2),
-                training=training,
-                name="features/stage{}/trans{}".format(i + 1, i + 1))
-            in_channels = in_channels // 2
-        for j, out_channels in enumerate(channels_per_stage):
-            x = dense_unit(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                dropout_rate=dropout_rate,
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = post_activation(
-        x=x,
-        training=training,
-        name="features/post_activ")
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 dropout_rate=0.0,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(DenseNet, self).__init__(**kwargs)
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.dropout_rate = dropout_rate
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output")
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    return x
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        x = dense_init_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.init_block_channels,
+            training=training,
+            name="features/init_block")
+        in_channels = self.init_block_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            if i != 0:
+                x = transition_block(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=(in_channels // 2),
+                    training=training,
+                    name="features/stage{}/trans{}".format(i + 1, i + 1))
+                in_channels = in_channels // 2
+            for j, out_channels in enumerate(channels_per_stage):
+                x = dense_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    dropout_rate=self.dropout_rate,
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = post_activation(
+            x=x,
+            training=training,
+            name="features/post_activ")
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=7,
+            strides=1,
+            data_format='channels_first',
+            name="features/final_pool")
+
+        x = tf.layers.flatten(x)
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output")
+
+        return x
 
 
 def get_densenet(num_layers,
@@ -447,29 +469,23 @@ def get_densenet(num_layers,
                       layers,
                       [[init_block_channels * 2]])[1:]
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   init_block_channels=init_block_channels):
-        y_net = densenet(
-            x=x,
-            channels=channels,
-            init_block_channels=init_block_channels,
-            training=training,
-            **kwargs)
-        return y_net
+    net = DenseNet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def densenet121(**kwargs):
@@ -571,13 +587,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -588,7 +603,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

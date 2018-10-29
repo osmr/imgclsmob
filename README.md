@@ -123,16 +123,16 @@ y = net.predict(x)
 Example of using the pretrained ResNet-18 model on TensorFlow:
 ```
 from tensorflowcv.model_provider import get_model as tfcv_get_model
-from tensorflowcv.model_provider import load_model as tfcv_load_model
+from tensorflowcv.model_provider import init_variables_from_state_dict as tfcv_init_variables_from_state_dict
 import tensorflow as tf
 import numpy as np
 
-net_lambda, net_file_path = tfcv_get_model("resnet18", pretrained=True)
+net = tfcv_get_model("resnet18", pretrained=True)
 x = tf.placeholder(dtype=tf.float32, shape=(None, 3, 224, 224), name='xx')
-y_net = net_lambda(x)
+y_net = net(x)
 
 with tf.Session() as sess:
-    tfcv_load_model(sess=sess, file_path=net_file_path)
+    tfcv_init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
     x_value = np.zeros((1, 3, 224, 224), np.float32)
     y = sess.run(y_net, feed_dict={x: x_value})
 ```
@@ -156,6 +156,7 @@ with tf.Session() as sess:
 - FD-MobileNet (['FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'](https://arxiv.org/abs/1802.03750))
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
 - NASNet-A-Mobile (['Learning Transferable Architectures for Scalable Image Recognition'](https://arxiv.org/abs/1707.07012))
+- InceptionV3 (['Rethinking the Inception Architecture for Computer Vision'](https://arxiv.org/abs/1512.00567))
 
 ## Pretrained models
 

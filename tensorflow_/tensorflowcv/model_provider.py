@@ -15,7 +15,7 @@ from .models.mobilenetv2 import *
 
 from .models.others.shufflenetv2 import *
 
-__all__ = ['get_model', 'load_model']
+__all__ = ['get_model', 'init_variables_from_state_dict']
 
 
 _models = {
@@ -184,23 +184,23 @@ def get_model(name, **kwargs):
     return net
 
 
-def load_model(sess,
-               file_path,
-               ignore_extra=True):
+def init_variables_from_state_dict(sess,
+                                   state_dict,
+                                   ignore_extra=True):
     """
-    Load model state dictionary from a file.
+    Initialize model variables from state dictionary.
 
     Parameters
     ----------
     sess: Session
         A Session to use to load the weights.
-    file_path : str
-        Path to the file.
+    state_dict : dict
+        Dictionary with values of model variables.
     ignore_extra : bool, default True
         Whether to silently ignore parameters from the file that are not present in this Module.
     """
     from .models.model_store import init_variables_from_state_dict
     init_variables_from_state_dict(
         sess=sess,
-        file_path=file_path,
+        state_dict=state_dict,
         ignore_extra=ignore_extra)

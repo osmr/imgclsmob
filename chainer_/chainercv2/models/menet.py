@@ -252,6 +252,8 @@ class MENet(Chain):
         Number of groups in convolution layers.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -261,8 +263,11 @@ class MENet(Chain):
                  side_channels,
                  groups,
                  in_channels=3,
+                 in_size=(224, 224),
                  classes=1000):
         super(MENet, self).__init__()
+        self.in_size = in_size
+        self.classes = classes
 
         with self.init_scope():
             self.features = SimpleSequential()

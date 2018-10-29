@@ -280,6 +280,8 @@ class DenseNet(HybridBlock):
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
     """
@@ -289,9 +291,12 @@ class DenseNet(HybridBlock):
                  bn_use_global_stats=False,
                  dropout_rate=0.0,
                  in_channels=3,
+                 in_size=(224, 224),
                  classes=1000,
                  **kwargs):
         super(DenseNet, self).__init__(**kwargs)
+        self.in_size = in_size
+        self.classes = classes
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')

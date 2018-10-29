@@ -53,6 +53,17 @@ def parse_args():
         help='resume from previously saved parameters if not None')
 
     parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
+
+    parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,
@@ -153,12 +164,12 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
-    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip())
+    num_classes = net.classes if hasattr(net, 'classes') else 1000
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     train_data, val_data = get_data_rec(
         rec_train=args.rec_train,
@@ -166,7 +177,9 @@ def main():
         rec_val=args.rec_val,
         rec_val_idx=args.rec_val_idx,
         batch_size=batch_size,
-        num_workers=args.num_workers)
+        num_workers=args.num_workers,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
     val_gen = get_data_generator(
         data_iterator=val_data,
         num_classes=num_classes)

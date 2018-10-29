@@ -160,7 +160,6 @@ def prepare_src_model(src_fwk,
 def prepare_dst_model(dst_fwk,
                       dst_model,
                       src_fwk,
-                      num_classes,
                       ctx,
                       use_cuda):
 
@@ -191,7 +190,6 @@ def prepare_dst_model(dst_fwk,
         from chainer_.utils import prepare_model as prepare_model_ch
         dst_net = prepare_model_ch(
             model_name=dst_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="")
         dst_params = {i[0]: i[1] for i in dst_net.namedparams()}
@@ -200,7 +198,6 @@ def prepare_dst_model(dst_fwk,
         from keras_.utils import prepare_model as prepare_model_ke
         dst_net = prepare_model_ke(
             model_name=dst_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="")
         dst_param_keys = list(dst_net._arg_names) + list(dst_net._aux_names)
@@ -216,7 +213,6 @@ def prepare_dst_model(dst_fwk,
         from tensorflow_.utils import prepare_model as prepare_model_tf
         dst_net = prepare_model_tf(
             model_name=dst_model,
-            classes=num_classes,
             use_pretrained=False,
             pretrained_model_file_path="")
         dst_param_keys = [v.name for v in tf.global_variables()]
@@ -719,7 +715,6 @@ def main():
 
     ctx = mx.cpu()
     use_cuda = False
-    num_classes = 1000
 
     src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2, src_arg_params = prepare_src_model(
         src_fwk=args.src_fwk,
@@ -733,7 +728,6 @@ def main():
         dst_fwk=args.dst_fwk,
         dst_model=args.dst_model,
         src_fwk=args.src_fwk,
-        num_classes=num_classes,
         ctx=ctx,
         use_cuda=use_cuda)
 

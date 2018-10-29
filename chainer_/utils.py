@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 import numpy as np
@@ -52,10 +53,12 @@ def get_val_data_iterator(data_dir,
                           batch_size,
                           num_workers,
                           num_classes):
+
     val_dir_path = os.path.join(data_dir, 'val')
     val_dataset = DirectoryParsingLabelDataset(val_dir_path)
     val_dataset_len = len(val_dataset)
     assert(len(directory_parsing_label_names(val_dir_path)) == num_classes)
+
     val_iterator = iterators.MultiprocessIterator(
         dataset=val_dataset,
         batch_size=batch_size,
@@ -63,20 +66,31 @@ def get_val_data_iterator(data_dir,
         shuffle=False,
         n_processes=num_workers,
         shared_mem=300000000)
+
     return val_iterator, val_dataset_len
 
 
 def get_data_iterators(data_dir,
                        batch_size,
                        num_workers,
-                       num_classes):
+                       num_classes,
+                       input_image_size=224,
+                       resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
 
     train_dir_path = os.path.join(data_dir, 'train')
-    train_dataset = PreprocessedDataset(root=train_dir_path)
+    train_dataset = PreprocessedDataset(
+        root=train_dir_path,
+        scale_size=resize_value,
+        crop_size=input_image_size)
     assert(len(directory_parsing_label_names(train_dir_path)) == num_classes)
 
     val_dir_path = os.path.join(data_dir, 'val')
-    val_dataset = PreprocessedDataset(root=val_dir_path)
+    val_dataset = PreprocessedDataset(
+        root=val_dir_path,
+        scale_size=resize_value,
+        crop_size=input_image_size)
     assert (len(directory_parsing_label_names(val_dir_path)) == num_classes)
 
     train_iterator = iterators.MultiprocessIterator(
@@ -97,13 +111,10 @@ def get_data_iterators(data_dir,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path,
                   num_gpus=0):
-
-    kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
+    kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
 

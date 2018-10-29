@@ -26,11 +26,9 @@ def load_model_params(net,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
+    kwargs = {'pretrained': use_pretrained}
 
     net_lambda, net_file_path = get_model(model_name, **kwargs)
 

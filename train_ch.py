@@ -45,6 +45,17 @@ def parse_args():
         help='resume from previously saved optimizer state if not None')
 
     parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
+
+    parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,
@@ -254,19 +265,21 @@ def main():
         cuda.get_device(0).use()
     batch_size = args.batch_size
 
-    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         num_gpus=num_gpus)
+    num_classes = net.classes if hasattr(net, 'classes') else 1000
+    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
     train_iter, val_iter = get_data_iterators(
         data_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
-        num_classes=num_classes)
+        num_classes=num_classes,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
     trainer = prepare_trainer(
         net=net,

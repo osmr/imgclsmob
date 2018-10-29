@@ -46,10 +46,11 @@ class ImageNetModel(ModelDesc):
 
     def __init__(self,
                  model_lambda,
+                 image_size=224,
                  **kwargs):
         super(ImageNetModel, self).__init__(**kwargs)
         self.model_lambda = model_lambda
-        self.image_size = 224
+        self.image_size = image_size
         self.image_dtype = tf.float32
         self.data_format = 'NCHW'
         self.label_smoothing = 0.0
@@ -169,8 +170,10 @@ class GoogleNetResize(imgaug.ImageAugmentor):
     crop 8%~100% of the original image
     See `Going Deeper with Convolutions` by Google.
     """
-    def __init__(self, crop_area_fraction=0.08,
-                 aspect_ratio_low=0.75, aspect_ratio_high=1.333,
+    def __init__(self,
+                 crop_area_fraction=0.08,
+                 aspect_ratio_low=0.75,
+                 aspect_ratio_high=1.333,
                  target_shape=224):
         self._init(locals())
 
@@ -240,11 +243,9 @@ def prepare_tf_context(num_gpus,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
+    kwargs = {'pretrained': use_pretrained}
 
     net_lambda, net_file_path = get_model(model_name, **kwargs)
     net = ImageNetModel(model_lambda=net_lambda)

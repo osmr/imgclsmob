@@ -1,3 +1,4 @@
+import math
 import argparse
 import time
 import logging
@@ -38,6 +39,17 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved parameters if not None')
+
+    parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model. default is 224')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop. default is 0.875')
 
     parser.add_argument(
         '--num-gpus',
@@ -87,11 +99,19 @@ def test(net,
          val_iterator,
          val_dataset_len,
          num_gpus,
+         input_image_size=224,
+         resize_inv_factor=0.875,
          calc_weight_count=False,
          extended_log=False):
+    assert (resize_inv_factor > 0.0)
+    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
+
     tic = time.time()
 
-    predictor = ImagenetPredictor(base_model=net)
+    predictor = ImagenetPredictor(
+        base_model=net,
+        scale_size=resize_value,
+        crop_size=input_image_size)
 
     if num_gpus > 0:
         predictor.to_gpu()
@@ -148,13 +168,13 @@ def main():
     if num_gpus > 0:
         cuda.get_device(0).use()
 
-    num_classes = 1000
     net = prepare_model(
         model_name=args.model,
-        classes=num_classes,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         num_gpus=num_gpus)
+    num_classes = net.classes if hasattr(net, 'classes') else 1000
+    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
     val_iterator, val_dataset_len = get_val_data_iterator(
         data_dir=args.data_dir,
@@ -168,6 +188,8 @@ def main():
         val_iterator=val_iterator,
         val_dataset_len=val_dataset_len,
         num_gpus=num_gpus,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor,
         calc_weight_count=True,
         extended_log=True)
 

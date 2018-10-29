@@ -54,6 +54,7 @@ def get_data_rec(rec_train,
     assert (resize_inv_factor > 0.0)
     if isinstance(input_image_size, int):
         input_image_size = (input_image_size, input_image_size)
+
     rec_train = os.path.expanduser(rec_train)
     rec_train_idx = os.path.expanduser(rec_train_idx)
     rec_val = os.path.expanduser(rec_val)

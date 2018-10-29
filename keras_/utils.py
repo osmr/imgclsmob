@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 
@@ -19,7 +20,13 @@ def get_data_rec(rec_train,
                  rec_val,
                  rec_val_idx,
                  batch_size,
-                 num_workers):
+                 num_workers,
+                 input_image_size=(224, 224),
+                 resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    if isinstance(input_image_size, int):
+        input_image_size = (input_image_size, input_image_size)
+
     rec_train = os.path.expanduser(rec_train)
     rec_train_idx = os.path.expanduser(rec_train_idx)
     rec_val = os.path.expanduser(rec_val)
@@ -28,6 +35,8 @@ def get_data_rec(rec_train,
     lighting_param = 0.1
     mean_rgb = [123.68, 116.779, 103.939]
     std_rgb = [58.393, 57.12, 57.375]
+    data_shape = (3,) + input_image_size
+    resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
     train_data = mx.io.ImageRecordIter(
         path_imgrec=rec_train,
@@ -36,7 +45,7 @@ def get_data_rec(rec_train,
         shuffle=True,
         batch_size=batch_size,
 
-        data_shape=(3, 224, 224),
+        data_shape=data_shape,
         mean_r=mean_rgb[0],
         mean_g=mean_rgb[1],
         mean_b=mean_rgb[2],
@@ -61,8 +70,8 @@ def get_data_rec(rec_train,
         shuffle=False,
         batch_size=batch_size,
 
-        resize=256,
-        data_shape=(3, 224, 224),
+        resize=resize_value,
+        data_shape=data_shape,
         mean_r=mean_rgb[0],
         mean_g=mean_rgb[1],
         mean_b=mean_rgb[2],
@@ -98,11 +107,9 @@ def get_data_generator(data_iterator,
 
 
 def prepare_model(model_name,
-                  classes,
                   use_pretrained,
                   pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained,
-              'classes': classes}
+    kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
 

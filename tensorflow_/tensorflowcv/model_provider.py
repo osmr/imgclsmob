@@ -13,7 +13,7 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 
-from .models.others.shufflenetv2 import *
+# from .models.others.shufflenetv2 import *
 
 __all__ = ['get_model', 'init_variables_from_state_dict']
 
@@ -158,8 +158,8 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
-    'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
-    'oth_shufflenetv2_w1': oth_shufflenetv2_w1,
+    # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
+    # 'oth_shufflenetv2_w1': oth_shufflenetv2_w1,
 }
 
 

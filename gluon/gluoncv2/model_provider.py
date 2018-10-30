@@ -16,7 +16,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 from .models.inceptionv3 import *
-from .models.others.oth_inceptionv3 import *
+# from .models.others.oth_inceptionv3 import *
 
 __all__ = ['get_model']
 
@@ -176,7 +176,7 @@ _models = {
 
     'inceptionv3': inceptionv3,
 
-    'oth_inceptionv3': oth_inception_v3,
+    # 'oth_inceptionv3': oth_inception_v3,
 }
 
 

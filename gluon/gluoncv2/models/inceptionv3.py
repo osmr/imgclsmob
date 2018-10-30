@@ -300,7 +300,6 @@ class InceptUnitA(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(InceptUnitA, self).__init__(**kwargs)
-
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -347,7 +346,6 @@ class InceptUnitB(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(InceptUnitB, self).__init__(**kwargs)
-
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -390,7 +388,6 @@ class InceptUnitC(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(InceptUnitC, self).__init__(**kwargs)
-
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -437,7 +434,6 @@ class InceptUnitD(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(InceptUnitD, self).__init__(**kwargs)
-
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -477,7 +473,6 @@ class InceptUnitE(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(InceptUnitE, self).__init__(**kwargs)
-
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(

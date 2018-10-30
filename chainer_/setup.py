@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='chainercv2',
-    version='0.0.8',
+    version='0.0.9',
     description='Image classification models for Chainer',
     license='MIT',
     long_description=long_description,
@@ -27,5 +27,5 @@ setup(
     keywords='machine-learning deep-learning neuralnetwork image-classification chainer',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
-    install_requires=['requests', 'chainer>=5.0.0b4'],
+    install_requires=['requests', 'chainer>=5.0.0'],
 )

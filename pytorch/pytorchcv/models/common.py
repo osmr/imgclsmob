@@ -2,7 +2,7 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential', 'Concurrent']
 
 import torch
 import torch.nn as nn
@@ -166,3 +166,24 @@ class DualPathSequential(nn.Sequential):
             return x1, x2
         else:
             return x1
+
+
+class Concurrent(nn.Sequential):
+    """
+    A container for concatenation of modules on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self, axis=1):
+        super(Concurrent, self).__init__()
+        self.axis = axis
+
+    def forward(self, x):
+        out = []
+        for module in self._modules.values():
+            out.append(module(x))
+        out = torch.cat(tuple(out), dim=self.axis)
+        return out

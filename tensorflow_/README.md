@@ -17,11 +17,11 @@ Note that the models use NCHW data format. The current version of TensorFlow can
 Example of using the pretrained ResNet-18 model:
 ```
 from tensorflowcv.model_provider import get_model as tfcv_get_model
-from tensorflowcv.model_provider import load_model as tfcv_load_model
+from tensorflowcv.model_provider import init_variables_from_state_dict as tfcv_init_variables_from_state_dict
 import tensorflow as tf
-net_lambda, net_file_path = tfcv_get_model("resnet18", pretrained=True)
+net = tfcv_get_model("resnet18", pretrained=True)
 x = tf.placeholder(dtype=tf.float32, shape=(None, 3, 224, 224), name='xx')
-y_net = net_lambda(x)
+y_net = net(x)
 with tf.Session() as sess:
-    tfcv_load_model(sess=sess, file_path=net_file_path)
+    tfcv_init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
 ```

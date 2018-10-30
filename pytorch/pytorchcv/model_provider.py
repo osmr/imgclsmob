@@ -14,6 +14,7 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
+from .models.inceptionv3 import *
 
 # from .models.others.shufflenet_v2 import *
 
@@ -165,6 +166,8 @@ _models = {
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
     'nasnet_a_mobile': nasnet_a_mobile,
+
+    'inceptionv3': inceptionv3,
 
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
 }

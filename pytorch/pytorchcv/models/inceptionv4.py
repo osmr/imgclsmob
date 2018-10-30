@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import Concurrent
+from common import Concurrent
 
 
 class InceptConv(nn.Module):
@@ -251,8 +251,10 @@ class ConvSeq3x3Branch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
+    out_channels : int
         Number of output channels.
+    mid_channels_list : tuple of int
+        Number of output channels for middle layers.
     kernel_size : tuple of int or tuple of tuple/list of 2 int
         Convolution window size.
     strides : tuple of int or tuple of tuple/list of 2 int
@@ -262,30 +264,31 @@ class ConvSeq3x3Branch(nn.Module):
     """
     def __init__(self,
                  in_channels,
-                 out_channels_list,
+                 out_channels,
+                 mid_channels_list,
                  kernel_size_list,
                  strides_list,
                  padding_list):
         super(ConvSeq3x3Branch, self).__init__()
         self.conv_list = nn.Sequential()
-        for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                out_channels_list, kernel_size_list, strides_list, padding_list)):
+        for i, (mid_channels, kernel_size, strides, padding) in enumerate(zip(
+                mid_channels_list, kernel_size_list, strides_list, padding_list)):
             self.conv_list.add_module("conv{}".format(i + 1), InceptConv(
                 in_channels=in_channels,
-                out_channels=out_channels,
+                out_channels=mid_channels,
                 kernel_size=kernel_size,
                 stride=strides,
                 padding=padding))
-            in_channels = out_channels
+            in_channels = mid_channels
         self.conv1x3 = InceptConv(
             in_channels=in_channels,
-            out_channels=in_channels,
+            out_channels=out_channels,
             kernel_size=(1, 3),
             stride=1,
             padding=(0, 1))
         self.conv3x1 = InceptConv(
             in_channels=in_channels,
-            out_channels=in_channels,
+            out_channels=out_channels,
             kernel_size=(3, 1),
             stride=1,
             padding=(1, 0))
@@ -360,18 +363,11 @@ class InceptUnit5a(nn.Module):
 class InceptUnitA(nn.Module):
     """
     InceptionV4 type A unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    pool_out_channels : int
-        Number of output channels in the pool branch.
     """
-    def __init__(self,
-                 in_channels,
-                 pool_out_channels):
+    def __init__(self):
         super(InceptUnitA, self).__init__()
+        in_channels = 384
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -390,7 +386,7 @@ class InceptUnitA(nn.Module):
             padding_list=(0, 1, 1)))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=pool_out_channels))
+            out_channels=96))
 
     def forward(self, x):
         x = self.branches(x)
@@ -400,15 +396,11 @@ class InceptUnitA(nn.Module):
 class ReductUnitA(nn.Module):
     """
     InceptionV4 type A-reduction unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
     """
-    def __init__(self,
-                 in_channels):
+    def __init__(self):
         super(ReductUnitA, self).__init__()
+        in_channels = 384
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
@@ -432,65 +424,54 @@ class ReductUnitA(nn.Module):
 class InceptUnitB(nn.Module):
     """
     InceptionV4 type B unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    mid_channels : int
-        Number of output channels in the 7x7 branches.
     """
-    def __init__(self,
-                 in_channels,
-                 mid_channels):
+    def __init__(self):
         super(InceptUnitB, self).__init__()
+        in_channels = 1024
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
             out_channels=384))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
-            out_channels_list=(mid_channels, mid_channels, 192),
+            out_channels_list=(192, 224, 256),
             kernel_size_list=(1, (1, 7), (7, 1)),
             strides_list=(1, 1, 1),
             padding_list=(0, (0, 3), (3, 0))))
         self.branches.add_module("branch3", ConvSeqBranch(
             in_channels=in_channels,
-            out_channels_list=(mid_channels, mid_channels, mid_channels, mid_channels, 192),
+            out_channels_list=(192, 192, 224, 224, 256),
             kernel_size_list=(1, (7, 1), (1, 7), (7, 1), (1, 7)),
             strides_list=(1, 1, 1, 1, 1),
             padding_list=(0, (3, 0), (0, 3), (3, 0), (0, 3))))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=192))
+            out_channels=128))
 
     def forward(self, x):
         x = self.branches(x)
         return x
 
 
-class InceptUnitD(nn.Module):
+class ReductUnitB(nn.Module):
     """
-    InceptionV4 type D unit.
+    InceptionV4 type B-reduction unit.
+    """
+    def __init__(self):
+        super(ReductUnitB, self).__init__()
+        in_channels = 1024
 
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(InceptUnitD, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
-            out_channels_list=(192, 320),
+            out_channels_list=(192, 192),
             kernel_size_list=(1, 3),
             strides_list=(1, 2),
             padding_list=(0, 0)))
         self.branches.add_module("branch2", ConvSeqBranch(
             in_channels=in_channels,
-            out_channels_list=(192, 192, 192, 192),
+            out_channels_list=(256, 256, 320, 320),
             kernel_size_list=(1, (1, 7), (7, 1), 3),
             strides_list=(1, 1, 1, 2),
             padding_list=(0, (0, 3), (3, 0), 0)))
@@ -501,37 +482,35 @@ class InceptUnitD(nn.Module):
         return x
 
 
-class InceptUnitE(nn.Module):
+class InceptUnitC(nn.Module):
     """
-    InceptionV4 type E unit.
+    InceptionV4 type C unit.
+    """
+    def __init__(self):
+        super(InceptUnitC, self).__init__()
+        in_channels = 1536
 
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(InceptUnitE, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
-            out_channels=320))
+            out_channels=256))
         self.branches.add_module("branch2", ConvSeq3x3Branch(
             in_channels=in_channels,
-            out_channels_list=(384,),
+            out_channels=256,
+            mid_channels_list=(384,),
             kernel_size_list=(1,),
             strides_list=(1,),
             padding_list=(0,)))
         self.branches.add_module("branch3", ConvSeq3x3Branch(
             in_channels=in_channels,
-            out_channels_list=(448, 384),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 1),
-            padding_list=(0, 1)))
+            out_channels=256,
+            mid_channels_list=(384, 448, 512),
+            kernel_size_list=(1, (3, 1), (1, 3)),
+            strides_list=(1, 1, 1),
+            padding_list=(0, (1, 0), (0, 1))))
         self.branches.add_module("branch4", AvgPoolBranch(
             in_channels=in_channels,
-            out_channels=192))
+            out_channels=256))
 
     def forward(self, x):
         x = self.branches(x)
@@ -568,36 +547,17 @@ class InceptInitBlock(nn.Module):
             kernel_size=3,
             stride=1,
             padding=1)
-
-        self.pool1 = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=0)
-        self.conv4 = InceptConv(
-            in_channels=64,
-            out_channels=80,
-            kernel_size=1,
-            stride=1,
-            padding=0)
-        self.conv5 = InceptConv(
-            in_channels=80,
-            out_channels=192,
-            kernel_size=3,
-            stride=1,
-            padding=0)
-        self.pool2 = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=0)
+        self.unit1 = InceptUnit3a()
+        self.unit2 = InceptUnit4a()
+        self.unit3 = InceptUnit5a()
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x = self.pool1(x)
-        x = self.conv4(x)
-        x = self.conv5(x)
-        x = self.pool2(x)
+        x = self.unit1(x)
+        x = self.unit2(x)
+        x = self.unit3(x)
         return x
 
 
@@ -612,57 +572,44 @@ class InceptionV4(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
                  in_channels=3,
                  in_size=(299, 299),
-                 classes=1000):
+                 num_classes=1000):
         super(InceptionV4, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.classes = num_classes
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
             in_channels=in_channels))
 
         stage1 = nn.Sequential()
-        stage1.add_module("unit1", InceptUnitA(
-            in_channels=384,
-            pool_out_channels=96))
-        stage1.add_module("unit2", InceptUnitA(
-            in_channels=256,
-            pool_out_channels=64))
-        stage1.add_module("unit3", InceptUnitA(
-            in_channels=288,
-            pool_out_channels=64))
+        stage1.add_module("unit1", InceptUnitA())
+        stage1.add_module("unit2", InceptUnitA())
+        stage1.add_module("unit3", InceptUnitA())
+        stage1.add_module("unit4", InceptUnitA())
         self.features.add_module("stage1", stage1)
 
         stage2 = nn.Sequential()
-        stage2.add_module("unit1", ReductUnitA(
-            in_channels=288))
-        stage2.add_module("unit2", InceptUnitB(
-            in_channels=768,
-            mid_channels=128))
-        stage2.add_module("unit3", InceptUnitB(
-            in_channels=768,
-            mid_channels=160))
-        stage2.add_module("unit4", InceptUnitB(
-            in_channels=768,
-            mid_channels=160))
-        stage2.add_module("unit5", InceptUnitB(
-            in_channels=768,
-            mid_channels=192))
+        stage2.add_module("unit1", ReductUnitA())
+        stage2.add_module("unit2", InceptUnitB())
+        stage2.add_module("unit3", InceptUnitB())
+        stage2.add_module("unit4", InceptUnitB())
+        stage2.add_module("unit5", InceptUnitB())
+        stage2.add_module("unit6", InceptUnitB())
+        stage2.add_module("unit7", InceptUnitB())
+        stage2.add_module("unit8", InceptUnitB())
         self.features.add_module("stage2", stage2)
 
         stage3 = nn.Sequential()
-        stage3.add_module("unit1", InceptUnitD(
-            in_channels=768))
-        stage3.add_module("unit2", InceptUnitE(
-            in_channels=1280))
-        stage3.add_module("unit3", InceptUnitE(
-            in_channels=2048))
+        stage3.add_module("unit1", ReductUnitB())
+        stage3.add_module("unit2", InceptUnitC())
+        stage3.add_module("unit3", InceptUnitC())
+        stage3.add_module("unit4", InceptUnitC())
         self.features.add_module("stage3", stage3)
 
         self.features.add_module('final_pool', nn.AvgPool2d(
@@ -672,8 +619,8 @@ class InceptionV4(nn.Module):
         self.output = nn.Sequential()
         self.output.add_module('dropout', nn.Dropout(p=0.5))
         self.output.add_module('fc', nn.Linear(
-            in_features=2048,
-            out_features=classes))
+            in_features=1536,
+            out_features=num_classes))
 
         self._init_params()
 

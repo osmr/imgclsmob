@@ -498,16 +498,16 @@ class InceptionV3(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
                  in_channels=3,
                  in_size=(299, 299),
-                 classes=1000):
+                 num_classes=1000):
         super(InceptionV3, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.classes = num_classes
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
@@ -559,12 +559,12 @@ class InceptionV3(nn.Module):
         self.output.add_module('dropout', nn.Dropout(p=0.5))
         self.output.add_module('fc', nn.Linear(
             in_features=2048,
-            out_features=classes))
+            out_features=num_classes))
 
         self._init_params()
 
     def _init_params(self):
-        for name, module in self.named_modules():
+        for module in self.modules():
             if isinstance(module, nn.Conv2d):
                 init.kaiming_uniform_(module.weight)
                 if module.bias is not None:

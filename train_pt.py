@@ -424,7 +424,10 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
-    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
+    if hasattr(net, 'module'):
+        input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
+    else:
+        input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
     train_data, val_data = get_data_loader(
         data_dir=args.data_dir,

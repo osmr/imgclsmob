@@ -1,3 +1,4 @@
+import math
 import logging
 import os
 import multiprocessing
@@ -248,7 +249,11 @@ def prepare_model(model_name,
     kwargs = {'pretrained': use_pretrained}
 
     raw_net = get_model(model_name, **kwargs)
-    net = ImageNetModel(model_lambda=raw_net)
+    input_image_size = raw_net.in_size[0] if hasattr(raw_net, 'in_size') else 224
+
+    net = ImageNetModel(
+        model_lambda=raw_net,
+        image_size=input_image_size)
 
     if use_pretrained and not pretrained_model_file_path:
         pretrained_model_file_path = raw_net.file_path
@@ -264,11 +269,17 @@ def prepare_model(model_name,
 
 def get_data(is_train,
              batch_size,
-             data_dir_path):
+             data_dir_path,
+             input_image_size=224,
+             resize_inv_factor=0.875):
+    assert (resize_inv_factor > 0.0)
+    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
 
     if is_train:
         augmentors = [
-            GoogleNetResize(crop_area_fraction=0.08),
+            GoogleNetResize(
+                crop_area_fraction=0.08,
+                target_shape=input_image_size),
             imgaug.RandomOrderAug([
                 imgaug.BrightnessScale((0.6, 1.4), clip=False),
                 imgaug.Contrast((0.6, 1.4), clip=False),
@@ -284,9 +295,9 @@ def get_data(is_train,
             imgaug.Flip(horiz=True)]
     else:
         augmentors = [
-            # imgaug.ResizeShortestEdge(256, cv2.INTER_CUBIC),
-            imgaug.ResizeShortestEdge(256, cv2.INTER_LINEAR),
-            imgaug.CenterCrop((224, 224))
+            # imgaug.ResizeShortestEdge(resize_value, cv2.INTER_CUBIC),
+            imgaug.ResizeShortestEdge(resize_value, cv2.INTER_LINEAR),
+            imgaug.CenterCrop((input_image_size, input_image_size))
         ]
 
     return get_imagenet_dataflow(
@@ -299,7 +310,7 @@ def get_data(is_train,
 def calc_flops(model):
     # manually build the graph with batch=1
     input_desc = [
-        InputDesc(tf.float32, [1, 224, 224, 3], 'input'),
+        InputDesc(tf.float32, [1, model.image_size, model.image_size, 3], 'input'),
         InputDesc(tf.int32, [1], 'label')
     ]
     input = PlaceholderInput()

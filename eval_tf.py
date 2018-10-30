@@ -162,7 +162,9 @@ def main():
     val_dataflow = get_data(
         is_train=False,
         batch_size=batch_size,
-        data_dir_path=args.data_dir)
+        data_dir_path=args.data_dir,
+        input_image_size=net.image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
     assert (args.use_pretrained or args.resume.strip())
     test(

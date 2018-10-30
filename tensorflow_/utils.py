@@ -31,9 +31,11 @@ def prepare_model(model_name,
     kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
+    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else 224
+
     x = tf.placeholder(
         dtype=tf.float32,
-        shape=(None, 3, 224, 224),
+        shape=(None, 3, input_image_size, input_image_size),
         name='xx')
     y_net = net(x)
 

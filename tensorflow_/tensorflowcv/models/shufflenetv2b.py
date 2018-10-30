@@ -4,11 +4,11 @@
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['shufflenetv2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
+__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, channel_shuffle2, maxpool2d, se_block
+from .common import conv2d, batchnorm, channel_shuffle, channel_shuffle2, maxpool2d, se_block
 
 
 def shuffle_conv(x,
@@ -149,6 +149,7 @@ def shuffle_unit(x,
                  downsample,
                  use_se,
                  use_residual,
+                 shuffle_group_first,
                  training,
                  name="shuffle_unit"):
     """
@@ -168,6 +169,8 @@ def shuffle_unit(x,
         Whether to use SE block.
     use_residual : bool
         Whether to use residual connection.
+    shuffle_group_first : bool
+        Whether to use channel shuffle in group first mode.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     name : str, default 'shuffle_unit'
@@ -233,10 +236,15 @@ def shuffle_unit(x,
 
     x = tf.concat([y1, y2], axis=1, name=name + "/concat")
 
-    assert (mid_channels % 2 == 0)
-    x = channel_shuffle2(
-        x=x,
-        groups=2)
+    assert (out_channels % 2 == 0)
+    if shuffle_group_first:
+        x = channel_shuffle(
+            x=x,
+            groups=2)
+    else:
+        x = channel_shuffle2(
+            x=x,
+            groups=2)
 
     return x
 
@@ -286,23 +294,13 @@ def shuffle_init_block(x,
     return x
 
 
-def shufflenetv2b(x,
-                  channels,
-                  init_block_channels,
-                  final_block_channels,
-                  use_se=False,
-                  use_residual=False,
-                  in_channels=3,
-                  classes=1000,
-                  training=False):
+class ShuffleNetV2b(object):
     """
     ShuffleNetV2(b) model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
@@ -313,61 +311,101 @@ def shufflenetv2b(x,
         Whether to use SE block.
     use_residual : bool, default False
         Whether to use residual connections.
+    shuffle_group_first : bool, default True
+        Whether to use channel shuffle in group first mode.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = shuffle_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        training=training,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        for j, out_channels in enumerate(channels_per_stage):
-            downsample = (j == 0)
-            x = shuffle_unit(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                downsample=downsample,
-                use_se=use_se,
-                use_residual=use_residual,
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = shuffle_conv1x1(
-        x=x,
-        in_channels=in_channels,
-        out_channels=final_block_channels,
-        training=training,
-        name="features/final_block")
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 final_block_channels,
+                 use_se=False,
+                 use_residual=False,
+                 shuffle_group_first=True,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(ShuffleNetV2b, self).__init__(**kwargs)
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.final_block_channels = final_block_channels
+        self.use_se = use_se
+        self.use_residual = use_residual
+        self.shuffle_group_first = shuffle_group_first
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output")
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    return x
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        x = shuffle_init_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.init_block_channels,
+            training=training,
+            name="features/init_block")
+        in_channels = self.init_block_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            for j, out_channels in enumerate(channels_per_stage):
+                downsample = (j == 0)
+                x = shuffle_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    downsample=downsample,
+                    use_se=self.use_se,
+                    use_residual=self.use_residual,
+                    shuffle_group_first=self.shuffle_group_first,
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = shuffle_conv1x1(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.final_block_channels,
+            training=training,
+            name="features/final_block")
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=7,
+            strides=1,
+            data_format='channels_first',
+            name="features/final_pool")
+
+        x = tf.layers.flatten(x)
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output")
+
+        return x
 
 
 def get_shufflenetv2b(width_scale,
+                      shuffle_group_first=True,
                       model_name=None,
                       pretrained=False,
                       root=os.path.join('~', '.tensorflow', 'models'),
@@ -379,6 +417,8 @@ def get_shufflenetv2b(width_scale,
     ----------
     width_scale : float
         Scale factor for width of layers.
+    shuffle_group_first : bool, default True
+        Whether to use channel shuffle in group first mode.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -406,31 +446,25 @@ def get_shufflenetv2b(width_scale,
         if width_scale > 1.5:
             final_block_channels = int(final_block_channels * width_scale)
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   init_block_channels=init_block_channels,
-                   final_block_channels=final_block_channels):
-        y_net = shufflenetv2b(
-            x=x,
-            channels=channels,
-            init_block_channels=init_block_channels,
-            final_block_channels=final_block_channels,
-            training=training,
-            **kwargs)
-        return y_net
+    net = ShuffleNetV2b(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        final_block_channels=final_block_channels,
+        shuffle_group_first=shuffle_group_first,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def shufflenetv2b_wd2(**kwargs):
@@ -452,7 +486,11 @@ def shufflenetv2b_wd2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2b(width_scale=(12.0 / 29.0), model_name="shufflenetv2_wd2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(12.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_wd2",
+        **kwargs)
 
 
 def shufflenetv2b_w1(**kwargs):
@@ -474,7 +512,11 @@ def shufflenetv2b_w1(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2b(width_scale=1.0, model_name="shufflenetv2_w1", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=1.0,
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w1",
+        **kwargs)
 
 
 def shufflenetv2b_w3d2(**kwargs):
@@ -496,7 +538,11 @@ def shufflenetv2b_w3d2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2b(width_scale=(44.0 / 29.0), model_name="shufflenetv2_w3d2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(44.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w3d2",
+        **kwargs)
 
 
 def shufflenetv2b_w2(**kwargs):
@@ -518,7 +564,11 @@ def shufflenetv2b_w2(**kwargs):
     net_file_path : str or None
         File path for pretrained model or None.
     """
-    return get_shufflenetv2b(width_scale=(61.0 / 29.0), model_name="shufflenetv2_w2", **kwargs)
+    return get_shufflenetv2b(
+        width_scale=(61.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w2",
+        **kwargs)
 
 
 def _test():
@@ -536,13 +586,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -553,7 +602,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

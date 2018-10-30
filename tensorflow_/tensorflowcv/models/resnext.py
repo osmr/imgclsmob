@@ -5,7 +5,7 @@
     - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['resnext', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
+__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
            'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_conv3x3', 'resnext_conv1x1']
 
 import os
@@ -353,23 +353,13 @@ def resnext_init_block(x,
     return x
 
 
-def resnext(x,
-            channels,
-            init_block_channels,
-            cardinality,
-            bottleneck_width,
-            use_se,
-            in_channels=3,
-            classes=1000,
-            training=False):
+class ResNeXt(object):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
     Also this class implements SE-ResNeXt from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
@@ -382,51 +372,85 @@ def resnext(x,
         Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = resnext_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        training=training,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        for j, out_channels in enumerate(channels_per_stage):
-            strides = 2 if (j == 0) and (i != 0) else 1
-            x = resnext_unit(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                cardinality=cardinality,
-                bottleneck_width=bottleneck_width,
-                use_se=use_se,
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 cardinality,
+                 bottleneck_width,
+                 use_se,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(ResNeXt, self).__init__(**kwargs)
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.cardinality = cardinality
+        self.bottleneck_width = bottleneck_width
+        self.use_se = use_se
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output")
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    return x
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        x = resnext_init_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.init_block_channels,
+            training=training,
+            name="features/init_block")
+        in_channels = self.init_block_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            for j, out_channels in enumerate(channels_per_stage):
+                strides = 2 if (j == 0) and (i != 0) else 1
+                x = resnext_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    cardinality=self.cardinality,
+                    bottleneck_width=self.bottleneck_width,
+                    use_se=self.use_se,
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=7,
+            strides=1,
+            data_format='channels_first',
+            name="features/final_pool")
+
+        x = tf.layers.flatten(x)
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output")
+
+        return x
 
 
 def get_resnext(blocks,
@@ -477,35 +501,26 @@ def get_resnext(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   init_block_channels=init_block_channels,
-                   cardinality=cardinality,
-                   bottleneck_width=bottleneck_width,
-                   use_se=use_se):
-        y_net = resnext(
-            x=x,
-            channels=channels,
-            init_block_channels=init_block_channels,
-            cardinality=cardinality,
-            bottleneck_width=bottleneck_width,
-            use_se=use_se,
-            training=training,
-            **kwargs)
-        return y_net
+    net = ResNeXt(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
+        use_se=use_se,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def resnext50_32x4d(**kwargs):
@@ -657,13 +672,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -676,7 +690,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

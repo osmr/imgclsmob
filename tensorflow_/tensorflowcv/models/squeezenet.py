@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1602.07360.
 """
 
-__all__ = ['squeezenet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
+__all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
 
 import os
 import tensorflow as tf
@@ -155,22 +155,13 @@ def squeeze_init_block(x,
     return x
 
 
-def squeezenet(x,
-               channels,
-               residuals,
-               init_block_kernel_size,
-               init_block_channels,
-               in_channels=3,
-               classes=1000,
-               training=False):
+class SqueezeNet(object):
     """
     SqueezeNet model from 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
     https://arxiv.org/abs/1602.07360.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     residuals : bool
@@ -181,64 +172,96 @@ def squeezenet(x,
         Number of output channels for the initial unit.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = squeeze_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        kernel_size=init_block_kernel_size,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        x = maxpool2d(
+    def __init__(self,
+                 channels,
+                 residuals,
+                 init_block_kernel_size,
+                 init_block_channels,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(SqueezeNet, self).__init__(**kwargs)
+        self.channels = channels
+        self.residuals = residuals
+        self.init_block_kernel_size = init_block_kernel_size
+        self.init_block_channels = init_block_channels
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
+
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
+
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        x = squeeze_init_block(
             x=x,
-            pool_size=3,
-            strides=2,
-            ceil_mode=True,
-            name="features/pool{}".format(i + 1))
-        for j, out_channels in enumerate(channels_per_stage):
-            expand_channels = out_channels // 2
-            squeeze_channels = out_channels // 8
-            x = fire_unit(
+            in_channels=in_channels,
+            out_channels=self.init_block_channels,
+            kernel_size=self.init_block_kernel_size,
+            name="features/init_block")
+        in_channels = self.init_block_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            x = maxpool2d(
                 x=x,
-                in_channels=in_channels,
-                squeeze_channels=squeeze_channels,
-                expand1x1_channels=expand_channels,
-                expand3x3_channels=expand_channels,
-                residual=((residuals is not None) and (residuals[i][j] == 1)),
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = tf.layers.dropout(
-        inputs=x,
-        rate=0.5,
-        training=training,
-        name="features/dropout")
+                pool_size=3,
+                strides=2,
+                ceil_mode=True,
+                name="features/pool{}".format(i + 1))
+            for j, out_channels in enumerate(channels_per_stage):
+                expand_channels = out_channels // 2
+                squeeze_channels = out_channels // 8
+                x = fire_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    squeeze_channels=squeeze_channels,
+                    expand1x1_channels=expand_channels,
+                    expand3x3_channels=expand_channels,
+                    residual=((self.residuals is not None) and (self.residuals[i][j] == 1)),
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = tf.layers.dropout(
+            inputs=x,
+            rate=0.5,
+            training=training,
+            name="features/dropout")
 
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=classes,
-        kernel_size=1,
-        name="output/final_conv")
-    x = tf.nn.relu(x, name="output/final_activ")
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=13,
-        strides=1,
-        data_format='channels_first',
-        name="output/final_pool")
-    x = tf.layers.flatten(x)
+        x = conv2d(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.classes,
+            kernel_size=1,
+            name="output/final_conv")
+        x = tf.nn.relu(x, name="output/final_activ")
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=13,
+            strides=1,
+            data_format='channels_first',
+            name="output/final_pool")
+        x = tf.layers.flatten(x)
 
-    return x
+        return x
 
 
 def get_squeezenet(version,
@@ -287,33 +310,25 @@ def get_squeezenet(version,
     if not residual:
         residuals = None
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   residuals=residuals,
-                   init_block_kernel_size=init_block_kernel_size,
-                   init_block_channels=init_block_channels):
-        y_net = squeezenet(
-            x=x,
-            channels=channels,
-            residuals=residuals,
-            init_block_kernel_size=init_block_kernel_size,
-            init_block_channels=init_block_channels,
-            training=training,
-            **kwargs)
-        return y_net
+    net = SqueezeNet(
+        channels=channels,
+        residuals=residuals,
+        init_block_kernel_size=init_block_kernel_size,
+        init_block_channels=init_block_channels,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def squeezenet_v1_0(**kwargs):
@@ -419,13 +434,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -436,7 +450,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

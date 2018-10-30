@@ -3,7 +3,7 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['senet', 'senet52', 'senet103', 'senet154']
+__all__ = ['SENet', 'senet52', 'senet103', 'senet154']
 
 import os
 import math
@@ -227,21 +227,12 @@ def senet_init_block(x,
     return x
 
 
-def senet(x,
-          channels,
-          init_block_channels,
-          cardinality,
-          bottleneck_width,
-          in_channels=3,
-          classes=1000,
-          training=False):
+class SENet(object):
     """
     SENet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
-    x : Tensor
-        Input tensor.
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
@@ -252,57 +243,89 @@ def senet(x,
         Width of bottleneck block.
     in_channels : int, default 3
         Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
     """
-    x = senet_init_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=init_block_channels,
-        training=training,
-        name="features/init_block")
-    in_channels = init_block_channels
-    for i, channels_per_stage in enumerate(channels):
-        identity_conv3x3 = (i != 0)
-        for j, out_channels in enumerate(channels_per_stage):
-            strides = 2 if (j == 0) and (i != 0) else 1
-            x = senet_unit(
-                x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                cardinality=cardinality,
-                bottleneck_width=bottleneck_width,
-                identity_conv3x3=identity_conv3x3,
-                training=training,
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-    x = tf.layers.average_pooling2d(
-        inputs=x,
-        pool_size=7,
-        strides=1,
-        data_format='channels_first',
-        name="features/final_pool")
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 cardinality,
+                 bottleneck_width,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(SENet, self).__init__(**kwargs)
+        self.channels = channels
+        self.init_block_channels = init_block_channels
+        self.cardinality = cardinality
+        self.bottleneck_width = bottleneck_width
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = tf.layers.flatten(x)
-    x = tf.layers.dropout(
-        inputs=x,
-        rate=0.2,
-        training=training,
-        name="output/dropout")
-    x = tf.layers.dense(
-        inputs=x,
-        units=classes,
-        name="output/fc")
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
 
-    return x
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        x = senet_init_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=self.init_block_channels,
+            training=training,
+            name="features/init_block")
+        in_channels = self.init_block_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            identity_conv3x3 = (i != 0)
+            for j, out_channels in enumerate(channels_per_stage):
+                strides = 2 if (j == 0) and (i != 0) else 1
+                x = senet_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    cardinality=self.cardinality,
+                    bottleneck_width=self.bottleneck_width,
+                    identity_conv3x3=identity_conv3x3,
+                    training=training,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+        x = tf.layers.average_pooling2d(
+            inputs=x,
+            pool_size=7,
+            strides=1,
+            data_format='channels_first',
+            name="features/final_pool")
+
+        x = tf.layers.flatten(x)
+        x = tf.layers.dropout(
+            inputs=x,
+            rate=0.2,
+            training=training,
+            name="output/dropout")
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output/fc")
+
+        return x
 
 
 def get_senet(blocks,
@@ -350,33 +373,25 @@ def get_senet(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    def net_lambda(x,
-                   training=False,
-                   channels=channels,
-                   init_block_channels=init_block_channels,
-                   cardinality=cardinality,
-                   bottleneck_width=bottleneck_width):
-        y_net = senet(
-            x=x,
-            channels=channels,
-            init_block_channels=init_block_channels,
-            cardinality=cardinality,
-            bottleneck_width=bottleneck_width,
-            training=training,
-            **kwargs)
-        return y_net
+    net = SENet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net_file_path = get_model_file(
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
             model_name=model_name,
             local_model_store_dir_path=root)
     else:
-        net_file_path = None
+        net.state_dict = None
+        net.file_path = None
 
-    return net_lambda, net_file_path
+    return net
 
 
 def senet52(**kwargs):
@@ -456,13 +471,12 @@ def _test():
 
     for model in models:
 
-        net_lambda, net_file_path = model(pretrained=pretrained)
-
+        net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224),
             name='xx')
-        y_net = net_lambda(x)
+        y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
@@ -472,7 +486,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, file_path=net_file_path)
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

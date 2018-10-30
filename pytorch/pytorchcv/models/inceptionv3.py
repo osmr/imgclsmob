@@ -236,7 +236,7 @@ class ConvSeq3x3Branch(nn.Module):
         self.conv_list = nn.Sequential()
         for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                 out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.add("conv{}".format(i + 1), InceptConv(
+            self.conv_list.add_module("conv{}".format(i + 1), InceptConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
@@ -329,7 +329,7 @@ class InceptUnitB(nn.Module):
             kernel_size_list=(1, 3, 3),
             strides_list=(1, 1, 2),
             padding_list=(0, 1, 0)))
-        self.branches.add(MaxPoolBranch())
+        self.branches.add_module("branch3", MaxPoolBranch())
 
     def forward(self, x):
         x = self.branches(x)

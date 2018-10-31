@@ -252,13 +252,16 @@ class InceptionAUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    pool_out_channels : int
-        Number of output channels in the pool branch.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
                  in_channels,
-                 pool_out_channels):
+                 out_channels):
         super(InceptionAUnit, self).__init__()
+        assert (out_channels > 224)
+        pool_out_channels = out_channels - 224
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -292,10 +295,16 @@ class ReductionAUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 out_channels):
         super(ReductionAUnit, self).__init__()
+        assert (in_channels == 288)
+        assert (out_channels == 768)
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
@@ -324,13 +333,19 @@ class InceptionBUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     mid_channels : int
         Number of output channels in the 7x7 branches.
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  mid_channels):
         super(InceptionBUnit, self).__init__()
+        assert (in_channels == 768)
+        assert (out_channels == 768)
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -364,10 +379,16 @@ class ReductionBUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 out_channels):
         super(ReductionBUnit, self).__init__()
+        assert (in_channels == 768)
+        assert (out_channels == 1280)
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
@@ -396,10 +417,15 @@ class InceptionCUnit(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 out_channels):
         super(InceptionCUnit, self).__init__()
+        assert (out_channels == 2048)
+
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -433,10 +459,15 @@ class InceptInitBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
-                 in_channels):
+                 in_channels,
+                 out_channels):
         super(InceptInitBlock, self).__init__()
+        assert (out_channels == 192)
+
         self.conv1 = InceptConv(
             in_channels=in_channels,
             out_channels=32,
@@ -494,6 +525,14 @@ class InceptionV3(nn.Module):
 
     Parameters:
     ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    b_mid_channels : list of int
+        Number of middle channels for each Inception-B unit.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
@@ -502,6 +541,10 @@ class InceptionV3(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
+                 channels,
+                 init_block_channels,
+                 b_mid_channels,
+                 dropout_rate=0.5,
                  in_channels=3,
                  in_size=(299, 299),
                  num_classes=1000):
@@ -511,54 +554,39 @@ class InceptionV3(nn.Module):
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
-            in_channels=in_channels))
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
 
-        stage1 = nn.Sequential()
-        stage1.add_module("unit1", InceptionAUnit(
-            in_channels=192,
-            pool_out_channels=32))
-        stage1.add_module("unit2", InceptionAUnit(
-            in_channels=256,
-            pool_out_channels=64))
-        stage1.add_module("unit3", InceptionAUnit(
-            in_channels=288,
-            pool_out_channels=64))
-        self.features.add_module("stage1", stage1)
-
-        stage2 = nn.Sequential()
-        stage2.add_module("unit1", ReductionAUnit(
-            in_channels=288))
-        stage2.add_module("unit2", InceptionBUnit(
-            in_channels=768,
-            mid_channels=128))
-        stage2.add_module("unit3", InceptionBUnit(
-            in_channels=768,
-            mid_channels=160))
-        stage2.add_module("unit4", InceptionBUnit(
-            in_channels=768,
-            mid_channels=160))
-        stage2.add_module("unit5", InceptionBUnit(
-            in_channels=768,
-            mid_channels=192))
-        self.features.add_module("stage2", stage2)
-
-        stage3 = nn.Sequential()
-        stage3.add_module("unit1", ReductionBUnit(
-            in_channels=768))
-        stage3.add_module("unit2", InceptionCUnit(
-            in_channels=1280))
-        stage3.add_module("unit3", InceptionCUnit(
-            in_channels=2048))
-        self.features.add_module("stage3", stage3)
+        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
+        reduction_units = [ReductionAUnit, ReductionBUnit]
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                if (j == 0) and (i != 0):
+                    unit = reduction_units[i - 1]
+                else:
+                    unit = normal_units[i]
+                if unit == InceptionBUnit:
+                    stage.add_module("unit{}".format(j + 1), unit(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        mid_channels=b_mid_channels[j - 1]))
+                else:
+                    stage.add_module("unit{}".format(j + 1), unit(
+                        in_channels=in_channels,
+                        out_channels=out_channels))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
 
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=8,
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=0.5))
+        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
         self.output.add_module('fc', nn.Linear(
-            in_features=2048,
+            in_features=in_channels,
             out_features=num_classes))
 
         self._init_params()
@@ -594,7 +622,17 @@ def get_inceptionv3(model_name=None,
         Location for keeping the model parameters.
     """
 
-    net = InceptionV3(**kwargs)
+    init_block_channels = 192
+    channels = [[256, 288, 288],
+                [768, 768, 768, 768, 768],
+                [1280, 2048, 2048]]
+    b_mid_channels = [128, 160, 160, 192]
+
+    net = InceptionV3(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        b_mid_channels=b_mid_channels,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):

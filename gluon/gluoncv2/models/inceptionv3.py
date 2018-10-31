@@ -289,17 +289,20 @@ class InceptionAUnit(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    pool_out_channels : int
-        Number of output channels in the pool branch.
+    out_channels : int
+        Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 pool_out_channels,
+                 out_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(InceptionAUnit, self).__init__(**kwargs)
+        assert (out_channels > 224)
+        pool_out_channels = out_channels - 224
+
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -338,14 +341,20 @@ class ReductionAUnit(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(ReductionAUnit, self).__init__(**kwargs)
+        assert (in_channels == 288)
+        assert (out_channels == 768)
+
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -377,6 +386,8 @@ class InceptionBUnit(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     mid_channels : int
         Number of output channels in the 7x7 branches.
     bn_use_global_stats : bool
@@ -384,10 +395,14 @@ class InceptionBUnit(HybridBlock):
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  mid_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(InceptionBUnit, self).__init__(**kwargs)
+        assert (in_channels == 768)
+        assert (out_channels == 768)
+
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -426,14 +441,20 @@ class ReductionBUnit(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(ReductionBUnit, self).__init__(**kwargs)
+        assert (in_channels == 768)
+        assert (out_channels == 1280)
+
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -465,14 +486,19 @@ class InceptionCUnit(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(InceptionCUnit, self).__init__(**kwargs)
+        assert (out_channels == 2048)
+
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -511,14 +537,19 @@ class InceptInitBlock(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
+    out_channels : int
+        Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
+                 out_channels,
                  bn_use_global_stats,
                  **kwargs):
         super(InceptInitBlock, self).__init__(**kwargs)
+        assert (out_channels == 192)
+
         with self.name_scope():
             self.conv1 = InceptConv(
                 in_channels=in_channels,
@@ -582,6 +613,14 @@ class InceptionV3(HybridBlock):
 
     Parameters:
     ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    b_mid_channels : list of int
+        Number of middle channels for each Inception-B unit.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -593,6 +632,10 @@ class InceptionV3(HybridBlock):
         Number of classification classes.
     """
     def __init__(self,
+                 channels,
+                 init_block_channels,
+                 b_mid_channels,
+                 dropout_rate=0.5,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(299, 299),
@@ -606,59 +649,33 @@ class InceptionV3(HybridBlock):
             self.features = nn.HybridSequential(prefix='')
             self.features.add(InceptInitBlock(
                 in_channels=in_channels,
+                out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels
 
-            stage1 = nn.HybridSequential(prefix='stage1_')
-            with stage1.name_scope():
-                stage1.add(InceptionAUnit(
-                    in_channels=192,
-                    pool_out_channels=32,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage1.add(InceptionAUnit(
-                    in_channels=256,
-                    pool_out_channels=64,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage1.add(InceptionAUnit(
-                    in_channels=288,
-                    pool_out_channels=64,
-                    bn_use_global_stats=bn_use_global_stats))
-            self.features.add(stage1)
-
-            stage2 = nn.HybridSequential(prefix='stage2_')
-            with stage2.name_scope():
-                stage2.add(ReductionAUnit(
-                    in_channels=288,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptionBUnit(
-                    in_channels=768,
-                    mid_channels=128,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptionBUnit(
-                    in_channels=768,
-                    mid_channels=160,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptionBUnit(
-                    in_channels=768,
-                    mid_channels=160,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptionBUnit(
-                    in_channels=768,
-                    mid_channels=192,
-                    bn_use_global_stats=bn_use_global_stats))
-            self.features.add(stage2)
-
-            stage3 = nn.HybridSequential(prefix='stage3_')
-            with stage3.name_scope():
-                stage3.add(ReductionBUnit(
-                    in_channels=768,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage3.add(InceptionCUnit(
-                    in_channels=1280,
-                    bn_use_global_stats=bn_use_global_stats))
-                stage3.add(InceptionCUnit(
-                    in_channels=2048,
-                    bn_use_global_stats=bn_use_global_stats))
-            self.features.add(stage3)
+            normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
+            reduction_units = [ReductionAUnit, ReductionBUnit]
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        if (j == 0) and (i != 0):
+                            unit = reduction_units[i - 1]
+                        else:
+                            unit = normal_units[i]
+                        if unit == InceptionBUnit:
+                            stage.add(unit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                mid_channels=b_mid_channels[j - 1],
+                                bn_use_global_stats=bn_use_global_stats))
+                        else:
+                            stage.add(unit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                bn_use_global_stats=bn_use_global_stats))
+                        in_channels = out_channels
+                self.features.add(stage)
 
             self.features.add(nn.AvgPool2D(
                 pool_size=8,
@@ -666,10 +683,10 @@ class InceptionV3(HybridBlock):
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.Flatten())
-            self.output.add(nn.Dropout(rate=0.5))
+            self.output.add(nn.Dropout(rate=dropout_rate))
             self.output.add(nn.Dense(
                 units=classes,
-                in_units=2048))
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -697,7 +714,17 @@ def get_inceptionv3(model_name=None,
         Location for keeping the model parameters.
     """
 
-    net = InceptionV3(**kwargs)
+    init_block_channels = 192
+    channels = [[256, 288, 288],
+                [768, 768, 768, 768, 768],
+                [1280, 2048, 2048]]
+    b_mid_channels = [128, 160, 160, 192]
+
+    net = InceptionV3(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        b_mid_channels=b_mid_channels,
+        **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):

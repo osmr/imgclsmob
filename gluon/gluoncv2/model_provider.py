@@ -147,7 +147,6 @@ _models = {
     'shufflenetv2b_w1': shufflenetv2b_w1,
     'shufflenetv2b_w3d2': shufflenetv2b_w3d2,
     'shufflenetv2b_w2': shufflenetv2b_w2,
-
     'shufflenetv2c_wd2': shufflenetv2c_wd2,
     'shufflenetv2c_w1': shufflenetv2c_w1,
 

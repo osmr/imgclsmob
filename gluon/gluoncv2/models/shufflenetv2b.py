@@ -508,7 +508,6 @@ def _test():
         shufflenetv2b_w1,
         shufflenetv2b_w3d2,
         shufflenetv2b_w2,
-
         shufflenetv2c_wd2,
         shufflenetv2c_w1,
     ]
@@ -533,7 +532,6 @@ def _test():
         assert (model != shufflenetv2b_w1 or weight_count == 2279760)
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
-
         assert (model != shufflenetv2c_wd2 or weight_count == 1366792)
         assert (model != shufflenetv2c_w1 or weight_count == 2279760)
 

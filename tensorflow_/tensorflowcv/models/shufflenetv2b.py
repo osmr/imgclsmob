@@ -1,10 +1,11 @@
 """
-    ShuffleNet V2, implemented in TensorFlow. The second variant.
+    ShuffleNet V2, implemented in TensorFlow. The alternative variant.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
+__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2',
+           'shufflenetv2c_wd2', 'shufflenetv2c_w1']
 
 import os
 import tensorflow as tf
@@ -488,7 +489,7 @@ def shufflenetv2b_wd2(**kwargs):
     """
     return get_shufflenetv2b(
         width_scale=(12.0 / 29.0),
-        shuffle_group_first=False,
+        shuffle_group_first=True,
         model_name="shufflenetv2_wd2",
         **kwargs)
 
@@ -514,7 +515,7 @@ def shufflenetv2b_w1(**kwargs):
     """
     return get_shufflenetv2b(
         width_scale=1.0,
-        shuffle_group_first=False,
+        shuffle_group_first=True,
         model_name="shufflenetv2_w1",
         **kwargs)
 
@@ -540,7 +541,7 @@ def shufflenetv2b_w3d2(**kwargs):
     """
     return get_shufflenetv2b(
         width_scale=(44.0 / 29.0),
-        shuffle_group_first=False,
+        shuffle_group_first=True,
         model_name="shufflenetv2_w3d2",
         **kwargs)
 
@@ -566,8 +567,60 @@ def shufflenetv2b_w2(**kwargs):
     """
     return get_shufflenetv2b(
         width_scale=(61.0 / 29.0),
-        shuffle_group_first=False,
+        shuffle_group_first=True,
         model_name="shufflenetv2_w2",
+        **kwargs)
+
+
+def shufflenetv2c_wd2(**kwargs):
+    """
+    ShuffleNetV2(b) 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    https://arxiv.org/abs/1807.11164.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
+    """
+    return get_shufflenetv2b(
+        width_scale=(12.0 / 29.0),
+        shuffle_group_first=False,
+        model_name="shufflenetv2_wd2",
+        **kwargs)
+
+
+def shufflenetv2c_w1(**kwargs):
+    """
+    ShuffleNetV2(b) 1x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
+    https://arxiv.org/abs/1807.11164.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    net_lambda : function
+        Function for model graph creation.
+    net_file_path : str or None
+        File path for pretrained model or None.
+    """
+    return get_shufflenetv2b(
+        width_scale=1.0,
+        shuffle_group_first=False,
+        model_name="shufflenetv2_w1",
         **kwargs)
 
 
@@ -582,6 +635,8 @@ def _test():
         shufflenetv2b_w1,
         shufflenetv2b_w3d2,
         shufflenetv2b_w2,
+        shufflenetv2c_wd2,
+        shufflenetv2c_w1,
     ]
 
     for model in models:
@@ -599,6 +654,8 @@ def _test():
         assert (model != shufflenetv2b_w1 or weight_count == 2279760)
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
+        assert (model != shufflenetv2c_wd2 or weight_count == 1366792)
+        assert (model != shufflenetv2c_w1 or weight_count == 2279760)
 
         with tf.Session() as sess:
             if pretrained:

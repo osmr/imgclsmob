@@ -281,9 +281,9 @@ class ConvSeq3x3Branch(HybridBlock):
         return x
 
 
-class InceptUnitA(HybridBlock):
+class InceptionAUnit(HybridBlock):
     """
-    InceptionV3 type A unit.
+    InceptionV3 type Inception-A unit.
 
     Parameters:
     ----------
@@ -299,7 +299,7 @@ class InceptUnitA(HybridBlock):
                  pool_out_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(InceptUnitA, self).__init__(**kwargs)
+        super(InceptionAUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -330,9 +330,9 @@ class InceptUnitA(HybridBlock):
         return x
 
 
-class InceptUnitB(HybridBlock):
+class ReductionAUnit(HybridBlock):
     """
-    InceptionV3 type B unit.
+    InceptionV3 type Reduction-A unit.
 
     Parameters:
     ----------
@@ -345,7 +345,7 @@ class InceptUnitB(HybridBlock):
                  in_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(InceptUnitB, self).__init__(**kwargs)
+        super(ReductionAUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -369,9 +369,9 @@ class InceptUnitB(HybridBlock):
         return x
 
 
-class InceptUnitC(HybridBlock):
+class InceptionBUnit(HybridBlock):
     """
-    InceptionV3 type C unit.
+    InceptionV3 type Inception-B unit.
 
     Parameters:
     ----------
@@ -387,7 +387,7 @@ class InceptUnitC(HybridBlock):
                  mid_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(InceptUnitC, self).__init__(**kwargs)
+        super(InceptionBUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -418,9 +418,9 @@ class InceptUnitC(HybridBlock):
         return x
 
 
-class InceptUnitD(HybridBlock):
+class ReductionBUnit(HybridBlock):
     """
-    InceptionV3 type D unit.
+    InceptionV3 type Reduction-B unit.
 
     Parameters:
     ----------
@@ -433,7 +433,7 @@ class InceptUnitD(HybridBlock):
                  in_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(InceptUnitD, self).__init__(**kwargs)
+        super(ReductionBUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(ConvSeqBranch(
@@ -457,9 +457,9 @@ class InceptUnitD(HybridBlock):
         return x
 
 
-class InceptUnitE(HybridBlock):
+class InceptionCUnit(HybridBlock):
     """
-    InceptionV3 type E unit.
+    InceptionV3 type Inception-C unit.
 
     Parameters:
     ----------
@@ -472,7 +472,7 @@ class InceptUnitE(HybridBlock):
                  in_channels,
                  bn_use_global_stats,
                  **kwargs):
-        super(InceptUnitE, self).__init__(**kwargs)
+        super(InceptionCUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Conv1x1Branch(
@@ -610,15 +610,15 @@ class InceptionV3(HybridBlock):
 
             stage1 = nn.HybridSequential(prefix='stage1_')
             with stage1.name_scope():
-                stage1.add(InceptUnitA(
+                stage1.add(InceptionAUnit(
                     in_channels=192,
                     pool_out_channels=32,
                     bn_use_global_stats=bn_use_global_stats))
-                stage1.add(InceptUnitA(
+                stage1.add(InceptionAUnit(
                     in_channels=256,
                     pool_out_channels=64,
                     bn_use_global_stats=bn_use_global_stats))
-                stage1.add(InceptUnitA(
+                stage1.add(InceptionAUnit(
                     in_channels=288,
                     pool_out_channels=64,
                     bn_use_global_stats=bn_use_global_stats))
@@ -626,22 +626,22 @@ class InceptionV3(HybridBlock):
 
             stage2 = nn.HybridSequential(prefix='stage2_')
             with stage2.name_scope():
-                stage2.add(InceptUnitB(
+                stage2.add(ReductionAUnit(
                     in_channels=288,
                     bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptUnitC(
+                stage2.add(InceptionBUnit(
                     in_channels=768,
                     mid_channels=128,
                     bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptUnitC(
+                stage2.add(InceptionBUnit(
                     in_channels=768,
                     mid_channels=160,
                     bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptUnitC(
+                stage2.add(InceptionBUnit(
                     in_channels=768,
                     mid_channels=160,
                     bn_use_global_stats=bn_use_global_stats))
-                stage2.add(InceptUnitC(
+                stage2.add(InceptionBUnit(
                     in_channels=768,
                     mid_channels=192,
                     bn_use_global_stats=bn_use_global_stats))
@@ -649,13 +649,13 @@ class InceptionV3(HybridBlock):
 
             stage3 = nn.HybridSequential(prefix='stage3_')
             with stage3.name_scope():
-                stage3.add(InceptUnitD(
+                stage3.add(ReductionBUnit(
                     in_channels=768,
                     bn_use_global_stats=bn_use_global_stats))
-                stage3.add(InceptUnitE(
+                stage3.add(InceptionCUnit(
                     in_channels=1280,
                     bn_use_global_stats=bn_use_global_stats))
-                stage3.add(InceptUnitE(
+                stage3.add(InceptionCUnit(
                     in_channels=2048,
                     bn_use_global_stats=bn_use_global_stats))
             self.features.add(stage3)

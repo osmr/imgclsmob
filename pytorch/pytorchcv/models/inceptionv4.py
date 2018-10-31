@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import Concurrent
+from .common import Concurrent
 
 
 class InceptConv(nn.Module):
@@ -360,12 +360,12 @@ class InceptUnit5a(nn.Module):
         return x
 
 
-class InceptUnitA(nn.Module):
+class InceptionAUnit(nn.Module):
     """
-    InceptionV4 type A unit.
+    InceptionV4 type Inception-A unit.
     """
     def __init__(self):
-        super(InceptUnitA, self).__init__()
+        super(InceptionAUnit, self).__init__()
         in_channels = 384
 
         self.branches = Concurrent()
@@ -393,12 +393,12 @@ class InceptUnitA(nn.Module):
         return x
 
 
-class ReductUnitA(nn.Module):
+class ReductionAUnit(nn.Module):
     """
-    InceptionV4 type A-reduction unit.
+    InceptionV4 type Reduction-A unit.
     """
     def __init__(self):
-        super(ReductUnitA, self).__init__()
+        super(ReductionAUnit, self).__init__()
         in_channels = 384
 
         self.branches = Concurrent()
@@ -421,12 +421,12 @@ class ReductUnitA(nn.Module):
         return x
 
 
-class InceptUnitB(nn.Module):
+class InceptionBUnit(nn.Module):
     """
-    InceptionV4 type B unit.
+    InceptionV4 type Inception-B unit.
     """
     def __init__(self):
-        super(InceptUnitB, self).__init__()
+        super(InceptionBUnit, self).__init__()
         in_channels = 1024
 
         self.branches = Concurrent()
@@ -454,12 +454,12 @@ class InceptUnitB(nn.Module):
         return x
 
 
-class ReductUnitB(nn.Module):
+class ReductionBUnit(nn.Module):
     """
-    InceptionV4 type B-reduction unit.
+    InceptionV4 type Reduction-B unit.
     """
     def __init__(self):
-        super(ReductUnitB, self).__init__()
+        super(ReductionBUnit, self).__init__()
         in_channels = 1024
 
         self.branches = Concurrent()
@@ -482,12 +482,12 @@ class ReductUnitB(nn.Module):
         return x
 
 
-class InceptUnitC(nn.Module):
+class InceptionCUnit(nn.Module):
     """
-    InceptionV4 type C unit.
+    InceptionV4 type Inception-C unit.
     """
     def __init__(self):
-        super(InceptUnitC, self).__init__()
+        super(InceptionCUnit, self).__init__()
         in_channels = 1536
 
         self.branches = Concurrent()
@@ -587,37 +587,25 @@ class InceptionV4(nn.Module):
         self.features.add_module("init_block", InceptInitBlock(
             in_channels=in_channels))
 
-        stage1 = nn.Sequential()
-        stage1.add_module("unit1", InceptUnitA())
-        stage1.add_module("unit2", InceptUnitA())
-        stage1.add_module("unit3", InceptUnitA())
-        stage1.add_module("unit4", InceptUnitA())
-        self.features.add_module("stage1", stage1)
-
-        stage2 = nn.Sequential()
-        stage2.add_module("unit1", ReductUnitA())
-        stage2.add_module("unit2", InceptUnitB())
-        stage2.add_module("unit3", InceptUnitB())
-        stage2.add_module("unit4", InceptUnitB())
-        stage2.add_module("unit5", InceptUnitB())
-        stage2.add_module("unit6", InceptUnitB())
-        stage2.add_module("unit7", InceptUnitB())
-        stage2.add_module("unit8", InceptUnitB())
-        self.features.add_module("stage2", stage2)
-
-        stage3 = nn.Sequential()
-        stage3.add_module("unit1", ReductUnitB())
-        stage3.add_module("unit2", InceptUnitC())
-        stage3.add_module("unit3", InceptUnitC())
-        stage3.add_module("unit4", InceptUnitC())
-        self.features.add_module("stage3", stage3)
+        layers = [4, 8, 4]
+        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
+        reduction_units = [ReductionAUnit, ReductionBUnit]
+        for i, layers_per_stage in enumerate(layers):
+            stage = nn.Sequential()
+            for j in range(layers_per_stage):
+                if (j == 0) and (i != 0):
+                    unit = reduction_units[i - 1]
+                else:
+                    unit = normal_units[i]
+                stage.add_module("unit{}".format(j + 1), unit())
+            self.features.add_module("stage{}".format(i + 1), stage)
 
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=8,
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=0.5))
+        self.output.add_module('dropout', nn.Dropout(p=0.0))
         self.output.add_module('fc', nn.Linear(
             in_features=1536,
             out_features=num_classes))

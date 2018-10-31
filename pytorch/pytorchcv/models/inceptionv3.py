@@ -244,9 +244,9 @@ class ConvSeq3x3Branch(nn.Module):
         return x
 
 
-class InceptUnitA(nn.Module):
+class InceptionAUnit(nn.Module):
     """
-    InceptionV3 type A unit.
+    InceptionV3 type Inception-A unit.
 
     Parameters:
     ----------
@@ -258,7 +258,7 @@ class InceptUnitA(nn.Module):
     def __init__(self,
                  in_channels,
                  pool_out_channels):
-        super(InceptUnitA, self).__init__()
+        super(InceptionAUnit, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -284,9 +284,9 @@ class InceptUnitA(nn.Module):
         return x
 
 
-class InceptUnitB(nn.Module):
+class ReductionAUnit(nn.Module):
     """
-    InceptionV3 type B unit.
+    InceptionV3 type Reduction-A unit.
 
     Parameters:
     ----------
@@ -295,7 +295,7 @@ class InceptUnitB(nn.Module):
     """
     def __init__(self,
                  in_channels):
-        super(InceptUnitB, self).__init__()
+        super(ReductionAUnit, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
@@ -316,9 +316,9 @@ class InceptUnitB(nn.Module):
         return x
 
 
-class InceptUnitC(nn.Module):
+class InceptionBUnit(nn.Module):
     """
-    InceptionV3 type C unit.
+    InceptionV3 type Inception-B unit.
 
     Parameters:
     ----------
@@ -330,7 +330,7 @@ class InceptUnitC(nn.Module):
     def __init__(self,
                  in_channels,
                  mid_channels):
-        super(InceptUnitC, self).__init__()
+        super(InceptionBUnit, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -356,9 +356,9 @@ class InceptUnitC(nn.Module):
         return x
 
 
-class InceptUnitD(nn.Module):
+class ReductionBUnit(nn.Module):
     """
-    InceptionV3 type D unit.
+    InceptionV3 type Reduction-B unit.
 
     Parameters:
     ----------
@@ -367,7 +367,7 @@ class InceptUnitD(nn.Module):
     """
     def __init__(self,
                  in_channels):
-        super(InceptUnitD, self).__init__()
+        super(ReductionBUnit, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", ConvSeqBranch(
             in_channels=in_channels,
@@ -388,9 +388,9 @@ class InceptUnitD(nn.Module):
         return x
 
 
-class InceptUnitE(nn.Module):
+class InceptionCUnit(nn.Module):
     """
-    InceptionV3 type E unit.
+    InceptionV3 type Inception-C unit.
 
     Parameters:
     ----------
@@ -399,7 +399,7 @@ class InceptUnitE(nn.Module):
     """
     def __init__(self,
                  in_channels):
-        super(InceptUnitE, self).__init__()
+        super(InceptionCUnit, self).__init__()
         self.branches = Concurrent()
         self.branches.add_module("branch1", Conv1x1Branch(
             in_channels=in_channels,
@@ -514,40 +514,40 @@ class InceptionV3(nn.Module):
             in_channels=in_channels))
 
         stage1 = nn.Sequential()
-        stage1.add_module("unit1", InceptUnitA(
+        stage1.add_module("unit1", InceptionAUnit(
             in_channels=192,
             pool_out_channels=32))
-        stage1.add_module("unit2", InceptUnitA(
+        stage1.add_module("unit2", InceptionAUnit(
             in_channels=256,
             pool_out_channels=64))
-        stage1.add_module("unit3", InceptUnitA(
+        stage1.add_module("unit3", InceptionAUnit(
             in_channels=288,
             pool_out_channels=64))
         self.features.add_module("stage1", stage1)
 
         stage2 = nn.Sequential()
-        stage2.add_module("unit1", InceptUnitB(
+        stage2.add_module("unit1", ReductionAUnit(
             in_channels=288))
-        stage2.add_module("unit2", InceptUnitC(
+        stage2.add_module("unit2", InceptionBUnit(
             in_channels=768,
             mid_channels=128))
-        stage2.add_module("unit3", InceptUnitC(
+        stage2.add_module("unit3", InceptionBUnit(
             in_channels=768,
             mid_channels=160))
-        stage2.add_module("unit4", InceptUnitC(
+        stage2.add_module("unit4", InceptionBUnit(
             in_channels=768,
             mid_channels=160))
-        stage2.add_module("unit5", InceptUnitC(
+        stage2.add_module("unit5", InceptionBUnit(
             in_channels=768,
             mid_channels=192))
         self.features.add_module("stage2", stage2)
 
         stage3 = nn.Sequential()
-        stage3.add_module("unit1", InceptUnitD(
+        stage3.add_module("unit1", ReductionBUnit(
             in_channels=768))
-        stage3.add_module("unit2", InceptUnitE(
+        stage3.add_module("unit2", InceptionCUnit(
             in_channels=1280))
-        stage3.add_module("unit3", InceptUnitE(
+        stage3.add_module("unit3", InceptionCUnit(
             in_channels=2048))
         self.features.add_module("stage3", stage3)
 

@@ -15,6 +15,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 from .models.inceptionv3 import *
+from .models.inceptionv4 import *
 
 __all__ = ['get_model']
 
@@ -166,6 +167,7 @@ _models = {
     'nasnet_a_mobile': nasnet_a_mobile,
 
     'inceptionv3': inceptionv3,
+    'inceptionv4': inceptionv4,
 }
 
 

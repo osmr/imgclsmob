@@ -95,6 +95,7 @@ def parse_args():
 def test(net,
          val_data,
          use_cuda,
+         input_image_size,
          calc_weight_count=False,
          calc_flops=False,
          extended_log=False):
@@ -112,7 +113,7 @@ def test(net,
         weight_count = calc_net_weight_count(net)
         logging.info('Model: {} trainable parameters'.format(weight_count))
     if calc_flops:
-        n_flops, n_params = measure_model(net, 224, 224)
+        n_flops, n_params = measure_model(net, input_image_size, input_image_size)
         logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(
             n_params, n_params / 1e6, n_flops, n_flops / 1e6))
     if extended_log:
@@ -162,6 +163,7 @@ def main():
         val_data=val_data,
         use_cuda=use_cuda,
         # calc_weight_count=(not log_file_exist),
+        input_image_size=input_image_size,
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         extended_log=True)

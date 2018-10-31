@@ -301,65 +301,6 @@ class ConvSeq3x3Branch(nn.Module):
         return x
 
 
-class InceptUnit3a(nn.Module):
-    """
-    InceptionV4 type Mixed-3a unit.
-    """
-    def __init__(self):
-        super(InceptUnit3a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", MaxPoolBranch())
-        self.branches.add_module("branch2", Conv3x3Branch(
-            in_channels=64,
-            out_channels=96))
-
-    def forward(self, x):
-        x = self.branches(x)
-        return x
-
-
-class InceptUnit4a(nn.Module):
-    """
-    InceptionV4 type Mixed-4a unit.
-    """
-    def __init__(self):
-        super(InceptUnit4a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=160,
-            out_channels_list=(64, 96),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 1),
-            padding_list=(0, 0)))
-        self.branches.add_module("branch2", ConvSeqBranch(
-            in_channels=160,
-            out_channels_list=(64, 64, 64, 96),
-            kernel_size_list=(1, (1, 7), (7, 1), 3),
-            strides_list=(1, 1, 1, 1),
-            padding_list=(0, (0, 3), (3, 0), 0)))
-
-    def forward(self, x):
-        x = self.branches(x)
-        return x
-
-
-class InceptUnit5a(nn.Module):
-    """
-    InceptionV4 type Mixed-5a unit.
-    """
-    def __init__(self):
-        super(InceptUnit5a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", Conv3x3Branch(
-            in_channels=192,
-            out_channels=192))
-        self.branches.add_module("branch2", MaxPoolBranch())
-
-    def forward(self, x):
-        x = self.branches(x)
-        return x
-
-
 class InceptionAUnit(nn.Module):
     """
     InceptionV4 type Inception-A unit.
@@ -517,6 +458,65 @@ class InceptionCUnit(nn.Module):
         return x
 
 
+class InceptBlock3a(nn.Module):
+    """
+    InceptionV4 type Mixed-3a block.
+    """
+    def __init__(self):
+        super(InceptBlock3a, self).__init__()
+        self.branches = Concurrent()
+        self.branches.add_module("branch1", MaxPoolBranch())
+        self.branches.add_module("branch2", Conv3x3Branch(
+            in_channels=64,
+            out_channels=96))
+
+    def forward(self, x):
+        x = self.branches(x)
+        return x
+
+
+class InceptBlock4a(nn.Module):
+    """
+    InceptionV4 type Mixed-4a block.
+    """
+    def __init__(self):
+        super(InceptBlock4a, self).__init__()
+        self.branches = Concurrent()
+        self.branches.add_module("branch1", ConvSeqBranch(
+            in_channels=160,
+            out_channels_list=(64, 96),
+            kernel_size_list=(1, 3),
+            strides_list=(1, 1),
+            padding_list=(0, 0)))
+        self.branches.add_module("branch2", ConvSeqBranch(
+            in_channels=160,
+            out_channels_list=(64, 64, 64, 96),
+            kernel_size_list=(1, (1, 7), (7, 1), 3),
+            strides_list=(1, 1, 1, 1),
+            padding_list=(0, (0, 3), (3, 0), 0)))
+
+    def forward(self, x):
+        x = self.branches(x)
+        return x
+
+
+class InceptBlock5a(nn.Module):
+    """
+    InceptionV4 type Mixed-5a block.
+    """
+    def __init__(self):
+        super(InceptBlock5a, self).__init__()
+        self.branches = Concurrent()
+        self.branches.add_module("branch1", Conv3x3Branch(
+            in_channels=192,
+            out_channels=192))
+        self.branches.add_module("branch2", MaxPoolBranch())
+
+    def forward(self, x):
+        x = self.branches(x)
+        return x
+
+
 class InceptInitBlock(nn.Module):
     """
     InceptionV4 specific initial block.
@@ -547,17 +547,17 @@ class InceptInitBlock(nn.Module):
             kernel_size=3,
             stride=1,
             padding=1)
-        self.unit1 = InceptUnit3a()
-        self.unit2 = InceptUnit4a()
-        self.unit3 = InceptUnit5a()
+        self.block1 = InceptBlock3a()
+        self.block2 = InceptBlock4a()
+        self.block3 = InceptBlock5a()
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x = self.unit1(x)
-        x = self.unit2(x)
-        x = self.unit3(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
         return x
 
 
@@ -568,6 +568,8 @@ class InceptionV4(nn.Module):
 
     Parameters:
     ----------
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (299, 299)
@@ -576,6 +578,7 @@ class InceptionV4(nn.Module):
         Number of classification classes.
     """
     def __init__(self,
+                 dropout_rate=0.0,
                  in_channels=3,
                  in_size=(299, 299),
                  num_classes=1000):
@@ -605,7 +608,8 @@ class InceptionV4(nn.Module):
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=0.0))
+        if dropout_rate > 0.0:
+            self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
         self.output.add_module('fc', nn.Linear(
             in_features=1536,
             out_features=num_classes))

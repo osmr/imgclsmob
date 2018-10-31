@@ -157,6 +157,7 @@ with tf.Session() as sess:
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
 - NASNet-A-Mobile (['Learning Transferable Architectures for Scalable Image Recognition'](https://arxiv.org/abs/1707.07012))
 - InceptionV3 (['Rethinking the Inception Architecture for Computer Vision'](https://arxiv.org/abs/1512.00567))
+- InceptionV4 (['Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning'](https://arxiv.org/abs/1602.07261))
 
 ## Pretrained models
 
@@ -165,9 +166,10 @@ Some remarks:
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet1k dataset.
 - ResNet/PreResNet with b-suffix is a version of the networks with the stride in the second convolution of the
 bottleneck block. Respectively a network without b-suffix has the stride in the first convolution.
-- ResNet/PreResNet models do not use biasses in convolutions at all.
+- ResNet/PreResNet models do not use biases in convolutions at all.
 - CondenseNet models are only so-called converted versions.
-- All models have an input 224x224 with ordinary normalization.
+- ShuffleNetV2/ShuffleNetV2b/ShuffleNetV2c are different implementations of the same architecture.
+- All models require ordinary normalization.
 
 ### For Gluon
 
@@ -219,7 +221,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 40.97 | 18.96 | 1,248,424 | 828.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.19/squeezenet_v1_0-1896-b69a4607.params.log)) |
 | SqueezeNet v1.1 | 39.09 | 17.39 | 1,235,496 | 354.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-d7a1483a.params.log)) |
 | SqueezeResNet v1.1 | 39.83 | 17.84 | 1,235,496 | 354.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-26064b82.params.log)) |
-| ShuffleNetV2 x0.5 | 40.98 | 18.53 | 1,366,792 | 42.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1853-3f6182b6.params.log)) |
+| ShuffleNetV2 x0.5 | 40.61 | 18.30 | 1,366,792 | 42.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1830-156953de.params.log)) |
 | ShuffleNetV2 x1.0 | 33.97 | 13.41 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1341-275f1d2e.params.log)) |
 | ShuffleNetV2 x1.5 | 32.38 | 12.37 | 4,406,098 | 318.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1237-08c01388.params.log)) |
 | ShuffleNetV2 x2.0 | 32.04 | 12.10 | 7,601,686 | 593.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1210-544b55d9.params.log)) |
@@ -293,7 +295,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.31 | 19.32 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.19/squeezenet_v1_0-1932-e4017303.pth.log)) |
 | SqueezeNet v1.1 | 39.31 | 17.72 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1772-25b77bc3.pth.log)) |
 | SqueezeResNet v1.1 | 40.09 | 18.21 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1821-c27ed88f.pth.log)) |
-| ShuffleNetV2 x0.5 | 41.48 | 19.02 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1902-75dbfcc1.pth.log)) |
+| ShuffleNetV2 x0.5 | 40.99 | 18.65 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1865-9c22238b.pth.log)) |
 | ShuffleNetV2 x1.0 | 34.39 | 13.78 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1378-dc6a33c9.pth.log)) |
 | ShuffleNetV2 x1.5 | 32.82 | 12.69 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1269-536ad5b1.pth.log)) |
 | ShuffleNetV2 x2.0 | 32.45 | 12.49 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1249-b9f9e84c.pth.log)) |
@@ -367,7 +369,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.01 | 18.96 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.20/squeezenet_v1_0-1896-6cbb35ce.npz.log)) |
 | SqueezeNet v1.1 | 39.13 | 17.40 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1740-b236c204.npz.log)) |
 | SqueezeResNet v1.1 | 39.85 | 17.87 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1787-f40e6051.npz.log)) |
-| ShuffleNetV2 x0.5 | 43.80 | 20.87 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-2087-1b600e1d.npz.log)) |
+| ShuffleNetV2 x0.5 | 43.45 | 20.73 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-2073-c5e5a23c.npz.log)) |
 | ShuffleNetV2 x1.0 | 36.48 | 15.19 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1519-2156e7df.npz.log)) |
 | ShuffleNetV2 x1.5 | 33.96 | 13.37 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1337-66c1d6ed.npz.log)) |
 | ShuffleNetV2 x2.0 | 33.21 | 13.03 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1303-349e42b5.npz.log)) |
@@ -436,7 +438,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.07 | 19.04 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.57/squeezenet_v1_0-1904-c2c87509.h5.log)) |
 | SqueezeNet v1.1 | 39.08 | 17.39 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-b9a8f9ea.h5.log)) |
 | SqueezeResNet v1.1 | 39.82 | 17.84 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-43ee9cbb.h5.log)) |
-| ShuffleNetV2 x0.5 | 41.00 | 18.68 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.67/shufflenetv2_wd2-1868-d86e9c2e.h5.log)) |
+| ShuffleNetV2 x0.5 | 40.76 | 18.40 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1840-9b4b0964.h5.log)) |
 | ShuffleNetV2 x1.0 | 33.82 | 13.49 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.63/shufflenetv2_w1-1349-f42e0113.h5.log)) |
 | ShuffleNetV2 x1.5 | 32.46 | 12.47 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1247-f7f813b4.h5.log)) |
 | ShuffleNetV2 x2.0 | 31.91 | 12.23 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1223-63291468.h5.log)) |
@@ -504,7 +506,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.0 | 41.13 | 19.02 | 1,248,424 | 828.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.78/squeezenet_v1_0-1902-694730ac.tf.npz.log)) |
 | SqueezeNet v1.1 | 39.14 | 17.39 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-48945577.tf.npz.log)) |
 | SqueezeResNet v1.1 | 39.75 | 17.92 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.79/squeezeresnet_v1_1-1792-44c17928.tf.npz.log)) |
-| ShuffleNetV2 x0.5 | 41.08 | 18.71 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_wd2-1871-95086484.tf.npz.log)) |
+| ShuffleNetV2 x0.5 | 40.88 | 18.44 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1844-2bd8a314.tf.npz.log)) |
 | ShuffleNetV2 x1.0 | 33.80 | 13.48 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w1-1348-7fd0afe5.tf.npz.log)) |
 | ShuffleNetV2 x1.5 | 32.51 | 12.50 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w3d2-1250-5dd7b5b1.tf.npz.log)) |
 | ShuffleNetV2 x2.0 | 31.99 | 12.26 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w2-1226-f66f6987.tf.npz.log)) |

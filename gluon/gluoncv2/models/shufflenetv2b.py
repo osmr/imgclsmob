@@ -388,7 +388,7 @@ def shufflenetv2b_wd2(**kwargs):
     return get_shufflenetv2b(
         width_scale=(12.0 / 29.0),
         shuffle_group_first=True,
-        model_name="shufflenetv2_wd2",
+        model_name="shufflenetv2b_wd2",
         **kwargs)
 
 
@@ -409,7 +409,7 @@ def shufflenetv2b_w1(**kwargs):
     return get_shufflenetv2b(
         width_scale=1.0,
         shuffle_group_first=True,
-        model_name="shufflenetv2_w1",
+        model_name="shufflenetv2b_w1",
         **kwargs)
 
 
@@ -430,7 +430,7 @@ def shufflenetv2b_w3d2(**kwargs):
     return get_shufflenetv2b(
         width_scale=(44.0 / 29.0),
         shuffle_group_first=True,
-        model_name="shufflenetv2_w3d2",
+        model_name="shufflenetv2b_w3d2",
         **kwargs)
 
 
@@ -451,7 +451,7 @@ def shufflenetv2b_w2(**kwargs):
     return get_shufflenetv2b(
         width_scale=(61.0 / 29.0),
         shuffle_group_first=True,
-        model_name="shufflenetv2_w2",
+        model_name="shufflenetv2b_w2",
         **kwargs)
 
 
@@ -472,7 +472,7 @@ def shufflenetv2c_wd2(**kwargs):
     return get_shufflenetv2b(
         width_scale=(12.0 / 29.0),
         shuffle_group_first=False,
-        model_name="shufflenetv2_wd2",
+        model_name="shufflenetv2c_wd2",
         **kwargs)
 
 
@@ -493,7 +493,7 @@ def shufflenetv2c_w1(**kwargs):
     return get_shufflenetv2b(
         width_scale=1.0,
         shuffle_group_first=False,
-        model_name="shufflenetv2_w1",
+        model_name="shufflenetv2c_w1",
         **kwargs)
 
 
@@ -501,15 +501,15 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
-        shufflenetv2b_wd2,
-        shufflenetv2b_w1,
-        shufflenetv2b_w3d2,
-        shufflenetv2b_w2,
+        # shufflenetv2b_wd2,
+        # shufflenetv2b_w1,
+        # shufflenetv2b_w3d2,
+        # shufflenetv2b_w2,
         shufflenetv2c_wd2,
-        shufflenetv2c_w1,
+        # shufflenetv2c_w1,
     ]
 
     for model in models:

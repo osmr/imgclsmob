@@ -550,7 +550,7 @@ class InceptionV3(nn.Module):
                  num_classes=1000):
         super(InceptionV3, self).__init__()
         self.in_size = in_size
-        self.classes = num_classes
+        self.num_classes = num_classes
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(

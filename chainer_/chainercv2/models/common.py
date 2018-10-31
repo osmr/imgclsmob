@@ -2,7 +2,7 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'SimpleSequential', 'DualPathSequential']
+__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent']
 
 
 def conv1x1(in_channels,
@@ -185,3 +185,24 @@ class DualPathSequential(SimpleSequential):
             return x1, x2
         else:
             return x1
+
+
+class Concurrent(SimpleSequential):
+    """
+    A container for concatenation of modules on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self, axis=1):
+        super(Concurrent, self).__init__()
+        self.axis = axis
+
+    def __call__(self, x):
+        out = []
+        for name in self.layer_names:
+            out.append(self[name](x))
+        out = F.concat(tuple(out), axis=self.axis)
+        return out

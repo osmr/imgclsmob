@@ -284,8 +284,8 @@ def oth_xception(num_classes=1000, pretrained='imagenet'):
         model.std = settings['std']
 
     # TODO: ugly
-    model.last_linear = model.fc
-    del model.fc
+    # model.last_linear = model.fc
+    # del model.fc
     return model
 
 

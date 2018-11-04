@@ -58,8 +58,24 @@ class SeparableConv2d(nn.Module):
                  bias=False):
         super(SeparableConv2d,self).__init__()
 
-        self.conv1 = nn.Conv2d(in_channels,in_channels,kernel_size,stride,padding,dilation,groups=in_channels,bias=bias)
-        self.pointwise = nn.Conv2d(in_channels,out_channels,1,1,0,1,1,bias=bias)
+        self.conv1 = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=in_channels,
+            bias=bias)
+        self.pointwise = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            dilation=1,
+            groups=1,
+            bias=bias)
 
     def forward(self,x):
         x = self.conv1(x)
@@ -271,3 +287,35 @@ def oth_xception(num_classes=1000, pretrained='imagenet'):
     model.last_linear = model.fc
     del model.fc
     return model
+
+
+def _test():
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_xception,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        net.train()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_xception or weight_count == 22855952)
+
+        x = Variable(torch.randn(1, 3, 299, 299))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

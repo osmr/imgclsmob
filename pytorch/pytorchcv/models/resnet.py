@@ -28,12 +28,10 @@ class ResConv(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
     """
@@ -907,7 +905,7 @@ def _test():
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        # print("m={}, {}".format(model.__name__, weight_count))
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)

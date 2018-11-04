@@ -96,8 +96,6 @@ def preres_conv3x3(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     return PreResConv(
         in_channels=in_channels,

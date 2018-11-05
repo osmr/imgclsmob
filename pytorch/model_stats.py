@@ -40,7 +40,7 @@ def measure_layer(layer, x):
                     (out_h * out_w) / layer.groups * multi_add
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['ChannelShuffle']:  # NB: Fake!
+    elif type_name in ['ChannelShuffle', 'ChannelShuffle2']:  # NB: Fake!
         delta_ops = x.numel()
         delta_params = get_layer_param(layer)
 

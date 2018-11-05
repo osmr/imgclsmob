@@ -20,7 +20,7 @@ from .models.inceptionv4 import *
 from .models.xception import *
 
 # from .models.others.shufflenet_v2 import *
-# from .models.others.oth_inceptionv4 import *
+from .models.others.oth_inceptionv4 import *
 # from .models.others.oth_xception import *
 
 __all__ = ['get_model']
@@ -184,7 +184,7 @@ _models = {
 
     'xception': xception,
 
-    # 'oth_inceptionv4': oth_inceptionv4,
+    'oth_inceptionv4': oth_inceptionv4,
     # 'oth_xception': oth_xception,
 
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,

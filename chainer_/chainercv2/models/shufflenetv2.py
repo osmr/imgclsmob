@@ -47,7 +47,9 @@ class ShuffleConv(Chain):
                 stride=stride,
                 pad=pad,
                 nobias=True)
-            self.bn = L.BatchNormalization(size=out_channels)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5)
             self.activ = F.relu
 
     def __call__(self, x):
@@ -132,26 +134,36 @@ class ShuffleUnit(Chain):
             self.compress_conv1 = conv1x1(
                 in_channels=(in_channels if self.downsample else mid_channels),
                 out_channels=mid_channels)
-            self.compress_bn1 = L.BatchNormalization(size=mid_channels)
+            self.compress_bn1 = L.BatchNormalization(
+                size=mid_channels,
+                eps=1e-5)
             self.dw_conv2 = depthwise_conv3x3(
                 channels=mid_channels,
                 stride=(2 if self.downsample else 1))
-            self.dw_bn2 = L.BatchNormalization(size=mid_channels)
+            self.dw_bn2 = L.BatchNormalization(
+                size=mid_channels,
+                eps=1e-5)
             self.expand_conv3 = conv1x1(
                 in_channels=mid_channels,
                 out_channels=mid_channels)
-            self.expand_bn3 = L.BatchNormalization(size=mid_channels)
+            self.expand_bn3 = L.BatchNormalization(
+                size=mid_channels,
+                eps=1e-5)
             if self.use_se:
                 self.se = SEBlock(channels=mid_channels)
             if downsample:
                 self.dw_conv4 = depthwise_conv3x3(
                     channels=in_channels,
                     stride=2)
-                self.dw_bn4 = L.BatchNormalization(size=in_channels)
+                self.dw_bn4 = L.BatchNormalization(
+                    size=in_channels,
+                    eps=1e-5)
                 self.expand_conv5 = conv1x1(
                     in_channels=in_channels,
                     out_channels=mid_channels)
-                self.expand_bn5 = L.BatchNormalization(size=mid_channels)
+                self.expand_bn5 = L.BatchNormalization(
+                    size=mid_channels,
+                    eps=1e-5)
 
             self.activ = F.relu
             self.c_shuffle = ChannelShuffle(

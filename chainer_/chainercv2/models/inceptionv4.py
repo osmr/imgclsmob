@@ -725,7 +725,7 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != InceptionV4 or weight_count == 42679816)
+        assert (model != inceptionv4 or weight_count == 42679816)
 
         x = np.zeros((1, 3, 299, 299), np.float32)
         y = net(x)

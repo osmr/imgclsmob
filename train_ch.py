@@ -12,7 +12,8 @@ from chainer import cuda
 # from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.utils import get_data_iterators, prepare_model
+from chainer_.utils_cv import get_data_iterators
+from chainer_.utils import prepare_model
 
 
 def parse_args():

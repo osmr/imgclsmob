@@ -13,7 +13,8 @@ from chainercv.utils import ProgressHook
 from common.logger_utils import initialize_logging
 from chainer_.imagenet_predictor import ImagenetPredictor
 from chainer_.top_k_accuracy import top_k_accuracy
-from chainer_.utils import get_val_data_iterator, prepare_model
+from chainer_.utils_cv import get_val_data_iterator
+from chainer_.utils import prepare_model
 
 
 def parse_args():

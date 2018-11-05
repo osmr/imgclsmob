@@ -2,7 +2,7 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'SEBlock', 'DualPathSequential', 'Concurrent']
+__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'Concurrent']
 
 import torch
 import torch.nn as nn
@@ -83,6 +83,58 @@ class ChannelShuffle(nn.Module):
 
     def forward(self, x):
         return channel_shuffle(x, self.groups)
+
+
+def channel_shuffle2(x,
+                     groups):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083. The alternative version.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    groups : int
+        Number of groups.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    batch, channels, height, width = x.size()
+    # assert (channels % groups == 0)
+    channels_per_group = channels // groups
+    x = x.view(batch, channels_per_group, groups, height, width)
+    x = torch.transpose(x, 1, 2).contiguous()
+    x = x.view(batch, channels, height, width)
+    return x
+
+
+class ChannelShuffle2(nn.Module):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
+    The alternative version.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 channels,
+                 groups):
+        super(ChannelShuffle2, self).__init__()
+        # assert (channels % groups == 0)
+        if channels % groups != 0:
+            raise ValueError('channels must be divisible by groups')
+        self.groups = groups
+
+    def forward(self, x):
+        return channel_shuffle2(x, self.groups)
 
 
 class SEBlock(nn.Module):

@@ -10,6 +10,7 @@ from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
 from .models.shufflenetv2 import *
+from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
@@ -144,6 +145,13 @@ _models = {
     'shufflenetv2_w1': shufflenetv2_w1,
     'shufflenetv2_w3d2': shufflenetv2_w3d2,
     'shufflenetv2_w2': shufflenetv2_w2,
+
+    'shufflenetv2b_wd2': shufflenetv2b_wd2,
+    'shufflenetv2b_w1': shufflenetv2b_w1,
+    'shufflenetv2b_w3d2': shufflenetv2b_w3d2,
+    'shufflenetv2b_w2': shufflenetv2b_w2,
+    'shufflenetv2c_wd2': shufflenetv2c_wd2,
+    'shufflenetv2c_w1': shufflenetv2c_w1,
 
     'menet108_8x1_g3': menet108_8x1_g3,
     'menet128_8x1_g4': menet128_8x1_g4,

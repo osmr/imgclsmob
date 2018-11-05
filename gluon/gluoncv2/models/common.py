@@ -81,8 +81,7 @@ def channel_shuffle2(x,
                      channels_per_group):
     """
     Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
-    https://arxiv.org/abs/1707.01083.
-    The alternative version.
+    https://arxiv.org/abs/1707.01083. The alternative version.
 
     Parameters:
     ----------

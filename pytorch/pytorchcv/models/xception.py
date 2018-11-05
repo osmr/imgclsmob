@@ -293,7 +293,7 @@ class XceptionUnit(nn.Module):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
-            identity = x
+            identity = x.clone()
         x = self.body(x)
         x = x + identity
         return x

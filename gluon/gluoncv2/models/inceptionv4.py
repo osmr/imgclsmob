@@ -844,7 +844,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != InceptionV4 or weight_count == 42679816)
+        assert (model != inceptionv4 or weight_count == 42679816)
 
         x = mx.nd.zeros((1, 3, 299, 299), ctx=ctx)
         y = net(x)

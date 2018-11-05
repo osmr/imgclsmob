@@ -19,7 +19,7 @@ from .models.inceptionv3 import *
 from .models.inceptionv4 import *
 from .models.xception import *
 
-from .models.others.oth_inceptionv3 import *
+# from .models.others.oth_inceptionv3 import *
 
 __all__ = ['get_model']
 
@@ -182,7 +182,7 @@ _models = {
 
     'xception': xception,
 
-    'oth_inceptionv3': oth_inception_v3,
+    # 'oth_inceptionv3': oth_inception_v3,
 }
 
 

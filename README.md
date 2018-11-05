@@ -223,7 +223,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeResNet v1.1 | 39.83 | 17.84 | 1,235,496 | 354.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-26064b82.params.log)) |
 | ShuffleNetV2 x0.5 | 40.61 | 18.30 | 1,366,792 | 42.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1830-156953de.params.log)) |
 | ShuffleNetV2c x0.5 | 39.87 | 18.11 | 1,366,792 | 42.34M | From [tensorpack/tensorpack] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.91/shufflenetv2c_wd2-1811-979ce7d9.params.log)) |
-| ShuffleNetV2 x1.0 | 33.97 | 13.41 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1341-275f1d2e.params.log)) |
+| ShuffleNetV2 x1.0 | 33.76 | 13.22 | 2,278,604 | 147.92M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.93/shufflenetv2_w1-1322-04b52239.params.log)) |
 | ShuffleNetV2 x1.5 | 32.38 | 12.37 | 4,406,098 | 318.61M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1237-08c01388.params.log)) |
 | ShuffleNetV2 x2.0 | 32.04 | 12.10 | 7,601,686 | 593.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1210-544b55d9.params.log)) |
 | 108-MENet-8x1 (g=3) | 43.62 | 20.30 | 654,516 | 40.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2030-aa07f925.params.log)) |
@@ -298,7 +298,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.1 | 39.31 | 17.72 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1772-25b77bc3.pth.log)) |
 | SqueezeResNet v1.1 | 40.09 | 18.21 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1821-c27ed88f.pth.log)) |
 | ShuffleNetV2 x0.5 | 40.99 | 18.65 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1865-9c22238b.pth.log)) |
-| ShuffleNetV2 x1.0 | 34.39 | 13.78 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1378-dc6a33c9.pth.log)) |
+| ShuffleNetV2 x1.0 | 34.26 | 13.54 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.93/shufflenetv2_w1-1354-73e7c9fd.pth.log)) |
 | ShuffleNetV2 x1.5 | 32.82 | 12.69 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1269-536ad5b1.pth.log)) |
 | ShuffleNetV2 x2.0 | 32.45 | 12.49 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1249-b9f9e84c.pth.log)) |
 | 108-MENet-8x1 (g=3) | 43.94 | 20.76 | 654,516 | 40.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2076-6acc82e4.pth.log)) |
@@ -373,7 +373,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.1 | 39.13 | 17.40 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1740-b236c204.npz.log)) |
 | SqueezeResNet v1.1 | 39.85 | 17.87 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1787-f40e6051.npz.log)) |
 | ShuffleNetV2 x0.5 | 43.45 | 20.73 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-2073-c5e5a23c.npz.log)) |
-| ShuffleNetV2 x1.0 | 36.48 | 15.19 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.48/shufflenetv2_w1-1519-2156e7df.npz.log)) |
+| ShuffleNetV2 x1.0 | 35.69 | 14.71 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.93/shufflenetv2_w1-1471-5698695f.npz.log)) |
 | ShuffleNetV2 x1.5 | 33.96 | 13.37 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1337-66c1d6ed.npz.log)) |
 | ShuffleNetV2 x2.0 | 33.21 | 13.03 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1303-349e42b5.npz.log)) |
 | 108-MENet-8x1 (g=3) | 43.67 | 20.42 | 654,516 | 40.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2042-9e3ff283.npz.log)) |
@@ -443,7 +443,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeNet v1.1 | 39.08 | 17.39 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-b9a8f9ea.h5.log)) |
 | SqueezeResNet v1.1 | 39.82 | 17.84 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-43ee9cbb.h5.log)) |
 | ShuffleNetV2 x0.5 | 40.76 | 18.40 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1840-9b4b0964.h5.log)) |
-| ShuffleNetV2 x1.0 | 33.82 | 13.49 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.63/shufflenetv2_w1-1349-f42e0113.h5.log)) |
+| ShuffleNetV2 x1.0 | 33.79 | 13.38 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.93/shufflenetv2_w1-1338-cb35f09e.h5.log)) |
 | ShuffleNetV2 x1.5 | 32.46 | 12.47 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1247-f7f813b4.h5.log)) |
 | ShuffleNetV2 x2.0 | 31.91 | 12.23 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1223-63291468.h5.log)) |
 | 108-MENet-8x1 (g=3) | 43.61 | 20.31 | 654,516 | 40.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2031-a4d43433.h5.log)) |
@@ -512,7 +512,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SqueezeResNet v1.1 | 39.75 | 17.92 | 1,235,496 | 354.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.79/squeezeresnet_v1_1-1792-44c17928.tf.npz.log)) |
 | ShuffleNetV2 x0.5 | 40.88 | 18.44 | 1,366,792 | 42.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1844-2bd8a314.tf.npz.log)) |
 | ShuffleNetV2c x0.5 | 39.93 | 18.11 | 1,366,792 | 42.34M | From [tensorpack/tensorpack] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.91/shufflenetv2c_wd2-1811-98435af9.tf.npz.log)) |
-| ShuffleNetV2 x1.0 | 33.80 | 13.48 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w1-1348-7fd0afe5.tf.npz.log)) |
+| ShuffleNetV2 x1.0 | 33.81 | 13.40 | 2,278,604 | 147.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.93/shufflenetv2_w1-1340-b5b2d8c6.tf.npz.log)) |
 | ShuffleNetV2 x1.5 | 32.51 | 12.50 | 4,406,098 | 318.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w3d2-1250-5dd7b5b1.tf.npz.log)) |
 | ShuffleNetV2 x2.0 | 31.99 | 12.26 | 7,601,686 | 593.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.85/shufflenetv2_w2-1226-f66f6987.tf.npz.log)) |
 | 108-MENet-8x1 (g=3) | 43.67 | 20.32 | 654,516 | 40.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2032-4e9e89e1.tf.npz.log)) |

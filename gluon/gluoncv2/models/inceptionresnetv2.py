@@ -648,7 +648,7 @@ class InceptionResNetV2(HybridBlock):
         return x
 
 
-def get_InceptionResNetV2(model_name=None,
+def get_inceptionresnetv2(model_name=None,
                     pretrained=False,
                     ctx=cpu(),
                     root=os.path.join('~', '.mxnet', 'models'),
@@ -697,7 +697,7 @@ def inceptionresnetv2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_InceptionResNetV2(model_name="inceptionresnetv2", **kwargs)
+    return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
 
 
 def _test():

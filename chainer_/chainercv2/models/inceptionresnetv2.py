@@ -1,10 +1,10 @@
 """
-    InceptionV4, implemented in Chainer.
+    InceptionResNetV2, implemented in Chainer.
     Original paper: 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 """
 
-__all__ = ['InceptionV4', 'inceptionv4']
+__all__ = ['InceptionResNetV2', 'inceptionresnetv2']
 
 import os
 import chainer.functions as F
@@ -12,12 +12,12 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, Concurrent
+from .common import conv1x1, SimpleSequential, Concurrent
 
 
 class InceptConv(Chain):
     """
-    InceptionV4 specific convolution block.
+    InceptionResNetV2 specific convolution block.
 
     Parameters:
     ----------
@@ -63,7 +63,7 @@ class InceptConv(Chain):
 def incept_conv1x1(in_channels,
                    out_channels):
     """
-    1x1 version of the InceptionV4 specific convolution block.
+    1x1 version of the InceptionResNetV2 specific convolution block.
 
     Parameters:
     ----------
@@ -80,35 +80,9 @@ def incept_conv1x1(in_channels,
         pad=0)
 
 
-def incept_conv3x3(in_channels,
-                   out_channels,
-                   stride,
-                   padding=1):
-    """
-    3x3 version of the InceptionV4 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    """
-    return InceptConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=padding)
-
-
 class MaxPoolBranch(Chain):
     """
-    InceptionV4 specific max pooling branch block.
+    InceptionResNetV2 specific max pooling branch block.
     """
     def __init__(self):
         super(MaxPoolBranch, self).__init__()
@@ -127,7 +101,7 @@ class MaxPoolBranch(Chain):
 
 class AvgPoolBranch(Chain):
     """
-    InceptionV4 specific average pooling branch block.
+    InceptionResNetV2 specific average pooling branch block.
 
     Parameters:
     ----------
@@ -159,7 +133,7 @@ class AvgPoolBranch(Chain):
 
 class Conv1x1Branch(Chain):
     """
-    InceptionV4 specific convolutional 1x1 branch block.
+    InceptionResNetV2 specific convolutional 1x1 branch block.
 
     Parameters:
     ----------
@@ -182,36 +156,9 @@ class Conv1x1Branch(Chain):
         return x
 
 
-class Conv3x3Branch(Chain):
-    """
-    InceptionV4 specific convolutional 3x3 branch block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(Conv3x3Branch, self).__init__()
-        with self.init_scope():
-            self.conv = incept_conv3x3(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=2,
-                padding=0)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        return x
-
-
 class ConvSeqBranch(Chain):
     """
-    InceptionV4 specific convolutional sequence branch block.
+    InceptionResNetV2 specific convolutional sequence branch block.
 
     Parameters:
     ----------
@@ -255,108 +202,55 @@ class ConvSeqBranch(Chain):
         return x
 
 
-class ConvSeq3x3Branch(Chain):
-    """
-    InceptionV4 specific convolutional sequence branch block with splitting by 3x3.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    mid_channels_list : tuple of int
-        Number of output channels for middle layers.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 mid_channels_list,
-                 kernel_size_list,
-                 strides_list,
-                 padding_list):
-        super(ConvSeq3x3Branch, self).__init__()
-        with self.init_scope():
-            self.conv_list = SimpleSequential()
-            with self.conv_list.init_scope():
-                for i, (mid_channels, kernel_size, strides, padding) in enumerate(zip(
-                        mid_channels_list, kernel_size_list, strides_list, padding_list)):
-                    setattr(self.conv_list, "conv{}".format(i + 1), InceptConv(
-                        in_channels=in_channels,
-                        out_channels=mid_channels,
-                        ksize=kernel_size,
-                        stride=strides,
-                        pad=padding))
-                    in_channels = mid_channels
-                self.conv1x3 = InceptConv(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    ksize=(1, 3),
-                    stride=1,
-                    pad=(0, 1))
-                self.conv3x1 = InceptConv(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    ksize=(3, 1),
-                    stride=1,
-                    pad=(1, 0))
-
-    def __call__(self, x):
-        x = self.conv_list(x)
-        y1 = self.conv1x3(x)
-        y2 = self.conv3x1(x)
-        x = F.concat((y1, y2), axis=1)
-        return x
-
-
 class InceptionAUnit(Chain):
     """
-    InceptionV4 type Inception-A unit.
+    InceptionResNetV2 type Inception-A unit.
     """
     def __init__(self):
         super(InceptionAUnit, self).__init__()
-        in_channels = 384
+        self.scale = 0.17
+        in_channels = 320
 
         with self.init_scope():
             self.branches = Concurrent()
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=96))
+                    out_channels=32))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(64, 96),
+                    out_channels_list=(32, 32),
                     kernel_size_list=(1, 3),
                     strides_list=(1, 1),
                     padding_list=(0, 1)))
                 setattr(self.branches, "branch3", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(64, 96, 96),
+                    out_channels_list=(32, 48, 64),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 1),
                     padding_list=(0, 1, 1)))
-                setattr(self.branches, "branch4", AvgPoolBranch(
-                    in_channels=in_channels,
-                    out_channels=96))
+            self.conv = conv1x1(
+                in_channels=128,
+                out_channels=in_channels,
+                use_bias=True)
+            self.activ = F.relu
 
     def __call__(self, x):
+        identity = x
         x = self.branches(x)
+        x = self.conv(x)
+        x = self.scale * x + identity
+        x = self.activ(x)
         return x
 
 
 class ReductionAUnit(Chain):
     """
-    InceptionV4 type Reduction-A unit.
+    InceptionResNetV2 type Reduction-A unit.
     """
     def __init__(self):
         super(ReductionAUnit, self).__init__()
-        in_channels = 384
+        in_channels = 320
 
         with self.init_scope():
             self.branches = Concurrent()
@@ -369,7 +263,7 @@ class ReductionAUnit(Chain):
                     padding_list=(0,)))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(192, 224, 256),
+                    out_channels_list=(256, 256, 384),
                     kernel_size_list=(1, 3, 3),
                     strides_list=(1, 1, 2),
                     padding_list=(0, 1, 0)))
@@ -382,63 +276,70 @@ class ReductionAUnit(Chain):
 
 class InceptionBUnit(Chain):
     """
-    InceptionV4 type Inception-B unit.
+    InceptionResNetV2 type Inception-B unit.
     """
     def __init__(self):
         super(InceptionBUnit, self).__init__()
-        in_channels = 1024
+        self.scale = 0.10
+        in_channels = 1088
 
         with self.init_scope():
             self.branches = Concurrent()
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=384))
+                    out_channels=192))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(192, 224, 256),
+                    out_channels_list=(128, 160, 192),
                     kernel_size_list=(1, (1, 7), (7, 1)),
                     strides_list=(1, 1, 1),
                     padding_list=(0, (0, 3), (3, 0))))
-                setattr(self.branches, "branch3", ConvSeqBranch(
-                    in_channels=in_channels,
-                    out_channels_list=(192, 192, 224, 224, 256),
-                    kernel_size_list=(1, (7, 1), (1, 7), (7, 1), (1, 7)),
-                    strides_list=(1, 1, 1, 1, 1),
-                    padding_list=(0, (3, 0), (0, 3), (3, 0), (0, 3))))
-                setattr(self.branches, "branch4", AvgPoolBranch(
-                    in_channels=in_channels,
-                    out_channels=128))
+            self.conv = conv1x1(
+                in_channels=384,
+                out_channels=in_channels,
+                use_bias=True)
+            self.activ = F.relu
 
     def __call__(self, x):
+        identity = x
         x = self.branches(x)
+        x = self.conv(x)
+        x = self.scale * x + identity
+        x = self.activ(x)
         return x
 
 
 class ReductionBUnit(Chain):
     """
-    InceptionV4 type Reduction-B unit.
+    InceptionResNetV2 type Reduction-B unit.
     """
     def __init__(self):
         super(ReductionBUnit, self).__init__()
-        in_channels = 1024
+        in_channels = 1088
 
         with self.init_scope():
             self.branches = Concurrent()
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(192, 192),
+                    out_channels_list=(256, 384),
                     kernel_size_list=(1, 3),
                     strides_list=(1, 2),
                     padding_list=(0, 0)))
                 setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels_list=(256, 256, 320, 320),
-                    kernel_size_list=(1, (1, 7), (7, 1), 3),
-                    strides_list=(1, 1, 1, 2),
-                    padding_list=(0, (0, 3), (3, 0), 0)))
-                setattr(self.branches, "branch3", MaxPoolBranch())
+                    out_channels_list=(256, 288),
+                    kernel_size_list=(1, 3),
+                    strides_list=(1, 2),
+                    padding_list=(0, 0)))
+                setattr(self.branches, "branch3", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(256, 288, 320),
+                    kernel_size_list=(1, 3, 3),
+                    strides_list=(1, 1, 2),
+                    padding_list=(0, 1, 0)))
+                setattr(self.branches, "branch4", MaxPoolBranch())
 
     def __call__(self, x):
         x = self.branches(x)
@@ -447,100 +348,81 @@ class ReductionBUnit(Chain):
 
 class InceptionCUnit(Chain):
     """
-    InceptionV4 type Inception-C unit.
+    InceptionResNetV2 type Inception-C unit.
+
+    Parameters:
+    ----------
+    scale : float, default 1.0
+        Scale value for residual branch.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
-    def __init__(self):
+    def __init__(self,
+                 scale=0.2,
+                 activate=True):
         super(InceptionCUnit, self).__init__()
-        in_channels = 1536
+        self.activate = activate
+        self.scale = scale
+        in_channels = 2080
 
         with self.init_scope():
             self.branches = Concurrent()
             with self.branches.init_scope():
                 setattr(self.branches, "branch1", Conv1x1Branch(
                     in_channels=in_channels,
-                    out_channels=256))
-                setattr(self.branches, "branch2", ConvSeq3x3Branch(
+                    out_channels=192))
+                setattr(self.branches, "branch2", ConvSeqBranch(
                     in_channels=in_channels,
-                    out_channels=256,
-                    mid_channels_list=(384,),
-                    kernel_size_list=(1,),
-                    strides_list=(1,),
-                    padding_list=(0,)))
-                setattr(self.branches, "branch3", ConvSeq3x3Branch(
-                    in_channels=in_channels,
-                    out_channels=256,
-                    mid_channels_list=(384, 448, 512),
-                    kernel_size_list=(1, (3, 1), (1, 3)),
+                    out_channels_list=(192, 224, 256),
+                    kernel_size_list=(1, (1, 3), (3, 1)),
                     strides_list=(1, 1, 1),
-                    padding_list=(0, (1, 0), (0, 1))))
+                    padding_list=(0, (0, 1), (1, 0))))
+            self.conv = conv1x1(
+                in_channels=448,
+                out_channels=in_channels,
+                use_bias=True)
+            if self.activate:
+                self.activ = F.relu
+
+    def __call__(self, x):
+        identity = x
+        x = self.branches(x)
+        x = self.conv(x)
+        x = self.scale * x + identity
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+class InceptBlock5b(Chain):
+    """
+    InceptionResNetV2 type Mixed-5b block.
+    """
+    def __init__(self):
+        super(InceptBlock5b, self).__init__()
+        in_channels = 192
+
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", Conv1x1Branch(
+                    in_channels=in_channels,
+                    out_channels=96))
+                setattr(self.branches, "branch2", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(48, 64),
+                    kernel_size_list=(1, 5),
+                    strides_list=(1, 1),
+                    padding_list=(0, 2)))
+                setattr(self.branches, "branch3", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(64, 96, 96),
+                    kernel_size_list=(1, 3, 3),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, 1, 1)))
                 setattr(self.branches, "branch4", AvgPoolBranch(
                     in_channels=in_channels,
-                    out_channels=256))
-
-    def __call__(self, x):
-        x = self.branches(x)
-        return x
-
-
-class InceptBlock3a(Chain):
-    """
-    InceptionV4 type Mixed-3a block.
-    """
-    def __init__(self):
-        super(InceptBlock3a, self).__init__()
-        with self.init_scope():
-            self.branches = Concurrent()
-            with self.branches.init_scope():
-                setattr(self.branches, "branch1", MaxPoolBranch())
-                setattr(self.branches, "branch2", Conv3x3Branch(
-                    in_channels=64,
-                    out_channels=96))
-
-    def __call__(self, x):
-        x = self.branches(x)
-        return x
-
-
-class InceptBlock4a(Chain):
-    """
-    InceptionV4 type Mixed-4a block.
-    """
-    def __init__(self):
-        super(InceptBlock4a, self).__init__()
-        with self.init_scope():
-            self.branches = Concurrent()
-            with self.branches.init_scope():
-                setattr(self.branches, "branch1", ConvSeqBranch(
-                    in_channels=160,
-                    out_channels_list=(64, 96),
-                    kernel_size_list=(1, 3),
-                    strides_list=(1, 1),
-                    padding_list=(0, 0)))
-                setattr(self.branches, "branch2", ConvSeqBranch(
-                    in_channels=160,
-                    out_channels_list=(64, 64, 64, 96),
-                    kernel_size_list=(1, (1, 7), (7, 1), 3),
-                    strides_list=(1, 1, 1, 1),
-                    padding_list=(0, (0, 3), (3, 0), 0)))
-
-    def __call__(self, x):
-        x = self.branches(x)
-        return x
-
-
-class InceptBlock5a(Chain):
-    """
-    InceptionV4 type Mixed-5a block.
-    """
-    def __init__(self):
-        super(InceptBlock5a, self).__init__()
-        with self.init_scope():
-            self.branches = Concurrent()
-            with self.branches.init_scope():
-                setattr(self.branches, "branch1", Conv3x3Branch(
-                    in_channels=192,
-                    out_channels=192))
-                setattr(self.branches, "branch2", MaxPoolBranch())
+                    out_channels=64))
 
     def __call__(self, x):
         x = self.branches(x)
@@ -549,7 +431,7 @@ class InceptBlock5a(Chain):
 
 class InceptInitBlock(Chain):
     """
-    InceptionV4 specific initial block.
+    InceptionResNetV2 specific initial block.
 
     Parameters:
     ----------
@@ -578,23 +460,47 @@ class InceptInitBlock(Chain):
                 ksize=3,
                 stride=1,
                 pad=1)
-            self.block1 = InceptBlock3a()
-            self.block2 = InceptBlock4a()
-            self.block3 = InceptBlock5a()
+            self.pool1 = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=0,
+                cover_all=False)
+            self.conv4 = InceptConv(
+                in_channels=64,
+                out_channels=80,
+                ksize=1,
+                stride=1,
+                pad=0)
+            self.conv5 = InceptConv(
+                in_channels=80,
+                out_channels=192,
+                ksize=3,
+                stride=1,
+                pad=0)
+            self.pool2 = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=0,
+                cover_all=False)
+            self.block = InceptBlock5b()
 
     def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x)
+        x = self.pool1(x)
+        x = self.conv4(x)
+        x = self.conv5(x)
+        x = self.pool2(x)
+        x = self.block(x)
         return x
 
 
-class InceptionV4(Chain):
+class InceptionResNetV2(Chain):
     """
-    InceptionV4 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
+    InceptionResNetV2 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
     Parameters:
@@ -613,7 +519,7 @@ class InceptionV4(Chain):
                  in_channels=3,
                  in_size=(299, 299),
                  classes=1000):
-        super(InceptionV4, self).__init__()
+        super(InceptionResNetV2, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -623,7 +529,7 @@ class InceptionV4(Chain):
                 setattr(self.features, "init_block", InceptInitBlock(
                     in_channels=in_channels))
 
-                layers = [4, 8, 4]
+                layers = [10, 21, 11]
                 normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
                 reduction_units = [ReductionAUnit, ReductionBUnit]
                 for i, layers_per_stage in enumerate(layers):
@@ -634,9 +540,15 @@ class InceptionV4(Chain):
                                 unit = reduction_units[i - 1]
                             else:
                                 unit = normal_units[i]
-                            setattr(stage, "unit{}".format(j + 1), unit())
+                            if (i == len(layers) - 1) and (j == layers_per_stage - 1):
+                                setattr(stage, "unit{}".format(j + 1), unit(scale=1.0, activate=False))
+                            else:
+                                setattr(stage, "unit{}".format(j + 1), unit())
                     setattr(self.features, "stage{}".format(i + 1), stage)
 
+                setattr(self.features, 'final_conv', incept_conv1x1(
+                    in_channels=2080,
+                    out_channels=1536))
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,
                     ksize=8,
@@ -662,12 +574,12 @@ class InceptionV4(Chain):
         return x
 
 
-def get_inceptionv4(model_name=None,
-                    pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
-                    **kwargs):
+def get_inceptionresnetv2(model_name=None,
+                          pretrained=False,
+                          root=os.path.join('~', '.chainer', 'models'),
+                          **kwargs):
     """
-    Create InceptionV4 model with specific parameters.
+    Create InceptionResNetV2 model with specific parameters.
 
     Parameters:
     ----------
@@ -679,7 +591,7 @@ def get_inceptionv4(model_name=None,
         Location for keeping the model parameters.
     """
 
-    net = InceptionV4(**kwargs)
+    net = InceptionResNetV2(**kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
@@ -694,9 +606,9 @@ def get_inceptionv4(model_name=None,
     return net
 
 
-def inceptionv4(**kwargs):
+def inceptionresnetv2(**kwargs):
     """
-    InceptionV4 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
+    InceptionResNetV2 model from 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 
     Parameters:
@@ -706,7 +618,7 @@ def inceptionv4(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_inceptionv4(model_name="inceptionv4", **kwargs)
+    return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
 
 
 def _test():
@@ -718,7 +630,7 @@ def _test():
     pretrained = False
 
     models = [
-        inceptionv4,
+        inceptionresnetv2,
     ]
 
     for model in models:
@@ -726,7 +638,7 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != inceptionv4 or weight_count == 42679816)
+        assert (model != inceptionresnetv2 or weight_count == 55843464)
 
         x = np.zeros((1, 3, 299, 299), np.float32)
         y = net(x)

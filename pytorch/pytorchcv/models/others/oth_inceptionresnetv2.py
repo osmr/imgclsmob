@@ -330,6 +330,7 @@ class InceptionResNetV2(nn.Module):
         x = self.logits(x)
         return x
 
+
 def oth_inceptionresnetv2(num_classes=1000, pretrained='imagenet'):
     r"""InceptionResNetV2 model architecture from the
     `"InceptionV4, Inception-ResNet..." <https://arxiv.org/abs/1602.07261>`_ paper.
@@ -359,22 +360,81 @@ def oth_inceptionresnetv2(num_classes=1000, pretrained='imagenet'):
         model = InceptionResNetV2(num_classes=num_classes)
     return model
 
-'''
-TEST
-Run this code with:
-```
-cd $HOME/pretrained-models.pytorch
-python -m pretrainedmodels.inceptionresnetv2
-```
-'''
-if __name__ == '__main__':
+# '''
+# TEST
+# Run this code with:
+# ```
+# cd $HOME/pretrained-models.pytorch
+# python -m pretrainedmodels.inceptionresnetv2
+# ```
+# '''
+# if __name__ == '__main__':
+#
+#     assert oth_inceptionresnetv2(num_classes=10, pretrained=None)
+#     print('success')
+#     assert oth_inceptionresnetv2(num_classes=1000, pretrained='imagenet')
+#     print('success')
+#     assert oth_inceptionresnetv2(num_classes=1001, pretrained='imagenet+background')
+#     print('success')
+#
+#     # fail
+#     assert oth_inceptionresnetv2(num_classes=1001, pretrained='imagenet')
 
-    assert oth_inceptionresnetv2(num_classes=10, pretrained=None)
-    print('success')
-    assert oth_inceptionresnetv2(num_classes=1000, pretrained='imagenet')
-    print('success')
-    assert oth_inceptionresnetv2(num_classes=1001, pretrained='imagenet+background')
-    print('success')
 
-    # fail
-    assert oth_inceptionresnetv2(num_classes=1001, pretrained='imagenet')
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
+
+
+def _test():
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_inceptionresnetv2,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        weight_count = 0
+        for param in net_params:
+            weight_count += np.prod(param.size())
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_inceptionresnetv2 or weight_count == 55843464)
+
+        x = Variable(torch.randn(1, 3, 299, 299))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

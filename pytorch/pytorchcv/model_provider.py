@@ -16,12 +16,14 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 from .models.inceptionv3 import *
+from .models.inceptionresnetv2 import *
 from .models.inceptionv4 import *
 from .models.xception import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
 # from .models.others.oth_xception import *
+from .models.others.oth_inceptionresnetv2 import *
 
 __all__ = ['get_model']
 
@@ -182,12 +184,15 @@ _models = {
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
 
+    'inceptionresnetv2': inceptionresnetv2,
+
     'xception': xception,
 
     # 'oth_inceptionv4': oth_inceptionv4,
     # 'oth_xception': oth_xception,
 
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
+    'oth_inceptionresnetv2': oth_inceptionresnetv2,
 }
 
 

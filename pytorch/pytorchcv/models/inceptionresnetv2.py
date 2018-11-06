@@ -47,7 +47,7 @@ class InceptConv(nn.Module):
             num_features=out_channels,
             eps=1e-3,
             momentum=0.1)
-        self.activ = nn.ReLU(inplace=False)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -219,7 +219,7 @@ class InceptionAUnit(nn.Module):
             in_channels=128,
             out_channels=in_channels,
             bias=True)
-        self.activ = nn.ReLU(inplace=False)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         identity = x
@@ -281,7 +281,7 @@ class InceptionBUnit(nn.Module):
             in_channels=384,
             out_channels=in_channels,
             bias=True)
-        self.activ = nn.ReLU(inplace=False)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         identity = x
@@ -360,7 +360,7 @@ class InceptionCUnit(nn.Module):
             out_channels=in_channels,
             bias=True)
         if self.activate:
-            self.activ = nn.ReLU(inplace=False)
+            self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         identity = x
@@ -519,8 +519,7 @@ class InceptionResNetV2(nn.Module):
             out_channels=1536))
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=8,
-            stride=1,
-            count_include_pad=True))
+            stride=1))
 
         self.output = nn.Sequential()
         if dropout_rate > 0.0:
@@ -588,7 +587,7 @@ def inceptionresnetv2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_inceptionresnetv2(model_name="InceptionResNetV2", **kwargs)
+    return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
 
 
 def _test():

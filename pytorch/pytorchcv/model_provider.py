@@ -16,8 +16,8 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.nasnet import *
 from .models.inceptionv3 import *
-from .models.inceptionresnetv2 import *
 from .models.inceptionv4 import *
+from .models.inceptionresnetv2 import *
 from .models.xception import *
 
 # from .models.others.shufflenet_v2 import *
@@ -183,9 +183,7 @@ _models = {
 
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
-
     'inceptionresnetv2': inceptionresnetv2,
-
     'xception': xception,
 
     # 'oth_inceptionv4': oth_inceptionv4,

@@ -649,10 +649,10 @@ class InceptionResNetV2(HybridBlock):
 
 
 def get_inceptionresnetv2(model_name=None,
-                    pretrained=False,
-                    ctx=cpu(),
-                    root=os.path.join('~', '.mxnet', 'models'),
-                    **kwargs):
+                          pretrained=False,
+                          ctx=cpu(),
+                          root=os.path.join('~', '.mxnet', 'models'),
+                          **kwargs):
     """
     Create InceptionResNetV2 model with specific parameters.
 

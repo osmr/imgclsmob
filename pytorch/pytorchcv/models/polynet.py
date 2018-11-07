@@ -516,15 +516,6 @@ class PolyPreCBlock(nn.Module):
 def poly_res_b_block():
     """
     PolyNet type PolyResidual-Res-B block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    num_blocks : int
-        Number of blocks (BatchNorm layers).
     """
     return conv1x1_block(
         in_channels=384,
@@ -536,15 +527,6 @@ def poly_res_b_block():
 def poly_res_c_block():
     """
     PolyNet type PolyResidual-Res-C block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    num_blocks : int
-        Number of blocks (BatchNorm layers).
     """
     return conv1x1_block(
         in_channels=448,
@@ -574,13 +556,13 @@ class MultiResidual(nn.Module):
         assert (num_blocks >= 1)
         self.scale = scale
 
-        self.blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=False)
+        self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         out = x
-        for block in self.blocks:
-            out = out + self.scale * block(x)
+        for res_block in self.res_blocks:
+            out = out + self.scale * res_block(x)
         out = self.activ(out)
         return out
 
@@ -611,7 +593,7 @@ class PolyResidual(nn.Module):
         self.pre_block = pre_block
 
         self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=False)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         out = x
@@ -950,11 +932,7 @@ class PolyNet(nn.Module):
                     stage.add_module("unit{}".format(j + 1), unit(
                         two_way_scale=two_way_scale,
                         poly_scale=poly_scale))
-                # if i == 1 and j == 1:
-                #     break
             self.features.add_module("stage{}".format(i + 1), stage)
-            # if i == 1:
-            #     break
 
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=9,
@@ -998,75 +976,14 @@ def get_polynet(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     two_way_scales = [
-        [
-            1.000000,
-            0.992308,
-            0.984615,
-            0.976923,
-            0.969231,
-            0.961538,
-            0.953846,
-            0.946154,
-            0.938462,
-            0.930769,
-        ],
-        [
-            0.000000,
-            0.915385,
-            0.900000,
-            0.884615,
-            0.869231,
-            0.853846,
-            0.838462,
-            0.823077,
-            0.807692,
-            0.792308,
-            0.776923,
-        ],
-        [
-            0.000000,
-            0.761538,
-            0.746154,
-            0.730769,
-            0.715385,
-            0.700000,
-        ]]
+        [1.000000, 0.992308, 0.984615, 0.976923, 0.969231, 0.961538, 0.953846, 0.946154, 0.938462, 0.930769],
+        [0.000000, 0.915385, 0.900000, 0.884615, 0.869231, 0.853846, 0.838462, 0.823077, 0.807692, 0.792308, 0.776923],
+        [0.000000, 0.761538, 0.746154, 0.730769, 0.715385, 0.700000]]
     poly_scales = [
-        [
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-            0.000000,
-        ],
-        [
-            0.000000,
-            0.923077,
-            0.907692,
-            0.892308,
-            0.876923,
-            0.861538,
-            0.846154,
-            0.830769,
-            0.815385,
-            0.800000,
-            0.784615,
-        ],
-        [
-            0.000000,
-            0.769231,
-            0.753846,
-            0.738462,
-            0.723077,
-            0.707692,
-        ]]
+        [0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000],
+        [0.000000, 0.923077, 0.907692, 0.892308, 0.876923, 0.861538, 0.846154, 0.830769, 0.815385, 0.800000, 0.784615],
+        [0.000000, 0.769231, 0.753846, 0.738462, 0.723077, 0.707692]]
 
     net = PolyNet(
         two_way_scales=two_way_scales,

@@ -2,7 +2,8 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential']
+__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'ParametricSequential',
+           'ParametricConcurrent']
 
 from mxnet.gluon import nn, HybridBlock
 
@@ -205,3 +206,41 @@ class DualPathSequential(nn.HybridSequential):
             return x1, x2
         else:
             return x1
+
+
+class ParametricSequential(nn.HybridSequential):
+    """
+    A sequential container for modules with parameters.
+    Blocks will be executed in the order they are added.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(ParametricSequential, self).__init__(**kwargs)
+
+    def hybrid_forward(self, F, x, **kwargs):
+        for block in self._children.values():
+            x = block(x, **kwargs)
+        return x
+
+
+class ParametricConcurrent(nn.HybridSequential):
+    """
+    A container for concatenation of modules with parameters.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self,
+                 axis=1,
+                 **kwargs):
+        super(ParametricConcurrent, self).__init__(**kwargs)
+        self.axis = axis
+
+    def hybrid_forward(self, F, x, **kwargs):
+        out = []
+        for block in self._children.values():
+            out.append(block(x, **kwargs))
+        out = F.concat(*out, dim=self.axis)
+        return out

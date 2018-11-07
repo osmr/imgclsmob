@@ -2,7 +2,8 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'Concurrent']
+__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'Concurrent',
+           'ParametricSequential', 'ParametricConcurrent']
 
 import torch
 import torch.nn as nn
@@ -237,5 +238,40 @@ class Concurrent(nn.Sequential):
         out = []
         for module in self._modules.values():
             out.append(module(x))
+        out = torch.cat(tuple(out), dim=self.axis)
+        return out
+
+
+class ParametricSequential(nn.Sequential):
+    """
+    A sequential container for modules with parameters.
+    Blocks will be executed in the order they are added.
+    """
+    def __init__(self, *args):
+        super(ParametricSequential, self).__init__(*args)
+
+    def forward(self, x, **kwargs):
+        for module in self._modules.values():
+            x = module(x, **kwargs)
+        return x
+
+
+class ParametricConcurrent(nn.Sequential):
+    """
+    A container for concatenation of modules with parameters.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self, axis=1):
+        super(ParametricConcurrent, self).__init__()
+        self.axis = axis
+
+    def forward(self, x, **kwargs):
+        out = []
+        for module in self._modules.values():
+            out.append(module(x, **kwargs))
         out = torch.cat(tuple(out), dim=self.axis)
         return out

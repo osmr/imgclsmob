@@ -400,56 +400,56 @@ class PolyNet(nn.Module):
         self.stage_b = nn.Sequential(
             InceptionResNetBPoly3(scale=0.923077),
             InceptionResNetB2Way(scale=0.915385),
-            # InceptionResNetBPoly3(scale=0.907692),
-            # InceptionResNetB2Way(scale=0.9),
-            # InceptionResNetBPoly3(scale=0.892308),
-            # InceptionResNetB2Way(scale=0.884615),
-            # InceptionResNetBPoly3(scale=0.876923),
-            # InceptionResNetB2Way(scale=0.869231),
-            # InceptionResNetBPoly3(scale=0.861538),
-            # InceptionResNetB2Way(scale=0.853846),
-            # InceptionResNetBPoly3(scale=0.846154),
-            # InceptionResNetB2Way(scale=0.838462),
-            # InceptionResNetBPoly3(scale=0.830769),
-            # InceptionResNetB2Way(scale=0.823077),
-            # InceptionResNetBPoly3(scale=0.815385),
-            # InceptionResNetB2Way(scale=0.807692),
-            # InceptionResNetBPoly3(scale=0.8),
-            # InceptionResNetB2Way(scale=0.792308),
-            # InceptionResNetBPoly3(scale=0.784615),
-            # InceptionResNetB2Way(scale=0.776923),
+            InceptionResNetBPoly3(scale=0.907692),
+            InceptionResNetB2Way(scale=0.9),
+            InceptionResNetBPoly3(scale=0.892308),
+            InceptionResNetB2Way(scale=0.884615),
+            InceptionResNetBPoly3(scale=0.876923),
+            InceptionResNetB2Way(scale=0.869231),
+            InceptionResNetBPoly3(scale=0.861538),
+            InceptionResNetB2Way(scale=0.853846),
+            InceptionResNetBPoly3(scale=0.846154),
+            InceptionResNetB2Way(scale=0.838462),
+            InceptionResNetBPoly3(scale=0.830769),
+            InceptionResNetB2Way(scale=0.823077),
+            InceptionResNetBPoly3(scale=0.815385),
+            InceptionResNetB2Way(scale=0.807692),
+            InceptionResNetBPoly3(scale=0.8),
+            InceptionResNetB2Way(scale=0.792308),
+            InceptionResNetBPoly3(scale=0.784615),
+            InceptionResNetB2Way(scale=0.776923),
         )
-        # self.reduction_b = ReductionB()
-        # self.stage_c = nn.Sequential(
-        #     InceptionResNetCPoly3(scale=0.769231),
-        #     InceptionResNetC2Way(scale=0.761538),
-        #     InceptionResNetCPoly3(scale=0.753846),
-        #     InceptionResNetC2Way(scale=0.746154),
-        #     InceptionResNetCPoly3(scale=0.738462),
-        #     InceptionResNetC2Way(scale=0.730769),
-        #     InceptionResNetCPoly3(scale=0.723077),
-        #     InceptionResNetC2Way(scale=0.715385),
-        #     InceptionResNetCPoly3(scale=0.707692),
-        #     InceptionResNetC2Way(scale=0.7),
-        # )
-        # self.avg_pool = nn.AvgPool2d(9, stride=1)
-        # self.dropout = nn.Dropout(0.2)
-        # self.last_linear = nn.Linear(2048, num_classes)
+        self.reduction_b = ReductionB()
+        self.stage_c = nn.Sequential(
+            InceptionResNetCPoly3(scale=0.769231),
+            InceptionResNetC2Way(scale=0.761538),
+            InceptionResNetCPoly3(scale=0.753846),
+            InceptionResNetC2Way(scale=0.746154),
+            InceptionResNetCPoly3(scale=0.738462),
+            InceptionResNetC2Way(scale=0.730769),
+            InceptionResNetCPoly3(scale=0.723077),
+            InceptionResNetC2Way(scale=0.715385),
+            InceptionResNetCPoly3(scale=0.707692),
+            InceptionResNetC2Way(scale=0.7),
+        )
+        self.avg_pool = nn.AvgPool2d(9, stride=1)
+        self.dropout = nn.Dropout(0.2)
+        self.last_linear = nn.Linear(2048, num_classes)
 
     def features(self, x):
         x = self.stem(x)
         x = self.stage_a(x)
         x = self.reduction_a(x)
         x = self.stage_b(x)
-        # x = self.reduction_b(x)
-        # x = self.stage_c(x)
+        x = self.reduction_b(x)
+        x = self.stage_c(x)
         return x
 
     def logits(self, x):
-        # x = self.avg_pool(x)
-        # x = self.dropout(x)
-        # x = x.view(x.size(0), -1)
-        # x = self.last_linear(x)
+        x = self.avg_pool(x)
+        x = self.dropout(x)
+        x = x.view(x.size(0), -1)
+        x = self.last_linear(x)
         return x
 
     def forward(self, x):
@@ -528,7 +528,7 @@ def _test():
         for param in net_params:
             weight_count += np.prod(param.size())
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != oth_polynet or weight_count == 95366600)
+        assert (model != oth_polynet or weight_count == 95366600)
 
         x = Variable(torch.randn(1, 3, 331, 331))
         y = net(x)

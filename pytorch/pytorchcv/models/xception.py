@@ -12,7 +12,7 @@ import torch.nn.init as init
 
 class ConvBlock(nn.Module):
     """
-    Standard convolution block with batchnorm and ReLU activation.
+    Standard convolution block with Batch normalization and ReLU activation.
 
     Parameters:
     ----------

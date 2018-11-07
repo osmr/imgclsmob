@@ -217,9 +217,9 @@ class ParametricSequential(nn.HybridSequential):
                  **kwargs):
         super(ParametricSequential, self).__init__(**kwargs)
 
-    def hybrid_forward(self, F, x, **kwargs):
+    def hybrid_forward(self, F, x, *args, **kwargs):
         for block in self._children.values():
-            x = block(x, **kwargs)
+            x = block(x, *args, **kwargs)
         return x
 
 
@@ -238,9 +238,9 @@ class ParametricConcurrent(nn.HybridSequential):
         super(ParametricConcurrent, self).__init__(**kwargs)
         self.axis = axis
 
-    def hybrid_forward(self, F, x, **kwargs):
+    def hybrid_forward(self, F, x, *args, **kwargs):
         out = []
         for block in self._children.values():
-            out.append(block(x, **kwargs))
+            out.append(block(x, *args, **kwargs))
         out = F.concat(*out, dim=self.axis)
         return out

@@ -10,7 +10,7 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
-from common import ParametricSequential, ParametricConcurrent
+from .common import ParametricSequential, ParametricConcurrent
 
 
 class ConvBlock(HybridBlock):
@@ -397,7 +397,7 @@ class PolyConvSeqBranch(HybridBlock):
                 in_channels = out_channels
 
     def hybrid_forward(self, F, x, index):
-        x = self.conv_list(x, index=index)
+        x = self.conv_list(x, index)
         return x
 
 
@@ -567,8 +567,7 @@ class PolyPreBBlock(HybridBlock):
                 num_blocks=num_blocks))
 
     def hybrid_forward(self, F, x, index):
-        kwargs = {'index': index}
-        x = self.branches(x, **kwargs)
+        x = self.branches(x, index)
         return x
 
 
@@ -611,7 +610,7 @@ class PolyPreCBlock(HybridBlock):
                 num_blocks=num_blocks))
 
     def hybrid_forward(self, F, x, index):
-        x = self.branches(x, index=index)
+        x = self.branches(x, index)
         return x
 
 
@@ -721,7 +720,7 @@ class PolyResidual(HybridBlock):
 
         with self.name_scope():
             for i in range(num_blocks):
-                setattr(self, "res_blocks{}".format(i + 1), res_block(bn_use_global_stats=bn_use_global_stats))
+                setattr(self, "res_block{}".format(i + 1), res_block(bn_use_global_stats=bn_use_global_stats))
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):

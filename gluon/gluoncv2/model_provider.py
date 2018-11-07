@@ -19,6 +19,7 @@ from .models.inceptionv3 import *
 from .models.inceptionv4 import *
 from .models.inceptionresnetv2 import *
 from .models.xception import *
+from .models.polynet import *
 
 # from .models.others.oth_inceptionv3 import *
 
@@ -182,6 +183,7 @@ _models = {
     'inceptionv4': inceptionv4,
     'inceptionresnetv2': inceptionresnetv2,
     'xception': xception,
+    'polynet': polynet,
 
     # 'oth_inceptionv3': oth_inception_v3,
 }

@@ -656,7 +656,7 @@ class MultiResidual(HybridBlock):
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
-    res_block : Module
+    res_block : HybridBlock class
         Residual branch block.
     num_blocks : int
         Number of residual branches.
@@ -696,11 +696,11 @@ class PolyResidual(HybridBlock):
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
-    res_block : Module class
+    res_block : HybridBlock class
         Residual branch block.
     num_blocks : int
         Number of residual branches.
-    pre_block : Module instance
+    pre_block : HybridBlock class
         Preliminary block.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -716,9 +716,11 @@ class PolyResidual(HybridBlock):
         assert (num_blocks >= 1)
         self.scale = scale
         self.num_blocks = num_blocks
-        self.pre_block = pre_block
 
         with self.name_scope():
+            self.pre_block = pre_block(
+                bn_use_global_stats=bn_use_global_stats,
+                num_blocks=num_blocks)
             for i in range(num_blocks):
                 setattr(self, "res_block{}".format(i + 1), res_block(bn_use_global_stats=bn_use_global_stats))
             self.activ = nn.Activation('relu')
@@ -743,13 +745,13 @@ class PolyBaseUnit(HybridBlock):
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
-    two_way_block : Module class
+    two_way_block : HybridBlock class
         Residual branch block for 2-way-stage.
     poly_scale : float, default 0.0
         Scale value for 2-way stage.
-    poly_res_block : Module class, default None
+    poly_res_block : HybridBlock class, default None
         Residual branch block for poly-stage.
-    poly_pre_block : Module instance, default None
+    poly_pre_block : HybridBlock class, default None
         Preliminary branch block for poly-stage.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -840,9 +842,7 @@ class PolyBUnit(PolyBaseUnit):
             two_way_block=TwoWayBBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_b_block,
-            poly_pre_block=PolyPreBBlock(
-                bn_use_global_stats=bn_use_global_stats,
-                num_blocks=3),
+            poly_pre_block=PolyPreBBlock,
             bn_use_global_stats=bn_use_global_stats,
             **kwargs)
 
@@ -870,9 +870,7 @@ class PolyCUnit(PolyBaseUnit):
             two_way_block=TwoWayCBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_c_block,
-            poly_pre_block=PolyPreCBlock(
-                bn_use_global_stats=bn_use_global_stats,
-                num_blocks=3),
+            poly_pre_block=PolyPreCBlock,
             bn_use_global_stats=bn_use_global_stats,
             **kwargs)
 

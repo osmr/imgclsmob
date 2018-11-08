@@ -571,7 +571,7 @@ class MultiResidual(Chain):
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
-    res_block : Module
+    res_block : Chain class
         Residual branch block.
     num_blocks : int
         Number of residual branches.
@@ -607,11 +607,11 @@ class PolyResidual(Chain):
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
-    res_block : Module class
+    res_block : Chain class
         Residual branch block.
     num_blocks : int
         Number of residual branches.
-    pre_block : Module instance
+    pre_block : Chain class
         Preliminary block.
     """
     def __init__(self,
@@ -623,9 +623,9 @@ class PolyResidual(Chain):
         assert (num_blocks >= 1)
         self.scale = scale
         self.num_blocks = num_blocks
-        self.pre_block = pre_block
 
         with self.init_scope():
+            self.pre_block = pre_block(num_blocks=num_blocks)
             for i in range(num_blocks):
                 setattr(self, "res_block{}".format(i + 1), res_block())
             self.activ = F.relu
@@ -650,13 +650,13 @@ class PolyBaseUnit(Chain):
     ----------
     two_way_scale : float
         Scale value for 2-way stage.
-    two_way_block : Module class
+    two_way_block : Chain class
         Residual branch block for 2-way-stage.
     poly_scale : float, default 0.0
         Scale value for 2-way stage.
-    poly_res_block : Module class, default None
+    poly_res_block : Chain class, default None
         Residual branch block for poly-stage.
-    poly_pre_block : Module instance, default None
+    poly_pre_block : Chain class, default None
         Preliminary branch block for poly-stage.
     """
     def __init__(self,
@@ -666,7 +666,6 @@ class PolyBaseUnit(Chain):
                  poly_res_block=None,
                  poly_pre_block=None):
         super(PolyBaseUnit, self).__init__()
-
         with self.init_scope():
             if poly_res_block is not None:
                 assert (poly_scale != 0.0)
@@ -731,7 +730,7 @@ class PolyBUnit(PolyBaseUnit):
             two_way_block=TwoWayBBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_b_block,
-            poly_pre_block=PolyPreBBlock(num_blocks=3))
+            poly_pre_block=PolyPreBBlock)
 
 
 class PolyCUnit(PolyBaseUnit):
@@ -753,7 +752,7 @@ class PolyCUnit(PolyBaseUnit):
             two_way_block=TwoWayCBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_c_block,
-            poly_pre_block=PolyPreCBlock(num_blocks=3))
+            poly_pre_block=PolyPreCBlock)
 
 
 class ReductionAUnit(Chain):
@@ -1085,7 +1084,7 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != polynet or weight_count == 95366600)
+        assert (model != polynet or weight_count == 95366600)
 
         x = np.zeros((1, 3, 331, 331), np.float32)
         y = net(x)

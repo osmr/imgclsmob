@@ -543,7 +543,7 @@ class MultiResidual(nn.Module):
     ----------
     scale : float, default 1.0
         Scale value for each residual branch.
-    res_block : Module
+    res_block : Module class
         Residual branch block.
     num_blocks : int
         Number of residual branches.
@@ -579,7 +579,7 @@ class PolyResidual(nn.Module):
         Residual branch block.
     num_blocks : int
         Number of residual branches.
-    pre_block : Module instance
+    pre_block : Module class
         Preliminary block.
     """
     def __init__(self,
@@ -590,8 +590,8 @@ class PolyResidual(nn.Module):
         super(PolyResidual, self).__init__()
         assert (num_blocks >= 1)
         self.scale = scale
-        self.pre_block = pre_block
 
+        self.pre_block = pre_block(num_blocks=num_blocks)
         self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
         self.activ = nn.ReLU(inplace=True)
 
@@ -620,7 +620,7 @@ class PolyBaseUnit(nn.Module):
         Scale value for 2-way stage.
     poly_res_block : Module class, default None
         Residual branch block for poly-stage.
-    poly_pre_block : Module instance, default None
+    poly_pre_block : Module class, default None
         Preliminary branch block for poly-stage.
     """
     def __init__(self,
@@ -694,7 +694,7 @@ class PolyBUnit(PolyBaseUnit):
             two_way_block=TwoWayBBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_b_block,
-            poly_pre_block=PolyPreBBlock(num_blocks=3))
+            poly_pre_block=PolyPreBBlock)
 
 
 class PolyCUnit(PolyBaseUnit):
@@ -716,7 +716,7 @@ class PolyCUnit(PolyBaseUnit):
             two_way_block=TwoWayCBlock,
             poly_scale=poly_scale,
             poly_res_block=poly_res_c_block,
-            poly_pre_block=PolyPreCBlock(num_blocks=3))
+            poly_pre_block=PolyPreCBlock)
 
 
 class ReductionAUnit(nn.Module):

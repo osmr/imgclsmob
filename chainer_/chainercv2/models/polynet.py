@@ -1,5 +1,5 @@
 """
-    PolyNet, implemented in PyTorch.
+    PolyNet, implemented in Chainer.
     Original paper: 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 """
@@ -7,12 +7,15 @@
 __all__ = ['PolyNet', 'polynet']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
-from .common import Concurrent, ParametricSequential, ParametricConcurrent
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import SimpleSequential, Concurrent, ParametricSequential, ParametricConcurrent
 
 
-class ConvBlock(nn.Module):
+class ConvBlock(Chain):
     """
     Standard convolution block with Batch normalization and ReLU activation.
 
@@ -22,11 +25,11 @@ class ConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     activate : bool, default True
         Whether activate the convolution block.
@@ -34,25 +37,28 @@ class ConvBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding,
+                 pad,
                  activate=True):
         super(ConvBlock, self).__init__()
         self.activate = activate
 
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5)
+            if self.activate:
+                self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         if self.activate:
@@ -74,23 +80,23 @@ def conv1x1_block(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
+        Stride of the convolution.
     activate : bool, default True
         Whether activate the convolution block.
     """
     return ConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
+        ksize=1,
         stride=stride,
-        padding=0,
+        pad=0,
         activate=activate)
 
 
 def conv3x3_block(in_channels,
                   out_channels,
                   stride,
-                  padding=1,
+                  pad=1,
                   activate=True):
     """
     3x3 version of the standard convolution block.
@@ -102,8 +108,8 @@ def conv3x3_block(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
     activate : bool, default True
         Whether activate the convolution block.
@@ -111,13 +117,13 @@ def conv3x3_block(in_channels,
     return ConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        ksize=3,
         stride=stride,
-        padding=padding,
+        pad=pad,
         activate=activate)
 
 
-class PolyConv(nn.Module):
+class PolyConv(Chain):
     """
     PolyNet specific convolution block. A block that is used inside poly-N (poly-2, poly-3, and so on) modules.
     The Convolution layer is shared between all Inception blocks inside a poly-N module. BatchNorm layers are not
@@ -130,11 +136,11 @@ class PolyConv(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     num_blocks : int
         Number of blocks (BatchNorm layers).
@@ -142,26 +148,29 @@ class PolyConv(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding,
+                 pad,
                  num_blocks):
         super(PolyConv, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bns = nn.ModuleList()
-        for i in range(num_blocks):
-            self.bns.append(nn.BatchNorm2d(num_features=out_channels))
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True)
+            for i in range(num_blocks):
+                setattr(self, "bn{}".format(i + 1), L.BatchNormalization(
+                    size=out_channels,
+                    eps=1e-5))
+            self.activ = F.relu
 
-    def forward(self, x, index):
+    def __call__(self, x, index):
         x = self.conv(x)
-        x = self.bns[index](x)
+        bn = getattr(self, "bn{}".format(index + 1))
+        x = bn(x)
         x = self.activ(x)
         return x
 
@@ -184,29 +193,32 @@ def poly_conv1x1(in_channels,
     return PolyConv(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
+        ksize=1,
         stride=1,
-        padding=0,
+        pad=0,
         num_blocks=num_blocks)
 
 
-class MaxPoolBranch(nn.Module):
+class MaxPoolBranch(Chain):
     """
     PolyNet specific max pooling branch block.
     """
     def __init__(self):
         super(MaxPoolBranch, self).__init__()
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=0)
+        with self.init_scope():
+            self.pool = partial(
+                F.max_pooling_2d,
+                ksize=3,
+                stride=2,
+                pad=0,
+                cover_all=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.pool(x)
         return x
 
 
-class Conv1x1Branch(nn.Module):
+class Conv1x1Branch(Chain):
     """
     PolyNet specific convolutional 1x1 branch block.
 
@@ -221,16 +233,17 @@ class Conv1x1Branch(nn.Module):
                  in_channels,
                  out_channels):
         super(Conv1x1Branch, self).__init__()
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
+        with self.init_scope():
+            self.conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         return x
 
 
-class Conv3x3Branch(nn.Module):
+class Conv3x3Branch(Chain):
     """
     PolyNet specific convolutional 3x3 branch block.
 
@@ -245,18 +258,19 @@ class Conv3x3Branch(nn.Module):
                  in_channels,
                  out_channels):
         super(Conv3x3Branch, self).__init__()
-        self.conv = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2,
-            padding=0)
+        with self.init_scope():
+            self.conv = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=2,
+                pad=0)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         return x
 
 
-class ConvSeqBranch(nn.Module):
+class ConvSeqBranch(Chain):
     """
     PolyNet specific convolutional sequence branch block.
 
@@ -284,23 +298,25 @@ class ConvSeqBranch(nn.Module):
         assert (len(out_channels_list) == len(strides_list))
         assert (len(out_channels_list) == len(padding_list))
 
-        self.conv_list = nn.Sequential()
-        for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.add_module("conv{}".format(i + 1), ConvBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=strides,
-                padding=padding))
-            in_channels = out_channels
+        with self.init_scope():
+            self.conv_list = SimpleSequential()
+            with self.conv_list.init_scope():
+                for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
+                        out_channels_list, kernel_size_list, strides_list, padding_list)):
+                    setattr(self.conv_list, "conv{}".format(i + 1), ConvBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        ksize=kernel_size,
+                        stride=strides,
+                        pad=padding))
+                    in_channels = out_channels
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv_list(x)
         return x
 
 
-class PolyConvSeqBranch(nn.Module):
+class PolyConvSeqBranch(Chain):
     """
     PolyNet specific convolutional sequence branch block with internal PolyNet specific convolution blocks.
 
@@ -331,24 +347,26 @@ class PolyConvSeqBranch(nn.Module):
         assert (len(out_channels_list) == len(strides_list))
         assert (len(out_channels_list) == len(padding_list))
 
-        self.conv_list = ParametricSequential()
-        for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
-                out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.add_module("conv{}".format(i + 1), PolyConv(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=strides,
-                padding=padding,
-                num_blocks=num_blocks))
-            in_channels = out_channels
+        with self.init_scope():
+            self.conv_list = ParametricSequential()
+            with self.conv_list.init_scope():
+                for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
+                        out_channels_list, kernel_size_list, strides_list, padding_list)):
+                    setattr(self.conv_list, "conv{}".format(i + 1), PolyConv(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        ksize=kernel_size,
+                        stride=strides,
+                        pad=padding,
+                        num_blocks=num_blocks))
+                    in_channels = out_channels
 
-    def forward(self, x, index):
+    def __call__(self, x, index):
         x = self.conv_list(x, index=index)
         return x
 
 
-class TwoWayABlock(nn.Module):
+class TwoWayABlock(Chain):
     """
     PolyNet type Inception-A block.
     """
@@ -356,34 +374,36 @@ class TwoWayABlock(nn.Module):
         super(TwoWayABlock, self).__init__()
         in_channels = 384
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(32, 48, 64),
-            kernel_size_list=(1, 3, 3),
-            strides_list=(1, 1, 1),
-            padding_list=(0, 1, 1)))
-        self.branches.add_module("branch2", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(32, 32),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 1),
-            padding_list=(0, 1)))
-        self.branches.add_module("branch3", Conv1x1Branch(
-            in_channels=in_channels,
-            out_channels=32))
-        self.conv = conv1x1_block(
-            in_channels=128,
-            out_channels=in_channels,
-            activate=False)
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(32, 48, 64),
+                    kernel_size_list=(1, 3, 3),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, 1, 1)))
+                setattr(self.branches, "branch2", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(32, 32),
+                    kernel_size_list=(1, 3),
+                    strides_list=(1, 1),
+                    padding_list=(0, 1)))
+                setattr(self.branches, "branch3", Conv1x1Branch(
+                    in_channels=in_channels,
+                    out_channels=32))
+                self.conv = conv1x1_block(
+                    in_channels=128,
+                    out_channels=in_channels,
+                    activate=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         x = self.conv(x)
         return x
 
 
-class TwoWayBBlock(nn.Module):
+class TwoWayBBlock(Chain):
     """
     PolyNet type Inception-B block.
     """
@@ -391,28 +411,30 @@ class TwoWayBBlock(nn.Module):
         super(TwoWayBBlock, self).__init__()
         in_channels = 1152
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(128, 160, 192),
-            kernel_size_list=(1, (1, 7), (7, 1)),
-            strides_list=(1, 1, 1),
-            padding_list=(0, (0, 3), (3, 0))))
-        self.branches.add_module("branch2", Conv1x1Branch(
-            in_channels=in_channels,
-            out_channels=192))
-        self.conv = conv1x1_block(
-            in_channels=384,
-            out_channels=in_channels,
-            activate=False)
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(128, 160, 192),
+                    kernel_size_list=(1, (1, 7), (7, 1)),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, (0, 3), (3, 0))))
+                setattr(self.branches, "branch2", Conv1x1Branch(
+                    in_channels=in_channels,
+                    out_channels=192))
+                self.conv = conv1x1_block(
+                    in_channels=384,
+                    out_channels=in_channels,
+                    activate=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         x = self.conv(x)
         return x
 
 
-class TwoWayCBlock(nn.Module):
+class TwoWayCBlock(Chain):
     """
     PolyNet type Inception-C block.
     """
@@ -420,28 +442,30 @@ class TwoWayCBlock(nn.Module):
         super(TwoWayCBlock, self).__init__()
         in_channels = 2048
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(192, 224, 256),
-            kernel_size_list=(1, (1, 3), (3, 1)),
-            strides_list=(1, 1, 1),
-            padding_list=(0, (0, 1), (1, 0))))
-        self.branches.add_module("branch2", Conv1x1Branch(
-            in_channels=in_channels,
-            out_channels=192))
-        self.conv = conv1x1_block(
-            in_channels=448,
-            out_channels=in_channels,
-            activate=False)
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(192, 224, 256),
+                    kernel_size_list=(1, (1, 3), (3, 1)),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, (0, 1), (1, 0))))
+                setattr(self.branches, "branch2", Conv1x1Branch(
+                    in_channels=in_channels,
+                    out_channels=192))
+                self.conv = conv1x1_block(
+                    in_channels=448,
+                    out_channels=in_channels,
+                    activate=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         x = self.conv(x)
         return x
 
 
-class PolyPreBBlock(nn.Module):
+class PolyPreBBlock(Chain):
     """
     PolyNet type PolyResidual-Pre-B block.
 
@@ -459,25 +483,27 @@ class PolyPreBBlock(nn.Module):
         super(PolyPreBBlock, self).__init__()
         in_channels = 1152
 
-        self.branches = ParametricConcurrent()
-        self.branches.add_module("branch1", PolyConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(128, 160, 192),
-            kernel_size_list=(1, (1, 7), (7, 1)),
-            strides_list=(1, 1, 1),
-            padding_list=(0, (0, 3), (3, 0)),
-            num_blocks=num_blocks))
-        self.branches.add_module("branch2", poly_conv1x1(
-            in_channels=in_channels,
-            out_channels=192,
-            num_blocks=num_blocks))
+        with self.init_scope():
+            self.branches = ParametricConcurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", PolyConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(128, 160, 192),
+                    kernel_size_list=(1, (1, 7), (7, 1)),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, (0, 3), (3, 0)),
+                    num_blocks=num_blocks))
+                setattr(self.branches, "branch2", poly_conv1x1(
+                    in_channels=in_channels,
+                    out_channels=192,
+                    num_blocks=num_blocks))
 
-    def forward(self, x, index):
+    def __call__(self, x, index):
         x = self.branches(x, index=index)
         return x
 
 
-class PolyPreCBlock(nn.Module):
+class PolyPreCBlock(Chain):
     """
     PolyNet type PolyResidual-Pre-C block.
 
@@ -495,20 +521,22 @@ class PolyPreCBlock(nn.Module):
         super(PolyPreCBlock, self).__init__()
         in_channels = 2048
 
-        self.branches = ParametricConcurrent()
-        self.branches.add_module("branch1", PolyConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(192, 224, 256),
-            kernel_size_list=(1, (1, 3), (3, 1)),
-            strides_list=(1, 1, 1),
-            padding_list=(0, (0, 1), (1, 0)),
-            num_blocks=num_blocks))
-        self.branches.add_module("branch2", poly_conv1x1(
-            in_channels=in_channels,
-            out_channels=192,
-            num_blocks=num_blocks))
+        with self.init_scope():
+            self.branches = ParametricConcurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", PolyConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(192, 224, 256),
+                    kernel_size_list=(1, (1, 3), (3, 1)),
+                    strides_list=(1, 1, 1),
+                    padding_list=(0, (0, 1), (1, 0)),
+                    num_blocks=num_blocks))
+                setattr(self.branches, "branch2", poly_conv1x1(
+                    in_channels=in_channels,
+                    out_channels=192,
+                    num_blocks=num_blocks))
 
-    def forward(self, x, index):
+    def __call__(self, x, index):
         x = self.branches(x, index=index)
         return x
 
@@ -535,7 +563,7 @@ def poly_res_c_block():
         activate=False)
 
 
-class MultiResidual(nn.Module):
+class MultiResidual(Chain):
     """
     Base class for constructing N-way modules (2-way, 3-way, and so on). Actually it is for 2-way modules.
 
@@ -555,19 +583,23 @@ class MultiResidual(nn.Module):
         super(MultiResidual, self).__init__()
         assert (num_blocks >= 1)
         self.scale = scale
+        self.num_blocks = num_blocks
 
-        self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            for i in range(num_blocks):
+                setattr(self, "res_block{}".format(i + 1), res_block())
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         out = x
-        for res_block in self.res_blocks:
+        for i in range(self.num_blocks):
+            res_block = getattr(self, "res_block{}".format(i + 1))
             out = out + self.scale * res_block(x)
         out = self.activ(out)
         return out
 
 
-class PolyResidual(nn.Module):
+class PolyResidual(Chain):
     """
     The other base class for constructing N-way poly-modules. Actually it is for 3-way poly-modules.
 
@@ -590,15 +622,19 @@ class PolyResidual(nn.Module):
         super(PolyResidual, self).__init__()
         assert (num_blocks >= 1)
         self.scale = scale
+        self.num_blocks = num_blocks
         self.pre_block = pre_block
 
-        self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            for i in range(num_blocks):
+                setattr(self, "res_block{}".format(i + 1), res_block())
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         out = x
-        for index, res_block in enumerate(self.res_blocks):
+        for index in range(self.num_blocks):
             x = self.pre_block(x, index)
+            res_block = getattr(self, "res_block{}".format(index + 1))
             x = res_block(x)
             out = out + self.scale * x
             x = self.activ(x)
@@ -606,7 +642,7 @@ class PolyResidual(nn.Module):
         return out
 
 
-class PolyBaseUnit(nn.Module):
+class PolyBaseUnit(Chain):
     """
     PolyNet unit base class.
 
@@ -631,24 +667,25 @@ class PolyBaseUnit(nn.Module):
                  poly_pre_block=None):
         super(PolyBaseUnit, self).__init__()
 
-        if poly_res_block is not None:
-            assert (poly_scale != 0.0)
-            assert (poly_pre_block is not None)
-            self.poly = PolyResidual(
-                scale=poly_scale,
-                res_block=poly_res_block,
-                num_blocks=3,
-                pre_block=poly_pre_block)
-        else:
-            assert (poly_scale == 0.0)
-            assert (poly_pre_block is None)
-            self.poly = None
-        self.twoway = MultiResidual(
-            scale=two_way_scale,
-            res_block=two_way_block,
-            num_blocks=2)
+        with self.init_scope():
+            if poly_res_block is not None:
+                assert (poly_scale != 0.0)
+                assert (poly_pre_block is not None)
+                self.poly = PolyResidual(
+                    scale=poly_scale,
+                    res_block=poly_res_block,
+                    num_blocks=3,
+                    pre_block=poly_pre_block)
+            else:
+                assert (poly_scale == 0.0)
+                assert (poly_pre_block is None)
+                self.poly = None
+            self.twoway = MultiResidual(
+                scale=two_way_scale,
+                res_block=two_way_block,
+                num_blocks=2)
 
-    def forward(self, x):
+    def __call__(self, x):
         if self.poly is not None:
             x = self.poly(x)
         x = self.twoway(x)
@@ -719,7 +756,7 @@ class PolyCUnit(PolyBaseUnit):
             poly_pre_block=PolyPreCBlock(num_blocks=3))
 
 
-class ReductionAUnit(nn.Module):
+class ReductionAUnit(Chain):
     """
     PolyNet type Reduction-A unit.
     """
@@ -727,27 +764,29 @@ class ReductionAUnit(nn.Module):
         super(ReductionAUnit, self).__init__()
         in_channels = 384
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(256, 256, 384),
-            kernel_size_list=(1, 3, 3),
-            strides_list=(1, 1, 2),
-            padding_list=(0, 1, 0)))
-        self.branches.add_module("branch2", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(384,),
-            kernel_size_list=(3,),
-            strides_list=(2,),
-            padding_list=(0,)))
-        self.branches.add_module("branch3", MaxPoolBranch())
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(256, 256, 384),
+                    kernel_size_list=(1, 3, 3),
+                    strides_list=(1, 1, 2),
+                    padding_list=(0, 1, 0)))
+                setattr(self.branches, "branch2", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(384,),
+                    kernel_size_list=(3,),
+                    strides_list=(2,),
+                    padding_list=(0,)))
+                setattr(self.branches, "branch3", MaxPoolBranch())
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         return x
 
 
-class ReductionBUnit(nn.Module):
+class ReductionBUnit(Chain):
     """
     PolyNet type Reduction-B unit.
     """
@@ -755,92 +794,100 @@ class ReductionBUnit(nn.Module):
         super(ReductionBUnit, self).__init__()
         in_channels = 1152
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(256, 256, 256),
-            kernel_size_list=(1, 3, 3),
-            strides_list=(1, 1, 2),
-            padding_list=(0, 1, 0)))
-        self.branches.add_module("branch2", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(256, 256),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 2),
-            padding_list=(0, 0)))
-        self.branches.add_module("branch3", ConvSeqBranch(
-            in_channels=in_channels,
-            out_channels_list=(256, 384),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 2),
-            padding_list=(0, 0)))
-        self.branches.add_module("branch4", MaxPoolBranch())
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(256, 256, 256),
+                    kernel_size_list=(1, 3, 3),
+                    strides_list=(1, 1, 2),
+                    padding_list=(0, 1, 0)))
+                setattr(self.branches, "branch2", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(256, 256),
+                    kernel_size_list=(1, 3),
+                    strides_list=(1, 2),
+                    padding_list=(0, 0)))
+                setattr(self.branches, "branch3", ConvSeqBranch(
+                    in_channels=in_channels,
+                    out_channels_list=(256, 384),
+                    kernel_size_list=(1, 3),
+                    strides_list=(1, 2),
+                    padding_list=(0, 0)))
+                setattr(self.branches, "branch4", MaxPoolBranch())
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         return x
 
 
-class PolyBlock3a(nn.Module):
+class PolyBlock3a(Chain):
     """
     PolyNet type Mixed-3a block.
     """
     def __init__(self):
         super(PolyBlock3a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", MaxPoolBranch())
-        self.branches.add_module("branch2", Conv3x3Branch(
-            in_channels=64,
-            out_channels=96))
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", MaxPoolBranch())
+                setattr(self.branches, "branch2", Conv3x3Branch(
+                    in_channels=64,
+                    out_channels=96))
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         return x
 
 
-class PolyBlock4a(nn.Module):
+class PolyBlock4a(Chain):
     """
     PolyNet type Mixed-4a block.
     """
     def __init__(self):
         super(PolyBlock4a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", ConvSeqBranch(
-            in_channels=160,
-            out_channels_list=(64, 96),
-            kernel_size_list=(1, 3),
-            strides_list=(1, 1),
-            padding_list=(0, 0)))
-        self.branches.add_module("branch2", ConvSeqBranch(
-            in_channels=160,
-            out_channels_list=(64, 64, 64, 96),
-            kernel_size_list=(1, (7, 1), (1, 7), 3),
-            strides_list=(1, 1, 1, 1),
-            padding_list=(0, (3, 0), (0, 3), 0)))
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", ConvSeqBranch(
+                    in_channels=160,
+                    out_channels_list=(64, 96),
+                    kernel_size_list=(1, 3),
+                    strides_list=(1, 1),
+                    padding_list=(0, 0)))
+                setattr(self.branches, "branch2", ConvSeqBranch(
+                    in_channels=160,
+                    out_channels_list=(64, 64, 64, 96),
+                    kernel_size_list=(1, (7, 1), (1, 7), 3),
+                    strides_list=(1, 1, 1, 1),
+                    padding_list=(0, (3, 0), (0, 3), 0)))
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         return x
 
 
-class PolyBlock5a(nn.Module):
+class PolyBlock5a(Chain):
     """
     PolyNet type Mixed-5a block.
     """
     def __init__(self):
         super(PolyBlock5a, self).__init__()
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", MaxPoolBranch())
-        self.branches.add_module("branch2", Conv3x3Branch(
-            in_channels=192,
-            out_channels=192))
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", MaxPoolBranch())
+                setattr(self.branches, "branch2", Conv3x3Branch(
+                    in_channels=192,
+                    out_channels=192))
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         return x
 
 
-class PolyInitBlock(nn.Module):
+class PolyInitBlock(Chain):
     """
     PolyNet specific initial block.
 
@@ -852,29 +899,30 @@ class PolyInitBlock(nn.Module):
     def __init__(self,
                  in_channels):
         super(PolyInitBlock, self).__init__()
-        self.conv1 = ConvBlock(
-            in_channels=in_channels,
-            out_channels=32,
-            kernel_size=3,
-            stride=2,
-            padding=0)
-        self.conv2 = ConvBlock(
-            in_channels=32,
-            out_channels=32,
-            kernel_size=3,
-            stride=1,
-            padding=0)
-        self.conv3 = ConvBlock(
-            in_channels=32,
-            out_channels=64,
-            kernel_size=3,
-            stride=1,
-            padding=1)
-        self.block1 = PolyBlock3a()
-        self.block2 = PolyBlock4a()
-        self.block3 = PolyBlock5a()
+        with self.init_scope():
+            self.conv1 = ConvBlock(
+                in_channels=in_channels,
+                out_channels=32,
+                ksize=3,
+                stride=2,
+                pad=0)
+            self.conv2 = ConvBlock(
+                in_channels=32,
+                out_channels=32,
+                ksize=3,
+                stride=1,
+                pad=0)
+            self.conv3 = ConvBlock(
+                in_channels=32,
+                out_channels=64,
+                ksize=3,
+                stride=1,
+                pad=1)
+            self.block1 = PolyBlock3a()
+            self.block2 = PolyBlock4a()
+            self.block3 = PolyBlock5a()
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
@@ -884,7 +932,7 @@ class PolyInitBlock(nn.Module):
         return x
 
 
-class PolyNet(nn.Module):
+class PolyNet(Chain):
     """
     PolyNet model from 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
@@ -901,7 +949,7 @@ class PolyNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (331, 331)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -910,59 +958,61 @@ class PolyNet(nn.Module):
                  dropout_rate=0.2,
                  in_channels=3,
                  in_size=(331, 331),
-                 num_classes=1000):
+                 classes=1000):
         super(PolyNet, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         normal_units = [PolyAUnit, PolyBUnit, PolyCUnit]
         reduction_units = [ReductionAUnit, ReductionBUnit]
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", PolyInitBlock(
-            in_channels=in_channels))
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", PolyInitBlock(
+                    in_channels=in_channels))
 
-        for i, (two_way_scales_per_stage, poly_scales_per_stage) in enumerate(zip(two_way_scales, poly_scales)):
-            stage = nn.Sequential()
-            for j, (two_way_scale, poly_scale) in enumerate(zip(two_way_scales_per_stage, poly_scales_per_stage)):
-                if (j == 0) and (i != 0):
-                    unit = reduction_units[i - 1]
-                    stage.add_module("unit{}".format(j + 1), unit())
-                else:
-                    unit = normal_units[i]
-                    stage.add_module("unit{}".format(j + 1), unit(
-                        two_way_scale=two_way_scale,
-                        poly_scale=poly_scale))
-            self.features.add_module("stage{}".format(i + 1), stage)
+                for i, (two_way_scales_per_stage, poly_scales_per_stage) in enumerate(zip(two_way_scales, poly_scales)):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, (two_way_scale, poly_scale) in enumerate(zip(
+                                two_way_scales_per_stage, poly_scales_per_stage)):
+                            if (j == 0) and (i != 0):
+                                unit = reduction_units[i - 1]
+                                setattr(stage, "unit{}".format(j + 1), unit())
+                            else:
+                                unit = normal_units[i]
+                                setattr(stage, "unit{}".format(j + 1), unit(
+                                    two_way_scale=two_way_scale,
+                                    poly_scale=poly_scale))
+                    setattr(self.features, "stage{}".format(i + 1), stage)
 
-        self.features.add_module('final_pool', nn.AvgPool2d(
-            kernel_size=9,
-            stride=1))
+                setattr(self.features, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=9,
+                    stride=1))
 
-        self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
-        self.output.add_module('fc', nn.Linear(
-            in_features=2048,
-            out_features=num_classes))
+            in_channels = 2048
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'flatten', partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, 'dropout', partial(
+                    F.dropout,
+                    ratio=dropout_rate))
+                setattr(self.output, 'fc', L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
 def get_polynet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join('~', '.chainer', 'models'),
                 **kwargs):
     """
     Create PolyNet model with specific parameters.
@@ -973,7 +1023,7 @@ def get_polynet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     two_way_scales = [
@@ -993,11 +1043,12 @@ def get_polynet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -1011,7 +1062,7 @@ def polynet(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_polynet(model_name="polynet", **kwargs)
@@ -1019,8 +1070,9 @@ def polynet(**kwargs):
 
 def _test():
     import numpy as np
-    import torch
-    from torch.autograd import Variable
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -1031,19 +1083,13 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != polynet or weight_count == 95366600)
+        # assert (model != polynet or weight_count == 95366600)
 
-        x = Variable(torch.randn(1, 3, 331, 331))
+        x = np.zeros((1, 3, 331, 331), np.float32)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

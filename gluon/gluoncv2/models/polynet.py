@@ -305,14 +305,14 @@ class ConvSeqBranch(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
-        Number of output channels.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
+    out_channels_list : list of tuple of int
+        List of numbers of output channels.
+    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of convolution window sizes.
+    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of strides of the convolution.
+    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of padding values for convolution layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
@@ -355,14 +355,14 @@ class PolyConvSeqBranch(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
-        Number of output channels.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
+    out_channels_list : list of tuple of int
+        List of numbers of output channels.
+    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of convolution window sizes.
+    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of strides of the convolution.
+    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of padding values for convolution layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     num_blocks : int
@@ -1133,6 +1133,8 @@ class PolyNet(HybridBlock):
         super(PolyNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
+        normal_units = [PolyAUnit, PolyBUnit, PolyCUnit]
+        reduction_units = [ReductionAUnit, ReductionBUnit]
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
@@ -1140,8 +1142,6 @@ class PolyNet(HybridBlock):
                 in_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats))
 
-            normal_units = [PolyAUnit, PolyBUnit, PolyCUnit]
-            reduction_units = [ReductionAUnit, ReductionBUnit]
             for i, (two_way_scales_per_stage, poly_scales_per_stage) in enumerate(zip(two_way_scales, poly_scales)):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():

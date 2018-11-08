@@ -153,14 +153,14 @@ class ConvSeqBranch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
-        Number of output channels.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
+    out_channels_list : list of tuple of int
+        List of numbers of output channels.
+    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of convolution window sizes.
+    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of strides of the convolution.
+    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of padding values for convolution layers.
     """
     def __init__(self,
                  in_channels,
@@ -197,14 +197,14 @@ class ConvSeq3x3Branch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
-        Number of output channels.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
+    out_channels_list : list of tuple of int
+        List of numbers of output channels.
+    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of convolution window sizes.
+    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of strides of the convolution.
+    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of padding values for convolution layers.
     """
     def __init__(self,
                  in_channels,
@@ -551,6 +551,8 @@ class InceptionV3(nn.Module):
         super(InceptionV3, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
+        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
+        reduction_units = [ReductionAUnit, ReductionBUnit]
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
@@ -558,8 +560,6 @@ class InceptionV3(nn.Module):
             out_channels=init_block_channels))
         in_channels = init_block_channels
 
-        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
-        reduction_units = [ReductionAUnit, ReductionBUnit]
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):

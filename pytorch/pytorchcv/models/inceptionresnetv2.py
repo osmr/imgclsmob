@@ -154,14 +154,14 @@ class ConvSeqBranch(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : tuple of int
-        Number of output channels.
-    kernel_size : tuple of int or tuple of tuple/list of 2 int
-        Convolution window size.
-    strides : tuple of int or tuple of tuple/list of 2 int
-        Strides of the convolution.
-    padding : tuple of int or tuple of tuple/list of 2 int
-        Padding value for convolution layer.
+    out_channels_list : list of tuple of int
+        List of numbers of output channels.
+    kernel_size_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of convolution window sizes.
+    strides_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of strides of the convolution.
+    padding_list : list of tuple of int or tuple of tuple/list of 2 int
+        List of padding values for convolution layers.
     """
     def __init__(self,
                  in_channels,
@@ -493,14 +493,14 @@ class InceptionResNetV2(nn.Module):
         super(InceptionResNetV2, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
+        layers = [10, 21, 11]
+        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
+        reduction_units = [ReductionAUnit, ReductionBUnit]
 
         self.features = nn.Sequential()
         self.features.add_module("init_block", InceptInitBlock(
             in_channels=in_channels))
 
-        layers = [10, 21, 11]
-        normal_units = [InceptionAUnit, InceptionBUnit, InceptionCUnit]
-        reduction_units = [ReductionAUnit, ReductionBUnit]
         for i, layers_per_stage in enumerate(layers):
             stage = nn.Sequential()
             for j in range(layers_per_stage):

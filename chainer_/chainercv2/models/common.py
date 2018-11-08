@@ -3,7 +3,7 @@ import chainer.links as L
 from chainer import Chain
 
 __all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential',
-           'Concurrent']
+           'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
 
 
 def conv1x1(in_channels,
@@ -254,5 +254,40 @@ class Concurrent(SimpleSequential):
         out = []
         for name in self.layer_names:
             out.append(self[name](x))
+        out = F.concat(tuple(out), axis=self.axis)
+        return out
+
+
+class ParametricSequential(SimpleSequential):
+    """
+    A sequential container for modules with parameters.
+    Blocks will be executed in the order they are added.
+    """
+    def __init__(self):
+        super(ParametricSequential, self).__init__()
+
+    def __call__(self, x, **kwargs):
+        for name in self.layer_names:
+            x = self[name](x, **kwargs)
+        return x
+
+
+class ParametricConcurrent(SimpleSequential):
+    """
+    A container for concatenation of modules on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self, axis=1):
+        super(ParametricConcurrent, self).__init__()
+        self.axis = axis
+
+    def __call__(self, x, **kwargs):
+        out = []
+        for name in self.layer_names:
+            out.append(self[name](x, **kwargs))
         out = F.concat(tuple(out), axis=self.axis)
         return out

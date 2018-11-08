@@ -25,7 +25,7 @@ from .models.polynet import *
 # from .models.others.oth_inceptionv4 import *
 # from .models.others.oth_xception import *
 # from .models.others.oth_inceptionresnetv2 import *
-from .models.others.oth_polynet import *
+# from .models.others.oth_polynet import *
 
 __all__ = ['get_model']
 
@@ -194,7 +194,7 @@ _models = {
 
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
     # 'oth_inceptionresnetv2': oth_inceptionresnetv2,
-    'oth_polynet': oth_polynet,
+    # 'oth_polynet': oth_polynet,
 }
 
 

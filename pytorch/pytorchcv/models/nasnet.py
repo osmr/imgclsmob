@@ -845,9 +845,9 @@ class NormalUnit(nn.Module):
         return x_out
 
 
-class Reduction1Unit(nn.Module):
+class ReductionBaseUnit(nn.Module):
     """
-    NASNet Reduction1 unit.
+    NASNet Reduction base unit.
 
     Parameters:
     ----------
@@ -857,85 +857,15 @@ class Reduction1Unit(nn.Module):
         Number of input channels in previous input.
     out_channels : int
         Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 prev_in_channels,
-                 out_channels):
-        super(Reduction1Unit, self).__init__()
-        mid_channels = out_channels // 4
-
-        self.conv1x1_prev = nas_conv1x1(
-            in_channels=prev_in_channels,
-            out_channels=mid_channels)
-        self.conv1x1 = nas_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-
-        self.comb0_left = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            extra_padding=True)
-        self.comb0_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            extra_padding=True)
-
-        self.comb1_left = NasMaxPoolBlock(extra_padding=True)
-        self.comb1_right = dws_branch_k7_s2_p3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            extra_padding=True)
-
-        self.comb2_left = NasAvgPoolBlock(extra_padding=True)
-        self.comb2_right = dws_branch_k5_s2_p2(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            extra_padding=True)
-
-        self.comb3_right = nasnet_avgpool3x3_s1()
-
-        self.comb4_left = dws_branch_k3_s1_p1(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            extra_padding=True)
-        self.comb4_right = NasMaxPoolBlock(extra_padding=True)
-
-    def forward(self, x, x_prev):
-        x_left = self.conv1x1(x)
-        x_right = self.conv1x1_prev(x_prev)
-
-        x0 = self.comb0_left(x_left) + self.comb0_right(x_right)
-        x1 = self.comb1_left(x_left) + self.comb1_right(x_right)
-        x2 = self.comb2_left(x_left) + self.comb2_right(x_right)
-        x3 = x1 + self.comb3_right(x0)
-        x4 = self.comb4_left(x0) + self.comb4_right(x_left)
-
-        x_out = torch.cat((x1, x2, x3, x4), dim=1)
-        return x_out
-
-
-class Reduction2Unit(nn.Module):
-    """
-    NASNet Reduction2 unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    prev_in_channels : int
-        Number of input channels in previous input.
-    out_channels : int
-        Number of output channels.
-    extra_padding : bool
+    extra_padding : bool, default True
         Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels,
-                 extra_padding):
-        super(Reduction2Unit, self).__init__()
+                 extra_padding=True):
+        super(ReductionBaseUnit, self).__init__()
         mid_channels = out_channels // 4
 
         self.conv1x1_prev = nas_conv1x1(
@@ -986,6 +916,57 @@ class Reduction2Unit(nn.Module):
 
         x_out = torch.cat((x1, x2, x3, x4), dim=1)
         return x_out
+
+
+class Reduction1Unit(ReductionBaseUnit):
+    """
+    NASNet Reduction1 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
+        super(Reduction1Unit, self).__init__(
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels,
+            extra_padding=True)
+
+
+class Reduction2Unit(ReductionBaseUnit):
+    """
+    NASNet Reduction1 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    extra_padding : bool
+        Whether to use extra padding.
+    """
+    def __init__(self,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
+                 extra_padding):
+        super(Reduction2Unit, self).__init__(
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels,
+            extra_padding=extra_padding)
 
 
 class NASNetInitBlock(nn.Module):
@@ -1054,10 +1035,7 @@ class NASNet(nn.Module):
         super(NASNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
-        if extra_padding:
-            reduction_units = [Reduction1Unit, Reduction1Unit]
-        else:
-            reduction_units = [Reduction1Unit, Reduction2Unit]
+        reduction_units = [Reduction1Unit, Reduction2Unit]
 
         self.features = nasnet_dual_path_sequential(
             return_two=False,
@@ -1146,7 +1124,7 @@ def get_nasnet(repeat,
                root=os.path.join('~', '.torch', 'models'),
                **kwargs):
     """
-    Create NASNet (NASNet-A-Mobile) model with specific parameters.
+    Create NASNet-A model with specific parameters.
 
     Parameters:
     ----------

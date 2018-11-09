@@ -27,6 +27,9 @@ from .models.polynet import *
 # from .models.others.oth_inceptionresnetv2 import *
 # from .models.others.oth_polynet import *
 
+from .models.others.oth_nasnet import *
+from .models.others.oth_nasnet_mobile import *
+
 __all__ = ['get_model']
 
 
@@ -195,6 +198,8 @@ _models = {
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
     # 'oth_inceptionresnetv2': oth_inceptionresnetv2,
     # 'oth_polynet': oth_polynet,
+    'oth_nasnetalarge': oth_nasnetalarge,
+    'oth_nasnetamobile': oth_nasnetamobile,
 }
 
 

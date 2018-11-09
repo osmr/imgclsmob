@@ -1,10 +1,10 @@
 """
-    NASNet-A-Mobile, implemented in Gluon.
+    NASNet-A, implemented in Gluon.
     Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 """
 
-__all__ = ['NASNet', 'nasnet_a_mobile']
+__all__ = ['NASNet', 'nasnet_4a1056', 'nasnet_6a4032']
 
 import os
 from mxnet import cpu
@@ -12,11 +12,23 @@ from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1, DualPathSequential
 
 
-def nasnet_dual_path_scheme(block,
-                            x,
-                            x_prev):
+class NasDualPathScheme(object):
     """
-    NASNet specific scheme of dual path response for a block in a DualPathSequential block.
+    NASNet specific scheme of dual path response for a block in a DualPathSequential module.
+
+    Parameters:
+    ----------
+    can_skip_input : bool
+        Whether can skip input for some blocks.
+    """
+
+    def __init__(self,
+                 can_skip_input):
+        super(NasDualPathScheme, self).__init__()
+        self.can_skip_input = can_skip_input
+
+    """
+    Scheme function.
 
     Parameters:
     ----------
@@ -34,10 +46,17 @@ def nasnet_dual_path_scheme(block,
     x : Tensor
         Current processed tensor.
     """
-    x_next = block(x, x_prev)
-    if type(x_next) == tuple:
-        x_next, x = x_next
-    return x_next, x
+
+    def __call__(self,
+                 block,
+                 x,
+                 x_prev):
+        x_next = block(x, x_prev)
+        if type(x_next) == tuple:
+            x_next, x = x_next
+        if self.can_skip_input and hasattr(block, 'skip_input') and block.skip_input:
+            x = x_prev
+        return x_next, x
 
 
 def nasnet_dual_path_scheme_ordinal(block,
@@ -67,15 +86,31 @@ def nasnet_dual_path_scheme_ordinal(block,
 def nasnet_dual_path_sequential(return_two=True,
                                 first_ordinals=0,
                                 last_ordinals=0,
+                                can_skip_input=False,
                                 **kwargs):
     """
     NASNet specific dual path sequential container.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first blocks with single input/output.
+    last_ordinals : int, default 0
+        Number of the final blocks with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a block.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal block.
+    can_skip_input : bool, default False
+        Whether can skip input for some blocks.
     """
     return DualPathSequential(
         return_two=return_two,
         first_ordinals=first_ordinals,
         last_ordinals=last_ordinals,
-        dual_path_scheme=nasnet_dual_path_scheme,
+        dual_path_scheme=NasDualPathScheme(can_skip_input=can_skip_input),
         dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal,
         **kwargs)
 
@@ -93,16 +128,6 @@ def nasnet_batch_norm(channels):
         momentum=0.1,
         epsilon=0.001,
         in_channels=channels)
-
-
-def nasnet_maxpool():
-    """
-    NASNet specific Max pooling layer.
-    """
-    return nn.MaxPool2D(
-        pool_size=3,
-        strides=2,
-        padding=1)
 
 
 def nasnet_avgpool1x1_s2():
@@ -166,46 +191,62 @@ def process_with_padding(x,
     return x
 
 
-class MaxPoolPad(HybridBlock):
+class NasMaxPoolBlock(HybridBlock):
     """
     NASNet specific Max pooling layer with extra padding.
+
+    Parameters:
+    ----------
+    extra_padding : bool, default False
+        Whether to use extra padding.
     """
     def __init__(self,
+                 extra_padding=False,
                  **kwargs):
-        super(MaxPoolPad, self).__init__(**kwargs)
+        super(NasMaxPoolBlock, self).__init__(**kwargs)
+        self.extra_padding = extra_padding
+
         with self.name_scope():
-            self.pool = nasnet_maxpool()
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
 
     def hybrid_forward(self, F, x):
-        x = process_with_padding(x, F, self.pool)
+        if self.extra_padding:
+            x = process_with_padding(x, F, self.pool)
+        else:
+            x = self.pool(x)
         return x
 
 
-class AvgPoolPad(HybridBlock):
+class NasAvgPoolBlock(HybridBlock):
     """
     NASNet specific 3x3 Average pooling layer with extra padding.
 
     Parameters:
     ----------
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
+    extra_padding : bool, default False
+        Whether to use extra padding.
     """
     def __init__(self,
-                 strides=2,
-                 padding=1,
+                 extra_padding=False,
                  **kwargs):
-        super(AvgPoolPad, self).__init__(**kwargs)
+        super(NasAvgPoolBlock, self).__init__(**kwargs)
+        self.extra_padding = extra_padding
+
         with self.name_scope():
             self.pool = nn.AvgPool2D(
                 pool_size=3,
-                strides=strides,
-                padding=padding,
+                strides=2,
+                padding=1,
                 count_include_pad=False)
 
     def hybrid_forward(self, F, x):
-        x = process_with_padding(x, F, self.pool)
+        if self.extra_padding:
+            x = process_with_padding(x, F, self.pool)
+        else:
+            x = self.pool(x)
         return x
 
 
@@ -341,7 +382,7 @@ class NasDwsConv(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     """
     def __init__(self,
@@ -350,10 +391,10 @@ class NasDwsConv(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
-                 specific=False,
+                 extra_padding=False,
                  **kwargs):
         super(NasDwsConv, self).__init__(**kwargs)
-        self.specific = specific
+        self.extra_padding = extra_padding
 
         with self.name_scope():
             self.activ = nn.Activation(activation='relu')
@@ -368,7 +409,7 @@ class NasDwsConv(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.activ(x)
-        if self.specific:
+        if self.extra_padding:
             x = process_with_padding(x, F, self.conv)
         else:
             x = self.conv(x)
@@ -392,7 +433,7 @@ class DwsBranch(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
         Whether to use squeeze reduction if False.
@@ -403,11 +444,11 @@ class DwsBranch(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
-                 specific=False,
+                 extra_padding=False,
                  stem=False,
                  **kwargs):
         super(DwsBranch, self).__init__(**kwargs)
-        assert (not stem) or (not specific)
+        assert (not stem) or (not extra_padding)
         mid_channels = out_channels if stem else in_channels
 
         with self.name_scope():
@@ -417,7 +458,7 @@ class DwsBranch(HybridBlock):
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
-                specific=specific)
+                extra_padding=extra_padding)
             self.conv2 = NasDwsConv(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -433,7 +474,7 @@ class DwsBranch(HybridBlock):
 
 def dws_branch_k3_s1_p1(in_channels,
                         out_channels,
-                        specific=False):
+                        extra_padding=False):
     """
     3x3/1/1 version of the NASNet specific depthwise separable convolution branch.
 
@@ -443,7 +484,7 @@ def dws_branch_k3_s1_p1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     """
     return DwsBranch(
@@ -452,12 +493,12 @@ def dws_branch_k3_s1_p1(in_channels,
         kernel_size=3,
         strides=1,
         padding=1,
-        specific=specific)
+        extra_padding=extra_padding)
 
 
 def dws_branch_k5_s1_p2(in_channels,
                         out_channels,
-                        specific=False):
+                        extra_padding=False):
     """
     5x5/1/2 version of the NASNet specific depthwise separable convolution branch.
 
@@ -467,7 +508,7 @@ def dws_branch_k5_s1_p2(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     """
     return DwsBranch(
@@ -476,12 +517,12 @@ def dws_branch_k5_s1_p2(in_channels,
         kernel_size=5,
         strides=1,
         padding=2,
-        specific=specific)
+        extra_padding=extra_padding)
 
 
 def dws_branch_k5_s2_p2(in_channels,
                         out_channels,
-                        specific=False,
+                        extra_padding=False,
                         stem=False):
     """
     5x5/2/2 version of the NASNet specific depthwise separable convolution branch.
@@ -492,7 +533,7 @@ def dws_branch_k5_s2_p2(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
         Whether to use squeeze reduction if False.
@@ -503,13 +544,13 @@ def dws_branch_k5_s2_p2(in_channels,
         kernel_size=5,
         strides=2,
         padding=2,
-        specific=specific,
+        extra_padding=extra_padding,
         stem=stem)
 
 
 def dws_branch_k7_s2_p3(in_channels,
                         out_channels,
-                        specific=False,
+                        extra_padding=False,
                         stem=False):
     """
     7x7/2/3 version of the NASNet specific depthwise separable convolution branch.
@@ -520,7 +561,7 @@ def dws_branch_k7_s2_p3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
         Whether to use squeeze reduction if False.
@@ -531,7 +572,7 @@ def dws_branch_k7_s2_p3(in_channels,
         kernel_size=7,
         strides=2,
         padding=3,
-        specific=specific,
+        extra_padding=extra_padding,
         stem=stem)
 
 
@@ -545,16 +586,16 @@ class NasPathBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 specific=False,
+                 extra_padding=False,
                  **kwargs):
         super(NasPathBranch, self).__init__(**kwargs)
-        self.specific = specific
+        self.extra_padding = extra_padding
 
         with self.name_scope():
             self.avgpool = nasnet_avgpool1x1_s2()
@@ -563,7 +604,7 @@ class NasPathBranch(HybridBlock):
                 out_channels=out_channels)
 
     def hybrid_forward(self, F, x):
-        if self.specific:
+        if self.extra_padding:
             x = process_with_padding(x, F, pad_width=(0, 0, 0, 0, 0, 1, 0, 1))
         x = self.avgpool(x)
         x = self.conv(x)
@@ -596,7 +637,7 @@ class NasPathBlock(HybridBlock):
             self.path2 = NasPathBranch(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=True)
             self.bn = nasnet_batch_norm(channels=out_channels)
 
     def hybrid_forward(self, F, x):
@@ -639,7 +680,7 @@ class Stem1Unit(HybridBlock):
                 out_channels=mid_channels,
                 stem=True)
 
-            self.comb1_left = nasnet_maxpool()
+            self.comb1_left = NasMaxPoolBlock(extra_padding=False)
             self.comb1_right = dws_branch_k7_s2_p3(
                 in_channels=in_channels,
                 out_channels=mid_channels,
@@ -656,7 +697,7 @@ class Stem1Unit(HybridBlock):
             self.comb4_left = dws_branch_k3_s1_p1(
                 in_channels=mid_channels,
                 out_channels=mid_channels)
-            self.comb4_right = nasnet_maxpool()
+            self.comb4_right = NasMaxPoolBlock(extra_padding=False)
 
     def hybrid_forward(self, F, x, _=None):
         x_left = self.conv1x1(x)
@@ -684,11 +725,14 @@ class Stem2Unit(HybridBlock):
         Number of input channels in previous input.
     out_channels : int
         Number of output channels.
+    extra_padding : bool
+        Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels,
+                 extra_padding,
                  **kwargs):
         super(Stem2Unit, self).__init__(**kwargs)
         mid_channels = out_channels // 4
@@ -704,31 +748,31 @@ class Stem2Unit(HybridBlock):
             self.comb0_left = dws_branch_k5_s2_p2(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
             self.comb0_right = dws_branch_k7_s2_p3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
-            self.comb1_left = MaxPoolPad()
+            self.comb1_left = NasMaxPoolBlock(extra_padding=extra_padding)
             self.comb1_right = dws_branch_k7_s2_p3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
-            self.comb2_left = AvgPoolPad()
+            self.comb2_left = NasAvgPoolBlock(extra_padding=extra_padding)
             self.comb2_right = dws_branch_k5_s2_p2(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
             self.comb3_right = nasnet_avgpool3x3_s1()
 
             self.comb4_left = dws_branch_k3_s1_p1(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
-            self.comb4_right = MaxPoolPad()
+                extra_padding=extra_padding)
+            self.comb4_right = NasMaxPoolBlock(extra_padding=extra_padding)
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)
@@ -877,9 +921,9 @@ class NormalUnit(HybridBlock):
         return x_out
 
 
-class ReductionUnit(HybridBlock):
+class ReductionBaseUnit(HybridBlock):
     """
-    NASNet Reduction unit (there is only one reduction unit for NASNet-A-Mobile).
+    NASNet Reduction base unit.
 
     Parameters:
     ----------
@@ -889,13 +933,17 @@ class ReductionUnit(HybridBlock):
         Number of input channels in previous input.
     out_channels : int
         Number of output channels.
+    extra_padding : bool, default True
+        Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
                  prev_in_channels,
                  out_channels,
+                 extra_padding=True,
                  **kwargs):
-        super(ReductionUnit, self).__init__(**kwargs)
+        super(ReductionBaseUnit, self).__init__(**kwargs)
+        self.skip_input = True
         mid_channels = out_channels // 4
 
         with self.name_scope():
@@ -909,31 +957,31 @@ class ReductionUnit(HybridBlock):
             self.comb0_left = dws_branch_k5_s2_p2(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
             self.comb0_right = dws_branch_k7_s2_p3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
-            self.comb1_left = MaxPoolPad()
+            self.comb1_left = NasMaxPoolBlock(extra_padding=extra_padding)
             self.comb1_right = dws_branch_k7_s2_p3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
-            self.comb2_left = AvgPoolPad()
+            self.comb2_left = NasAvgPoolBlock(extra_padding=extra_padding)
             self.comb2_right = dws_branch_k5_s2_p2(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
+                extra_padding=extra_padding)
 
             self.comb3_right = nasnet_avgpool3x3_s1()
 
             self.comb4_left = dws_branch_k3_s1_p1(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                specific=True)
-            self.comb4_right = MaxPoolPad()
+                extra_padding=extra_padding)
+            self.comb4_right = NasMaxPoolBlock(extra_padding=extra_padding)
 
     def hybrid_forward(self, F, x, x_prev):
         x_left = self.conv1x1(x)
@@ -947,6 +995,57 @@ class ReductionUnit(HybridBlock):
 
         x_out = F.concat(x1, x2, x3, x4, dim=1)
         return x_out
+
+
+class Reduction1Unit(ReductionBaseUnit):
+    """
+    NASNet Reduction1 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels):
+        super(Reduction1Unit, self).__init__(
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels,
+            extra_padding=True)
+
+
+class Reduction2Unit(ReductionBaseUnit):
+    """
+    NASNet Reduction2 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    extra_padding : bool
+        Whether to use extra padding.
+    """
+    def __init__(self,
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
+                 extra_padding):
+        super(Reduction2Unit, self).__init__(
+            in_channels=in_channels,
+            prev_in_channels=prev_in_channels,
+            out_channels=out_channels,
+            extra_padding=extra_padding)
 
 
 class NASNetInitBlock(HybridBlock):
@@ -983,7 +1082,7 @@ class NASNetInitBlock(HybridBlock):
 
 class NASNet(HybridBlock):
     """
-    NASNet (NASNet-A-Mobile) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
+    NASNet-A model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 
     Parameters:
@@ -994,6 +1093,12 @@ class NASNet(HybridBlock):
         Number of output channels for the initial unit.
     stem_blocks_channels : list of 2 int
         Number of output channels for the Stem units.
+    final_pool_size : int
+        Size of the pooling windows for final pool.
+    extra_padding : bool
+        Whether to use extra padding.
+    skip_reduction_layer_input : bool
+        Whether to skip the reduction layers when calculating the previous layer to connect to.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -1005,6 +1110,9 @@ class NASNet(HybridBlock):
                  channels,
                  init_block_channels,
                  stem_blocks_channels,
+                 final_pool_size,
+                 extra_padding,
+                 skip_reduction_layer_input,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -1012,6 +1120,7 @@ class NASNet(HybridBlock):
         super(NASNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
+        reduction_units = [Reduction1Unit, Reduction2Unit]
 
         with self.name_scope():
             self.features = nasnet_dual_path_sequential(
@@ -1035,31 +1144,41 @@ class NASNet(HybridBlock):
             self.features.add(Stem2Unit(
                 in_channels=in_channels,
                 prev_in_channels=prev_in_channels,
-                out_channels=out_channels))
+                out_channels=out_channels,
+                extra_padding=extra_padding))
             prev_in_channels = in_channels
             in_channels = out_channels
 
             for i, channels_per_stage in enumerate(channels):
-                stage = nasnet_dual_path_sequential(prefix='stage{}_'.format(i + 1))
+                stage = nasnet_dual_path_sequential(
+                    can_skip_input=skip_reduction_layer_input,
+                    prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         if (j == 0) and (i != 0):
-                            unit = ReductionUnit
+                            unit = reduction_units[i - 1]
                         elif ((i == 0) and (j == 0)) or ((i != 0) and (j == 1)):
                             unit = FirstUnit
                         else:
                             unit = NormalUnit
-                        stage.add(unit(
-                            in_channels=in_channels,
-                            prev_in_channels=prev_in_channels,
-                            out_channels=out_channels))
+                        if unit == Reduction2Unit:
+                            stage.add(Reduction2Unit(
+                                in_channels=in_channels,
+                                prev_in_channels=prev_in_channels,
+                                out_channels=out_channels,
+                                extra_padding=extra_padding))
+                        else:
+                            stage.add(unit(
+                                in_channels=in_channels,
+                                prev_in_channels=prev_in_channels,
+                                out_channels=out_channels))
                         prev_in_channels = in_channels
                         in_channels = out_channels
                 self.features.add(stage)
 
             self.features.add(nn.Activation('relu'))
             self.features.add(nn.AvgPool2D(
-                pool_size=7,
+                pool_size=final_pool_size,
                 strides=1))
 
             self.output = nn.HybridSequential(prefix='')
@@ -1077,13 +1196,18 @@ class NASNet(HybridBlock):
 
 def get_nasnet(repeat,
                penultimate_filters,
+               init_block_channels,
+               final_pool_size,
+               extra_padding,
+               skip_reduction_layer_input,
+               in_size,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
                root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
-    Create NASNet (NASNet-A-Mobile) model with specific parameters.
+    Create NASNet-A model with specific parameters.
 
     Parameters:
     ----------
@@ -1091,6 +1215,16 @@ def get_nasnet(repeat,
         NNumber of cell repeats.
     penultimate_filters : int
         Number of filters in the penultimate layer of the network.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    final_pool_size : int
+        Size of the pooling windows for final pool.
+    extra_padding : bool
+        Whether to use extra padding.
+    skip_reduction_layer_input : bool
+        Whether to skip the reduction layers when calculating the previous layer to connect to.
+    in_size : tuple of two ints
+        Spatial size of the expected input image.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -1100,13 +1234,11 @@ def get_nasnet(repeat,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    assert (repeat == 4)
-
-    init_block_channels = 32
     stem_blocks_channels = [1, 2]
-    channels = [[6, 6, 6, 6],
-                [8, 12, 12, 12, 12],
-                [16, 24, 24, 24, 24]]
+    reduct_channels = [[], [8], [16]]
+    norm_channels = [6, 12, 24]
+    channels = [rci + [nci] * repeat for rci, nci in zip(reduct_channels, norm_channels)]
+
     base_channel_chunk = penultimate_filters // channels[-1][-1]
 
     stem_blocks_channels = [(ci * base_channel_chunk) for ci in stem_blocks_channels]
@@ -1116,6 +1248,10 @@ def get_nasnet(repeat,
         channels=channels,
         init_block_channels=init_block_channels,
         stem_blocks_channels=stem_blocks_channels,
+        final_pool_size=final_pool_size,
+        extra_padding=extra_padding,
+        skip_reduction_layer_input=skip_reduction_layer_input,
+        in_size=in_size,
         **kwargs)
 
     if pretrained:
@@ -1131,9 +1267,9 @@ def get_nasnet(repeat,
     return net
 
 
-def nasnet_a_mobile(**kwargs):
+def nasnet_4a1056(**kwargs):
     """
-    NASNet-A-Mobile (NASNet 4x1056) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
+    NASNet-A 4@1056 (NASNet-A-Mobile) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 
     Parameters:
@@ -1145,17 +1281,53 @@ def nasnet_a_mobile(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_nasnet(repeat=4, penultimate_filters=1056, model_name="nasnet_a_mobile", **kwargs)
+    return get_nasnet(
+        repeat=4,
+        penultimate_filters=1056,
+        init_block_channels=32,
+        final_pool_size=7,
+        extra_padding=True,
+        skip_reduction_layer_input=False,
+        in_size=(224, 224),
+        model_name="nasnet_4a1056",
+        **kwargs)
+
+
+def nasnet_6a4032(**kwargs):
+    """
+    NASNet-A 6@4032 (NASNet-A-Large) model from 'Learning Transferable Architectures for Scalable Image Recognition,'
+    https://arxiv.org/abs/1707.07012.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_nasnet(
+        repeat=6,
+        penultimate_filters=4032,
+        init_block_channels=96,
+        final_pool_size=11,
+        extra_padding=False,
+        skip_reduction_layer_input=True,
+        in_size=(331, 331),
+        model_name="nasnet_6a4032",
+        **kwargs)
 
 
 def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
-        nasnet_a_mobile,
+        nasnet_4a1056,
+        nasnet_6a4032,
     ]
 
     for model in models:
@@ -1173,9 +1345,10 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != nasnet_a_mobile or weight_count == 5289978)
+        assert (model != nasnet_4a1056 or weight_count == 5289978)
+        assert (model != nasnet_6a4032 or weight_count == 88753150)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
         y = net(x)
         assert (y.shape == (1, 1000))
 

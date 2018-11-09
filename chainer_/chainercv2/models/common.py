@@ -194,7 +194,7 @@ class SimpleSequential(Chain):
 
 class DualPathSequential(SimpleSequential):
     """
-    A sequential container for hybrid blocks with dual inputs/outputs.
+    A sequential container for blocks with dual inputs/outputs.
     Blocks will be executed in the order they are added.
 
     Parameters:

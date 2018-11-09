@@ -94,13 +94,13 @@ def nasnet_dual_path_sequential(return_two=True,
     return_two : bool, default True
         Whether to return two output after execution.
     first_ordinals : int, default 0
-        Number of the first blocks with single input/output.
+        Number of the first modules with single input/output.
     last_ordinals : int, default 0
-        Number of the final blocks with single input/output.
+        Number of the final modules with single input/output.
     dual_path_scheme : function
-        Scheme of dual path response for a block.
+        Scheme of dual path response for a module.
     dual_path_scheme_ordinal : function
-        Scheme of dual path response for an ordinal block.
+        Scheme of dual path response for an ordinal module.
     can_skip_input : bool, default False
         Whether can skip input for some modules.
     """
@@ -552,26 +552,26 @@ class NasPathBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    specific : bool, default False
+    extra_padding : bool, default False
         Whether to use extra padding.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 specific=False):
+                 extra_padding=False):
         super(NasPathBranch, self).__init__()
-        self.specific = specific
+        self.extra_padding = extra_padding
 
         self.avgpool = nasnet_avgpool1x1_s2()
         self.conv = conv1x1(
             in_channels=in_channels,
             out_channels=out_channels)
-        if self.specific:
-            self.padding = nn.ZeroPad2d(padding=(0, 1, 0, 1))
+        if self.extra_padding:
+            self.pad = nn.ZeroPad2d(padding=(0, 1, 0, 1))
 
     def forward(self, x):
-        if self.specific:
-            x = self.padding(x)
+        if self.extra_padding:
+            x = self.pad(x)
             x = x[:, :, 1:, 1:].contiguous()
         x = self.avgpool(x)
         x = self.conv(x)
@@ -602,7 +602,7 @@ class NasPathBlock(nn.Module):
         self.path2 = NasPathBranch(
             in_channels=in_channels,
             out_channels=mid_channels,
-            specific=True)
+            extra_padding=True)
         self.bn = nasnet_batch_norm(channels=out_channels)
 
     def forward(self, x):
@@ -978,7 +978,7 @@ class Reduction1Unit(ReductionBaseUnit):
 
 class Reduction2Unit(ReductionBaseUnit):
     """
-    NASNet Reduction1 unit.
+    NASNet Reduction2 unit.
 
     Parameters:
     ----------

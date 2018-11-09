@@ -146,10 +146,11 @@ def nasnet_avgpool3x3_s1():
     NASNet specific 3x3 Average pooling layer with stride 1.
     """
     return partial(
-        F.average_pooling_2d,
+        F.average_pooling_nd,
         ksize=3,
         stride=1,
-        pad=1)
+        pad=1,
+        pad_value=None)
 
 
 def nasnet_avgpool3x3_s2():
@@ -157,10 +158,11 @@ def nasnet_avgpool3x3_s2():
     NASNet specific 3x3 Average pooling layer with stride 2.
     """
     return partial(
-        F.average_pooling_2d,
+        F.average_pooling_nd,
         ksize=3,
         stride=2,
-        pad=1)
+        pad=1,
+        pad_value=None)
 
 
 def process_with_padding(x,
@@ -235,10 +237,11 @@ class NasAvgPoolBlock(Chain):
 
         with self.init_scope():
             self.pool = partial(
-                F.average_pooling_2d,
+                F.average_pooling_nd,
                 ksize=3,
                 stride=2,
-                pad=1)
+                pad=1,
+                pad_value=None)
 
     def __call__(self, x):
         if self.extra_padding:

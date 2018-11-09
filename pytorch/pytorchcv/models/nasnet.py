@@ -58,34 +58,6 @@ class NasDualPathScheme(object):
         return x_next, x
 
 
-# def nasnet_dual_path_scheme(module,
-#                             x,
-#                             x_prev):
-#     """
-#     NASNet specific scheme of dual path response for a module in a DualPathSequential module.
-#
-#     Parameters:
-#     ----------
-#     module : nn.Module
-#         A module.
-#     x : Tensor
-#         Current processed tensor.
-#     x_prev : Tensor
-#         Previous processed tensor.
-#
-#     Returns
-#     -------
-#     x_next : Tensor
-#         Next processed tensor.
-#     x : Tensor
-#         Current processed tensor.
-#     """
-#     x_next = module(x, x_prev)
-#     if type(x_next) == tuple:
-#         x_next, x = x_next
-#     return x_next, x
-
-
 def nasnet_dual_path_scheme_ordinal(module,
                                     x,
                                     _):
@@ -1265,7 +1237,7 @@ def nasnet_4a1056(**kwargs):
         init_block_channels=32,
         final_pool_size=7,
         extra_padding=True,
-        skip_reduction_layer_input=True,
+        skip_reduction_layer_input=False,
         in_size=(224, 224),
         model_name="nasnet_4a1056",
         **kwargs)
@@ -1303,7 +1275,7 @@ def _test():
     pretrained = False
 
     models = [
-        # nasnet_4a1056,
+        nasnet_4a1056,
         nasnet_6a4032,
     ]
 

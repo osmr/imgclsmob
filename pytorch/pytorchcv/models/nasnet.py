@@ -1232,7 +1232,7 @@ def _test():
     pretrained = False
 
     models = [
-        nasnet_4a1056,
+        # nasnet_4a1056,
         nasnet_6a4032,
     ]
 

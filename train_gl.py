@@ -187,6 +187,11 @@ def parse_args():
         '--no-wd',
         action='store_true',
         help='whether to remove weight decay on bias, and beta/gamma for batchnorm layers.')
+    parser.add_argument(
+        '--grad-clip',
+        type=float,
+        default=None,
+        help='max_norm for gradient clipping.')
 
     parser.add_argument(
         '--mixup',
@@ -343,7 +348,8 @@ def train_epoch(epoch,
                 mixup,
                 mixup_epoch_tail,
                 num_classes,
-                num_epochs):
+                num_epochs,
+                grad_clip_value):
 
     labels_list_inds = None
     tic = time.time()
@@ -371,6 +377,11 @@ def train_epoch(epoch,
         for loss in loss_list:
             loss.backward()
         lr_scheduler.update(i, epoch)
+
+        if grad_clip_value is not None:
+            grads = [v.grad(ctx[0]) for v in net.collect_params().values() if v._grad is not None]
+            gluon.utils.clip_global_norm(grads, max_norm=grad_clip_value)
+
         trainer.step(batch_size)
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
@@ -416,6 +427,7 @@ def train_net(batch_size,
               mixup,
               mixup_epoch_tail,
               num_classes,
+              grad_clip_value,
               ctx):
 
     if isinstance(ctx, mx.Context):
@@ -462,7 +474,8 @@ def train_net(batch_size,
             mixup=mixup,
             mixup_epoch_tail=mixup_epoch_tail,
             num_classes=num_classes,
-            num_epochs=num_epochs)
+            num_epochs=num_epochs,
+            grad_clip_value=grad_clip_value)
 
         err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1_val,
@@ -596,6 +609,7 @@ def main():
         mixup=args.mixup,
         mixup_epoch_tail=args.mixup_epoch_tail,
         num_classes=num_classes,
+        grad_clip_value=args.grad_clip,
         ctx=ctx)
 
 

@@ -13,11 +13,22 @@ import torch.nn.init as init
 from .common import conv1x1, DualPathSequential
 
 
-def nasnet_dual_path_scheme(module,
-                            x,
-                            x_prev):
+class NasDualPathScheme(object):
     """
     NASNet specific scheme of dual path response for a module in a DualPathSequential module.
+
+    Parameters:
+    ----------
+    can_skip_input : bool
+        Whether can skip input for some modules.
+    """
+    def __init__(self,
+                 can_skip_input):
+        super(NasDualPathScheme, self).__init__()
+        self.can_skip_input = can_skip_input
+
+    """
+    Scheme function.
 
     Parameters:
     ----------
@@ -35,10 +46,44 @@ def nasnet_dual_path_scheme(module,
     x : Tensor
         Current processed tensor.
     """
-    x_next = module(x, x_prev)
-    if type(x_next) == tuple:
-        x_next, x = x_next
-    return x_next, x
+    def __call__(self,
+                 module,
+                 x,
+                 x_prev):
+        x_next = module(x, x_prev)
+        if type(x_next) == tuple:
+            x_next, x = x_next
+        if self.can_skip_input and hasattr(module, 'skip_input') and module.skip_input:
+            x = x_prev
+        return x_next, x
+
+
+# def nasnet_dual_path_scheme(module,
+#                             x,
+#                             x_prev):
+#     """
+#     NASNet specific scheme of dual path response for a module in a DualPathSequential module.
+#
+#     Parameters:
+#     ----------
+#     module : nn.Module
+#         A module.
+#     x : Tensor
+#         Current processed tensor.
+#     x_prev : Tensor
+#         Previous processed tensor.
+#
+#     Returns
+#     -------
+#     x_next : Tensor
+#         Next processed tensor.
+#     x : Tensor
+#         Current processed tensor.
+#     """
+#     x_next = module(x, x_prev)
+#     if type(x_next) == tuple:
+#         x_next, x = x_next
+#     return x_next, x
 
 
 def nasnet_dual_path_scheme_ordinal(module,
@@ -67,15 +112,31 @@ def nasnet_dual_path_scheme_ordinal(module,
 
 def nasnet_dual_path_sequential(return_two=True,
                                 first_ordinals=0,
-                                last_ordinals=0):
+                                last_ordinals=0,
+                                can_skip_input=False):
     """
     NASNet specific dual path sequential container.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first blocks with single input/output.
+    last_ordinals : int, default 0
+        Number of the final blocks with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a block.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal block.
+    can_skip_input : bool, default False
+        Whether can skip input for some modules.
     """
     return DualPathSequential(
         return_two=return_two,
         first_ordinals=first_ordinals,
         last_ordinals=last_ordinals,
-        dual_path_scheme=nasnet_dual_path_scheme,
+        dual_path_scheme=NasDualPathScheme(can_skip_input=can_skip_input),
         dual_path_scheme_ordinal=nasnet_dual_path_scheme_ordinal)
 
 
@@ -866,6 +927,7 @@ class ReductionBaseUnit(nn.Module):
                  out_channels,
                  extra_padding=True):
         super(ReductionBaseUnit, self).__init__()
+        self.skip_input = True
         mid_channels = out_channels // 4
 
         self.conv1x1_prev = nas_conv1x1(
@@ -1016,6 +1078,8 @@ class NASNet(nn.Module):
         Size of the pooling windows for final pool.
     extra_padding : bool
         Whether to use extra padding.
+    skip_reduction_layer_input : bool
+        Whether to skip the reduction layers when calculating the previous layer to connect to.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -1029,6 +1093,7 @@ class NASNet(nn.Module):
                  stem_blocks_channels,
                  final_pool_size,
                  extra_padding,
+                 skip_reduction_layer_input,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -1063,7 +1128,7 @@ class NASNet(nn.Module):
         in_channels = out_channels
 
         for i, channels_per_stage in enumerate(channels):
-            stage = nasnet_dual_path_sequential()
+            stage = nasnet_dual_path_sequential(can_skip_input=skip_reduction_layer_input)
             for j, out_channels in enumerate(channels_per_stage):
                 if (j == 0) and (i != 0):
                     unit = reduction_units[i - 1]
@@ -1118,6 +1183,7 @@ def get_nasnet(repeat,
                init_block_channels,
                final_pool_size,
                extra_padding,
+               skip_reduction_layer_input,
                in_size,
                model_name=None,
                pretrained=False,
@@ -1138,6 +1204,8 @@ def get_nasnet(repeat,
         Size of the pooling windows for final pool.
     extra_padding : bool
         Whether to use extra padding.
+    skip_reduction_layer_input : bool
+        Whether to skip the reduction layers when calculating the previous layer to connect to.
     in_size : tuple of two ints
         Spatial size of the expected input image.
     model_name : str or None, default None
@@ -1163,6 +1231,7 @@ def get_nasnet(repeat,
         stem_blocks_channels=stem_blocks_channels,
         final_pool_size=final_pool_size,
         extra_padding=extra_padding,
+        skip_reduction_layer_input=skip_reduction_layer_input,
         in_size=in_size,
         **kwargs)
 
@@ -1196,6 +1265,7 @@ def nasnet_4a1056(**kwargs):
         init_block_channels=32,
         final_pool_size=7,
         extra_padding=True,
+        skip_reduction_layer_input=True,
         in_size=(224, 224),
         model_name="nasnet_4a1056",
         **kwargs)
@@ -1219,6 +1289,7 @@ def nasnet_6a4032(**kwargs):
         init_block_channels=96,
         final_pool_size=11,
         extra_padding=False,
+        skip_reduction_layer_input=True,
         in_size=(331, 331),
         model_name="nasnet_6a4032",
         **kwargs)
@@ -1240,7 +1311,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        # net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

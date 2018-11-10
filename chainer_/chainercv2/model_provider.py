@@ -20,7 +20,6 @@ from .models.inceptionresnetv2 import *
 from .models.xception import *
 from .models.polynet import *
 from .models.nasnet import *
-from .models.nasnet_old import *
 
 __all__ = ['get_model']
 
@@ -182,7 +181,6 @@ _models = {
     'xception': xception,
     'polynet': polynet,
 
-    'nasnet_a_mobile': nasnet_a_mobile,
     'nasnet_4a1056': nasnet_4a1056,
     'nasnet_6a4032': nasnet_6a4032,
 }

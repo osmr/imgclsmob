@@ -14,10 +14,10 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
 from .models.inceptionresnetv2 import *
-from .models.xception import *
 from .models.polynet import *
 from .models.nasnet import *
 
@@ -175,10 +175,10 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
+    'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
     'inceptionresnetv2': inceptionresnetv2,
-    'xception': xception,
     'polynet': polynet,
 
     'nasnet_4a1056': nasnet_4a1056,

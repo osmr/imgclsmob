@@ -423,36 +423,6 @@ class PnasUnit(PnasBaseUnit):
         return x_out
 
 
-class NASNetInitBlock(nn.Module):
-    """
-    PNASNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(NASNetInitBlock, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=3,
-            stride=2,
-            padding=0,
-            bias=False)
-        self.bn = nasnet_batch_norm(channels=out_channels)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        return x
-
-
 class PNASNet(nn.Module):
     """
     PNASNet model from 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.

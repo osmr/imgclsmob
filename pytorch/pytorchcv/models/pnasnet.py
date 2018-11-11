@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 from .common import conv1x1
-from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock
+from .nasnet import nasnet_dual_path_sequential, nasnet_batch_norm, NasConv, NasDwsConv, NasPathBlock, NASNetInitBlock
 
 
 class PnasMaxPoolBlock(nn.Module):
@@ -423,7 +423,7 @@ class PnasUnit(PnasBaseUnit):
         return x_out
 
 
-class PNASNetInitBlock(nn.Module):
+class NASNetInitBlock(nn.Module):
     """
     PNASNet specific initial block.
 
@@ -437,7 +437,7 @@ class PNASNetInitBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(PNASNetInitBlock, self).__init__()
+        super(NASNetInitBlock, self).__init__()
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -487,7 +487,7 @@ class PNASNet(nn.Module):
             return_two=False,
             first_ordinals=2,
             last_ordinals=2)
-        self.features.add_module("init_block", PNASNetInitBlock(
+        self.features.add_module("init_block", NASNetInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels

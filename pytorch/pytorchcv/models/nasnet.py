@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv1x1, DualPathSequential
+from .common import conv1x1, DualPathSequential
 
 
 class NasDualPathScheme(object):

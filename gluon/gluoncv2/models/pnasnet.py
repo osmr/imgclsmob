@@ -444,7 +444,7 @@ class PNASNet(HybridBlock):
         Number of output channels for the Stem1 unit.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple of two ints, default (331, 331)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
@@ -454,7 +454,7 @@ class PNASNet(HybridBlock):
                  init_block_channels,
                  stem1_blocks_channels,
                  in_channels=3,
-                 in_size=(224, 224),
+                 in_size=(331, 331),
                  classes=1000,
                  **kwargs):
         super(PNASNet, self).__init__(**kwargs)

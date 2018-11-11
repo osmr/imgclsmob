@@ -20,6 +20,7 @@ from .models.inceptionv4 import *
 from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
+from .models.pnasnet import *
 
 # from .models.others.oth_inceptionv3 import *
 
@@ -185,6 +186,8 @@ _models = {
 
     'nasnet_4a1056': nasnet_4a1056,
     'nasnet_6a4032': nasnet_6a4032,
+
+    'pnasnet5large': pnasnet5large,
 
     # 'oth_inceptionv3': oth_inception_v3,
 }

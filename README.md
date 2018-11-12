@@ -160,6 +160,7 @@ with tf.Session() as sess:
 - InceptionV4/InceptionResNetV2 (['Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning'](https://arxiv.org/abs/1602.07261))
 - PolyNet (['PolyNet: A Pursuit of Structural Diversity in Very Deep Networks'](https://arxiv.org/abs/1611.05725))
 - NASNet (['Learning Transferable Architectures for Scalable Image Recognition'](https://arxiv.org/abs/1707.07012))
+- PNASNet (['Progressive Neural Architecture Search'](https://arxiv.org/abs/1712.00559))
 
 ## Pretrained models
 
@@ -253,6 +254,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | InceptionResNetV2 | 20.08 | 5.02 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.99/inceptionresnetv2-0502-0b93c6ef.params.log)) |
 | PolyNet | 19.09 | 4.53 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0453-74280314.params.log)) |
 | NASNet-A 4@1056 | 25.37 | 7.95 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0795-5c78908e.params.log)) |
+| NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |
 
 ### For PyTorch
 
@@ -334,6 +336,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | InceptionResNetV2 | 20.05 | 5.00 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.99/inceptionresnetv2-0500-e236401f.pth.log)) |
 | PolyNet | 19.10 | 4.52 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0452-6a1b295d.pth.log)) |
 | NASNet-A 4@1056 | 25.68 | 8.16 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0816-d21bbaf5.pth.log)) |
+| NASNet-A 6@4032 | 18.14 | 4.21 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0421-f354d28f.pth.log)) |
 
 ### For Chainer
 
@@ -415,6 +418,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | InceptionResNetV2 | 20.03 | 5.01 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.99/inceptionresnetv2-0501-9c91e414.npz.log)) |
 | PolyNet | 19.08 | 4.50 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0450-6dc7028b.npz.log)) |
 | NASNet-A 4@1056 | 25.36 | 7.96 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0796-f09950c0.npz.log)) |
+| NASNet-A 6@4032 | 18.17 | 4.22 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0422-d49d4663.npz.log)) |
 
 ### For Keras
 

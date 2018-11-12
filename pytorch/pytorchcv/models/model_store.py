@@ -85,7 +85,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('inceptionv4', '0532', '6bdbf383118c588f4b3a0e0b1fbae6ae15c6d7a8', 'v0.0.98'),
     ('inceptionresnetv2', '0500', 'e236401fde0eaf7ed0a9d70f5166aea9213e20d1', 'v0.0.99'),
     ('polynet', '0452', '6a1b295dad3f261b48e845f1b283e4eef3ab5a0b', 'v0.0.96'),
-    ('nasnet_4a1056', '0816', 'd21bbaf5e937c2e06134fa40e7bdb1f501423b86', 'v0.0.97')]}
+    ('nasnet_4a1056', '0816', 'd21bbaf5e937c2e06134fa40e7bdb1f501423b86', 'v0.0.97'),
+    ('nasnet_6a4032', '0421', 'f354d28f4acdde399e081260c3f46152eca5d27e', 'v0.0.101')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

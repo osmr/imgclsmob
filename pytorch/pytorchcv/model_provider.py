@@ -30,7 +30,7 @@ from .models.pnasnet import *
 
 # from .models.others.oth_nasnet import *
 # from .models.others.oth_nasnet_mobile import *
-from .models.others.oth_pnasnet import *
+# from .models.others.oth_pnasnet import *
 
 __all__ = ['get_model']
 
@@ -205,7 +205,7 @@ _models = {
     # 'oth_polynet': oth_polynet,
     # 'oth_nasnetalarge': oth_nasnetalarge,
     # 'oth_nasnetamobile': oth_nasnetamobile,
-    'oth_pnasnet5large': oth_pnasnet5large,
+    # 'oth_pnasnet5large': oth_pnasnet5large,
 }
 
 

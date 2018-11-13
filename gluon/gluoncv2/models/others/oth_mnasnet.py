@@ -72,6 +72,7 @@ class SepCONV(nn.HybridBlock):
 class ExpandedConv(nn.HybridBlock):
     def __init__(self, inp, oup, t, strides, kernel=3, same_shape=True, **kwargs):
         super(ExpandedConv, self).__init__(**kwargs)
+        # print("inp={}, oup={}, t={}, strides={}, kernel={}".format(inp, oup, t, strides, kernel))
 
         self.same_shape = same_shape
         self.strides = strides
@@ -121,6 +122,7 @@ class MobilenetV2(nn.HybridBlock):
             inp = 16
             for i, (t, c, n, s, k, prefix) in enumerate(self.interverted_residual_setting):
                 oup = c
+                # print("i={}, (t={}, c={}, n={}, s={}, k={}, prefix={}), inp={}, oup={}".format(i, t, c, n, s, k, prefix, inp, oup))
                 self.features.add(ExpandedConvSequence(t, k, inp, oup, n, s, prefix=prefix))
                 inp = oup
 
@@ -133,18 +135,73 @@ class MobilenetV2(nn.HybridBlock):
         x = self.output(x)
         return x
 
-if __name__ == '__main__':
-    net = MobilenetV2(1000, prefix="")
-    x = nd.random.normal(shape=(1,3,224,224))
-    net.initialize()
-    y = net(x)
-    net.summary(x)
+# if __name__ == '__main__':
+#     net = MobilenetV2(1000, prefix="")
+#     x = nd.random.normal(shape=(1,3,224,224))
+#     net.initialize()
+#     y = net(x)
+#     net.summary(x)
+#
+#     # save as symbol
+#     #data =mx.sym.var('data')
+#     #sym = net(data)
+#
+#     ## plot network graph
+#     #mx.viz.print_summary(sym, shape={'data':(8,3,224,224)})
+#     #mx.viz.plot_network(sym,shape={'data':(8,3,224,224)}, node_attrs={'shape':'oval','fixedsize':'fasl==false'}).view()
 
-    # save as symbol
-    #data =mx.sym.var('data')
-    #sym = net(data)
 
-    ## plot network graph
-    #mx.viz.print_summary(sym, shape={'data':(8,3,224,224)})
-    #mx.viz.plot_network(sym,shape={'data':(8,3,224,224)}, node_attrs={'shape':'oval','fixedsize':'fasl==false'}).view()
+def oth_mnasnet(model_name=None,
+                pretrained=False,
+                ctx=None,
+                root=None,
+                **kwargs):
 
+    net = MobilenetV2(**kwargs)
+
+    # if pretrained:
+    #     import mxnet as mx
+    #     from .model_store import get_model_file
+    #     net.load_parameters(
+    #         filename=get_model_file(
+    #             model_name=model_name,
+    #             local_model_store_dir_path=root),
+    #         ctx=mx.cpu())
+
+    return net
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_mnasnet,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_mnasnet or weight_count == 4308816)
+
+
+if __name__ == "__main__":
+    _test()

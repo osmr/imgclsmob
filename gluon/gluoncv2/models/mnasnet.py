@@ -10,20 +10,9 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-class ReLU6(nn.HybridBlock):
+class ConvBlock(HybridBlock):
     """
-    ReLU6 activation layer.
-    """
-    def __init__(self, **kwargs):
-        super(ReLU6, self).__init__(**kwargs)
-
-    def hybrid_forward(self, F, x):
-        return F.clip(x, 0, 6, name="relu6")
-
-
-class MobnetConv(HybridBlock):
-    """
-    MnasNet specific convolution block.
+    Standard convolution block with Batch normalization and ReLU activation.
 
     Parameters:
     ----------
@@ -37,11 +26,11 @@ class MobnetConv(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    groups : int
+    groups : int, default 1
         Number of groups.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
+    activate : bool, default True
         Whether activate the convolution block.
     """
     def __init__(self,
@@ -50,11 +39,11 @@ class MobnetConv(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
-                 groups,
-                 bn_use_global_stats,
-                 activate,
+                 groups=1,
+                 bn_use_global_stats=False,
+                 activate=True,
                  **kwargs):
-        super(MobnetConv, self).__init__(**kwargs)
+        super(ConvBlock, self).__init__(**kwargs)
         self.activate = activate
 
         with self.name_scope():
@@ -70,7 +59,7 @@ class MobnetConv(HybridBlock):
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
             if self.activate:
-                self.activ = ReLU6()
+                self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -80,12 +69,12 @@ class MobnetConv(HybridBlock):
         return x
 
 
-def mobnet_conv1x1(in_channels,
-                   out_channels,
-                   bn_use_global_stats,
-                   activate):
+def conv1x1_block(in_channels,
+                  out_channels,
+                  bn_use_global_stats,
+                  activate=True):
     """
-    1x1 version of the MnasNet specific convolution block.
+    1x1 version of the standard convolution block.
 
     Parameters:
     ----------
@@ -95,10 +84,10 @@ def mobnet_conv1x1(in_channels,
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
+    activate : bool, default True
         Whether activate the convolution block.
     """
-    return MobnetConv(
+    return ConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
@@ -109,13 +98,14 @@ def mobnet_conv1x1(in_channels,
         activate=activate)
 
 
-def mobnet_dwconv3x3(in_channels,
-                     out_channels,
-                     strides,
-                     bn_use_global_stats,
-                     activate):
+def dwconv_block(in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 bn_use_global_stats,
+                 activate=True):
     """
-    3x3 depthwise version of the MnasNet specific convolution block.
+    Depthwise version of the standard convolution block.
 
     Parameters:
     ----------
@@ -123,27 +113,29 @@ def mobnet_dwconv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
+    activate : bool, default True
         Whether activate the convolution block.
     """
-    return MobnetConv(
+    return ConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        kernel_size=kernel_size,
         strides=strides,
-        padding=1,
+        padding=(kernel_size // 2),
         groups=out_channels,
         bn_use_global_stats=bn_use_global_stats,
         activate=activate)
 
 
-class LinearBottleneck(HybridBlock):
+class DwsConvBlock(HybridBlock):
     """
-    So-called 'Linear Bottleneck' layer. It is used as a MnasNet unit.
+    Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
     Parameters:
     ----------
@@ -151,37 +143,79 @@ class LinearBottleneck(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the second convolution layer.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    expansion : bool
-        Whether do expansion of channels.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
                  bn_use_global_stats,
-                 expansion,
                  **kwargs):
-        super(LinearBottleneck, self).__init__(**kwargs)
+        super(DwsConvBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.dw_conv = dwconv_block(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                kernel_size=3,
+                strides=1,
+                bn_use_global_stats=bn_use_global_stats)
+            self.pw_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
+
+    def hybrid_forward(self, F, x):
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
+        return x
+
+
+class MnasUnit(HybridBlock):
+    """
+    MnasNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the second convolution layer.
+    expansion_factor : int
+        Factor for expansion of channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 expansion_factor,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(MnasUnit, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
-        mid_channels = in_channels * 6 if expansion else in_channels
+        mid_channels = in_channels * expansion_factor
+        # print("in_channels={}, out_channels={}, kernel_size={}, strides={}, expansion_factor={}".format(in_channels, out_channels, kernel_size, strides, expansion_factor))
 
         with self.name_scope():
-            self.conv1 = mobnet_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.conv2 = mobnet_dwconv3x3(
+            self.conv2 = dwconv_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
+                kernel_size=kernel_size,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.conv3 = mobnet_conv1x1(
+            self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
@@ -198,6 +232,46 @@ class LinearBottleneck(HybridBlock):
         return x
 
 
+class MnasInitBlock(HybridBlock):
+    """
+    MnasNet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels_list : list of 2 int
+        Numbers of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels_list,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(MnasInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv1 = ConvBlock(
+                in_channels=in_channels,
+                out_channels=out_channels_list[0],
+                kernel_size=3,
+                strides=2,
+                padding=1,
+                groups=1,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=True)
+            self.conv2 = DwsConvBlock(
+                in_channels=out_channels_list[0],
+                out_channels=out_channels_list[1],
+                bn_use_global_stats=bn_use_global_stats)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
+
+
 class MnasNet(HybridBlock):
     """
     MnasNet model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
@@ -207,10 +281,14 @@ class MnasNet(HybridBlock):
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    init_block_channels : int
-        Number of output channels for the initial unit.
+    init_block_channels : list of 2 int
+        Numbers of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    kernel_sizes : list of list of int
+        Number of kernel sizes for each unit.
+    expansion_factors : list of list of int
+        Number of expansion factors for each unit.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -225,6 +303,8 @@ class MnasNet(HybridBlock):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 kernel_sizes,
+                 expansion_factors,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -236,31 +316,30 @@ class MnasNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(MobnetConv(
+            self.features.add(MnasInitBlock(
                 in_channels=in_channels,
-                out_channels=init_block_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                groups=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True))
-            in_channels = init_block_channels
+                out_channels_list=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels[-1]
             for i, channels_per_stage in enumerate(channels):
+                kernel_sizes_per_stage = kernel_sizes[i]
+                expansion_factors_per_stage = expansion_factors[i]
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
-                        expansion = (i != 0) or (j != 0)
-                        stage.add(LinearBottleneck(
+                        kernel_size = kernel_sizes_per_stage[j]
+                        expansion_factor = expansion_factors_per_stage[j]
+                        strides = 2 if (j == 0) else 1
+                        stage.add(MnasUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
+                            kernel_size=kernel_size,
                             strides=strides,
-                            bn_use_global_stats=bn_use_global_stats,
-                            expansion=expansion))
+                            expansion_factor=expansion_factor,
+                            bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(mobnet_conv1x1(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
@@ -271,12 +350,10 @@ class MnasNet(HybridBlock):
                 strides=1))
 
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Conv2D(
-                channels=classes,
-                kernel_size=1,
-                use_bias=False,
-                in_channels=in_channels))
             self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -284,8 +361,7 @@ class MnasNet(HybridBlock):
         return x
 
 
-def get_mnasnet(width_scale,
-                model_name=None,
+def get_mnasnet(model_name=None,
                 pretrained=False,
                 ctx=cpu(),
                 root=os.path.join('~', '.mxnet', 'models'),
@@ -295,8 +371,6 @@ def get_mnasnet(width_scale,
 
     Parameters:
     ----------
-    width_scale : float
-        Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -307,26 +381,29 @@ def get_mnasnet(width_scale,
         Location for keeping the model parameters.
     """
 
-    init_block_channels = 32
+    init_block_channels = [32, 16]
     final_block_channels = 1280
-    layers = [1, 2, 3, 4, 3, 3, 1]
-    downsample = [0, 1, 1, 1, 0, 1, 0]
-    channels_per_layers = [16, 24, 32, 64, 96, 160, 320]
+    layers = [3, 3, 3, 2, 4, 1]
+    downsample = [1, 1, 1, 0, 1, 0]
+    channels_per_layers = [24, 40, 80, 96, 192, 320]
+    expansion_factors_per_layers = [3, 3, 6, 6, 6, 6]
+    kernel_sizes_per_layers = [3, 5, 5, 3, 5, 3]
+    default_kernel_size = 3
 
     from functools import reduce
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                      zip(channels_per_layers, layers, downsample), [[]])
-
-    if width_scale != 1.0:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
-        init_block_channels = int(init_block_channels * width_scale)
-        if width_scale > 1.0:
-            final_block_channels = int(final_block_channels * width_scale)
+                      zip(channels_per_layers, layers, downsample), [])
+    kernel_sizes = reduce(lambda x, y: x + [[y[0]] + [default_kernel_size] * (y[1] - 1)] if y[2] != 0 else x[:-1] + [
+        x[-1] + [y[0]] + [default_kernel_size] * (y[1] - 1)], zip(kernel_sizes_per_layers, layers, downsample), [])
+    expansion_factors = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
+                               zip(expansion_factors_per_layers, layers, downsample), [])
 
     net = MnasNet(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
+        kernel_sizes=kernel_sizes,
+        expansion_factors=expansion_factors,
         **kwargs)
 
     if pretrained:
@@ -356,7 +433,7 @@ def mnasnet(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_mnasnet(width_scale=1.0, model_name="mnasnet", **kwargs)
+    return get_mnasnet(model_name="mnasnet", **kwargs)
 
 
 def _test():
@@ -383,7 +460,8 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        assert (model != mnasnet or weight_count == 3504960)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != mnasnet or weight_count == 4308816)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

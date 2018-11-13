@@ -24,7 +24,7 @@ from .models.pnasnet import *
 from .models.mnasnet import *
 
 # from .models.others.oth_inceptionv3 import *
-from .models.others.oth_mnasnet import *
+# from .models.others.oth_mnasnet import *
 
 __all__ = ['get_model']
 
@@ -192,8 +192,8 @@ _models = {
     'pnasnet5large': pnasnet5large,
 
     'mnasnet': mnasnet,
-    'oth_mnasnet': oth_mnasnet,
 
+    # 'oth_mnasnet': oth_mnasnet,
     # 'oth_inceptionv3': oth_inception_v3,
 }
 

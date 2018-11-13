@@ -255,6 +255,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PolyNet | 19.09 | 4.53 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0453-74280314.params.log)) |
 | NASNet-A 4@1056 | 25.37 | 7.95 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0795-5c78908e.params.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |
+| PNASNet-5-Large | 18.10 | 4.36 | 86,057,668 | 25,169.47M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.102/pnasnet5large-0436-9cc6d674.params.log)) |
 
 ### For PyTorch
 
@@ -337,6 +338,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PolyNet | 19.10 | 4.52 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0452-6a1b295d.pth.log)) |
 | NASNet-A 4@1056 | 25.68 | 8.16 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0816-d21bbaf5.pth.log)) |
 | NASNet-A 6@4032 | 18.14 | 4.21 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0421-f354d28f.pth.log)) |
+| PNASNet-5-Large | 18.09 | 4.36 | 86,057,668 | 25,169.47M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.102/pnasnet5large-0436-275d1239.pth.log)) |
 
 ### For Chainer
 
@@ -419,6 +421,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PolyNet | 19.08 | 4.50 | 95,366,600 | 34,768.84M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.96/polynet-0450-6dc7028b.npz.log)) |
 | NASNet-A 4@1056 | 25.36 | 7.96 | 5,289,978 | 587.29M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0796-f09950c0.npz.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.22 | 88,753,150 | 24,021.18M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0422-d49d4663.npz.log)) |
+| PNASNet-5-Large | 18.11 | 4.37 | 86,057,668 | 25,169.47M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.102/pnasnet5large-0437-721da10f.npz.log)) |
 
 ### For Keras
 

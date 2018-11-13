@@ -200,7 +200,6 @@ class MnasUnit(HybridBlock):
         super(MnasUnit, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
         mid_channels = in_channels * expansion_factor
-        # print("in_channels={}, out_channels={}, kernel_size={}, strides={}, expansion_factor={}".format(in_channels, out_channels, kernel_size, strides, expansion_factor))
 
         with self.name_scope():
             self.conv1 = conv1x1_block(

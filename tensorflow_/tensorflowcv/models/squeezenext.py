@@ -81,7 +81,7 @@ def sqnxt_unit(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'sqnxt_unit'
         Block name.
@@ -177,7 +177,7 @@ def sqnxt_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'sqnxt_init_block'
         Block name.
@@ -325,10 +325,8 @@ def get_squeezenext(version,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     init_block_channels = 64
@@ -382,10 +380,8 @@ def sqnxt23_w1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23", width_scale=1.0, model_name="sqnxt23_w1", **kwargs)
 
@@ -403,10 +399,8 @@ def sqnxt23_w3d2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23", width_scale=1.5, model_name="sqnxt23_w3d2", **kwargs)
 
@@ -424,10 +418,8 @@ def sqnxt23_w2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23", width_scale=2.0, model_name="sqnxt23_w2", **kwargs)
 
@@ -445,10 +437,8 @@ def sqnxt23v5_w1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23v5", width_scale=1.0, model_name="sqnxt23v5_w1", **kwargs)
 
@@ -466,10 +456,8 @@ def sqnxt23v5_w3d2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23v5", width_scale=1.5, model_name="sqnxt23v5_w3d2", **kwargs)
 
@@ -487,10 +475,8 @@ def sqnxt23v5_w2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenext(version="23v5", width_scale=2.0, model_name="sqnxt23v5_w2", **kwargs)
 

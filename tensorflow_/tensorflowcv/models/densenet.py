@@ -35,7 +35,7 @@ def dense_conv(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dense_conv'
         Block name.
@@ -78,7 +78,7 @@ def dense_conv1x1(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dense_conv1x1'
         Block name.
@@ -115,7 +115,7 @@ def dense_conv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dense_conv3x3'
         Block name.
@@ -155,7 +155,7 @@ def dense_unit(x,
         Number of output channels.
     dropout_rate : bool
         Parameter of Dropout layer. Faction of the input units to drop.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dense_unit'
         Unit name.
@@ -213,7 +213,7 @@ def transition_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'transition_block'
         Unit name.
@@ -254,7 +254,7 @@ def dense_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dense_init_block'
         Block name.
@@ -297,7 +297,7 @@ def post_activation(x,
     ----------
     x : Tensor
         Input tensor.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'post_activation'
         Block name.
@@ -435,10 +435,8 @@ def get_densenet(num_layers,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if num_layers == 121:
@@ -501,10 +499,8 @@ def densenet121(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
 
@@ -522,10 +518,8 @@ def densenet161(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
 
@@ -543,10 +537,8 @@ def densenet169(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
 
@@ -564,10 +556,8 @@ def densenet201(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
 

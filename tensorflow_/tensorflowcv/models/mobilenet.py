@@ -90,7 +90,7 @@ def dws_conv_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dws_conv_block'
         Block name.
@@ -234,10 +234,8 @@ def get_mobilenet(version,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if version == 'orig':
@@ -285,10 +283,8 @@ def mobilenet_w1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="orig", width_scale=1.0, model_name="mobilenet_w1", **kwargs)
 
@@ -307,10 +303,8 @@ def mobilenet_w3d4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="orig", width_scale=0.75, model_name="mobilenet_w3d4", **kwargs)
 
@@ -329,10 +323,8 @@ def mobilenet_wd2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="orig", width_scale=0.5, model_name="mobilenet_wd2", **kwargs)
 
@@ -351,10 +343,8 @@ def mobilenet_wd4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="orig", width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
@@ -373,10 +363,8 @@ def fdmobilenet_w1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="fd", width_scale=1.0, model_name="fdmobilenet_w1", **kwargs)
 
@@ -395,10 +383,8 @@ def fdmobilenet_w3d4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="fd", width_scale=0.75, model_name="fdmobilenet_w3d4", **kwargs)
 
@@ -417,10 +403,8 @@ def fdmobilenet_wd2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="fd", width_scale=0.5, model_name="fdmobilenet_wd2", **kwargs)
 
@@ -439,10 +423,8 @@ def fdmobilenet_wd4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_mobilenet(version="fd", width_scale=0.25, model_name="fdmobilenet_wd4", **kwargs)
 

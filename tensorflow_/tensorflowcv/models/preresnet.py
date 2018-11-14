@@ -41,7 +41,7 @@ def preres_conv(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_conv'
         Block name.
@@ -88,7 +88,7 @@ def preres_conv1x1(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_conv1x1'
         Block name.
@@ -128,7 +128,7 @@ def preres_conv3x3(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_conv3x3'
         Block name.
@@ -168,7 +168,7 @@ def preres_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_block'
         Block name.
@@ -217,7 +217,7 @@ def preres_bottleneck_block(x,
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_bottleneck_block'
         Block name.
@@ -281,7 +281,7 @@ def preres_unit(x,
         Whether to use stride in the first or the second convolution layer of the block.
     use_se : bool
         Whether to use SE block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_unit'
         Unit name.
@@ -346,7 +346,7 @@ def preres_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_init_block'
         Block name.
@@ -389,7 +389,7 @@ def preres_activation(x,
     ----------
     x : Tensor
         Input tensor.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'preres_activation'
         Block name.
@@ -541,10 +541,8 @@ def get_preresnet(blocks,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if blocks == 10:
@@ -618,6 +616,11 @@ def preresnet10(**kwargs):
         Whether to load the pretrained weights for model.
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
 
@@ -636,10 +639,8 @@ def preresnet12(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
 
@@ -658,10 +659,8 @@ def preresnet14(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
 
@@ -680,10 +679,8 @@ def preresnet16(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
@@ -702,10 +699,8 @@ def preresnet18_wd4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
@@ -724,10 +719,8 @@ def preresnet18_wd2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
@@ -746,10 +739,8 @@ def preresnet18_w3d4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
 
@@ -767,10 +758,8 @@ def preresnet18(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
@@ -788,10 +777,8 @@ def preresnet34(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
@@ -809,10 +796,8 @@ def preresnet50(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
 
@@ -831,10 +816,8 @@ def preresnet50b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
 
@@ -852,10 +835,8 @@ def preresnet101(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
 
@@ -874,10 +855,8 @@ def preresnet101b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
 
@@ -895,10 +874,8 @@ def preresnet152(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
 
@@ -917,10 +894,8 @@ def preresnet152b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
 
@@ -938,10 +913,8 @@ def preresnet200(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
 
@@ -960,10 +933,8 @@ def preresnet200b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
@@ -981,10 +952,8 @@ def sepreresnet18(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=18, use_se=True, model_name="sepreresnet18", **kwargs)
 
@@ -1002,10 +971,8 @@ def sepreresnet34(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=34, use_se=True, model_name="sepreresnet34", **kwargs)
 
@@ -1023,10 +990,8 @@ def sepreresnet50(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=50, use_se=True, model_name="sepreresnet50", **kwargs)
 
@@ -1045,10 +1010,8 @@ def sepreresnet50b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=50, conv1_stride=False, use_se=True, model_name="sepreresnet50b", **kwargs)
 
@@ -1066,10 +1029,8 @@ def sepreresnet101(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=101, use_se=True, model_name="sepreresnet101", **kwargs)
 
@@ -1088,10 +1049,8 @@ def sepreresnet101b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=101, conv1_stride=False, use_se=True, model_name="sepreresnet101b", **kwargs)
 
@@ -1109,10 +1068,8 @@ def sepreresnet152(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=152, use_se=True, model_name="sepreresnet152", **kwargs)
 
@@ -1131,10 +1088,8 @@ def sepreresnet152b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=152, conv1_stride=False, use_se=True, model_name="sepreresnet152b", **kwargs)
 
@@ -1153,10 +1108,8 @@ def sepreresnet200(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=200, use_se=True, model_name="sepreresnet200", **kwargs)
 
@@ -1175,10 +1128,8 @@ def sepreresnet200b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_preresnet(blocks=200, conv1_stride=False, use_se=True, model_name="sepreresnet200b", **kwargs)
 

@@ -45,7 +45,7 @@ def resnext_conv(x,
         Number of groups.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_conv'
         Block name.
@@ -96,7 +96,7 @@ def resnext_conv1x1(x,
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_conv1x1'
         Block name.
@@ -144,7 +144,7 @@ def resnext_conv3x3(x,
         Number of groups.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_conv3x3'
         Block name.
@@ -192,7 +192,7 @@ def resnext_bottleneck(x,
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_bottleneck'
         Block name.
@@ -262,7 +262,7 @@ def resnext_unit(x,
         Width of bottleneck block.
     use_se : bool
         Whether to use SE block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_unit'
         Unit name.
@@ -323,7 +323,7 @@ def resnext_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'resnext_init_block'
         Block name.
@@ -483,10 +483,8 @@ def get_resnext(blocks,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if blocks == 50:
@@ -537,10 +535,8 @@ def resnext50_32x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="resnext50_32x4d", **kwargs)
 
@@ -559,10 +555,8 @@ def resnext101_32x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="resnext101_32x4d", **kwargs)
 
@@ -581,10 +575,8 @@ def resnext101_64x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="resnext101_64x4d", **kwargs)
 
@@ -602,10 +594,8 @@ def seresnext50_32x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext50_32x4d",
                        **kwargs)
@@ -624,10 +614,8 @@ def seresnext101_32x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext101_32x4d",
                        **kwargs)
@@ -646,10 +634,8 @@ def seresnext101_64x4d(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, use_se=True, model_name="seresnext101_64x4d",
                        **kwargs)

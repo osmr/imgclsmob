@@ -32,7 +32,7 @@ def dark_conv(x,
         Convolution window size.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv'
         Block name.
@@ -74,7 +74,7 @@ def dark_conv1x1(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv1x1'
         Block name.
@@ -110,7 +110,7 @@ def dark_conv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'dark_conv3x3'
         Block name.
@@ -290,10 +290,8 @@ def get_darknet(version,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if version == 'ref':
@@ -357,10 +355,8 @@ def darknet_ref(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_darknet(version="ref", model_name="darknet_ref", **kwargs)
 
@@ -378,10 +374,8 @@ def darknet_tiny(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_darknet(version="tiny", model_name="darknet_tiny", **kwargs)
 
@@ -399,10 +393,8 @@ def darknet19(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_darknet(version="19", model_name="darknet19", **kwargs)
 

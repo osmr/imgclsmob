@@ -37,7 +37,7 @@ def senet_bottleneck(x,
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'senet_bottleneck'
         Block name.
@@ -108,7 +108,7 @@ def senet_unit(x,
         Width of bottleneck block.
     identity_conv3x3 : bool, default False
         Whether to use 3x3 convolution in the identity link.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'senet_unit'
         Unit name.
@@ -179,7 +179,7 @@ def senet_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'senet_init_block'
         Block name.
@@ -349,10 +349,8 @@ def get_senet(blocks,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if blocks == 52:
@@ -407,10 +405,8 @@ def senet52(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_senet(blocks=52, model_name="senet52", **kwargs)
 
@@ -428,10 +424,8 @@ def senet103(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_senet(blocks=103, model_name="senet103", **kwargs)
 
@@ -449,10 +443,8 @@ def senet154(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_senet(blocks=154, model_name="senet154", **kwargs)
 

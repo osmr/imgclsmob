@@ -12,6 +12,7 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.mnasnet import *
 
 # from .models.others.shufflenetv2 import *
 
@@ -159,6 +160,8 @@ _models = {
     'mobilenetv2_w3d4': mobilenetv2_w3d4,
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
+
+    'mnasnet': mnasnet,
 
     # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
     # 'oth_shufflenetv2_w1': oth_shufflenetv2_w1,

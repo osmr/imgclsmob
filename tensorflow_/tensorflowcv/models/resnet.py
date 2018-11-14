@@ -43,7 +43,7 @@ def res_conv(x,
         Padding value for convolution layer.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv'
         Block name.
@@ -93,7 +93,7 @@ def res_conv1x1(x,
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv1x1'
         Block name.
@@ -137,7 +137,7 @@ def res_conv3x3(x,
         Strides of the convolution.
     activate : bool
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_conv3x3'
         Block name.
@@ -178,7 +178,7 @@ def res_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_block'
         Block name.
@@ -229,7 +229,7 @@ def res_bottleneck_block(x,
         Strides of the convolution.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_bottleneck_block'
         Block name.
@@ -296,7 +296,7 @@ def res_unit(x,
         Whether to use stride in the first or the second convolution layer of the block.
     use_se : bool
         Whether to use SE block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_unit'
         Unit name.
@@ -365,7 +365,7 @@ def res_init_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
+    training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
     name : str, default 'res_init_block'
         Block name.
@@ -524,10 +524,8 @@ def get_resnet(blocks,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if blocks == 10:
@@ -604,10 +602,8 @@ def resnet10(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=10, model_name="resnet10", **kwargs)
 
@@ -626,10 +622,8 @@ def resnet12(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=12, model_name="resnet12", **kwargs)
 
@@ -648,10 +642,8 @@ def resnet14(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=14, model_name="resnet14", **kwargs)
 
@@ -670,10 +662,8 @@ def resnet16(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=16, model_name="resnet16", **kwargs)
 
@@ -692,10 +682,8 @@ def resnet18_wd4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
 
@@ -714,10 +702,8 @@ def resnet18_wd2(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
 
@@ -736,10 +722,8 @@ def resnet18_w3d4(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
 
@@ -757,10 +741,8 @@ def resnet18(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, model_name="resnet18", **kwargs)
 
@@ -778,10 +760,8 @@ def resnet34(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=34, model_name="resnet34", **kwargs)
 
@@ -799,10 +779,8 @@ def resnet50(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=50, model_name="resnet50", **kwargs)
 
@@ -821,10 +799,8 @@ def resnet50b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
 
@@ -842,10 +818,8 @@ def resnet101(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=101, model_name="resnet101", **kwargs)
 
@@ -864,10 +838,8 @@ def resnet101b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
 
@@ -885,10 +857,8 @@ def resnet152(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=152, model_name="resnet152", **kwargs)
 
@@ -907,10 +877,8 @@ def resnet152b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
 
@@ -929,10 +897,8 @@ def resnet200(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=200, model_name="resnet200", **kwargs)
 
@@ -951,10 +917,8 @@ def resnet200b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
@@ -972,10 +936,8 @@ def seresnet18(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, use_se=True, model_name="seresnet18", **kwargs)
 
@@ -993,10 +955,8 @@ def seresnet34(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=34, use_se=True, model_name="seresnet34", **kwargs)
 
@@ -1014,10 +974,8 @@ def seresnet50(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=50, use_se=True, model_name="seresnet50", **kwargs)
 
@@ -1036,10 +994,8 @@ def seresnet50b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=50, conv1_stride=False, use_se=True, model_name="seresnet50b", **kwargs)
 
@@ -1057,10 +1013,8 @@ def seresnet101(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=101, use_se=True, model_name="seresnet101", **kwargs)
 
@@ -1079,10 +1033,8 @@ def seresnet101b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=101, conv1_stride=False, use_se=True, model_name="seresnet101b", **kwargs)
 
@@ -1100,10 +1052,8 @@ def seresnet152(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=152, use_se=True, model_name="seresnet152", **kwargs)
 
@@ -1122,10 +1072,8 @@ def seresnet152b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=152, conv1_stride=False, use_se=True, model_name="seresnet152b", **kwargs)
 
@@ -1144,10 +1092,8 @@ def seresnet200(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=200, use_se=True, model_name="seresnet200", **kwargs)
 
@@ -1166,10 +1112,8 @@ def seresnet200b(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=200, conv1_stride=False, use_se=True, model_name="seresnet200b", **kwargs)
 

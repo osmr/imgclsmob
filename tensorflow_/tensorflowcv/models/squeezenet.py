@@ -288,10 +288,8 @@ def get_squeezenet(version,
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
 
     if version == '1.0':
@@ -345,10 +343,8 @@ def squeezenet_v1_0(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenet(version="1.0", residual=False, model_name="squeezenet_v1_0", **kwargs)
 
@@ -367,10 +363,8 @@ def squeezenet_v1_1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenet(version="1.1", residual=False, model_name="squeezenet_v1_1", **kwargs)
 
@@ -389,10 +383,8 @@ def squeezeresnet_v1_0(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenet(version="1.0", residual=True, model_name="squeezeresnet_v1_0", **kwargs)
 
@@ -411,10 +403,8 @@ def squeezeresnet_v1_1(**kwargs):
 
     Returns
     -------
-    net_lambda : function
-        Function for model graph creation.
-    net_file_path : str or None
-        File path for pretrained model or None.
+    functor
+        Functor for model graph creation with extra fields.
     """
     return get_squeezenet(version="1.1", residual=True, model_name="squeezeresnet_v1_1", **kwargs)
 

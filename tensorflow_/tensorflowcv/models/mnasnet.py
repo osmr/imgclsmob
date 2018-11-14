@@ -1,27 +1,27 @@
 """
-    MobileNetV2, implemented in TensorFlow.
-    Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
+    MnasNet, implemented in TensorFlow.
+    Original paper: 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,' https://arxiv.org/abs/1807.11626.
 """
 
-__all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4']
+__all__ = ['MnasNet', 'mnasnet']
 
 import os
 import tensorflow as tf
 from .common import conv2d, batchnorm
 
 
-def mobnet_conv(x,
-                in_channels,
-                out_channels,
-                kernel_size,
-                strides,
-                padding,
-                groups,
-                activate,
-                training,
-                name="mobnet_conv"):
+def conv_block(x,
+               in_channels,
+               out_channels,
+               kernel_size,
+               strides,
+               padding,
+               groups,
+               activate,
+               training,
+               name="conv_block"):
     """
-    MobileNetV2 specific convolution block.
+    Standard convolution block with Batch normalization and ReLU activation.
 
     Parameters:
     ----------
@@ -43,7 +43,7 @@ def mobnet_conv(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_conv'
+    name : str, default 'conv_block'
         Block name.
 
     Returns
@@ -66,18 +66,18 @@ def mobnet_conv(x,
         training=training,
         name=name + "/bn")
     if activate:
-        x = tf.nn.relu6(x, name=name + "/activ")
+        x = tf.nn.relu(x, name=name + "/activ")
     return x
 
 
-def mobnet_conv1x1(x,
-                   in_channels,
-                   out_channels,
-                   activate,
-                   training,
-                   name="mobnet_conv1x1"):
+def conv1x1_block(x,
+                  in_channels,
+                  out_channels,
+                  activate=True,
+                  training=False,
+                  name="conv1x1_block"):
     """
-    1x1 version of the MobileNetV2 specific convolution block.
+    1x1 version of the standard convolution block.
 
     Parameters:
     ----------
@@ -87,11 +87,11 @@ def mobnet_conv1x1(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    activate : bool
+    activate : bool, default True
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
+    training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_conv1x1'
+    name : str, default 'conv1x1_block'
         Block name.
 
     Returns
@@ -99,7 +99,7 @@ def mobnet_conv1x1(x,
     Tensor
         Resulted tensor.
     """
-    return mobnet_conv(
+    return conv_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -112,15 +112,16 @@ def mobnet_conv1x1(x,
         name=name)
 
 
-def mobnet_dwconv3x3(x,
-                     in_channels,
-                     out_channels,
-                     strides,
-                     activate,
-                     training,
-                     name="mobnet_dwconv3x3"):
+def dwconv_block(x,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 activate=True,
+                 training=False,
+                 name="dwconv_block"):
     """
-    3x3 depthwise version of the MobileNetV2 specific convolution block.
+    Depthwise version of the standard convolution block.
 
     Parameters:
     ----------
@@ -130,13 +131,15 @@ def mobnet_dwconv3x3(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    activate : bool
+    activate : bool, default True
         Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
+    training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_dwconv3x3'
+    name : str, default 'dwconv_block'
         Block name.
 
     Returns
@@ -144,26 +147,70 @@ def mobnet_dwconv3x3(x,
     Tensor
         Resulted tensor.
     """
-    return mobnet_conv(
+    return conv_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        kernel_size=kernel_size,
         strides=strides,
-        padding=1,
+        padding=(kernel_size // 2),
         groups=out_channels,
         activate=activate,
         training=training,
         name=name)
 
 
-def linear_bottleneck(x,
-                      in_channels,
-                      out_channels,
-                      strides,
-                      expansion,
-                      training,
-                      name="linear_bottleneck"):
+def dws_conv_block(x,
+                   in_channels,
+                   out_channels,
+                   training,
+                   name="dws_conv_block"):
+    """
+    Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'dws_conv_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    x = dwconv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=in_channels,
+        kernel_size=3,
+        strides=1,
+        training=training,
+        name=name + "/dw_conv")
+    x = conv1x1_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        training=training,
+        name=name + "/pw_conv")
+    return x
+
+
+def mnas_unit(x,
+              in_channels,
+              out_channels,
+              kernel_size,
+              strides,
+              expansion_factor,
+              training,
+              name="mnas_unit"):
     """
     So-called 'Linear Bottleneck' layer. It is used as a MobileNetV2 unit.
 
@@ -175,13 +222,15 @@ def linear_bottleneck(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    expansion : bool
-        Whether do expansion of channels.
+    expansion_factor : int
+        Factor for expansion of channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'linear_bottleneck'
+    name : str, default 'mnas_unit'
         Unit name.
 
     Returns
@@ -190,27 +239,28 @@ def linear_bottleneck(x,
         Resulted tensor.
     """
     residual = (in_channels == out_channels) and (strides == 1)
-    mid_channels = in_channels * 6 if expansion else in_channels
+    mid_channels = in_channels * expansion_factor
 
     if residual:
         identity = x
 
-    x = mobnet_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         activate=True,
         training=training,
         name=name + "/conv1")
-    x = mobnet_dwconv3x3(
+    x = dwconv_block(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
+        kernel_size=kernel_size,
         strides=strides,
         activate=True,
         training=training,
         name=name + "/conv2")
-    x = mobnet_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
@@ -224,18 +274,69 @@ def linear_bottleneck(x,
     return x
 
 
-class MobileNetV2(object):
+def mnas_init_block(x,
+                    in_channels,
+                    out_channels_list,
+                    training,
+                    name="mnas_init_block"):
     """
-    MobileNetV2 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
+    Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels_list : list of 2 int
+        Numbers of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'mnas_init_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    x = conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels_list[0],
+        kernel_size=3,
+        strides=2,
+        padding=1,
+        groups=1,
+        activate=True,
+        training=training,
+        name=name + "/conv1")
+    x = dws_conv_block(
+        x=x,
+        in_channels=out_channels_list[0],
+        out_channels=out_channels_list[1],
+        training=training,
+        name=name + "/conv2")
+    return x
+
+
+class MnasNet(object):
+    """
+    MnasNet model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
+    https://arxiv.org/abs/1807.11626.
 
     Parameters:
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    init_block_channels : int
-        Number of output channels for the initial unit.
+    init_block_channels : list of 2 int
+        Numbers of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    kernel_sizes : list of list of int
+        Number of kernel sizes for each unit.
+    expansion_factors : list of list of int
+        Number of expansion factors for each unit.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -247,14 +348,18 @@ class MobileNetV2(object):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 kernel_sizes,
+                 expansion_factors,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(MobileNetV2, self).__init__(**kwargs)
+        super(MnasNet, self).__init__(**kwargs)
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.final_block_channels = final_block_channels
+        self.kernel_sizes = kernel_sizes
+        self.expansion_factors = expansion_factors
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
@@ -278,39 +383,38 @@ class MobileNetV2(object):
             Resulted tensor.
         """
         in_channels = self.in_channels
-        x = mobnet_conv(
+        x = mnas_init_block(
             x=x,
             in_channels=in_channels,
-            out_channels=self.init_block_channels,
-            kernel_size=3,
-            strides=2,
-            padding=1,
-            groups=1,
-            activate=True,
+            out_channels_list=self.init_block_channels,
             training=training,
             name="features/init_block")
-        in_channels = self.init_block_channels
+        in_channels = self.init_block_channels[-1]
         for i, channels_per_stage in enumerate(self.channels):
+            kernel_sizes_per_stage = self.kernel_sizes[i]
+            expansion_factors_per_stage = self.expansion_factors[i]
             for j, out_channels in enumerate(channels_per_stage):
-                strides = 2 if (j == 0) and (i != 0) else 1
-                expansion = (i != 0) or (j != 0)
-                x = linear_bottleneck(
+                kernel_size = kernel_sizes_per_stage[j]
+                expansion_factor = expansion_factors_per_stage[j]
+                strides = 2 if (j == 0) else 1
+                x = mnas_unit(
                     x=x,
                     in_channels=in_channels,
                     out_channels=out_channels,
+                    kernel_size=kernel_size,
                     strides=strides,
-                    expansion=expansion,
+                    expansion_factor=expansion_factor,
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = mobnet_conv1x1(
+        x = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
             activate=True,
             training=training,
             name="features/final_block")
-        in_channels = self.final_block_channels
+        # in_channels = self.final_block_channels
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
@@ -318,30 +422,24 @@ class MobileNetV2(object):
             data_format='channels_first',
             name="features/final_pool")
 
-        x = conv2d(
-            x=x,
-            in_channels=in_channels,
-            out_channels=self.classes,
-            kernel_size=1,
-            use_bias=False,
-            name="output")
         x = tf.layers.flatten(x)
+        x = tf.layers.dense(
+            inputs=x,
+            units=self.classes,
+            name="output")
 
         return x
 
 
-def get_mobilenetv2(width_scale,
-                    model_name=None,
-                    pretrained=False,
-                    root=os.path.join('~', '.tensorflow', 'models'),
-                    **kwargs):
+def get_mnasnet(model_name=None,
+                pretrained=False,
+                root=os.path.join('~', '.keras', 'models'),
+                **kwargs):
     """
-    Create MobileNetV2 model with specific parameters.
+    Create MnasNet model with specific parameters.
 
     Parameters:
     ----------
-    width_scale : float
-        Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -355,26 +453,29 @@ def get_mobilenetv2(width_scale,
         Functor for model graph creation with extra fields.
     """
 
-    init_block_channels = 32
+    init_block_channels = [32, 16]
     final_block_channels = 1280
-    layers = [1, 2, 3, 4, 3, 3, 1]
-    downsample = [0, 1, 1, 1, 0, 1, 0]
-    channels_per_layers = [16, 24, 32, 64, 96, 160, 320]
+    layers = [3, 3, 3, 2, 4, 1]
+    downsample = [1, 1, 1, 0, 1, 0]
+    channels_per_layers = [24, 40, 80, 96, 192, 320]
+    expansion_factors_per_layers = [3, 3, 6, 6, 6, 6]
+    kernel_sizes_per_layers = [3, 5, 5, 3, 5, 3]
+    default_kernel_size = 3
 
     from functools import reduce
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                      zip(channels_per_layers, layers, downsample), [[]])
+                      zip(channels_per_layers, layers, downsample), [])
+    kernel_sizes = reduce(lambda x, y: x + [[y[0]] + [default_kernel_size] * (y[1] - 1)] if y[2] != 0 else x[:-1] + [
+        x[-1] + [y[0]] + [default_kernel_size] * (y[1] - 1)], zip(kernel_sizes_per_layers, layers, downsample), [])
+    expansion_factors = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
+                               zip(expansion_factors_per_layers, layers, downsample), [])
 
-    if width_scale != 1.0:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
-        init_block_channels = int(init_block_channels * width_scale)
-        if width_scale > 1.0:
-            final_block_channels = int(final_block_channels * width_scale)
-
-    net = MobileNetV2(
+    net = MnasNet(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
+        kernel_sizes=kernel_sizes,
+        expansion_factors=expansion_factors,
         **kwargs)
 
     if pretrained:
@@ -391,10 +492,10 @@ def get_mobilenetv2(width_scale,
     return net
 
 
-def mobilenetv2_w1(**kwargs):
+def mnasnet(**kwargs):
     """
-    1.0 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
-    https://arxiv.org/abs/1801.04381.
+    MnasNet model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
+    https://arxiv.org/abs/1807.11626.
 
     Parameters:
     ----------
@@ -408,67 +509,7 @@ def mobilenetv2_w1(**kwargs):
     functor
         Functor for model graph creation with extra fields.
     """
-    return get_mobilenetv2(width_scale=1.0, model_name="mobilenetv2_w1", **kwargs)
-
-
-def mobilenetv2_w3d4(**kwargs):
-    """
-    0.75 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
-    https://arxiv.org/abs/1801.04381.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
-
-    Returns
-    -------
-    functor
-        Functor for model graph creation with extra fields.
-    """
-    return get_mobilenetv2(width_scale=0.75, model_name="mobilenetv2_w3d4", **kwargs)
-
-
-def mobilenetv2_wd2(**kwargs):
-    """
-    0.5 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
-    https://arxiv.org/abs/1801.04381.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
-
-    Returns
-    -------
-    functor
-        Functor for model graph creation with extra fields.
-    """
-    return get_mobilenetv2(width_scale=0.5, model_name="mobilenetv2_wd2", **kwargs)
-
-
-def mobilenetv2_wd4(**kwargs):
-    """
-    0.25 MobileNetV2-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
-    https://arxiv.org/abs/1801.04381.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.tensorflow/models'
-        Location for keeping the model parameters.
-
-    Returns
-    -------
-    functor
-        Functor for model graph creation with extra fields.
-    """
-    return get_mobilenetv2(width_scale=0.25, model_name="mobilenetv2_wd4", **kwargs)
+    return get_mnasnet(model_name="mnasnet", **kwargs)
 
 
 def _test():
@@ -478,10 +519,7 @@ def _test():
     pretrained = False
 
     models = [
-        mobilenetv2_w1,
-        mobilenetv2_w3d4,
-        mobilenetv2_wd2,
-        mobilenetv2_wd4,
+        mnasnet,
     ]
 
     for model in models:
@@ -495,10 +533,7 @@ def _test():
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != mobilenetv2_w1 or weight_count == 3504960)
-        assert (model != mobilenetv2_w3d4 or weight_count == 2627592)
-        assert (model != mobilenetv2_wd2 or weight_count == 1964736)
-        assert (model != mobilenetv2_wd4 or weight_count == 1516392)
+        assert (model != mnasnet or weight_count == 4308816)
 
         with tf.Session() as sess:
             if pretrained:

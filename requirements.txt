@@ -9,3 +9,4 @@ keras-mxnet>=2.2.2
 tensorflow-gpu
 git+https://github.com/tensorpack/tensorpack.git
 opencv-python
+pandas

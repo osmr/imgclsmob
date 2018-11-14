@@ -161,6 +161,7 @@ with tf.Session() as sess:
 - PolyNet (['PolyNet: A Pursuit of Structural Diversity in Very Deep Networks'](https://arxiv.org/abs/1611.05725))
 - NASNet (['Learning Transferable Architectures for Scalable Image Recognition'](https://arxiv.org/abs/1707.07012))
 - PNASNet (['Progressive Neural Architecture Search'](https://arxiv.org/abs/1712.00559))
+- MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
 
 ## Pretrained models
 

@@ -383,11 +383,11 @@ class ResNet(Chain):
         x = self.output(x)
         return x
 
-    def namedpersistent(self, include_uninit=True):
-        d = self.__dict__
-        for name in sorted(self._persistent):
-            if include_uninit or d[name].data is not None:
-                yield '/' + name, d[name]
+    # def namedpersistent(self, include_uninit=True):
+    #     d = self.__dict__
+    #     for name in sorted(self._persistent):
+    #         if include_uninit or d[name].data is not None:
+    #             yield '/' + name, d[name]
 
 
 def get_resnet(blocks,

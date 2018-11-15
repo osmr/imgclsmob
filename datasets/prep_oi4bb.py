@@ -1,7 +1,14 @@
+if __name__ == '__main__' and __package__ is None:
+    import sys
+    from os import path
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
 import argparse
 import os
 import zipfile
 import logging
+import shutil
+import numpy as np
 import pandas as pd
 
 from common.logger_utils import initialize_logging
@@ -25,6 +32,10 @@ def parse_args():
         '--remove-archives',
         action='store_true',
         help='remove archives.')
+    parser.add_argument(
+        '--rewrite',
+        action='store_true',
+        help='rewrite all existed files.')
 
     parser.add_argument(
         '--logging-file-name',
@@ -45,36 +56,154 @@ def parse_args():
     return args
 
 
-def extract_val(src_dir_path,
-                dst_dir_path,
-                remove_src,
-                val_archive_file_name="validation.zip"):
+def extract_data_from_archive(src_dir_path,
+                              dst_dir_path,
+                              rewrite,
+                              remove_src,
+                              archive_file_stem,
+                              dst_data_dir_name):
     assert (os.path.exists(src_dir_path))
     assert (os.path.exists(dst_dir_path))
+    archive_file_name = archive_file_stem + ".zip"
+    logging.info('Extracting data from archive <{}>'.format(archive_file_name))
 
-    val_archive_file_path = os.path.join(src_dir_path, val_archive_file_name)
-    with zipfile.ZipFile(val_archive_file_path) as zf:
+    data_dir_path = os.path.join(dst_dir_path, dst_data_dir_name)
+    if os.path.exists(data_dir_path) and not rewrite:
+        logging.info('Data are already exist...Skip.')
+        return
+
+    archive_file_path = os.path.join(src_dir_path, archive_file_name)
+    with zipfile.ZipFile(archive_file_path) as zf:
         zf.extractall(dst_dir_path)
+
     if remove_src:
-        os.remove(val_archive_file_path)
+        os.remove(archive_file_path)
+
+    if archive_file_stem == dst_data_dir_name:
+        return
+
+    if not os.path.exists(data_dir_path):
+        os.makedirs(data_dir_path)
+    src_data_dir_path = os.path.join(dst_dir_path, archive_file_stem)
+
+    file_name_list = os.listdir(src_data_dir_path)
+    for file_name in file_name_list:
+        src_file_path = os.path.join(src_data_dir_path, file_name)
+        dst_file_path = os.path.join(data_dir_path, file_name)
+        shutil.move(
+            src=src_file_path,
+            dst=dst_file_path)
+
+    os.remove(src_data_dir_path)
 
 
-def create_val_cls_list(src_dir_path,
-                        dst_dir_path,
-                        val_annotation_file_name="validation-annotations-bbox.csv",
-                        val_cls_list_file_name="validation-cls.csv"):
+def create_cls_list(src_dir_path,
+                    dst_dir_path,
+                    rewrite,
+                    annotation_file_name,
+                    cls_list_file_name):
     assert (os.path.exists(src_dir_path))
     assert (os.path.exists(dst_dir_path))
+    logging.info('Creating classification list <{}>'.format(cls_list_file_name))
 
-    val_annotation_file_path = os.path.join(src_dir_path, val_annotation_file_name)
-    val_cls_list_file_path = os.path.join(src_dir_path, val_cls_list_file_name)
+    cls_list_file_path = os.path.join(dst_dir_path, cls_list_file_name)
+    if os.path.exists(cls_list_file_path) and not rewrite:
+        logging.info('Already exist...Skip.')
+        return
+    annotation_file_path = os.path.join(src_dir_path, annotation_file_name)
 
-    df = pd.read_csv(val_annotation_file_path)
+    df = pd.read_csv(annotation_file_path)
     df2 = df.assign(Square=(df.XMax - df.XMin) * (df.YMax - df.YMin))
     df2 = df2[["ImageID", "LabelName", "Square"]]
     df2 = df2.loc[df2.groupby(["ImageID"])["Square"].idxmax()]
     df2 = df2[["ImageID", "LabelName"]]
-    df2.to_csv(val_cls_list_file_path, index=False)
+    df2.to_csv(cls_list_file_path, index=False)
+
+
+def create_dataset(src_dir_path,
+                   dst_dir_path,
+                   rewrite,
+                   remove_src,
+                   src_data_dir_name,
+                   dst_dataset_dir_name,
+                   cls_list_file_name):
+    assert (os.path.exists(src_dir_path))
+    assert (os.path.exists(dst_dir_path))
+    logging.info('Creating dataset <{}>'.format(dst_dataset_dir_name))
+
+    dst_dataset_dir_path = os.path.join(dst_dir_path, dst_dataset_dir_name)
+    if os.path.exists(dst_dataset_dir_path):
+        logging.info('Already exist...Skip.')
+        # if not rewrite:
+        #     return
+    else:
+        os.makedirs(dst_dataset_dir_path)
+    src_data_dir_path = os.path.join(dst_dir_path, src_data_dir_name)
+
+    cls_list_file_path = os.path.join(dst_dir_path, cls_list_file_name)
+    df = pd.read_csv(
+        cls_list_file_path,
+        dtype={'ImageID': np.unicode, 'LabelName': np.unicode})
+    image_names = df['ImageID'].values.astype(np.unicode)
+    label_names = df['LabelName'].values.astype(np.unicode)
+    for i, (image_name, label_name) in enumerate(zip(image_names, label_names)):
+        src_image_file_path = os.path.join(src_data_dir_path, "{}.jpg".format(image_name))
+        assert (os.path.exists(src_image_file_path))
+        label_dir_name = label_name[3:]
+        label_dir_path = os.path.join(dst_dataset_dir_path, label_dir_name)
+        if not os.path.exists(label_dir_path):
+            os.makedirs(label_dir_path)
+        dst_image_file_path = os.path.join(label_dir_path, "{}.jpg".format(image_name))
+        if remove_src:
+            shutil.move(
+                src=src_image_file_path,
+                dst=dst_image_file_path)
+        else:
+            shutil.copy(
+                src=src_image_file_path,
+                dst=dst_image_file_path)
+
+
+def process_data(src_dir_path,
+                 dst_dir_path,
+                 rewrite,
+                 remove_src,
+                 data_name,
+                 archive_file_stem_list):
+    assert (os.path.exists(src_dir_path))
+    assert (os.path.exists(dst_dir_path))
+    logging.info('Process data for <{}>'.format(data_name))
+
+    tmp_dir_name = data_name + "_tmp"
+    for archive_file_stem in archive_file_stem_list:
+        extract_data_from_archive(
+            src_dir_path=src_dir_path,
+            dst_dir_path=dst_dir_path,
+            rewrite=rewrite,
+            remove_src=remove_src,
+            archive_file_stem=archive_file_stem,
+            dst_data_dir_name=tmp_dir_name)
+
+    annotation_file_name = data_name + "-annotations-bbox.csv"
+    cls_list_file_name = data_name + "-cls.csv"
+    create_cls_list(
+        src_dir_path=src_dir_path,
+        dst_dir_path=dst_dir_path,
+        rewrite=rewrite,
+        annotation_file_name=annotation_file_name,
+        cls_list_file_name=cls_list_file_name)
+
+    create_dataset(
+        src_dir_path=src_dir_path,
+        dst_dir_path=dst_dir_path,
+        remove_src=remove_src,
+        rewrite=rewrite,
+        src_data_dir_name=tmp_dir_name,
+        dst_dataset_dir_name=data_name,
+        cls_list_file_name=cls_list_file_name)
+
+    tmp_dir_path = os.path.join(dst_dir_path, tmp_dir_name)
+    os.remove(tmp_dir_path)
 
 
 def main():
@@ -95,14 +224,33 @@ def main():
     if not os.path.exists(dst_dir_path):
         os.makedirs(dst_dir_path)
     remove_src = args.remove_archives
+    rewrite = args.rewrite
 
-    extract_val(
+    process_data(
         src_dir_path=src_dir_path,
         dst_dir_path=dst_dir_path,
-        remove_src=remove_src)
-    create_val_cls_list(
+        rewrite=rewrite,
+        remove_src=remove_src,
+        data_name="validation",
+        archive_file_stem_list=["validation"])
+
+    process_data(
         src_dir_path=src_dir_path,
-        dst_dir_path=dst_dir_path)
+        dst_dir_path=dst_dir_path,
+        rewrite=rewrite,
+        remove_src=remove_src,
+        data_name="test",
+        archive_file_stem_list=["test"])
+
+    train_archive_file_stem_list = ['train_00', 'train_01', 'train_02', 'train_03', 'train_04', 'train_05', 'train_06',
+                                    'train_07', 'train_08']
+    process_data(
+        src_dir_path=src_dir_path,
+        dst_dir_path=dst_dir_path,
+        rewrite=rewrite,
+        remove_src=remove_src,
+        data_name="train",
+        archive_file_stem_list=train_archive_file_stem_list)
 
 
 if __name__ == '__main__':

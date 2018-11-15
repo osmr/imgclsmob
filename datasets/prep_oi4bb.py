@@ -94,7 +94,7 @@ def extract_data_from_archive(src_dir_path,
             src=src_file_path,
             dst=dst_file_path)
 
-    os.remove(src_data_dir_path)
+    os.rmdir(src_data_dir_path)
 
 
 def create_cls_list(src_dir_path,
@@ -203,7 +203,7 @@ def process_data(src_dir_path,
         cls_list_file_name=cls_list_file_name)
 
     tmp_dir_path = os.path.join(dst_dir_path, tmp_dir_name)
-    os.remove(tmp_dir_path)
+    os.rmdir(tmp_dir_path)
 
 
 def main():

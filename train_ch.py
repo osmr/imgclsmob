@@ -17,8 +17,9 @@ from chainer_.utils import prepare_model
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Train a model for image classification (Chainer)',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description='Train a model for image classification (Chainer)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--data-dir',
         type=str,

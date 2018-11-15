@@ -9,8 +9,9 @@ from pytorch.utils import prepare_pt_context, prepare_model, get_data_loader, ca
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Evaluate a model for image classification (PyTorch)',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image classification (PyTorch)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--data-dir',
         type=str,

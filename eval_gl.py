@@ -10,8 +10,9 @@ from gluon.utils import prepare_mx_context, prepare_model, get_data_rec, get_dat
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Evaluate a model for image classification (Gluon)',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image classification (Gluon)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--data-dir',
         type=str,

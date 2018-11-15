@@ -12,8 +12,9 @@ from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data, ca
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Evaluate a model for image classification (TensorFlow/TensorPack)',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image classification (TensorFlow/TensorPack)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--data-dir',
         type=str,

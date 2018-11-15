@@ -9,8 +9,9 @@ from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_da
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Evaluate a model for image classification (Keras)',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image classification (Keras)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--rec-train',
         type=str,

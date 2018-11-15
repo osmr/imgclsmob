@@ -56,6 +56,20 @@ def parse_args():
     return args
 
 
+def get_label_list(src_dir_path):
+    assert (os.path.exists(src_dir_path))
+    classes_file_name = "class-descriptions-boxable.csv"
+    classes_file_path = os.path.join(src_dir_path, classes_file_name)
+    df = pd.read_csv(
+        classes_file_path,
+        header=None,
+        dtype={'LabelName': np.unicode, 'LabelDesc': np.unicode})
+    label_names = df['LabelName'].values.astype(np.unicode)
+    unique_label_names = np.unique(label_names)
+    np.sort(unique_label_names)
+    return unique_label_names
+
+
 def extract_data_from_archive(src_dir_path,
                               dst_dir_path,
                               rewrite,
@@ -115,6 +129,7 @@ def create_cls_list(src_dir_path,
     df = pd.read_csv(annotation_file_path)
     df2 = df.assign(Square=(df.XMax - df.XMin) * (df.YMax - df.YMin))
     df2 = df2[["ImageID", "LabelName", "Square"]]
+    df2 = df2.sort_values(["ImageID", "LabelName", "Square"])
     df2 = df2.loc[df2.groupby(["ImageID"])["Square"].idxmax()]
     df2 = df2[["ImageID", "LabelName"]]
     df2.to_csv(cls_list_file_path, index=False)
@@ -126,7 +141,8 @@ def create_dataset(src_dir_path,
                    remove_src,
                    src_data_dir_name,
                    dst_dataset_dir_name,
-                   cls_list_file_name):
+                   cls_list_file_name,
+                   unique_label_names):
     assert (os.path.exists(src_dir_path))
     assert (os.path.exists(dst_dir_path))
     logging.info('Creating dataset <{}>'.format(dst_dataset_dir_name))
@@ -146,8 +162,6 @@ def create_dataset(src_dir_path,
         dtype={'ImageID': np.unicode, 'LabelName': np.unicode})
     image_names = df['ImageID'].values.astype(np.unicode)
     label_names = df['LabelName'].values.astype(np.unicode)
-    unique_label_names = np.unique(label_names)
-    np.sort(unique_label_names)
     for label_name in unique_label_names:
         label_dir_name = label_name[3:]
         label_dir_path = os.path.join(dst_dataset_dir_path, label_dir_name)
@@ -170,7 +184,8 @@ def process_data(src_dir_path,
                  rewrite,
                  remove_src,
                  data_name,
-                 archive_file_stem_list):
+                 archive_file_stem_list,
+                 unique_label_names):
     assert (os.path.exists(src_dir_path))
     assert (os.path.exists(dst_dir_path))
     logging.info('Process data for <{}>'.format(data_name))
@@ -201,10 +216,11 @@ def process_data(src_dir_path,
         rewrite=rewrite,
         src_data_dir_name=tmp_dir_name,
         dst_dataset_dir_name=data_name,
-        cls_list_file_name=cls_list_file_name)
+        cls_list_file_name=cls_list_file_name,
+        unique_label_names=unique_label_names)
 
     tmp_dir_path = os.path.join(dst_dir_path, tmp_dir_name)
-    os.rmdir(tmp_dir_path)
+    shutil.rmtree(tmp_dir_path)
 
 
 def main():
@@ -227,31 +243,24 @@ def main():
     remove_src = args.remove_archives
     rewrite = args.rewrite
 
-    process_data(
-        src_dir_path=src_dir_path,
-        dst_dir_path=dst_dir_path,
-        rewrite=rewrite,
-        remove_src=remove_src,
-        data_name="validation",
-        archive_file_stem_list=["validation"])
+    unique_label_names = get_label_list(src_dir_path=src_dir_path)
 
-    process_data(
-        src_dir_path=src_dir_path,
-        dst_dir_path=dst_dir_path,
-        rewrite=rewrite,
-        remove_src=remove_src,
-        data_name="test",
-        archive_file_stem_list=["test"])
+    data_name_list = ["validation", "test", "train"]
+    archive_file_stem_lists = [
+        ["validation"],
+        ["test"],
+        ['train_00', 'train_01', 'train_02', 'train_03', 'train_04', 'train_05', 'train_06', 'train_07', 'train_08']
+    ]
 
-    train_archive_file_stem_list = ['train_00', 'train_01', 'train_02', 'train_03', 'train_04', 'train_05', 'train_06',
-                                    'train_07', 'train_08']
-    process_data(
-        src_dir_path=src_dir_path,
-        dst_dir_path=dst_dir_path,
-        rewrite=rewrite,
-        remove_src=remove_src,
-        data_name="train",
-        archive_file_stem_list=train_archive_file_stem_list)
+    for i in range(len(data_name_list)):
+        process_data(
+            src_dir_path=src_dir_path,
+            dst_dir_path=dst_dir_path,
+            rewrite=rewrite,
+            remove_src=remove_src,
+            data_name=data_name_list[i],
+            archive_file_stem_list=archive_file_stem_lists[i],
+            unique_label_names=unique_label_names)
 
 
 if __name__ == '__main__':

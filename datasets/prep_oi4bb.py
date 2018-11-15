@@ -67,8 +67,8 @@ def extract_data_from_archive(src_dir_path,
     archive_file_name = archive_file_stem + ".zip"
     logging.info('Extracting data from archive <{}>'.format(archive_file_name))
 
-    data_dir_path = os.path.join(dst_dir_path, dst_data_dir_name)
-    if os.path.exists(data_dir_path) and not rewrite:
+    dst_data_dir_path = os.path.join(dst_dir_path, dst_data_dir_name)
+    if os.path.exists(dst_data_dir_path) and not rewrite:
         logging.info('Data are already exist...Skip.')
         return
 
@@ -82,14 +82,14 @@ def extract_data_from_archive(src_dir_path,
     if archive_file_stem == dst_data_dir_name:
         return
 
-    if not os.path.exists(data_dir_path):
-        os.makedirs(data_dir_path)
+    if not os.path.exists(dst_data_dir_path):
+        os.makedirs(dst_data_dir_path)
     src_data_dir_path = os.path.join(dst_dir_path, archive_file_stem)
 
     file_name_list = os.listdir(src_data_dir_path)
     for file_name in file_name_list:
         src_file_path = os.path.join(src_data_dir_path, file_name)
-        dst_file_path = os.path.join(data_dir_path, file_name)
+        dst_file_path = os.path.join(dst_data_dir_path, file_name)
         shutil.move(
             src=src_file_path,
             dst=dst_file_path)
@@ -146,22 +146,23 @@ def create_dataset(src_dir_path,
         dtype={'ImageID': np.unicode, 'LabelName': np.unicode})
     image_names = df['ImageID'].values.astype(np.unicode)
     label_names = df['LabelName'].values.astype(np.unicode)
+    unique_label_names = np.unique(label_names)
+    np.sort(unique_label_names)
+    for label_name in unique_label_names:
+        label_dir_name = label_name[3:]
+        label_dir_path = os.path.join(dst_dataset_dir_path, label_dir_name)
+        if not os.path.exists(label_dir_path):
+            os.makedirs(label_dir_path)
     for i, (image_name, label_name) in enumerate(zip(image_names, label_names)):
         src_image_file_path = os.path.join(src_data_dir_path, "{}.jpg".format(image_name))
         assert (os.path.exists(src_image_file_path))
         label_dir_name = label_name[3:]
         label_dir_path = os.path.join(dst_dataset_dir_path, label_dir_name)
-        if not os.path.exists(label_dir_path):
-            os.makedirs(label_dir_path)
+        assert (os.path.exists(label_dir_path))
         dst_image_file_path = os.path.join(label_dir_path, "{}.jpg".format(image_name))
-        if remove_src:
-            shutil.move(
-                src=src_image_file_path,
-                dst=dst_image_file_path)
-        else:
-            shutil.copy(
-                src=src_image_file_path,
-                dst=dst_image_file_path)
+        shutil.move(
+            src=src_image_file_path,
+            dst=dst_image_file_path)
 
 
 def process_data(src_dir_path,

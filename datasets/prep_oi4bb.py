@@ -64,10 +64,10 @@ def get_label_list(src_dir_path):
         classes_file_path,
         header=None,
         dtype={'LabelName': np.unicode, 'LabelDesc': np.unicode})
-    label_names = df['LabelName'].values.astype(np.unicode)
-    unique_label_names = np.unique(label_names)
-    np.sort(unique_label_names)
-    return unique_label_names
+    label_names = df[0].values.astype(np.unicode)
+    assert (len(label_names) == len(np.unique(label_names)))
+    np.sort(label_names)
+    return label_names
 
 
 def extract_data_from_archive(src_dir_path,

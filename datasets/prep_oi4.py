@@ -6,10 +6,8 @@ if __name__ == '__main__' and __package__ is None:
 import argparse
 import os
 import cv2
-# import zipfile
 import logging
 import hashlib
-# import shutil
 from PIL import Image
 import numpy as np
 import pandas as pd
@@ -135,7 +133,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
             # Disable pyling too broad Exception
             # pylint: disable=W0703
             try:
-                print('Downloading {} from {}...'.format(fname, url))
+                logging.info('Downloading {} from {}...'.format(fname, url))
                 r = requests.get(url, stream=True, verify=verify_ssl)
                 if r.status_code != 200:
                     raise RuntimeError("Failed downloading url {}".format(url))
@@ -154,8 +152,9 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
                 if retries <= 0:
                     raise e
                 else:
-                    print("download failed, retrying, {} attempt{} left"
-                          .format(retries, 's' if retries > 1 else ''))
+                    logging.info("download failed, retrying, {} attempt{} left".format(
+                        retries,
+                        's' if retries > 1 else ''))
 
     return fname
 
@@ -222,10 +221,13 @@ def create_train_data_subset(src_dir_path,
                 rot = url_df2.Rotation.values.astype(np.float32)[0]
                 try:
                     _download(url=url, path=image_file_path)
+                    img_size_bytes = os.path.getsize(image_file_path)
+                    if img_size_bytes < 5000:
+                        raise Exception("Image too small, size = {}".format(img_size_bytes))
                     img = Image.open(image_file_path)
                     img.verify()
                     img.close()
-                    if rot != 0.0:
+                    if (not np.isnan(rot)) and (rot != 0.0):
                         img = cv2.imread(image_file_path)
                         if rot == 90.0:
                             img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)

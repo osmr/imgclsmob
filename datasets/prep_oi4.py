@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument(
         '--log-packages',
         type=str,
-        default='pandas',
+        default='pandas, Pillow, opencv-python',
         help='list of python packages for logging')
     parser.add_argument(
         '--log-pip-packages',

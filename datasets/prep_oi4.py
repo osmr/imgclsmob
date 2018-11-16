@@ -164,7 +164,9 @@ def create_train_data_subset(src_dir_path,
                              src_data_subset_name,
                              dst_data_subset_name,
                              annotations_sha1,
-                             urls_sha1):
+                             urls_sha1,
+                             num_classes,
+                             max_image_count):
     logging.info("Processing <{}> subset...".format(src_data_subset_name))
 
     dst_data_subset_dir_path = os.path.join(dst_dir_path, dst_data_subset_name)
@@ -187,7 +189,7 @@ def create_train_data_subset(src_dir_path,
     ann_df1 = ann_df1.query("Confidence == 1")[["ImageID", "LabelName"]]
 
     ann_df2 = ann_df1.groupby(["LabelName"]).size().reset_index(name="n")
-    ann_df3 = ann_df2.nlargest(1000, "n").sort_values(by="n")
+    ann_df3 = ann_df2.nlargest(num_classes, "n").sort_values(by="n")
 
     ann_df4 = ann_df1[ann_df1.LabelName.isin(ann_df3.LabelName)][["ImageID"]].drop_duplicates()
     ann_df5 = ann_df1[ann_df1.ImageID.isin(ann_df4.ImageID)]
@@ -212,6 +214,8 @@ def create_train_data_subset(src_dir_path,
 
         image_count = 0
         for id_ann_df7, row_ann_df7 in ann_df7.iterrows():
+            if image_count > max_image_count:
+                break
             image_id = row_ann_df7["ImageID"]
             image_file_path = os.path.join(label_dir_path, image_id + ".jpg")
             if not os.path.exists(image_file_path):
@@ -279,7 +283,9 @@ def main():
         src_data_subset_name="train",
         dst_data_subset_name="train",
         annotations_sha1="4203637e3fb28f3c57c7d4e0c53121cd5e9e098e",
-        urls_sha1="2f64a7d611426cbc4ac3ffa029908d1871c9317d")
+        urls_sha1="2f64a7d611426cbc4ac3ffa029908d1871c9317d",
+        num_classes=1000,
+        max_image_count=5000)
 
     # create_data_subset(
     #     src_dir_path=src_dir_path,

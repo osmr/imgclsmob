@@ -231,7 +231,7 @@ class PyrUnit(nn.Module):
                 kernel_size=2,
                 stride=stride,
                 ceil_mode=True)
-        self.identity_pad = (0, 0, 0, 0, out_channels - in_channels, 0)
+        self.identity_pad = (0, 0, 0, 0, 0, out_channels - in_channels)
 
     def forward(self, x):
         identity = x

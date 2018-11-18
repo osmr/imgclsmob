@@ -214,6 +214,7 @@ class PyrUnit(nn.Module):
         super(PyrUnit, self).__init__()
         assert (out_channels > in_channels)
         self.resize_identity = (stride != 1)
+        self.identity_pad_width = (0, 0, 0, 0, 0, out_channels - in_channels)
 
         if bottleneck:
             self.body = PyrBottleneck(
@@ -231,7 +232,6 @@ class PyrUnit(nn.Module):
                 kernel_size=2,
                 stride=stride,
                 ceil_mode=True)
-        self.identity_pad = (0, 0, 0, 0, 0, out_channels - in_channels)
 
     def forward(self, x):
         identity = x
@@ -239,7 +239,7 @@ class PyrUnit(nn.Module):
         x = self.bn(x)
         if self.resize_identity:
             identity = self.identity_pool(identity)
-        identity = F.pad(identity, pad=self.identity_pad)
+        identity = F.pad(identity, pad=self.identity_pad_width)
         x = x + identity
         return x
 

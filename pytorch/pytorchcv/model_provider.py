@@ -2,6 +2,7 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
+from .models.pyramidnet import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.dpn import *
@@ -22,7 +23,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 from .models.mnasnet import *
-from .models.pyramidnet import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
@@ -33,7 +33,7 @@ from .models.pyramidnet import *
 # from .models.others.oth_nasnet import *
 # from .models.others.oth_nasnet_mobile import *
 # from .models.others.oth_pnasnet import *
-from .models.others.oth_pyramidnet import *
+# from .models.others.oth_pyramidnet import *
 
 __all__ = ['get_model']
 
@@ -109,6 +109,8 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'pyramidnet101_a360': pyramidnet101_a360,
 
     'densenet121': densenet121,
     'densenet161': densenet161,
@@ -202,9 +204,7 @@ _models = {
 
     'mnasnet': mnasnet,
 
-    'pyramidnet101_a360': pyramidnet101_a360,
-    'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
-
+    # 'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
     # 'oth_inceptionv4': oth_inceptionv4,
     # 'oth_xception': oth_xception,
 

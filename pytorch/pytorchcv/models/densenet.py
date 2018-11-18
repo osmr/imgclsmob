@@ -336,13 +336,13 @@ def get_densenet(num_layers,
         raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
 
     from functools import reduce
-    channels = reduce(lambda xi, yi:
-                      xi + [reduce(lambda xj, yj:
-                                   xj + [xj[-1] + yj],
-                                   [growth_rate] * yi,
-                                   [xi[-1][-1] // 2])[1:]],
-                      layers,
-                      [[init_block_channels * 2]])[1:]
+    channels = reduce(
+        lambda xi, yi: xi + [reduce(
+            lambda xj, yj: xj + [xj[-1] + yj],
+            [growth_rate] * yi,
+            [xi[-1][-1] // 2])[1:]],
+        layers,
+        [[init_block_channels * 2]])[1:]
 
     net = DenseNet(
         channels=channels,

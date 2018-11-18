@@ -22,6 +22,7 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 from .models.mnasnet import *
+from .models.pyramidnet import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
@@ -32,6 +33,7 @@ from .models.mnasnet import *
 # from .models.others.oth_nasnet import *
 # from .models.others.oth_nasnet_mobile import *
 # from .models.others.oth_pnasnet import *
+from .models.others.oth_pyramidnet2 import *
 
 __all__ = ['get_model']
 
@@ -199,6 +201,9 @@ _models = {
     'pnasnet5large': pnasnet5large,
 
     'mnasnet': mnasnet,
+
+    'pyramidnet101_a360': pyramidnet101_a360,
+    'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
 
     # 'oth_inceptionv4': oth_inceptionv4,
     # 'oth_xception': oth_xception,

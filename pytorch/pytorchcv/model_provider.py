@@ -33,7 +33,7 @@ from .models.pyramidnet import *
 # from .models.others.oth_nasnet import *
 # from .models.others.oth_nasnet_mobile import *
 # from .models.others.oth_pnasnet import *
-from .models.others.oth_pyramidnet2 import *
+from .models.others.oth_pyramidnet import *
 
 __all__ = ['get_model']
 

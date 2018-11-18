@@ -233,7 +233,7 @@ class PyramidNet(nn.Module):
 
 
 def oth_pyramidnet101_a360(num_classes=1000, pretrained='imagenet'):
-    net = PyramidNet(depth=101, alpha=360, num_classes=num_classes, bottleneck=True)
+    net = PyramidNet(dataset="imagenet", depth=101, alpha=360, num_classes=num_classes, bottleneck=True)
     return net
 
 

@@ -156,13 +156,13 @@ with tf.Session() as sess:
 - MobileNet (['MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'](https://arxiv.org/abs/1704.04861))
 - FD-MobileNet (['FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'](https://arxiv.org/abs/1802.03750))
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
+- MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
 - Xception (['Xception: Deep Learning with Depthwise Separable Convolutions'](https://arxiv.org/abs/1610.02357))
 - InceptionV3 (['Rethinking the Inception Architecture for Computer Vision'](https://arxiv.org/abs/1512.00567))
 - InceptionV4/InceptionResNetV2 (['Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning'](https://arxiv.org/abs/1602.07261))
 - PolyNet (['PolyNet: A Pursuit of Structural Diversity in Very Deep Networks'](https://arxiv.org/abs/1611.05725))
 - NASNet (['Learning Transferable Architectures for Scalable Image Recognition'](https://arxiv.org/abs/1707.07012))
 - PNASNet (['Progressive Neural Architecture Search'](https://arxiv.org/abs/1712.00559))
-- MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
 
 ## Pretrained models
 
@@ -212,7 +212,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNeXt-50 (32x4d) | 21.06 | 5.58 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext50_32x4d-0558-a49f8fb0.params.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.99 | 5.00 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext101_32x4d-0500-cf161260.params.log)) |
 | SENet-154 | 18.84 | 4.65 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.13/senet154-0465-dd244507.params.log)) |
-| PyramidNet-101 (a=360) | 22.72 | 6.52 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid..PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0652-08d5a5d1.params.log)) |
+| PyramidNet-101 (a=360) | 22.72 | 6.52 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0652-08d5a5d1.params.log)) |
 | DenseNet-121 | 25.11 | 7.80 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet121-0780-49b72d04.params.log)) |
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0689-281ec06b.params.log)) |
@@ -251,6 +251,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.51 | 14.64 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_wd2-1464-02fe7ff2.params.log)) |
 | MobileNetV2 x0.75 | 30.82 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1126-152672f5.params.log)) |
 | MobileNetV2 x1.0 | 28.51 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-0990-4e1a3878.params.log)) |
+| MnasNet | 32.34 | 12.02 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1202-993d5546.params.log)) |
 | Xception | 21.07 | 5.61 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0561-a0e538e1.params.log)) |
 | InceptionV3 | 21.22 | 5.59 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0559-6c087967.params.log)) |
 | InceptionV4 | 20.60 | 5.25 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0525-f7aa9536.params.log)) |
@@ -296,7 +297,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNeXt-50 (32x4d) | 21.00 | 5.54 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext50_32x4d-0554-99e0e9aa.pth.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.96 | 5.05 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext101_32x4d-0505-0924f0a2.pth.log)) |
 | SENet-154 | 18.62 | 4.61 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.13/senet154-0461-6512228c.pth.log)) |
-| PyramidNet-101 (a=360) | 21.98 | 6.20 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid..PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0620-3a24427b.pth.log)) |
+| PyramidNet-101 (a=360) | 21.98 | 6.20 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0620-3a24427b.pth.log)) |
 | DenseNet-121 | 25.57 | 8.03 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet121-0803-f994107a.pth.log)) |
 | DenseNet-161 | 22.86 | 6.44 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0644-c0fb22c8.pth.log)) |
 | DenseNet-169 | 24.40 | 7.19 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0719-27139105.pth.log)) |
@@ -335,6 +336,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 36.54 | 15.19 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_wd2-1519-d0937a23.pth.log)) |
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
+| MnasNet | 32.62 | 12.35 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1235-58b6de49.pth.log)) |
 | Xception | 21.12 | 5.68 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0568-9e15f3e1.pth.log)) |
 | InceptionV3 | 21.12 | 5.65 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0565-cf406180.pth.log)) |
 | InceptionV4 | 20.64 | 5.29 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0529-5cb7b4e4.pth.log)) |
@@ -380,7 +382,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNeXt-50 (32x4d) | 21.04 | 5.58 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.27/seresnext50_32x4d-0558-5c435c1b.npz.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.99 | 5.01 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.27/seresnext101_32x4d-0501-98ea6fc4.npz.log)) |
 | SENet-154 | 18.79 | 4.63 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.28/senet154-0463-381d2494.npz.log)) |
-| PyramidNet-101 (a=360) | 22.66 | 6.49 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid..PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0649-b68c786b.npz.log)) |
+| PyramidNet-101 (a=360) | 22.66 | 6.49 | 42,455,070 | 8,706.81M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0649-b68c786b.npz.log)) |
 | DenseNet-121 | 25.04 | 7.79 | 7,978,856 | 2,852.39M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.29/densenet121-0779-06d5ebbf.npz.log)) |
 | DenseNet-161 | 22.36 | 6.20 | 28,681,000 | 7,761.25M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.29/densenet161-0620-6d05f3b9.npz.log)) |
 | DenseNet-169 | 23.85 | 6.86 | 14,149,480 | 3,381.48M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.29/densenet169-0686-1978656b.npz.log)) |
@@ -419,6 +421,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.96 | 14.98 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_wd2-1498-4b767a98.npz.log)) |
 | MobileNetV2 x0.75 | 31.28 | 11.48 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w3d4-1148-a6f852ea.npz.log)) |
 | MobileNetV2 x1.0 | 28.87 | 10.05 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w1-1005-3b6d1764.npz.log)) |
+| MnasNet | 32.33 | 12.05 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1205-7bc88b51.npz.log)) |
 | Xception | 21.07 | 5.63 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0563-dbbcecaf.npz.log)) |
 | InceptionV3 | 21.11 | 5.61 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0561-4ddea4df.npz.log)) |
 | InceptionV4 | 20.62 | 5.26 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0526-02e53701.npz.log)) |
@@ -495,6 +498,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.51 | 14.65 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_wd2-1465-774d5bca.h5.log)) |
 | MobileNetV2 x0.75 | 30.81 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w3d4-1126-f2f664da.h5.log)) |
 | MobileNetV2 x1.0 | 28.50 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.61/mobilenetv2_w1-0990-cbb8be96.h5.log)) |
+| MnasNet | 32.32 | 12.03 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1203-76505508.h5.log)) |
 
 ### For TensorFlow
 
@@ -565,6 +569,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.51 | 14.60 | 1,964,736 | 95.62M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.82/mobilenetv2_wd2-1460-12376d24.tf.npz.log)) |
 | MobileNetV2 x0.75 | 30.79 | 11.24 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.82/mobilenetv2_w3d4-1124-3531c997.tf.npz.log)) |
 | MobileNetV2 x1.0 | 28.53 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.82/mobilenetv2_w1-0990-e80f9fe4.tf.npz.log)) |
+| MnasNet | 32.34 | 12.07 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1207-929dc499.tf.npz.log)) |
 
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
@@ -572,4 +577,5 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 [clavichord93/MENet]: https://github.com/clavichord93/MENet
 [clavichord93/FD-MobileNet]: https://github.com/clavichord93/FD-MobileNet
 [tensorpack/tensorpack]: https://github.com/tensorpack/tensorpack
-[dyhan0920/Pyramid..PyTorch]: https://github.com/dyhan0920/PyramidNet-PyTorch 
+[dyhan0920/Pyramid...PyTorch]: https://github.com/dyhan0920/PyramidNet-PyTorch 
+[zeusees/Mnasnet...Model]: https://github.com/zeusees/Mnasnet-Pretrained-Model

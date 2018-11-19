@@ -15,6 +15,7 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.mnasnet import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
@@ -22,7 +23,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-from .models.mnasnet import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
@@ -34,7 +34,7 @@ from .models.mnasnet import *
 # from .models.others.oth_nasnet_mobile import *
 # from .models.others.oth_pnasnet import *
 # from .models.others.oth_pyramidnet import *
-from .models.others.oth_darts import *
+# from .models.others.oth_darts import *
 
 __all__ = ['get_model']
 
@@ -192,6 +192,8 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
+    'mnasnet': mnasnet,
+
     'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
@@ -203,8 +205,6 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
-    'mnasnet': mnasnet,
-
     # 'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
     # 'oth_inceptionv4': oth_inceptionv4,
     # 'oth_xception': oth_xception,
@@ -215,7 +215,7 @@ _models = {
     # 'oth_nasnetalarge': oth_nasnetalarge,
     # 'oth_nasnetamobile': oth_nasnetamobile,
     # 'oth_pnasnet5large': oth_pnasnet5large,
-    'oth_darts': oth_darts,
+    # 'oth_darts': oth_darts,
 }
 
 

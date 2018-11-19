@@ -15,6 +15,7 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.mnasnet import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
@@ -22,7 +23,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-from .models.mnasnet import *
 
 # from .models.others.oth_inceptionv3 import *
 # from .models.others.oth_mnasnet import *
@@ -183,6 +183,8 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
+    'mnasnet': mnasnet,
+
     'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
@@ -193,8 +195,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'mnasnet': mnasnet,
 
     # 'oth_mnasnet': oth_mnasnet,
     # 'oth_inceptionv3': oth_inception_v3,

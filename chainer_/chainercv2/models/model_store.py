@@ -83,7 +83,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenetv2_w1', '1005', '3b6d1764934efd35d4cf402ea5194546dc5004e4', 'v0.0.31'),
     ('xception', '0563', 'dbbcecaf4223964ab2aaddf6bee15f2e777e854e', 'v0.0.100'),
     ('inceptionv3', '0561', '4ddea4df44f132ffc9e2b22b1e7d686f8b59703b', 'v0.0.92'),
-    ('inceptionv4', '0530', 'a193a4b649a35f4adde7678630335b5689b8f4be', 'v0.0.98'),
+    ('inceptionv4', '0526', '02e53701d1bda64b057b41fa90d8e04a17d07f66', 'v0.0.105'),
     ('inceptionresnetv2', '0501', '9c91e41432ce6273d4d419cd4c2f8125abd8567d', 'v0.0.99'),
     ('polynet', '0450', '6dc7028b0edc48c452f83dd38448b1242c554a5e', 'v0.0.96'),
     ('nasnet_4a1056', '0796', 'f09950c0f4a333007dc33049531534b8cd9f8521', 'v0.0.97'),

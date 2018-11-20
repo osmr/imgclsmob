@@ -203,6 +203,10 @@ _models = {
     'bn_vgg13': bn_vgg13,
     'bn_vgg16': bn_vgg16,
     'bn_vgg19': bn_vgg19,
+    'bn_vgg11b': bn_vgg11b,
+    'bn_vgg13b': bn_vgg13b,
+    'bn_vgg16b': bn_vgg16b,
+    'bn_vgg19b': bn_vgg19b,
 }
 
 

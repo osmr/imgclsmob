@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1409.1556.
 """
 
-__all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'bn_vgg16', 'bn_vgg19']
+__all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'bn_vgg16', 'bn_vgg19', 'bn_vgg11b',
+           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b']
 
 import os
 import chainer.functions as F
@@ -362,7 +363,7 @@ def bn_vgg11(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=11, use_bias=True, use_bn=True, model_name="vgg11", **kwargs)
+    return get_vgg(blocks=11, use_bias=False, use_bn=True, model_name="vgg11", **kwargs)
 
 
 def bn_vgg13(**kwargs):
@@ -377,7 +378,7 @@ def bn_vgg13(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=13, use_bias=True, use_bn=True, model_name="vgg13", **kwargs)
+    return get_vgg(blocks=13, use_bias=False, use_bn=True, model_name="vgg13", **kwargs)
 
 
 def bn_vgg16(**kwargs):
@@ -392,7 +393,7 @@ def bn_vgg16(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=16, use_bias=True, use_bn=True, model_name="vgg16", **kwargs)
+    return get_vgg(blocks=16, use_bias=False, use_bn=True, model_name="vgg16", **kwargs)
 
 
 def bn_vgg19(**kwargs):
@@ -407,7 +408,67 @@ def bn_vgg19(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=19, use_bias=True, use_bn=True, model_name="vgg19", **kwargs)
+    return get_vgg(blocks=19, use_bias=False, use_bn=True, model_name="vgg19", **kwargs)
+
+
+def bn_vgg11b(**kwargs):
+    """
+    VGG-11 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
+    Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_vgg(blocks=11, use_bias=True, use_bn=True, model_name="vgg11b", **kwargs)
+
+
+def bn_vgg13b(**kwargs):
+    """
+    VGG-13 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
+    Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_vgg(blocks=13, use_bias=True, use_bn=True, model_name="vgg13b", **kwargs)
+
+
+def bn_vgg16b(**kwargs):
+    """
+    VGG-16 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
+    Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_vgg(blocks=16, use_bias=True, use_bn=True, model_name="vgg16b", **kwargs)
+
+
+def bn_vgg19b(**kwargs):
+    """
+    VGG-19 model with batch normalization and biases in convolution layers from 'Very Deep Convolutional Networks for
+    Large-Scale Image Recognition,' https://arxiv.org/abs/1409.1556.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_vgg(blocks=19, use_bias=True, use_bn=True, model_name="vgg19b", **kwargs)
 
 
 def _test():
@@ -427,6 +488,10 @@ def _test():
         bn_vgg13,
         bn_vgg16,
         bn_vgg19,
+        bn_vgg11b,
+        bn_vgg13b,
+        bn_vgg16b,
+        bn_vgg19b,
     ]
 
     for model in models:
@@ -438,10 +503,14 @@ def _test():
         assert (model != vgg13 or weight_count == 133047848)
         assert (model != vgg16 or weight_count == 138357544)
         assert (model != vgg19 or weight_count == 143667240)
-        assert (model != bn_vgg11 or weight_count == 132868840)
-        assert (model != bn_vgg13 or weight_count == 133053736)
-        assert (model != bn_vgg16 or weight_count == 138365992)
-        assert (model != bn_vgg19 or weight_count == 143678248)
+        assert (model != bn_vgg11 or weight_count == 132866088)
+        assert (model != bn_vgg13 or weight_count == 133050792)
+        assert (model != bn_vgg16 or weight_count == 138361768)
+        assert (model != bn_vgg19 or weight_count == 143672744)
+        assert (model != bn_vgg11b or weight_count == 132868840)
+        assert (model != bn_vgg13b or weight_count == 133053736)
+        assert (model != bn_vgg16b or weight_count == 138365992)
+        assert (model != bn_vgg19b or weight_count == 143678248)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

@@ -24,8 +24,12 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.vgg import *
+
 # from .models.others.oth_inceptionv3 import *
 # from .models.others.oth_mnasnet import *
+
+from .models.others.oth_vgg import *
 
 __all__ = ['get_model']
 
@@ -198,6 +202,24 @@ _models = {
 
     # 'oth_mnasnet': oth_mnasnet,
     # 'oth_inceptionv3': oth_inception_v3,
+
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
+
+    'oth_vgg11': oth_vgg11,
+    'oth_vgg13': oth_vgg13,
+    'oth_vgg16': oth_vgg16,
+    'oth_vgg19': oth_vgg19,
+    'oth_vgg11_bn': oth_vgg11_bn,
+    'oth_vgg13_bn': oth_vgg13_bn,
+    'oth_vgg16_bn': oth_vgg16_bn,
+    'oth_vgg19_bn': oth_vgg19_bn,
 }
 
 

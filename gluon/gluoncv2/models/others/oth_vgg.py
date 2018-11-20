@@ -235,3 +235,46 @@ def oth_vgg19_bn(**kwargs):
     """
     kwargs['batch_norm'] = True
     return get_vgg(19, **kwargs)
+
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_vgg11,
+        oth_vgg13,
+        oth_vgg16,
+        oth_vgg19,
+        oth_vgg11_bn,
+        oth_vgg13_bn,
+        oth_vgg16_bn,
+        oth_vgg19_bn,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+
+
+if __name__ == "__main__":
+    _test()

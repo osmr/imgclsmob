@@ -24,6 +24,8 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.vgg import *
+
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
 # from .models.others.oth_xception import *
@@ -204,6 +206,15 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
 
     # 'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
     # 'oth_inceptionv4': oth_inceptionv4,

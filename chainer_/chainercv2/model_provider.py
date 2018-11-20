@@ -24,6 +24,8 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.vgg import *
+
 __all__ = ['get_model']
 
 
@@ -192,6 +194,15 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
 }
 
 

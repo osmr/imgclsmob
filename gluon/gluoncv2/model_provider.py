@@ -1,8 +1,11 @@
+from .models.alexnet import *
+from .models.vgg import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
 from .models.pyramidnet import *
+from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.dpn import *
@@ -24,20 +27,30 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-from .models.alexnet import *
-from .models.vgg import *
-from .models.diracnetv2 import *
-
 # from .models.others.oth_inceptionv3 import *
 # from .models.others.oth_mnasnet import *
-
-from .models.others.oth_vgg import *
-from .models.others.oth_alexnet import *
+# from .models.others.oth_vgg import *
+# from .models.others.oth_alexnet import *
 
 __all__ = ['get_model']
 
 
 _models = {
+    'alexnet': alexnet,
+
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
+    'bn_vgg11b': bn_vgg11b,
+    'bn_vgg13b': bn_vgg13b,
+    'bn_vgg16b': bn_vgg16b,
+    'bn_vgg19b': bn_vgg19b,
+
     'resnet10': resnet10,
     'resnet12': resnet12,
     'resnet14': resnet14,
@@ -110,6 +123,9 @@ _models = {
     'senet154': senet154,
 
     'pyramidnet101_a360': pyramidnet101_a360,
+
+    'diracnet18v2': diracnet18v2,
+    'diracnet34v2': diracnet34v2,
 
     'densenet121': densenet121,
     'densenet161': densenet161,
@@ -205,33 +221,15 @@ _models = {
 
     # 'oth_mnasnet': oth_mnasnet,
     # 'oth_inceptionv3': oth_inception_v3,
-
-    'alexnet': alexnet,
-    'vgg11': vgg11,
-    'vgg13': vgg13,
-    'vgg16': vgg16,
-    'vgg19': vgg19,
-    'bn_vgg11': bn_vgg11,
-    'bn_vgg13': bn_vgg13,
-    'bn_vgg16': bn_vgg16,
-    'bn_vgg19': bn_vgg19,
-    'bn_vgg11b': bn_vgg11b,
-    'bn_vgg13b': bn_vgg13b,
-    'bn_vgg16b': bn_vgg16b,
-    'bn_vgg19b': bn_vgg19b,
-
-    'diracnet18v2': diracnet18v2,
-    'diracnet34v2': diracnet34v2,
-
-    'oth_alexnet': oth_alexnet,
-    'oth_vgg11': oth_vgg11,
-    'oth_vgg13': oth_vgg13,
-    'oth_vgg16': oth_vgg16,
-    'oth_vgg19': oth_vgg19,
-    'oth_vgg11_bn': oth_vgg11_bn,
-    'oth_vgg13_bn': oth_vgg13_bn,
-    'oth_vgg16_bn': oth_vgg16_bn,
-    'oth_vgg19_bn': oth_vgg19_bn,
+    # 'oth_alexnet': oth_alexnet,
+    # 'oth_vgg11': oth_vgg11,
+    # 'oth_vgg13': oth_vgg13,
+    # 'oth_vgg16': oth_vgg16,
+    # 'oth_vgg19': oth_vgg19,
+    # 'oth_vgg11_bn': oth_vgg11_bn,
+    # 'oth_vgg13_bn': oth_vgg13_bn,
+    # 'oth_vgg16_bn': oth_vgg16_bn,
+    # 'oth_vgg19_bn': oth_vgg19_bn,
 }
 
 

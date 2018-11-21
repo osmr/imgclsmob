@@ -11,6 +11,10 @@ from mxnet.gluon.utils import download, check_sha1
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('alexnet', '2126', '9cb87ebd09523bec00e10d8ba9abb81a2c632e8b', 'v0.0.108'),
+    ('vgg11', '1176', '95dd287d0eafa05f8c25a780e41c8760acdb7806', 'v0.0.109'),
+    ('vgg13', '1112', 'a0db3c6c854c675e8c83040c35a80da6e5cdf15f', 'v0.0.109'),
+    ('vgg16', '0869', '57a2556f64a7f0851f9764e9305126074334ef2d', 'v0.0.109'),
+    ('vgg19', '0823', '0e2a1e0a9fdeb74dfef9aedd37712ad306627e35', 'v0.0.109'),
     ('resnet10', '1555', 'cfb0a76d89d916adf3e167fe3002f18096f73b4e', 'v0.0.1'),
     ('resnet12', '1446', '9ce715b091d167dd5985d4474c0013b7fb358b08', 'v0.0.30'),
     ('resnet14', '1241', 'a8955ff3d4facd8e38e776fc72f1945806def16a', 'v0.0.40'),

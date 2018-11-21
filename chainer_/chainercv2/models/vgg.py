@@ -30,7 +30,7 @@ class VGGConv(Chain):
         Convolution window size.
     stride : int or tuple/list of 2 int
         Stride of the convolution.
-    padding : int or tuple/list of 2 int
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     use_bias : bool
         Whether the convolution layer uses a bias vector.

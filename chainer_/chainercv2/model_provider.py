@@ -24,6 +24,7 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.alexnet import *
 from .models.vgg import *
 
 __all__ = ['get_model']
@@ -195,6 +196,7 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
+    'alexnet': alexnet,
     'vgg11': vgg11,
     'vgg13': vgg13,
     'vgg16': vgg16,

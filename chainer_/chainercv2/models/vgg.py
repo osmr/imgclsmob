@@ -13,7 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
+from common import SimpleSequential
 
 
 class VGGConv(Chain):
@@ -281,7 +281,7 @@ def get_vgg(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
+        from model_store import get_model_file
         load_npz(
             file=get_model_file(
                 model_name=model_name,
@@ -477,21 +477,21 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = False
+    pretrained = True
 
     models = [
         vgg11,
         vgg13,
         vgg16,
         vgg19,
-        bn_vgg11,
-        bn_vgg13,
-        bn_vgg16,
-        bn_vgg19,
-        bn_vgg11b,
-        bn_vgg13b,
-        bn_vgg16b,
-        bn_vgg19b,
+        # bn_vgg11,
+        # bn_vgg13,
+        # bn_vgg16,
+        # bn_vgg19,
+        # bn_vgg11b,
+        # bn_vgg13b,
+        # bn_vgg16b,
+        # bn_vgg19b,
     ]
 
     for model in models:

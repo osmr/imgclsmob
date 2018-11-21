@@ -12,7 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import SimpleSequential
+from .common import SimpleSequential
 
 
 class DiracConv(Chain):

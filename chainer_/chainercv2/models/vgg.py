@@ -13,7 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import SimpleSequential
+from .common import SimpleSequential
 
 
 class VGGConv(Chain):
@@ -281,7 +281,7 @@ def get_vgg(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from model_store import get_model_file
+        from .model_store import get_model_file
         load_npz(
             file=get_model_file(
                 model_name=model_name,
@@ -363,7 +363,7 @@ def bn_vgg11(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=11, use_bias=False, use_bn=True, model_name="vgg11", **kwargs)
+    return get_vgg(blocks=11, use_bias=False, use_bn=True, model_name="bn_vgg11", **kwargs)
 
 
 def bn_vgg13(**kwargs):
@@ -378,7 +378,7 @@ def bn_vgg13(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=13, use_bias=False, use_bn=True, model_name="vgg13", **kwargs)
+    return get_vgg(blocks=13, use_bias=False, use_bn=True, model_name="bn_vgg13", **kwargs)
 
 
 def bn_vgg16(**kwargs):
@@ -393,7 +393,7 @@ def bn_vgg16(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=16, use_bias=False, use_bn=True, model_name="vgg16", **kwargs)
+    return get_vgg(blocks=16, use_bias=False, use_bn=True, model_name="bn_vgg16", **kwargs)
 
 
 def bn_vgg19(**kwargs):
@@ -408,7 +408,7 @@ def bn_vgg19(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=19, use_bias=False, use_bn=True, model_name="vgg19", **kwargs)
+    return get_vgg(blocks=19, use_bias=False, use_bn=True, model_name="bn_vgg19", **kwargs)
 
 
 def bn_vgg11b(**kwargs):
@@ -423,7 +423,7 @@ def bn_vgg11b(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=11, use_bias=True, use_bn=True, model_name="vgg11b", **kwargs)
+    return get_vgg(blocks=11, use_bias=True, use_bn=True, model_name="bn_vgg11b", **kwargs)
 
 
 def bn_vgg13b(**kwargs):
@@ -438,7 +438,7 @@ def bn_vgg13b(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=13, use_bias=True, use_bn=True, model_name="vgg13b", **kwargs)
+    return get_vgg(blocks=13, use_bias=True, use_bn=True, model_name="bn_vgg13b", **kwargs)
 
 
 def bn_vgg16b(**kwargs):
@@ -453,7 +453,7 @@ def bn_vgg16b(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=16, use_bias=True, use_bn=True, model_name="vgg16b", **kwargs)
+    return get_vgg(blocks=16, use_bias=True, use_bn=True, model_name="bn_vgg16b", **kwargs)
 
 
 def bn_vgg19b(**kwargs):
@@ -468,7 +468,7 @@ def bn_vgg19b(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=19, use_bias=True, use_bn=True, model_name="vgg19b", **kwargs)
+    return get_vgg(blocks=19, use_bias=True, use_bn=True, model_name="bn_vgg19b", **kwargs)
 
 
 def _test():
@@ -477,21 +477,21 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
         vgg11,
         vgg13,
         vgg16,
         vgg19,
-        # bn_vgg11,
-        # bn_vgg13,
-        # bn_vgg16,
-        # bn_vgg19,
-        # bn_vgg11b,
-        # bn_vgg13b,
-        # bn_vgg16b,
-        # bn_vgg19b,
+        bn_vgg11,
+        bn_vgg13,
+        bn_vgg16,
+        bn_vgg19,
+        bn_vgg11b,
+        bn_vgg13b,
+        bn_vgg16b,
+        bn_vgg19b,
     ]
 
     for model in models:

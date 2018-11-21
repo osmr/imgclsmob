@@ -1,5 +1,5 @@
 """
-    AlexNet, implemented in Gluon.
+    AlexNet, implemented in PyTorch.
     Original paper: 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 """
@@ -7,11 +7,11 @@
 __all__ = ['AlexNet', 'alexnet']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import torch.nn as nn
+import torch.nn.init as init
 
 
-class AlexConv(HybridBlock):
+class AlexConv(nn.Module):
     """
     AlexNet specific convolution block.
 
@@ -23,7 +23,7 @@ class AlexConv(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -33,27 +33,25 @@ class AlexConv(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 strides,
-                 padding,
-                 **kwargs):
-        super(AlexConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=True,
-                in_channels=in_channels)
-            self.activ = nn.Activation('relu')
+                 stride,
+                 padding):
+        super(AlexConv, self).__init__()
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            bias=True)
+        self.activ = nn.ReLU(inplace=True)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.conv(x)
         x = self.activ(x)
         return x
 
 
-class AlexDense(HybridBlock):
+class AlexDense(nn.Module):
     """
     AlexNet specific dense block.
 
@@ -67,25 +65,22 @@ class AlexDense(HybridBlock):
 
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 **kwargs):
-        super(AlexDense, self).__init__(**kwargs)
-        with self.name_scope():
-            self.fc = nn.Dense(
-                units=out_channels,
-                weight_initializer="normal",
-                in_units=in_channels)
-            self.activ = nn.Activation('relu')
-            self.dropout = nn.Dropout(rate=0.5)
+                 out_channels):
+        super(AlexDense, self).__init__()
+        self.fc = nn.Linear(
+            in_features=in_channels,
+            out_features=out_channels)
+        self.activ = nn.ReLU(inplace=True)
+        self.dropout = nn.Dropout(p=0.5)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.fc(x)
         x = self.activ(x)
         x = self.dropout(x)
         return x
 
 
-class AlexOutputBlock(HybridBlock):
+class AlexOutputBlock(nn.Module):
     """
     AlexNet specific output block.
 
@@ -98,31 +93,28 @@ class AlexOutputBlock(HybridBlock):
     """
     def __init__(self,
                  in_channels,
-                 classes,
-                 **kwargs):
-        super(AlexOutputBlock, self).__init__(**kwargs)
+                 classes):
+        super(AlexOutputBlock, self).__init__()
         mid_channels = 4096
 
-        with self.name_scope():
-            self.fc1 = AlexDense(
-                in_channels=in_channels,
-                out_channels=mid_channels)
-            self.fc2 = AlexDense(
-                in_channels=mid_channels,
-                out_channels=mid_channels)
-            self.fc3 = nn.Dense(
-                units=classes,
-                weight_initializer="normal",
-                in_units=mid_channels)
+        self.fc1 = AlexDense(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.fc2 = AlexDense(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.fc3 = nn.Linear(
+            in_features=mid_channels,
+            out_features=classes)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.fc1(x)
         x = self.fc2(x)
         x = self.fc3(x)
         return x
 
 
-class AlexNet(HybridBlock):
+class AlexNet(nn.Module):
     """
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
@@ -141,7 +133,7 @@ class AlexNet(HybridBlock):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -151,48 +143,51 @@ class AlexNet(HybridBlock):
                  paddings,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(AlexNet, self).__init__(**kwargs)
+                 num_classes=1000):
+        super(AlexNet, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.num_classes = num_classes
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        stage.add(AlexConv(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            kernel_size=kernel_sizes[i][j],
-                            strides=strides[i][j],
-                            padding=paddings[i][j]))
-                        in_channels = out_channels
-                    stage.add(nn.MaxPool2D(
-                        pool_size=3,
-                        strides=2,
-                        padding=0))
-                self.features.add(stage)
+        self.features = nn.Sequential()
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                stage.add_module("unit{}".format(j + 1), AlexConv(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    kernel_size=kernel_sizes[i][j],
+                    stride=strides[i][j],
+                    padding=paddings[i][j]))
+                in_channels = out_channels
+            stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
+                kernel_size=3,
+                stride=2,
+                padding=0))
+            self.features.add_module("stage{}".format(i + 1), stage)
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            in_channels = in_channels * 6 * 6
-            self.output.add(AlexOutputBlock(
-                in_channels=in_channels,
-                classes=classes))
+        self.output = AlexOutputBlock(
+            in_channels=(in_channels * 6 * 6),
+            classes=num_classes)
 
-    def hybrid_forward(self, F, x):
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
+    def forward(self, x):
         x = self.features(x)
+        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
 def get_alexnet(model_name=None,
                 pretrained=False,
-                ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join('~', '.torch', 'models'),
                 **kwargs):
     """
     Create AlexNet model with specific parameters.
@@ -205,7 +200,7 @@ def get_alexnet(model_name=None,
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     channels = [[64], [192], [384, 256, 256]]
@@ -223,12 +218,11 @@ def get_alexnet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -244,7 +238,7 @@ def alexnet(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_alexnet(model_name="alexnet", **kwargs)
@@ -252,7 +246,8 @@ def alexnet(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import torch
+    from torch.autograd import Variable
 
     pretrained = False
 
@@ -264,22 +259,18 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
+        # net.train()
+        net.eval()
+        net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        for param in net_params:
+            weight_count += np.prod(param.size())
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != alexnet or weight_count == 61100840)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

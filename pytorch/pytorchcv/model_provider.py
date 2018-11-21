@@ -26,6 +26,7 @@ from .models.pnasnet import *
 
 from .models.alexnet import *
 from .models.vgg import *
+from .models.diracnetv2 import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
@@ -38,6 +39,9 @@ from .models.vgg import *
 # from .models.others.oth_pnasnet import *
 # from .models.others.oth_pyramidnet import *
 # from .models.others.oth_darts import *
+
+
+from .models.others.oth_diracnetv2 import *
 
 __all__ = ['get_model']
 
@@ -221,6 +225,12 @@ _models = {
     'bn_vgg13b': bn_vgg13b,
     'bn_vgg16b': bn_vgg16b,
     'bn_vgg19b': bn_vgg19b,
+
+    'diracnet18v2': diracnet18v2,
+    'diracnet34v2': diracnet34v2,
+
+    'oth_diracnet18v2': oth_diracnet18v2,
+    'oth_diracnet34v2': oth_diracnet34v2,
 
     # 'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
     # 'oth_inceptionv4': oth_inceptionv4,

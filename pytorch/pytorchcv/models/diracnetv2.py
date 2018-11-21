@@ -1,19 +1,19 @@
 """
-    AlexNet, implemented in PyTorch.
-    Original paper: 'One weird trick for parallelizing convolutional neural networks,'
-    https://arxiv.org/abs/1404.5997.
+    DiracNetV2, implemented in PyTorch.
+    Original paper: 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
+    https://arxiv.org/abs/1706.00388.
 """
 
-__all__ = ['AlexNet', 'alexnet']
+__all__ = ['DiracNetV2', 'diracnet18v2', 'diracnet34v2']
 
 import os
 import torch.nn as nn
 import torch.nn.init as init
 
 
-class AlexConv(nn.Module):
+class DiracConv(nn.Module):
     """
-    AlexNet specific convolution block.
+    DiracNetV2 specific convolution block with pre-activation.
 
     Parameters:
     ----------
@@ -35,7 +35,8 @@ class AlexConv(nn.Module):
                  kernel_size,
                  stride,
                  padding):
-        super(AlexConv, self).__init__()
+        super(DiracConv, self).__init__()
+        self.activ = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -43,17 +44,17 @@ class AlexConv(nn.Module):
             stride=stride,
             padding=padding,
             bias=True)
-        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = self.conv(x)
         x = self.activ(x)
+        x = self.conv(x)
         return x
 
 
-class AlexDense(nn.Module):
+def dirac_conv3x3(in_channels,
+                  out_channels):
     """
-    AlexNet specific dense block.
+    3x3 version of the DiracNetV2 specific convolution block.
 
     Parameters:
     ----------
@@ -62,73 +63,58 @@ class AlexDense(nn.Module):
     out_channels : int
         Number of output channels.
     """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(AlexDense, self).__init__()
-        self.fc = nn.Linear(
-            in_features=in_channels,
-            out_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout(p=0.5)
-
-    def forward(self, x):
-        x = self.fc(x)
-        x = self.activ(x)
-        x = self.dropout(x)
-        return x
+    return DiracConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=1,
+        padding=1)
 
 
-class AlexOutputBlock(nn.Module):
+class DiracInitBlock(nn.Module):
     """
-    AlexNet specific output block.
+    DiracNetV2 specific initial block.
 
     Parameters:
     ----------
     in_channels : int
         Number of input channels.
-    classes : int
-        Number of classification classes.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
                  in_channels,
-                 classes):
-        super(AlexOutputBlock, self).__init__()
-        mid_channels = 4096
-
-        self.fc1 = AlexDense(
+                 out_channels):
+        super(DiracInitBlock, self).__init__()
+        self.conv = nn.Conv2d(
             in_channels=in_channels,
-            out_channels=mid_channels)
-        self.fc2 = AlexDense(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.fc3 = nn.Linear(
-            in_features=mid_channels,
-            out_features=classes)
+            out_channels=out_channels,
+            kernel_size=7,
+            stride=2,
+            padding=3,
+            bias=True)
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
+        x = self.conv(x)
+        x = self.pool(x)
         return x
 
 
-class AlexNet(nn.Module):
+class DiracNetV2(nn.Module):
     """
-    AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
-    https://arxiv.org/abs/1404.5997.
+    DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
+    https://arxiv.org/abs/1706.00388.
 
     Parameters:
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    kernel_sizes : list of list of int
-        Convolution window sizes for each unit.
-    strides : list of list of int or tuple/list of 2 int
-        Strides of the convolution for each unit.
-    paddings : list of list of int or tuple/list of 2 int
-        Padding value for convolution layer for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -138,36 +124,40 @@ class AlexNet(nn.Module):
     """
     def __init__(self,
                  channels,
-                 kernel_sizes,
-                 strides,
-                 paddings,
+                 init_block_channels,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(AlexNet, self).__init__()
+        super(DiracNetV2, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
+        self.features.add_module("init_block", DiracInitBlock(
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                stage.add_module("unit{}".format(j + 1), AlexConv(
+                stage.add_module("unit{}".format(j + 1), dirac_conv3x3(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_sizes[i][j],
-                    stride=strides[i][j],
-                    padding=paddings[i][j]))
+                    out_channels=out_channels))
                 in_channels = out_channels
-            stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=0))
+            if i != len(channels) - 1:
+                stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
+                    kernel_size=2,
+                    stride=2,
+                    padding=0))
             self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module('final_activ', nn.ReLU(inplace=True))
+        self.features.add_module('final_pool', nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
 
-        self.output = AlexOutputBlock(
-            in_channels=(in_channels * 6 * 6),
-            classes=num_classes)
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
         self._init_params()
 
@@ -185,32 +175,42 @@ class AlexNet(nn.Module):
         return x
 
 
-def get_alexnet(model_name=None,
-                pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
-                **kwargs):
+def get_diracnetv2(blocks,
+                   model_name=None,
+                   pretrained=False,
+                   root=os.path.join('~', '.torch', 'models'),
+                   **kwargs):
     """
-    Create AlexNet model with specific parameters.
+    Create DiracNetV2 model with specific parameters.
 
     Parameters:
     ----------
+    blocks : int
+        Number of blocks.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    channels = [[64], [192], [384, 256, 256]]
-    kernel_sizes = [[11], [5], [3, 3, 3]]
-    strides = [[4], [1], [1, 1, 1]]
-    paddings = [[2], [2], [1, 1, 1]]
+    if blocks == 18:
+        layers = [4, 4, 4, 4]
+    elif blocks == 34:
+        layers = [6, 8, 12, 6]
+    else:
+        raise ValueError("Unsupported DiracNetV2 with number of blocks: {}".format(blocks))
 
-    net = AlexNet(
+    channels_per_layers = [64, 128, 256, 512]
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+
+    init_block_channels = 64
+
+    net = DiracNetV2(
         channels=channels,
-        kernel_sizes=kernel_sizes,
-        strides=strides,
-        paddings=paddings,
+        init_block_channels=init_block_channels,
         **kwargs)
 
     if pretrained:
@@ -225,19 +225,38 @@ def get_alexnet(model_name=None,
     return net
 
 
-def alexnet(**kwargs):
+def diracnet18v2(**kwargs):
     """
-    AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
-    https://arxiv.org/abs/1404.5997.
+    DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
+    https://arxiv.org/abs/1706.00388.
 
     Parameters:
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_alexnet(model_name="alexnet", **kwargs)
+    return get_diracnetv2(blocks=18, model_name="diracnet18v2", **kwargs)
+
+
+def diracnet34v2(**kwargs):
+    """
+    DiracNetV2 model from 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
+    https://arxiv.org/abs/1706.00388.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_diracnetv2(blocks=34, model_name="diracnet34v2", **kwargs)
 
 
 def _test():
@@ -248,7 +267,8 @@ def _test():
     pretrained = False
 
     models = [
-        alexnet,
+        diracnet18v2,
+        diracnet34v2,
     ]
 
     for model in models:
@@ -262,7 +282,8 @@ def _test():
         for param in net_params:
             weight_count += np.prod(param.size())
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 61100840)
+        assert (model != diracnet18v2 or weight_count == 11511784)
+        assert (model != diracnet34v2 or weight_count == 21616232)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

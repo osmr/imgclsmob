@@ -80,7 +80,7 @@ def prepare_model(model_name,
         checkpoint = torch.load(
             pretrained_model_file_path,
             map_location=(None if use_cuda else 'cpu'))
-        if type(checkpoint) == dict:
+        if (type(checkpoint) == dict) and ('state_dict' in checkpoint):
             net.load_state_dict(checkpoint['state_dict'])
         else:
             net.load_state_dict(checkpoint)

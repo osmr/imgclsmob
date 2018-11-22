@@ -8,6 +8,7 @@ from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
+from .models.wrn import *
 from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
@@ -129,6 +130,8 @@ _models = {
 
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,
+
+    'wrn50_2': wrn50_2,
 
     'dpn68': dpn68,
     'dpn68b': dpn68b,

@@ -8,6 +8,7 @@ from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
+from .models.wrn import *
 from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
@@ -26,7 +27,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-from .models.wrn import *
 
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
@@ -144,6 +144,8 @@ _models = {
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,
 
+    'wrn50_2': wrn50_2,
+
     'dpn68': dpn68,
     'dpn68b': dpn68b,
     'dpn98': dpn98,
@@ -228,7 +230,6 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
-    'wrn50_2': wrn50_2,
     'oth_wrn50_2': oth_wrn50_2,
 
     # 'oth_diracnet18v2': oth_diracnet18v2,

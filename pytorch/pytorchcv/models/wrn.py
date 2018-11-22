@@ -112,7 +112,7 @@ def wrn_conv3x3(in_channels,
 
 class WRNBottleneck(nn.Module):
     """
-    WRN bottleneck block for residual path in ResNet unit.
+    WRN bottleneck block for residual path in WRN unit.
 
     Parameters:
     ----------
@@ -122,13 +122,16 @@ class WRNBottleneck(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    width_factor : float
+        Wide scale factor for width of layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
+                 stride,
+                 width_factor):
         super(WRNBottleneck, self).__init__()
-        mid_channels = out_channels // 2
+        mid_channels = int(round(out_channels // 4 * width_factor))
 
         self.conv1 = wrn_conv1x1(
             in_channels=in_channels,
@@ -165,18 +168,22 @@ class WRNUnit(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    width_factor : float
+        Wide scale factor for width of layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
+                 stride,
+                 width_factor):
         super(WRNUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         self.body = WRNBottleneck(
             in_channels=in_channels,
             out_channels=out_channels,
-            stride=stride)
+            stride=stride,
+            width_factor=width_factor)
         if self.resize_identity:
             self.identity_conv = wrn_conv1x1(
                 in_channels=in_channels,
@@ -239,6 +246,8 @@ class WRN(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    width_factor : float
+        Wide scale factor for width of layers.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -249,6 +258,7 @@ class WRN(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 width_factor,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -268,7 +278,8 @@ class WRN(nn.Module):
                 stage.add_module("unit{}".format(j + 1), WRNUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    stride=stride))
+                    stride=stride,
+                    width_factor=width_factor))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('final_pool', nn.AvgPool2d(
@@ -296,6 +307,7 @@ class WRN(nn.Module):
 
 
 def get_wrn(blocks,
+            width_factor,
             model_name=None,
             pretrained=False,
             root=os.path.join('~', '.torch', 'models'),
@@ -307,6 +319,8 @@ def get_wrn(blocks,
     ----------
     blocks : int
         Number of blocks.
+    width_factor : float
+        Wide scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -316,6 +330,12 @@ def get_wrn(blocks,
     """
     if blocks == 50:
         layers = [3, 4, 6, 3]
+    elif blocks == 101:
+        layers = [3, 4, 23, 3]
+    elif blocks == 152:
+        layers = [3, 8, 36, 3]
+    elif blocks == 200:
+        layers = [3, 24, 36, 3]
     else:
         raise ValueError("Unsupported WRN with number of blocks: {}".format(blocks))
 
@@ -327,6 +347,7 @@ def get_wrn(blocks,
     net = WRN(
         channels=channels,
         init_block_channels=init_block_channels,
+        width_factor=width_factor,
         **kwargs)
 
     if pretrained:
@@ -352,7 +373,7 @@ def wrn50_2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(blocks=50, model_name="wrn50_2", **kwargs)
+    return get_wrn(blocks=50, width_factor=2.0, model_name="wrn50_2", **kwargs)
 
 
 def _test():
@@ -377,7 +398,7 @@ def _test():
         for param in net_params:
             weight_count += np.prod(param.size())
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != wrn50_2 or weight_count == 11511784)
+        assert (model != wrn50_2 or weight_count == 68849128)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

@@ -278,7 +278,7 @@ class WRN(nn.Module):
         x = self.pool0(x)
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.output(x)
+        x = self.fc(x)
         return x
 
 

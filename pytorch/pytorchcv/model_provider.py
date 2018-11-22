@@ -28,19 +28,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-# from .models.others.shufflenet_v2 import *
-# from .models.others.oth_inceptionv4 import *
-# from .models.others.oth_xception import *
-# from .models.others.oth_inceptionresnetv2 import *
-# from .models.others.oth_polynet import *
-# from .models.others.oth_nasnet import *
-# from .models.others.oth_nasnet_mobile import *
-# from .models.others.oth_pnasnet import *
-# from .models.others.oth_pyramidnet import *
-# from .models.others.oth_darts import *
-# from .models.others.oth_diracnetv2 import *
-from .models.others.oth_wrn2 import *
-
 __all__ = ['get_model']
 
 
@@ -229,21 +216,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'oth_wrn50_2': oth_wrn50_2,
-
-    # 'oth_diracnet18v2': oth_diracnet18v2,
-    # 'oth_diracnet34v2': oth_diracnet34v2,
-    # 'oth_pyramidnet101_a360': oth_pyramidnet101_a360,
-    # 'oth_inceptionv4': oth_inceptionv4,
-    # 'oth_xception': oth_xception,
-    # 'oth_shufflenetv2_wd2': oth_shufflenetv2_wd2,
-    # 'oth_inceptionresnetv2': oth_inceptionresnetv2,
-    # 'oth_polynet': oth_polynet,
-    # 'oth_nasnetalarge': oth_nasnetalarge,
-    # 'oth_nasnetamobile': oth_nasnetamobile,
-    # 'oth_pnasnet5large': oth_pnasnet5large,
-    # 'oth_darts': oth_darts,
 }
 
 

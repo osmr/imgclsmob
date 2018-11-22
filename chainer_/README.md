@@ -1,6 +1,6 @@
 # Large-scale image classification networks
 
-Several large-scale image classification models on Chainer, trained on the ImageNet-1k dataset.
+Collection of large-scale image classification models on Chainer, pretrained on the ImageNet-1k dataset.
 
 ## Installation
 

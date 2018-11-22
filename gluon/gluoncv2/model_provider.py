@@ -28,11 +28,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-# from .models.others.oth_inceptionv3 import *
-# from .models.others.oth_mnasnet import *
-# from .models.others.oth_vgg import *
-# from .models.others.oth_alexnet import *
-
 __all__ = ['get_model']
 
 
@@ -221,18 +216,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    # 'oth_mnasnet': oth_mnasnet,
-    # 'oth_inceptionv3': oth_inception_v3,
-    # 'oth_alexnet': oth_alexnet,
-    # 'oth_vgg11': oth_vgg11,
-    # 'oth_vgg13': oth_vgg13,
-    # 'oth_vgg16': oth_vgg16,
-    # 'oth_vgg19': oth_vgg19,
-    # 'oth_vgg11_bn': oth_vgg11_bn,
-    # 'oth_vgg13_bn': oth_vgg13_bn,
-    # 'oth_vgg16_bn': oth_vgg16_bn,
-    # 'oth_vgg19_bn': oth_vgg19_bn,
 }
 
 

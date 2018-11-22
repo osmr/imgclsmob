@@ -27,6 +27,8 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.wrn import *
+
 # from .models.others.shufflenet_v2 import *
 # from .models.others.oth_inceptionv4 import *
 # from .models.others.oth_xception import *
@@ -38,6 +40,7 @@ from .models.pnasnet import *
 # from .models.others.oth_pyramidnet import *
 # from .models.others.oth_darts import *
 # from .models.others.oth_diracnetv2 import *
+from .models.others.oth_wrn2 import *
 
 __all__ = ['get_model']
 
@@ -225,6 +228,9 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'wrn50_2': wrn50_2,
+    'oth_wrn50_2': oth_wrn50_2,
 
     # 'oth_diracnet18v2': oth_diracnet18v2,
     # 'oth_diracnet34v2': oth_diracnet34v2,

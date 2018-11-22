@@ -218,6 +218,13 @@ class WRNInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(WRNInitBlock, self).__init__()
+        # self.conv = nn.Conv2d(
+        #     in_channels=in_channels,
+        #     out_channels=out_channels,
+        #     kernel_size=7,
+        #     stride=2,
+        #     padding=3,
+        #     bias=True)
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,

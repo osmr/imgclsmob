@@ -173,39 +173,6 @@ class WRNUnit(nn.Module):
         return x
 
 
-class WRNInitBlock(nn.Module):
-    """
-    WRN specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(WRNInitBlock, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias=True)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
 class WRN(nn.Module):
     """
     WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
@@ -263,7 +230,8 @@ class WRN(nn.Module):
         self.fc = nn.Linear(
             in_features=in_channels,
             out_features=num_classes)
-
+        self.activ = nn.ReLU(inplace=True)
+        
         self._init_params()
 
     def _init_params(self):
@@ -275,6 +243,7 @@ class WRN(nn.Module):
 
     def forward(self, x):
         x = self.conv0(x)
+        x = self.activ(x)
         x = self.pool0(x)
         x = self.features(x)
         x = x.view(x.size(0), -1)

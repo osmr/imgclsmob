@@ -128,21 +128,20 @@ class WRNBottleneck(nn.Module):
                  out_channels,
                  stride):
         super(WRNBottleneck, self).__init__()
-        mid_channels2 = out_channels // 2
-        mid_channels = out_channels // 4
+        mid_channels = out_channels // 2
 
         self.conv1 = wrn_conv1x1(
             in_channels=in_channels,
-            out_channels=mid_channels2,
+            out_channels=mid_channels,
             stride=1,
             activate=True)
         self.conv2 = wrn_conv3x3(
-            in_channels=mid_channels2,
-            out_channels=mid_channels2,
+            in_channels=mid_channels,
+            out_channels=mid_channels,
             stride=stride,
             activate=True)
         self.conv3 = wrn_conv1x1(
-            in_channels=mid_channels2,
+            in_channels=mid_channels,
             out_channels=out_channels,
             stride=1,
             activate=False)

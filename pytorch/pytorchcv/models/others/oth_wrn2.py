@@ -231,7 +231,7 @@ class WRN(nn.Module):
             in_features=in_channels,
             out_features=num_classes)
         self.activ = nn.ReLU(inplace=True)
-        
+
         self._init_params()
 
     def _init_params(self):

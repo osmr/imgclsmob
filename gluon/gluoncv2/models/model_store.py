@@ -102,7 +102,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('polynet', '0453', '742803144e5a2a6148212570726350da09adf3f6', 'v0.0.96'),
     ('nasnet_4a1056', '0795', '5c78908e38c531283d86f9cbe7e14c2afd85a7ce', 'v0.0.97'),
     ('nasnet_6a4032', '0424', '73cca5fee009db77412c5fca7c826b3563752757', 'v0.0.101'),
-    ('pnasnet5large', '0436', '9cc6d6744a7de969a79a65f1c4abbc9774942ff9', 'v0.0.102')]}
+    ('pnasnet5large', '0428', '998a548f44ac1b1ac6c4959a721f2675ab5c48b9', 'v0.0.114')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

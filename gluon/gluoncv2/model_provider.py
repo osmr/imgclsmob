@@ -26,6 +26,7 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
+from .models.wrn import *
 
 # from .models.others.oth_inceptionv3 import *
 # from .models.others.oth_mnasnet import *
@@ -218,6 +219,8 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'wrn50_2': wrn50_2,
 
     # 'oth_mnasnet': oth_mnasnet,
     # 'oth_inceptionv3': oth_inception_v3,

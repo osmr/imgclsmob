@@ -26,7 +26,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
 from .models.wrn import *
 
 # from .models.others.shufflenet_v2 import *

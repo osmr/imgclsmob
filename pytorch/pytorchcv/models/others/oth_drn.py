@@ -436,12 +436,12 @@ def _test():
 
     models = [
         oth_drn_c_26,
-        # oth_drn_c_42,
-        # oth_drn_c_58,
-        # oth_drn_d_22,
-        # oth_drn_d_38,
-        # oth_drn_d_54,
-        # oth_drn_d_105,
+        oth_drn_c_42,
+        oth_drn_c_58,
+        oth_drn_d_22,
+        oth_drn_d_38,
+        oth_drn_d_54,
+        oth_drn_d_105,
     ]
 
     for model in models:

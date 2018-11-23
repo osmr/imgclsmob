@@ -269,7 +269,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 30.82 | 11.26 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1126-152672f5.params.log)) |
 | MobileNetV2 x1.0 | 28.51 | 9.90 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-0990-4e1a3878.params.log)) |
 | MnasNet | 32.34 | 12.02 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1202-993d5546.params.log)) |
-| Xception | 21.07 | 5.61 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0561-a0e538e1.params.log)) |
+| Xception | 20.99 | 5.56 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0556-bd2c1684.params.log)) |
 | InceptionV3 | 21.22 | 5.59 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0559-6c087967.params.log)) |
 | InceptionV4 | 20.60 | 5.25 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0525-f7aa9536.params.log)) |
 | InceptionResNetV2 | 19.96 | 4.94 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0494-3328f7fa.params.log)) |
@@ -367,7 +367,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
 | MnasNet | 32.62 | 12.35 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1235-58b6de49.pth.log)) |
-| Xception | 21.12 | 5.68 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0568-9e15f3e1.pth.log)) |
+| Xception | 20.97 | 5.49 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0549-e4f0232c.pth.log)) |
 | InceptionV3 | 21.12 | 5.65 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0565-cf406180.pth.log)) |
 | InceptionV4 | 20.64 | 5.29 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0529-5cb7b4e4.pth.log)) |
 | InceptionResNetV2 | 19.93 | 4.90 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0490-1d1b4d18.pth.log)) |
@@ -465,7 +465,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.28 | 11.48 | 2,627,592 | 191.61M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w3d4-1148-a6f852ea.npz.log)) |
 | MobileNetV2 x1.0 | 28.87 | 10.05 | 3,504,960 | 320.19M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w1-1005-3b6d1764.npz.log)) |
 | MnasNet | 32.33 | 12.05 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.106/mnasnet-1205-7bc88b51.npz.log)) |
-| Xception | 21.07 | 5.63 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.100/xception-0563-dbbcecaf.npz.log)) |
+| Xception | 21.04 | 5.47 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0547-7a5be958.npz.log)) |
 | InceptionV3 | 21.11 | 5.61 | 23,834,568 | 5,746.72M | Converted from Gluon Model Zoo ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0561-4ddea4df.npz.log)) |
 | InceptionV4 | 20.62 | 5.26 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0526-02e53701.npz.log)) |
 | InceptionResNetV2 | 19.93 | 4.92 | 55,843,464 | 13,189.58M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.107/inceptionresnetv2-0492-3d3de82b.npz.log)) |

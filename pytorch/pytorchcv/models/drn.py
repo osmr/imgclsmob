@@ -242,7 +242,7 @@ class DRNUnit(nn.Module):
         assert (not (bottleneck and simplified))
         assert (not (residual and simplified))
         self.residual = residual
-        self.resize_identity = ((in_channels != out_channels) or (stride != 1)) and (not simplified)
+        self.resize_identity = ((in_channels != out_channels) or (stride != 1)) and self.residual and (not simplified)
 
         if bottleneck:
             self.body = DRNBottleneck(
@@ -263,7 +263,6 @@ class DRNUnit(nn.Module):
                 out_channels=out_channels,
                 stride=stride,
                 dilation=dilation)
-        # if self.residual and self.resize_identity:
         if self.resize_identity:
             self.identity_conv = drn_conv1x1(
                 in_channels=in_channels,
@@ -615,7 +614,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != drnc26 or weight_count == 21126584)
         assert (model != drnc42 or weight_count == 31234744)
-        assert (model != drnc58 or weight_count == 41591608)
+        assert (model != drnc58 or weight_count == 40542008)  # 41591608
         assert (model != drnd22 or weight_count == 16393752)
         assert (model != drnd38 or weight_count == 26501912)
         assert (model != drnd54 or weight_count == 35809176)

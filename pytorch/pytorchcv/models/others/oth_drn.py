@@ -178,7 +178,9 @@ class DRN(nn.Module):
                     residual=True):
         assert dilation == 1 or dilation % 2 == 0
         downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
+        if block == Bottleneck:
+            assert residual
+        if (stride != 1 or self.inplanes != planes * block.expansion) and residual:
             downsample = nn.Sequential(
                 nn.Conv2d(self.inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
@@ -341,7 +343,16 @@ def oth_drn_c_42(pretrained=False, **kwargs):
 def oth_drn_c_58(pretrained=False, **kwargs):
     model = DRN(Bottleneck, [1, 1, 3, 4, 6, 3, 1, 1], arch='C', **kwargs)
     if pretrained:
-        model.load_state_dict(model_zoo.load_url(model_urls['drn-c-58']))
+        import torch
+        pretrained_state = model_zoo.load_url(model_urls['drn-c-58'])
+        model_dict = model.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        model.load_state_dict(pretrained_state)
+        torch.save(
+            obj=model.state_dict(),
+            f="../imgclsmob_data/oth_drn_c_58.pth")
+
+        # model.load_state_dict(model_zoo.load_url(model_urls['drn-c-58']))
     return model
 
 
@@ -462,7 +473,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_drn_c_26 or weight_count == 21126584)
         assert (model != oth_drn_c_42 or weight_count == 31234744)
-        assert (model != oth_drn_c_58 or weight_count == 41591608)
+        assert (model != oth_drn_c_58 or weight_count == 40542008)  # 41591608
         assert (model != oth_drn_d_22 or weight_count == 16393752)
         assert (model != oth_drn_d_38 or weight_count == 26501912)
         assert (model != oth_drn_d_54 or weight_count == 35809176)

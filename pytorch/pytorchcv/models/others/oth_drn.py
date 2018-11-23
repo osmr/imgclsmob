@@ -401,6 +401,32 @@ def drn_d_107(pretrained=False, **kwargs):
     return model
 
 
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
+
+
 def _test():
     import numpy as np
     import torch
@@ -409,25 +435,26 @@ def _test():
     pretrained = False
 
     models = [
-        # oth_drn_c_26,
+        oth_drn_c_26,
         # oth_drn_c_42,
         # oth_drn_c_58,
-        oth_drn_d_22,
-        oth_drn_d_38,
-        oth_drn_d_54,
-        oth_drn_d_105,
+        # oth_drn_d_22,
+        # oth_drn_d_38,
+        # oth_drn_d_54,
+        # oth_drn_d_105,
     ]
 
     for model in models:
 
         net = model(pretrained=pretrained)
 
+        # net.train()
+        net.eval()
+
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
         assert (tuple(y.size()) == (1, 1000))
 
-        # net.train()
-        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

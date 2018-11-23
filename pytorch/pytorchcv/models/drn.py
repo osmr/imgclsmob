@@ -437,7 +437,7 @@ def get_drn(blocks,
     if blocks < 50:
         channels_per_layers = [16, 32, 64, 128, 256, 512, 512, 512]
         bottlenecks_per_layers = [0, 0, 0, 0, 0, 0, 0, 0]
-        residuals_per_layers = [0, 0, 1, 1, 1, 1, 0, 0]
+        residuals_per_layers = [1, 1, 1, 1, 1, 1, 0, 0]
     else:
         channels_per_layers = [16, 32, 256, 512, 1024, 2048, 512, 512]
         bottlenecks_per_layers = [0, 0, 1, 1, 1, 1, 0, 0]
@@ -609,7 +609,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        # net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

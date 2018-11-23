@@ -274,8 +274,10 @@ def get_mobilenetv2(width_scale,
     channels_per_layers = [16, 24, 32, 64, 96, 160, 320]
 
     from functools import reduce
-    channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                      zip(channels_per_layers, layers, downsample), [[]])
+    channels = reduce(
+        lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
+        zip(channels_per_layers, layers, downsample),
+        [[]])
 
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]

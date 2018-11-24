@@ -236,13 +236,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0864-cde68fa2.params.log)) |
 | CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1049-4cf4a08e.params.log)) |
 | WRN-50-2 | 22.15 | 6.12 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0612-f8013e68.params.log)) |
-| DPN-C-26 | 25.68 | 7.89 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0789-ee56ffab.params.log)) |
-| DPN-C-42 | 23.80 | 6.92 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0692-f89c26d6.params.log)) |
-| DPN-C-58 | 22.35 | 6.27 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0627-44cbf15c.params.log)) |
-| DPN-D-22 | 26.67 | 8.52 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0852-08574752.params.log)) |
-| DPN-D-38 | 24.51 | 7.36 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0736-c7d53bc0.params.log)) |
-| DPN-D-54 | 22.05 | 6.27 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0627-87d44c87.params.log)) |
-| DPN-D-105 | 21.31 | 5.81 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0581-ab12d662.params.log)) |
+| DRN-C-26 | 25.68 | 7.89 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0789-ee56ffab.params.log)) |
+| DRN-C-42 | 23.80 | 6.92 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0692-f89c26d6.params.log)) |
+| DRN-C-58 | 22.35 | 6.27 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0627-44cbf15c.params.log)) |
+| DRN-D-22 | 26.67 | 8.52 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0852-08574752.params.log)) |
+| DRN-D-38 | 24.51 | 7.36 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0736-c7d53bc0.params.log)) |
+| DRN-D-54 | 22.05 | 6.27 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0627-87d44c87.params.log)) |
+| DRN-D-105 | 21.31 | 5.81 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0581-ab12d662.params.log)) |
 | DPN-68 | 23.57 | 7.00 | 12,611,602 | 2,338.71M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn68-0700-3114719d.params.log)) |
 | DPN-98 | 20.23 | 5.28 | 61,570,728 | 11,702.80M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn98-0528-fa5d6fca.params.log)) |
 | DPN-131 | 20.03 | 5.22 | 79,254,504 | 16,056.22M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0522-35ac2f82.params.log)) |
@@ -341,13 +341,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0828-5ba55049.pth.log)) |
 | CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1006-3574d874.pth.log)) |
 | WRN-50-2 | 22.53 | 6.41 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0641-83897ab9.pth.log)) |
-| DPN-C-26 | 24.86 | 7.55 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0755-35405bd5.pth.log)) |
-| DPN-C-42 | 22.94 | 6.57 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0657-7c99c460.pth.log)) |
-| DPN-C-58 | 21.73 | 6.01 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0601-70ec1f56.pth.log)) |
-| DPN-D-22 | 25.80 | 8.23 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0823-5c2c6a0c.pth.log)) |
-| DPN-D-38 | 23.79 | 6.95 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0695-4630f0fb.pth.log)) |
-| DPN-D-54 | 21.22 | 5.86 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0586-bfdc1f88.pth.log)) |
-| DPN-D-105 | 20.62 | 5.48 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0548-a643f4dc.pth.log)) |
+| DRN-C-26 | 24.86 | 7.55 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0755-35405bd5.pth.log)) |
+| DRN-C-42 | 22.94 | 6.57 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0657-7c99c460.pth.log)) |
+| DRN-C-58 | 21.73 | 6.01 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0601-70ec1f56.pth.log)) |
+| DRN-D-22 | 25.80 | 8.23 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0823-5c2c6a0c.pth.log)) |
+| DRN-D-38 | 23.79 | 6.95 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0695-4630f0fb.pth.log)) |
+| DRN-D-54 | 21.22 | 5.86 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0586-bfdc1f88.pth.log)) |
+| DRN-D-105 | 20.62 | 5.48 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0548-a643f4dc.pth.log)) |
 | DPN-68 | 24.17 | 7.27 | 12,611,602 | 2,338.71M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn68-0727-43849233.pth.log)) |
 | DPN-98 | 20.81 | 5.53 | 61,570,728 | 11,702.80M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn98-0553-52c55969.pth.log)) |
 | DPN-131 | 20.54 | 5.48 | 79,254,504 | 16,056.22M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0548-0c53e5b3.pth.log)) |
@@ -446,13 +446,13 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | CondenseNet-74 (C=G=4) | 26.81 | 8.61 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.36/condensenet74_c4_g4-0861-ef6077ec.npz.log)) |
 | CondenseNet-74 (C=G=8) | 29.74 | 10.43 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.36/condensenet74_c8_g8-1043-277fbfb8.npz.log)) |
 | WRN-50-2 | 22.06 | 6.13 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0613-d0cd9171.npz.log)) |
-| DPN-C-26 | 25.68 | 7.88 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0788-762c34c1.npz.log)) |
-| DPN-C-42 | 23.72 | 6.93 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0693-ec938cc4.npz.log)) |
-| DPN-C-58 | 22.35 | 6.29 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0629-063ef199.npz.log)) |
-| DPN-D-22 | 26.65 | 8.50 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0850-b25d4757.npz.log)) |
-| DPN-D-38 | 24.53 | 7.36 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0736-153481d6.npz.log)) |
-| DPN-D-54 | 22.08 | 6.23 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0623-31e8eeb8.npz.log)) |
-| DPN-D-105 | 21.32 | 5.84 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0584-c0d7657b.npz.log)) |
+| DRN-C-26 | 25.68 | 7.88 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0788-762c34c1.npz.log)) |
+| DRN-C-42 | 23.72 | 6.93 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0693-ec938cc4.npz.log)) |
+| DRN-C-58 | 22.35 | 6.29 | 40,542,008 | 36,862.32M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc58-0629-063ef199.npz.log)) |
+| DRN-D-22 | 26.65 | 8.50 | 16,393,752 | 16,626.00M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd22-0850-b25d4757.npz.log)) |
+| DRN-D-38 | 24.53 | 7.36 | 26,501,912 | 27,024.27M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd38-0736-153481d6.npz.log)) |
+| DRN-D-54 | 22.08 | 6.23 | 35,809,176 | 32,649.62M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd54-0623-31e8eeb8.npz.log)) |
+| DRN-D-105 | 21.32 | 5.84 | 54,801,304 | 48,682.11M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnd105-0584-c0d7657b.npz.log)) |
 | DPN-68 | 23.61 | 7.01 | 12,611,602 | 2,338.71M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn68-0701-ad8cd4ec.npz.log)) |
 | DPN-98 | 20.80 | 5.53 | 61,570,728 | 11,702.80M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn98-0553-9cd57335.npz.log)) |
 | DPN-131 | 20.04 | 5.23 | 79,254,504 | 16,056.22M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn131-0523-e3721599.npz.log)) |

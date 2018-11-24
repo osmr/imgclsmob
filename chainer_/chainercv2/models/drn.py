@@ -14,7 +14,7 @@ from chainer.serializers import load_npz
 from .common import SimpleSequential
 
 
-class DRNConv(nn.Module):
+class DRNConv(Chain):
     """
     DRN specific convolution block.
 
@@ -27,10 +27,10 @@ class DRNConv(nn.Module):
     ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int
+    dilate : int or tuple/list of 2 int
         Dilation value for convolution layer.
     activate : bool
         Whether activate the convolution block.
@@ -40,25 +40,28 @@ class DRNConv(nn.Module):
                  out_channels,
                  ksize,
                  stride,
-                 padding,
-                 dilation,
+                 pad,
+                 dilate,
                  activate):
         super(DRNConv, self).__init__()
         self.activate = activate
 
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=ksize,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True,
+                dilate=dilate)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5)
+            if self.activate:
+                self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         if self.activate:
@@ -80,7 +83,7 @@ def drn_conv1x1(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     activate : bool
         Whether activate the convolution block.
     """
@@ -89,15 +92,15 @@ def drn_conv1x1(in_channels,
         out_channels=out_channels,
         ksize=1,
         stride=stride,
-        padding=0,
-        dilation=1,
+        pad=0,
+        dilate=1,
         activate=activate)
 
 
 def drn_conv3x3(in_channels,
                 out_channels,
                 stride,
-                dilation,
+                dilate,
                 activate):
     """
     3x3 version of the DRN specific convolution block.
@@ -109,8 +112,8 @@ def drn_conv3x3(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+        Stride of the convolution.
+    dilate : int or tuple/list of 2 int
         Padding/dilation value for convolution layer.
     activate : bool
         Whether activate the convolution block.
@@ -120,12 +123,12 @@ def drn_conv3x3(in_channels,
         out_channels=out_channels,
         ksize=3,
         stride=stride,
-        padding=dilation,
-        dilation=dilation,
+        pad=dilate,
+        dilate=dilate,
         activate=activate)
 
 
-class DRNBlock(nn.Module):
+class DRNBlock(Chain):
     """
     Simple DRN block for residual path in DRN unit.
 
@@ -136,36 +139,37 @@ class DRNBlock(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+        Stride of the convolution.
+    dilate : int or tuple/list of 2 int
         Padding/dilation value for convolution layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 dilation):
+                 dilate):
         super(DRNBlock, self).__init__()
-        self.conv1 = drn_conv3x3(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            dilation=dilation,
-            activate=True)
-        self.conv2 = drn_conv3x3(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            stride=1,
-            dilation=dilation,
-            activate=False)
+        with self.init_scope():
+            self.conv1 = drn_conv3x3(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                dilate=dilate,
+                activate=True)
+            self.conv2 = drn_conv3x3(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                stride=1,
+                dilate=dilate,
+                activate=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class DRNBottleneck(nn.Module):
+class DRNBottleneck(Chain):
     """
     DRN bottleneck block for residual path in DRN unit.
 
@@ -176,43 +180,44 @@ class DRNBottleneck(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+        Stride of the convolution.
+    dilate : int or tuple/list of 2 int
         Padding/dilation value for 3x3 convolution layer.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 dilation):
+                 dilate):
         super(DRNBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv1 = drn_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
-        self.conv2 = drn_conv3x3(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride,
-            dilation=dilation,
-            activate=True)
-        self.conv3 = drn_conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=False)
+        with self.init_scope():
+            self.conv1 = drn_conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=1,
+                activate=True)
+            self.conv2 = drn_conv3x3(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=stride,
+                dilate=dilate,
+                activate=True)
+            self.conv3 = drn_conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                stride=1,
+                activate=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         return x
 
 
-class DRNUnit(nn.Module):
+class DRNUnit(Chain):
     """
     DRN unit with residual connection.
 
@@ -223,8 +228,8 @@ class DRNUnit(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    dilation : int or tuple/list of 2 int
+        Stride of the convolution.
+    dilate : int or tuple/list of 2 int
         Padding/dilation value for 3x3 convolution layers.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
@@ -237,7 +242,7 @@ class DRNUnit(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
-                 dilation,
+                 dilate,
                  bottleneck,
                  simplified,
                  residual):
@@ -248,34 +253,35 @@ class DRNUnit(nn.Module):
         self.residual = residual
         self.resize_identity = ((in_channels != out_channels) or (stride != 1)) and self.residual and (not simplified)
 
-        if bottleneck:
-            self.body = DRNBottleneck(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                dilation=dilation)
-        elif simplified:
-            self.body = drn_conv3x3(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                dilation=dilation,
-                activate=False)
-        else:
-            self.body = DRNBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                dilation=dilation)
-        if self.resize_identity:
-            self.identity_conv = drn_conv1x1(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                activate=False)
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            if bottleneck:
+                self.body = DRNBottleneck(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    dilate=dilate)
+            elif simplified:
+                self.body = drn_conv3x3(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    dilate=dilate,
+                    activate=False)
+            else:
+                self.body = DRNBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    dilate=dilate)
+            if self.resize_identity:
+                self.identity_conv = drn_conv1x1(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    activate=False)
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -304,12 +310,12 @@ def drn_init_block(in_channels,
         out_channels=out_channels,
         ksize=7,
         stride=1,
-        padding=3,
-        dilation=1,
+        pad=3,
+        dilate=1,
         activate=True)
 
 
-class DRN(nn.Module):
+class DRN(Chain):
     """
     DRN-C&D model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -331,7 +337,7 @@ class DRN(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -343,52 +349,51 @@ class DRN(nn.Module):
                  residuals,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
+                 classes=1000):
         super(DRN, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", drn_init_block(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), DRNUnit(
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", drn_init_block(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride,
-                    dilation=dilations[i][j],
-                    bottleneck=(bottlenecks[i][j] == 1),
-                    simplified=(simplifieds[i][j] == 1),
-                    residual=(residuals[i][j] == 1)))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
-            kernel_size=28,
-            stride=1))
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            stride = 2 if (j == 0) and (i != 0) else 1
+                            setattr(stage, "unit{}".format(j + 1), DRNUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                dilate=dilations[i][j],
+                                bottleneck=(bottlenecks[i][j] == 1),
+                                simplified=(simplifieds[i][j] == 1),
+                                residual=(residuals[i][j] == 1)))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=28,
+                    stride=1))
 
-        self.output = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=num_classes,
-            kernel_size=1)
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'final_conv', L.Convolution2D(
+                    in_channels=in_channels,
+                    out_channels=classes,
+                    ksize=1))
+                setattr(self.output, 'final_flatten', partial(
+                    F.reshape,
+                    shape=(-1, classes)))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
-        x = x.view(x.size(0), -1)
         return x
 
 
@@ -480,11 +485,12 @@ def get_drn(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 

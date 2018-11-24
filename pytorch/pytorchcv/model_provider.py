@@ -9,6 +9,7 @@ from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.wrn import *
+from .models.drn import *
 from .models.dpn import *
 from .models.darknet import *
 from .models.squeezenet import *
@@ -27,9 +28,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.drn import *
-from .models.others.oth_drn import *
 
 __all__ = ['get_model']
 
@@ -136,6 +134,14 @@ _models = {
 
     'wrn50_2': wrn50_2,
 
+    'drnc26': drnc26,
+    'drnc42': drnc42,
+    'drnc58': drnc58,
+    'drnd22': drnd22,
+    'drnd38': drnd38,
+    'drnd54': drnd54,
+    'drnd105': drnd105,
+
     'dpn68': dpn68,
     'dpn68b': dpn68b,
     'dpn98': dpn98,
@@ -219,22 +225,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'drnc26': drnc26,
-    'drnc42': drnc42,
-    'drnc58': drnc58,
-    'drnd22': drnd22,
-    'drnd38': drnd38,
-    'drnd54': drnd54,
-    'drnd105': drnd105,
-
-    'oth_drn_d_105': oth_drn_d_105,
-    'oth_drn_d_54': oth_drn_d_54,
-    'oth_drn_d_38': oth_drn_d_38,
-    'oth_drn_d_22': oth_drn_d_22,
-    'oth_drn_c_58': oth_drn_c_58,
-    'oth_drn_c_42': oth_drn_c_42,
-    'oth_drn_c_26': oth_drn_c_26,
 }
 
 

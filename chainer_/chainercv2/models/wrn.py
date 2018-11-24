@@ -322,7 +322,7 @@ def get_wrn(blocks,
             root=os.path.join('~', '.chainer', 'models'),
             **kwargs):
     """
-    Create ResNet or SE-ResNet model with specific parameters.
+    Create WRN model with specific parameters.
 
     Parameters:
     ----------
@@ -349,7 +349,7 @@ def get_wrn(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported WRN with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
     channels_per_layers = [256, 512, 1024, 2048]

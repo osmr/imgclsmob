@@ -429,8 +429,6 @@ def resnext50_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -446,8 +444,6 @@ def resnext101_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -463,8 +459,6 @@ def resnext101_64x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -479,8 +473,6 @@ def seresnext50_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -496,8 +488,6 @@ def seresnext101_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -513,8 +503,6 @@ def seresnext101_64x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """

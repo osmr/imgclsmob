@@ -397,8 +397,6 @@ def menet108_8x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -414,8 +412,6 @@ def menet128_8x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -431,8 +427,6 @@ def menet160_8x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -448,8 +442,6 @@ def menet228_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -465,8 +457,6 @@ def menet256_12x1_g4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -482,8 +472,6 @@ def menet348_12x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -499,8 +487,6 @@ def menet352_12x1_g8(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -516,8 +502,6 @@ def menet456_24x1_g3(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """

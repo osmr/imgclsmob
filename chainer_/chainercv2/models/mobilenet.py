@@ -192,8 +192,6 @@ def get_mobilenet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -237,8 +235,6 @@ def mobilenet_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -254,8 +250,6 @@ def mobilenet_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -271,8 +265,6 @@ def mobilenet_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -288,8 +280,6 @@ def mobilenet_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -305,8 +295,6 @@ def fdmobilenet_w1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -322,8 +310,6 @@ def fdmobilenet_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -339,8 +325,6 @@ def fdmobilenet_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -356,8 +340,6 @@ def fdmobilenet_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """

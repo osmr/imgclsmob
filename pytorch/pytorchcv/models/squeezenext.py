@@ -255,8 +255,6 @@ def get_squeezenext(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """

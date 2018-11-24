@@ -409,8 +409,6 @@ def get_resnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -483,8 +481,6 @@ def resnet10(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -500,8 +496,6 @@ def resnet12(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -517,8 +511,6 @@ def resnet14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -534,8 +526,6 @@ def resnet16(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -551,8 +541,6 @@ def resnet18_wd4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -568,8 +556,6 @@ def resnet18_wd2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -585,8 +571,6 @@ def resnet18_w3d4(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -601,8 +585,6 @@ def resnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -617,8 +599,6 @@ def resnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -633,8 +613,6 @@ def resnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -650,8 +628,6 @@ def resnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -666,8 +642,6 @@ def resnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -683,8 +657,6 @@ def resnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -699,8 +671,6 @@ def resnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -716,8 +686,6 @@ def resnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -733,8 +701,6 @@ def resnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -750,8 +716,6 @@ def resnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -766,8 +730,6 @@ def seresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -782,8 +744,6 @@ def seresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -798,8 +758,6 @@ def seresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -815,8 +773,6 @@ def seresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -831,8 +787,6 @@ def seresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -848,8 +802,6 @@ def seresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -864,8 +816,6 @@ def seresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -881,8 +831,6 @@ def seresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -898,8 +846,6 @@ def seresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
@@ -915,8 +861,6 @@ def seresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """

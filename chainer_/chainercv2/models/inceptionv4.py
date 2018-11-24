@@ -28,7 +28,7 @@ class InceptConv(Chain):
     ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     """
@@ -94,7 +94,7 @@ def incept_conv3x3(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     padding : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
     """

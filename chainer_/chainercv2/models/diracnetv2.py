@@ -28,7 +28,7 @@ class DiracConv(Chain):
     ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     pad : int or tuple/list of 2 int
         Padding value for convolution layer.
     """

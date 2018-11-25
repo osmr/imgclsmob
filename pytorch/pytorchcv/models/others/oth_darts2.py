@@ -36,47 +36,6 @@ class DARTSConv(nn.Module):
         return self.op(x)
 
 
-# class DARTSConv(nn.Module):
-#     """
-#     DARTS specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     kernel_size : int or tuple/list of 2 int
-#         Convolution window size.
-#     stride : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     padding : int or tuple/list of 2 int
-#         Padding value for convolution layer.
-#     """
-#     def __init__(self,
-#                  in_channels,
-#                  out_channels,
-#                  kernel_size,
-#                  stride,
-#                  padding):
-#         super(DARTSConv, self).__init__()
-#         self.activ = nn.ReLU(inplace=True)
-#         self.conv = nn.Conv2d(
-#             in_channels=in_channels,
-#             out_channels=out_channels,
-#             kernel_size=kernel_size,
-#             stride=stride,
-#             padding=padding,
-#             bias=False)
-#         self.bn = nn.BatchNorm2d(num_features=out_channels)
-#
-#     def forward(self, x):
-#         x = self.activ(x)
-#         x = self.conv(x)
-#         x = self.bn(x)
-#         return x
-
-
 class DilConv(nn.Module):
 
     def __init__(self,

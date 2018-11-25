@@ -70,7 +70,8 @@ def prepare_model(model_name,
                   pretrained_model_file_path,
                   use_cuda,
                   use_data_parallel=True,
-                  ignore_extra=True):
+                  ignore_extra=False,
+                  remap_to_cpu=False):
     kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
@@ -80,7 +81,7 @@ def prepare_model(model_name,
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
         checkpoint = torch.load(
             pretrained_model_file_path,
-            map_location=(None if use_cuda else 'cpu'))
+            map_location=(None if use_cuda and not remap_to_cpu else 'cpu'))
         if (type(checkpoint) == dict) and ('state_dict' in checkpoint):
             checkpoint = checkpoint['state_dict']
 

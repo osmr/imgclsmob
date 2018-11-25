@@ -1,38 +1,25 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 
 
-OPS = {
-    'none': lambda C, stride, affine: Zero(stride),
-    'avg_pool_3x3': lambda C, stride, affine: nn.AvgPool2d(3, stride=stride, padding=1, count_include_pad=False),
-    'max_pool_3x3': lambda C, stride, affine: nn.MaxPool2d(3, stride=stride, padding=1),
-    'skip_connect': lambda C, stride, affine: Identity() if stride == 1 else FactorizedReduce(C, C, affine=affine),
-    'sep_conv_3x3': lambda C, stride, affine: SepConv(C, C, 3, stride, 1, affine=affine),
-    'sep_conv_5x5': lambda C, stride, affine: SepConv(C, C, 5, stride, 2, affine=affine),
-    'sep_conv_7x7': lambda C, stride, affine: SepConv(C, C, 7, stride, 3, affine=affine),
-    'dil_conv_3x3': lambda C, stride, affine: DilConv(C, C, 3, stride, 2, 2, affine=affine),
-    'dil_conv_5x5': lambda C, stride, affine: DilConv(C, C, 5, stride, 4, 2, affine=affine),
-    'conv_7x1_1x7': lambda C, stride, affine: nn.Sequential(
-        nn.ReLU(inplace=False),
-        nn.Conv2d(C, C, (1, 7), stride=(1, stride), padding=(0, 3), bias=False),
-        nn.Conv2d(C, C, (7, 1), stride=(stride, 1), padding=(3, 0), bias=False),
-        nn.BatchNorm2d(C, affine=affine)
-    ),
-}
+class Identity(nn.Module):
+
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
 
 
-class ReLUConvBN(nn.Module):
+class DARTSConv(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride,
-                 padding,
-                 affine=True):
-        super(ReLUConvBN, self).__init__()
-        assert (affine)
+                 padding):
+        super(DARTSConv, self).__init__()
         self.op = nn.Sequential(
             nn.ReLU(inplace=False),
             nn.Conv2d(
@@ -42,13 +29,52 @@ class ReLUConvBN(nn.Module):
                 stride=stride,
                 padding=padding,
                 bias=False),
-            nn.BatchNorm2d(
-                out_channels,
-                affine=affine)
+            nn.BatchNorm2d(out_channels)
         )
 
     def forward(self, x):
         return self.op(x)
+
+
+# class DARTSConv(nn.Module):
+#     """
+#     DARTS specific convolution block.
+#
+#     Parameters:
+#     ----------
+#     in_channels : int
+#         Number of input channels.
+#     out_channels : int
+#         Number of output channels.
+#     kernel_size : int or tuple/list of 2 int
+#         Convolution window size.
+#     stride : int or tuple/list of 2 int
+#         Strides of the convolution.
+#     padding : int or tuple/list of 2 int
+#         Padding value for convolution layer.
+#     """
+#     def __init__(self,
+#                  in_channels,
+#                  out_channels,
+#                  kernel_size,
+#                  stride,
+#                  padding):
+#         super(DARTSConv, self).__init__()
+#         self.activ = nn.ReLU(inplace=True)
+#         self.conv = nn.Conv2d(
+#             in_channels=in_channels,
+#             out_channels=out_channels,
+#             kernel_size=kernel_size,
+#             stride=stride,
+#             padding=padding,
+#             bias=False)
+#         self.bn = nn.BatchNorm2d(num_features=out_channels)
+#
+#     def forward(self, x):
+#         x = self.activ(x)
+#         x = self.conv(x)
+#         x = self.bn(x)
+#         return x
 
 
 class DilConv(nn.Module):
@@ -59,10 +85,8 @@ class DilConv(nn.Module):
                  kernel_size,
                  stride,
                  padding,
-                 dilation,
-                 affine=True):
+                 dilation):
         super(DilConv, self).__init__()
-        assert (affine)
         self.op = nn.Sequential(
             nn.ReLU(inplace=False),
             nn.Conv2d(
@@ -82,7 +106,7 @@ class DilConv(nn.Module):
                 bias=False),
             nn.BatchNorm2d(
                 out_channels,
-                affine=affine),
+                affine=True),
         )
 
     def forward(self, x):
@@ -96,32 +120,21 @@ class SepConv(nn.Module):
                  out_channels,
                  kernel_size,
                  stride,
-                 padding,
-                 affine=True):
+                 padding):
         super(SepConv, self).__init__()
-        assert (affine)
         self.op = nn.Sequential(
             nn.ReLU(inplace=False),
             nn.Conv2d(in_channels, in_channels, kernel_size=kernel_size, stride=stride, padding=padding, groups=in_channels, bias=False),
             nn.Conv2d(in_channels, in_channels, kernel_size=1, padding=0, bias=False),
-            nn.BatchNorm2d(in_channels, affine=affine),
+            nn.BatchNorm2d(in_channels, affine=True),
             nn.ReLU(inplace=False),
             nn.Conv2d(in_channels, in_channels, kernel_size=kernel_size, stride=1, padding=padding, groups=in_channels, bias=False),
             nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, bias=False),
-            nn.BatchNorm2d(out_channels, affine=affine),
+            nn.BatchNorm2d(out_channels, affine=True),
         )
 
     def forward(self, x):
         return self.op(x)
-
-
-class Identity(nn.Module):
-
-    def __init__(self):
-        super(Identity, self).__init__()
-
-    def forward(self, x):
-        return x
 
 
 class Zero(nn.Module):
@@ -140,21 +153,27 @@ class FactorizedReduce(nn.Module):
 
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 affine=True):
+                 out_channels):
         super(FactorizedReduce, self).__init__()
-        assert (affine)
         assert out_channels % 2 == 0
         self.relu = nn.ReLU(inplace=False)
         self.conv_1 = nn.Conv2d(in_channels, out_channels // 2, 1, stride=2, padding=0, bias=False)
         self.conv_2 = nn.Conv2d(in_channels, out_channels // 2, 1, stride=2, padding=0, bias=False)
-        self.bn = nn.BatchNorm2d(out_channels, affine=affine)
+        self.bn = nn.BatchNorm2d(out_channels, affine=True)
 
     def forward(self, x):
         x = self.relu(x)
         out = torch.cat([self.conv_1(x), self.conv_2(x[:, :, 1:, 1:])], dim=1)
         out = self.bn(out)
         return out
+
+
+OPS = {
+    'max_pool_3x3': lambda channels, stride: nn.MaxPool2d(3, stride=stride, padding=1),
+    'skip_connect': lambda channels, stride: Identity() if stride == 1 else FactorizedReduce(channels, channels),
+    'sep_conv_3x3': lambda channels, stride: SepConv(channels, channels, 3, stride, 1),
+    'dil_conv_3x3': lambda channels, stride: DilConv(channels, channels, 3, stride, 2, 2),
+}
 
 
 class Cell(nn.Module):
@@ -171,8 +190,18 @@ class Cell(nn.Module):
         if reduction_prev:
             self.preprocess0 = FactorizedReduce(prev_in_channels, out_channels)
         else:
-            self.preprocess0 = ReLUConvBN(prev_in_channels, out_channels, 1, 1, 0)
-        self.preprocess1 = ReLUConvBN(in_channels, out_channels, 1, 1, 0)
+            self.preprocess0 = DARTSConv(
+                prev_in_channels,
+                out_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0)
+        self.preprocess1 = DARTSConv(
+            in_channels,
+            out_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0)
 
         if reduction:
             op_names, indices = zip(*genotype.reduce)
@@ -180,9 +209,19 @@ class Cell(nn.Module):
         else:
             op_names, indices = zip(*genotype.normal)
             concat = genotype.normal_concat
-        self._compile(out_channels, op_names, indices, concat, reduction)
+        self._compile(
+            out_channels,
+            op_names,
+            indices,
+            concat,
+            reduction)
 
-    def _compile(self, C, op_names, indices, concat, reduction):
+    def _compile(self,
+                 out_channels,
+                 op_names,
+                 indices,
+                 concat,
+                 reduction):
         assert len(op_names) == len(indices)
         self._steps = len(op_names) // 2
         self._concat = concat
@@ -191,7 +230,7 @@ class Cell(nn.Module):
         self._ops = nn.ModuleList()
         for name, index in zip(op_names, indices):
             stride = 2 if reduction and index < 2 else 1
-            op = OPS[name](C, stride, True)
+            op = OPS[name](out_channels, stride)
             self._ops += [op]
         self._indices = indices
 

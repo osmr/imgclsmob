@@ -29,7 +29,7 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-# from .models.others.oth_darts import *
+from .models.others.oth_darts2 import *
 
 __all__ = ['get_model']
 
@@ -228,7 +228,7 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
-    # 'oth_darts': oth_darts,
+    'oth_darts': oth_darts,
 }
 
 

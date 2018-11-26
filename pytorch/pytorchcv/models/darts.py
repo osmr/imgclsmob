@@ -437,9 +437,7 @@ def darts_dws_branch3x3(channels,
         padding=1)
 
 
-"""
-Set of operations in genotype. 
-"""
+# Set of operations in genotype.
 GENOTYPE_OPS = {
     'max_pool_3x3': darts_maxpool3x3,
     'skip_connect': darts_skip_connection,

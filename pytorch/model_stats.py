@@ -102,7 +102,8 @@ def measure_layer(layer, x):
         delta_ops = x.size()[0] * (weight_ops + bias_ops)
         delta_params = get_layer_param(layer)
 
-    elif type_name in ['BatchNorm2d', 'Dropout2d', 'DropChannel', 'Dropout', 'LambdaReduce', 'Lambda', 'ZeroPad2d']:
+    elif type_name in ['BatchNorm2d', 'Dropout2d', 'DropChannel', 'Dropout', 'LambdaReduce', 'Lambda', 'ZeroPad2d',
+                       'Identity']:
         delta_params = get_layer_param(layer)
 
     else:

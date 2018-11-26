@@ -21,6 +21,7 @@ from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.mnasnet import *
+from .models.darts import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
@@ -28,8 +29,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.darts import *
 
 __all__ = ['get_model']
 
@@ -217,6 +216,8 @@ _models = {
 
     'mnasnet': mnasnet,
 
+    'darts': darts,
+
     'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
@@ -227,8 +228,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'darts': darts,
 }
 
 

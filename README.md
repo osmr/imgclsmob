@@ -32,6 +32,7 @@ scripts for training/validating/converting models. All models are designed for u
 - FD-MobileNet (['FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'](https://arxiv.org/abs/1802.03750))
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
 - MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
+- DARTS (['DARTS: Differentiable Architecture Search'](https://arxiv.org/abs/1806.09055))
 - Xception (['Xception: Deep Learning with Depthwise Separable Convolutions'](https://arxiv.org/abs/1610.02357))
 - InceptionV3 (['Rethinking the Inception Architecture for Computer Vision'](https://arxiv.org/abs/1512.00567))
 - InceptionV4/InceptionResNetV2 (['Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning'](https://arxiv.org/abs/1602.07261))
@@ -277,6 +278,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 30.82 | 11.26 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1126-152672f5.params.log)) |
 | MobileNetV2 x1.0 | 28.51 | 9.90 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-0990-4e1a3878.params.log)) |
 | MnasNet | 31.32 | 11.44 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-c972fec0.params.log)) |
+| DARTS | 27.23 | 8.97 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-aafd6452.params.log)) |
 | Xception | 20.99 | 5.56 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0556-bd2c1684.params.log)) |
 | InceptionV3 | 21.22 | 5.59 | 23,834,568 | 5,746.72M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0559-6c087967.params.log)) |
 | InceptionV4 | 20.60 | 5.25 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0525-f7aa9536.params.log)) |
@@ -382,6 +384,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
 | MnasNet | 31.58 | 11.74 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1174-e8ec017c.pth.log)) |
+| DARTS | 26.70 | 8.74 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0874-74f0c7b6.pth.log)) |
 | Xception | 20.97 | 5.49 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0549-e4f0232c.pth.log)) |
 | InceptionV3 | 21.12 | 5.65 | 23,834,568 | 5,746.72M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0565-cf406180.pth.log)) |
 | InceptionV4 | 20.64 | 5.29 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0529-5cb7b4e4.pth.log)) |
@@ -487,6 +490,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.75 | 31.28 | 11.48 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w3d4-1148-a6f852ea.npz.log)) |
 | MobileNetV2 x1.0 | 28.87 | 10.05 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w1-1005-3b6d1764.npz.log)) |
 | MnasNet | 31.27 | 11.44 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-688e523d.npz.log)) |
+| DARTS | 27.29 | 8.97 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-8986fe64.npz.log)) |
 | Xception | 21.04 | 5.47 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0547-7a5be958.npz.log)) |
 | InceptionV3 | 21.11 | 5.61 | 23,834,568 | 5,746.72M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.92/inceptionv3-0561-4ddea4df.npz.log)) |
 | InceptionV4 | 20.62 | 5.26 | 42,679,816 | 12,314.17M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.105/inceptionv4-0526-02e53701.npz.log)) |
@@ -649,3 +653,4 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 [szagoruyko/diracnets]: https://github.com/szagoruyko/diracnets
 [szagoruyko/functional-zoo]: https://github.com/szagoruyko/functional-zoo
 [fyu/drn]: https://github.com/fyu/drn
+[quark0/darts]: https://github.com/quark0/darts

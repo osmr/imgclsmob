@@ -8,13 +8,13 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='tensorflowcv',
-    version='0.0.8',
+    version='0.0.9',
     description='Image classification models for TensorFlow',
     license='MIT',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/osmr/imgclsmob',
-    author='osmr',
+    author='Oleg Sémery',
     author_email='osemery@gmail.com',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -24,7 +24,8 @@ setup(
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
-    keywords='machine-learning deep-learning neuralnetwork image-classification imagenet tensorflow',
+    keywords='machine-learning deep-learning neuralnetwork image-classification imagenet tensorflow resnet resnext '
+             'senet densenet darknet squeezenet shufflenet menet mobilenent mnasnet',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
     install_requires=['numpy', 'requests'],

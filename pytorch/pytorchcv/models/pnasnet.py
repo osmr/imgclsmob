@@ -84,7 +84,7 @@ class DwsBranch(nn.Module):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
@@ -137,7 +137,7 @@ def dws_branch_k3(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 2
-        Stride of the convolution.
+        Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
@@ -167,7 +167,7 @@ def dws_branch_k5(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 2
-        Stride of the convolution.
+        Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
     stem : bool, default False
@@ -196,7 +196,7 @@ def dws_branch_k7(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 2
-        Stride of the convolution.
+        Strides of the convolution.
     extra_padding : bool, default False
         Whether to use extra padding.
     """

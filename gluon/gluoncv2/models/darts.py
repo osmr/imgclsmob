@@ -8,20 +8,9 @@ __all__ = ['DARTS', 'darts']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
+from mxnet.gluon.contrib.nn import Identity
 from .common import conv1x1
 from .nasnet import nasnet_dual_path_sequential
-
-
-class Identity(HybridBlock):
-    """
-    Identity block.
-    """
-    def __init__(self,
-                 **kwargs):
-        super(Identity, self).__init__(**kwargs)
-
-    def forward(self, x):
-        return x
 
 
 class DwsConv(HybridBlock):
@@ -37,7 +26,7 @@ class DwsConv(HybridBlock):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     strides : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int
@@ -234,7 +223,7 @@ class DartsDwsBranch(HybridBlock):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     strides : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     """
@@ -599,9 +588,8 @@ class DARTS(HybridBlock):
                 in_channels=in_channels,
                 out_channels=stem_blocks_channels))
             in_channels = stem_blocks_channels
-
             self.features.add(stem2_unit(
-                in_channels=stem_blocks_channels,
+                in_channels=in_channels,
                 out_channels=stem_blocks_channels))
             prev_in_channels = in_channels
             in_channels = stem_blocks_channels
@@ -622,7 +610,6 @@ class DARTS(HybridBlock):
                     prev_in_channels = in_channels
                     in_channels = out_channels
                 self.features.add(stage)
-
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))

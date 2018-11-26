@@ -300,7 +300,7 @@ class DwsConv(nn.Module):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     bias : bool, default False
@@ -346,7 +346,7 @@ class NasDwsConv(nn.Module):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     extra_padding : bool, default False
@@ -398,7 +398,7 @@ class DwsBranch(nn.Module):
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Stride of the convolution.
+        Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     extra_padding : bool, default False

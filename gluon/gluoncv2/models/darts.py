@@ -1,30 +1,30 @@
 """
-    DARTS, implemented in PyTorch.
+    DARTS, implemented in Gluon.
     Original paper: 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 """
 
 __all__ = ['DARTS', 'darts']
 
 import os
-import torch
-import torch.nn as nn
-import torch.nn.init as init
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1
 from .nasnet import nasnet_dual_path_sequential
 
 
-class Identity(nn.Module):
+class Identity(HybridBlock):
     """
     Identity block.
     """
-    def __init__(self):
-        super(Identity, self).__init__()
+    def __init__(self,
+                 **kwargs):
+        super(Identity, self).__init__(**kwargs)
 
     def forward(self, x):
         return x
 
 
-class DwsConv(nn.Module):
+class DwsConv(HybridBlock):
     """
     Standard dilated depthwise separable convolution block with.
 
@@ -36,45 +36,47 @@ class DwsConv(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Stride of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int
         Dilation value for convolution layer.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layers use a bias vector.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
                  dilation,
-                 bias=False):
-        super(DwsConv, self).__init__()
-        self.dw_conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=in_channels,
-            bias=bias)
-        self.pw_conv = conv1x1(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bias=bias)
+                 use_bias=False,
+                 **kwargs):
+        super(DwsConv, self).__init__(**kwargs)
+        with self.name_scope():
+            self.dw_conv = nn.Conv2D(
+                channels=in_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=dilation,
+                groups=in_channels,
+                use_bias=use_bias,
+                in_channels=in_channels)
+            self.pw_conv = conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                use_bias=use_bias)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.dw_conv(x)
         x = self.pw_conv(x)
         return x
 
 
-class DartsConv(nn.Module):
+class DartsConv(HybridBlock):
     """
     DARTS specific convolution block.
 
@@ -86,7 +88,7 @@ class DartsConv(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -97,24 +99,26 @@ class DartsConv(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
-                 activate=True):
-        super(DartsConv, self).__init__()
+                 activate=True,
+                 **kwargs):
+        super(DartsConv, self).__init__(**kwargs)
         self.activate = activate
 
-        if self.activate:
-            self.activ = nn.ReLU(inplace=False)
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        with self.name_scope():
+            if self.activate:
+                self.activ = nn.Activation('relu')
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                use_bias=False,
+                in_channels=in_channels)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.activate:
             x = self.activ(x)
         x = self.conv(x)
@@ -141,7 +145,7 @@ def darts_conv1x1(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        stride=1,
+        strides=1,
         padding=0,
         activate=activate)
 
@@ -165,12 +169,12 @@ def darts_conv3x3_s2(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        stride=2,
+        strides=2,
         padding=1,
         activate=activate)
 
 
-class DartsDwsConv(nn.Module):
+class DartsDwsConv(HybridBlock):
     """
     DARTS specific dilated convolution block.
 
@@ -182,7 +186,7 @@ class DartsDwsConv(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -193,29 +197,31 @@ class DartsDwsConv(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
-                 dilation):
-        super(DartsDwsConv, self).__init__()
-        self.activ = nn.ReLU(inplace=False)
-        self.conv = DwsConv(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
+                 dilation,
+                 **kwargs):
+        super(DartsDwsConv, self).__init__(**kwargs)
+        with self.name_scope():
+            self.activ = nn.Activation('relu')
+            self.conv = DwsConv(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=dilation,
+                use_bias=False)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.activ(x)
         x = self.conv(x)
         x = self.bn(x)
         return x
 
 
-class DartsDwsBranch(nn.Module):
+class DartsDwsBranch(HybridBlock):
     """
     DARTS specific block with depthwise separable convolution layers.
 
@@ -227,7 +233,7 @@ class DartsDwsBranch(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Stride of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -236,33 +242,35 @@ class DartsDwsBranch(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
-                 padding):
-        super(DartsDwsBranch, self).__init__()
+                 strides,
+                 padding,
+                 **kwargs):
+        super(DartsDwsBranch, self).__init__(**kwargs)
         mid_channels = in_channels
 
-        self.conv1 = DartsDwsConv(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=1)
-        self.conv2 = DartsDwsConv(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=1,
-            padding=padding,
-            dilation=1)
+        with self.name_scope():
+            self.conv1 = DartsDwsConv(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=1)
+            self.conv2 = DartsDwsConv(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                strides=1,
+                padding=padding,
+                dilation=1)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class DartsReduceBranch(nn.Module):
+class DartsReduceBranch(HybridBlock):
     """
     DARTS specific factorized reduce block.
 
@@ -272,39 +280,41 @@ class DartsReduceBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 2
+    strides : int or tuple/list of 2 int, default 2
         Strides of the convolution.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=2):
-        super(DartsReduceBranch, self).__init__()
+                 strides=2,
+                 **kwargs):
+        super(DartsReduceBranch, self).__init__(**kwargs)
         assert (out_channels % 2 == 0)
         mid_channels = out_channels // 2
 
-        self.activ = nn.ReLU(inplace=False)
-        self.conv1 = conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=stride)
-        self.conv2 = conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=stride)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        with self.name_scope():
+            self.activ = nn.Activation('relu')
+            self.conv1 = conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                strides=strides)
+            self.conv2 = conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                strides=strides)
+            self.bn = nn.BatchNorm(in_channels=out_channels)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.activ(x)
         x1 = self.conv1(x)
-        x = x[:, :, 1:, 1:].contiguous()
+        x = F.slice(x, begin=(None, None, 1, 1), end=(None, None, None, None))
         x2 = self.conv2(x)
-        x = torch.cat((x1, x2), dim=1)
+        x = F.concat(x1, x2, dim=1)
         x = self.bn(x)
         return x
 
 
-class Stem1Unit(nn.Module):
+class Stem1Unit(HybridBlock):
     """
     DARTS Stem1 unit.
 
@@ -317,20 +327,22 @@ class Stem1Unit(nn.Module):
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(Stem1Unit, self).__init__()
+                 out_channels,
+                 **kwargs):
+        super(Stem1Unit, self).__init__(**kwargs)
         mid_channels = out_channels // 2
 
-        self.conv1 = darts_conv3x3_s2(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            activate=False)
-        self.conv2 = darts_conv3x3_s2(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            activate=True)
+        with self.name_scope():
+            self.conv1 = darts_conv3x3_s2(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                activate=False)
+            self.conv2 = darts_conv3x3_s2(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                activate=True)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
@@ -355,7 +367,7 @@ def stem2_unit(in_channels,
 
 
 def darts_maxpool3x3(channels,
-                     stride):
+                     strides):
     """
     DARTS specific 3x3 Max pooling layer.
 
@@ -363,18 +375,18 @@ def darts_maxpool3x3(channels,
     ----------
     channels : int
         Number of input/output channels. Unused parameter.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     """
     assert (channels > 0)
-    return nn.MaxPool2d(
-        kernel_size=3,
-        stride=stride,
+    return nn.MaxPool2D(
+        pool_size=3,
+        strides=strides,
         padding=1)
 
 
 def darts_skip_connection(channels,
-                          stride):
+                          strides):
     """
     DARTS specific skip connection layer.
 
@@ -382,22 +394,22 @@ def darts_skip_connection(channels,
     ----------
     channels : int
         Number of input/output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     """
     assert (channels > 0)
-    if stride == 1:
+    if strides == 1:
         return Identity()
     else:
-        assert (stride == 2)
+        assert (strides == 2)
         return DartsReduceBranch(
             in_channels=channels,
             out_channels=channels,
-            stride=stride)
+            strides=strides)
 
 
 def darts_dws_conv3x3(channels,
-                      stride):
+                      strides):
     """
     3x3 version of DARTS specific dilated convolution block.
 
@@ -405,20 +417,20 @@ def darts_dws_conv3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     """
     return DartsDwsConv(
         in_channels=channels,
         out_channels=channels,
         kernel_size=3,
-        stride=stride,
+        strides=strides,
         padding=2,
         dilation=2)
 
 
 def darts_dws_branch3x3(channels,
-                        stride):
+                        strides):
     """
     3x3 version of DARTS specific dilated convolution branch.
 
@@ -426,14 +438,14 @@ def darts_dws_branch3x3(channels,
     ----------
     channels : int
         Number of input/output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     """
     return DartsDwsBranch(
         in_channels=channels,
         out_channels=channels,
         kernel_size=3,
-        stride=stride,
+        strides=strides,
         padding=1)
 
 
@@ -446,7 +458,7 @@ GENOTYPE_OPS = {
 }
 
 
-class DartsMainBlock(nn.Module):
+class DartsMainBlock(HybridBlock):
     """
     DARTS main block, described by genotype.
 
@@ -462,39 +474,39 @@ class DartsMainBlock(nn.Module):
     def __init__(self,
                  genotype,
                  channels,
-                 reduction):
-        super(DartsMainBlock, self).__init__()
+                 reduction,
+                 **kwargs):
+        super(DartsMainBlock, self).__init__(**kwargs)
         self.concat = [2, 3, 4, 5]
         op_names, indices = zip(*genotype)
         self.indices = indices
         self.steps = len(op_names) // 2
 
-        self.ops = nn.ModuleList()
-        for name, index in zip(op_names, indices):
-            stride = 2 if reduction and index < 2 else 1
-            op = GENOTYPE_OPS[name](channels, stride)
-            self.ops += [op]
+        with self.name_scope():
+            for i, (name, index) in enumerate(zip(op_names, indices)):
+                stride = 2 if reduction and index < 2 else 1
+                setattr(self, "ops{}".format(i + 1), GENOTYPE_OPS[name](channels, stride))
 
-    def forward(self, x, x_prev):
+    def hybrid_forward(self, F, x, x_prev):
         s0 = x_prev
         s1 = x
         states = [s0, s1]
         for i in range(self.steps):
             j1 = 2 * i
             j2 = 2 * i + 1
-            op1 = self.ops[j1]
-            op2 = self.ops[j2]
+            op1 = getattr(self, "ops{}".format(j1 + 1))
+            op2 = getattr(self, "ops{}".format(j2 + 1))
             y1 = states[self.indices[j1]]
             y2 = states[self.indices[j2]]
             y1 = op1(y1)
             y2 = op2(y2)
             s = y1 + y2
             states += [s]
-        x_out = torch.cat([states[i] for i in self.concat], dim=1)
+        x_out = F.concat(*[states[i] for i in self.concat], dim=1)
         return x_out
 
 
-class DartsUnit(nn.Module):
+class DartsUnit(HybridBlock):
     """
     DARTS unit.
 
@@ -517,36 +529,38 @@ class DartsUnit(nn.Module):
                  out_channels,
                  genotype,
                  reduction,
-                 prev_reduction):
-        super(DartsUnit, self).__init__()
+                 prev_reduction,
+                 **kwargs):
+        super(DartsUnit, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        if prev_reduction:
-            self.preprocess_prev = DartsReduceBranch(
-                in_channels=prev_in_channels,
+        with self.name_scope():
+            if prev_reduction:
+                self.preprocess_prev = DartsReduceBranch(
+                    in_channels=prev_in_channels,
+                    out_channels=mid_channels)
+            else:
+                self.preprocess_prev = darts_conv1x1(
+                    in_channels=prev_in_channels,
+                    out_channels=mid_channels)
+
+            self.preprocess = darts_conv1x1(
+                in_channels=in_channels,
                 out_channels=mid_channels)
-        else:
-            self.preprocess_prev = darts_conv1x1(
-                in_channels=prev_in_channels,
-                out_channels=mid_channels)
 
-        self.preprocess = darts_conv1x1(
-            in_channels=in_channels,
-            out_channels=mid_channels)
+            self.body = DartsMainBlock(
+                genotype=genotype,
+                channels=mid_channels,
+                reduction=reduction)
 
-        self.body = DartsMainBlock(
-            genotype=genotype,
-            channels=mid_channels,
-            reduction=reduction)
-
-    def forward(self, x, x_prev):
+    def hybrid_forward(self, F, x, x_prev):
         x = self.preprocess(x)
         x_prev = self.preprocess_prev(x_prev)
         x_out = self.body(x, x_prev)
         return x_out
 
 
-class DARTS(nn.Module):
+class DARTS(HybridBlock):
     """
     DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 
@@ -560,7 +574,7 @@ class DARTS(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -570,69 +584,65 @@ class DARTS(nn.Module):
                  reduce_genotype,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(DARTS, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(DARTS, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nasnet_dual_path_sequential(
-            return_two=False,
-            first_ordinals=2,
-            last_ordinals=1)
-        self.features.add_module("stem1_unit", Stem1Unit(
-            in_channels=in_channels,
-            out_channels=stem_blocks_channels))
-        in_channels = stem_blocks_channels
-        self.features.add_module("stem2_unit", stem2_unit(
-            in_channels=stem_blocks_channels,
-            out_channels=stem_blocks_channels))
-        prev_in_channels = in_channels
-        in_channels = stem_blocks_channels
+        with self.name_scope():
+            self.features = nasnet_dual_path_sequential(
+                return_two=False,
+                first_ordinals=2,
+                last_ordinals=1)
+            self.features.add(Stem1Unit(
+                in_channels=in_channels,
+                out_channels=stem_blocks_channels))
+            in_channels = stem_blocks_channels
 
-        for i, channels_per_stage in enumerate(channels):
-            stage = nasnet_dual_path_sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                reduction = (i != 0) and (j == 0)
-                prev_reduction = ((i == 0) and (j == 0)) or ((i != 0) and (j == 1))
-                genotype = reduce_genotype if reduction else normal_genotype
-                stage.add_module("unit{}".format(j + 1), DartsUnit(
-                    in_channels=in_channels,
-                    prev_in_channels=prev_in_channels,
-                    out_channels=out_channels,
-                    genotype=genotype,
-                    reduction=reduction,
-                    prev_reduction=prev_reduction))
-                prev_in_channels = in_channels
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
+            self.features.add(stem2_unit(
+                in_channels=stem_blocks_channels,
+                out_channels=stem_blocks_channels))
+            prev_in_channels = in_channels
+            in_channels = stem_blocks_channels
 
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+            for i, channels_per_stage in enumerate(channels):
+                stage = nasnet_dual_path_sequential(prefix='stage{}_'.format(i + 1))
+                for j, out_channels in enumerate(channels_per_stage):
+                    reduction = (i != 0) and (j == 0)
+                    prev_reduction = ((i == 0) and (j == 0)) or ((i != 0) and (j == 1))
+                    genotype = reduce_genotype if reduction else normal_genotype
+                    stage.add(DartsUnit(
+                        in_channels=in_channels,
+                        prev_in_channels=prev_in_channels,
+                        out_channels=out_channels,
+                        genotype=genotype,
+                        reduction=reduction,
+                        prev_reduction=prev_reduction))
+                    prev_in_channels = in_channels
+                    in_channels = out_channels
+                self.features.add(stage)
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-        self._init_params()
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
 def get_darts(model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.torch', 'models'),
+              ctx=cpu(),
+              root=os.path.join('~', '.mxnet', 'models'),
               **kwargs):
     """
     Create DARTS model with specific parameters.
@@ -643,7 +653,9 @@ def get_darts(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     stem_blocks_channels = 48
@@ -680,11 +692,12 @@ def get_darts(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -697,7 +710,9 @@ def darts(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_darts(model_name="darts", **kwargs)
@@ -705,8 +720,7 @@ def darts(**kwargs):
 
 def _test():
     import numpy as np
-    import torch
-    from torch.autograd import Variable
+    import mxnet as mx
 
     pretrained = False
 
@@ -718,18 +732,22 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        net_params = net.collect_params()
         weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != darts or weight_count == 4718752)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

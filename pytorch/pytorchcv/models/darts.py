@@ -1,5 +1,16 @@
+"""
+    DARTS, implemented in PyTorch.
+    Original paper: 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
+"""
+
+__all__ = ['DARTS', 'darts']
+
+import os
 import torch
 import torch.nn as nn
+import torch.nn.init as init
+from .common import conv1x1
+from .nasnet import nasnet_dual_path_sequential
 
 
 class Identity(nn.Module):
@@ -11,32 +22,6 @@ class Identity(nn.Module):
 
     def forward(self, x):
         return x
-
-
-def conv1x1(in_channels,
-            out_channels,
-            stride=1,
-            bias=False):
-    """
-    Convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        bias=bias)
 
 
 class DwsConv(nn.Module):
@@ -119,7 +104,7 @@ class DartsConv(nn.Module):
         self.activate = activate
 
         if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+            self.activ = nn.ReLU(inplace=False)
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -161,11 +146,11 @@ def darts_conv1x1(in_channels,
         activate=activate)
 
 
-def darts_conv3x3(in_channels,
-                  out_channels,
-                  activate=True):
+def darts_conv3x3_s2(in_channels,
+                     out_channels,
+                     activate=True):
     """
-    3x3 version of the DARTS specific convolution block.
+    3x3 version of the DARTS specific convolution block with stride 2.
 
     Parameters:
     ----------
@@ -212,7 +197,7 @@ class DartsDwsConv(nn.Module):
                  padding,
                  dilation):
         super(DartsDwsConv, self).__init__()
-        self.activ = nn.ReLU(inplace=True)
+        self.activ = nn.ReLU(inplace=False)
         self.conv = DwsConv(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -298,7 +283,7 @@ class DartsReduceBranch(nn.Module):
         assert (out_channels % 2 == 0)
         mid_channels = out_channels // 2
 
-        self.activ = nn.ReLU(inplace=True)
+        self.activ = nn.ReLU(inplace=False)
         self.conv1 = conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
@@ -317,6 +302,56 @@ class DartsReduceBranch(nn.Module):
         x = torch.cat((x1, x2), dim=1)
         x = self.bn(x)
         return x
+
+
+class Stem1Unit(nn.Module):
+    """
+    DARTS Stem1 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(Stem1Unit, self).__init__()
+        mid_channels = out_channels // 2
+
+        self.conv1 = darts_conv3x3_s2(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            activate=False)
+        self.conv2 = darts_conv3x3_s2(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            activate=True)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
+
+
+def stem2_unit(in_channels,
+               out_channels):
+    """
+    DARTS Stem2 unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    return darts_conv3x3_s2(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        activate=True)
 
 
 def darts_maxpool3x3(channels,
@@ -346,7 +381,7 @@ def darts_skip_connection(channels,
     Parameters:
     ----------
     channels : int
-        Number of input/output channels. Unused parameter.
+        Number of input/output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
     """
@@ -369,7 +404,7 @@ def darts_dws_conv3x3(channels,
     Parameters:
     ----------
     channels : int
-        Number of input/output channels. Unused parameter.
+        Number of input/output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
     """
@@ -390,7 +425,7 @@ def darts_dws_branch3x3(channels,
     Parameters:
     ----------
     channels : int
-        Number of input/output channels. Unused parameter.
+        Number of input/output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
     """
@@ -402,7 +437,10 @@ def darts_dws_branch3x3(channels,
         padding=1)
 
 
-OPS = {
+"""
+Set of operations in genotype. 
+"""
+GENOTYPE_OPS = {
     'max_pool_3x3': darts_maxpool3x3,
     'skip_connect': darts_skip_connection,
     'dil_conv_3x3': darts_dws_conv3x3,
@@ -410,199 +448,262 @@ OPS = {
 }
 
 
-class Cell(nn.Module):
+class DartsMainBlock(nn.Module):
+    """
+    DARTS main block, described by genotype.
 
+    Parameters:
+    ----------
+    genotype : list of tuples (str, int)
+        List of genotype elements (operations and linked indices).
+    channels : int
+        Number of input/output channels.
+    reduction : bool
+        Whether use reduction.
+    """
     def __init__(self,
                  genotype,
-                 prev_in_channels,
-                 in_channels,
-                 out_channels,
-                 reduction,
-                 reduction_prev):
-        super(Cell, self).__init__()
-
-        if reduction_prev:
-            self.preprocess0 = DartsReduceBranch(
-                in_channels=prev_in_channels,
-                out_channels=out_channels)
-        else:
-            self.preprocess0 = darts_conv1x1(
-                in_channels=prev_in_channels,
-                out_channels=out_channels)
-        self.preprocess1 = darts_conv1x1(
-            in_channels=in_channels,
-            out_channels=out_channels)
-
-        if reduction:
-            op_names, indices = zip(*genotype.reduce)
-            concat = genotype.reduce_concat
-        else:
-            op_names, indices = zip(*genotype.normal)
-            concat = genotype.normal_concat
-        self._compile(
-            out_channels,
-            op_names,
-            indices,
-            concat,
-            reduction)
-
-    def _compile(self,
-                 out_channels,
-                 op_names,
-                 indices,
-                 concat,
+                 channels,
                  reduction):
-        assert len(op_names) == len(indices)
-        self._steps = len(op_names) // 2
-        self._concat = concat
-        self.multiplier = len(concat)
+        super(DartsMainBlock, self).__init__()
+        self.concat = [2, 3, 4, 5]
 
-        self._ops = nn.ModuleList()
+        op_names, indices = zip(*genotype)
+        self.ops = nn.ModuleList()
         for name, index in zip(op_names, indices):
             stride = 2 if reduction and index < 2 else 1
-            op = OPS[name](out_channels, stride)
-            self._ops += [op]
-        self._indices = indices
+            op = GENOTYPE_OPS[name](channels, stride)
+            self.ops += [op]
 
-    def forward(self, s0, s1):
-        s0 = self.preprocess0(s0)
-        s1 = self.preprocess1(s1)
+        self.indices = indices
+        self.steps = len(op_names) // 2
 
+    def forward(self, x, x_prev):
+        s0 = x_prev
+        s1 = x
         states = [s0, s1]
-        for i in range(self._steps):
-            h1 = states[self._indices[2 * i]]
-            h2 = states[self._indices[2 * i + 1]]
-            op1 = self._ops[2 * i]
-            op2 = self._ops[2 * i + 1]
-            h1 = op1(h1)
-            h2 = op2(h2)
-            s = h1 + h2
+        for i in range(self.steps):
+            j1 = 2 * i
+            j2 = 2 * i + 1
+            op1 = self.ops[j1]
+            op2 = self.ops[j2]
+            y1 = states[self.indices[j1]]
+            y2 = states[self.indices[j2]]
+            y1 = op1(y1)
+            y2 = op2(y2)
+            s = y1 + y2
             states += [s]
-        return torch.cat([states[i] for i in self._concat], dim=1)
+        x_out = torch.cat([states[i] for i in self.concat], dim=1)
+        return x_out
 
 
-class NetworkImageNet(nn.Module):
+class DartsUnit(nn.Module):
+    """
+    DARTS unit.
 
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    prev_in_channels : int
+        Number of input channels in previous input.
+    out_channels : int
+        Number of output channels.
+    genotype : list of tuples (str, int)
+        List of genotype elements (operations and linked indices).
+    reduction : bool
+        Whether use reduction.
+    """
     def __init__(self,
-                 init_block_channels,
-                 num_classes,
-                 layers,
-                 genotype):
-        super(NetworkImageNet, self).__init__()
-        self._layers = layers
+                 in_channels,
+                 prev_in_channels,
+                 out_channels,
+                 genotype,
+                 reduction,
+                 prev_reduction):
+        super(DartsUnit, self).__init__()
+        mid_channels = out_channels // 4
 
-        self.stem0 = nn.Sequential(
-            darts_conv3x3(
-                in_channels=3,
-                out_channels=init_block_channels // 2,
-                activate=False),
-            darts_conv3x3(
-                in_channels=init_block_channels // 2,
-                out_channels=init_block_channels,
-                activate=True))
+        if prev_reduction:
+            self.preprocess_prev = DartsReduceBranch(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
+        else:
+            self.preprocess_prev = darts_conv1x1(
+                in_channels=prev_in_channels,
+                out_channels=mid_channels)
 
-        self.stem1 = darts_conv3x3(
-            in_channels=init_block_channels,
-            out_channels=init_block_channels,
-            activate=True)
+        self.preprocess = darts_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels)
 
-        prev_in_channels, in_channels, out_channels = init_block_channels, init_block_channels, init_block_channels
+        self.body = DartsMainBlock(
+            genotype=genotype,
+            channels=mid_channels,
+            reduction=reduction)
 
-        self.cells = nn.ModuleList()
-        reduction_prev = True
-        for i in range(layers):
-            if i in [layers // 3, 2 * layers // 3]:
-                out_channels *= 2
-                reduction = True
-            else:
-                reduction = False
-            cell = Cell(
-                genotype,
-                prev_in_channels,
-                in_channels,
-                out_channels,
-                reduction,
-                reduction_prev)
-            reduction_prev = reduction
-            self.cells += [cell]
-            prev_in_channels, in_channels = in_channels, cell.multiplier * out_channels
+    def forward(self, x, x_prev):
+        x = self.preprocess(x)
+        x_prev = self.preprocess_prev(x_prev)
+        x_out = self.body(x, x_prev)
+        return x_out
 
-        self.final_pool = nn.AvgPool2d(
+
+class DARTS(nn.Module):
+    """
+    DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
+
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    stem_blocks_channels : int
+        Number of output channels for the Stem units.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
+    def __init__(self,
+                 channels,
+                 stem_blocks_channels,
+                 normal_genotype,
+                 reduce_genotype,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 num_classes=1000):
+        super(DARTS, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
+
+        self.features = nasnet_dual_path_sequential(
+            return_two=False,
+            first_ordinals=2,
+            last_ordinals=1)
+        self.features.add_module("stem1_unit", Stem1Unit(
+            in_channels=in_channels,
+            out_channels=stem_blocks_channels))
+        in_channels = stem_blocks_channels
+        self.features.add_module("stem2_unit", stem2_unit(
+            in_channels=stem_blocks_channels,
+            out_channels=stem_blocks_channels))
+        prev_in_channels = in_channels
+        in_channels = stem_blocks_channels
+
+        for i, channels_per_stage in enumerate(channels):
+            stage = nasnet_dual_path_sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                reduction = (i != 0) and (j == 0)
+                prev_reduction = ((i == 0) and (j == 0)) or ((i != 0) and (j == 1))
+                genotype = reduce_genotype if reduction else normal_genotype
+                stage.add_module("unit{}".format(j + 1), DartsUnit(
+                    in_channels=in_channels,
+                    prev_in_channels=prev_in_channels,
+                    out_channels=out_channels,
+                    genotype=genotype,
+                    reduction=reduction,
+                    prev_reduction=prev_reduction))
+                prev_in_channels = in_channels
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
+
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
-            stride=1)
+            stride=1))
+
         self.output = nn.Linear(
             in_features=in_channels,
             out_features=num_classes)
 
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
     def forward(self, x):
-        x_prev = self.stem0(x)
-        x = self.stem1(x_prev)
-        for i, cell in enumerate(self.cells):
-            x_prev, x = x, cell(x_prev, x)
-        x = self.final_pool(x)
+        x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
-def oth_darts(num_classes=1000, pretrained='imagenet'):
+def get_darts(model_name=None,
+              pretrained=False,
+              root=os.path.join('~', '.torch', 'models'),
+              **kwargs):
+    """
+    Create DARTS model with specific parameters.
 
-    from collections import namedtuple
-    Genotype = namedtuple('Genotype', 'normal normal_concat reduce reduce_concat')
+    Parameters:
+    ----------
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    stem_blocks_channels = 48
+    layers = [4, 5, 5]
+    channels_per_layers = [192, 384, 768]
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = NetworkImageNet(
-        init_block_channels=48,
-        num_classes=num_classes,
-        layers=14,
-        genotype=Genotype(
-            normal=[
-                ('sep_conv_3x3', 0),
-                ('sep_conv_3x3', 1),
-                ('sep_conv_3x3', 0),
-                ('sep_conv_3x3', 1),
-                ('sep_conv_3x3', 1),
-                ('skip_connect', 0),
-                ('skip_connect', 0),
-                ('dil_conv_3x3', 2)],
-            normal_concat=[2, 3, 4, 5],
-            reduce=[
-                ('max_pool_3x3', 0),
-                ('max_pool_3x3', 1),
-                ('skip_connect', 2),
-                ('max_pool_3x3', 1),
-                ('max_pool_3x3', 0),
-                ('skip_connect', 2),
-                ('skip_connect', 2),
-                ('max_pool_3x3', 1)],
-            reduce_concat=[2, 3, 4, 5])
-    )
+    normal_genotype = [
+        ('sep_conv_3x3', 0),
+        ('sep_conv_3x3', 1),
+        ('sep_conv_3x3', 0),
+        ('sep_conv_3x3', 1),
+        ('sep_conv_3x3', 1),
+        ('skip_connect', 0),
+        ('skip_connect', 0),
+        ('dil_conv_3x3', 2)]
+    reduce_genotype = [
+        ('max_pool_3x3', 0),
+        ('max_pool_3x3', 1),
+        ('skip_connect', 2),
+        ('max_pool_3x3', 1),
+        ('max_pool_3x3', 0),
+        ('skip_connect', 2),
+        ('skip_connect', 2),
+        ('max_pool_3x3', 1)]
+
+    net = DARTS(
+        channels=channels,
+        stem_blocks_channels=stem_blocks_channels,
+        normal_genotype=normal_genotype,
+        reduce_genotype=reduce_genotype,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
     return net
 
 
-def load_model(net,
-               file_path,
-               ignore_extra=True):
+def darts(**kwargs):
     """
-  Load model state dictionary from a file.
+    DARTS model from 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 
-  Parameters
-  ----------
-  net : Module
-      Network in which weights are loaded.
-  file_path : str
-      Path to the file.
-  ignore_extra : bool, default True
-      Whether to silently ignore parameters from the file that are not present in this Module.
-  """
-    import torch
-
-    if ignore_extra:
-        pretrained_state = torch.load(file_path)
-        model_dict = net.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
-    else:
-        net.load_state_dict(torch.load(file_path))
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_darts(model_name="darts", **kwargs)
 
 
 def _test():
@@ -613,7 +714,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_darts,
+        darts,
     ]
 
     for model in models:
@@ -627,7 +728,7 @@ def _test():
         for param in net_params:
             weight_count += np.prod(param.size())
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_darts or weight_count == 4718752)
+        assert (model != darts or weight_count == 4718752)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

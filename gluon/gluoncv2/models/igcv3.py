@@ -25,7 +25,7 @@ class ReLU6(nn.HybridBlock):
 
 class ConvBlock(HybridBlock):
     """
-    Standard convolution block with Batch normalization and ReLU activation.
+    Standard convolution block with Batch normalization and ReLU6 activation.
 
     Parameters:
     ----------
@@ -451,10 +451,10 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != igcv3_w1 or weight_count == 3490688)
-        # assert (model != igcv3_w3d4 or weight_count == 2637084)
-        # assert (model != igcv3_wd2 or weight_count == 1984528)
-        # assert (model != igcv3_wd4 or weight_count == 1533020)
+        assert (model != igcv3_w1 or weight_count == 3491688)
+        assert (model != igcv3_w3d4 or weight_count == 2638084)
+        assert (model != igcv3_wd2 or weight_count == 1985528)
+        assert (model != igcv3_wd4 or weight_count == 1534020)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

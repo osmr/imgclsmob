@@ -227,6 +227,7 @@ def convert_mx2gl(dst_net,
         src_param_keys = [key.replace('-exp', '.conv1') for key in src_param_keys]
         src_param_keys = [key.replace('-depthwise', '.conv2') for key in src_param_keys]
         src_param_keys = [key.replace('-linear', '.conv3') for key in src_param_keys]
+        src_param_keys = [key.replace('-block', '.block') for key in src_param_keys]
 
         dst_param_keys = [key.replace('features.0.', 'features.A.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.6.', 'features.B.') for key in dst_param_keys]
@@ -251,11 +252,13 @@ def convert_mx2gl(dst_net,
         src_param_keys = [key.replace('.conv3', '-linear') for key in src_param_keys]
         src_param_keys = [key.replace('features.', 'seq-') for key in src_param_keys]
         src_param_keys = [key.replace('output.1.', 'fc_') for key in src_param_keys]
+        src_param_keys = [key.replace('.block', '-block') for key in src_param_keys]
 
         dst_param_keys = [key.replace('features.A.', 'features.0.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.B.', 'features.6.') for key in dst_param_keys]
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+        assert (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1])
         assert (dst_params[dst_key].shape == src_params[src_key].shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape)

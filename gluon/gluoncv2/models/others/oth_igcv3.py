@@ -136,8 +136,8 @@ def invresi_blocks(data, in_c, t, c, n, s, prefix):
         expansion_factor=t,
         prefix='%s-block0'%prefix
     )
-    print(in_c)
-    print(c)
+    # print(in_c)
+    # print(c)
     last_residual_block = first_block
     last_c = c
 
@@ -255,41 +255,58 @@ def get_symbol(num_classes=1000, multiplier=1.0):
     mnetv2_sym = mnetgen(class_num=num_classes, layer_out=None)
     return mnetv2_sym
 
-if __name__ == '__main__':
-    mnetgen = MNetV2Gen((224,224))
-    class_num=1000
+# if __name__ == '__main__':
+#     mnetgen = MNetV2Gen((224,224))
+#     class_num=1000
+#
+#     # classification network
+#     layer_out = None
+#     mnetv2_sym = mnetgen(class_num=class_num, layer_out=layer_out)
+#     net_plot = mx.viz.plot_network(
+#         symbol=mnetv2_sym,
+#         title='mobilenet-v2',
+#         shape={
+#             'data':(16,3,224,224),
+#             'softmax_label':(16,)
+#         }
+#     )
+#     # net_plot.view()
+#     # specific layer
+#     layer_out = 'seq-2-block2-shortcut'
+#     layer_sym = mnetgen(class_num=class_num, layer_out=layer_out)
+#     layer_plot = mx.viz.plot_network(
+#         symbol=layer_sym,
+#         title='layer_out',
+#         shape={
+#             'data':(16,3,224,224),
+#         }
+#     )
+#     # check whether bottle neck structure was right
+#     layer_plot.view()
+#     # specific layers
+#     layer_out = [
+#         'seq-1-block1-shortcut',
+#         'seq-2-block2-shortcut',
+#         'seq-3-block3-shortcut',
+#         'seq-4-block2-shortcut',
+#         'seq-5-block2-shortcut'
+#     ]
+#     layer_sym_ls = mnetgen(class_num=class_num, layer_out=layer_out)
+#     # no need to plot these layers any more, right? :)
 
-    # classification network 
-    layer_out = None
-    mnetv2_sym = mnetgen(class_num=class_num, layer_out=layer_out)
-    net_plot = mx.viz.plot_network(
-        symbol=mnetv2_sym,
-        title='mobilenet-v2',
-        shape={
-            'data':(16,3,224,224),
-            'softmax_label':(16,)
-        }
-    )
-    # net_plot.view()
-    # specific layer
-    layer_out = 'seq-2-block2-shortcut'
-    layer_sym = mnetgen(class_num=class_num, layer_out=layer_out)
-    layer_plot = mx.viz.plot_network(
-        symbol=layer_sym,
-        title='layer_out',
-        shape={
-            'data':(16,3,224,224),
-        }
-    )
-    # check whether bottle neck structure was right
-    layer_plot.view()
-    # specific layers
-    layer_out = [
-        'seq-1-block1-shortcut',
-        'seq-2-block2-shortcut',
-        'seq-3-block3-shortcut',
-        'seq-4-block2-shortcut',
-        'seq-5-block2-shortcut'
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    models = [
+        get_symbol,
     ]
-    layer_sym_ls = mnetgen(class_num=class_num, layer_out=layer_out)
-    # no need to plot these layers any more, right? :)
+
+    for model in models:
+
+        net = model()
+
+
+if __name__ == "__main__":
+    _test()

@@ -20,6 +20,7 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.igcv3 import *
 from .models.mnasnet import *
 from .models.darts import *
 from .models.xception import *
@@ -29,8 +30,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.igcv3 import *
 
 __all__ = ['get_model']
 
@@ -216,6 +215,11 @@ _models = {
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
 
+    'igcv3_w1': igcv3_w1,
+    'igcv3_w3d4': igcv3_w3d4,
+    'igcv3_wd2': igcv3_wd2,
+    'igcv3_wd4': igcv3_wd4,
+
     'mnasnet': mnasnet,
 
     'darts': darts,
@@ -230,11 +234,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'igcv3_w1': igcv3_w1,
-    'igcv3_w3d4': igcv3_w3d4,
-    'igcv3_wd2': igcv3_wd2,
-    'igcv3_wd4': igcv3_wd4,
 }
 
 

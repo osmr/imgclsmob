@@ -31,6 +31,7 @@ scripts for training/validating/converting models. All models are designed for u
 - MobileNet (['MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'](https://arxiv.org/abs/1704.04861))
 - FD-MobileNet (['FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'](https://arxiv.org/abs/1802.03750))
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
+- IGCV3 (['IGCV3: Interleaved Low-Rank Group Convolutions for Efficient Deep Neural Networks'](https://arxiv.org/abs/1806.00178))
 - MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
 - DARTS (['DARTS: Differentiable Architecture Search'](https://arxiv.org/abs/1806.09055))
 - Xception (['Xception: Deep Learning with Depthwise Separable Convolutions'](https://arxiv.org/abs/1610.02357))
@@ -277,6 +278,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.51 | 14.64 | 1,964,736 | 95.62M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_wd2-1464-02fe7ff2.params.log)) |
 | MobileNetV2 x0.75 | 30.82 | 11.26 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1126-152672f5.params.log)) |
 | MobileNetV2 x1.0 | 28.51 | 9.90 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-0990-4e1a3878.params.log)) |
+| IGCV3 | 28.82 | 9.87 | 3,491,688 | 323.81M | From [homles11/IGCV3] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.119/igcv3_w1-0987-468f49eb.params.log)) |
 | MnasNet | 31.32 | 11.44 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-c972fec0.params.log)) |
 | DARTS | 27.23 | 8.97 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-aafd6452.params.log)) |
 | Xception | 20.99 | 5.56 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0556-bd2c1684.params.log)) |
@@ -383,6 +385,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 36.54 | 15.19 | 1,964,736 | 95.62M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_wd2-1519-d0937a23.pth.log)) |
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
 | MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
+| IGCV3 | 28.45 | 9.75 | 3,491,688 | 323.81M | From [homles11/IGCV3] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.119/igcv3_w1-0975-4340af61.pth.log)) |
 | MnasNet | 31.58 | 11.74 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1174-e8ec017c.pth.log)) |
 | DARTS | 26.70 | 8.74 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0874-74f0c7b6.pth.log)) |
 | Xception | 20.97 | 5.49 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0549-e4f0232c.pth.log)) |
@@ -489,6 +492,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNetV2 x0.5 | 35.96 | 14.98 | 1,964,736 | 95.62M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_wd2-1498-4b767a98.npz.log)) |
 | MobileNetV2 x0.75 | 31.28 | 11.48 | 2,627,592 | 191.61M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w3d4-1148-a6f852ea.npz.log)) |
 | MobileNetV2 x1.0 | 28.87 | 10.05 | 3,504,960 | 320.19M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.31/mobilenetv2_w1-1005-3b6d1764.npz.log)) |
+| IGCV3 | 28.78 | 9.90 | 3,491,688 | 323.81M | From [homles11/IGCV3] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.119/igcv3_w1-0990-a5bf6b91.npz.log)) |
 | MnasNet | 31.27 | 11.44 | 4,308,816 | 310.75M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-688e523d.npz.log)) |
 | DARTS | 27.29 | 8.97 | 4,718,752 | 537.64M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-8986fe64.npz.log)) |
 | Xception | 21.04 | 5.47 | 22,855,952 | 8,385.86M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.115/xception-0547-7a5be958.npz.log)) |
@@ -654,3 +658,4 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 [szagoruyko/functional-zoo]: https://github.com/szagoruyko/functional-zoo
 [fyu/drn]: https://github.com/fyu/drn
 [quark0/darts]: https://github.com/quark0/darts
+[homles11/IGCV3]: https://github.com/homles11/IGCV3

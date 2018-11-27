@@ -69,7 +69,7 @@ def conv1x1_block(in_channels,
                   groups,
                   activate):
     """
-    1x1 version of the standard convolution block.
+    1x1 version of the standard convolution block with ReLU6 activation.
 
     Parameters:
     ----------
@@ -97,7 +97,7 @@ def dwconv3x3_block(in_channels,
                     stride,
                     activate):
     """
-    3x3 depthwise version of the standard convolution block.
+    3x3 depthwise version of the standard convolution block with ReLU6 activation.
 
     Parameters:
     ----------

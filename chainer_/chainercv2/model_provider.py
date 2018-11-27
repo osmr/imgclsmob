@@ -30,6 +30,8 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.igcv3 import *
+
 __all__ = ['get_model']
 
 
@@ -228,6 +230,11 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'igcv3_w1': igcv3_w1,
+    'igcv3_w3d4': igcv3_w3d4,
+    'igcv3_wd2': igcv3_wd2,
+    'igcv3_wd4': igcv3_wd4,
 }
 
 

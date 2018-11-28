@@ -363,7 +363,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         # senet52,
@@ -375,7 +375,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        # net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

@@ -298,7 +298,7 @@ def _test():
     import numpy as np
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         # darknet_ref,
@@ -310,7 +310,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        # net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:

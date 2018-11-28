@@ -81,7 +81,7 @@ class AirNeXtBottleneck(HybridBlock):
                     ratio=ratio,
                     in_size=in_size)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.use_air_block:
             att = self.air(x)
         x = self.conv1(x)
@@ -147,7 +147,7 @@ class AirNeXtUnit(HybridBlock):
                     activate=False)
             self.activ = nn.Activation('relu')
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -380,15 +380,6 @@ def airnext101_32x4d_r16(**kwargs):
         ratio=16,
         model_name="airnext101_32x4d_r16",
         **kwargs)
-
-
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
 
 
 def _test():

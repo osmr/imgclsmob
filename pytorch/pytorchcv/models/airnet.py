@@ -200,16 +200,16 @@ class AirBottleneck(nn.Module):
             out_channels=mid_channels,
             stride=stride,
             activate=True)
-        if self.use_air_block:
-            self.air = AirBlock(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                ratio=ratio)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             stride=1,
             activate=False)
+        if self.use_air_block:
+            self.air = AirBlock(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                ratio=ratio)
 
     def forward(self, x):
         if self.use_air_block:

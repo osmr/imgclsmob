@@ -134,7 +134,6 @@ class AirBlock(nn.Module):
         super(AirBlock, self).__init__()
         assert (out_channels % ratio == 0)
         mid_channels = out_channels // ratio
-        self.ratio = ratio
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
@@ -163,7 +162,7 @@ class AirBlock(nn.Module):
         x = self.conv2(x)
         x = F.interpolate(
             input=x,
-            scale_factor=self.ratio,
+            scale_factor=2,
             mode='bilinear',
             align_corners=True)
         x = self.conv3(x)

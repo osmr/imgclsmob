@@ -71,7 +71,8 @@ def prepare_model(model_name,
                   use_cuda,
                   use_data_parallel=True,
                   ignore_extra=False,
-                  remap_to_cpu=False):
+                  remap_to_cpu=False,
+                  remove_module=False):
     kwargs = {'pretrained': use_pretrained}
 
     net = get_model(model_name, **kwargs)
@@ -91,7 +92,12 @@ def prepare_model(model_name,
             pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
             net.load_state_dict(pretrained_state)
         else:
-            net.load_state_dict(checkpoint)
+            if remove_module:
+                net_tmp = torch.nn.DataParallel(net)
+                net_tmp.load_state_dict(checkpoint)
+                net.load_state_dict(net_tmp.module.state_dict())
+            else:
+                net.load_state_dict(checkpoint)
 
     if use_data_parallel and use_cuda:
         net = torch.nn.DataParallel(net)

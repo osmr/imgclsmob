@@ -32,7 +32,9 @@ from .models.nasnet import *
 from .models.pnasnet import *
 
 from .models.airnet import *
+from .models.airnext import *
 from .models.others.oth_air import *
+from .models.others.oth_airx import *
 
 __all__ = ['get_model']
 
@@ -242,9 +244,17 @@ _models = {
     'airnet50_1x64d_r16': airnet50_1x64d_r16,
     'airnet101_1x64d_r2': airnet101_1x64d_r2,
 
+    'airnext50_32x4d_r2': airnext50_32x4d_r2,
+    'airnext101_32x4d_r2': airnext101_32x4d_r2,
+    'airnext101_32x4d_r16': airnext101_32x4d_r16,
+
     'oth_air50_1x64d': oth_air50_1x64d,
     'oth_air101_1x64d': oth_air101_1x64d,
     'oth_air50_1x64d_r16': oth_air50_1x64d_r16,
+
+    'oth_airx50_32x4d': oth_airx50_32x4d,
+    'oth_airx101_32x4d_r16': oth_airx101_32x4d_r16,
+    'oth_airx101_32x4d_r2': oth_airx101_32x4d_r2,
 }
 
 

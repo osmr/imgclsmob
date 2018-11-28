@@ -10,7 +10,7 @@ import torch.nn.functional as F
 from torch.nn import init
 import torch
 
-__all__ = ['airx50_32x4d', 'airx101_32x4d_r16', 'airx101_32x4d_r2']
+__all__ = ['oth_airx50_32x4d', 'oth_airx101_32x4d_r16', 'oth_airx101_32x4d_r2']
 
 
 class AIRXBottleneck(nn.Module):
@@ -195,16 +195,59 @@ class AIRX(nn.Module):
         return x
 
 
-def airx50_32x4d():
+def oth_airx50_32x4d(pretrained=False, **kwargs):
     model = AIRX(baseWidth=4, cardinality=32, head7x7=False, layers=(3, 4, 6, 3), num_classes=1000)
     return model
 
 
-def airx101_32x4d_r16():
+def oth_airx101_32x4d_r16(pretrained=False, **kwargs):
     model = AIRX(baseWidth=4, cardinality=32, head7x7=False, ratio=16, layers=(3, 4, 23, 3), num_classes=1000)
     return model
 
 
-def airx101_32x4d_r2():
+def oth_airx101_32x4d_r2(pretrained=False, **kwargs):
     model = AIRX(baseWidth=4, cardinality=32, head7x7=False, layers=(3, 4, 23, 3), num_classes=1000)
     return model
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import numpy as np
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_airx50_32x4d,
+        oth_airx101_32x4d_r16,
+        oth_airx101_32x4d_r2,
+    ]
+
+    for model in models:
+
+        net = model()
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_airx50_32x4d or weight_count == 27604296)
+        assert (model != oth_airx101_32x4d_r16 or weight_count == 45456456)
+        assert (model != oth_airx101_32x4d_r2 or weight_count == 54099272)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

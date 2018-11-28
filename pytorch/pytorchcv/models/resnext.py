@@ -151,7 +151,7 @@ class ResNeXtBottleneck(nn.Module):
                  bottleneck_width):
         super(ResNeXtBottleneck, self).__init__()
         mid_channels = out_channels // 4
-        D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
         group_width = cardinality * D
 
         self.conv1 = resnext_conv1x1(
@@ -506,7 +506,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         # resnext50_32x4d,
@@ -521,12 +521,13 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        net.train()
+        # net.train()
+        net.eval()
         net_params = filter(lambda p: p.requires_grad, net.parameters())
         weight_count = 0
         for param in net_params:
             weight_count += np.prod(param.size())
-        # print("m={}, {}".format(model.__name__, weight_count))
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)

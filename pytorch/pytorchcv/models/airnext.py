@@ -1,189 +1,19 @@
 """
-    AirNet, implemented in PyTorch.
+    AirNeXt, implemented in PyTorch.
     Original paper: 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 """
 
-__all__ = ['AirNet', 'airnet50_1x64d_r2', 'airnet50_1x64d_r16', 'airnet101_1x64d_r2']
+__all__ = ['AirNeXt', 'airnext50_32x4d_r2', 'airnext101_32x4d_r2', 'airnext101_32x4d_r16']
 
 import os
+import math
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.init as init
+from .airnet import conv1x1_block, conv3x3_block, AirBlock, AirInitBlock
 
 
-class ConvBlock(nn.Module):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups,
-                 activate):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride,
-                  activate):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        groups=1,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride,
-                  groups=1,
-                  activate=True):
-    """
-    Depthwise version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        groups=groups,
-        activate=activate)
-
-
-class AirBlock(nn.Module):
-    """
-    AirNet attention block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int, default 1
-        Number of groups.
-    ratio: int, default 2
-        Air compression ratio.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 groups=1,
-                 ratio=2):
-        super(AirBlock, self).__init__()
-        assert (out_channels % ratio == 0)
-        mid_channels = out_channels // ratio
-
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-        self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=1,
-            groups=groups,
-            activate=True)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=False)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.pool(x)
-        x = self.conv2(x)
-        x = F.interpolate(
-            input=x,
-            scale_factor=2,
-            mode='bilinear',
-            align_corners=True)
-        x = self.conv3(x)
-        x = self.sigmoid(x)
-        return x
-
-
-class AirBottleneck(nn.Module):
+class AirNeXtBottleneck(nn.Module):
     """
     AirNet bottleneck block for residual path in ResNet unit.
 
@@ -195,6 +25,10 @@ class AirBottleneck(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     ratio: int
         Air compression ratio.
     """
@@ -202,30 +36,36 @@ class AirBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
+                 cardinality,
+                 bottleneck_width,
                  ratio):
-        super(AirBottleneck, self).__init__()
+        super(AirNeXtBottleneck, self).__init__()
         mid_channels = out_channels // 4
+        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
+        group_width = cardinality * D
         self.use_air_block = (stride == 1 and mid_channels < 512)
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels,
+            out_channels=group_width,
             stride=1,
             activate=True)
         self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
+            in_channels=group_width,
+            out_channels=group_width,
             stride=stride,
+            groups=cardinality,
             activate=True)
         self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
+            in_channels=group_width,
             out_channels=out_channels,
             stride=1,
             activate=False)
         if self.use_air_block:
             self.air = AirBlock(
                 in_channels=in_channels,
-                out_channels=mid_channels,
+                out_channels=group_width,
+                groups=(cardinality // ratio),
                 ratio=ratio)
 
     def forward(self, x):
@@ -239,7 +79,7 @@ class AirBottleneck(nn.Module):
         return x
 
 
-class AirUnit(nn.Module):
+class AirNeXtUnit(nn.Module):
     """
     AirNet unit with residual connection.
 
@@ -251,6 +91,10 @@ class AirUnit(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     ratio: int
         Air compression ratio.
     """
@@ -258,14 +102,18 @@ class AirUnit(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
+                 cardinality,
+                 bottleneck_width,
                  ratio):
-        super(AirUnit, self).__init__()
+        super(AirNeXtUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        self.body = AirBottleneck(
+        self.body = AirNeXtBottleneck(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride,
+            cardinality=cardinality,
+            bottleneck_width=bottleneck_width,
             ratio=ratio)
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
@@ -286,52 +134,7 @@ class AirUnit(nn.Module):
         return x
 
 
-class AirInitBlock(nn.Module):
-    """
-    AirNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(AirInitBlock, self).__init__()
-        mid_channels = out_channels // 2
-
-        self.conv1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=2,
-            activate=True)
-        self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
-        self.conv3 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=True)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        x = self.pool(x)
-        return x
-
-
-class AirNet(nn.Module):
+class AirNeXt(nn.Module):
     """
     AirNet model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
@@ -342,6 +145,10 @@ class AirNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     ratio: int
         Air compression ratio.
     in_channels : int, default 3
@@ -354,11 +161,13 @@ class AirNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 cardinality,
+                 bottleneck_width,
                  ratio,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(AirNet, self).__init__()
+        super(AirNeXt, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -371,10 +180,12 @@ class AirNet(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), AirUnit(
+                stage.add_module("unit{}".format(j + 1), AirNeXtUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
+                    cardinality=cardinality,
+                    bottleneck_width=bottleneck_width,
                     ratio=ratio))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
@@ -402,13 +213,15 @@ class AirNet(nn.Module):
         return x
 
 
-def get_airnet(blocks,
-               base_channels,
-               ratio,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
-               **kwargs):
+def get_airnext(blocks,
+                cardinality,
+                bottleneck_width,
+                base_channels,
+                ratio,
+                model_name=None,
+                pretrained=False,
+                root=os.path.join('~', '.torch', 'models'),
+                **kwargs):
     """
     Create AirNet model with specific parameters.
 
@@ -416,6 +229,10 @@ def get_airnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     base_channels: int
         Base number of channels.
     ratio: int
@@ -441,9 +258,11 @@ def get_airnet(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = AirNet(
+    net = AirNeXt(
         channels=channels,
         init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
         ratio=ratio,
         **kwargs)
 
@@ -459,9 +278,9 @@ def get_airnet(blocks,
     return net
 
 
-def airnet50_1x64d_r2(**kwargs):
+def airnext50_32x4d_r2(**kwargs):
     """
-    AirNet50-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
+    AirNeXt50-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
     Parameters:
@@ -471,12 +290,19 @@ def airnet50_1x64d_r2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_airnet(blocks=50, base_channels=64, ratio=2, model_name="airnet50_1x64d_r2", **kwargs)
+    return get_airnext(
+        blocks=50,
+        cardinality=32,
+        bottleneck_width=4,
+        base_channels=64,
+        ratio=2,
+        model_name="airnext50_32x4d_r2",
+        **kwargs)
 
 
-def airnet50_1x64d_r16(**kwargs):
+def airnext101_32x4d_r2(**kwargs):
     """
-    AirNet50-1x64d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
+    AirNeXt101-32x4d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
     Parameters:
@@ -486,12 +312,19 @@ def airnet50_1x64d_r16(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_airnet(blocks=50, base_channels=64, ratio=16, model_name="airnet50_1x64d_r16", **kwargs)
+    return get_airnext(
+        blocks=101,
+        cardinality=32,
+        bottleneck_width=4,
+        base_channels=64,
+        ratio=2,
+        model_name="airnext101_32x4d_r2",
+        **kwargs)
 
 
-def airnet101_1x64d_r2(**kwargs):
+def airnext101_32x4d_r16(**kwargs):
     """
-    AirNet101-1x64d (r=2) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
+    AirNeXt101-32x4d (r=16) model from 'Attention Inspiring Receptive-Fields Network for Learning Invariant
     Representations,' https://ieeexplore.ieee.org/document/8510896.
 
     Parameters:
@@ -501,7 +334,14 @@ def airnet101_1x64d_r2(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_airnet(blocks=101, base_channels=64, ratio=2, model_name="airnet101_1x64d_r2", **kwargs)
+    return get_airnext(
+        blocks=101,
+        cardinality=32,
+        bottleneck_width=4,
+        base_channels=64,
+        ratio=16,
+        model_name="airnext101_32x4d_r16",
+        **kwargs)
 
 
 def _calc_width(net):
@@ -520,9 +360,9 @@ def _test():
     pretrained = False
 
     models = [
-        airnet50_1x64d_r2,
-        airnet50_1x64d_r16,
-        airnet101_1x64d_r2,
+        airnext50_32x4d_r2,
+        airnext101_32x4d_r2,
+        airnext101_32x4d_r16,
     ]
 
     for model in models:
@@ -533,9 +373,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != airnet50_1x64d_r2 or weight_count == 27425864)
-        assert (model != airnet50_1x64d_r16 or weight_count == 25714952)
-        assert (model != airnet101_1x64d_r2 or weight_count == 51727432)
+        assert (model != airnext50_32x4d_r2 or weight_count == 27604296)
+        assert (model != airnext101_32x4d_r2 or weight_count == 54099272)
+        assert (model != airnext101_32x4d_r16 or weight_count == 45456456)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

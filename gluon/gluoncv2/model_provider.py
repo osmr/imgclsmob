@@ -31,6 +31,8 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.airnet import *
+
 __all__ = ['get_model']
 
 
@@ -234,6 +236,10 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'airnet50_1x64d_r2': airnet50_1x64d_r2,
+    'airnet50_1x64d_r16': airnet50_1x64d_r16,
+    'airnet101_1x64d_r2': airnet101_1x64d_r2,
 }
 
 

@@ -590,8 +590,16 @@ def inceptionresnetv2(**kwargs):
     return get_inceptionresnetv2(model_name="inceptionresnetv2", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
     import torch
     from torch.autograd import Variable
 
@@ -607,10 +615,7 @@ def _test():
 
         # net.train()
         net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionresnetv2 or weight_count == 55843464)
 

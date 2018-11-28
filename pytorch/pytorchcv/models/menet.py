@@ -499,8 +499,16 @@ def menet456_24x1_g3(**kwargs):
     return get_menet(first_stage_channels=456, side_channels=24, groups=3, model_name="menet456_24x1_g3", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
     import torch
     from torch.autograd import Variable
 
@@ -523,10 +531,8 @@ def _test():
 
         # net.train()
         net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != menet108_8x1_g3 or weight_count == 654516)
         assert (model != menet128_8x1_g4 or weight_count == 750796)
         assert (model != menet160_8x1_g8 or weight_count == 850120)

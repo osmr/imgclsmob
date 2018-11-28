@@ -294,8 +294,16 @@ def darknet19(**kwargs):
     return get_darknet(version="19", model_name="darknet19", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
     from torch.autograd import Variable
 
     pretrained = False
@@ -312,10 +320,8 @@ def _test():
 
         # net.train()
         net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != darknet_ref or weight_count == 7319416)
         assert (model != darknet_tiny or weight_count == 1042104)
         assert (model != darknet19 or weight_count == 20842376)

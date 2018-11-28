@@ -358,8 +358,16 @@ def senet154(**kwargs):
     return get_senet(blocks=154, model_name="senet154", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
     import torch
     from torch.autograd import Variable
 
@@ -377,11 +385,8 @@ def _test():
 
         # net.train()
         net.eval()
-        net_params = filter(lambda p: p.requires_grad, net.parameters())
-        weight_count = 0
-        for param in net_params:
-            weight_count += np.prod(param.size())
-        # print("m={}, {}".format(model.__name__, weight_count))
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != senet52 or weight_count == 44659416)  # 22623272
         assert (model != senet103 or weight_count == 60963096)  # 38908456
         assert (model != senet154 or weight_count == 115088984)  # 93018024

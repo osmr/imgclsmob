@@ -4,6 +4,8 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.senet import *
+from .models.airnet import *
+from .models.airnext import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
@@ -30,11 +32,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.airnet import *
-from .models.airnext import *
-from .models.others.oth_air import *
-from .models.others.oth_airx import *
 
 __all__ = ['get_model']
 
@@ -125,6 +122,14 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'airnet50_1x64d_r2': airnet50_1x64d_r2,
+    'airnet50_1x64d_r16': airnet50_1x64d_r16,
+    'airnet101_1x64d_r2': airnet101_1x64d_r2,
+
+    'airnext50_32x4d_r2': airnext50_32x4d_r2,
+    'airnext101_32x4d_r2': airnext101_32x4d_r2,
+    'airnext101_32x4d_r16': airnext101_32x4d_r16,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 
@@ -239,22 +244,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'airnet50_1x64d_r2': airnet50_1x64d_r2,
-    'airnet50_1x64d_r16': airnet50_1x64d_r16,
-    'airnet101_1x64d_r2': airnet101_1x64d_r2,
-
-    'airnext50_32x4d_r2': airnext50_32x4d_r2,
-    'airnext101_32x4d_r2': airnext101_32x4d_r2,
-    'airnext101_32x4d_r16': airnext101_32x4d_r16,
-
-    'oth_air50_1x64d': oth_air50_1x64d,
-    'oth_air101_1x64d': oth_air101_1x64d,
-    'oth_air50_1x64d_r16': oth_air50_1x64d_r16,
-
-    'oth_airx50_32x4d': oth_airx50_32x4d,
-    'oth_airx101_32x4d_r16': oth_airx101_32x4d_r16,
-    'oth_airx101_32x4d_r2': oth_airx101_32x4d_r2,
 }
 
 

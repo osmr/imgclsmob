@@ -185,7 +185,7 @@ class AirBlock(nn.Module):
 
 class AirBottleneck(nn.Module):
     """
-    AirNet bottleneck block for residual path in ResNet unit.
+    AirNet bottleneck block for residual path in AirNet unit.
 
     Parameters:
     ----------
@@ -433,7 +433,7 @@ def get_airnet(blocks,
     elif blocks == 101:
         layers = [3, 4, 23, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported AirNet with number of blocks: {}".format(blocks))
 
     bottleneck_expansion = 4
     init_block_channels = base_channels

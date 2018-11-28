@@ -250,7 +250,7 @@ def get_airnext(blocks,
     elif blocks == 101:
         layers = [3, 4, 23, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported AirNeXt with number of blocks: {}".format(blocks))
 
     bottleneck_expansion = 4
     init_block_channels = base_channels

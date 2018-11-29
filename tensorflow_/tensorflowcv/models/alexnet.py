@@ -1,16 +1,14 @@
 """
-    AlexNet, implemented in Keras.
+    AlexNet, implemented in TensorFlow.
     Original paper: 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 """
 
-__all__ = ['alexnet_model', 'alexnet']
+__all__ = ['AlexNet', 'alexnet']
 
 import os
-from keras import backend as K
-from keras import layers as nn
-from keras.models import Model
-from .common import conv2d
+import tensorflow as tf
+from .common import conv2d, maxpool2d
 
 
 def alex_conv(x,
@@ -25,8 +23,8 @@ def alex_conv(x,
 
     Parameters:
     ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
+    x : Tensor
+        Input tensor.
     in_channels : int
         Number of input channels.
     out_channels : int
@@ -42,8 +40,8 @@ def alex_conv(x,
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    Tensor
+        Resulted tensor.
     """
     x = conv2d(
         x=x,
@@ -54,66 +52,75 @@ def alex_conv(x,
         padding=padding,
         use_bias=True,
         name=name + "/conv")
-    x = nn.Activation("relu", name=name + "/activ")(x)
+    x = tf.nn.relu(x, name=name + "/activ")
     return x
 
 
 def alex_dense(x,
                in_channels,
                out_channels,
+               training,
                name="alex_dense"):
     """
     AlexNet specific dense block.
 
     Parameters:
     ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
+    x : Tensor
+        Input tensor.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
+    training : bool, or a TensorFlow boolean scalar tensor
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'alex_dense'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    Tensor
+        Resulted tensor.
     """
-    x = nn.Dense(
+    assert (in_channels > 0)
+    x = tf.layers.dense(
+        inputs=x,
         units=out_channels,
-        input_dim=in_channels,
-        name=name + "/fc")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    x = nn.Dropout(
+        name=name + "/fc")
+    x = tf.nn.relu(x, name=name + "/activ")
+    x = tf.layers.dropout(
+        inputs=x,
         rate=0.5,
-        name=name + "/dropout")(x)
+        training=training,
+        name=name + "/dropout")
     return x
 
 
 def alex_output_block(x,
                       in_channels,
                       classes,
+                      training,
                       name="alex_output_block"):
     """
     AlexNet specific output block.
 
     Parameters:
     ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
+    x : Tensor
+        Input tensor.
     in_channels : int
         Number of input channels.
     classes : int
         Number of classification classes.
+    training : bool, or a TensorFlow boolean scalar tensor
+      Whether to return the output in training mode or in inference mode.
     name : str, default 'alex_output_block'
         Block name.
 
     Returns
     -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
+    Tensor
+        Resulted tensor.
     """
     mid_channels = 4096
 
@@ -121,26 +128,22 @@ def alex_output_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
+        training=training,
         name=name + "/fc1")
     x = alex_dense(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
+        training=training,
         name=name + "/fc2")
-    x = nn.Dense(
+    x = tf.layers.dense(
+        inputs=x,
         units=classes,
-        input_dim=mid_channels,
-        name=name + "/fc3")(x)
+        name=name + "/fc3")
     return x
 
 
-def alexnet_model(channels,
-                  kernel_sizes,
-                  strides,
-                  paddings,
-                  in_channels=3,
-                  in_size=(224, 224),
-                  classes=1000):
+class AlexNet(object):
     """
     AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
@@ -162,43 +165,75 @@ def alexnet_model(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
-    input = nn.Input(shape=input_shape)
+    def __init__(self,
+                 channels,
+                 kernel_sizes,
+                 strides,
+                 paddings,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 classes=1000,
+                 **kwargs):
+        super(AlexNet, self).__init__(**kwargs)
+        self.channels = channels
+        self.kernel_sizes = kernel_sizes
+        self.strides = strides
+        self.paddings = paddings
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
 
-    x = input
-    for i, channels_per_stage in enumerate(channels):
-        for j, out_channels in enumerate(channels_per_stage):
-            x = alex_conv(
+    def __call__(self,
+                 x,
+                 training=False):
+        """
+        Build a model graph.
+
+        Parameters:
+        ----------
+        x : Tensor
+            Input tensor.
+        training : bool, or a TensorFlow boolean scalar tensor, default False
+          Whether to return the output in training mode or in inference mode.
+
+        Returns
+        -------
+        Tensor
+            Resulted tensor.
+        """
+        in_channels = self.in_channels
+        for i, channels_per_stage in enumerate(self.channels):
+            for j, out_channels in enumerate(channels_per_stage):
+                x = alex_conv(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    kernel_size=self.kernel_sizes[i][j],
+                    strides=self.strides[i][j],
+                    padding=self.paddings[i][j],
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+                in_channels = out_channels
+            x = maxpool2d(
                 x=x,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_sizes[i][j],
-                strides=strides[i][j],
-                padding=paddings[i][j],
-                name="features/stage{}/unit{}".format(i + 1, j + 1))
-            in_channels = out_channels
-        x = nn.MaxPool2D(
-            pool_size=3,
-            strides=2,
-            padding='valid',
-            name="features/stage{}/pool".format(i + 1))(x)
+                pool_size=3,
+                strides=2,
+                padding=0,
+                name="features/stage{}/pool".format(i + 1))
 
-    x = nn.Flatten()(x)
-    x = alex_output_block(
-        x=x,
-        in_channels=(in_channels * 6 * 6),
-        classes=classes,
-        name="output")
+        x = tf.layers.flatten(x)
+        x = alex_output_block(
+            x=x,
+            in_channels=(in_channels * 6 * 6),
+            classes=self.classes,
+            training=training,
+            name="output")
 
-    model = Model(inputs=input, outputs=x)
-    model.in_size = in_size
-    model.classes = classes
-    return model
+        return x
 
 
 def get_alexnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.keras', 'models'),
+                root=os.path.join('~', '.tensorflow', 'models'),
                 **kwargs):
     """
     Create AlexNet model with specific parameters.
@@ -209,7 +244,7 @@ def get_alexnet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.keras/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     channels = [[64], [192], [384, 256, 256]]
@@ -217,7 +252,7 @@ def get_alexnet(model_name=None,
     strides = [[4], [1], [1, 1, 1]]
     paddings = [[2], [2], [1, 1, 1]]
 
-    net = alexnet_model(
+    net = AlexNet(
         channels=channels,
         kernel_sizes=kernel_sizes,
         strides=strides,
@@ -227,11 +262,13 @@ def get_alexnet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_weights(
-            filepath=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root))
+        from .model_store import download_state_dict
+        net.state_dict, net.file_path = download_state_dict(
+            model_name=model_name,
+            local_model_store_dir_path=root)
+    else:
+        net.state_dict = None
+        net.file_path = None
 
     return net
 
@@ -245,7 +282,7 @@ def alexnet(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.keras/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_alexnet(model_name="alexnet", **kwargs)
@@ -253,7 +290,7 @@ def alexnet(**kwargs):
 
 def _test():
     import numpy as np
-    import keras
+    from .model_store import init_variables_from_state_dict
 
     pretrained = False
 
@@ -264,14 +301,25 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-        # net.summary()
-        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
+        x = tf.placeholder(
+            dtype=tf.float32,
+            shape=(None, 3, 224, 224),
+            name='xx')
+        y_net = net(x)
+
+        weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != alexnet or weight_count == 61100840)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
-        y = net.predict(x)
-        assert (y.shape == (1, 1000))
+        with tf.Session() as sess:
+            if pretrained:
+                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
+            else:
+                sess.run(tf.global_variables_initializer())
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
+            assert (y.shape == (1, 1000))
+        tf.reset_default_graph()
 
 
 if __name__ == "__main__":

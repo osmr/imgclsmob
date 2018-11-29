@@ -1,3 +1,4 @@
+from .models.alexnet import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -18,6 +19,8 @@ __all__ = ['get_model', 'init_variables_from_state_dict']
 
 
 _models = {
+    'alexnet': alexnet,
+
     'resnet10': resnet10,
     'resnet12': resnet12,
     'resnet14': resnet14,

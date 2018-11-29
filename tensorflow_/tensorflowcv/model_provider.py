@@ -1,4 +1,5 @@
 from .models.alexnet import *
+from .models.vgg import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -20,6 +21,19 @@ __all__ = ['get_model', 'init_variables_from_state_dict']
 
 _models = {
     'alexnet': alexnet,
+
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
+    'bn_vgg11b': bn_vgg11b,
+    'bn_vgg13b': bn_vgg13b,
+    'bn_vgg16b': bn_vgg16b,
+    'bn_vgg19b': bn_vgg19b,
 
     'resnet10': resnet10,
     'resnet12': resnet12,

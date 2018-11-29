@@ -229,7 +229,7 @@ def vgg(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    x = nn.Flatten()(x)
+    x = nn.Reshape((-1,))(x)
     x = vgg_output_block(
         x=x,
         in_channels=(in_channels * 7 * 7),

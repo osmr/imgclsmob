@@ -183,8 +183,6 @@ def alexnet_model(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    # channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
-    # x = nn.Flatten()(x)
     x = nn.Reshape((-1,))(x)
     x = alex_output_block(
         x=x,

@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d
+from common import conv2d
 
 
 def alex_conv(x,
@@ -183,7 +183,9 @@ def alexnet_model(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    x = nn.Flatten()(x)
+    # channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+    # x = nn.Flatten()(x)
+    x = nn.Reshape((-1,))(x)
     x = alex_output_block(
         x=x,
         in_channels=(in_channels * 6 * 6),

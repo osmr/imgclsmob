@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from common import conv2d
+from .common import conv2d
 
 
 def alex_conv(x,

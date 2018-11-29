@@ -220,11 +220,11 @@ class AlexNet(object):
                 padding=0,
                 name="features/stage{}/pool".format(i + 1))
 
-        # x = tf.layers.flatten(x)
-        x = tf.reshape(x, (None, -1))
+        in_channels = in_channels * 6 * 6
+        x = tf.reshape(x, [-1, in_channels])
         x = alex_output_block(
             x=x,
-            in_channels=(in_channels * 6 * 6),
+            in_channels=in_channels,
             classes=self.classes,
             training=training,
             name="output")

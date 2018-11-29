@@ -276,10 +276,11 @@ class VGG(object):
                 padding=0,
                 name="features/stage{}/pool".format(i + 1))
 
-        x = tf.layers.flatten(x)
+        in_channels = in_channels * 7 * 7
+        x = tf.reshape(x, [-1, in_channels])
         x = vgg_output_block(
             x=x,
-            in_channels=(in_channels * 7 * 7),
+            in_channels=in_channels,
             classes=self.classes,
             training=training,
             name="output")

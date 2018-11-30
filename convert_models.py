@@ -534,6 +534,15 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
+    if dst_model == "bam_resnet50":
+        src_bams = list(filter(re.compile("^bam").search, src_param_keys))
+        src_param_keys = [key for key in src_param_keys if key not in src_bams]
+        src_param_keys = src_param_keys + src_bams
+
+        dst_bams = list(filter(re.compile("^features.stage\d.unit1.bam.").search, dst_param_keys))
+        dst_param_keys = [key for key in dst_param_keys if key not in dst_bams]
+        dst_param_keys = dst_param_keys + dst_bams
+
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if (src_model == "oth_shufflenetv2_wd2" and dst_model == "shufflenetv2_wd2") and \
                 (src_key == "network.8.weight"):

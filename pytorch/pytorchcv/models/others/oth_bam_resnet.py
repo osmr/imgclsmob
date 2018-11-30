@@ -184,7 +184,7 @@ class ResNet(nn.Module):
 def ResidualNet(network_type, depth, num_classes, att_type):
 
     assert network_type in ["ImageNet", "CIFAR10", "CIFAR100"], "network type should be ImageNet or CIFAR10 / CIFAR100"
-    assert depth in [18, 34, 50, 101], 'network depth should be 18, 34, 50 or 101'
+    assert depth in [18, 34, 50, 101, 152], 'network depth should be 18, 34, 50 or 101'
 
     if depth == 18:
         model = ResNet(BasicBlock, [2, 2, 2, 2], network_type, num_classes, att_type)
@@ -197,6 +197,9 @@ def ResidualNet(network_type, depth, num_classes, att_type):
 
     elif depth == 101:
         model = ResNet(Bottleneck, [3, 4, 23, 3], network_type, num_classes, att_type)
+
+    elif depth == 152:
+        model = ResNet(Bottleneck, [3, 8, 36, 3], network_type, num_classes, att_type)
 
     return model
 
@@ -260,7 +263,7 @@ def _test():
 
     models = [
         oth_bam_resnet50,
-        oth_cbam_resnet50,
+        # oth_cbam_resnet50,
     ]
 
     for model in models:

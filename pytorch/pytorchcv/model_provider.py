@@ -34,6 +34,7 @@ from .models.nasnet import *
 from .models.pnasnet import *
 
 
+from .models.bamresnet import *
 from .models.others.oth_bam_resnet import *
 
 __all__ = ['get_model']
@@ -247,6 +248,12 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'bam_resnet18': bam_resnet18,
+    'bam_resnet34': bam_resnet34,
+    'bam_resnet50': bam_resnet50,
+    'bam_resnet101': bam_resnet101,
+    'bam_resnet152': bam_resnet152,
 
     'oth_bam_resnet50': oth_bam_resnet50,
     'oth_cbam_resnet50': oth_cbam_resnet50,

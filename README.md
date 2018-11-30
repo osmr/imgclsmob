@@ -523,6 +523,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | VGG-13 | 31.06 | 11.12 | 133,047,848 | 11,326.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg13-1112-90b447ec.h5.log)) |
 | VGG-16 | 26.78 | 8.69 | 138,357,544 | 15,489.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg16-0869-13d19be6.h5.log)) |
 | VGG-19 | 25.87 | 8.23 | 143,667,240 | 19,653.05M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg19-0823-cab851b8.h5.log)) |
+| BN-VGG-11b | 30.34 | 10.57 | 132,868,840 | 7,622.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg11b-1057-8b6a294a.h5.log)) |
+| BN-VGG-13b | 29.48 | 10.16 | 133,053,736 | 11,326.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg13b-1016-b26cafd3.h5.log)) |
+| BN-VGG-16b | 26.88 | 8.65 | 138,365,992 | 15,489.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg16b-0865-2272fdd1.h5.log)) |
+| BN-VGG-19b | 25.65 | 8.14 | 143,678,248 | 19,653.05M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg19b-0814-852e2ca2.h5.log)) |
 | ResNet-10 | 37.09 | 15.54 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet10-1554-294a0786.h5.log)) |
 | ResNet-12 | 35.86 | 14.45 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet12-1445-285da75b.h5.log)) |
 | ResNet-14 | 32.85 | 12.42 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet14-1242-e2ffca6e.h5.log)) |
@@ -597,6 +601,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | VGG-13 | 31.03 | 11.15 | 133,047,848 | 11,326.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg13-1115-f01687c1.tf.npz.log)) |
 | VGG-16 | 26.77 | 8.68 | 138,357,544 | 15,489.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg16-0868-f6cadf2c.tf.npz.log)) |
 | VGG-19 | 25.93 | 8.23 | 143,667,240 | 19,653.05M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg19-0823-99580f95.tf.npz.log)) |
+| BN-VGG-11b | 30.34 | 10.58 | 132,868,840 | 7,622.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg11b-1058-44558265.tf.npz.log)) |
+| BN-VGG-13b | 29.47 | 10.15 | 133,053,736 | 11,326.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg13b-1015-999e47a6.tf.npz.log)) |
+| BN-VGG-16b | 26.83 | 8.66 | 138,365,992 | 15,489.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg16b-0866-1f8251aa.tf.npz.log)) |
+| BN-VGG-19b | 25.62 | 8.17 | 143,678,248 | 19,653.05M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg19b-0817-784e4c39.tf.npz.log)) |
 | ResNet-10 | 37.11 | 15.52 | 5,418,792 | 892.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet10-1552-e2c11848.tf.npz.log)) |
 | ResNet-12 | 35.82 | 14.50 | 5,492,776 | 1,124.23M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet12-1450-8865f58b.tf.npz.log)) |
 | ResNet-14 | 32.83 | 12.45 | 5,788,200 | 1,355.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet14-1245-8596c8f1.tf.npz.log)) |

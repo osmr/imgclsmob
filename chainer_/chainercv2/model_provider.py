@@ -6,6 +6,7 @@ from .models.resnext import *
 from .models.senet import *
 from .models.airnet import *
 from .models.airnext import *
+from .models.bamresnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
@@ -130,6 +131,12 @@ _models = {
     'airnext50_32x4d_r2': airnext50_32x4d_r2,
     'airnext101_32x4d_r2': airnext101_32x4d_r2,
     'airnext101_32x4d_r16': airnext101_32x4d_r16,
+
+    'bam_resnet18': bam_resnet18,
+    'bam_resnet34': bam_resnet34,
+    'bam_resnet50': bam_resnet50,
+    'bam_resnet101': bam_resnet101,
+    'bam_resnet152': bam_resnet152,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 

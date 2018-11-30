@@ -6,6 +6,7 @@ from .models.resnext import *
 from .models.senet import *
 from .models.airnet import *
 from .models.airnext import *
+from .models.bamresnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
@@ -32,8 +33,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.bamresnet import *
 from .models.others.oth_bam_resnet import *
 
 __all__ = ['get_model']
@@ -133,6 +132,12 @@ _models = {
     'airnext50_32x4d_r2': airnext50_32x4d_r2,
     'airnext101_32x4d_r2': airnext101_32x4d_r2,
     'airnext101_32x4d_r16': airnext101_32x4d_r16,
+
+    'bam_resnet18': bam_resnet18,
+    'bam_resnet34': bam_resnet34,
+    'bam_resnet50': bam_resnet50,
+    'bam_resnet101': bam_resnet101,
+    'bam_resnet152': bam_resnet152,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 
@@ -247,12 +252,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'bam_resnet18': bam_resnet18,
-    'bam_resnet34': bam_resnet34,
-    'bam_resnet50': bam_resnet50,
-    'bam_resnet101': bam_resnet101,
-    'bam_resnet152': bam_resnet152,
 
     'oth_bam_resnet50': oth_bam_resnet50,
     'oth_cbam_resnet50': oth_cbam_resnet50,

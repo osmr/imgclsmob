@@ -33,7 +33,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-
 from .models.bamresnet import *
 from .models.others.oth_bam_resnet import *
 

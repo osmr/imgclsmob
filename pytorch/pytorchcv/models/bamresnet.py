@@ -151,7 +151,7 @@ class ChannelGate(nn.Module):
         mid_channels = channels // reduction_ratio
 
         self.pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.first_fc = DenseBlock(
+        self.init_fc = DenseBlock(
             in_features=channels,
             out_features=mid_channels)
         self.main_fcs = nn.Sequential()
@@ -167,7 +167,7 @@ class ChannelGate(nn.Module):
         input = x
         x = self.pool(x)
         x = x.view(x.size(0), -1)
-        x = self.first_fc(x)
+        x = self.init_fc(x)
         x = self.main_fcs(x)
         x = self.final_fc(x)
         x = x.unsqueeze(2).unsqueeze(3).expand_as(input)
@@ -197,7 +197,7 @@ class SpatialGate(nn.Module):
         super(SpatialGate, self).__init__()
         mid_channels = channels // reduction_ratio
 
-        self.first_conv = conv1x1_block(
+        self.init_conv = conv1x1_block(
             in_channels=channels,
             out_channels=mid_channels,
             stride=1,
@@ -222,7 +222,7 @@ class SpatialGate(nn.Module):
 
     def forward(self, x):
         input = x
-        x = self.first_conv(x)
+        x = self.init_conv(x)
         x = self.dil_convs(x)
         x = self.final_conv(x)
         x = x.expand_as(input)
@@ -241,8 +241,8 @@ class BamBlock(nn.Module):
     def __init__(self,
                  channels):
         super(BamBlock, self).__init__()
-        self.ch_att = ChannelGate(channels)
-        self.sp_att = SpatialGate(channels)
+        self.ch_att = ChannelGate(channels=channels)
+        self.sp_att = SpatialGate(channels=channels)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):

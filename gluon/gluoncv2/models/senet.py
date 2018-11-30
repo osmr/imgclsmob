@@ -393,7 +393,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         # senet52,
@@ -415,7 +415,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        # print("m={}, {}".format(model.__name__, weight_count))
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != senet52 or weight_count == 44659416)  # 22623272
         assert (model != senet103 or weight_count == 60963096)  # 38908456
         assert (model != senet154 or weight_count == 115088984)  # 93018024

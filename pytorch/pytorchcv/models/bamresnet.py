@@ -9,7 +9,7 @@ import os
 import torch.nn as nn
 import torch.nn.init as init
 from .common import conv1x1
-from .resnet import res_conv1x1, ResInitBlock, ResUnit
+from .resnet import ResInitBlock, ResUnit
 
 
 class ConvBlock(nn.Module):
@@ -164,12 +164,13 @@ class ChannelGate(nn.Module):
             out_features=channels)
 
     def forward(self, x):
+        input = x
         x = self.pool(x)
         x = x.view(x.size(0), -1)
         x = self.first_fc(x)
         x = self.main_fcs(x)
         x = self.final_fc(x)
-        x = x.unsqueeze(2).unsqueeze(3).expand_as(x)
+        x = x.unsqueeze(2).unsqueeze(3).expand_as(input)
         return x
 
 
@@ -220,10 +221,11 @@ class SpatialGate(nn.Module):
             bias=True)
 
     def forward(self, x):
+        input = x
         x = self.first_conv(x)
         x = self.dil_convs(x)
         x = self.final_conv(x)
-        x = x.expand_as(x)
+        x = x.expand_as(input)
         return x
 
 

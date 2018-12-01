@@ -9,8 +9,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .resnet import res_conv1x1, ResInitBlock, ResBlock, ResBottleneck
-from .bamresnet import ConvBlock
+from .common import conv1x1_block, ConvBlock
+from .resnet import ResInitBlock, ResBlock, ResBottleneck
 
 
 def conv7x7_block(in_channels,
@@ -103,7 +103,7 @@ class ChannelGate(nn.Module):
     def forward(self, x):
         att1 = self.avg_pool(x)
         att1 = self.mlp(att1)
-        att2 = self.avg_pool(x)
+        att2 = self.max_pool(x)
         att2 = self.mlp(att2)
         att = att1 + att2
         att = self.sigmoid(att)
@@ -125,8 +125,8 @@ class SpatialGate(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        att1 = torch.max(x, 1)[0].unsqueeze(1)
-        att2 = torch.mean(x, 1).unsqueeze(1)
+        att1 = x.max(dim=1)[0].unsqueeze(1)
+        att2 = x.mean(dim=1).unsqueeze(1)
         att = torch.cat((att1, att2), dim=1)
         att = self.conv(att)
         att = self.sigmoid(att)
@@ -195,7 +195,7 @@ class CbamResUnit(nn.Module):
                 out_channels=out_channels,
                 stride=stride)
         if self.resize_identity:
-            self.identity_conv = res_conv1x1(
+            self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
@@ -439,11 +439,11 @@ def _test():
     pretrained = False
 
     models = [
-        cbam_resnet18,
-        cbam_resnet34,
+        # cbam_resnet18,
+        # cbam_resnet34,
         cbam_resnet50,
-        cbam_resnet101,
-        cbam_resnet152,
+        # cbam_resnet101,
+        # cbam_resnet152,
     ]
 
     for model in models:

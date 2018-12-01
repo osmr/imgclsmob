@@ -2,8 +2,8 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent']
+__all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
 
 import torch
 import torch.nn as nn
@@ -33,6 +33,135 @@ def conv1x1(in_channels,
         kernel_size=1,
         stride=stride,
         bias=bias)
+
+
+class ConvBlock(nn.Module):
+    """
+    Standard convolution block with Batch normalization and ReLU activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 activate=True):
+        super(ConvBlock, self).__init__()
+        self.activate = activate
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        if self.activate:
+            self.activ = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def conv1x1_block(in_channels,
+                  out_channels,
+                  stride,
+                  bias=False,
+                  activate=True):
+    """
+    1x1 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=0,
+        bias=bias,
+        activate=activate)
+
+
+def conv3x3_block(in_channels,
+                  out_channels,
+                  stride,
+                  padding=1,
+                  dilation=1,
+                  bias=False,
+                  activate=True):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        bias=bias,
+        activate=activate)
 
 
 def channel_shuffle(x,

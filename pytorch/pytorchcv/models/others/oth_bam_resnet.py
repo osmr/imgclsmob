@@ -238,7 +238,7 @@ def load_model(net,
     import torch
 
     if ignore_extra:
-        pretrained_state = torch.load(file_path)
+        pretrained_state = torch.load(file_path, map_location='cpu')
         model_dict = net.state_dict()
         pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
         net.load_state_dict(pretrained_state)

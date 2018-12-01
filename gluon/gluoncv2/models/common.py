@@ -119,7 +119,8 @@ class ConvBlock(HybridBlock):
 
 def conv1x1_block(in_channels,
                   out_channels,
-                  strides,
+                  strides=1,
+                  groups=1,
                   use_bias=False,
                   bn_use_global_stats=False,
                   act_type="relu",
@@ -133,8 +134,10 @@ def conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
@@ -150,6 +153,7 @@ def conv1x1_block(in_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
+        groups=groups,
         use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
         act_type=act_type,

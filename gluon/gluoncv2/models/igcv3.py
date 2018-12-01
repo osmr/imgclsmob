@@ -9,109 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle
-
-
-class ReLU6(nn.HybridBlock):
-    """
-    ReLU6 activation layer.
-    """
-    def __init__(self, **kwargs):
-        super(ReLU6, self).__init__(**kwargs)
-
-    def hybrid_forward(self, F, x):
-        return F.clip(x, 0, 6, name="relu6")
-
-
-class ConvBlock(HybridBlock):
-    """
-    Standard convolution block with Batch normalization and ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 groups,
-                 bn_use_global_stats,
-                 activate,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
-        self.activate = activate
-
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = ReLU6()
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  groups,
-                  bn_use_global_stats,
-                  activate):
-    """
-    1x1 version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        groups=groups,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+from .common import conv1x1_block, ConvBlock, ChannelShuffle
 
 
 def dwconv3x3_block(in_channels,
@@ -143,6 +41,7 @@ def dwconv3x3_block(in_channels,
         padding=1,
         groups=out_channels,
         bn_use_global_stats=bn_use_global_stats,
+        act_type="relu6",
         activate=activate)
 
 
@@ -181,6 +80,7 @@ class InvResUnit(HybridBlock):
                 out_channels=mid_channels,
                 groups=groups,
                 bn_use_global_stats=bn_use_global_stats,
+                act_type="relu6",
                 activate=False)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
@@ -196,6 +96,7 @@ class InvResUnit(HybridBlock):
                 out_channels=out_channels,
                 groups=groups,
                 bn_use_global_stats=bn_use_global_stats,
+                act_type="relu6",
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -276,7 +177,7 @@ class IGCV3(HybridBlock):
                 in_channels=in_channels,
                 out_channels=final_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                groups=1,
+                act_type="relu6",
                 activate=True))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(

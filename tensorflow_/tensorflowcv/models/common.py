@@ -2,8 +2,8 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'se_block', 'channel_shuffle',
-           'channel_shuffle2']
+__all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block', 'conv1x1_block', 'conv3x3_block',
+           'se_block', 'channel_shuffle', 'channel_shuffle2']
 
 import math
 import tensorflow as tf
@@ -15,6 +15,7 @@ def conv2d(x,
            kernel_size,
            strides=1,
            padding=0,
+           dilation=1,
            groups=1,
            use_bias=True,
            name="conv2d"):
@@ -35,6 +36,8 @@ def conv2d(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     use_bias : bool, default False
@@ -53,6 +56,8 @@ def conv2d(x,
         strides = (strides, strides)
     if isinstance(padding, int):
         padding = (padding, padding)
+    if isinstance(dilation, int):
+        padding = (dilation, dilation)
 
     if (padding[0] > 0) or (padding[1] > 0):
         x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
@@ -65,10 +70,12 @@ def conv2d(x,
             strides=strides,
             padding='valid',
             data_format='channels_first',
+            dilation_rate=dilation,
             use_bias=use_bias,
             kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
             name=name)
     elif (groups == out_channels) and (out_channels == in_channels):
+        assert (dilation[0] == 1) and (dilation[1] == 1)
         kernel = tf.get_variable(
             name=name + '/dw_kernel',
             shape=kernel_size + (in_channels, 1),
@@ -98,6 +105,7 @@ def conv2d(x,
                 strides=strides,
                 padding='valid',
                 data_format='channels_first',
+                dilation_rate=dilation,
                 use_bias=use_bias,
                 kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
                 name=name + "/convgroup{}".format(gi + 1))
@@ -307,6 +315,196 @@ def avgpool2d(x,
             data_format='channels_first',
             name=name + "/stride")
     return x
+
+
+def conv_block(x,
+               in_channels,
+               out_channels,
+               kernel_size,
+               strides,
+               padding,
+               dilation=1,
+               groups=1,
+               use_bias=False,
+               act_type="relu",
+               activate=True,
+               training=False,
+               name="conv_block"):
+    """
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'conv_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        use_bias=use_bias,
+        name=name + "/conv")
+    x = batchnorm(
+        x=x,
+        training=training,
+        name=name + "/bn")
+    if activate:
+        if act_type == "relu":
+            x = tf.nn.relu(x, name=name + "/activ")
+        elif act_type == "relu6":
+            x = tf.nn.relu6(x, name=name + "/activ")
+        else:
+            raise NotImplementedError()
+    return x
+
+
+def conv1x1_block(x,
+                  in_channels,
+                  out_channels,
+                  strides=1,
+                  groups=1,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  training=False,
+                  name="conv1x1_block"):
+    """
+    1x1 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'conv1x1_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=strides,
+        padding=0,
+        groups=groups,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        training=training,
+        name=name)
+
+
+def conv3x3_block(x,
+                  in_channels,
+                  out_channels,
+                  strides,
+                  padding=1,
+                  dilation=1,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  training=False,
+                  name="conv3x3_block"):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'conv3x3_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        training=training,
+        name=name)
 
 
 def channel_shuffle(x,

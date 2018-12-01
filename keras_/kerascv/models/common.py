@@ -2,7 +2,8 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block',
+           'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
 
 import math
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol

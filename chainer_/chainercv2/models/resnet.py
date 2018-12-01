@@ -56,7 +56,9 @@ class ResConv(Chain):
                 stride=stride,
                 pad=pad,
                 nobias=True)
-            self.bn = L.BatchNormalization(size=out_channels)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5)
             if self.activate:
                 self.activ = F.relu
 

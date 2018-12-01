@@ -12,101 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, ChannelShuffle
-
-
-class ReLU6(Chain):
-    """
-    ReLU6 activation layer.
-    """
-    def __init__(self):
-        super(ReLU6, self).__init__()
-
-    def __call__(self, x):
-        return F.clip(x, 0.0, 6.0)
-
-
-class ConvBlock(Chain):
-    """
-    Standard convolution block with Batch normalization and ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 groups,
-                 activate):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True,
-                groups=groups)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = ReLU6()
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  groups,
-                  activate):
-    """
-    1x1 version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0,
-        groups=groups,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, ConvBlock, ChannelShuffle, SimpleSequential
 
 
 def dwconv3x3_block(in_channels,
@@ -134,6 +40,7 @@ def dwconv3x3_block(in_channels,
         stride=stride,
         pad=1,
         groups=out_channels,
+        act_type="relu6",
         activate=activate)
 
 
@@ -167,6 +74,7 @@ class InvResUnit(Chain):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=groups,
+                act_type="relu6",
                 activate=False)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
@@ -180,6 +88,7 @@ class InvResUnit(Chain):
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups,
+                act_type="relu6",
                 activate=False)
 
     def __call__(self, x):
@@ -228,14 +137,11 @@ class IGCV3(Chain):
         with self.init_scope():
             self.features = SimpleSequential()
             with self.features.init_scope():
-                setattr(self.features, "init_block", ConvBlock(
+                setattr(self.features, "init_block", conv3x3_block(
                     in_channels=in_channels,
                     out_channels=init_block_channels,
-                    ksize=3,
                     stride=2,
-                    pad=1,
-                    groups=1,
-                    activate=True))
+                    act_type="relu6"))
                 in_channels = init_block_channels
                 for i, channels_per_stage in enumerate(channels):
                     stage = SimpleSequential()
@@ -253,8 +159,7 @@ class IGCV3(Chain):
                 setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
-                    groups=1,
-                    activate=True))
+                    act_type="relu6"))
                 in_channels = final_block_channels
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,

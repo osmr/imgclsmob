@@ -9,87 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ChannelShuffle
-
-
-class ConvBlock(nn.Module):
-    """
-    Standard convolution block with Batch normalization and ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups,
-                 activate):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU6(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  groups,
-                  activate):
-    """
-    1x1 version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0,
-        groups=groups,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, ConvBlock, ChannelShuffle
 
 
 def dwconv3x3_block(in_channels,
@@ -117,6 +37,7 @@ def dwconv3x3_block(in_channels,
         stride=stride,
         padding=1,
         groups=out_channels,
+        act_type="relu6",
         activate=activate)
 
 
@@ -149,6 +70,7 @@ class InvResUnit(nn.Module):
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=groups,
+            act_type="relu6",
             activate=False)
         self.c_shuffle = ChannelShuffle(
             channels=mid_channels,
@@ -162,6 +84,7 @@ class InvResUnit(nn.Module):
             in_channels=mid_channels,
             out_channels=out_channels,
             groups=groups,
+            act_type="relu6",
             activate=False)
 
     def forward(self, x):
@@ -208,14 +131,11 @@ class IGCV3(nn.Module):
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ConvBlock(
+        self.features.add_module("init_block", conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            kernel_size=3,
             stride=2,
-            padding=1,
-            groups=1,
-            activate=True))
+            act_type="relu6"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
@@ -232,8 +152,7 @@ class IGCV3(nn.Module):
         self.features.add_module('final_block', conv1x1_block(
             in_channels=in_channels,
             out_channels=final_block_channels,
-            groups=1,
-            activate=True))
+            act_type="relu6"))
         in_channels = final_block_channels
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=7,

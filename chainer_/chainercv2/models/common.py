@@ -116,7 +116,8 @@ class ConvBlock(Chain):
 
 def conv1x1_block(in_channels,
                   out_channels,
-                  stride,
+                  stride=1,
+                  groups=1,
                   use_bias=False,
                   act_type="relu",
                   activate=True):
@@ -129,8 +130,10 @@ def conv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     act_type : str, default 'relu'
@@ -144,6 +147,7 @@ def conv1x1_block(in_channels,
         ksize=1,
         stride=stride,
         pad=0,
+        groups=groups,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate)

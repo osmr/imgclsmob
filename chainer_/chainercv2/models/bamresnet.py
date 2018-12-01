@@ -11,101 +11,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, conv1x1
+from .common import SimpleSequential, conv1x1, conv1x1_block, conv3x3_block
 from .resnet import ResInitBlock, ResUnit
-
-
-class ConvBlock(Chain):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    dilate : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    use_bias : bool, default False
-        Whether the layer uses a bias vector.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 dilate=1,
-                 groups=1,
-                 use_bias=False,
-                 activate=True):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=(not use_bias),
-                dilate=dilate,
-                groups=groups)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride,
-                  use_bias,
-                  activate):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    use_bias : bool
-        Whether the layer uses a bias vector.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0,
-        use_bias=use_bias,
-        activate=activate)
 
 
 class DenseBlock(Chain):
@@ -217,10 +124,9 @@ class SpatialGate(Chain):
             self.dil_convs = SimpleSequential()
             with self.dil_convs.init_scope():
                 for i in range(num_dil_convs):
-                    setattr(self.dil_convs, "conv{}".format(i + 1), ConvBlock(
+                    setattr(self.dil_convs, "conv{}".format(i + 1), conv3x3_block(
                         in_channels=mid_channels,
                         out_channels=mid_channels,
-                        ksize=3,
                         stride=1,
                         pad=dilate,
                         dilate=dilate,

@@ -262,8 +262,8 @@ def _test():
     pretrained = False
 
     models = [
-        oth_bam_resnet50,
-        # oth_cbam_resnet50,
+        # oth_bam_resnet50,
+        oth_cbam_resnet50,
     ]
 
     for model in models:

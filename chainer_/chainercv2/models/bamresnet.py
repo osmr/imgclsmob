@@ -93,7 +93,7 @@ def conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int
         Stride of the convolution.
-    use_bias : bool, default False
+    use_bias : bool
         Whether the layer uses a bias vector.
     activate : bool
         Whether activate the convolution block.

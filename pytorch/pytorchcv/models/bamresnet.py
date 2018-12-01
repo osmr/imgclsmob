@@ -87,7 +87,7 @@ def conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
-    bias : bool, default False
+    bias : bool
         Whether the layer uses a bias vector.
     activate : bool
         Whether activate the convolution block.
@@ -98,6 +98,44 @@ def conv1x1_block(in_channels,
         kernel_size=1,
         stride=stride,
         padding=0,
+        bias=bias,
+        activate=activate)
+
+
+def conv3x3_block(in_channels,
+                  out_channels,
+                  stride,
+                  padding=1,
+                  dilation=1,
+                  bias=False,
+                  activate=True):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
         bias=bias,
         activate=activate)
 
@@ -205,10 +243,9 @@ class SpatialGate(nn.Module):
             activate=True)
         self.dil_convs = nn.Sequential()
         for i in range(num_dil_convs):
-            self.dil_convs.add_module("conv{}".format(i + 1), ConvBlock(
+            self.dil_convs.add_module("conv{}".format(i + 1), conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                kernel_size=3,
                 stride=1,
                 padding=dilation,
                 dilation=dilation,

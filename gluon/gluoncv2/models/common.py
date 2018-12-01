@@ -2,10 +2,21 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent']
+__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2',
+           'SEBlock', 'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent']
 
 from mxnet.gluon import nn, HybridBlock
+
+
+class ReLU6(nn.HybridBlock):
+    """
+    ReLU6 activation layer.
+    """
+    def __init__(self, **kwargs):
+        super(ReLU6, self).__init__(**kwargs)
+
+    def hybrid_forward(self, F, x):
+        return F.clip(x, 0, 6, name="relu6")
 
 
 def conv1x1(in_channels,
@@ -58,6 +69,8 @@ class ConvBlock(HybridBlock):
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -71,6 +84,7 @@ class ConvBlock(HybridBlock):
                  groups=1,
                  use_bias=False,
                  bn_use_global_stats=False,
+                 act_type="relu",
                  activate=True,
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
@@ -90,7 +104,10 @@ class ConvBlock(HybridBlock):
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
             if self.activate:
-                self.activ = nn.Activation('relu')
+                if act_type == "relu6":
+                    self.activ = ReLU6()
+                else:
+                    self.activ = nn.Activation(act_type)
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -105,6 +122,7 @@ def conv1x1_block(in_channels,
                   strides,
                   use_bias=False,
                   bn_use_global_stats=False,
+                  act_type="relu",
                   activate=True):
     """
     1x1 version of the standard convolution block.
@@ -121,6 +139,8 @@ def conv1x1_block(in_channels,
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -132,6 +152,7 @@ def conv1x1_block(in_channels,
         padding=0,
         use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
+        act_type=act_type,
         activate=activate)
 
 
@@ -142,6 +163,7 @@ def conv3x3_block(in_channels,
                   dilation=1,
                   use_bias=False,
                   bn_use_global_stats=False,
+                  act_type="relu",
                   activate=True):
     """
     3x3 version of the standard convolution block.
@@ -162,6 +184,8 @@ def conv3x3_block(in_channels,
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -174,6 +198,7 @@ def conv3x3_block(in_channels,
         dilation=dilation,
         use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
+        act_type=act_type,
         activate=activate)
 
 

@@ -2,8 +2,20 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
+__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2',
+           'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ParametricConcurrent']
+
+
+class ReLU6(Chain):
+    """
+    ReLU6 activation layer.
+    """
+    def __init__(self):
+        super(ReLU6, self).__init__()
+
+    def __call__(self, x):
+        return F.clip(x, 0.0, 6.0)
 
 
 def conv1x1(in_channels,
@@ -54,6 +66,8 @@ class ConvBlock(Chain):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -66,6 +80,7 @@ class ConvBlock(Chain):
                  dilate=1,
                  groups=1,
                  use_bias=False,
+                 act_type="relu",
                  activate=True):
         super(ConvBlock, self).__init__()
         self.activate = activate
@@ -84,7 +99,12 @@ class ConvBlock(Chain):
                 size=out_channels,
                 eps=1e-5)
             if self.activate:
-                self.activ = F.relu
+                if act_type == "relu":
+                    self.activ = F.relu
+                elif act_type == "relu6":
+                    self.activ = ReLU6()
+                else:
+                    raise NotImplementedError()
 
     def __call__(self, x):
         x = self.conv(x)
@@ -98,6 +118,7 @@ def conv1x1_block(in_channels,
                   out_channels,
                   stride,
                   use_bias=False,
+                  act_type="relu",
                   activate=True):
     """
     1x1 version of the standard convolution block.
@@ -112,6 +133,8 @@ def conv1x1_block(in_channels,
         Stride of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -122,6 +145,7 @@ def conv1x1_block(in_channels,
         stride=stride,
         pad=0,
         use_bias=use_bias,
+        act_type=act_type,
         activate=activate)
 
 
@@ -131,6 +155,7 @@ def conv3x3_block(in_channels,
                   pad=1,
                   dilate=1,
                   use_bias=False,
+                  act_type="relu",
                   activate=True):
     """
     3x3 version of the standard convolution block.
@@ -149,6 +174,8 @@ def conv3x3_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -160,6 +187,7 @@ def conv3x3_block(in_channels,
         pad=pad,
         dilate=dilate,
         use_bias=use_bias,
+        act_type=act_type,
         activate=activate)
 
 

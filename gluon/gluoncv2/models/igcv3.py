@@ -9,7 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, ConvBlock, ChannelShuffle
+from .common import conv1x1_block, conv3x3_block, ConvBlock, ChannelShuffle
 
 
 def dwconv3x3_block(in_channels,
@@ -149,15 +149,12 @@ class IGCV3(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(ConvBlock(
+            self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                kernel_size=3,
                 strides=2,
-                padding=1,
-                groups=1,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=True))
+                act_type="relu6"))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -177,8 +174,7 @@ class IGCV3(HybridBlock):
                 in_channels=in_channels,
                 out_channels=final_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                act_type="relu6",
-                activate=True))
+                act_type="relu6"))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,

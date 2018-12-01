@@ -47,7 +47,7 @@ def conv1x1(in_channels,
 
 class ConvBlock(HybridBlock):
     """
-    Standard convolution block with Batch normalization and ReLU activation.
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
 
     Parameters:
     ----------

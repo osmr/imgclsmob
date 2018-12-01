@@ -18,6 +18,7 @@ def conv2d(x,
            kernel_size,
            strides=1,
            padding=0,
+           dilation=1,
            groups=1,
            use_bias=True,
            name="conv2d"):
@@ -38,6 +39,8 @@ def conv2d(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     use_bias : bool, default False
@@ -56,6 +59,8 @@ def conv2d(x,
         strides = (strides, strides)
     if isinstance(padding, int):
         padding = (padding, padding)
+    if isinstance(dilation, int):
+        padding = (dilation, dilation)
 
     extra_pad = False
     if (padding[0] == padding[1]) and (padding[0] == 0):
@@ -77,9 +82,11 @@ def conv2d(x,
             kernel_size=kernel_size,
             strides=strides,
             padding=ke_padding,
+            dilation_rate=dilation,
             use_bias=use_bias,
             name=name)(x)
     elif (groups == out_channels) and (out_channels == in_channels):
+        assert (dilation[0] == 1) and (dilation[1] == 1)
         if extra_pad:
             name = name + "/conv"
         x = nn.DepthwiseConv2D(
@@ -105,6 +112,7 @@ def conv2d(x,
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=ke_padding,
+                dilation_rate=dilation,
                 use_bias=use_bias,
                 name=name + "/convgroup{}".format(gi + 1))(xi)
             group_list.append(xi)
@@ -185,6 +193,182 @@ def max_pool2d_ceil(x,
         padding=padding,
         **kwargs)(x)
     return x
+
+
+def conv_block(x,
+               in_channels,
+               out_channels,
+               kernel_size,
+               strides,
+               padding,
+               dilation=1,
+               groups=1,
+               use_bias=False,
+               act_type="relu",
+               activate=True,
+               name="conv_block"):
+    """
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    name : str, default 'conv_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        use_bias=use_bias,
+        name=name + "/conv")
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    if activate:
+        if act_type == "relu":
+            x = nn.Activation("relu", name=name + "/activ")(x)
+        elif act_type == "relu6":
+            x = nn.ReLU(max_value=6.0, name=name + "/activ")(x)
+        else:
+            raise NotImplementedError()
+    return x
+
+
+def conv1x1_block(x,
+                  in_channels,
+                  out_channels,
+                  strides=1,
+                  groups=1,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  name="conv1x1_block"):
+    """
+    1x1 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    name : str, default 'conv1x1_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=strides,
+        padding=0,
+        groups=groups,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        name=name)
+
+
+def conv3x3_block(x,
+                  in_channels,
+                  out_channels,
+                  strides,
+                  padding=1,
+                  dilation=1,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  name="conv3x3_block"):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    name : str, default 'conv3x3_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        name=name)
 
 
 def channel_shuffle(x,

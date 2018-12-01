@@ -1,199 +1,186 @@
 """
-    BAM-ResNet, implemented in Gluon.
-    Original paper: 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet, implemented in Gluon.
+    Original paper: 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 """
 
-__all__ = ['BamResNet', 'bam_resnet18', 'bam_resnet34', 'bam_resnet50', 'bam_resnet101', 'bam_resnet152']
+__all__ = ['CbamResNet', 'cbam_resnet18', 'cbam_resnet34', 'cbam_resnet50', 'cbam_resnet101', 'cbam_resnet152']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, conv1x1_block, conv3x3_block
-from .resnet import ResInitBlock, ResUnit
+from .common import conv1x1_block, ConvBlock
+from .resnet import ResInitBlock, ResBlock, ResBottleneck
 
 
-class DenseBlock(HybridBlock):
+def conv7x7_block(in_channels,
+                  out_channels,
+                  strides=1,
+                  padding=3,
+                  bn_use_global_stats=False,
+                  activate=True):
     """
-    Standard dense block with Batch normalization and ReLU activation.
+    7x7 version of the standard convolution block.
 
     Parameters:
     ----------
     in_channels : int
-        Number of input features.
+        Number of input channels.
     out_channels : int
-        Number of output features.
-    bn_use_global_stats : bool
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=strides,
+        padding=padding,
+        use_bias=False,
+        bn_use_global_stats=bn_use_global_stats,
+        activate=activate)
+
+
+class MLP(HybridBlock):
+    """
+    Multilayer perceptron block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    reduction_ratio : int, default 16
+        Channel reduction ratio.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_use_global_stats,
+                 channels,
+                 reduction_ratio=16,
                  **kwargs):
-        super(DenseBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.fc = nn.Dense(
-                units=out_channels,
-                in_units=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+        super(MLP, self).__init__(**kwargs)
+        mid_channels = channels // reduction_ratio
+
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Dense(
+            units=mid_channels,
+            in_units=channels)
+        self.activ = nn.Activation('relu')
+        self.fc2 = nn.Dense(
+            units=channels,
+            in_units=mid_channels)
 
     def hybrid_forward(self, F, x):
-        x = self.fc(x)
-        x = self.bn(x)
+        x = self.flatten(x)
+        x = self.fc1(x)
         x = self.activ(x)
+        x = self.fc2(x)
         return x
 
 
 class ChannelGate(HybridBlock):
     """
-    BAM channel gate block.
+    CBAM channel gate block.
 
     Parameters:
     ----------
     channels : int
         Number of input/output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     reduction_ratio : int, default 16
         Channel reduction ratio.
-    num_layers : int, default 1
-        Number of dense blocks.
     """
     def __init__(self,
                  channels,
-                 bn_use_global_stats,
                  reduction_ratio=16,
-                 num_layers=1,
                  **kwargs):
         super(ChannelGate, self).__init__(**kwargs)
-        mid_channels = channels // reduction_ratio
 
-        with self.name_scope():
-            self.pool = nn.GlobalAvgPool2D()
-            self.flatten = nn.Flatten()
-            self.init_fc = DenseBlock(
-                in_channels=channels,
-                out_channels=mid_channels,
-                bn_use_global_stats=bn_use_global_stats)
-            self.main_fcs = nn.HybridSequential(prefix='')
-            for i in range(num_layers - 1):
-                self.main_fcs.add(DenseBlock(
-                    in_channels=mid_channels,
-                    out_channels=mid_channels,
-                    bn_use_global_stats=bn_use_global_stats))
-            self.final_fc = nn.Dense(
-                units=channels,
-                in_units=mid_channels)
+        self.avg_pool = nn.GlobalAvgPool2D()
+        self.max_pool = nn.GlobalMaxPool2D()
+        self.mlp = MLP(
+            channels=channels,
+            reduction_ratio=reduction_ratio)
+        self.sigmoid = nn.Activation('sigmoid')
 
     def hybrid_forward(self, F, x):
-        input = x
-        x = self.pool(x)
-        x = self.flatten(x)
-        x = self.init_fc(x)
-        x = self.main_fcs(x)
-        x = self.final_fc(x)
-        x = x.expand_dims(2).expand_dims(3).broadcast_like(input)
+        att1 = self.avg_pool(x)
+        att1 = self.mlp(att1)
+        att2 = self.max_pool(x)
+        att2 = self.mlp(att2)
+        att = att1 + att2
+        att = self.sigmoid(att)
+        att = att.expand_dims(2).expand_dims(3).broadcast_like(x)
+        x = x * att
         return x
 
 
 class SpatialGate(HybridBlock):
     """
-    BAM spatial gate block.
+    CBAM spatial gate block.
 
     Parameters:
     ----------
-    channels : int
-        Number of input/output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    reduction_ratio : int, default 16
-        Channel reduction ratio.
-    num_dil_convs : int, default 2
-        Number of dilated convolutions.
-    dilation : int, default 4
-        Dilation/padding value for corresponding convolutions.
     """
     def __init__(self,
-                 channels,
                  bn_use_global_stats,
-                 reduction_ratio=16,
-                 num_dil_convs=2,
-                 dilation=4,
                  **kwargs):
         super(SpatialGate, self).__init__(**kwargs)
-        mid_channels = channels // reduction_ratio
-
-        with self.name_scope():
-            self.init_conv = conv1x1_block(
-                in_channels=channels,
-                out_channels=mid_channels,
-                strides=1,
-                use_bias=True,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.dil_convs = nn.HybridSequential(prefix='')
-            for i in range(num_dil_convs):
-                self.dil_convs.add(conv3x3_block(
-                    in_channels=mid_channels,
-                    out_channels=mid_channels,
-                    strides=1,
-                    padding=dilation,
-                    dilation=dilation,
-                    use_bias=True,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=True))
-            self.final_conv = conv1x1(
-                in_channels=mid_channels,
-                out_channels=1,
-                strides=1,
-                use_bias=True)
+        self.conv = conv7x7_block(
+            in_channels=2,
+            out_channels=1,
+            bn_use_global_stats=bn_use_global_stats,
+            activate=False)
+        self.sigmoid = nn.Activation('sigmoid')
 
     def hybrid_forward(self, F, x):
-        input = x
-        x = self.init_conv(x)
-        x = self.dil_convs(x)
-        x = self.final_conv(x)
-        x = x.broadcast_like(input)
-        return x
-
-
-class BamBlock(HybridBlock):
-    """
-    BAM attention block for BAM-ResNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 channels,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(BamBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.ch_att = ChannelGate(
-                channels=channels,
-                bn_use_global_stats=bn_use_global_stats)
-            self.sp_att = SpatialGate(
-                channels=channels,
-                bn_use_global_stats=bn_use_global_stats)
-            self.sigmoid = nn.Activation('sigmoid')
-
-    def hybrid_forward(self, F, x):
-        att = 1 + self.sigmoid(self.ch_att(x) * self.sp_att(x))
+        att1 = x.max(axis=1).expand_dims(1)
+        att2 = x.mean(axis=1).expand_dims(1)
+        att = F.concat(att1, att2, dim=1)
+        att = self.conv(att)
+        att = self.sigmoid(att)
         x = x * att
         return x
 
 
-class BamResUnit(HybridBlock):
+class CbamBlock(HybridBlock):
     """
-    BAM-ResNet unit.
+    CBAM attention block for CBAM-ResNet.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    reduction_ratio : int, default 16
+        Channel reduction ratio.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 channels,
+                 reduction_ratio=16,
+                 bn_use_global_stats=False,
+                 **kwargs):
+        super(CbamBlock, self).__init__(**kwargs)
+        self.ch_gate = ChannelGate(
+            channels=channels,
+            reduction_ratio=reduction_ratio)
+        self.sp_gate = SpatialGate(bn_use_global_stats=bn_use_global_stats)
+
+    def hybrid_forward(self, F, x):
+        x = self.ch_gate(x)
+        x = self.sp_gate(x)
+        return x
+
+
+class CbamResUnit(HybridBlock):
+    """
+    CBAM-ResNet unit.
 
     Parameters:
     ----------
@@ -215,33 +202,47 @@ class BamResUnit(HybridBlock):
                  bn_use_global_stats,
                  bottleneck,
                  **kwargs):
-        super(BamResUnit, self).__init__(**kwargs)
-        self.use_bam = (strides != 1)
+        super(CbamResUnit, self).__init__(**kwargs)
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
-        with self.name_scope():
-            if self.use_bam:
-                self.bam = BamBlock(
-                    channels=in_channels,
-                    bn_use_global_stats=bn_use_global_stats)
-            self.res_unit = ResUnit(
+        if bottleneck:
+            self.body = ResBottleneck(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
-                bottleneck=bottleneck,
-                conv1_stride=False,
-                use_se=False)
+                conv1_stride=False)
+        else:
+            self.body = ResBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
+        if self.resize_identity:
+            self.identity_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats,
+                activate=False)
+        self.cbam = CbamBlock(channels=out_channels)
+        self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
-        if self.use_bam:
-            x = self.bam(x)
-        x = self.res_unit(x)
+        if self.resize_identity:
+            identity = self.identity_conv(x)
+        else:
+            identity = x
+        x = self.body(x)
+        x = self.cbam(x)
+        x = x + identity
+        x = self.activ(x)
         return x
 
 
-class BamResNet(HybridBlock):
+class CbamResNet(HybridBlock):
     """
-    BAM-ResNet model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -270,7 +271,7 @@ class BamResNet(HybridBlock):
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(BamResNet, self).__init__(**kwargs)
+        super(CbamResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -286,7 +287,7 @@ class BamResNet(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(BamResUnit(
+                        stage.add(CbamResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
@@ -317,7 +318,7 @@ def get_resnet(blocks,
                root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
-    Create BAM-ResNet model with specific parameters.
+    Create CBAM-ResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -350,7 +351,7 @@ def get_resnet(blocks,
     elif blocks == 152:
         layers = [3, 8, 36, 3]
     else:
-        raise ValueError("Unsupported BAM-ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported CBAM-ResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 
@@ -363,7 +364,7 @@ def get_resnet(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = BamResNet(
+    net = CbamResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -382,9 +383,9 @@ def get_resnet(blocks,
     return net
 
 
-def bam_resnet18(**kwargs):
+def cbam_resnet18(**kwargs):
     """
-    BAM-ResNet-18 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet-18 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -395,12 +396,12 @@ def bam_resnet18(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, model_name="bam_resnet18", **kwargs)
+    return get_resnet(blocks=18, model_name="cbam_resnet18", **kwargs)
 
 
-def bam_resnet34(**kwargs):
+def cbam_resnet34(**kwargs):
     """
-    BAM-ResNet-34 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet-34 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -411,12 +412,12 @@ def bam_resnet34(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, model_name="bam_resnet34", **kwargs)
+    return get_resnet(blocks=34, model_name="cbam_resnet34", **kwargs)
 
 
-def bam_resnet50(**kwargs):
+def cbam_resnet50(**kwargs):
     """
-    BAM-ResNet-50 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet-50 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -427,12 +428,12 @@ def bam_resnet50(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, model_name="bam_resnet50", **kwargs)
+    return get_resnet(blocks=50, model_name="cbam_resnet50", **kwargs)
 
 
-def bam_resnet101(**kwargs):
+def cbam_resnet101(**kwargs):
     """
-    BAM-ResNet-101 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet-101 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -443,12 +444,12 @@ def bam_resnet101(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, model_name="bam_resnet101", **kwargs)
+    return get_resnet(blocks=101, model_name="cbam_resnet101", **kwargs)
 
 
-def bam_resnet152(**kwargs):
+def cbam_resnet152(**kwargs):
     """
-    BAM-ResNet-152 model from 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
+    CBAM-ResNet-152 model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 
     Parameters:
     ----------
@@ -459,7 +460,7 @@ def bam_resnet152(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, model_name="bam_resnet152", **kwargs)
+    return get_resnet(blocks=152, model_name="cbam_resnet152", **kwargs)
 
 
 def _test():
@@ -469,11 +470,11 @@ def _test():
     pretrained = False
 
     models = [
-        bam_resnet18,
-        bam_resnet34,
-        bam_resnet50,
-        bam_resnet101,
-        bam_resnet152,
+        cbam_resnet18,
+        cbam_resnet34,
+        cbam_resnet50,
+        cbam_resnet101,
+        cbam_resnet152,
     ]
 
     for model in models:
@@ -491,11 +492,11 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != bam_resnet18 or weight_count == 11712503)
-        assert (model != bam_resnet34 or weight_count == 21820663)
-        assert (model != bam_resnet50 or weight_count == 25915099)
-        assert (model != bam_resnet101 or weight_count == 44907227)
-        assert (model != bam_resnet152 or weight_count == 60550875)
+        assert (model != cbam_resnet18 or weight_count == 11779392)
+        assert (model != cbam_resnet34 or weight_count == 21960468)
+        assert (model != cbam_resnet50 or weight_count == 28089624)
+        assert (model != cbam_resnet101 or weight_count == 49330172)
+        assert (model != cbam_resnet152 or weight_count == 66826848)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

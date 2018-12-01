@@ -112,24 +112,12 @@ class ChannelGate(nn.Module):
         return x
 
 
-class ChannelPool(nn.Module):
-    """
-    CBAM specific channel pooling layer.
-    """
-    def forward(self, x):
-        x1 = torch.max(x, 1)[0].unsqueeze(1)
-        x2 = torch.mean(x, 1).unsqueeze(1)
-        x = torch.cat((x1, x2), dim=1)
-        return x
-
-
 class SpatialGate(nn.Module):
     """
     CBAM spatial gate block.
     """
     def __init__(self):
         super(SpatialGate, self).__init__()
-        self.pool = ChannelPool()
         self.conv = conv7x7_block(
             in_channels=2,
             out_channels=1,
@@ -137,7 +125,10 @@ class SpatialGate(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        att = self.pool(x)
+        att1 = torch.max(x, 1)[0].unsqueeze(1)
+        att2 = torch.mean(x, 1).unsqueeze(1)
+        att = torch.cat((att1, att2), dim=1)
+        att = self.pool(att)
         att = self.conv(att)
         att = self.sigmoid(att)
         x = x * att

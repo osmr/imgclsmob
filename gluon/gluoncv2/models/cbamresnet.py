@@ -143,7 +143,7 @@ class SpatialGate(HybridBlock):
         att2 = x.mean(axis=1).expand_dims(1)
         att = F.concat(att1, att2, dim=1)
         att = self.conv(att)
-        att = self.sigmoid(att)
+        att = self.sigmoid(att).broadcast_like(x)
         x = x * att
         return x
 
@@ -470,11 +470,11 @@ def _test():
     pretrained = False
 
     models = [
-        cbam_resnet18,
-        cbam_resnet34,
+        # cbam_resnet18,
+        # cbam_resnet34,
         cbam_resnet50,
-        cbam_resnet101,
-        cbam_resnet152,
+        # cbam_resnet101,
+        # cbam_resnet152,
     ]
 
     for model in models:
@@ -485,6 +485,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
@@ -498,9 +499,9 @@ def _test():
         assert (model != cbam_resnet101 or weight_count == 49330172)
         assert (model != cbam_resnet152 or weight_count == 66826848)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = mx.nd.zeros((2, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (y.shape == (2, 1000))
 
 
 if __name__ == "__main__":

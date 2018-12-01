@@ -128,7 +128,6 @@ class SpatialGate(nn.Module):
         att1 = torch.max(x, 1)[0].unsqueeze(1)
         att2 = torch.mean(x, 1).unsqueeze(1)
         att = torch.cat((att1, att2), dim=1)
-        att = self.pool(att)
         att = self.conv(att)
         att = self.sigmoid(att)
         x = x * att

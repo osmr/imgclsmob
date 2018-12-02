@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from common import conv1x1_block, conv3x3_block, conv_block, channel_shuffle_lambda
+from .common import conv1x1_block, conv3x3_block, conv_block, channel_shuffle_lambda
 
 
 def dwconv3x3_block(x,

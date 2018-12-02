@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1806.00178.
 """
 
-__all__ = ['igcv3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
+__all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 
 import os
 import tensorflow as tf

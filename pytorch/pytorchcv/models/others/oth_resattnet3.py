@@ -28,6 +28,112 @@ def conv1x1(in_channels,
         bias=bias)
 
 
+class ConvBlock(nn.Module):
+    """
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 act_type="relu",
+                 activate=True):
+        super(ConvBlock, self).__init__()
+        self.activate = activate
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        if self.activate:
+            if act_type == "relu":
+                self.activ = nn.ReLU(inplace=True)
+            elif act_type == "relu6":
+                self.activ = nn.ReLU6(inplace=True)
+            else:
+                raise NotImplementedError()
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def conv7x7_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=3,
+                  bias=False,
+                  act_type="relu",
+                  activate=True):
+    """
+    7x7 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        stride=stride,
+        padding=padding,
+        bias=bias,
+        act_type=act_type,
+        activate=activate)
+
+
 class PreConvBlock(nn.Module):
     """
     Convolution block with Batch normalization and ReLU pre-activation.
@@ -422,16 +528,43 @@ class AttentionModule_stage3(nn.Module):
         return out_last
 
 
+class ResAttInitBlock(nn.Module):
+    """
+    ResAttNet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(ResAttInitBlock, self).__init__()
+        self.conv = conv7x7_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            stride=2)
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.pool(x)
+        return x
+
+
 class ResidualAttentionModel_56(nn.Module):
     # for input size 224
     def __init__(self):
         super(ResidualAttentionModel_56, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True)
-        )
-        self.mpool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.init_block = ResAttInitBlock(
+            in_channels=3,
+            out_channels=64)
         self.residual_block1 = ResBlock(64, 256)
         self.attention_module1 = AttentionModule_stage1(256, 256)
         self.residual_block2 = ResBlock(256, 512, 2)
@@ -449,8 +582,7 @@ class ResidualAttentionModel_56(nn.Module):
         self.fc = nn.Linear(2048,1000)
 
     def forward(self, x):
-        out = self.conv1(x)
-        out = self.mpool1(out)
+        out = self.init_block(x)
         # print(out.data)
         out = self.residual_block1(out)
         out = self.attention_module1(out)
@@ -473,12 +605,9 @@ class ResidualAttentionModel_92(nn.Module):
     # for input size 224
     def __init__(self):
         super(ResidualAttentionModel_92, self).__init__()
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True)
-        )
-        self.mpool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.init_block = ResAttInitBlock(
+            in_channels=3,
+            out_channels=64)
         self.residual_block1 = ResBlock(64, 256)
         self.attention_module1 = AttentionModule_stage1(256, 256)
         self.residual_block2 = ResBlock(256, 512, 2)
@@ -499,8 +628,7 @@ class ResidualAttentionModel_92(nn.Module):
         self.fc = nn.Linear(2048,1000)
 
     def forward(self, x):
-        out = self.conv1(x)
-        out = self.mpool1(out)
+        out = self.init_block(x)
         # print(out.data)
         out = self.residual_block1(out)
         out = self.attention_module1(out)

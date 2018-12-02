@@ -2,8 +2,9 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
+__all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ParametricConcurrent']
 
 import torch
 import torch.nn as nn
@@ -179,6 +180,44 @@ def conv3x3_block(in_channels,
         stride=stride,
         padding=padding,
         dilation=dilation,
+        bias=bias,
+        act_type=act_type,
+        activate=activate)
+
+
+def conv7x7_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=3,
+                  bias=False,
+                  act_type="relu",
+                  activate=True):
+    """
+    7x7 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        stride=stride,
+        padding=padding,
         bias=bias,
         act_type=act_type,
         activate=activate)

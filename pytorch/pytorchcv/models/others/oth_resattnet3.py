@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def conv1x1(in_channels,
@@ -27,9 +28,9 @@ def conv1x1(in_channels,
         bias=bias)
 
 
-class PreResConv(nn.Module):
+class PreConvBlock(nn.Module):
     """
-    PreResNet specific convolution block, with pre-activation.
+    Convolution block with Batch normalization and ReLU pre-activation.
 
     Parameters:
     ----------
@@ -41,16 +42,19 @@ class PreResConv(nn.Module):
         Convolution window size.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride,
-                 padding):
-        super(PreResConv, self).__init__()
+                 padding,
+                 return_preact=False):
+        super(PreConvBlock, self).__init__()
+        self.return_preact = return_preact
+
         self.bn = nn.BatchNorm2d(num_features=in_channels)
         self.activ = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(
@@ -64,16 +68,21 @@ class PreResConv(nn.Module):
     def forward(self, x):
         x = self.bn(x)
         x = self.activ(x)
-        x_pre_activ = x
+        if self.return_preact:
+            x_pre_activ = x
         x = self.conv(x)
-        return x, x_pre_activ
+        if self.return_preact:
+            return x, x_pre_activ
+        else:
+            return x
 
 
-def preres_conv1x1(in_channels,
-                   out_channels,
-                   stride):
+def pre_conv1x1_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      return_preact=False):
     """
-    1x1 version of the PreResNet specific convolution block.
+    1x1 version of the pre-activated convolution block.
 
     Parameters:
     ----------
@@ -81,22 +90,26 @@ def preres_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
     """
-    return PreResConv(
+    return PreConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         stride=stride,
-        padding=0)
+        padding=0,
+        return_preact=return_preact)
 
 
-def preres_conv3x3(in_channels,
-                   out_channels,
-                   stride):
+def pre_conv3x3_block(in_channels,
+                      out_channels,
+                      stride,
+                      return_preact=False):
     """
-    3x3 version of the PreResNet specific convolution block.
+    3x3 version of the pre-activated convolution block.
 
     Parameters:
     ----------
@@ -106,13 +119,16 @@ def preres_conv3x3(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
     """
-    return PreResConv(
+    return PreConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
         stride=stride,
-        padding=1)
+        padding=1,
+        return_preact=return_preact)
 
 
 class PreResBottleneck(nn.Module):
@@ -135,23 +151,22 @@ class PreResBottleneck(nn.Module):
         super(PreResBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv1 = preres_conv1x1(
+        self.conv1 = pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=1)
-        self.conv2 = preres_conv3x3(
+            return_preact=True)
+        self.conv2 = pre_conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
             stride=stride)
-        self.conv3 = preres_conv1x1(
+        self.conv3 = pre_conv1x1_block(
             in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1)
+            out_channels=out_channels)
 
     def forward(self, x):
         x, x_pre_activ = self.conv1(x)
-        x, _ = self.conv2(x)
-        x, _ = self.conv3(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         return x, x_pre_activ
 
 
@@ -194,6 +209,14 @@ class ResBlock(nn.Module):
         return x
 
 
+def interpolate(x, size):
+    return F.interpolate(
+        input=x,
+        size=size,
+        mode='bilinear',
+        align_corners=True)
+
+
 class AttentionModule_stage1(nn.Module):
     # input size is 56*56
     def __init__(self,
@@ -203,6 +226,9 @@ class AttentionModule_stage1(nn.Module):
                  size2=(28, 28),
                  size3=(14, 14)):
         super(AttentionModule_stage1, self).__init__()
+        self.size1 = size1
+        self.size2 = size2
+        self.size3 = size3
 
         self.first_residual_blocks = ResBlock(in_channels, out_channels)
         self.trunk_branches = nn.Sequential(
@@ -224,23 +250,23 @@ class AttentionModule_stage1(nn.Module):
             ResBlock(in_channels, out_channels)
         )
 
-        self.interpolation3 = nn.UpsamplingBilinear2d(size=size3)
+        # self.interpolation3 = nn.UpsamplingBilinear2d(size=size3)
 
         self.softmax4_blocks = ResBlock(in_channels, out_channels)
 
-        self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
+        # self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
 
         self.softmax5_blocks = ResBlock(in_channels, out_channels)
 
-        self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
+        # self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
 
         self.softmax6_blocks = nn.Sequential(
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels , kernel_size = 1, stride = 1, bias = False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels , kernel_size = 1, stride = 1, bias = False),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
             nn.Sigmoid()
         )
 
@@ -260,15 +286,15 @@ class AttentionModule_stage1(nn.Module):
 
         out_mpool3 = self.mpool3(out_softmax2)
         out_softmax3 = self.softmax3_blocks(out_mpool3)
-        out_interp3 = self.interpolation3(out_softmax3) + out_softmax2
+        out_interp3 = interpolate(out_softmax3, size=self.size3) + out_softmax2
         out = out_interp3 + out_skip2_connection
 
         out_softmax4 = self.softmax4_blocks(out)
-        out_interp2 = self.interpolation2(out_softmax4) + out_softmax1
+        out_interp2 = interpolate(out_softmax4, size=self.size2) + out_softmax1
         out = out_interp2 + out_skip1_connection
 
         out_softmax5 = self.softmax5_blocks(out)
-        out_interp1 = self.interpolation1(out_softmax5) + out_trunk
+        out_interp1 = interpolate(out_softmax5, size=self.size1) + out_trunk
 
         out_softmax6 = self.softmax6_blocks(out_interp1)
         out = (1 + out_softmax6) * out_trunk
@@ -279,8 +305,15 @@ class AttentionModule_stage1(nn.Module):
 
 class AttentionModule_stage2(nn.Module):
     # input image size is 28*28
-    def __init__(self, in_channels, out_channels, size1=(28, 28), size2=(14, 14)):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 size1=(28, 28),
+                 size2=(14, 14)):
         super(AttentionModule_stage2, self).__init__()
+        self.size1 = size1
+        self.size2 = size2
+
         self.first_residual_blocks = ResBlock(in_channels, out_channels)
 
         self.trunk_branches = nn.Sequential(
@@ -301,19 +334,19 @@ class AttentionModule_stage2(nn.Module):
             ResBlock(in_channels, out_channels)
         )
 
-        self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
+        # self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
 
         self.softmax3_blocks = ResBlock(in_channels, out_channels)
 
-        self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
+        # self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
 
         self.softmax4_blocks = nn.Sequential(
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
             nn.Sigmoid()
         )
 
@@ -328,12 +361,10 @@ class AttentionModule_stage2(nn.Module):
         out_mpool2 = self.mpool2(out_softmax1)
         out_softmax2 = self.softmax2_blocks(out_mpool2)
 
-        out_interp2 = self.interpolation2(out_softmax2) + out_softmax1
-        # print(out_skip2_connection.data)
-        # print(out_interp3.data)
+        out_interp2 = interpolate(out_softmax2, size=self.size2) + out_softmax1
         out = out_interp2 + out_skip1_connection
         out_softmax3 = self.softmax3_blocks(out)
-        out_interp1 = self.interpolation1(out_softmax3) + out_trunk
+        out_interp1 = interpolate(out_softmax3, size=self.size1) + out_trunk
         out_softmax4 = self.softmax4_blocks(out_interp1)
         out = (1 + out_softmax4) * out_trunk
         out_last = self.last_blocks(out)
@@ -343,8 +374,13 @@ class AttentionModule_stage2(nn.Module):
 
 class AttentionModule_stage3(nn.Module):
     # input image size is 14*14
-    def __init__(self, in_channels, out_channels, size1=(14, 14)):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 size1=(14, 14)):
         super(AttentionModule_stage3, self).__init__()
+        self.size1 = size1
+
         self.first_residual_blocks = ResBlock(in_channels, out_channels)
 
         self.trunk_branches = nn.Sequential(
@@ -361,12 +397,12 @@ class AttentionModule_stage3(nn.Module):
         self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
 
         self.softmax2_blocks = nn.Sequential(
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
+            pre_conv1x1_block(
+                in_channels=out_channels,
+                out_channels=out_channels),
             nn.Sigmoid()
         )
 
@@ -378,7 +414,7 @@ class AttentionModule_stage3(nn.Module):
         out_mpool1 = self.mpool1(x)
         out_softmax1 = self.softmax1_blocks(out_mpool1)
 
-        out_interp1 = self.interpolation1(out_softmax1) + out_trunk
+        out_interp1 = interpolate(out_softmax1, size=self.size1) + out_trunk
         out_softmax2 = self.softmax2_blocks(out_interp1)
         out = (1 + out_softmax2) * out_trunk
         out_last = self.last_blocks(out)
@@ -391,7 +427,7 @@ class ResidualAttentionModel_56(nn.Module):
     def __init__(self):
         super(ResidualAttentionModel_56, self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias = False),
+            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )
@@ -438,7 +474,7 @@ class ResidualAttentionModel_92(nn.Module):
     def __init__(self):
         super(ResidualAttentionModel_92, self).__init__()
         self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias = False),
+            nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )

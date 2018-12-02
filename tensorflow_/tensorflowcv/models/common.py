@@ -57,7 +57,7 @@ def conv2d(x,
     if isinstance(padding, int):
         padding = (padding, padding)
     if isinstance(dilation, int):
-        padding = (dilation, dilation)
+        dilation = (dilation, dilation)
 
     if (padding[0] > 0) or (padding[1] > 0):
         x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])

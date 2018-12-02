@@ -61,7 +61,7 @@ def conv2d(x,
     if isinstance(padding, int):
         padding = (padding, padding)
     if isinstance(dilation, int):
-        padding = (dilation, dilation)
+        dilation = (dilation, dilation)
 
     extra_pad = False
     if (padding[0] == padding[1]) and (padding[0] == 0):

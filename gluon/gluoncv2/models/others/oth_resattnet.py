@@ -1,9 +1,9 @@
 """ResidualAttentionNetwork, implemented in Gluon."""
 
-__all__ = ['ResidualAttentionModel', 'cifar_ResidualAttentionModel',
-           'residualattentionnet56', 'cifar_residualattentionnet56',
-           'residualattentionnet92', 'cifar_residualattentionnet92',
-           'residualattentionnet128', 'cifar_residualattentionnet452',
+__all__ = ['ResidualAttentionModel',
+           'residualattentionnet56',
+           'residualattentionnet92',
+           'residualattentionnet128',
            'residualattentionnet164', 'residualattentionnet200',
            'residualattentionnet236', 'residualattentionnet452']
 

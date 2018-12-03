@@ -463,3 +463,4 @@ class ParametricConcurrent(nn.Sequential):
             out.append(module(x, **kwargs))
         out = torch.cat(tuple(out), dim=self.axis)
         return out
+

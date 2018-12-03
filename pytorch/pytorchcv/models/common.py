@@ -237,6 +237,8 @@ class PreConvBlock(nn.Module):
         Convolution window size.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     """
@@ -595,12 +597,13 @@ class Hourglass(nn.Module):
         assert (len(up_seq) == len(down_seq))
         assert (len(skip_seq) == len(down_seq))
         assert (merge_type in ["add"])
-        self.down_seq = down_seq
-        self.up_seq = up_seq
-        self.skip_seq = skip_seq
         self.merge_type = merge_type
         self.return_first_skip = return_first_skip
         self.depth = len(down_seq)
+
+        self.down_seq = down_seq
+        self.up_seq = up_seq
+        self.skip_seq = skip_seq
 
     def forward(self, x, **kwargs):
         y = None

@@ -401,6 +401,28 @@ class InterpolationBlock(nn.Module):
             align_corners=True)
 
 
+class InterpolationBlock2(nn.Module):
+    """
+    Interpolation block.
+
+    Parameters:
+    ----------
+    scale_factor : float
+        Multiplier for spatial size.
+    """
+    def __init__(self,
+                 scale_factor):
+        super(InterpolationBlock2, self).__init__()
+        self.scale_factor = scale_factor
+
+    def forward(self, x, **kwargs):
+        return F.interpolate(
+            input=x,
+            scale_factor=self.scale_factor,
+            mode='bilinear',
+            align_corners=True)
+
+
 class DoubleSkipBlock(nn.Module):
     """
     Double skip connection block.
@@ -420,11 +442,9 @@ class AttentionModule_stage1(nn.Module):
     # input size is 56*56
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 size1=(56, 56),
-                 size2=(28, 28),
-                 size3=(14, 14)):
+                 out_channels):
         super(AttentionModule_stage1, self).__init__()
+        scale_factor = 2
 
         self.first_residual_blocks = ResBlock(in_channels, out_channels)
 
@@ -447,11 +467,11 @@ class AttentionModule_stage1(nn.Module):
         up_seq = nn.Sequential()
         up_seq.add_module('up1', nn.Sequential(
             ResBlock(in_channels, out_channels),
-            InterpolationBlock(size1)))
+            InterpolationBlock2(scale_factor)))
         up_seq.add_module('up2', nn.Sequential(
             ResBlock(in_channels, out_channels),
-            InterpolationBlock(size2)))
-        up_seq.add_module('up3', InterpolationBlock(size3))
+            InterpolationBlock2(scale_factor)))
+        up_seq.add_module('up3', InterpolationBlock2(scale_factor))
         skip_seq = nn.Sequential()
         skip_seq.add_module('skip1', nn.Sequential(
             ResBlock(in_channels, out_channels),
@@ -480,92 +500,6 @@ class AttentionModule_stage1(nn.Module):
         x = self.first_residual_blocks(x)
 
         out_interp1, out_trunk = self.hg(x)
-
-        out_softmax6 = self.softmax6_blocks(out_interp1)
-        out = (1 + out_softmax6) * out_trunk
-
-        out_last = self.last_blocks(out)
-        return out_last
-
-
-class AttentionModule_stage1b(nn.Module):
-    # input size is 56*56
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 size1=(56, 56),
-                 size2=(28, 28),
-                 size3=(14, 14)):
-        super(AttentionModule_stage1b, self).__init__()
-        self.size1 = size1
-        self.size2 = size2
-        self.size3 = size3
-
-        self.first_residual_blocks = ResBlock(in_channels, out_channels)
-        self.trunk_branches = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-         )
-
-        self.mpool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax1_blocks = ResBlock(in_channels, out_channels)
-
-        self.mpool2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax2_blocks = ResBlock(in_channels, out_channels)
-
-        self.mpool3 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax3_blocks = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-        )
-
-        self.skip1_connection_residual_block = ResBlock(in_channels, out_channels)
-
-        self.skip2_connection_residual_block = ResBlock(in_channels, out_channels)
-
-        # self.interpolation3 = nn.UpsamplingBilinear2d(size=size3)
-
-        self.softmax4_blocks = ResBlock(in_channels, out_channels)
-
-        # self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
-
-        self.softmax5_blocks = ResBlock(in_channels, out_channels)
-
-        # self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
-
-        self.softmax6_blocks = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.last_blocks = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
-        x = self.first_residual_blocks(x)
-        out_trunk = self.trunk_branches(x)
-
-        out_mpool1 = self.mpool1(x)
-        out_softmax1 = self.softmax1_blocks(out_mpool1)
-        out_skip1_connection = self.skip1_connection_residual_block(out_softmax1)
-
-        out_mpool2 = self.mpool2(out_softmax1)
-        out_softmax2 = self.softmax2_blocks(out_mpool2)
-        out_skip2_connection = self.skip2_connection_residual_block(out_softmax2)
-
-        out_mpool3 = self.mpool3(out_softmax2)
-        out_softmax3 = self.softmax3_blocks(out_mpool3)
-        out = interpolate(out_softmax3, size=self.size3) + (out_softmax2 + out_skip2_connection)
-
-        out_softmax4 = self.softmax4_blocks(out)
-        out = interpolate(out_softmax4, size=self.size2) + (out_softmax1 + out_skip1_connection)
-
-        out_softmax5 = self.softmax5_blocks(out)
-        out_interp1 = interpolate(out_softmax5, size=self.size1) + out_trunk
 
         out_softmax6 = self.softmax6_blocks(out_interp1)
         out = (1 + out_softmax6) * out_trunk

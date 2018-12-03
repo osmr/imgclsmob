@@ -8,6 +8,7 @@ from .models.airnet import *
 from .models.airnext import *
 from .models.bamresnet import *
 from .models.cbamresnet import *
+from .models.resattnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
@@ -144,6 +145,14 @@ _models = {
     'cbam_resnet50': cbam_resnet50,
     'cbam_resnet101': cbam_resnet101,
     'cbam_resnet152': cbam_resnet152,
+
+    'resattnet56': resattnet56,
+    'resattnet92': resattnet92,
+    'resattnet128': resattnet128,
+    'resattnet164': resattnet164,
+    'resattnet200': resattnet200,
+    'resattnet236': resattnet236,
+    'resattnet452': resattnet452,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 

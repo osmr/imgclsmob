@@ -10,7 +10,7 @@ import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from common import conv1x1, conv7x7_block, pre_conv1x1_block, pre_conv3x3_block, Hourglass
+from .common import conv1x1, conv7x7_block, pre_conv1x1_block, pre_conv3x3_block, Hourglass
 
 
 class PreResBottleneck(nn.Module):
@@ -91,14 +91,6 @@ class ResBlock(nn.Module):
         return x
 
 
-def interpolate(x, size):
-    return F.interpolate(
-        input=x,
-        size=size,
-        mode='bilinear',
-        align_corners=True)
-
-
 class InterpolationBlock(nn.Module):
     """
     Interpolation block.
@@ -124,6 +116,13 @@ class InterpolationBlock(nn.Module):
 class DoubleSkipBlock(nn.Module):
     """
     Double skip connection block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
     """
     def __init__(self,
                  in_channels,
@@ -137,7 +136,20 @@ class DoubleSkipBlock(nn.Module):
 
 
 class AttBlock(nn.Module):
-    # input size is 56*56
+    """
+    Attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    hourglass_depth : int
+        Depth of hourglass block.
+    att_scales : list of int
+        Attention block specific scales.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -255,7 +267,7 @@ class PreActivation(nn.Module):
 
 class ResAttNet(nn.Module):
     """
-    ResAttNet model.
+    ResAttNet model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
     Parameters:
     ----------
@@ -265,7 +277,7 @@ class ResAttNet(nn.Module):
         Number of output channels for the initial unit.
     attentions : list of list of int
         Whether to use a attention unit or residual one.
-    attentions : list of int
+    att_scales : list of int
         Attention block specific scales.
     in_channels : int, default 3
         Number of input channels.
@@ -402,58 +414,102 @@ def get_resattnet(blocks,
     return net
 
 
-def resattnet56(pretrained=False, **kwargs):
-    return get_resattnet(56, **kwargs)
-
-
-def resattnet92(pretrained=False, **kwargs):
-    return get_resattnet(92, **kwargs)
-
-
-def resattnet128(pretrained=False, **kwargs):
-    return get_resattnet(128, **kwargs)
-
-
-def resattnet164(pretrained=False, **kwargs):
-    return get_resattnet(164, **kwargs)
-
-
-def resattnet200(pretrained=False, **kwargs):
-    return get_resattnet(200, **kwargs)
-
-
-def resattnet236(pretrained=False, **kwargs):
-    return get_resattnet(236, **kwargs)
-
-
-def resattnet452(pretrained=False, **kwargs):
-    return get_resattnet(452, **kwargs)
-
-
-def load_model(net,
-               file_path,
-               ignore_extra=True):
+def resattnet56(**kwargs):
     """
-    Load model state dictionary from a file.
+    ResAttNet-56 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
-    Parameters
+    Parameters:
     ----------
-    net : Module
-        Network in which weights are loaded.
-    file_path : str
-        Path to the file.
-    ignore_extra : bool, default True
-        Whether to silently ignore parameters from the file that are not present in this Module.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    import torch
+    return get_resattnet(blocks=56, model_name="resattnet56", **kwargs)
 
-    if ignore_extra:
-        pretrained_state = torch.load(file_path)
-        model_dict = net.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
-    else:
-        net.load_state_dict(torch.load(file_path))
+
+def resattnet92(**kwargs):
+    """
+    ResAttNet-92 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=92, model_name="resattnet92", **kwargs)
+
+
+def resattnet128(**kwargs):
+    """
+    ResAttNet-128 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=128, model_name="resattnet128", **kwargs)
+
+
+def resattnet164(**kwargs):
+    """
+    ResAttNet-164 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=164, model_name="resattnet164", **kwargs)
+
+
+def resattnet200(**kwargs):
+    """
+    ResAttNet-200 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=200, model_name="resattnet200", **kwargs)
+
+
+def resattnet236(**kwargs):
+    """
+    ResAttNet-236 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=236, model_name="resattnet236", **kwargs)
+
+
+def resattnet452(**kwargs):
+    """
+    ResAttNet-452 model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resattnet(blocks=452, model_name="resattnet452", **kwargs)
 
 
 def _calc_width(net):

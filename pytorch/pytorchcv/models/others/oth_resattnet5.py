@@ -1,5 +1,7 @@
+import os
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.nn.init as init
 
 
 class Hourglass(nn.Module):
@@ -13,11 +15,11 @@ class Hourglass(nn.Module):
     up_seq : nn.Sequential
         Up modules as sequential.
     skip_seq : nn.Sequential
-        Skip modules as sequential.
+        Skip connection modules as sequential.
     merge_type : str, default 'add'
         Type of concatenation of up and skip outputs.
     return_first_skip : bool, default False
-        Whether return the first skip connection output.
+        Whether return the first skip connection output. Used in ResAttNet.
     """
     def __init__(self,
                  down_seq,
@@ -47,7 +49,7 @@ class Hourglass(nn.Module):
                 y = down_outs[self.depth - i]
                 skip_module = self.skip_seq[self.depth - i]
                 y = skip_module(y)
-                if self.merge_type == "add":
+                if (y is not None) and (self.merge_type == "add"):
                     x = x + y
             if i != len(down_outs) - 1:
                 up_module = self.up_seq[self.depth - 1 - i]
@@ -385,34 +387,12 @@ class InterpolationBlock(nn.Module):
 
     Parameters:
     ----------
-    size : tuple of 2 int
-        Output spatial size.
-    """
-    def __init__(self,
-                 size):
-        super(InterpolationBlock, self).__init__()
-        self.size = size
-
-    def forward(self, x, **kwargs):
-        return F.interpolate(
-            input=x,
-            size=self.size,
-            mode='bilinear',
-            align_corners=True)
-
-
-class InterpolationBlock2(nn.Module):
-    """
-    Interpolation block.
-
-    Parameters:
-    ----------
     scale_factor : float
         Multiplier for spatial size.
     """
     def __init__(self,
                  scale_factor):
-        super(InterpolationBlock2, self).__init__()
+        super(InterpolationBlock, self).__init__()
         self.scale_factor = scale_factor
 
     def forward(self, x, **kwargs):
@@ -438,211 +418,43 @@ class DoubleSkipBlock(nn.Module):
         return x
 
 
-class AttentionModule_stage1(nn.Module):
+class AttBlock(nn.Module):
     # input size is 56*56
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(AttentionModule_stage1, self).__init__()
-        scale_factor = 2
-        hourglass_depth = 3
-
-        self.init_block = ResBlock(in_channels, out_channels)
-
-        down_seq = nn.Sequential()
-        up_seq = nn.Sequential()
-        skip_seq = nn.Sequential()
-        for i in range(hourglass_depth):
-            down_seq.add_module('down{}'.format(i + 1), nn.Sequential(
-                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                ResBlock(in_channels, out_channels)
-            ))
-            up_seq.add_module('up{}'.format(i + 1), nn.Sequential(
-                ResBlock(in_channels, out_channels),
-                InterpolationBlock2(scale_factor)))
-            if i == 0:
-                skip_seq.add_module('skip1', nn.Sequential(
-                    ResBlock(in_channels, out_channels),
-                    ResBlock(in_channels, out_channels)))
-            else:
-                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(in_channels, out_channels))
-        self.hg = Hourglass(
-            down_seq=down_seq,
-            up_seq=up_seq,
-            skip_seq=skip_seq,
-            return_first_skip=True)
-
-        self.middle_block = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.final_block = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
-        x = self.init_block(x)
-        x, y = self.hg(x)
-        x = self.middle_block(x)
-        x = (1 + x) * y
-        x = self.final_block(x)
-        return x
-
-
-class AttentionModule_stage2(nn.Module):
-    # input image size is 28*28
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(AttentionModule_stage2, self).__init__()
-        scale_factor = 2
-        hourglass_depth = 2
-
-        self.init_block = ResBlock(in_channels, out_channels)
-
-        down_seq = nn.Sequential()
-        up_seq = nn.Sequential()
-        skip_seq = nn.Sequential()
-        for i in range(hourglass_depth):
-            down_seq.add_module('down{}'.format(i + 1), nn.Sequential(
-                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                ResBlock(in_channels, out_channels)
-            ))
-            up_seq.add_module('up{}'.format(i + 1), nn.Sequential(
-                ResBlock(in_channels, out_channels),
-                InterpolationBlock2(scale_factor)))
-            if i == 0:
-                skip_seq.add_module('skip1', nn.Sequential(
-                    ResBlock(in_channels, out_channels),
-                    ResBlock(in_channels, out_channels)))
-            else:
-                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(in_channels, out_channels))
-        self.hg = Hourglass(
-            down_seq=down_seq,
-            up_seq=up_seq,
-            skip_seq=skip_seq,
-            return_first_skip=True)
-
-        self.middle_block = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.final_block = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
-        x = self.init_block(x)
-        x, y = self.hg(x)
-        x = self.middle_block(x)
-        x = (1 + x) * y
-        x = self.final_block(x)
-        return x
-
-
-class AttentionModule_stage2b(nn.Module):
-    # input image size is 28*28
-    def __init__(self,
-                 in_channels,
                  out_channels,
-                 size1=(28, 28),
-                 size2=(14, 14)):
-        super(AttentionModule_stage2b, self).__init__()
-        self.size1 = size1
-        self.size2 = size2
-
-        self.first_residual_blocks = ResBlock(in_channels, out_channels)
-
-        self.trunk_branches = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-        )
-
-        self.mpool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax1_blocks = ResBlock(in_channels, out_channels)
-        self.skip1_connection_residual_block = ResBlock(in_channels, out_channels)
-
-        self.mpool2 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax2_blocks = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-        )
-
-        # self.interpolation2 = nn.UpsamplingBilinear2d(size=size2)
-
-        self.softmax3_blocks = ResBlock(in_channels, out_channels)
-
-        # self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
-
-        self.softmax4_blocks = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.last_blocks = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
-        x = self.first_residual_blocks(x)
-        out_trunk = self.trunk_branches(x)
-
-        out_mpool1 = self.mpool1(x)
-        out_softmax1 = self.softmax1_blocks(out_mpool1)
-        out_skip1_connection = self.skip1_connection_residual_block(out_softmax1)
-
-        out_mpool2 = self.mpool2(out_softmax1)
-        out_softmax2 = self.softmax2_blocks(out_mpool2)
-        out = interpolate(out_softmax2, size=self.size2) + (out_softmax1 + out_skip1_connection)
-
-        out_softmax3 = self.softmax3_blocks(out)
-        out_interp1 = interpolate(out_softmax3, size=self.size1) + out_trunk
-
-        out_softmax4 = self.softmax4_blocks(out_interp1)
-        out = (1 + out_softmax4) * out_trunk
-
-        out_last = self.last_blocks(out)
-
-        return out_last
-
-
-class AttentionModule_stage3(nn.Module):
-    # input image size is 14*14
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(AttentionModule_stage3, self).__init__()
+                 hourglass_depth,
+                 att_scales):
+        super(AttBlock, self).__init__()
+        assert (len(att_scales) == 3)
         scale_factor = 2
-        hourglass_depth = 1
+        scale_p, scale_t, scale_r = att_scales
 
-        self.init_block = ResBlock(in_channels, out_channels)
+        self.init_blocks = nn.Sequential()
+        for i in range(scale_p):
+            self.init_blocks.add_module('block{}'.format(i + 1), ResBlock(in_channels, out_channels))
 
         down_seq = nn.Sequential()
         up_seq = nn.Sequential()
         skip_seq = nn.Sequential()
         for i in range(hourglass_depth):
+            down_res_blocks = nn.Sequential()
+            for j in range(scale_r):
+                down_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
             down_seq.add_module('down{}'.format(i + 1), nn.Sequential(
                 nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                ResBlock(in_channels, out_channels)
-            ))
+                down_res_blocks))
+            up_res_blocks = nn.Sequential()
+            for j in range(scale_r):
+                up_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
             up_seq.add_module('up{}'.format(i + 1), nn.Sequential(
-                ResBlock(in_channels, out_channels),
-                InterpolationBlock2(scale_factor)))
+                up_res_blocks,
+                InterpolationBlock(scale_factor)))
             if i == 0:
-                skip_seq.add_module('skip1', nn.Sequential(
-                    ResBlock(in_channels, out_channels),
-                    ResBlock(in_channels, out_channels)))
+                skip_res_blocks = nn.Sequential()
+                for j in range(scale_t):
+                    skip_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
+                skip_seq.add_module('skip1', skip_res_blocks)
             else:
                 skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(in_channels, out_channels))
         self.hg = Hourglass(
@@ -664,63 +476,12 @@ class AttentionModule_stage3(nn.Module):
         self.final_block = ResBlock(in_channels, out_channels)
 
     def forward(self, x):
-        x = self.init_block(x)
+        x = self.init_blocks(x)
         x, y = self.hg(x)
         x = self.middle_block(x)
         x = (1 + x) * y
         x = self.final_block(x)
         return x
-
-
-class AttentionModule_stage3b(nn.Module):
-    # input image size is 14*14
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 size1=(14, 14)):
-        super(AttentionModule_stage3b, self).__init__()
-        self.size1 = size1
-
-        self.first_residual_blocks = ResBlock(in_channels, out_channels)
-
-        self.trunk_branches = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-        )
-
-        self.mpool1 = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.softmax1_blocks = nn.Sequential(
-            ResBlock(in_channels, out_channels),
-            ResBlock(in_channels, out_channels)
-        )
-
-        self.interpolation1 = nn.UpsamplingBilinear2d(size=size1)
-
-        self.softmax2_blocks = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.last_blocks = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
-        x = self.first_residual_blocks(x)
-        out_trunk = self.trunk_branches(x)
-
-        out_mpool1 = self.mpool1(x)
-        out_softmax1 = self.softmax1_blocks(out_mpool1)
-        out_interp1 = interpolate(out_softmax1, size=self.size1) + out_trunk
-
-        out_softmax2 = self.softmax2_blocks(out_interp1)
-        out = (1 + out_softmax2) * out_trunk
-        out_last = self.last_blocks(out)
-
-        return out_last
 
 
 class ResAttInitBlock(nn.Module):
@@ -753,104 +514,202 @@ class ResAttInitBlock(nn.Module):
         return x
 
 
-class ResidualAttentionModel_56(nn.Module):
-    # for input size 224
-    def __init__(self):
-        super(ResidualAttentionModel_56, self).__init__()
-        self.init_block = ResAttInitBlock(
-            in_channels=3,
-            out_channels=64)
-        self.residual_block1 = ResBlock(64, 256)
-        self.attention_module1 = AttentionModule_stage1(256, 256)
-        self.residual_block2 = ResBlock(256, 512, 2)
-        self.attention_module2 = AttentionModule_stage2(512, 512)
-        self.residual_block3 = ResBlock(512, 1024, 2)
-        self.attention_module3 = AttentionModule_stage3(1024, 1024)
-        self.residual_block4 = ResBlock(1024, 2048, 2)
-        self.residual_block5 = ResBlock(2048, 2048)
-        self.residual_block6 = ResBlock(2048, 2048)
-        self.mpool2 = nn.Sequential(
-            nn.BatchNorm2d(2048),
-            nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=7, stride=1)
-        )
-        self.fc = nn.Linear(2048,1000)
+class PreActivation(nn.Module):
+    """
+    Pre-activation block without convolution layer. It's used by itself as the final block in PreResNet.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    """
+    def __init__(self,
+                 in_channels):
+        super(PreActivation, self).__init__()
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        out = self.init_block(x)
-        # print(out.data)
-        out = self.residual_block1(out)
-        out = self.attention_module1(out)
-        out = self.residual_block2(out)
-        out = self.attention_module2(out)
-        out = self.residual_block3(out)
-        # print(out.data)
-        out = self.attention_module3(out)
-        out = self.residual_block4(out)
-        out = self.residual_block5(out)
-        out = self.residual_block6(out)
-        out = self.mpool2(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc(out)
-
-        return out
+        x = self.bn(x)
+        x = self.activ(x)
+        return x
 
 
-class ResidualAttentionModel_92(nn.Module):
-    # for input size 224
-    def __init__(self):
-        super(ResidualAttentionModel_92, self).__init__()
-        self.init_block = ResAttInitBlock(
-            in_channels=3,
-            out_channels=64)
-        self.residual_block1 = ResBlock(64, 256)
-        self.attention_module1 = AttentionModule_stage1(256, 256)
-        self.residual_block2 = ResBlock(256, 512, 2)
-        self.attention_module2 = AttentionModule_stage2(512, 512)
-        self.attention_module2_2 = AttentionModule_stage2(512, 512)  # tbq add
-        self.residual_block3 = ResBlock(512, 1024, 2)
-        self.attention_module3 = AttentionModule_stage3(1024, 1024)
-        self.attention_module3_2 = AttentionModule_stage3(1024, 1024)  # tbq add
-        self.attention_module3_3 = AttentionModule_stage3(1024, 1024)  # tbq add
-        self.residual_block4 = ResBlock(1024, 2048, 2)
-        self.residual_block5 = ResBlock(2048, 2048)
-        self.residual_block6 = ResBlock(2048, 2048)
-        self.mpool2 = nn.Sequential(
-            nn.BatchNorm2d(2048),
-            nn.ReLU(inplace=True),
-            nn.AvgPool2d(kernel_size=7, stride=1)
-        )
-        self.fc = nn.Linear(2048,1000)
+class ResAttNet(nn.Module):
+    """
+    ResAttNet model.
+
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    attentions : list of list of int
+        Whether to use a attention unit or residual one.
+    attentions : list of int
+        Attention block specific scales.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
+    def __init__(self,
+                 channels,
+                 init_block_channels,
+                 attentions,
+                 att_scales,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 num_classes=1000):
+        super(ResAttNet, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
+
+        self.features = nn.Sequential()
+        self.features.add_module("init_block", ResAttInitBlock(
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            hourglass_depth = len(channels) - 1 - i
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                stride = 1 if (i == 0) or (j != 0) else 2
+                if attentions[i][j]:
+                    stage.add_module("unit{}".format(j + 1), AttBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        hourglass_depth=hourglass_depth,
+                        att_scales=att_scales))
+                else:
+                    stage.add_module("unit{}".format(j + 1), ResBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        stride=stride))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module('post_activ', PreActivation(in_channels=in_channels))
+        self.features.add_module('final_pool', nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
+
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
-        out = self.init_block(x)
-        # print(out.data)
-        out = self.residual_block1(out)
-        out = self.attention_module1(out)
-        out = self.residual_block2(out)
-        out = self.attention_module2(out)
-        out = self.attention_module2_2(out)
-        out = self.residual_block3(out)
-        # print(out.data)
-        out = self.attention_module3(out)
-        out = self.attention_module3_2(out)
-        out = self.attention_module3_3(out)
-        out = self.residual_block4(out)
-        out = self.residual_block5(out)
-        out = self.residual_block6(out)
-        out = self.mpool2(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc(out)
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        x = self.output(x)
+        return x
 
-        return out
+
+def get_resattnet(blocks,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join('~', '.torch', 'models'),
+                  **kwargs):
+    """
+    Create ResAttNet model with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    if blocks == 56:
+        att_layers = [1, 1, 1]
+        att_scales = [1, 2, 1]
+    elif blocks == 92:
+        att_layers = [1, 2, 3]
+        att_scales = [1, 2, 1]
+    elif blocks == 128:
+        att_layers = [2, 3, 4]
+        att_scales = [1, 2, 1]
+    elif blocks == 164:
+        att_layers = [3, 4, 5]
+        att_scales = [1, 2, 1]
+    elif blocks == 200:
+        att_layers = [4, 5, 6]
+        att_scales = [1, 2, 1]
+    elif blocks == 236:
+        att_layers = [5, 6, 7]
+        att_scales = [1, 2, 1]
+    elif blocks == 452:
+        att_layers = [5, 6, 7]
+        att_scales = [2, 4, 3]
+    else:
+        raise ValueError("Unsupported ResAttNet with number of blocks: {}".format(blocks))
+
+    init_block_channels = 64
+    channels_per_layers = [256, 512, 1024, 2048]
+    layers = att_layers + [2]
+    channels = [[ci] * (li + 1) for (ci, li) in zip(channels_per_layers, layers)]
+    attentions = [[0] + [1] * li for li in att_layers] + [[0] * 3]
+
+    net = ResAttNet(
+        channels=channels,
+        init_block_channels=init_block_channels,
+        attentions=attentions,
+        att_scales=att_scales,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
 
 
 def oth_resattnet56(pretrained=False, **kwargs):
-    return ResidualAttentionModel_56(**kwargs)
+    return get_resattnet(56, **kwargs)
 
 
 def oth_resattnet92(pretrained=False, **kwargs):
-    return ResidualAttentionModel_92(**kwargs)
+    return get_resattnet(92, **kwargs)
+
+
+def oth_resattnet128(pretrained=False, **kwargs):
+    return get_resattnet(128, **kwargs)
+
+
+def oth_resattnet164(pretrained=False, **kwargs):
+    return get_resattnet(164, **kwargs)
+
+
+def oth_resattnet200(pretrained=False, **kwargs):
+    return get_resattnet(200, **kwargs)
+
+
+def oth_resattnet236(pretrained=False, **kwargs):
+    return get_resattnet(236, **kwargs)
+
+
+def oth_resattnet452(pretrained=False, **kwargs):
+    return get_resattnet(452, **kwargs)
 
 
 def load_model(net,
@@ -897,6 +756,11 @@ def _test():
     models = [
         oth_resattnet56,
         oth_resattnet92,
+        oth_resattnet128,
+        oth_resattnet164,
+        oth_resattnet200,
+        oth_resattnet236,
+        oth_resattnet452,
     ]
 
     for model in models:
@@ -910,6 +774,11 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_resattnet56 or weight_count == 31810728)
         assert (model != oth_resattnet92 or weight_count == 52466344)
+        assert (model != oth_resattnet128 or weight_count == 65294504)
+        assert (model != oth_resattnet164 or weight_count == 78122664)
+        assert (model != oth_resattnet200 or weight_count == 90950824)
+        assert (model != oth_resattnet236 or weight_count == 103778984)
+        assert (model != oth_resattnet452 or weight_count == 182285224)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

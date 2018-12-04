@@ -11,18 +11,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class ReLU6(Chain):
-    """
-    ReLU6 activation layer.
-    """
-    def __init__(self):
-        super(ReLU6, self).__init__()
-
-    def __call__(self, x):
-        return F.clip(x, 0.0, 6.0)
+from .common import ReLU6, SimpleSequential
 
 
 class MobnetConv(Chain):

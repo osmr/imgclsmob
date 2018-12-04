@@ -8,17 +8,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class ReLU6(nn.HybridBlock):
-    """
-    ReLU6 activation layer.
-    """
-    def __init__(self, **kwargs):
-        super(ReLU6, self).__init__(**kwargs)
-
-    def hybrid_forward(self, F, x):
-        return F.clip(x, 0, 6, name="relu6")
+from .common import ReLU6
 
 
 class MobnetConv(HybridBlock):

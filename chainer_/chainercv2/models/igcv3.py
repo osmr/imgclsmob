@@ -12,34 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, ChannelShuffle, SimpleSequential
-
-
-def dwconv3x3_block(in_channels,
-                    out_channels,
-                    stride,
-                    activate):
-    """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return conv3x3_block(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        stride=stride,
-        groups=out_channels,
-        act_type="relu6",
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, SimpleSequential
 
 
 class InvResUnit(Chain):
@@ -81,6 +54,7 @@ class InvResUnit(Chain):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=stride,
+                act_type="relu6",
                 activate=True)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,

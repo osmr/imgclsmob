@@ -10,47 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, channel_shuffle_lambda
-
-
-def dwconv3x3_block(x,
-                    in_channels,
-                    out_channels,
-                    strides,
-                    activate,
-                    name="dwconv3x3_block"):
-    """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'dwconv3x3_block'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return conv3x3_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        strides=strides,
-        groups=out_channels,
-        act_type="relu6",
-        activate=activate,
-        name=name)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle_lambda
 
 
 def inv_res_unit(x,
@@ -106,6 +66,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
+        act_type="relu6",
         activate=True,
         name=name + "/conv2")
     x = conv1x1_block(

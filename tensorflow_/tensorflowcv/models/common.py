@@ -3,7 +3,7 @@
 """
 
 __all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block', 'conv1x1_block', 'conv3x3_block',
-           'se_block', 'channel_shuffle', 'channel_shuffle2']
+           'dwconv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
 
 import math
 import tensorflow as tf
@@ -504,6 +504,65 @@ def conv3x3_block(x,
         padding=padding,
         dilation=dilation,
         groups=groups,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        training=training,
+        name=name)
+
+
+def dwconv3x3_block(x,
+                    in_channels,
+                    out_channels,
+                    strides,
+                    padding=1,
+                    dilation=1,
+                    use_bias=False,
+                    act_type="relu",
+                    activate=True,
+                    training=False,
+                    name="dwconv3x3_block"):
+    """
+    3x3 depthwise version of the standard convolution block with ReLU6 activation.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'dwconv3x3_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return conv3x3_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate,

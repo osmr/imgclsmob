@@ -9,38 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, ChannelShuffle
-
-
-def dwconv3x3_block(in_channels,
-                    out_channels,
-                    strides,
-                    bn_use_global_stats,
-                    activate):
-    """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return conv3x3_block(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        strides=strides,
-        groups=out_channels,
-        bn_use_global_stats=bn_use_global_stats,
-        act_type="relu6",
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle
 
 
 class InvResUnit(HybridBlock):
@@ -88,6 +57,7 @@ class InvResUnit(HybridBlock):
                 out_channels=mid_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
+                act_type="relu6",
                 activate=True)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,

@@ -8,51 +8,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, channel_shuffle
-
-
-def dwconv3x3_block(x,
-                    in_channels,
-                    out_channels,
-                    strides,
-                    activate,
-                    training,
-                    name="dwconv3x3_block"):
-    """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dwconv3x3_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv3x3_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        strides=strides,
-        groups=out_channels,
-        act_type="relu6",
-        activate=activate,
-        training=training,
-        name=name)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle
 
 
 def inv_res_unit(x,
@@ -111,6 +67,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
+        act_type="relu6",
         activate=True,
         training=training,
         name=name + "/conv2")

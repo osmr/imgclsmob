@@ -2,8 +2,8 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
+           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
            'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
 
 from mxnet.gluon import nn, HybridBlock
@@ -247,6 +247,52 @@ def conv7x7_block(in_channels,
         kernel_size=7,
         strides=strides,
         padding=padding,
+        use_bias=use_bias,
+        bn_use_global_stats=bn_use_global_stats,
+        act_type=act_type,
+        activate=activate)
+
+
+def dwconv3x3_block(in_channels,
+                    out_channels,
+                    strides,
+                    padding=1,
+                    dilation=1,
+                    use_bias=False,
+                    bn_use_global_stats=False,
+                    act_type="relu",
+                    activate=True):
+    """
+    3x3 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return conv3x3_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
         use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
         act_type=act_type,

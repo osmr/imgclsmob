@@ -9,34 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, ChannelShuffle
-
-
-def dwconv3x3_block(in_channels,
-                    out_channels,
-                    stride,
-                    activate):
-    """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return conv3x3_block(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        stride=stride,
-        groups=out_channels,
-        act_type="relu6",
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle
 
 
 class InvResUnit(nn.Module):
@@ -77,6 +50,7 @@ class InvResUnit(nn.Module):
             in_channels=mid_channels,
             out_channels=mid_channels,
             stride=stride,
+            act_type="relu6",
             activate=True)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,

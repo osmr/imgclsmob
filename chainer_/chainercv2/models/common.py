@@ -2,8 +2,8 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
+           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
            'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
 
 
@@ -232,6 +232,48 @@ def conv7x7_block(in_channels,
         ksize=7,
         stride=stride,
         pad=pad,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate)
+
+
+def dwconv3x3_block(in_channels,
+                    out_channels,
+                    stride,
+                    pad=1,
+                    dilate=1,
+                    use_bias=False,
+                    act_type="relu",
+                    activate=True):
+    """
+    3x3 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return conv3x3_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        stride=stride,
+        pad=pad,
+        dilate=dilate,
+        groups=out_channels,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate)

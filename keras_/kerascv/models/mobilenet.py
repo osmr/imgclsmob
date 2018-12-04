@@ -13,7 +13,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv_block, conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 def dws_conv_block(x,
@@ -43,14 +43,11 @@ def dws_conv_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = conv_block(
+    x = dwconv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=in_channels,
-        kernel_size=3,
         strides=strides,
-        padding=1,
-        groups=in_channels,
         name=name + "/dw_conv")
     x = conv1x1_block(
         x=x,

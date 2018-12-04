@@ -15,7 +15,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import ConvBlock, conv1x1_block, conv3x3_block, SimpleSequential
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential
 
 
 class DwsConvBlock(Chain):
@@ -38,13 +38,10 @@ class DwsConvBlock(Chain):
                  stride):
         super(DwsConvBlock, self).__init__()
         with self.init_scope():
-            self.dw_conv = ConvBlock(
+            self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                ksize=3,
-                stride=stride,
-                pad=1,
-                groups=in_channels)
+                stride=stride)
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels)

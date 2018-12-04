@@ -12,7 +12,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ConvBlock, conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 class DwsConvBlock(HybridBlock):
@@ -39,13 +39,10 @@ class DwsConvBlock(HybridBlock):
                  **kwargs):
         super(DwsConvBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.dw_conv = ConvBlock(
+            self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                kernel_size=3,
                 strides=strides,
-                padding=1,
-                groups=in_channels,
                 bn_use_global_stats=bn_use_global_stats)
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,

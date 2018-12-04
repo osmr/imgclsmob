@@ -12,7 +12,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ConvBlock, conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 class DwsConvBlock(nn.Module):
@@ -34,13 +34,10 @@ class DwsConvBlock(nn.Module):
                  out_channels,
                  stride):
         super(DwsConvBlock, self).__init__()
-        self.dw_conv = ConvBlock(
+        self.dw_conv = dwconv3x3_block(
             in_channels=in_channels,
             out_channels=in_channels,
-            kernel_size=3,
-            stride=stride,
-            padding=1,
-            groups=in_channels)
+            stride=stride)
         self.pw_conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels)

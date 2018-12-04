@@ -341,7 +341,7 @@ def pre_conv1x1_block(in_channels,
 def pre_conv3x3_block(in_channels,
                       out_channels,
                       strides,
-                      bn_use_global_stats,
+                      bn_use_global_stats=False,
                       return_preact=False):
     """
     3x3 version of the pre-activated convolution block.
@@ -354,7 +354,7 @@ def pre_conv3x3_block(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.

@@ -105,7 +105,7 @@ class InterpolationBlock(nn.Module):
         super(InterpolationBlock, self).__init__()
         self.scale_factor = scale_factor
 
-    def forward(self, x, **kwargs):
+    def forward(self, x):
         return F.interpolate(
             input=x,
             scale_factor=self.scale_factor,
@@ -128,10 +128,134 @@ class DoubleSkipBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(DoubleSkipBlock, self).__init__()
-        self.skip1 = ResBlock(in_channels, out_channels)
+        self.skip1 = ResBlock(
+            in_channels=in_channels,
+            out_channels=out_channels)
 
-    def forward(self, x, **kwargs):
+    def forward(self, x):
         x = x + self.skip1(x)
+        return x
+
+
+class ResBlockSequence(nn.Module):
+    """
+    Sequence of residual blocks with pre-activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of sequence.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length):
+        super(ResBlockSequence, self).__init__()
+        self.blocks = nn.Sequential()
+        for i in range(length):
+            self.blocks.add_module('block{}'.format(i + 1), ResBlock(
+                in_channels=in_channels,
+                out_channels=out_channels))
+
+    def forward(self, x):
+        x = self.blocks(x)
+        return x
+
+
+class DownAttBlock(nn.Module):
+    """
+    Down sub-block for hourglass of attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of residual blocks list.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length):
+        super(DownAttBlock, self).__init__()
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
+        self.res_blocks = ResBlockSequence(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            length=length)
+
+    def forward(self, x):
+        x = self.pool(x)
+        x = self.res_blocks(x)
+        return x
+
+
+class UpAttBlock(nn.Module):
+    """
+    Up sub-block for hourglass of attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of residual blocks list.
+    scale_factor : float
+        Multiplier for spatial size.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length,
+                 scale_factor):
+        super(UpAttBlock, self).__init__()
+        self.res_blocks = ResBlockSequence(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            length=length)
+        self.upsample = InterpolationBlock(scale_factor)
+
+    def forward(self, x):
+        x = self.res_blocks(x)
+        x = self.upsample(x)
+        return x
+
+
+class MiddleAttBlock(nn.Module):
+    """
+    Middle sub-block for attention block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    """
+    def __init__(self,
+                 channels):
+        super(MiddleAttBlock, self).__init__()
+        self.conv1 = pre_conv1x1_block(
+            in_channels=channels,
+            out_channels=channels)
+        self.conv2 = pre_conv1x1_block(
+            in_channels=channels,
+            out_channels=channels)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.sigmoid(x)
         return x
 
 
@@ -160,50 +284,43 @@ class AttBlock(nn.Module):
         scale_factor = 2
         scale_p, scale_t, scale_r = att_scales
 
-        self.init_blocks = nn.Sequential()
-        for i in range(scale_p):
-            self.init_blocks.add_module('block{}'.format(i + 1), ResBlock(in_channels, out_channels))
+        self.init_blocks = ResBlockSequence(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            length=scale_p)
 
         down_seq = nn.Sequential()
         up_seq = nn.Sequential()
         skip_seq = nn.Sequential()
         for i in range(hourglass_depth):
-            down_res_blocks = nn.Sequential()
-            for j in range(scale_r):
-                down_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-            down_seq.add_module('down{}'.format(i + 1), nn.Sequential(
-                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                down_res_blocks))
-            up_res_blocks = nn.Sequential()
-            for j in range(scale_r):
-                up_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-            up_seq.add_module('up{}'.format(i + 1), nn.Sequential(
-                up_res_blocks,
-                InterpolationBlock(scale_factor)))
+            down_seq.add_module('down{}'.format(i + 1), DownAttBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                length=scale_r))
+            up_seq.add_module('up{}'.format(i + 1), UpAttBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                length=scale_r,
+                scale_factor=scale_factor))
             if i == 0:
-                skip_res_blocks = nn.Sequential()
-                for j in range(scale_t):
-                    skip_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-                skip_seq.add_module('skip1', skip_res_blocks)
+                skip_seq.add_module('skip1', ResBlockSequence(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    length=scale_t))
             else:
-                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(in_channels, out_channels))
+                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels))
         self.hg = Hourglass(
             down_seq=down_seq,
             up_seq=up_seq,
             skip_seq=skip_seq,
             return_first_skip=True)
 
-        self.middle_block = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
-
-        self.final_block = ResBlock(in_channels, out_channels)
+        self.middle_block = MiddleAttBlock(channels=out_channels)
+        self.final_block = ResBlock(
+            in_channels=in_channels,
+            out_channels=out_channels)
 
     def forward(self, x):
         x = self.init_blocks(x)

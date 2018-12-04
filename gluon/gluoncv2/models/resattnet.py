@@ -1,5 +1,5 @@
 """
-    ResAttNet, implemented in PyTorch.
+    ResAttNet, implemented in Gluon.
     Original paper: 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 """
 
@@ -7,13 +7,12 @@ __all__ = ['ResAttNet', 'resattnet56', 'resattnet92', 'resattnet128', 'resattnet
            'resattnet452']
 
 import os
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1, conv7x7_block, pre_conv1x1_block, pre_conv3x3_block, Hourglass
 
 
-class PreResBottleneck(nn.Module):
+class PreResBottleneck(HybridBlock):
     """
     PreResNet bottleneck block for residual path in PreResNet unit.
 
@@ -23,36 +22,44 @@ class PreResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
-        super(PreResBottleneck, self).__init__()
+                 strides,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(PreResBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        self.conv1 = pre_conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            return_preact=True)
-        self.conv2 = pre_conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride)
-        self.conv3 = pre_conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels)
+        with self.name_scope():
+            self.conv1 = pre_conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                return_preact=True)
+            self.conv2 = pre_conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                strides=strides)
+            self.conv3 = pre_conv1x1_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x, x_pre_activ = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         return x, x_pre_activ
 
 
-class ResBlock(nn.Module):
+class ResBlock(HybridBlock):
     """
     Residual block with pre-activation.
 
@@ -62,27 +69,33 @@ class ResBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=1):
-        super(ResBlock, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+                 strides=1,
+                 bn_use_global_stats=False,
+                 **kwargs):
+        super(ResBlock, self).__init__(**kwargs)
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
-        self.body = PreResBottleneck(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride)
-        if self.resize_identity:
-            self.identity_conv = conv1x1(
+        with self.name_scope():
+            self.body = PreResBottleneck(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride)
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
+            if self.resize_identity:
+                self.identity_conv = conv1x1(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         identity = x
         x, x_pre_activ = self.body(x)
         if self.resize_identity:
@@ -91,29 +104,26 @@ class ResBlock(nn.Module):
         return x
 
 
-class InterpolationBlock(nn.Module):
+class InterpolationBlock(HybridBlock):
     """
     Interpolation block.
 
     Parameters:
     ----------
-    scale_factor : float
-        Multiplier for spatial size.
+    size : tuple of 2 int, default (None, None)
+        Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
-                 scale_factor):
-        super(InterpolationBlock, self).__init__()
-        self.scale_factor = scale_factor
+                 size=(None, None),
+                 **kwargs):
+        super(InterpolationBlock, self).__init__(**kwargs)
+        self.size = size
 
-    def forward(self, x, **kwargs):
-        return F.interpolate(
-            input=x,
-            scale_factor=self.scale_factor,
-            mode='bilinear',
-            align_corners=True)
+    def hybrid_forward(self, F, x):
+        return F.contrib.BilinearResize2D(x, height=self.size[0], width=self.size[1])
 
 
-class DoubleSkipBlock(nn.Module):
+class DoubleSkipBlock(HybridBlock):
     """
     Double skip connection block.
 
@@ -123,19 +133,174 @@ class DoubleSkipBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(DoubleSkipBlock, self).__init__()
-        self.skip1 = ResBlock(in_channels, out_channels)
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(DoubleSkipBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.skip1 = ResBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
 
-    def forward(self, x, **kwargs):
+    def hybrid_forward(self, F, x):
         x = x + self.skip1(x)
         return x
 
 
-class AttBlock(nn.Module):
+class ResBlockSequence(HybridBlock):
+    """
+    Sequence of residual blocks with pre-activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of sequence.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(ResBlockSequence, self).__init__(**kwargs)
+        with self.name_scope():
+            self.blocks = nn.HybridSequential(prefix='')
+            for i in range(length):
+                self.blocks.add(ResBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    bn_use_global_stats=bn_use_global_stats))
+
+    def hybrid_forward(self, F, x):
+        x = self.blocks(x)
+        return x
+
+
+class DownAttBlock(HybridBlock):
+    """
+    Down sub-block for hourglass of attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of residual blocks list.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(DownAttBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+            self.res_blocks = ResBlockSequence(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                length=length,
+                bn_use_global_stats=bn_use_global_stats)
+
+    def hybrid_forward(self, F, x):
+        x = self.pool(x)
+        x = self.res_blocks(x)
+        return x
+
+
+class UpAttBlock(HybridBlock):
+    """
+    Up sub-block for hourglass of attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    length : int
+        Length of residual blocks list.
+    size : tuple of 2 int, default (None, None)
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 length,
+                 size,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(UpAttBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.res_blocks = ResBlockSequence(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                length=length,
+                bn_use_global_stats=bn_use_global_stats)
+            self.upsample = InterpolationBlock(size)
+
+    def hybrid_forward(self, F, x):
+        x = self.res_blocks(x)
+        x = self.upsample(x)
+        return x
+
+
+class MiddleAttBlock(HybridBlock):
+    """
+    Middle sub-block for attention block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(MiddleAttBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv1 = pre_conv1x1_block(
+                in_channels=channels,
+                out_channels=channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = pre_conv1x1_block(
+                in_channels=channels,
+                out_channels=channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.sigmoid = nn.Activation('sigmoid')
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.sigmoid(x)
+        return x
+
+
+class AttBlock(HybridBlock):
     """
     Attention block.
 
@@ -149,63 +314,73 @@ class AttBlock(nn.Module):
         Depth of hourglass block.
     att_scales : list of int
         Attention block specific scales.
+    in_size : tuple of 2 int
+        Spatial size of the input tensor for the bilinear upsampling operation.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  hourglass_depth,
-                 att_scales):
-        super(AttBlock, self).__init__()
+                 att_scales,
+                 in_size,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(AttBlock, self).__init__(**kwargs)
         assert (len(att_scales) == 3)
         scale_factor = 2
         scale_p, scale_t, scale_r = att_scales
 
-        self.init_blocks = nn.Sequential()
-        for i in range(scale_p):
-            self.init_blocks.add_module('block{}'.format(i + 1), ResBlock(in_channels, out_channels))
+        with self.name_scope():
+            self.init_blocks = ResBlockSequence(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                length=scale_p,
+                bn_use_global_stats=bn_use_global_stats)
 
-        down_seq = nn.Sequential()
-        up_seq = nn.Sequential()
-        skip_seq = nn.Sequential()
-        for i in range(hourglass_depth):
-            down_res_blocks = nn.Sequential()
-            for j in range(scale_r):
-                down_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-            down_seq.add_module('down{}'.format(i + 1), nn.Sequential(
-                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
-                down_res_blocks))
-            up_res_blocks = nn.Sequential()
-            for j in range(scale_r):
-                up_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-            up_seq.add_module('up{}'.format(i + 1), nn.Sequential(
-                up_res_blocks,
-                InterpolationBlock(scale_factor)))
-            if i == 0:
-                skip_res_blocks = nn.Sequential()
-                for j in range(scale_t):
-                    skip_res_blocks.add_module('block{}'.format(j + 1), ResBlock(in_channels, out_channels))
-                skip_seq.add_module('skip1', skip_res_blocks)
-            else:
-                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(in_channels, out_channels))
-        self.hg = Hourglass(
-            down_seq=down_seq,
-            up_seq=up_seq,
-            skip_seq=skip_seq,
-            return_first_skip=True)
+            down_seq = nn.HybridSequential(prefix='')
+            up_seq = nn.HybridSequential(prefix='')
+            skip_seq = nn.HybridSequential(prefix='')
+            for i in range(hourglass_depth):
+                down_seq.add(DownAttBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    length=scale_r,
+                    bn_use_global_stats=bn_use_global_stats))
+                up_seq.add(UpAttBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    length=scale_r,
+                    size=in_size,
+                    bn_use_global_stats=bn_use_global_stats))
+                in_size = tuple([x // scale_factor for x in in_size])
+                if i == 0:
+                    skip_seq.add(ResBlockSequence(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        length=scale_t,
+                        bn_use_global_stats=bn_use_global_stats))
+                else:
+                    skip_seq.add(DoubleSkipBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        bn_use_global_stats=bn_use_global_stats))
+            self.hg = Hourglass(
+                down_seq=down_seq,
+                up_seq=up_seq,
+                skip_seq=skip_seq,
+                return_first_skip=True)
 
-        self.middle_block = nn.Sequential(
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            pre_conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels),
-            nn.Sigmoid()
-        )
+            self.middle_block = MiddleAttBlock(
+                channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.final_block = ResBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
 
-        self.final_block = ResBlock(in_channels, out_channels)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.init_blocks(x)
         x, y = self.hg(x)
         x = self.middle_block(x)
@@ -214,7 +389,7 @@ class AttBlock(nn.Module):
         return x
 
 
-class ResAttInitBlock(nn.Module):
+class ResAttInitBlock(HybridBlock):
     """
     ResAttNet specific initial block.
 
@@ -224,27 +399,33 @@ class ResAttInitBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(ResAttInitBlock, self).__init__()
-        self.conv = conv7x7_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(ResAttInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = conv7x7_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=2,
+                bn_use_global_stats=bn_use_global_stats)
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv(x)
         x = self.pool(x)
         return x
 
 
-class PreActivation(nn.Module):
+class PreActivation(HybridBlock):
     """
     Pre-activation block without convolution layer. It's used by itself as the final block in PreResNet.
 
@@ -252,20 +433,27 @@ class PreActivation(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
-                 in_channels):
-        super(PreActivation, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
+                 in_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(PreActivation, self).__init__(**kwargs)
+        with self.name_scope():
+            self.bn = nn.BatchNorm(
+                in_channels=in_channels,
+                use_global_stats=bn_use_global_stats)
+            self.activ = nn.Activation('relu')
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.bn(x)
         x = self.activ(x)
         return x
 
 
-class ResAttNet(nn.Module):
+class ResAttNet(HybridBlock):
     """
     ResAttNet model from 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 
@@ -279,11 +467,14 @@ class ResAttNet(nn.Module):
         Whether to use a attention unit or residual one.
     att_scales : list of int
         Attention block specific scales.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -291,57 +482,61 @@ class ResAttNet(nn.Module):
                  init_block_channels,
                  attentions,
                  att_scales,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(ResAttNet, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(ResAttNet, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", ResAttInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            hourglass_depth = len(channels) - 1 - i
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 1 if (i == 0) or (j != 0) else 2
-                if attentions[i][j]:
-                    stage.add_module("unit{}".format(j + 1), AttBlock(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        hourglass_depth=hourglass_depth,
-                        att_scales=att_scales))
-                else:
-                    stage.add_module("unit{}".format(j + 1), ResBlock(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        stride=stride))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PreActivation(in_channels=in_channels))
-        self.features.add_module('final_pool', nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(ResAttInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            in_size = tuple([x // 4 for x in in_size])
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                hourglass_depth = len(channels) - 1 - i
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and (i != 0) else 1
+                        if attentions[i][j]:
+                            stage.add(AttBlock(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                hourglass_depth=hourglass_depth,
+                                att_scales=att_scales,
+                                in_size=in_size,
+                                bn_use_global_stats=bn_use_global_stats))
+                        else:
+                            stage.add(ResBlock(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                strides=strides,
+                                bn_use_global_stats=bn_use_global_stats))
+                        in_channels = out_channels
+                        in_size = tuple([x // strides for x in in_size])
+                self.features.add(stage)
+            self.features.add(PreActivation(
+                in_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -349,6 +544,7 @@ class ResAttNet(nn.Module):
 def get_resattnet(blocks,
                   model_name=None,
                   pretrained=False,
+                  ctx=cpu(),
                   root=os.path.join('~', '.torch', 'models'),
                   **kwargs):
     """
@@ -362,6 +558,8 @@ def get_resattnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -422,6 +620,8 @@ def resattnet56(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -436,6 +636,8 @@ def resattnet92(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -450,6 +652,8 @@ def resattnet128(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -464,6 +668,8 @@ def resattnet164(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -478,6 +684,8 @@ def resattnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -492,6 +700,8 @@ def resattnet236(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
@@ -506,24 +716,17 @@ def resattnet452(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=452, model_name="resattnet452", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -541,9 +744,17 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resattnet56 or weight_count == 31810728)
         assert (model != resattnet92 or weight_count == 52466344)
@@ -553,9 +764,9 @@ def _test():
         assert (model != resattnet236 or weight_count == 103778984)
         assert (model != resattnet452 or weight_count == 182285224)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

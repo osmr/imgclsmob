@@ -13,57 +13,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, GluonBatchNormalization
-
-
-def conv_block(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides=1,
-               padding=0,
-               groups=1,
-               name="conv_block"):
-    """
-    Standard enough convolution block with BatchNorm and activation.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    name : str, default 'conv_block'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        groups=groups,
-        use_bias=False,
-        name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    return x
+from .common import conv_block, conv1x1_block, conv3x3_block
 
 
 def dws_conv_block(x,
@@ -102,11 +52,10 @@ def dws_conv_block(x,
         padding=1,
         groups=in_channels,
         name=name + "/dw_conv")
-    x = conv_block(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
         name=name + "/pw_conv")
     return x
 
@@ -138,13 +87,11 @@ def mobilenet(channels,
     input = nn.Input(shape=input_shape)
 
     init_block_channels = channels[0][0]
-    x = conv_block(
+    x = conv3x3_block(
         x=input,
         in_channels=in_channels,
         out_channels=init_block_channels,
-        kernel_size=3,
         strides=2,
-        padding=1,
         name="features/init_block")
     in_channels = init_block_channels
     for i, channels_per_stage in enumerate(channels[1:]):

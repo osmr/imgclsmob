@@ -12,58 +12,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class ConvBlock(HybridBlock):
-    """
-    Standard enough convolution block with BatchNorm and activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides=1,
-                 padding=0,
-                 groups=1,
-                 bn_use_global_stats=False,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
+from .common import ConvBlock, conv1x1_block, conv3x3_block
 
 
 class DwsConvBlock(HybridBlock):
@@ -98,10 +47,9 @@ class DwsConvBlock(HybridBlock):
                 padding=1,
                 groups=in_channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.pw_conv = ConvBlock(
+            self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=1,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -147,12 +95,10 @@ class MobileNet(HybridBlock):
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             init_block_channels = channels[0][0]
-            self.features.add(ConvBlock(
+            self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                kernel_size=3,
                 strides=2,
-                padding=1,
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels[1:]):

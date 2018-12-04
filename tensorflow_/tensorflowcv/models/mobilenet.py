@@ -11,63 +11,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm
-
-
-def conv_block(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides=1,
-               padding=0,
-               groups=1,
-               training=False,
-               name="conv_block"):
-    """
-    Standard enough convolution block with BatchNorm and activation.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'conv_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        groups=groups,
-        use_bias=False,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
-    return x
+from .common import conv_block, conv1x1_block, conv3x3_block
 
 
 def dws_conv_block(x,
@@ -110,11 +54,10 @@ def dws_conv_block(x,
         groups=in_channels,
         training=training,
         name=name + "/dw_conv")
-    x = conv_block(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
         training=training,
         name=name + "/pw_conv")
     return x
@@ -173,13 +116,11 @@ class MobileNet(object):
         """
         in_channels = self.in_channels
         init_block_channels = self.channels[0][0]
-        x = conv_block(
+        x = conv3x3_block(
             x=x,
             in_channels=in_channels,
             out_channels=init_block_channels,
-            kernel_size=3,
             strides=2,
-            padding=1,
             training=training,
             name="features/init_block")
         in_channels = init_block_channels

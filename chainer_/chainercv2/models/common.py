@@ -493,6 +493,9 @@ class SimpleSequential(Chain):
         except ValueError:
             pass
 
+    def __len__(self):
+        return len(self.layer_names)
+
     def __call__(self, x):
         for name in self.layer_names:
             x = self[name](x)

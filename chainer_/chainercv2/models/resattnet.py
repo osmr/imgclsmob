@@ -12,7 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from common import conv1x1, conv7x7_block, pre_conv1x1_block, pre_conv3x3_block, Hourglass, SimpleSequential
+from .common import conv1x1, conv7x7_block, pre_conv1x1_block, pre_conv3x3_block, Hourglass, SimpleSequential
 
 
 class PreResBottleneck(Chain):

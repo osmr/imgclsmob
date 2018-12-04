@@ -634,9 +634,10 @@ class Hourglass(Chain):
         self.return_first_skip = return_first_skip
         self.depth = len(down_seq)
 
-        self.down_seq = down_seq
-        self.up_seq = up_seq
-        self.skip_seq = skip_seq
+        with self.init_scope():
+            self.down_seq = down_seq
+            self.up_seq = up_seq
+            self.skip_seq = skip_seq
 
     def __call__(self, x):
         y = None

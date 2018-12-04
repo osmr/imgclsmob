@@ -158,6 +158,7 @@ def conv3x3_block(in_channels,
                   stride,
                   pad=1,
                   dilate=1,
+                  groups=1,
                   use_bias=False,
                   act_type="relu",
                   activate=True):
@@ -176,6 +177,8 @@ def conv3x3_block(in_channels,
         Padding value for convolution layer.
     dilate : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     act_type : str, default 'relu'
@@ -190,6 +193,7 @@ def conv3x3_block(in_channels,
         stride=stride,
         pad=pad,
         dilate=dilate,
+        groups=groups,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate)

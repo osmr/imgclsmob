@@ -12,7 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, ConvBlock, ChannelShuffle, SimpleSequential
+from .common import conv1x1_block, conv3x3_block, ChannelShuffle, SimpleSequential
 
 
 def dwconv3x3_block(in_channels,
@@ -33,12 +33,10 @@ def dwconv3x3_block(in_channels,
     activate : bool
         Whether activate the convolution block.
     """
-    return ConvBlock(
+    return conv3x3_block(
         in_channels=in_channels,
         out_channels=out_channels,
-        ksize=3,
         stride=stride,
-        pad=1,
         groups=out_channels,
         act_type="relu6",
         activate=activate)

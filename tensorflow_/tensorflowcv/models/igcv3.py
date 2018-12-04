@@ -8,7 +8,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, conv_block, channel_shuffle
+from .common import conv1x1_block, conv3x3_block, channel_shuffle
 
 
 def dwconv3x3_block(x,
@@ -43,13 +43,11 @@ def dwconv3x3_block(x,
     Tensor
         Resulted tensor.
     """
-    return conv_block(
+    return conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=strides,
-        padding=1,
         groups=out_channels,
         act_type="relu6",
         activate=activate,

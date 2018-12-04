@@ -9,7 +9,7 @@ __all__ = ['IGCV3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, ConvBlock, ChannelShuffle
+from .common import conv1x1_block, conv3x3_block, ChannelShuffle
 
 
 def dwconv3x3_block(in_channels,
@@ -30,12 +30,10 @@ def dwconv3x3_block(in_channels,
     activate : bool
         Whether activate the convolution block.
     """
-    return ConvBlock(
+    return conv3x3_block(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         stride=stride,
-        padding=1,
         groups=out_channels,
         act_type="relu6",
         activate=activate)

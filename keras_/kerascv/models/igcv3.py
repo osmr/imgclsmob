@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, conv_block, channel_shuffle_lambda
+from .common import conv1x1_block, conv3x3_block, channel_shuffle_lambda
 
 
 def dwconv3x3_block(x,
@@ -42,13 +42,11 @@ def dwconv3x3_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    return conv_block(
+    return conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=strides,
-        padding=1,
         groups=out_channels,
         act_type="relu6",
         activate=activate,

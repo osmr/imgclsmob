@@ -11,39 +11,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, conv1x1_block, ConvBlock
+from .common import SimpleSequential, conv1x1_block, conv7x7_block
 from .resnet import ResInitBlock, ResBlock, ResBottleneck
-
-
-def conv7x7_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  pad=3,
-                  activate=True):
-    """
-    7x7 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 3
-        Padding value for convolution layer.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=7,
-        stride=stride,
-        pad=pad,
-        use_bias=False,
-        activate=activate)
 
 
 class MLP(Chain):

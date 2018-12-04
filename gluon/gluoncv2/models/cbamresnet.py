@@ -8,43 +8,8 @@ __all__ = ['CbamResNet', 'cbam_resnet18', 'cbam_resnet34', 'cbam_resnet50', 'cba
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, ConvBlock
+from .common import conv1x1_block, conv7x7_block
 from .resnet import ResInitBlock, ResBlock, ResBottleneck
-
-
-def conv7x7_block(in_channels,
-                  out_channels,
-                  strides=1,
-                  padding=3,
-                  bn_use_global_stats=False,
-                  activate=True):
-    """
-    7x7 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 3
-        Padding value for convolution layer.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=7,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
 
 
 class MLP(HybridBlock):

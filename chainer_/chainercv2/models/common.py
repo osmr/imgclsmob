@@ -2,9 +2,9 @@ import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 
-__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent']
+__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
 
 
 class ReLU6(Chain):
@@ -231,6 +231,112 @@ def conv7x7_block(in_channels,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate)
+
+
+class PreConvBlock(Chain):
+    """
+    Convolution block with Batch normalization and ReLU pre-activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    ksize : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 ksize,
+                 stride,
+                 pad,
+                 return_preact=False):
+        super(PreConvBlock, self).__init__()
+        self.return_preact = return_preact
+
+        with self.init_scope():
+            self.bn = L.BatchNormalization(size=in_channels)
+            self.activ = F.relu
+            self.conv = L.Convolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=True)
+
+    def __call__(self, x):
+        x = self.bn(x)
+        x = self.activ(x)
+        if self.return_preact:
+            x_pre_activ = x
+        x = self.conv(x)
+        if self.return_preact:
+            return x, x_pre_activ
+        else:
+            return x
+
+
+def pre_conv1x1_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      return_preact=False):
+    """
+    1x1 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Stride of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    """
+    return PreConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=1,
+        stride=stride,
+        pad=0,
+        return_preact=return_preact)
+
+
+def pre_conv3x3_block(in_channels,
+                      out_channels,
+                      stride,
+                      return_preact=False):
+    """
+    3x3 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    """
+    return PreConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=3,
+        stride=stride,
+        pad=1,
+        return_preact=return_preact)
 
 
 def channel_shuffle(x,
@@ -492,3 +598,63 @@ class ParametricConcurrent(SimpleSequential):
             out.append(self[name](x, **kwargs))
         out = F.concat(tuple(out), axis=self.axis)
         return out
+
+
+class Hourglass(Chain):
+    """
+    A hourglass block.
+
+    Parameters:
+    ----------
+    down_seq : SimpleSequential
+        Down modules as sequential.
+    up_seq : SimpleSequential
+        Up modules as sequential.
+    skip_seq : SimpleSequential
+        Skip connection modules as sequential.
+    merge_type : str, default 'add'
+        Type of concatenation of up and skip outputs.
+    return_first_skip : bool, default False
+        Whether return the first skip connection output. Used in ResAttNet.
+    """
+    def __init__(self,
+                 down_seq,
+                 up_seq,
+                 skip_seq,
+                 merge_type="add",
+                 return_first_skip=False):
+        super(Hourglass, self).__init__()
+        assert (len(up_seq) == len(down_seq))
+        assert (len(skip_seq) == len(down_seq))
+        assert (merge_type in ["add"])
+        self.merge_type = merge_type
+        self.return_first_skip = return_first_skip
+        self.depth = len(down_seq)
+
+        self.down_seq = down_seq
+        self.up_seq = up_seq
+        self.skip_seq = skip_seq
+
+    def __call__(self, x):
+        y = None
+        down_outs = [x]
+        for down_module_name in self.down_seq.layer_names:
+            down_module = self.down_seq[down_module_name]
+            x = down_module(x)
+            down_outs.append(x)
+        for i in range(len(down_outs)):
+            if i != 0:
+                y = down_outs[self.depth - i]
+                skip_module_name = self.skip_seq.layer_names[self.depth - i]
+                skip_module = self.skip_seq[skip_module_name]
+                y = skip_module(y)
+                if (y is not None) and (self.merge_type == "add"):
+                    x = x + y
+            if i != len(down_outs) - 1:
+                up_module_name = self.up_seq.layer_names[self.depth - 1 - i]
+                up_module = self.up_seq[up_module_name]
+                x = up_module(x)
+        if self.return_first_skip:
+            return x, y
+        else:
+            return x

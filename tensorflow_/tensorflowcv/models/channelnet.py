@@ -135,7 +135,7 @@ def pure_conv2d(outs,
         strides = (stride, 1, 1)
         axis = 1
         df = 'channels_first'
-    outs = tf.expand_dims(outs, axis=axis, name=scope+'/expand_dims')
+    outs = tf.expand_dims(outs, axis=axis, name=scope + '/expand_dims')
     outs = tf.layers.conv3d(
         inputs=outs,
         filters=chan_num,
@@ -144,13 +144,13 @@ def pure_conv2d(outs,
         padding=padding,
         use_bias=False,
         data_format=df,
-        name=scope+'/pure_conv',
+        name=scope + '/pure_conv',
         kernel_initializer=tf.truncated_normal_initializer(stddev=0.09))
     if keep_r < 1.0:
         outs = tf.contrib.layers.dropout(
             outs, keep_r, is_training=train, scope=scope)
     if chan_num == 1:
-        outs = tf.squeeze(outs, axis=[axis], name=scope+'/squeeze')
+        outs = tf.squeeze(outs, axis=[axis], name=scope + '/squeeze')
     return outs
 
 
@@ -190,7 +190,7 @@ def conv_group_block(x,
         keep_r=dropout_rate,
         train=training,
         chan_num=groups)
-    axis = -1 if data_format=='NHWC' else 1
+    axis = -1 if data_format == 'NHWC' else 1
     conv_outs = tf.unstack(conv_outs, axis=axis, name=name + '/unstack')
     for g in range(groups):
         cur_outs = single_block(
@@ -383,7 +383,7 @@ class ChannelNet(object):
             name="output")
 
         return x
-    
+
 
 def get_channelnet(model_name=None,
                    pretrained=False,

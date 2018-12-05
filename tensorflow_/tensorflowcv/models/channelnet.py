@@ -11,10 +11,10 @@ import tensorflow as tf
 
 
 def batchnorm(x,
-              scope,
               training=True,
               act_fn=tf.nn.relu6,
-              data_format='NHWC'):
+              name="batchnorm"):
+    data_format = 'NCHW'
     not_final = True
     x = tf.contrib.layers.batch_norm(
         x,
@@ -26,25 +26,25 @@ def batchnorm(x,
         epsilon=1e-3,
         is_training=training,
         data_format=data_format,
-        scope=scope+'/batch_norm')
+        scope=name + '/batch_norm')
     return x
 
 
 def channet_conv(x,
                  out_channels,
-                 kernel,
-                 scope,
-                 stride=1,
+                 kernel_size,
+                 strides=1,
                  dropout_rate=1.0,
                  training=True,
                  act_fn=tf.nn.relu6,
-                 data_format='NHWC'):
+                 name="channet_conv"):
+    data_format = 'NCHW'
     x = tf.contrib.layers.conv2d(
         x,
         out_channels,
-        kernel,
-        scope=scope,
-        stride=stride,
+        kernel_size,
+        scope=name,
+        stride=strides,
         data_format=data_format,
         activation_fn=None,
         weights_initializer=tf.truncated_normal_initializer(stddev=0.09),
@@ -54,70 +54,67 @@ def channet_conv(x,
             x,
             dropout_rate,
             is_training=training,
-            scope=scope)
+            scope=name)
     x = batchnorm(
         x=x,
-        scope=scope,
         training=training,
         act_fn=act_fn,
-        data_format=data_format)
+        name=name)
     return x
 
 
-def dw_conv2d(outs,
-              kernel,
-              stride,
-              scope,
-              keep_r=1.0,
-              train=True,
+def dw_conv2d(x,
+              kernel_size,
+              strides,
+              dropout_rate=1.0,
+              training=True,
               act_fn=None,
-              data_format='NHWC'):
-    shape = list(kernel)+[outs.shape[data_format.index('C')].value, 1]
+              name="dw_conv2d"):
+    data_format = 'NCHW'
+    shape = list(kernel_size) + [x.shape[data_format.index('C')].value, 1]
     weights = tf.get_variable(
-        scope+'/conv/weight_depths',
+        name + '/conv/weight_depths',
         shape,
         initializer=tf.truncated_normal_initializer(stddev=0.09))
     if data_format == 'NCHW':
-        strides = [1, 1, stride, stride]
+        strides = [1, 1, strides, strides]
     else:
-        strides = [1, stride, stride, 1]
-    outs = tf.nn.depthwise_conv2d(
-        outs,
+        strides = [1, strides, strides, 1]
+    x = tf.nn.depthwise_conv2d(
+        x,
         weights,
         strides,
         'SAME',
-        name=scope+'/depthwise_conv2d',
+        name=name + '/depthwise_conv2d',
         data_format=data_format)
-    return act_fn(outs) if act_fn else outs
+    x = act_fn(x) if act_fn else x
+    return x
 
 
-def dw_block(outs,
-             num_outs,
-             stride,
-             scope,
-             dropout_rate,
-             is_train,
-             act_fn=tf.nn.relu6,
-             data_format='NHWC'):
-    outs = dw_conv2d(
-        outs,
-        (3, 3),
-        stride,
-        scope+'/conv1',
-        dropout_rate,
-        is_train,
-        data_format=data_format)
-    outs = channet_conv(
-        outs,
-        num_outs,
-        (1, 1),
-        scope + '/conv2',
-        1,
-        dropout_rate,
-        is_train,
+def channet_dws_conv_block(x,
+                           out_channels,
+                           strides,
+                           dropout_rate=1.0,
+                           act_fn=tf.nn.relu6,
+                           training=False,
+                           name="channet_dws_conv_block"):
+    x = dw_conv2d(
+        x=x,
+        kernel_size=(3, 3),
+        strides=strides,
+        dropout_rate=dropout_rate,
+        training=training,
+        name=name + '/conv1')
+    x = channet_conv(
+        x,
+        out_channels=out_channels,
+        kernel_size=(1, 1),
+        strides=1,
+        dropout_rate=dropout_rate,
+        training=training,
         act_fn=act_fn,
-        data_format=data_format)
-    return outs
+        name=name + '/conv2')
+    return x
 
 
 def pure_conv2d(outs,
@@ -127,8 +124,8 @@ def pure_conv2d(outs,
                 keep_r=1.0,
                 train=True,
                 padding='SAME',
-                chan_num=1,
-                data_format='NHWC'):
+                chan_num=1):
+    data_format = 'NCHW'
     stride = int(outs.shape[data_format.index('C')].value/num_outs)
     if data_format == 'NHWC':
         strides = (1, 1, stride)
@@ -159,110 +156,93 @@ def pure_conv2d(outs,
 
 def single_block(outs,
                  block_num,
-                 keep_r,
-                 is_train,
-                 scope,
-                 data_format,
-                 *args):
+                 dropout_rate,
+                 training,
+                 scope):
+    data_format = 'NCHW'
     num_outs = outs.shape[data_format.index('C')].value
     for i in range(block_num):
-        outs = dw_block(
-            outs=outs,
-            num_outs=num_outs,
-            stride=1,
-            scope=scope+'/conv_%s' % i,
-            dropout_rate=keep_r,
-            is_train=is_train,
-            data_format=data_format)
+        outs = channet_dws_conv_block(x=outs, out_channels=num_outs, strides=1, dropout_rate=dropout_rate,
+                                      training=training, name=scope + '/conv_%s' % i)
     return outs
 
 
-def conv_group_block(outs,
+def conv_group_block(x,
                      block_num,
-                     keep_r,
-                     is_train,
-                     scope,
-                     data_format,
                      group,
-                     *args):
-    num_outs = int(outs.shape[data_format.index('C')].value/group)
+                     dropout_rate,
+                     training,
+                     name):
+    data_format = 'NCHW'
+    num_outs = int(x.shape[data_format.index('C')].value / group)
     shape = [1, 1, 4*group] if data_format == 'NHWC' else [4*group, 1, 1]
     results = []
     conv_outs = pure_conv2d(
-        outs=outs,
+        outs=x,
         num_outs=num_outs,
         kernel=shape,
-        scope=scope+'/pure_conv',
-        keep_r=keep_r,
-        train=is_train,
-        chan_num=group,
-        data_format=data_format)
+        scope=name + '/pure_conv',
+        keep_r=dropout_rate,
+        train=training,
+        chan_num=group)
     axis = -1 if data_format=='NHWC' else 1
-    conv_outs = tf.unstack(conv_outs, axis=axis, name=scope+'/unstack')
+    conv_outs = tf.unstack(conv_outs, axis=axis, name=name + '/unstack')
     for g in range(group):
         cur_outs = single_block(
             conv_outs[g],
             block_num,
-            keep_r,
-            is_train,
-            scope+'/group_%s' % g,
-            data_format)
+            dropout_rate,
+            training,
+            name + '/group_%s' % g)
         results.append(cur_outs)
-    results = tf.concat(results, data_format.index('C'), name=scope+'/concat')
+    results = tf.concat(results, data_format.index('C'), name=name + '/concat')
     return results
 
 
-def simple_group_block(outs,
+def simple_group_block(x,
                        block_num,
-                       keep_r,
-                       is_train,
-                       scope,
-                       data_format,
                        group,
-                       *args):
+                       dropout_rate,
+                       training,
+                       name):
+    data_format = 'NCHW'
     results = []
-    split_outs = tf.split(outs, group, data_format.index('C'), name=scope+'/split')
+    split_outs = tf.split(x, group, data_format.index('C'), name=name + '/split')
     for g in range(group):
         cur_outs = single_block(
             split_outs[g],
             block_num,
-            keep_r,
-            is_train,
-            scope+'/group_%s' % g,
-            data_format)
+            dropout_rate,
+            training,
+            name + '/group_%s' % g)
         results.append(cur_outs)
-    results = tf.concat(results, data_format.index('C'), name=scope+'/concat')
+    results = tf.concat(results, data_format.index('C'), name=name + '/concat')
     return results
 
 
-def dense(outs,
+def dense(x,
           dim,
-          scope,
-          train=True,
-          data_format='NHWC'):
-    outs = tf.contrib.layers.fully_connected(
-        outs,
+          name="dense"):
+    x = tf.contrib.layers.fully_connected(
+        x,
         dim,
         activation_fn=None,
-        scope=scope+'/dense',
+        scope=name + '/dense',
         weights_initializer=tf.truncated_normal_initializer(stddev=0.09))
-    return outs
+    return x
 
 
-def out_block(outs,
-              scope,
-              class_num,
-              is_train,
-              data_format='NHWC'):
+def out_block(x,
+              num_classes,
+              name="out_block"):
+    data_format = 'NCHW'
     axes = [2, 3] if data_format == 'NCHW' else [1, 2]
-    outs = tf.reduce_mean(outs, axes, name=scope+'/pool')
-    outs = dense(
-        outs=outs,
-        dim=class_num,
-        scope=scope,
-        train=is_train,
-        data_format=data_format)
-    return outs
+    x = tf.reduce_mean(x, axes, name=name + '/pool')
+    x = dense(
+        x=x,
+        dim=num_classes,
+        name=name)
+    return x
 
 
 class ChannelNet(object):
@@ -317,127 +297,103 @@ class ChannelNet(object):
             Resulted tensor.
         """
         cur_out_num = self.ch_num
-        outs = channet_conv(
+        x = channet_conv(
             x=x,
             out_channels=cur_out_num,
-            kernel=(3, 3),
-            scope='conv_s',
+            kernel_size=(3, 3),
+            strides=2,
             training=training,
-            stride=2,
             act_fn=None,
-            data_format=self.data_format)
+            name='conv_s')
 
         cur_out_num *= 2
-        cur_outs = dw_block(  # 112 * 112 * 64
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=1,
-            scope='conv_1_0',
+        x2 = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=1,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        outs = tf.concat([outs, cur_outs], axis=1, name='add0')
+            training=training,
+            name='conv_1_0')
+        x = tf.concat([x, x2], axis=1, name='add0')
 
         cur_out_num *= 2
-        outs = dw_block(  # 56 * 56 * 128
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=2,
-            scope='conv_1_1',
+        x = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=2,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        cur_outs = dw_block(  # 56 * 56 * 128
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=1,
-            scope='conv_1_2',
+            training=training,
+            name='conv_1_1')
+        x2 = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=1,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        outs = tf.concat([outs, cur_outs], axis=1, name='add1')
+            training=training,
+            name='conv_1_2')
+        x = tf.concat([x, x2], axis=1, name='add1')
 
         cur_out_num *= 2
-        outs = dw_block(  # 28 * 28 * 256
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=2,
-            scope='conv_1_3',
+        x = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=2,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        cur_outs = dw_block(  # 28 * 28 * 256
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=1,
-            scope='conv_1_4',
+            training=training,
+            name='conv_1_3')
+        x2 = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=1,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        outs = tf.concat([outs, cur_outs], axis=1, name='add2')
+            training=training,
+            name='conv_1_4')
+        x = tf.concat([x, x2], axis=1, name='add2')
 
         cur_out_num *= 2
-        outs = dw_block(  # 14 * 14 * 512
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=2,
-            scope='conv_1_5',
+        x = channet_dws_conv_block(
+            x=x,
+            out_channels=cur_out_num,
+            strides=2,
             dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        cur_outs = simple_group_block(  # 14 * 14 * 512
-            outs=outs,
+            training=training,
+            name='conv_1_5')
+        x2 = simple_group_block(
+            x=x,
             block_num=self.block_num,
-            keep_r=self.dropout_rate,
-            is_train=training,
-            scope='conv_2_1',
-            data_format=self.data_format,
-            group=self.group_num)
-        outs = tf.add(outs, cur_outs, name='add21')
+            group=self.group_num,
+            dropout_rate=self.dropout_rate,
+            training=training,
+            name='conv_2_1')
+        x = tf.add(x, x2, name='add21')
 
-        outs = conv_group_block(  # 14 * 14 * 512
-            outs=outs,
+        x = conv_group_block(
+            x=x,
             block_num=self.block_num,
-            keep_r=self.dropout_rate,
-            is_train=training,
-            scope='conv_2_2',
-            data_format=self.data_format,
-            group=self.group_num)
-        cur_outs = conv_group_block(  # 14 * 14 * 512
-            outs=outs,
+            group=self.group_num,
+            dropout_rate=self.dropout_rate,
+            training=training,
+            name='conv_2_2')
+        x2 = conv_group_block(
+            x=x,
             block_num=self.block_num,
-            keep_r=self.dropout_rate,
-            is_train=training,
-            scope='conv_2_3',
-            data_format=self.data_format,
-            group=self.group_num)
-        outs = tf.add(outs, cur_outs, name='add23')
+            group=self.group_num,
+            dropout_rate=self.dropout_rate,
+            training=training,
+            name='conv_2_3')
+        x = tf.add(x, x2, name='add23')
 
         cur_out_num *= 2
-        outs = dw_block(  # 7 * 7 * 1024
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=2,
-            scope='conv_3_0',
-            dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
-        outs = dw_block(  # 7 * 7 * 1024
-            outs=outs,
-            num_outs=cur_out_num,
-            stride=1,
-            scope='conv_3_1',
-            dropout_rate=self.dropout_rate,
-            is_train=training,
-            data_format=self.data_format)
+        x = channet_dws_conv_block(x=x, out_channels=cur_out_num, strides=2, dropout_rate=self.dropout_rate,
+                                   training=training, name='conv_3_0')
+        x = channet_dws_conv_block(x=x, out_channels=cur_out_num, strides=1, dropout_rate=self.dropout_rate,
+                                   training=training, name='conv_3_1')
 
-        outs = out_block(
-            outs=outs,
-            scope='out',
-            class_num=self.classes,
-            is_train=training,
-            data_format=self.data_format)
-        return outs
+        x = out_block(
+            x=x,
+            num_classes=self.classes,
+            name='out')
+        return x
     
 
 def get_channelnet(model_name=None,

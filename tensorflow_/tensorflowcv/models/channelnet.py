@@ -484,9 +484,9 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            # x_value = np.zeros((1, 3, 224, 224), np.float32)
-            # y = sess.run(y_net, feed_dict={x: x_value})
-            # assert (y.shape == (1, 1000))
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
+            assert (y.shape == (1, 1000))
         tf.reset_default_graph()
 
 

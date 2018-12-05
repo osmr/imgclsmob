@@ -118,7 +118,7 @@ def channet_dws_conv_block(x,
 
 
 def pure_conv2d(outs,
-                num_outs,
+                out_channels,
                 kernel,
                 scope,
                 keep_r=1.0,
@@ -126,7 +126,7 @@ def pure_conv2d(outs,
                 padding='SAME',
                 chan_num=1):
     data_format = 'NCHW'
-    stride = int(outs.shape[data_format.index('C')].value/num_outs)
+    stride = int(outs.shape[data_format.index('C')].value / out_channels)
     if data_format == 'NHWC':
         strides = (1, 1, stride)
         axis = -1
@@ -154,17 +154,22 @@ def pure_conv2d(outs,
     return outs
 
 
-def single_block(outs,
-                 block_num,
+def single_block(x,
+                 num_blocks,
                  dropout_rate,
                  training,
-                 scope):
+                 name):
     data_format = 'NCHW'
-    num_outs = outs.shape[data_format.index('C')].value
-    for i in range(block_num):
-        outs = channet_dws_conv_block(x=outs, out_channels=num_outs, strides=1, dropout_rate=dropout_rate,
-                                      training=training, name=scope + '/conv_%s' % i)
-    return outs
+    out_channels = x.shape[data_format.index('C')].value
+    for i in range(num_blocks):
+        x = channet_dws_conv_block(
+            x=x,
+            out_channels=out_channels,
+            strides=1,
+            dropout_rate=dropout_rate,
+            training=training,
+            name=name + '/conv_%s' % i)
+    return x
 
 
 def conv_group_block(x,
@@ -179,7 +184,7 @@ def conv_group_block(x,
     results = []
     conv_outs = pure_conv2d(
         outs=x,
-        num_outs=num_outs,
+        out_channels=num_outs,
         kernel=shape,
         scope=name + '/pure_conv',
         keep_r=dropout_rate,
@@ -223,8 +228,8 @@ def simple_group_block(x,
 def channet_unit(x,
                  out_channels_list,
                  strides,
-                 block_num,
-                 groups,
+                 num_blocks,
+                 num_groups,
                  dropout_rate,
                  block_names,
                  merge_type,
@@ -234,7 +239,7 @@ def channet_unit(x,
     x_outs = []
     for i, (out_channels, block_name) in enumerate(zip(out_channels_list, block_names)):
         strides_i = (strides if i == 0 else 1)
-        name_i = name + '/conv{}'.format(i + 1)
+        name_i = name + '/block{}'.format(i + 1)
         if block_name == "channet_dws_conv_block":
             x = channet_dws_conv_block(
                 x=x,
@@ -246,16 +251,16 @@ def channet_unit(x,
         elif block_name == "conv_group_block":
             x = conv_group_block(
                 x=x,
-                block_num=block_num,
-                groups=groups,
+                block_num=num_blocks,
+                groups=num_groups,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
         elif block_name == "simple_group_block":
             x = simple_group_block(
                 x=x,
-                block_num=block_num,
-                groups=groups,
+                block_num=num_blocks,
+                groups=num_groups,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
@@ -296,6 +301,12 @@ class ChannelNet(object):
         Names of blocks for each unit.
     block_names : list of list of str
         Merge types for each unit.
+    dropout_rate : float, default 0.9999
+        Dropout rate.
+    num_blocks : int, default 2
+        Block count architectural parameter.
+    num_groups : int, default 2
+        Group count architectural parameter.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -307,6 +318,9 @@ class ChannelNet(object):
                  channels,
                  block_names,
                  merge_types,
+                 dropout_rate=0.9999,
+                 num_blocks=2,
+                 num_groups=2,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -315,14 +329,12 @@ class ChannelNet(object):
         self.channels = channels
         self.block_names = block_names
         self.merge_types = merge_types
+        self.dropout_rate = dropout_rate
+        self.num_blocks = num_blocks
+        self.num_groups = num_groups
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
-        self.data_format = 'NCHW'
-        self.dropout_rate = 0.9999
-        self.ch_num = 32
-        self.block_num = 2
-        self.group_num = 2
 
     def __call__(self,
                  x,
@@ -349,185 +361,13 @@ class ChannelNet(object):
                     x=x,
                     out_channels_list=out_channels,
                     strides=strides,
-                    block_num=self.block_num,
-                    groups=self.group_num,
+                    num_blocks=self.num_blocks,
+                    num_groups=self.num_groups,
                     dropout_rate=self.dropout_rate,
                     block_names=self.block_names[i][j],
                     merge_type=self.merge_types[i][j],
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
-                in_channels = out_channels[-1]
-                print("i={}, out_channels={}, self.block_names[i][j]={}, self.merge_types[i][j]={}".format(
-                    i, out_channels, self.block_names[i][j], self.merge_types[i][j]))
-
-        # out_channels = self.ch_num
-        # # x = channet_conv(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     kernel_size=(3, 3),
-        # #     strides=2,
-        # #     training=training,
-        # #     act_fn=None,
-        # #     name='conv_s')
-        # # out_channels *= 2
-        # # x2 = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=1,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_0')
-        # # x = tf.concat([x, x2], axis=1, name='add0')
-        # out_channels *= 2
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(self.ch_num, out_channels),
-        #     strides=2,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("channet_conv", "channet_dws_conv_block"),
-        #     merge_type="cat",
-        #     training=training,
-        #     name="features/unit1")
-        #
-        # out_channels *= 2
-        # # x = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=2,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_1')
-        # # x2 = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=1,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_2')
-        # # x = tf.concat([x, x2], axis=1, name='add1')
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(out_channels, out_channels),
-        #     strides=2,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("channet_dws_conv_block", "channet_dws_conv_block"),
-        #     merge_type="cat",
-        #     training=training,
-        #     name="features/unit2")
-        #
-        # out_channels *= 2
-        # # x = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=2,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_3')
-        # # x2 = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=1,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_4')
-        # # x = tf.concat([x, x2], axis=1, name='add2')
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(out_channels, out_channels),
-        #     strides=2,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("channet_dws_conv_block", "channet_dws_conv_block"),
-        #     merge_type="cat",
-        #     training=training,
-        #     name="features/unit3")
-        #
-        # out_channels *= 2
-        # # x = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=2,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_1_5')
-        # # x2 = simple_group_block(
-        # #     x=x,
-        # #     block_num=self.block_num,
-        # #     group=self.group_num,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_2_1')
-        # # x = tf.add(x, x2, name='add21')
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(out_channels, out_channels),
-        #     strides=2,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("channet_dws_conv_block", "simple_group_block"),
-        #     merge_type="add",
-        #     training=training,
-        #     name="features/unit4")
-        #
-        # # x = conv_group_block(
-        # #     x=x,
-        # #     block_num=self.block_num,
-        # #     group=self.group_num,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_2_2')
-        # # x2 = conv_group_block(
-        # #     x=x,
-        # #     block_num=self.block_num,
-        # #     group=self.group_num,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_2_3')
-        # # x = tf.add(x, x2, name='add23')
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(out_channels, out_channels),
-        #     strides=1,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("conv_group_block", "conv_group_block"),
-        #     merge_type="add",
-        #     training=training,
-        #     name="features/unit5")
-        #
-        # out_channels *= 2
-        # # x = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=2,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_3_0')
-        # # x = channet_dws_conv_block(
-        # #     x=x,
-        # #     out_channels=out_channels,
-        # #     strides=1,
-        # #     dropout_rate=self.dropout_rate,
-        # #     training=training,
-        # #     name='conv_3_1')
-        # x = channet_unit(
-        #     x=x,
-        #     out_channels_list=(out_channels, out_channels),
-        #     strides=2,
-        #     block_num=self.block_num,
-        #     groups=self.group_num,
-        #     dropout_rate=self.dropout_rate,
-        #     block_names=("channet_dws_conv_block", "channet_dws_conv_block"),
-        #     merge_type="seq",
-        #     training=training,
-        #     name="features/unitN1")
 
         x = tf.layers.average_pooling2d(
             inputs=x,

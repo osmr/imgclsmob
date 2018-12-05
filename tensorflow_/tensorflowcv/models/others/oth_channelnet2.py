@@ -31,13 +31,12 @@ def batchnorm(x,
 
 
 def channet_conv(x,
-                 in_channels,
                  out_channels,
                  kernel_size,
                  strides=1,
                  dropout_rate=1.0,
-                 activate=True,
                  training=True,
+                 act_fn=tf.nn.relu6,
                  name="channet_conv"):
     data_format = 'NCHW'
     x = tf.contrib.layers.conv2d(
@@ -59,7 +58,7 @@ def channet_conv(x,
     x = batchnorm(
         x=x,
         training=training,
-        act_fn=tf.nn.relu6 if activate else None,
+        act_fn=act_fn,
         name=name)
     return x
 
@@ -93,10 +92,10 @@ def dw_conv2d(x,
 
 
 def channet_dws_conv_block(x,
-                           in_channels,
                            out_channels,
                            strides,
                            dropout_rate=1.0,
+                           act_fn=tf.nn.relu6,
                            training=False,
                            name="channet_dws_conv_block"):
     x = dw_conv2d(
@@ -107,14 +106,13 @@ def channet_dws_conv_block(x,
         training=training,
         name=name + '/conv1')
     x = channet_conv(
-        x=x,
-        in_channels=in_channels,
+        x,
         out_channels=out_channels,
         kernel_size=(1, 1),
         strides=1,
         dropout_rate=dropout_rate,
-        activate=True,
         training=training,
+        act_fn=act_fn,
         name=name + '/conv2')
     return x
 
@@ -162,12 +160,11 @@ def single_block(x,
                  training,
                  name):
     data_format = 'NCHW'
-    in_channels = x.shape[data_format.index('C')].value
+    out_channels = x.shape[data_format.index('C')].value
     for i in range(num_blocks):
         x = channet_dws_conv_block(
             x=x,
-            in_channels=in_channels,
-            out_channels=in_channels,
+            out_channels=out_channels,
             strides=1,
             dropout_rate=dropout_rate,
             training=training,
@@ -208,7 +205,6 @@ def conv_group_block(x,
 
 
 def simple_group_block(x,
-                       channels,
                        block_num,
                        groups,
                        dropout_rate,
@@ -230,7 +226,6 @@ def simple_group_block(x,
 
 
 def channet_unit(x,
-                 in_channels,
                  out_channels_list,
                  strides,
                  num_blocks,
@@ -248,7 +243,6 @@ def channet_unit(x,
         if block_name == "channet_dws_conv_block":
             x = channet_dws_conv_block(
                 x=x,
-                in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides_i,
                 dropout_rate=dropout_rate,
@@ -265,7 +259,6 @@ def channet_unit(x,
         elif block_name == "simple_group_block":
             x = simple_group_block(
                 x=x,
-                channels=in_channels,
                 block_num=num_blocks,
                 groups=num_groups,
                 dropout_rate=dropout_rate,
@@ -274,18 +267,16 @@ def channet_unit(x,
         elif block_name == "channet_conv":
             x = channet_conv(
                 x=x,
-                in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=(3, 3),
                 strides=strides_i,
                 dropout_rate=dropout_rate,
-                activate=False,
                 training=training,
+                act_fn=None,
                 name=name_i)
         else:
             raise NotImplementedError()
         x_outs = x_outs + [x]
-        in_channels = in_channels
     if merge_type == "seq":
         x = x_outs[-1]
     elif merge_type == "add":
@@ -363,13 +354,11 @@ class ChannelNet(object):
         Tensor
             Resulted tensor.
         """
-        in_channels = self.in_channels
         for i, channels_per_stage in enumerate(self.channels):
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) else 1
                 x = channet_unit(
                     x=x,
-                    in_channels=in_channels,
                     out_channels_list=out_channels,
                     strides=strides,
                     num_blocks=self.num_blocks,
@@ -379,7 +368,6 @@ class ChannelNet(object):
                     merge_type=self.merge_types[i][j],
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
-                in_channels = out_channels[-1]
 
         x = tf.layers.average_pooling2d(
             inputs=x,
@@ -484,9 +472,9 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            # x_value = np.zeros((1, 3, 224, 224), np.float32)
-            # y = sess.run(y_net, feed_dict={x: x_value})
-            # assert (y.shape == (1, 1000))
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
+            assert (y.shape == (1, 1000))
         tf.reset_default_graph()
 
 

@@ -446,7 +446,6 @@ def channelnet(**kwargs):
 
 def _test():
     import numpy as np
-    from model_store import init_variables_from_state_dict
 
     pretrained = False
 
@@ -469,7 +468,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
-                init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
+                pass
             else:
                 sess.run(tf.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224), np.float32)

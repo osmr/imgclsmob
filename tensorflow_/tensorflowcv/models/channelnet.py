@@ -8,7 +8,7 @@ __all__ = ['ChannelNet', 'channelnet']
 
 import os
 import tensorflow as tf
-from common import conv2d, batchnorm
+from .common import conv2d, batchnorm
 
 
 def dwconv3x3(x,
@@ -295,18 +295,18 @@ def channet_dws_conv_block(x,
     return x
 
 
-def single_block(x,
-                 num_blocks,
-                 dropout_rate,
-                 training,
-                 name):
-    data_format = 'NCHW'
-    in_channels = x.shape[data_format.index('C')].value
+def dws_multi_block(x,
+                    channels,
+                    num_blocks,
+                    dropout_rate,
+                    training=False,
+                    name="dws_multi_block"):
+    assert (channels == x.shape[1].value)
     for i in range(num_blocks):
         x = channet_dws_conv_block(
             x=x,
-            in_channels=in_channels,
-            out_channels=in_channels,
+            in_channels=channels,
+            out_channels=channels,
             strides=1,
             dropout_rate=dropout_rate,
             training=training,
@@ -314,95 +314,88 @@ def single_block(x,
     return x
 
 
-def pure_conv2d(outs,
-                out_channels,
-                kernel,
-                scope,
-                keep_r=1.0,
-                train=True,
-                padding='SAME',
-                chan_num=1):
-    data_format = 'NCHW'
-    stride = int(outs.shape[data_format.index('C')].value / out_channels)
-    if data_format == 'NHWC':
-        strides = (1, 1, stride)
-        axis = -1
-        df = 'channels_last'
-    else:
-        strides = (stride, 1, 1)
-        axis = 1
-        df = 'channels_first'
-    outs = tf.expand_dims(outs, axis=axis, name=scope + '/expand_dims')
-    outs = tf.layers.conv3d(
-        inputs=outs,
-        filters=chan_num,
-        kernel_size=kernel,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        data_format=df,
-        name=scope + '/pure_conv',
-        kernel_initializer=tf.truncated_normal_initializer(stddev=0.09))
-    if keep_r < 1.0:
-        outs = tf.contrib.layers.dropout(
-            outs, keep_r, is_training=train, scope=scope)
-    if chan_num == 1:
-        outs = tf.squeeze(outs, axis=[axis], name=scope + '/squeeze')
-    return outs
-
-
-def conv_group_block(x,
-                     block_num,
-                     groups,
-                     dropout_rate,
-                     training,
-                     name):
-    data_format = 'NCHW'
-    num_outs = int(x.shape[data_format.index('C')].value / groups)
-    shape = [1, 1, 4 * groups] if data_format == 'NHWC' else [4 * groups, 1, 1]
-    results = []
-    conv_outs = pure_conv2d(
-        outs=x,
-        out_channels=num_outs,
-        kernel=shape,
-        scope=name + '/pure_conv',
-        keep_r=dropout_rate,
-        train=training,
-        chan_num=groups)
-    axis = -1 if data_format == 'NHWC' else 1
-    conv_outs = tf.unstack(conv_outs, axis=axis, name=name + '/unstack')
-    for g in range(groups):
-        cur_outs = single_block(
-            conv_outs[g],
-            block_num,
-            dropout_rate,
-            training,
-            name + '/group_%s' % g)
-        results.append(cur_outs)
-    results = tf.concat(results, data_format.index('C'), name=name + '/concat')
-    return results
-
-
 def simple_group_block(x,
                        channels,
-                       block_num,
-                       groups,
+                       num_blocks,
+                       num_groups,
                        dropout_rate,
                        training=False,
                        name="simple_group_block"):
-    data_format = 'NCHW'
+    assert (channels % num_groups == 0)
+    channels_per_group = channels // num_groups
     x_out_list = []
-    x_in_list = tf.split(x, groups, data_format.index('C'), name=name + '/split')
-    for gi in range(groups):
-        xi_out = single_block(
-            x_in_list[gi],
-            block_num,
-            dropout_rate,
-            training,
-            name + '/group_%s' % gi)
+    if type(x) == list:
+        x_in_list = x
+    else:
+        x_in_list = tf.split(x, num_or_size_splits=num_groups, axis=1, name=name + "/split")
+    for gi in range(num_groups):
+        xi_out = dws_multi_block(
+            x=x_in_list[gi],
+            channels=channels_per_group,
+            num_blocks=num_blocks,
+            dropout_rate=dropout_rate,
+            training=training,
+            name=name + "/group{}".format(gi + 1))
         x_out_list.append(xi_out)
-    x_out = tf.concat(x_out_list, data_format.index('C'), name=name + '/concat')
+    x_out = tf.concat(x_out_list, axis=1, name=name + "/concat")
     return x_out
+
+
+def pure_conv2d(x,
+                filters,
+                kernel_size,
+                strides,
+                dropout_rate=1.0,
+                training=False,
+                name="pure_conv2d"):
+    x = tf.expand_dims(x, axis=1, name=name + '/expand_dims')
+    x = tf.layers.conv3d(
+        inputs=x,
+        filters=filters,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding="same",
+        data_format="channels_first",
+        use_bias=False,
+        name=name + '/conv3d')
+    if dropout_rate > 0.0:
+        x = tf.layers.dropout(
+            inputs=x,
+            rate=dropout_rate,
+            training=training,
+            name=name + "/dropout")
+    if filters == 1:
+        x = tf.squeeze(x, axis=[1], name=name + '/squeeze')
+    return x
+
+
+def conv_group_block(x,
+                     channels,
+                     num_blocks,
+                     num_groups,
+                     dropout_rate,
+                     training=False,
+                     name="conv_group_block"):
+    assert (channels == x.shape[1].value)
+    assert (channels % num_groups == 0)
+    x = pure_conv2d(
+        x=x,
+        filters=num_groups,
+        kernel_size=[4 * num_groups, 1, 1],
+        strides=[num_groups, 1, 1],
+        dropout_rate=dropout_rate,
+        training=training,
+        name=name + '/pure_conv')
+    x = tf.unstack(x, axis=1, name=name + '/unstack')
+    x = simple_group_block(
+        x=x,
+        channels=channels,
+        num_blocks=num_blocks,
+        num_groups=num_groups,
+        dropout_rate=dropout_rate,
+        training=training,
+        name=name)
+    return x
 
 
 def channet_unit(x,
@@ -441,20 +434,21 @@ def channet_unit(x,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
-        elif block_name == "conv_group_block":
-            x = conv_group_block(
-                x=x,
-                block_num=num_blocks,
-                groups=num_groups,
-                dropout_rate=dropout_rate,
-                training=training,
-                name=name_i)
         elif block_name == "simple_group_block":
             x = simple_group_block(
                 x=x,
                 channels=in_channels,
-                block_num=num_blocks,
-                groups=num_groups,
+                num_blocks=num_blocks,
+                num_groups=num_groups,
+                dropout_rate=dropout_rate,
+                training=training,
+                name=name_i)
+        elif block_name == "conv_group_block":
+            x = conv_group_block(
+                x=x,
+                channels=in_channels,
+                num_blocks=num_blocks,
+                num_groups=num_groups,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
@@ -663,9 +657,9 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            # x_value = np.zeros((1, 3, 224, 224), np.float32)
-            # y = sess.run(y_net, feed_dict={x: x_value})
-            # assert (y.shape == (1, 1000))
+            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            y = sess.run(y_net, feed_dict={x: x_value})
+            assert (y.shape == (1, 1000))
         tf.reset_default_graph()
 
 

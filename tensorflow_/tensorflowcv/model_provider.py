@@ -6,6 +6,7 @@ from .models.resnext import *
 from .models.senet import *
 from .models.densenet import *
 from .models.darknet import *
+from .models.channelnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -115,6 +116,8 @@ _models = {
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
+
+    'channelnet': channelnet,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

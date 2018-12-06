@@ -251,7 +251,8 @@ def channet_dws_conv_block(x,
                            in_channels,
                            out_channels,
                            strides,
-                           dropout_rate=1.0,
+                           groups=1,
+                           dropout_rate=0.0,
                            training=False,
                            name="channet_dws_conv_block"):
     """
@@ -268,6 +269,8 @@ def channet_dws_conv_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     dropout_rate : float, default 0.0
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -290,20 +293,22 @@ def channet_dws_conv_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
+        groups=groups,
         dropout_rate=dropout_rate,
         training=training,
         name=name + '/pw_conv')
     return x
 
 
-def dws_multi_block(x,
-                    channels,
-                    num_blocks,
-                    dropout_rate,
-                    training,
-                    name="dws_multi_block"):
+def simple_group_block(x,
+                       channels,
+                       multi_blocks,
+                       groups,
+                       dropout_rate,
+                       training,
+                       name="simple_group_block"):
     """
-    ChannelNet specific block with a sequence of depthwise separable convolution layers.
+    ChannelNet specific block with a sequence of depthwise separable grouped convolution layers.
 
     Parameters:
     ----------
@@ -311,13 +316,15 @@ def dws_multi_block(x,
         Input tensor.
     channels : int
         Number of input/output channels.
-    num_blocks : int
+    multi_blocks : int
         Number of DWS layers in the sequence.
+    groups : int
+        Number of groups.
     dropout_rate : float
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'dws_multi_block'
+    name : str, default 'simple_group_block'
         Block name.
 
     Returns
@@ -326,79 +333,28 @@ def dws_multi_block(x,
         Resulted tensor.
     """
     assert (channels == x.shape[1].value)
-    for i in range(num_blocks):
+    for i in range(multi_blocks):
         x = channet_dws_conv_block(
             x=x,
             in_channels=channels,
             out_channels=channels,
             strides=1,
+            groups=groups,
             dropout_rate=dropout_rate,
             training=training,
             name=name + '/block{}'.format(i + 1))
     return x
 
 
-def simple_group_block(x,
-                       channels,
-                       num_blocks,
-                       num_groups,
+def channelwise_conv2d(x,
+                       filters,
+                       kernel_size,
+                       strides,
                        dropout_rate,
-                       training,
-                       name="simple_group_block"):
+                       training=False,
+                       name="pure_conv2d"):
     """
-    ChannelNet specific block with a combination of group convolutions and depthwise separable convolutions.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    channels : int
-        Number of input/output channels.
-    num_blocks : int
-        Number of DWS layers in the sequence.
-    num_groups : int
-        Number of groups.
-    dropout_rate : float
-        Dropout rate.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dws_multi_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    assert (channels % num_groups == 0)
-    channels_per_group = channels // num_groups
-    x_out_list = []
-    if type(x) == list:
-        x_in_list = x
-    else:
-        x_in_list = tf.split(x, num_or_size_splits=num_groups, axis=1, name=name + "/split")
-    for gi in range(num_groups):
-        xi_out = dws_multi_block(
-            x=x_in_list[gi],
-            channels=channels_per_group,
-            num_blocks=num_blocks,
-            dropout_rate=dropout_rate,
-            training=training,
-            name=name + "/group{}".format(gi + 1))
-        x_out_list.append(xi_out)
-    x_out = tf.concat(x_out_list, axis=1, name=name + "/concat")
-    return x_out
-
-
-def pure_conv2d(x,
-                filters,
-                kernel_size,
-                strides,
-                dropout_rate,
-                training=False,
-                name="pure_conv2d"):
-    """
-    ChannelNet specific block with 3D convolution for 2D data.
+    ChannelNet specific block with channel-wise convolution.
 
     Parameters:
     ----------
@@ -440,13 +396,15 @@ def pure_conv2d(x,
             name=name + "/dropout")
     if filters == 1:
         x = tf.squeeze(x, axis=[1], name=name + '/squeeze')
+    x = tf.unstack(x, axis=1, name=name + '/unstack')
+    x = tf.concat(x, axis=1, name=name + "/concat")
     return x
 
 
 def conv_group_block(x,
                      channels,
-                     num_blocks,
-                     num_groups,
+                     multi_blocks,
+                     groups,
                      dropout_rate,
                      training,
                      name="conv_group_block"):
@@ -460,9 +418,9 @@ def conv_group_block(x,
         Input tensor.
     channels : int
         Number of input/output channels.
-    num_blocks : int
+    multi_blocks : int
         Number of DWS layers in the sequence.
-    num_groups : int
+    groups : int
         Number of groups.
     dropout_rate : float
         Dropout rate.
@@ -477,21 +435,20 @@ def conv_group_block(x,
         Resulted tensor.
     """
     assert (channels == x.shape[1].value)
-    assert (channels % num_groups == 0)
-    x = pure_conv2d(
+    assert (channels % groups == 0)
+    x = channelwise_conv2d(
         x=x,
-        filters=num_groups,
-        kernel_size=[4 * num_groups, 1, 1],
-        strides=[num_groups, 1, 1],
+        filters=groups,
+        kernel_size=[4 * groups, 1, 1],
+        strides=[groups, 1, 1],
         dropout_rate=dropout_rate,
         training=training,
         name=name + '/pure_conv')
-    x = tf.unstack(x, axis=1, name=name + '/unstack')
     x = simple_group_block(
         x=x,
         channels=channels,
-        num_blocks=num_blocks,
-        num_groups=num_groups,
+        multi_blocks=multi_blocks,
+        groups=groups,
         dropout_rate=dropout_rate,
         training=training,
         name=name)
@@ -502,8 +459,8 @@ def channet_unit(x,
                  in_channels,
                  out_channels_list,
                  strides,
-                 num_blocks,
-                 num_groups,
+                 multi_blocks,
+                 groups,
                  dropout_rate,
                  block_names,
                  merge_type,
@@ -522,9 +479,9 @@ def channet_unit(x,
         Number of output channels for each sub-block.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    num_blocks : int
+    multi_blocks : int
         Number of DWS layers in the sequence.
-    num_groups : int
+    groups : int
         Number of groups.
     dropout_rate : float
         Dropout rate.
@@ -571,8 +528,8 @@ def channet_unit(x,
             x = simple_group_block(
                 x=x,
                 channels=in_channels,
-                num_blocks=num_blocks,
-                num_groups=num_groups,
+                multi_blocks=multi_blocks,
+                groups=groups,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
@@ -580,8 +537,8 @@ def channet_unit(x,
             x = conv_group_block(
                 x=x,
                 channels=in_channels,
-                num_blocks=num_blocks,
-                num_groups=num_groups,
+                multi_blocks=multi_blocks,
+                groups=groups,
                 dropout_rate=dropout_rate,
                 training=training,
                 name=name_i)
@@ -615,9 +572,9 @@ class ChannelNet(object):
         Merge types for each unit.
     dropout_rate : float, default 0.0001
         Dropout rate.
-    num_blocks : int, default 2
+    multi_blocks : int, default 2
         Block count architectural parameter.
-    num_groups : int, default 2
+    groups : int, default 2
         Group count architectural parameter.
     in_channels : int, default 3
         Number of input channels.
@@ -631,8 +588,8 @@ class ChannelNet(object):
                  block_names,
                  merge_types,
                  dropout_rate=0.0001,
-                 num_blocks=2,
-                 num_groups=2,
+                 multi_blocks=2,
+                 groups=2,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -642,8 +599,8 @@ class ChannelNet(object):
         self.block_names = block_names
         self.merge_types = merge_types
         self.dropout_rate = dropout_rate
-        self.num_blocks = num_blocks
-        self.num_groups = num_groups
+        self.multi_blocks = multi_blocks
+        self.groups = groups
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
@@ -675,8 +632,8 @@ class ChannelNet(object):
                     in_channels=in_channels,
                     out_channels_list=out_channels,
                     strides=strides,
-                    num_blocks=self.num_blocks,
-                    num_groups=self.num_groups,
+                    multi_blocks=self.multi_blocks,
+                    groups=self.groups,
                     dropout_rate=self.dropout_rate,
                     block_names=self.block_names[i][j],
                     merge_type=self.merge_types[i][j],
@@ -749,8 +706,8 @@ def get_channelnet(model_name=None,
 
 def channelnet(**kwargs):
     """
-    AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
-    https://arxiv.org/abs/1404.5997.
+    ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
+    Convolutions,' https://arxiv.org/abs/1809.01330.
 
     Parameters:
     ----------
@@ -759,7 +716,7 @@ def channelnet(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_channelnet(model_name="alexnet", **kwargs)
+    return get_channelnet(model_name="channelnet", **kwargs)
 
 
 def _test():

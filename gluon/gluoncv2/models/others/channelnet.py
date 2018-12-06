@@ -11,17 +11,165 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
+class ReLU6(nn.HybridBlock):
+    """
+    ReLU6 activation layer.
+    """
+    def __init__(self, **kwargs):
+        super(ReLU6, self).__init__(**kwargs)
+
+    def hybrid_forward(self, F, x):
+        return F.clip(x, 0, 6, name="relu6")
+
+
 def dwconv3x3(in_channels,
               out_channels,
               strides,
-              padding=1,
-              dilation=1,
-              use_bias=False,
-              bn_use_global_stats=False,
-              act_type="relu",
-              activate=True):
+              use_bias=False):
     """
     3x3 depthwise version of the standard convolution layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=out_channels,
+        use_bias=use_bias,
+        in_channels=in_channels)
+
+
+class ChannetConv(HybridBlock):
+    """
+    ChannelNet specific convolution block with Batch normalization and ReLU6 activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    dropout_rate : float, default 0.0
+        Dropout rate.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 dropout_rate=0.0,
+                 activate=True,
+                 **kwargs):
+        super(ChannetConv, self).__init__(**kwargs)
+        self.use_dropout = (dropout_rate > 0.0)
+        self.activate = activate
+
+        with self.name_scope():
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
+                use_bias=use_bias,
+                in_channels=in_channels)
+            if self.use_dropout:
+                self.dropout = nn.Dropout(rate=dropout_rate)
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels)
+            if self.activate:
+                self.activ = ReLU6()
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def channet_conv1x1(in_channels,
+                    out_channels,
+                    strides=1,
+                    groups=1,
+                    use_bias=False,
+                    dropout_rate=0.0,
+                    activate=True):
+    """
+    1x1 version of ChannelNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    dropout_rate : float, default 0.0
+        Dropout rate.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ChannetConv(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=strides,
+        padding=0,
+        groups=groups,
+        use_bias=use_bias,
+        dropout_rate=dropout_rate,
+        activate=activate)
+
+
+def channet_conv3x3(in_channels,
+                    out_channels,
+                    strides,
+                    padding=1,
+                    dilation=1,
+                    groups=1,
+                    use_bias=False,
+                    dropout_rate=0.0,
+                    activate=True):
+    """
+    3x3 version of the standard convolution block.
 
     Parameters:
     ----------
@@ -35,28 +183,117 @@ def dwconv3x3(in_channels,
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    dropout_rate : float, default 0.0
+        Dropout rate.
     activate : bool, default True
         Whether activate the convolution block.
     """
-    return conv3x3_block(
+    return ChannetConv(
         in_channels=in_channels,
         out_channels=out_channels,
+        kernel_size=3,
         strides=strides,
         padding=padding,
         dilation=dilation,
-        groups=out_channels,
+        groups=groups,
         use_bias=use_bias,
-        bn_use_global_stats=bn_use_global_stats,
-        act_type=act_type,
+        dropout_rate=dropout_rate,
         activate=activate)
 
 
+class ChannetDwsConvBlock(HybridBlock):
+    """
+    ChannelNet specific depthwise separable convolution block with BatchNorms and activations at last convolution
+    layers.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    dropout_rate : float, default 0.0
+        Dropout rate.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 strides,
+                 groups=1,
+                 dropout_rate=0.0,
+                 **kwargs):
+        super(ChannetDwsConvBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.dw_conv = dwconv3x3(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                strides=strides)
+            self.pw_conv = channet_conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                groups=groups,
+                dropout_rate=dropout_rate)
+
+    def hybrid_forward(self, F, x):
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
+        return x
+
+
+class SimpleGroupBlock(HybridBlock):
+    """
+    ChannelNet specific block with a sequence of depthwise separable grouped convolution layers.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    multi_blocks : int
+        Number of DWS layers in the sequence.
+    groups : int
+        Number of groups.
+    dropout_rate : float
+        Dropout rate.
+    """
+    def __init__(self,
+                 channels,
+                 multi_blocks,
+                 groups,
+                 dropout_rate,
+                 **kwargs):
+        super(SimpleGroupBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.blocks = nn.HybridSequential(prefix='')
+            for i in range(multi_blocks):
+                self.blocks.add(ChannetDwsConvBlock(
+                    in_channels=channels,
+                    out_channels=channels,
+                    strides=1,
+                    groups=groups,
+                    dropout_rate=dropout_rate))
+
+    def hybrid_forward(self, F, x):
+        x = self.blocks(x)
+        return x
+
+
+class ChannetUnit(nn.HybridBlock):
+    """
+    ChannelNet unit.
+    """
+    def __init__(self, **kwargs):
+        super(ChannetUnit, self).__init__(**kwargs)
+
+    def hybrid_forward(self, F, x):
+        return x
 
 
 class ChannelNet(HybridBlock):

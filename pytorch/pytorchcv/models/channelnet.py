@@ -7,10 +7,9 @@
 __all__ = ['ChannelNet', 'channelnet']
 
 import os
+import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.init as init
-from .common import ReLU6
 
 
 def dwconv3x3(in_channels,
@@ -61,7 +60,7 @@ class ChannetConv(nn.Module):
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    use_bias : bool, default False
+    bias : bool, default False
         Whether the layer uses a bias vector.
     dropout_rate : float, default 0.0
         Dropout rate.
@@ -78,28 +77,25 @@ class ChannetConv(nn.Module):
                  groups=1,
                  bias=False,
                  dropout_rate=0.0,
-                 activate=True,
-                 **kwargs):
-        super(ChannetConv, self).__init__(**kwargs)
+                 activate=True):
+        super(ChannetConv, self).__init__()
         self.use_dropout = (dropout_rate > 0.0)
         self.activate = activate
 
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=stride,
-                padding=padding,
-                dilation=dilation,
-                groups=groups,
-                use_bias=bias,
-                in_channels=in_channels)
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels)
-            if self.activate:
-                self.activ = ReLU6()
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        if self.activate:
+            self.activ = nn.ReLU6(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
@@ -113,9 +109,9 @@ class ChannetConv(nn.Module):
 
 def channet_conv1x1(in_channels,
                     out_channels,
-                    strides=1,
+                    stride=1,
                     groups=1,
-                    use_bias=False,
+                    bias=False,
                     dropout_rate=0.0,
                     activate=True):
     """
@@ -127,11 +123,11 @@ def channet_conv1x1(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int, default 1
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
-    use_bias : bool, default False
+    bias : bool, default False
         Whether the layer uses a bias vector.
     dropout_rate : float, default 0.0
         Dropout rate.
@@ -142,21 +138,21 @@ def channet_conv1x1(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        stride=strides,
+        stride=stride,
         padding=0,
         groups=groups,
-        bias=use_bias,
+        bias=bias,
         dropout_rate=dropout_rate,
         activate=activate)
 
 
 def channet_conv3x3(in_channels,
                     out_channels,
-                    strides,
+                    stride,
                     padding=1,
                     dilation=1,
                     groups=1,
-                    use_bias=False,
+                    bias=False,
                     dropout_rate=0.0,
                     activate=True):
     """
@@ -168,7 +164,7 @@ def channet_conv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
@@ -176,7 +172,7 @@ def channet_conv3x3(in_channels,
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    use_bias : bool, default False
+    bias : bool, default False
         Whether the layer uses a bias vector.
     dropout_rate : float, default 0.0
         Dropout rate.
@@ -187,11 +183,11 @@ def channet_conv3x3(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        stride=strides,
+        stride=stride,
         padding=padding,
         dilation=dilation,
         groups=groups,
-        bias=use_bias,
+        bias=bias,
         dropout_rate=dropout_rate,
         activate=activate)
 
@@ -207,7 +203,7 @@ class ChannetDwsConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
@@ -217,21 +213,19 @@ class ChannetDwsConvBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
+                 stride,
                  groups=1,
-                 dropout_rate=0.0,
-                 **kwargs):
-        super(ChannetDwsConvBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.dw_conv = dwconv3x3(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                stride=strides)
-            self.pw_conv = channet_conv1x1(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                groups=groups,
-                dropout_rate=dropout_rate)
+                 dropout_rate=0.0):
+        super(ChannetDwsConvBlock, self).__init__()
+        self.dw_conv = dwconv3x3(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            stride=stride)
+        self.pw_conv = channet_conv1x1(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            groups=groups,
+            dropout_rate=dropout_rate)
 
     def forward(self, x):
         x = self.dw_conv(x)
@@ -258,18 +252,16 @@ class SimpleGroupBlock(nn.Module):
                  channels,
                  multi_blocks,
                  groups,
-                 dropout_rate,
-                 **kwargs):
-        super(SimpleGroupBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
-            for i in range(multi_blocks):
-                self.blocks.add(ChannetDwsConvBlock(
-                    in_channels=channels,
-                    out_channels=channels,
-                    strides=1,
-                    groups=groups,
-                    dropout_rate=dropout_rate))
+                 dropout_rate):
+        super(SimpleGroupBlock, self).__init__()
+        self.blocks = nn.Sequential()
+        for i in range(multi_blocks):
+            self.blocks.add_module("block{}".format(i + 1), ChannetDwsConvBlock(
+                in_channels=channels,
+                out_channels=channels,
+                stride=1,
+                groups=groups,
+                dropout_rate=dropout_rate))
 
     def forward(self, x):
         x = self.blocks(x)
@@ -289,28 +281,27 @@ class ChannelwiseConv2d(nn.Module):
     """
     def __init__(self,
                  groups,
-                 dropout_rate,
-                 **kwargs):
-        super(ChannelwiseConv2d, self).__init__(**kwargs)
+                 dropout_rate):
+        super(ChannelwiseConv2d, self).__init__()
         self.use_dropout = (dropout_rate > 0.0)
 
-        with self.name_scope():
-            self.conv = nn.Conv3D(
-                channels=groups,
-                kernel_size=(4 * groups, 1, 1),
-                strides=(groups, 1, 1),
-                padding=(2 * groups - 1, 0, 0),
-                use_bias=False,
-                in_channels=1)
-            if self.use_dropout:
-                self.dropout = nn.Dropout(rate=dropout_rate)
+        self.conv = nn.Conv3d(
+            in_channels=1,
+            out_channels=groups,
+            kernel_size=(4 * groups, 1, 1),
+            stride=(groups, 1, 1),
+            padding=(2 * groups - 1, 0, 0),
+            bias=False)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
-        x = x.expand_dims(axis=1)
+        batch, channels, height, width = x.size()
+        x = x.unsqueeze(dim=1)
         x = self.conv(x)
         if self.use_dropout:
             x = self.dropout(x)
-        x = x.reshape((0, -3, -2))
+        x = x.view(batch, channels, height, width)
         return x
 
 
@@ -333,18 +324,16 @@ class ConvGroupBlock(nn.Module):
                  channels,
                  multi_blocks,
                  groups,
-                 dropout_rate,
-                 **kwargs):
-        super(ConvGroupBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = ChannelwiseConv2d(
-                groups=groups,
-                dropout_rate=dropout_rate)
-            self.block = SimpleGroupBlock(
-                channels=channels,
-                multi_blocks=multi_blocks,
-                groups=groups,
-                dropout_rate=dropout_rate)
+                 dropout_rate):
+        super(ConvGroupBlock, self).__init__()
+        self.conv = ChannelwiseConv2d(
+            groups=groups,
+            dropout_rate=dropout_rate)
+        self.block = SimpleGroupBlock(
+            channels=channels,
+            multi_blocks=multi_blocks,
+            groups=groups,
+            dropout_rate=dropout_rate)
 
     def forward(self, x):
         x = self.conv(x)
@@ -383,60 +372,58 @@ class ChannetUnit(nn.Module):
                  groups,
                  dropout_rate,
                  block_names,
-                 merge_type,
-                 **kwargs):
-        super(ChannetUnit, self).__init__(**kwargs)
+                 merge_type):
+        super(ChannetUnit, self).__init__()
         assert (len(block_names) == 2)
         assert (merge_type in ["seq", "add", "cat"])
         self.merge_type = merge_type
 
-        with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
-            for i, (out_channels, block_name) in enumerate(zip(out_channels_list, block_names)):
-                strides_i = (strides if i == 0 else 1)
-                if block_name == "channet_conv3x3":
-                    self.blocks.add(channet_conv3x3(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        strides=strides_i,
-                        dropout_rate=dropout_rate,
-                        activate=False))
-                elif block_name == "channet_dws_conv_block":
-                    self.blocks.add(ChannetDwsConvBlock(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        strides=strides_i,
-                        dropout_rate=dropout_rate))
-                elif block_name == "simple_group_block":
-                    self.blocks.add(SimpleGroupBlock(
-                        channels=in_channels,
-                        multi_blocks=multi_blocks,
-                        groups=groups,
-                        dropout_rate=dropout_rate))
-                elif block_name == "conv_group_block":
-                    self.blocks.add(ConvGroupBlock(
-                        channels=in_channels,
-                        multi_blocks=multi_blocks,
-                        groups=groups,
-                        dropout_rate=dropout_rate))
-                else:
-                    raise NotImplementedError()
-                in_channels = out_channels
+        self.blocks = nn.Sequential()
+        for i, (out_channels, block_name) in enumerate(zip(out_channels_list, block_names)):
+            stride_i = (strides if i == 0 else 1)
+            if block_name == "channet_conv3x3":
+                self.blocks.add_module("block{}".format(i + 1), channet_conv3x3(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride_i,
+                    dropout_rate=dropout_rate,
+                    activate=False))
+            elif block_name == "channet_dws_conv_block":
+                self.blocks.add_module("block{}".format(i + 1), ChannetDwsConvBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride_i,
+                    dropout_rate=dropout_rate))
+            elif block_name == "simple_group_block":
+                self.blocks.add_module("block{}".format(i + 1), SimpleGroupBlock(
+                    channels=in_channels,
+                    multi_blocks=multi_blocks,
+                    groups=groups,
+                    dropout_rate=dropout_rate))
+            elif block_name == "conv_group_block":
+                self.blocks.add_module("block{}".format(i + 1), ConvGroupBlock(
+                    channels=in_channels,
+                    multi_blocks=multi_blocks,
+                    groups=groups,
+                    dropout_rate=dropout_rate))
+            else:
+                raise NotImplementedError()
+            in_channels = out_channels
 
     def forward(self, x):
         x_outs = []
-        for block in self.blocks._children.values():
+        for block in self.blocks._modules.values():
             x = block(x)
             x_outs.append(x)
         if self.merge_type == "add":
             for i in range(len(x_outs) - 1):
                 x = x + x_outs[i]
         elif self.merge_type == "cat":
-            x = F.concat(*x_outs, dim=1)
+            x = torch.cat(tuple(x_outs), dim=1)
         return x
 
 
-class ChannelNet(HybridBlock):
+class ChannelNet(nn.Module):
     """
     ChannelNet model from 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise
     Convolutions,' https://arxiv.org/abs/1809.01330.
@@ -459,7 +446,7 @@ class ChannelNet(HybridBlock):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -471,45 +458,50 @@ class ChannelNet(HybridBlock):
                  groups=2,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(ChannelNet, self).__init__(**kwargs)
+                 num_classes=1000):
+        super(ChannelNet, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.num_classes = num_classes
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) else 1
-                        stage.add(ChannetUnit(
-                            in_channels=in_channels,
-                            out_channels_list=out_channels,
-                            strides=strides,
-                            multi_blocks=multi_blocks,
-                            groups=groups,
-                            dropout_rate=dropout_rate,
-                            block_names=block_names[i][j],
-                            merge_type=merge_types[i][j]))
-                        if merge_types[i][j] == "cat":
-                            in_channels = sum(out_channels)
-                        else:
-                            in_channels = out_channels[-1]
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+        self.features = nn.Sequential()
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                strides = 2 if (j == 0) else 1
+                stage.add_module("unit{}".format(j + 1), ChannetUnit(
+                    in_channels=in_channels,
+                    out_channels_list=out_channels,
+                    strides=strides,
+                    multi_blocks=multi_blocks,
+                    groups=groups,
+                    dropout_rate=dropout_rate,
+                    block_names=block_names[i][j],
+                    merge_type=merge_types[i][j]))
+                if merge_types[i][j] == "cat":
+                    in_channels = sum(out_channels)
+                else:
+                    in_channels = out_channels[-1]
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module('final_pool', nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)
+        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 

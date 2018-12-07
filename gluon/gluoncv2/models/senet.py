@@ -9,8 +9,7 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import SEBlock
-from .resnext import resnext_conv3x3, resnext_conv1x1
+from .common import conv1x1_block, conv3x3_block, SEBlock
 
 
 class SENetBottleneck(HybridBlock):
@@ -42,28 +41,24 @@ class SENetBottleneck(HybridBlock):
                  **kwargs):
         super(SENetBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // 4
-        D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
         group_width = cardinality * D
         group_width2 = group_width // 2
 
         with self.name_scope():
-            self.conv1 = resnext_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=group_width2,
-                strides=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = resnext_conv3x3(
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = conv3x3_block(
                 in_channels=group_width2,
                 out_channels=group_width,
                 strides=strides,
                 groups=cardinality,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv3 = resnext_conv1x1(
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv3 = conv1x1_block(
                 in_channels=group_width,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
@@ -118,15 +113,14 @@ class SENetUnit(HybridBlock):
             self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 if identity_conv3x3:
-                    self.identity_conv = resnext_conv3x3(
+                    self.identity_conv = conv3x3_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         strides=strides,
-                        groups=1,
                         bn_use_global_stats=bn_use_global_stats,
                         activate=False)
                 else:
-                    self.identity_conv = resnext_conv1x1(
+                    self.identity_conv = conv1x1_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         strides=strides,
@@ -168,27 +162,19 @@ class SEInitBlock(HybridBlock):
         mid_channels = out_channels // 2
 
         with self.name_scope():
-            self.conv1 = resnext_conv3x3(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=2,
-                groups=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = resnext_conv3x3(
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                strides=1,
-                groups=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv3 = resnext_conv3x3(
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv3 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                strides=1,
-                groups=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,

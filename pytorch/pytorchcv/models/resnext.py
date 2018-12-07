@@ -6,124 +6,13 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_conv3x3', 'resnext_conv1x1']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
 
 import os
 import math
 import torch.nn as nn
 import torch.nn.init as init
-from .common import SEBlock
-
-
-class ResNeXtConv(nn.Module):
-    """
-    ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups,
-                 activate):
-        super(ResNeXtConv, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def resnext_conv1x1(in_channels,
-                    out_channels,
-                    stride,
-                    activate):
-    """
-    1x1 version of the ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResNeXtConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        groups=1,
-        activate=activate)
-
-
-def resnext_conv3x3(in_channels,
-                    out_channels,
-                    stride,
-                    groups,
-                    activate):
-    """
-    3x3 version of the ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResNeXtConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        groups=groups,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
 
 
 class ResNeXtBottleneck(nn.Module):
@@ -154,21 +43,17 @@ class ResNeXtBottleneck(nn.Module):
         D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
         group_width = cardinality * D
 
-        self.conv1 = resnext_conv1x1(
+        self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=group_width,
-            stride=1,
-            activate=True)
-        self.conv2 = resnext_conv3x3(
+            out_channels=group_width)
+        self.conv2 = conv3x3_block(
             in_channels=group_width,
             out_channels=group_width,
             stride=stride,
-            groups=cardinality,
-            activate=True)
-        self.conv3 = resnext_conv1x1(
+            groups=cardinality)
+        self.conv3 = conv1x1_block(
             in_channels=group_width,
             out_channels=out_channels,
-            stride=1,
             activate=False)
 
     def forward(self, x):
@@ -217,7 +102,7 @@ class ResNeXtUnit(nn.Module):
         if self.use_se:
             self.se = SEBlock(channels=out_channels)
         if self.resize_identity:
-            self.identity_conv = resnext_conv1x1(
+            self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
@@ -252,14 +137,10 @@ class ResNeXtInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(ResNeXtInitBlock, self).__init__()
-        self.conv = ResNeXtConv(
+        self.conv = conv7x7_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            groups=1,
-            activate=True)
+            stride=2)
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -326,7 +207,7 @@ class ResNeXt(nn.Module):
                     use_se=use_se))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

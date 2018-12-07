@@ -6,165 +6,12 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_conv3x3', 'resnext_conv1x1']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
 
 import os
 import math
 import tensorflow as tf
-from .common import conv2d, batchnorm, maxpool2d, se_block
-
-
-def resnext_conv(x,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 groups,
-                 activate,
-                 training,
-                 name="resnext_conv"):
-    """
-    ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'resnext_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        groups=groups,
-        use_bias=False,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    if activate:
-        x = tf.nn.relu(x, name=name + "/activ")
-    return x
-
-
-def resnext_conv1x1(x,
-                    in_channels,
-                    out_channels,
-                    strides,
-                    activate,
-                    training,
-                    name="resnext_conv1x1"):
-    """
-    1x1 version of the ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'resnext_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return resnext_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        groups=1,
-        activate=activate,
-        training=training,
-        name=name)
-
-
-def resnext_conv3x3(x,
-                    in_channels,
-                    out_channels,
-                    strides,
-                    groups,
-                    activate,
-                    training,
-                    name="resnext_conv3x3"):
-    """
-    3x3 version of the ResNeXt specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'resnext_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return resnext_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=groups,
-        activate=activate,
-        training=training,
-        name=name)
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, se_block
 
 
 def resnext_bottleneck(x,
@@ -203,31 +50,27 @@ def resnext_bottleneck(x,
         Resulted tensor.
     """
     mid_channels = out_channels // 4
-    D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+    D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
     group_width = cardinality * D
 
-    x = resnext_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=group_width,
-        strides=1,
-        activate=True,
         training=training,
         name=name + "/conv1")
-    x = resnext_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=group_width,
         out_channels=group_width,
         strides=strides,
         groups=cardinality,
-        activate=True,
         training=training,
         name=name + "/conv2")
-    x = resnext_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=group_width,
         out_channels=out_channels,
-        strides=1,
         activate=False,
         training=training,
         name=name + "/conv3")
@@ -274,7 +117,7 @@ def resnext_unit(x,
     """
     resize_identity = (in_channels != out_channels) or (strides != 1)
     if resize_identity:
-        identity = resnext_conv1x1(
+        identity = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
@@ -333,15 +176,11 @@ def resnext_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = resnext_conv(
+    x = conv7x7_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=7,
         strides=2,
-        padding=3,
-        groups=1,
-        activate=True,
         training=training,
         name=name + "/conv")
     x = maxpool2d(
@@ -441,7 +280,7 @@ class ResNeXt(object):
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format="channels_first",
             name="features/final_pool")
 
         x = tf.layers.flatten(x)

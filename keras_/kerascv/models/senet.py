@@ -10,8 +10,7 @@ import math
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import se_block
-from .resnext import resnext_conv3x3, resnext_conv1x1
+from .common import conv1x1_block, conv3x3_block, se_block
 
 
 def senet_bottleneck(x,
@@ -47,30 +46,26 @@ def senet_bottleneck(x,
         Resulted tensor/variable/symbol.
     """
     mid_channels = out_channels // 4
-    D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+    D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
     group_width = cardinality * D
     group_width2 = group_width // 2
 
-    x = resnext_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=group_width2,
-        strides=1,
-        activate=True,
         name=name + "/conv1")
-    x = resnext_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=group_width2,
         out_channels=group_width,
         strides=strides,
         groups=cardinality,
-        activate=True,
         name=name + "/conv2")
-    x = resnext_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=group_width,
         out_channels=out_channels,
-        strides=1,
         activate=False,
         name=name + "/conv3")
     return x
@@ -114,16 +109,15 @@ def senet_unit(x,
     resize_identity = (in_channels != out_channels) or (strides != 1)
     if resize_identity:
         if identity_conv3x3:
-            identity = resnext_conv3x3(
+            identity = conv3x3_block(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                groups=1,
                 activate=False,
                 name=name + "/identity_conv")
         else:
-            identity = resnext_conv1x1(
+            identity = conv1x1_block(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -181,29 +175,21 @@ def senet_init_block(x,
     """
     mid_channels = out_channels // 2
 
-    x = resnext_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=2,
-        groups=1,
-        activate=True,
         name=name + "/conv1")
-    x = resnext_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
-        strides=1,
-        groups=1,
-        activate=True,
         name=name + "/conv2")
-    x = resnext_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
-        strides=1,
-        groups=1,
-        activate=True,
         name=name + "/conv3")
     x = nn.MaxPool2D(
         pool_size=3,

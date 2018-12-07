@@ -12,8 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, SEBlock
-from .resnext import resnext_conv3x3, resnext_conv1x1
+from .common import conv1x1_block, conv3x3_block, SimpleSequential, SEBlock
 
 
 class SENetBottleneck(Chain):
@@ -41,26 +40,22 @@ class SENetBottleneck(Chain):
                  bottleneck_width):
         super(SENetBottleneck, self).__init__()
         mid_channels = out_channels // 4
-        D = int(math.floor(mid_channels * (bottleneck_width / 64)))
+        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
         group_width = cardinality * D
         group_width2 = group_width // 2
 
         with self.init_scope():
-            self.conv1 = resnext_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=group_width2,
-                stride=1,
-                activate=True)
-            self.conv2 = resnext_conv3x3(
+                out_channels=group_width2)
+            self.conv2 = conv3x3_block(
                 in_channels=group_width2,
                 out_channels=group_width,
                 stride=stride,
-                groups=cardinality,
-                activate=True)
-            self.conv3 = resnext_conv1x1(
+                groups=cardinality)
+            self.conv3 = conv1x1_block(
                 in_channels=group_width,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
 
     def __call__(self, x):
@@ -111,14 +106,13 @@ class SENetUnit(Chain):
                 self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 if identity_conv3x3:
-                    self.identity_conv = resnext_conv3x3(
+                    self.identity_conv = conv3x3_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         stride=stride,
-                        groups=1,
                         activate=False)
                 else:
-                    self.identity_conv = resnext_conv1x1(
+                    self.identity_conv = conv1x1_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         stride=stride,
@@ -156,24 +150,16 @@ class SEInitBlock(Chain):
         mid_channels = out_channels // 2
 
         with self.init_scope():
-            self.conv1 = resnext_conv3x3(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=2,
-                groups=1,
-                activate=True)
-            self.conv2 = resnext_conv3x3(
+                stride=2)
+            self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
-                out_channels=mid_channels,
-                stride=1,
-                groups=1,
-                activate=True)
-            self.conv3 = resnext_conv3x3(
+                out_channels=mid_channels)
+            self.conv3 = conv3x3_block(
                 in_channels=mid_channels,
-                out_channels=out_channels,
-                stride=1,
-                groups=1,
-                activate=True)
+                out_channels=out_channels)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,

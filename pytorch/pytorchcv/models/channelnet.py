@@ -1,5 +1,5 @@
 """
-    ChannelNet, implemented in Gluon.
+    ChannelNet, implemented in PyTorch.
     Original paper: 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise Convolutions,'
     https://arxiv.org/abs/1809.01330.
 """
@@ -7,15 +7,16 @@
 __all__ = ['ChannelNet', 'channelnet']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.nn.init as init
 from .common import ReLU6
 
 
 def dwconv3x3(in_channels,
               out_channels,
-              strides,
-              use_bias=False):
+              stride,
+              bias=False):
     """
     3x3 depthwise version of the standard convolution layer.
 
@@ -25,22 +26,22 @@ def dwconv3x3(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
-    use_bias : bool, default False
+    bias : bool, default False
         Whether the layer uses a bias vector.
     """
-    return nn.Conv2D(
-        channels=out_channels,
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=3,
-        strides=strides,
+        stride=stride,
         padding=1,
         groups=out_channels,
-        use_bias=use_bias,
-        in_channels=in_channels)
+        bias=bias)
 
 
-class ChannetConv(HybridBlock):
+class ChannetConv(nn.Module):
     """
     ChannelNet specific convolution block with Batch normalization and ReLU6 activation.
 
@@ -52,7 +53,7 @@ class ChannetConv(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -71,11 +72,11 @@ class ChannetConv(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 strides,
+                 stride,
                  padding,
                  dilation=1,
                  groups=1,
-                 use_bias=False,
+                 bias=False,
                  dropout_rate=0.0,
                  activate=True,
                  **kwargs):
@@ -87,11 +88,11 @@ class ChannetConv(HybridBlock):
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
-                strides=strides,
+                strides=stride,
                 padding=padding,
                 dilation=dilation,
                 groups=groups,
-                use_bias=use_bias,
+                use_bias=bias,
                 in_channels=in_channels)
             if self.use_dropout:
                 self.dropout = nn.Dropout(rate=dropout_rate)
@@ -100,7 +101,7 @@ class ChannetConv(HybridBlock):
             if self.activate:
                 self.activ = ReLU6()
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.conv(x)
         if self.use_dropout:
             x = self.dropout(x)
@@ -141,10 +142,10 @@ def channet_conv1x1(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        strides=strides,
+        stride=strides,
         padding=0,
         groups=groups,
-        use_bias=use_bias,
+        bias=use_bias,
         dropout_rate=dropout_rate,
         activate=activate)
 
@@ -186,16 +187,16 @@ def channet_conv3x3(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        strides=strides,
+        stride=strides,
         padding=padding,
         dilation=dilation,
         groups=groups,
-        use_bias=use_bias,
+        bias=use_bias,
         dropout_rate=dropout_rate,
         activate=activate)
 
 
-class ChannetDwsConvBlock(HybridBlock):
+class ChannetDwsConvBlock(nn.Module):
     """
     ChannelNet specific depthwise separable convolution block with BatchNorms and activations at last convolution
     layers.
@@ -225,20 +226,20 @@ class ChannetDwsConvBlock(HybridBlock):
             self.dw_conv = dwconv3x3(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                strides=strides)
+                stride=strides)
             self.pw_conv = channet_conv1x1(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 groups=groups,
                 dropout_rate=dropout_rate)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.dw_conv(x)
         x = self.pw_conv(x)
         return x
 
 
-class SimpleGroupBlock(HybridBlock):
+class SimpleGroupBlock(nn.Module):
     """
     ChannelNet specific block with a sequence of depthwise separable group convolution layers.
 
@@ -270,12 +271,12 @@ class SimpleGroupBlock(HybridBlock):
                     groups=groups,
                     dropout_rate=dropout_rate))
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.blocks(x)
         return x
 
 
-class ChannelwiseConv2d(HybridBlock):
+class ChannelwiseConv2d(nn.Module):
     """
     ChannelNet specific block with channel-wise convolution.
 
@@ -304,7 +305,7 @@ class ChannelwiseConv2d(HybridBlock):
             if self.use_dropout:
                 self.dropout = nn.Dropout(rate=dropout_rate)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = x.expand_dims(axis=1)
         x = self.conv(x)
         if self.use_dropout:
@@ -313,7 +314,7 @@ class ChannelwiseConv2d(HybridBlock):
         return x
 
 
-class ConvGroupBlock(HybridBlock):
+class ConvGroupBlock(nn.Module):
     """
     ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
 
@@ -345,13 +346,13 @@ class ConvGroupBlock(HybridBlock):
                 groups=groups,
                 dropout_rate=dropout_rate)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.conv(x)
         x = self.block(x)
         return x
 
 
-class ChannetUnit(nn.HybridBlock):
+class ChannetUnit(nn.Module):
     """
     ChannelNet unit.
 
@@ -422,7 +423,7 @@ class ChannetUnit(nn.HybridBlock):
                     raise NotImplementedError()
                 in_channels = out_channels
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x_outs = []
         for block in self.blocks._children.values():
             x = block(x)
@@ -507,7 +508,7 @@ class ChannelNet(HybridBlock):
                 units=classes,
                 in_units=in_channels))
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.features(x)
         x = self.output(x)
         return x
@@ -515,8 +516,7 @@ class ChannelNet(HybridBlock):
 
 def get_channelnet(model_name=None,
                    pretrained=False,
-                   ctx=cpu(),
-                   root=os.path.join('~', '.mxnet', 'models'),
+                   root=os.path.join('~', '.torch', 'models'),
                    **kwargs):
     """
     Create ChannelNet model with specific parameters.
@@ -527,9 +527,7 @@ def get_channelnet(model_name=None,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
 
@@ -550,12 +548,11 @@ def get_channelnet(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -569,17 +566,24 @@ def channelnet(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_channelnet(model_name="channelnet", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
-    import mxnet as mx
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
 
     pretrained = False
 
@@ -591,22 +595,15 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != channelnet or weight_count == 3875112)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

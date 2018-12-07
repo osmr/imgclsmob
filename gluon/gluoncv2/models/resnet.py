@@ -44,12 +44,10 @@ class ResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 
@@ -91,18 +89,15 @@ class ResBottleneck(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=False)
 

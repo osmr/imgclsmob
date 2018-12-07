@@ -48,13 +48,11 @@ def res_block(x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=strides,
-        activate=True,
         name=name + "/conv1")
     x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        strides=1,
         activate=False,
         name=name + "/conv2")
     return x
@@ -96,20 +94,17 @@ def res_bottleneck_block(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
-        activate=True,
         name=name + "/conv1")
     x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
-        activate=True,
         name=name + "/conv2")
     x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        strides=1,
         activate=False,
         name=name + "/conv3")
     return x

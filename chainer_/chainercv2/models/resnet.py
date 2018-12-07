@@ -42,12 +42,10 @@ class ResBlock(Chain):
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
-                activate=True)
+                stride=stride)
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
 
     def __call__(self, x):
@@ -83,17 +81,14 @@ class ResBottleneck(Chain):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=(stride if conv1_stride else 1),
-                activate=True)
+                stride=(stride if conv1_stride else 1))
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=(1 if conv1_stride else stride),
-                activate=True)
+                stride=(1 if conv1_stride else stride))
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
 
     def __call__(self, x):

@@ -3,7 +3,8 @@
 """
 
 __all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
+           'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda',
+           'se_block', 'GluonBatchNormalization']
 
 import math
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
@@ -479,6 +480,140 @@ def dwconv3x3_block(x,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate,
+        name=name)
+
+
+def pre_conv_block(x,
+                   in_channels,
+                   out_channels,
+                   kernel_size,
+                   strides,
+                   padding,
+                   return_preact=False,
+                   name="pre_conv_block"):
+    """
+    Convolution block with Batch normalization and ReLU pre-activation.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
+    name : str, default 'pre_conv_block'
+        Block name.
+
+    Returns
+    -------
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
+    """
+    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
+    if return_preact:
+        x_pre_activ = x
+    x = conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        use_bias=False,
+        name=name + "/conv")
+    if return_preact:
+        return x, x_pre_activ
+    else:
+        return x
+
+
+def pre_conv1x1_block(x,
+                      in_channels,
+                      out_channels,
+                      strides=1,
+                      return_preact=False,
+                      name="preres_conv1x1"):
+    """
+    1x1 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    name : str, default 'preres_conv1x1'
+        Block name.
+
+    Returns
+    -------
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
+    """
+    return pre_conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        strides=strides,
+        padding=0,
+        return_preact=return_preact,
+        name=name)
+
+
+def pre_conv3x3_block(x,
+                      in_channels,
+                      out_channels,
+                      strides,
+                      return_preact=False,
+                      name="pre_conv3x3_block"):
+    """
+    3x3 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    name : str, default 'pre_conv3x3_block'
+        Block name.
+
+    Returns
+    -------
+    tuple of two keras.backend tensor/variable/symbol
+        Resulted tensor and preactivated input tensor.
+    """
+    return pre_conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        return_preact=return_preact,
         name=name)
 
 

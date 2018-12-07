@@ -15,126 +15,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, se_block, GluonBatchNormalization
-
-
-def preres_conv(x,
-                in_channels,
-                out_channels,
-                kernel_size,
-                strides,
-                padding,
-                name="preres_conv"):
-    """
-    PreResNet specific convolution block, with pre-activation.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    name : str, default 'preres_conv'
-        Block name.
-
-    Returns
-    -------
-    tuple of two keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    x_pre_activ = x
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    return x, x_pre_activ
-
-
-def preres_conv1x1(x,
-                   in_channels,
-                   out_channels,
-                   strides,
-                   name="preres_conv1x1"):
-    """
-    1x1 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'preres_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    tuple of two keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    return preres_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        name=name)
-
-
-def preres_conv3x3(x,
-                   in_channels,
-                   out_channels,
-                   strides,
-                   name="preres_conv3x3"):
-    """
-    3x3 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'preres_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    tuple of two keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    return preres_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        name=name)
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, se_block, GluonBatchNormalization
 
 
 def preres_block(x,
@@ -163,13 +44,14 @@ def preres_block(x,
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
-    x, x_pre_activ = preres_conv3x3(
+    x, x_pre_activ = pre_conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=strides,
+        return_preact=True,
         name=name + "/conv1")
-    x, _ = preres_conv3x3(
+    x = pre_conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -209,19 +91,20 @@ def preres_bottleneck_block(x,
     """
     mid_channels = out_channels // 4
 
-    x, x_pre_activ = preres_conv1x1(
+    x, x_pre_activ = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
+        return_preact=True,
         name=name + "/conv1")
-    x, _ = preres_conv3x3(
+    x = pre_conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
         name=name + "/conv2")
-    x, _ = preres_conv1x1(
+    x = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,

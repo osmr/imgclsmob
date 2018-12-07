@@ -17,96 +17,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, conv1x1, SEBlock
-
-
-class PreResConv(Chain):
-    """
-    PreResNet specific convolution block, with pre-activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(PreResConv, self).__init__()
-        with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
-            self.activ = F.relu
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-
-    def __call__(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        x_pre_activ = x
-        x = self.conv(x)
-        return x, x_pre_activ
-
-
-def preres_conv1x1(in_channels,
-                   out_channels,
-                   stride):
-    """
-    1x1 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    return PreResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0)
-
-
-def preres_conv3x3(in_channels,
-                   out_channels,
-                   stride):
-    """
-    3x3 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    return PreResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1)
+from .common import pre_conv1x1_block, pre_conv3x3_block, SimpleSequential, conv1x1, SEBlock
 
 
 class PreResBlock(Chain):
@@ -128,18 +39,19 @@ class PreResBlock(Chain):
                  stride):
         super(PreResBlock, self).__init__()
         with self.init_scope():
-            self.conv1 = preres_conv3x3(
+            self.conv1 = pre_conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride)
-            self.conv2 = preres_conv3x3(
+                stride=stride,
+                return_preact=True)
+            self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 stride=1)
 
     def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
-        x, _ = self.conv2(x)
+        x = self.conv2(x)
         return x, x_pre_activ
 
 
@@ -167,23 +79,24 @@ class PreResBottleneck(Chain):
         mid_channels = out_channels // 4
 
         with self.init_scope():
-            self.conv1 = preres_conv1x1(
+            self.conv1 = pre_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=(stride if conv1_stride else 1))
-            self.conv2 = preres_conv3x3(
+                stride=(stride if conv1_stride else 1),
+                return_preact=True)
+            self.conv2 = pre_conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=(1 if conv1_stride else stride))
-            self.conv3 = preres_conv1x1(
+            self.conv3 = pre_conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 stride=1)
 
     def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
-        x, _ = self.conv2(x)
-        x, _ = self.conv3(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         return x, x_pre_activ
 
 

@@ -14,110 +14,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, SEBlock
-
-
-class PreResConv(HybridBlock):
-    """
-    PreResNet specific convolution block, with pre-activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(PreResConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.bn = nn.BatchNorm(
-                in_channels=in_channels,
-                use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-
-    def hybrid_forward(self, F, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        x_pre_activ = x
-        x = self.conv(x)
-        return x, x_pre_activ
-
-
-def preres_conv1x1(in_channels,
-                   out_channels,
-                   strides,
-                   bn_use_global_stats):
-    """
-    1x1 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    return PreResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        bn_use_global_stats=bn_use_global_stats)
-
-
-def preres_conv3x3(in_channels,
-                   out_channels,
-                   strides,
-                   bn_use_global_stats):
-    """
-    3x3 version of the PreResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    return PreResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        bn_use_global_stats=bn_use_global_stats)
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SEBlock
 
 
 class PreResBlock(HybridBlock):
@@ -143,12 +40,13 @@ class PreResBlock(HybridBlock):
                  **kwargs):
         super(PreResBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = preres_conv3x3(
+            self.conv1 = pre_conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = preres_conv3x3(
+                bn_use_global_stats=bn_use_global_stats,
+                return_preact=True)
+            self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=1,
@@ -156,7 +54,7 @@ class PreResBlock(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x, x_pre_activ = self.conv1(x)
-        x, _ = self.conv2(x)
+        x = self.conv2(x)
         return x, x_pre_activ
 
 
@@ -188,17 +86,18 @@ class PreResBottleneck(HybridBlock):
         mid_channels = out_channels // 4
 
         with self.name_scope():
-            self.conv1 = preres_conv1x1(
+            self.conv1 = pre_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = preres_conv3x3(
+                bn_use_global_stats=bn_use_global_stats,
+                return_preact=True)
+            self.conv2 = pre_conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv3 = preres_conv1x1(
+            self.conv3 = pre_conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=1,
@@ -206,8 +105,8 @@ class PreResBottleneck(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x, x_pre_activ = self.conv1(x)
-        x, _ = self.conv2(x)
-        x, _ = self.conv3(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
         return x, x_pre_activ
 
 

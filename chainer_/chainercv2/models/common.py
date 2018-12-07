@@ -310,7 +310,9 @@ class PreConvBlock(Chain):
         self.return_preact = return_preact
 
         with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
+            self.bn = L.BatchNormalization(
+                size=in_channels,
+                eps=1e-5)
             self.activ = F.relu
             self.conv = L.Convolution2D(
                 in_channels=in_channels,

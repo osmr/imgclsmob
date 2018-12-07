@@ -332,7 +332,7 @@ def simple_group_block(x,
     Tensor
         Resulted tensor.
     """
-    assert (channels == x.shape[1].value)
+    # assert (channels == x.shape[1].value)
     for i in range(multi_blocks):
         x = channet_dws_conv_block(
             x=x,
@@ -362,7 +362,7 @@ def channelwise_conv2d(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'pure_conv2d'
+    name : str, default 'channelwise_conv2d'
         Block name.
 
     Returns
@@ -382,7 +382,7 @@ def channelwise_conv2d(x,
         padding="same",
         data_format="channels_first",
         use_bias=False,
-        name=name + '/conv3d')
+        name=name + '/conv')
     if dropout_rate > 0.0:
         x = tf.layers.dropout(
             inputs=x,
@@ -420,7 +420,7 @@ def conv_group_block(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'pure_conv2d'
+    name : str, default 'conv_group_block'
         Block name.
 
     Returns
@@ -435,7 +435,7 @@ def conv_group_block(x,
         groups=groups,
         dropout_rate=dropout_rate,
         training=training,
-        name=name + '/pure_conv')
+        name=name + '/conv')
     x = simple_group_block(
         x=x,
         channels=channels,
@@ -483,7 +483,7 @@ def channet_unit(x,
         Type of sub-block output merging.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'pure_conv2d'
+    name : str, default 'channet_unit'
         Block name.
 
     Returns

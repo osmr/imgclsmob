@@ -298,9 +298,9 @@ class ChannelwiseConv2d(HybridBlock):
                 channels=groups,
                 kernel_size=(4 * groups, 1, 1),
                 strides=(groups, 1, 1),
-                padding=(2 * groups, 0, 0),
+                padding=(2 * groups - 1, 0, 0),
                 use_bias=False,
-                in_channels=groups)
+                in_channels=1)
             if self.use_dropout:
                 self.dropout = nn.Dropout(rate=dropout_rate)
 

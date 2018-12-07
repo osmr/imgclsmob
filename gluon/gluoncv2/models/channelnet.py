@@ -9,17 +9,7 @@ __all__ = ['ChannelNet', 'channelnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class ReLU6(nn.HybridBlock):
-    """
-    ReLU6 activation layer.
-    """
-    def __init__(self, **kwargs):
-        super(ReLU6, self).__init__(**kwargs)
-
-    def hybrid_forward(self, F, x):
-        return F.clip(x, 0, 6, name="relu6")
+from .common import ReLU6
 
 
 def dwconv3x3(in_channels,
@@ -250,7 +240,7 @@ class ChannetDwsConvBlock(HybridBlock):
 
 class SimpleGroupBlock(HybridBlock):
     """
-    ChannelNet specific block with a sequence of depthwise separable grouped convolution layers.
+    ChannelNet specific block with a sequence of depthwise separable group convolution layers.
 
     Parameters:
     ----------
@@ -285,14 +275,163 @@ class SimpleGroupBlock(HybridBlock):
         return x
 
 
+class ChannelwiseConv2d(HybridBlock):
+    """
+    ChannelNet specific block with channel-wise convolution.
+
+    Parameters:
+    ----------
+    groups : int
+        Number of groups.
+    dropout_rate : float
+        Dropout rate.
+    """
+    def __init__(self,
+                 groups,
+                 dropout_rate,
+                 **kwargs):
+        super(ChannelwiseConv2d, self).__init__(**kwargs)
+        self.use_dropout = (dropout_rate > 0.0)
+
+        with self.name_scope():
+            self.conv = nn.Conv3D(
+                channels=groups,
+                kernel_size=(4 * groups, 1, 1),
+                strides=(groups, 1, 1),
+                padding=(2 * groups, 0, 0),
+                use_bias=False,
+                in_channels=groups)
+            if self.use_dropout:
+                self.dropout = nn.Dropout(rate=dropout_rate)
+
+    def hybrid_forward(self, F, x):
+        x = x.expand_dims(axis=1)
+        x = self.conv(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        x = x.reshape((0, -3, -2))
+        return x
+
+
+class ConvGroupBlock(HybridBlock):
+    """
+    ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    multi_blocks : int
+        Number of DWS layers in the sequence.
+    groups : int
+        Number of groups.
+    dropout_rate : float
+        Dropout rate.
+    """
+    def __init__(self,
+                 channels,
+                 multi_blocks,
+                 groups,
+                 dropout_rate,
+                 **kwargs):
+        super(ConvGroupBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = ChannelwiseConv2d(
+                groups=groups,
+                dropout_rate=dropout_rate)
+            self.block = SimpleGroupBlock(
+                channels=channels,
+                multi_blocks=multi_blocks,
+                groups=groups,
+                dropout_rate=dropout_rate)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.block(x)
+        return x
+
+
 class ChannetUnit(nn.HybridBlock):
     """
     ChannelNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels_list : tuple/list of 2 int
+        Number of output channels for each sub-block.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    multi_blocks : int
+        Number of DWS layers in the sequence.
+    groups : int
+        Number of groups.
+    dropout_rate : float
+        Dropout rate.
+    block_names : tuple/list of 2 str
+        Sub-block names.
+    merge_type : str
+        Type of sub-block output merging.
     """
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 in_channels,
+                 out_channels_list,
+                 strides,
+                 multi_blocks,
+                 groups,
+                 dropout_rate,
+                 block_names,
+                 merge_type,
+                 **kwargs):
         super(ChannetUnit, self).__init__(**kwargs)
+        assert (len(block_names) == 2)
+        assert (merge_type in ["seq", "add", "cat"])
+        self.merge_type = merge_type
+
+        with self.name_scope():
+            self.blocks = nn.HybridSequential(prefix='')
+            for i, (out_channels, block_name) in enumerate(zip(out_channels_list, block_names)):
+                strides_i = (strides if i == 0 else 1)
+                if block_name == "channet_conv3x3":
+                    self.blocks.add(channet_conv3x3(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        strides=strides_i,
+                        dropout_rate=dropout_rate,
+                        activate=False))
+                elif block_name == "channet_dws_conv_block":
+                    self.blocks.add(ChannetDwsConvBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        strides=strides_i,
+                        dropout_rate=dropout_rate))
+                elif block_name == "simple_group_block":
+                    self.blocks.add(SimpleGroupBlock(
+                        channels=in_channels,
+                        multi_blocks=multi_blocks,
+                        groups=groups,
+                        dropout_rate=dropout_rate))
+                elif block_name == "conv_group_block":
+                    self.blocks.add(ConvGroupBlock(
+                        channels=in_channels,
+                        multi_blocks=multi_blocks,
+                        groups=groups,
+                        dropout_rate=dropout_rate))
+                else:
+                    raise NotImplementedError()
+                in_channels = out_channels
 
     def hybrid_forward(self, F, x):
+        x_outs = []
+        for block in self.blocks._children.values():
+            x = block(x)
+            x_outs.append(x)
+        if self.merge_type == "add":
+            for i in range(len(x_outs) - 1):
+                x = x + x_outs[i]
+        elif self.merge_type == "cat":
+            x = F.concat(*x_outs, dim=1)
         return x
 
 
@@ -311,9 +450,9 @@ class ChannelNet(HybridBlock):
         Merge types for each unit.
     dropout_rate : float, default 0.0001
         Dropout rate.
-    num_blocks : int, default 2
+    multi_blocks : int, default 2
         Block count architectural parameter.
-    num_groups : int, default 2
+    groups : int, default 2
         Group count architectural parameter.
     in_channels : int, default 3
         Number of input channels.
@@ -327,8 +466,8 @@ class ChannelNet(HybridBlock):
                  block_names,
                  merge_types,
                  dropout_rate=0.0001,
-                 num_blocks=2,
-                 num_groups=2,
+                 multi_blocks=2,
+                 groups=2,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -346,14 +485,17 @@ class ChannelNet(HybridBlock):
                         strides = 2 if (j == 0) else 1
                         stage.add(ChannetUnit(
                             in_channels=in_channels,
-                            out_channels=out_channels,
+                            out_channels_list=out_channels,
                             strides=strides,
-                            num_blocks=num_blocks,
-                            num_groups=num_groups,
+                            multi_blocks=multi_blocks,
+                            groups=groups,
                             dropout_rate=dropout_rate,
                             block_names=block_names[i][j],
                             merge_type=merge_types[i][j]))
-                        in_channels = out_channels
+                        if merge_types[i][j] == "cat":
+                            in_channels = sum(out_channels)
+                        else:
+                            in_channels = out_channels[-1]
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
                 pool_size=7,

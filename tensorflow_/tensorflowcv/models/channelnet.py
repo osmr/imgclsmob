@@ -308,7 +308,7 @@ def simple_group_block(x,
                        training,
                        name="simple_group_block"):
     """
-    ChannelNet specific block with a sequence of depthwise separable grouped convolution layers.
+    ChannelNet specific block with a sequence of depthwise separable group convolution layers.
 
     Parameters:
     ----------
@@ -347,9 +347,7 @@ def simple_group_block(x,
 
 
 def channelwise_conv2d(x,
-                       filters,
-                       kernel_size,
-                       strides,
+                       groups,
                        dropout_rate,
                        training=False,
                        name="pure_conv2d"):
@@ -360,12 +358,6 @@ def channelwise_conv2d(x,
     ----------
     x : Tensor
         Input tensor.
-    filters : int
-        The dimensionality of the output space for 3D convolution. In our case it's number of groups.
-    kernel_size : int or tuple/list of 3 int
-        Convolution window size.
-    strides : int or tuple/list of 3 int
-        Strides of the convolution.
     dropout_rate : float
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
@@ -379,6 +371,9 @@ def channelwise_conv2d(x,
         Resulted tensor.
     """
     x = tf.expand_dims(x, axis=1, name=name + '/expand_dims')
+    filters = groups
+    kernel_size = [4 * groups, 1, 1]
+    strides = [groups, 1, 1]
     x = tf.layers.conv3d(
         inputs=x,
         filters=filters,
@@ -409,8 +404,7 @@ def conv_group_block(x,
                      training,
                      name="conv_group_block"):
     """
-    ChannelNet specific block with a combination of 3D convolution, group convolutions, and depthwise separable
-    convolutions.
+    ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
 
     Parameters:
     ----------
@@ -438,9 +432,7 @@ def conv_group_block(x,
     assert (channels % groups == 0)
     x = channelwise_conv2d(
         x=x,
-        filters=groups,
-        kernel_size=[4 * groups, 1, 1],
-        strides=[groups, 1, 1],
+        groups=groups,
         dropout_rate=dropout_rate,
         training=training,
         name=name + '/pure_conv')
@@ -500,6 +492,7 @@ def channet_unit(x,
         Resulted tensor.
     """
     assert (len(block_names) == 2)
+    assert (merge_type in ["seq", "add", "cat"])
     x_outs = []
     for i, (out_channels, block_name) in enumerate(zip(out_channels_list, block_names)):
         strides_i = (strides if i == 0 else 1)

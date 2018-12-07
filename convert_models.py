@@ -539,7 +539,7 @@ def convert_pt2pt(dst_params_file_path,
         src_param_keys = [key for key in src_param_keys if key not in src_bams]
         src_param_keys = src_param_keys + src_bams
 
-        dst_bams = list(filter(re.compile("^features.stage\d.unit1.bam.").search, dst_param_keys))
+        dst_bams = list(filter(re.compile("^features.stage[0-9].unit1.bam.").search, dst_param_keys))
         dst_param_keys = [key for key in dst_param_keys if key not in dst_bams]
         dst_param_keys = dst_param_keys + dst_bams
 

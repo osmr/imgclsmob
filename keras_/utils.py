@@ -97,7 +97,7 @@ def get_data_generator(data_iterator,
         try:
             db = data_iterator.next()
 
-        except StopIteration as e:
+        except StopIteration as _:
             # logging.warning("get_data exception due to end of data - resetting iterator")
             data_iterator.reset()
             db = data_iterator.next()

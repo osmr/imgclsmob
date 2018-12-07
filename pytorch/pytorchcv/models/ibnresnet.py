@@ -34,10 +34,10 @@ class IBN(nn.Module):
         self.batch_norm = nn.BatchNorm2d(h2_channels)
 
     def forward(self, x_out):
-        x_split = torch.split(x_out, self.half, 1)
+        x_split = torch.split(x_out, split_size_or_sections=self.half, dim=1)
         x1 = self.inst_norm(x_split[0].contiguous())
         x2 = self.batch_norm(x_split[1].contiguous())
-        x_out = torch.cat((x1, x2), 1)
+        x_out = torch.cat((x1, x2), dim=1)
         return x_out
 
 
@@ -161,18 +161,21 @@ class IBNResBottleneck(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    conv1_ibn : bool
+        Whether to use IBN normalization in the first convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
+                 stride,
+                 conv1_ibn):
         super(IBNResBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
         self.conv1 = ibnnet_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
-            norm_type=("ibn" if in_channels >= 512 else "bn"))
+            norm_type=("ibn" if conv1_ibn else "bn"))
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
@@ -201,18 +204,22 @@ class IBNResUnit(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    conv1_ibn : bool
+        Whether to use IBN normalization in the first convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
+                 stride,
+                 conv1_ibn):
         super(IBNResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         self.body = IBNResBottleneck(
             in_channels=in_channels,
             out_channels=out_channels,
-            stride=stride)
+            stride=stride,
+            conv1_ibn=conv1_ibn)
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
@@ -299,10 +306,12 @@ class IBNResNet(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
+                conv1_ibn = (in_channels >= 512)
                 stage.add_module("unit{}".format(j + 1), IBNResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    stride=stride))
+                    stride=stride,
+                    conv1_ibn=conv1_ibn))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("final_pool", nn.AvgPool2d(

@@ -8,7 +8,8 @@
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
-           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b', 'ResBlock', 'ResBottleneck',
+           'ResUnit', 'ResInitBlock']
 
 import os
 import chainer.functions as F
@@ -16,112 +17,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, SEBlock
-
-
-class ResConv(Chain):
-    """
-    ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 activate):
-        super(ResConv, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def res_conv1x1(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    1x1 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0,
-        activate=activate)
-
-
-def res_conv3x3(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    3x3 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, SimpleSequential, SEBlock
 
 
 class ResBlock(Chain):
@@ -143,12 +39,12 @@ class ResBlock(Chain):
                  stride):
         super(ResBlock, self).__init__()
         with self.init_scope():
-            self.conv1 = res_conv3x3(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
                 activate=True)
-            self.conv2 = res_conv3x3(
+            self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 stride=1,
@@ -184,17 +80,17 @@ class ResBottleneck(Chain):
         mid_channels = out_channels // 4
 
         with self.init_scope():
-            self.conv1 = res_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 stride=(stride if conv1_stride else 1),
                 activate=True)
-            self.conv2 = res_conv3x3(
+            self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=(1 if conv1_stride else stride),
                 activate=True)
-            self.conv3 = res_conv1x1(
+            self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 stride=1,
@@ -252,7 +148,7 @@ class ResUnit(Chain):
             if self.use_se:
                 self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
-                self.identity_conv = res_conv1x1(
+                self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
@@ -288,13 +184,10 @@ class ResInitBlock(Chain):
                  out_channels):
         super(ResInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = ResConv(
+            self.conv = conv7x7_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                ksize=7,
-                stride=2,
-                pad=3,
-                activate=True)
+                stride=2)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -366,17 +259,17 @@ class ResNet(Chain):
                                 use_se=use_se))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 

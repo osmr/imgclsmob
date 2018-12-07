@@ -3,7 +3,7 @@
 """
 
 __all__ = ['conv2d', 'conv1x1', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block', 'conv1x1_block', 'conv3x3_block',
-           'dwconv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
+           'conv7x7_block', 'dwconv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
 
 import math
 import tensorflow as tf
@@ -504,6 +504,61 @@ def conv3x3_block(x,
         padding=padding,
         dilation=dilation,
         groups=groups,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        training=training,
+        name=name)
+
+
+def conv7x7_block(x,
+                  in_channels,
+                  out_channels,
+                  strides=1,
+                  padding=3,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  training=False,
+                  name="conv7x7_block"):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    training : bool, or a TensorFlow boolean scalar tensor, default False
+      Whether to return the output in training mode or in inference mode.
+    name : str, default 'conv7x7_block'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=strides,
+        padding=padding,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate,

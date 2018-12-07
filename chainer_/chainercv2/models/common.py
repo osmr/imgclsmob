@@ -4,7 +4,8 @@ from chainer import Chain
 
 __all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent']
+           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent',
+           'Hourglass']
 
 
 class ReLU6(Chain):

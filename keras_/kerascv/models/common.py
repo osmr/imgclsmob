@@ -2,8 +2,8 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'dwconv3x3_block',
-           'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
 
 import math
 from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
@@ -370,6 +370,57 @@ def conv3x3_block(x,
         padding=padding,
         dilation=dilation,
         groups=groups,
+        use_bias=use_bias,
+        act_type=act_type,
+        activate=activate,
+        name=name)
+
+
+def conv7x7_block(x,
+                  in_channels,
+                  out_channels,
+                  strides=1,
+                  padding=3,
+                  use_bias=False,
+                  act_type="relu",
+                  activate=True,
+                  name="conv7x7_block"):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    act_type : str, default 'relu'
+        Name of activation function to use.
+    activate : bool, default True
+        Whether activate the convolution block.
+    name : str, default 'conv7x7_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    return conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=strides,
+        padding=padding,
         use_bias=use_bias,
         act_type=act_type,
         activate=activate,

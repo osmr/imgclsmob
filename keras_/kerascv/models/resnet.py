@@ -14,137 +14,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, se_block, GluonBatchNormalization
-
-
-def res_conv(x,
-             in_channels,
-             out_channels,
-             kernel_size,
-             strides,
-             padding,
-             activate,
-             name="res_conv"):
-    """
-    ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    if activate:
-        x = nn.Activation("relu", name=name + "/activ")(x)
-    return x
-
-
-def res_conv1x1(x,
-                in_channels,
-                out_channels,
-                strides,
-                activate,
-                name="res_conv1x1"):
-    """
-    1x1 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return res_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        activate=activate,
-        name=name)
-
-
-def res_conv3x3(x,
-                in_channels,
-                out_channels,
-                strides,
-                activate,
-                name="res_conv3x3"):
-    """
-    3x3 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    name : str, default 'res_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return res_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        activate=activate,
-        name=name)
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, se_block
 
 
 def res_block(x,
@@ -173,14 +43,14 @@ def res_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = res_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=strides,
         activate=True,
         name=name + "/conv1")
-    x = res_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -221,21 +91,21 @@ def res_bottleneck_block(x,
     """
     mid_channels = out_channels // 4
 
-    x = res_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(strides if conv1_stride else 1),
         activate=True,
         name=name + "/conv1")
-    x = res_conv3x3(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         strides=(1 if conv1_stride else strides),
         activate=True,
         name=name + "/conv2")
-    x = res_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -282,7 +152,7 @@ def res_unit(x,
     """
     resize_identity = (in_channels != out_channels) or (strides != 1)
     if resize_identity:
-        identity = res_conv1x1(
+        identity = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
@@ -343,14 +213,11 @@ def res_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = res_conv(
+    x = conv7x7_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=7,
         strides=2,
-        padding=3,
-        activate=True,
         name=name + "/conv")
     x = nn.MaxPool2D(
         pool_size=3,
@@ -391,7 +258,7 @@ def resnet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = res_init_block(

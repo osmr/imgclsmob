@@ -8,129 +8,13 @@
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
            'resnet200', 'resnet200b', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
-           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b', 'ResBlock', 'ResBottleneck',
+           'ResUnit', 'ResInitBlock']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import SEBlock
-
-
-class ResConv(HybridBlock):
-    """
-    ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 bn_use_global_stats,
-                 activate,
-                 **kwargs):
-        super(ResConv, self).__init__(**kwargs)
-        self.activate = activate
-
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def res_conv1x1(in_channels,
-                out_channels,
-                strides,
-                bn_use_global_stats,
-                activate):
-    """
-    1x1 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=strides,
-        padding=0,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
-
-
-def res_conv3x3(in_channels,
-                out_channels,
-                strides,
-                bn_use_global_stats,
-                activate):
-    """
-    3x3 version of the ResNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ResConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
 
 
 class ResBlock(HybridBlock):
@@ -156,13 +40,13 @@ class ResBlock(HybridBlock):
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = res_conv3x3(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.conv2 = res_conv3x3(
+            self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=1,
@@ -203,19 +87,19 @@ class ResBottleneck(HybridBlock):
         mid_channels = out_channels // 4
 
         with self.name_scope():
-            self.conv1 = res_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.conv2 = res_conv3x3(
+            self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.conv3 = res_conv1x1(
+            self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=1,
@@ -280,13 +164,13 @@ class ResUnit(HybridBlock):
             if self.use_se:
                 self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
-                self.identity_conv = res_conv1x1(
+                self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
                     activate=False)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
@@ -321,14 +205,11 @@ class ResInitBlock(HybridBlock):
                  **kwargs):
         super(ResInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = ResConv(
+            self.conv = conv7x7_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=7,
                 strides=2,
-                padding=3,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -390,7 +271,7 @@ class ResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1

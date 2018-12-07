@@ -13,8 +13,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-from .airnet import conv1x1_block, conv3x3_block, AirBlock, AirInitBlock
+from .common import SimpleSequential, conv1x1_block, conv3x3_block
+from .airnet import AirBlock, AirInitBlock
 
 
 class AirNeXtBottleneck(Chain):
@@ -52,19 +52,15 @@ class AirNeXtBottleneck(Chain):
         with self.init_scope():
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=group_width,
-                stride=1,
-                activate=True)
+                out_channels=group_width)
             self.conv2 = conv3x3_block(
                 in_channels=group_width,
                 out_channels=group_width,
                 stride=stride,
-                groups=cardinality,
-                activate=True)
+                groups=cardinality)
             self.conv3 = conv1x1_block(
                 in_channels=group_width,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
             if self.use_air_block:
                 self.air = AirBlock(
@@ -198,17 +194,17 @@ class AirNeXt(Chain):
                                 ratio=ratio))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 

@@ -145,7 +145,7 @@ def conv1x1_block(in_channels,
 
 def conv3x3_block(in_channels,
                   out_channels,
-                  stride,
+                  stride=1,
                   padding=1,
                   dilation=1,
                   groups=1,
@@ -161,7 +161,7 @@ def conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.

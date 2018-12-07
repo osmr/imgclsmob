@@ -4,7 +4,7 @@
     https://ieeexplore.ieee.org/document/8510896.
 """
 
-__all__ = ['AirNet', 'airnet50_1x64d_r2', 'airnet50_1x64d_r16', 'airnet101_1x64d_r2']
+__all__ = ['AirNet', 'airnet50_1x64d_r2', 'airnet50_1x64d_r16', 'airnet101_1x64d_r2', 'AirBlock', 'AirInitBlock']
 
 import os
 import chainer.functions as F
@@ -12,121 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class ConvBlock(Chain):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 groups,
-                 activate):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True,
-                groups=groups)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride,
-                  activate):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0,
-        groups=1,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride,
-                  groups=1,
-                  activate=True):
-    """
-    Depthwise version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    groups : int, default 1
-        Number of groups.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        groups=groups,
-        activate=activate)
+from .common import SimpleSequential, conv1x1_block, conv3x3_block
 
 
 class AirBlock(Chain):
@@ -156,9 +42,7 @@ class AirBlock(Chain):
         with self.init_scope():
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=mid_channels,
-                stride=1,
-                activate=True)
+                out_channels=mid_channels)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -168,13 +52,10 @@ class AirBlock(Chain):
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=1,
-                groups=groups,
-                activate=True)
+                groups=groups)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
 
     def __call__(self, x):
@@ -215,18 +96,14 @@ class AirBottleneck(Chain):
         with self.init_scope():
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=mid_channels,
-                stride=1,
-                activate=True)
+                out_channels=mid_channels)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=stride,
-                activate=True)
+                stride=stride)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                stride=1,
                 activate=False)
             if self.use_air_block:
                 self.air = AirBlock(
@@ -314,18 +191,13 @@ class AirInitBlock(Chain):
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=2,
-                activate=True)
+                stride=2)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
-                out_channels=mid_channels,
-                stride=1,
-                activate=True)
+                out_channels=mid_channels)
             self.conv3 = conv3x3_block(
                 in_channels=mid_channels,
-                out_channels=out_channels,
-                stride=1,
-                activate=True)
+                out_channels=out_channels)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -391,17 +263,17 @@ class AirNet(Chain):
                                 ratio=ratio))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 

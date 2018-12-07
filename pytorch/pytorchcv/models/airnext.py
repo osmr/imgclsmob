@@ -10,7 +10,8 @@ import os
 import math
 import torch.nn as nn
 import torch.nn.init as init
-from .airnet import conv1x1_block, conv3x3_block, AirBlock, AirInitBlock
+from .common import conv1x1_block, conv3x3_block
+from .airnet import AirBlock, AirInitBlock
 
 
 class AirNeXtBottleneck(nn.Module):
@@ -47,19 +48,15 @@ class AirNeXtBottleneck(nn.Module):
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=group_width,
-            stride=1,
-            activate=True)
+            out_channels=group_width)
         self.conv2 = conv3x3_block(
             in_channels=group_width,
             out_channels=group_width,
             stride=stride,
-            groups=cardinality,
-            activate=True)
+            groups=cardinality)
         self.conv3 = conv1x1_block(
             in_channels=group_width,
             out_channels=out_channels,
-            stride=1,
             activate=False)
         if self.use_air_block:
             self.air = AirBlock(
@@ -189,7 +186,7 @@ class AirNeXt(nn.Module):
                     ratio=ratio))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

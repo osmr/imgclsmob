@@ -10,7 +10,8 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .airnet import conv1x1_block, conv3x3_block, AirBlock, AirInitBlock
+from .common import conv1x1_block, conv3x3_block
+from .airnet import AirBlock, AirInitBlock
 
 
 class AirNeXtBottleneck(HybridBlock):
@@ -56,20 +57,16 @@ class AirNeXtBottleneck(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=group_width,
-                strides=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=group_width,
                 out_channels=group_width,
                 strides=strides,
                 groups=cardinality,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv1x1_block(
                 in_channels=group_width,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=False)
             if self.use_air_block:
@@ -209,7 +206,7 @@ class AirNeXt(HybridBlock):
             in_channels = init_block_channels
             in_size = tuple([x // 4 for x in in_size])
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1

@@ -4,123 +4,13 @@
     https://ieeexplore.ieee.org/document/8510896.
 """
 
-__all__ = ['AirNet', 'airnet50_1x64d_r2', 'airnet50_1x64d_r16', 'airnet101_1x64d_r2']
+__all__ = ['AirNet', 'airnet50_1x64d_r2', 'airnet50_1x64d_r16', 'airnet101_1x64d_r2', 'AirBlock', 'AirInitBlock']
 
 import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-
-
-class ConvBlock(nn.Module):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 groups,
-                 activate):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride,
-                  activate):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        groups=1,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride,
-                  groups=1,
-                  activate=True):
-    """
-    Depthwise version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        groups=groups,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block
 
 
 class AirBlock(nn.Module):
@@ -149,9 +39,7 @@ class AirBlock(nn.Module):
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
+            out_channels=mid_channels)
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -159,13 +47,10 @@ class AirBlock(nn.Module):
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=1,
-            groups=groups,
-            activate=True)
+            groups=groups)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            stride=1,
             activate=False)
         self.sigmoid = nn.Sigmoid()
 
@@ -176,7 +61,7 @@ class AirBlock(nn.Module):
         x = F.interpolate(
             input=x,
             scale_factor=2,
-            mode='bilinear',
+            mode="bilinear",
             align_corners=True)
         x = self.conv3(x)
         x = self.sigmoid(x)
@@ -209,18 +94,14 @@ class AirBottleneck(nn.Module):
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
+            out_channels=mid_channels)
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=stride,
-            activate=True)
+            stride=stride)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            stride=1,
             activate=False)
         if self.use_air_block:
             self.air = AirBlock(
@@ -306,18 +187,13 @@ class AirInitBlock(nn.Module):
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=2,
-            activate=True)
+            stride=2)
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=1,
-            activate=True)
+            out_channels=mid_channels)
         self.conv3 = conv3x3_block(
             in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=True)
+            out_channels=out_channels)
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -378,7 +254,7 @@ class AirNet(nn.Module):
                     ratio=ratio))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

@@ -6,7 +6,7 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
+           'seresnext101_32x4d', 'seresnext101_64x4d']
 
 import os
 import math
@@ -15,7 +15,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, SimpleSequential, SEBlock
+from .common import conv1x1_block, conv3x3_block, SimpleSequential, SEBlock
+from .resnet import ResInitBlock
 
 
 class ResNeXtBottleneck(Chain):
@@ -127,39 +128,6 @@ class ResNeXtUnit(Chain):
         return x
 
 
-class ResNeXtInitBlock(Chain):
-    """
-    ResNeXt specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(ResNeXtInitBlock, self).__init__()
-        with self.init_scope():
-            self.conv = conv7x7_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=2)
-            self.pool = partial(
-                F.max_pooling_2d,
-                ksize=3,
-                stride=2,
-                pad=1,
-                cover_all=False)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
 class ResNeXt(Chain):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
@@ -200,7 +168,7 @@ class ResNeXt(Chain):
         with self.init_scope():
             self.features = SimpleSequential()
             with self.features.init_scope():
-                setattr(self.features, "init_block", ResNeXtInitBlock(
+                setattr(self.features, "init_block", ResInitBlock(
                     in_channels=in_channels,
                     out_channels=init_block_channels))
                 in_channels = init_block_channels

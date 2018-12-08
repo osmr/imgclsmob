@@ -1,15 +1,12 @@
 """
-    PreResNet & SE-PreResNet, implemented in Chainer.
-    Original papers:
-    - 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
-    - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    PreResNet, implemented in Chainer.
+    Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
-           'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
-           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
+           'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
 
 import os
 import chainer.functions as F
@@ -17,7 +14,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import pre_conv1x1_block, pre_conv3x3_block, SimpleSequential, conv1x1, SEBlock
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SimpleSequential
 
 
 class PreResBlock(Chain):
@@ -114,18 +111,14 @@ class PreResUnit(Chain):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
-    use_se : bool
-        Whether to use SE block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
                  bottleneck,
-                 conv1_stride,
-                 use_se):
+                 conv1_stride):
         super(PreResUnit, self).__init__()
-        self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         with self.init_scope():
@@ -140,8 +133,6 @@ class PreResUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride)
-            if self.use_se:
-                self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 self.identity_conv = conv1x1(
                     in_channels=in_channels,
@@ -151,8 +142,6 @@ class PreResUnit(Chain):
     def __call__(self, x):
         identity = x
         x, x_pre_activ = self.body(x)
-        if self.use_se:
-            x = self.se(x)
         if self.resize_identity:
             identity = self.identity_conv(x_pre_activ)
         x = x + identity
@@ -223,8 +212,7 @@ class PreResActivation(Chain):
 
 class PreResNet(Chain):
     """
-    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027. Also this
-    class implements SE-PreResNet from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -236,8 +224,6 @@ class PreResNet(Chain):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    use_se : bool
-        Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -250,7 +236,6 @@ class PreResNet(Chain):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 use_se,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -275,23 +260,22 @@ class PreResNet(Chain):
                                 out_channels=out_channels,
                                 stride=stride,
                                 bottleneck=bottleneck,
-                                conv1_stride=conv1_stride,
-                                use_se=use_se))
+                                conv1_stride=conv1_stride))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'post_activ', PreResActivation(
+                setattr(self.features, "post_activ", PreResActivation(
                     in_channels=in_channels))
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 
@@ -303,14 +287,13 @@ class PreResNet(Chain):
 
 def get_preresnet(blocks,
                   conv1_stride=True,
-                  use_se=False,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
                   root=os.path.join('~', '.chainer', 'models'),
                   **kwargs):
     """
-    Create PreResNet or SE-PreResNet model with specific parameters.
+    Create PreResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -318,8 +301,6 @@ def get_preresnet(blocks,
         Number of blocks.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    use_se : bool
-        Whether to use SE block.
     width_scale : float
         Scale factor for width of layers.
     model_name : str or None, default None
@@ -351,7 +332,7 @@ def get_preresnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 
@@ -373,7 +354,6 @@ def get_preresnet(blocks,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
-        use_se=use_se,
         **kwargs)
 
     if pretrained:
@@ -638,151 +618,6 @@ def preresnet200b(**kwargs):
     return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
-def sepreresnet18(**kwargs):
-    """
-    SE-PreResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=18, use_se=True, model_name="sepreresnet18", **kwargs)
-
-
-def sepreresnet34(**kwargs):
-    """
-    SE-PreResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=34, use_se=True, model_name="sepreresnet34", **kwargs)
-
-
-def sepreresnet50(**kwargs):
-    """
-    SE-PreResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=50, use_se=True, model_name="sepreresnet50", **kwargs)
-
-
-def sepreresnet50b(**kwargs):
-    """
-    SE-PreResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=50, conv1_stride=False, use_se=True, model_name="sepreresnet50b", **kwargs)
-
-
-def sepreresnet101(**kwargs):
-    """
-    SE-PreResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=101, use_se=True, model_name="sepreresnet101", **kwargs)
-
-
-def sepreresnet101b(**kwargs):
-    """
-    SE-PreResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=101, conv1_stride=False, use_se=True, model_name="sepreresnet101b", **kwargs)
-
-
-def sepreresnet152(**kwargs):
-    """
-    SE-PreResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=152, use_se=True, model_name="sepreresnet152", **kwargs)
-
-
-def sepreresnet152b(**kwargs):
-    """
-    SE-PreResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=152, conv1_stride=False, use_se=True, model_name="sepreresnet152b", **kwargs)
-
-
-def sepreresnet200(**kwargs):
-    """
-    SE-PreResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507. It's an
-    experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=200, use_se=True, model_name="sepreresnet200", **kwargs)
-
-
-def sepreresnet200b(**kwargs):
-    """
-    SE-PreResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_preresnet(blocks=200, conv1_stride=False, use_se=True, model_name="sepreresnet200b", **kwargs)
-
-
 def _test():
     import numpy as np
     import chainer
@@ -810,17 +645,6 @@ def _test():
         preresnet152b,
         preresnet200,
         preresnet200b,
-
-        sepreresnet18,
-        sepreresnet34,
-        sepreresnet50,
-        sepreresnet50b,
-        sepreresnet101,
-        sepreresnet101b,
-        sepreresnet152,
-        sepreresnet152b,
-        sepreresnet200,
-        sepreresnet200b,
     ]
 
     for model in models:
@@ -846,16 +670,6 @@ def _test():
         assert (model != preresnet152b or weight_count == 60185256)
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
-        assert (model != sepreresnet18 or weight_count == 11776928)
-        assert (model != sepreresnet34 or weight_count == 21957204)
-        assert (model != sepreresnet50 or weight_count == 28080472)
-        assert (model != sepreresnet50b or weight_count == 28080472)
-        assert (model != sepreresnet101 or weight_count == 49319320)
-        assert (model != sepreresnet101b or weight_count == 49319320)
-        assert (model != sepreresnet152 or weight_count == 66814296)
-        assert (model != sepreresnet152b or weight_count == 66814296)
-        assert (model != sepreresnet200 or weight_count == 71828312)
-        assert (model != sepreresnet200b or weight_count == 71828312)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

@@ -4,6 +4,7 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.seresnet import *
+from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
 from .models.airnet import *
@@ -96,17 +97,6 @@ _models = {
     'preresnet200': preresnet200,
     'preresnet200b': preresnet200b,
 
-    'sepreresnet18': sepreresnet18,
-    'sepreresnet34': sepreresnet34,
-    'sepreresnet50': sepreresnet50,
-    'sepreresnet50b': sepreresnet50b,
-    'sepreresnet101': sepreresnet101,
-    'sepreresnet101b': sepreresnet101b,
-    'sepreresnet152': sepreresnet152,
-    'sepreresnet152b': sepreresnet152b,
-    'sepreresnet200': sepreresnet200,
-    'sepreresnet200b': sepreresnet200b,
-
     'resnext50_32x4d': resnext50_32x4d,
     'resnext101_32x4d': resnext101_32x4d,
     'resnext101_64x4d': resnext101_64x4d,
@@ -121,6 +111,17 @@ _models = {
     'seresnet152b': seresnet152b,
     'seresnet200': seresnet200,
     'seresnet200b': seresnet200b,
+
+    'sepreresnet18': sepreresnet18,
+    'sepreresnet34': sepreresnet34,
+    'sepreresnet50': sepreresnet50,
+    'sepreresnet50b': sepreresnet50b,
+    'sepreresnet101': sepreresnet101,
+    'sepreresnet101b': sepreresnet101b,
+    'sepreresnet152': sepreresnet152,
+    'sepreresnet152b': sepreresnet152b,
+    'sepreresnet200': sepreresnet200,
+    'sepreresnet200b': sepreresnet200b,
 
     'seresnext50_32x4d': seresnext50_32x4d,
     'seresnext101_32x4d': seresnext101_32x4d,

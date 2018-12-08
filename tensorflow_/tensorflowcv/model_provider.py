@@ -3,6 +3,7 @@ from .models.vgg import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
+from .models.seresnet import *
 from .models.senet import *
 from .models.densenet import *
 from .models.darknet import *
@@ -56,17 +57,6 @@ _models = {
     'resnet200': resnet200,
     'resnet200b': resnet200b,
 
-    'seresnet18': seresnet18,
-    'seresnet34': seresnet34,
-    'seresnet50': seresnet50,
-    'seresnet50b': seresnet50b,
-    'seresnet101': seresnet101,
-    'seresnet101b': seresnet101b,
-    'seresnet152': seresnet152,
-    'seresnet152b': seresnet152b,
-    'seresnet200': seresnet200,
-    'seresnet200b': seresnet200b,
-
     'preresnet10': preresnet10,
     'preresnet12': preresnet12,
     'preresnet14': preresnet14,
@@ -103,6 +93,17 @@ _models = {
     'seresnext50_32x4d': seresnext50_32x4d,
     'seresnext101_32x4d': seresnext101_32x4d,
     'seresnext101_64x4d': seresnext101_64x4d,
+
+    'seresnet18': seresnet18,
+    'seresnet34': seresnet34,
+    'seresnet50': seresnet50,
+    'seresnet50b': seresnet50b,
+    'seresnet101': seresnet101,
+    'seresnet101b': seresnet101b,
+    'seresnet152': seresnet152,
+    'seresnet152b': seresnet152b,
+    'seresnet200': seresnet200,
+    'seresnet200b': seresnet200b,
 
     'senet52': senet52,
     'senet103': senet103,

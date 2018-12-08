@@ -363,7 +363,7 @@ def pre_conv1x1_block(in_channels,
 
 def pre_conv3x3_block(in_channels,
                       out_channels,
-                      stride,
+                      stride=1,
                       return_preact=False):
     """
     3x3 version of the pre-activated convolution block.
@@ -374,7 +374,7 @@ def pre_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
     return_preact : bool, default False
         Whether return pre-activation.

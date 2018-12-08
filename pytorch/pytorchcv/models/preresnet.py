@@ -42,8 +42,7 @@ class PreResBlock(nn.Module):
             return_preact=True)
         self.conv2 = pre_conv3x3_block(
             in_channels=out_channels,
-            out_channels=out_channels,
-            stride=1)
+            out_channels=out_channels)
 
     def forward(self, x):
         x, x_pre_activ = self.conv1(x)
@@ -85,8 +84,7 @@ class PreResBottleneck(nn.Module):
             stride=(1 if conv1_stride else stride))
         self.conv3 = pre_conv1x1_block(
             in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1)
+            out_channels=out_channels)
 
     def forward(self, x):
         x, x_pre_activ = self.conv1(x)

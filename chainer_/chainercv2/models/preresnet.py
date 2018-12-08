@@ -46,8 +46,7 @@ class PreResBlock(Chain):
                 return_preact=True)
             self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
-                out_channels=out_channels,
-                stride=1)
+                out_channels=out_channels)
 
     def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
@@ -90,8 +89,7 @@ class PreResBottleneck(Chain):
                 stride=(1 if conv1_stride else stride))
             self.conv3 = pre_conv1x1_block(
                 in_channels=mid_channels,
-                out_channels=out_channels,
-                stride=1)
+                out_channels=out_channels)
 
     def __call__(self, x):
         x, x_pre_activ = self.conv1(x)
@@ -791,16 +789,16 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
-        # preresnet10,
-        # preresnet12,
-        # preresnet14,
-        # preresnet16,
-        # preresnet18_wd4,
-        # preresnet18_wd2,
-        # preresnet18_w3d4,
+        preresnet10,
+        preresnet12,
+        preresnet14,
+        preresnet16,
+        preresnet18_wd4,
+        preresnet18_wd2,
+        preresnet18_w3d4,
 
         preresnet18,
         preresnet34,
@@ -810,19 +808,19 @@ def _test():
         preresnet101b,
         preresnet152,
         preresnet152b,
-        # preresnet200,
-        # preresnet200b,
-        #
-        # sepreresnet18,
-        # sepreresnet34,
-        # sepreresnet50,
-        # sepreresnet50b,
-        # sepreresnet101,
-        # sepreresnet101b,
-        # sepreresnet152,
-        # sepreresnet152b,
-        # sepreresnet200,
-        # sepreresnet200b,
+        preresnet200,
+        preresnet200b,
+
+        sepreresnet18,
+        sepreresnet34,
+        sepreresnet50,
+        sepreresnet50b,
+        sepreresnet101,
+        sepreresnet101b,
+        sepreresnet152,
+        sepreresnet152b,
+        sepreresnet200,
+        sepreresnet200b,
     ]
 
     for model in models:

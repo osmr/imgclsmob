@@ -57,7 +57,6 @@ def preres_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        strides=1,
         training=training,
         name=name + "/conv2")
     return x, x_pre_activ
@@ -116,7 +115,6 @@ def preres_bottleneck_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        strides=1,
         training=training,
         name=name + "/conv3")
     return x, x_pre_activ

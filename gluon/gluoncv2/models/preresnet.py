@@ -49,7 +49,6 @@ class PreResBlock(HybridBlock):
             self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -100,7 +99,6 @@ class PreResBottleneck(HybridBlock):
             self.conv3 = pre_conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -879,34 +877,34 @@ def _test():
 
     models = [
         preresnet10,
-        # preresnet12,
-        # preresnet14,
-        # preresnet16,
-        # preresnet18_wd4,
-        # preresnet18_wd2,
-        # preresnet18_w3d4,
-        #
-        # preresnet18,
-        # preresnet34,
-        # preresnet50,
-        # preresnet50b,
-        # preresnet101,
-        # preresnet101b,
-        # preresnet152,
-        # preresnet152b,
-        # preresnet200,
-        # preresnet200b,
-        #
-        # sepreresnet18,
-        # sepreresnet34,
-        # sepreresnet50,
-        # sepreresnet50b,
-        # sepreresnet101,
-        # sepreresnet101b,
-        # sepreresnet152,
-        # sepreresnet152b,
-        # sepreresnet200,
-        # sepreresnet200b,
+        preresnet12,
+        preresnet14,
+        preresnet16,
+        preresnet18_wd4,
+        preresnet18_wd2,
+        preresnet18_w3d4,
+
+        preresnet18,
+        preresnet34,
+        preresnet50,
+        preresnet50b,
+        preresnet101,
+        preresnet101b,
+        preresnet152,
+        preresnet152b,
+        preresnet200,
+        preresnet200b,
+
+        sepreresnet18,
+        sepreresnet34,
+        sepreresnet50,
+        sepreresnet50b,
+        sepreresnet101,
+        sepreresnet101b,
+        sepreresnet152,
+        sepreresnet152b,
+        sepreresnet200,
+        sepreresnet200b,
     ]
 
     for model in models:
@@ -917,13 +915,14 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
-        # print("m={}, {}".format(model.__name__, weight_count))
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet10 or weight_count == 5417128)
         assert (model != preresnet12 or weight_count == 5491112)
         assert (model != preresnet14 or weight_count == 5786536)

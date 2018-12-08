@@ -390,7 +390,7 @@ def pre_conv1x1_block(in_channels,
 
 def pre_conv3x3_block(in_channels,
                       out_channels,
-                      strides,
+                      strides=1,
                       bn_use_global_stats=False,
                       return_preact=False):
     """
@@ -402,7 +402,7 @@ def pre_conv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

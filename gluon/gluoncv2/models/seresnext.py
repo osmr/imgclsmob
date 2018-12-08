@@ -1,21 +1,21 @@
 """
-    ResNeXt, implemented in Gluon.
-    Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt, implemented in Gluon.
+    Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'ResNeXtBottleneck']
+__all__ = ['SEResNeXt', 'seresnext50_32x4d', 'seresnext101_32x4d', 'seresnext101_64x4d']
 
 import os
-import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block
+from .common import conv1x1_block, SEBlock
 from .resnet import ResInitBlock
+from .resnext import ResNeXtBottleneck
 
 
-class ResNeXtBottleneck(HybridBlock):
+class SEResNeXtUnit(HybridBlock):
     """
-    ResNeXt bottleneck block for residual path in ResNeXt unit.
+    SE-ResNeXt unit with residual connection.
 
     Parameters:
     ----------
@@ -40,63 +40,7 @@ class ResNeXtBottleneck(HybridBlock):
                  bottleneck_width,
                  bn_use_global_stats,
                  **kwargs):
-        super(ResNeXtBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // 4
-        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
-        group_width = cardinality * D
-
-        with self.name_scope():
-            self.conv1 = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=group_width,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
-                in_channels=group_width,
-                out_channels=group_width,
-                strides=strides,
-                groups=cardinality,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv3 = conv1x1_block(
-                in_channels=group_width,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=False)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        return x
-
-
-class ResNeXtUnit(HybridBlock):
-    """
-    ResNeXt unit with residual connection.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    cardinality: int
-        Number of groups.
-    bottleneck_width: int
-        Width of bottleneck block.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 cardinality,
-                 bottleneck_width,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(ResNeXtUnit, self).__init__(**kwargs)
+        super(SEResNeXtUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
@@ -107,6 +51,7 @@ class ResNeXtUnit(HybridBlock):
                 cardinality=cardinality,
                 bottleneck_width=bottleneck_width,
                 bn_use_global_stats=bn_use_global_stats)
+            self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
@@ -122,14 +67,15 @@ class ResNeXtUnit(HybridBlock):
         else:
             identity = x
         x = self.body(x)
+        x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x
 
 
-class ResNeXt(HybridBlock):
+class SEResNeXt(HybridBlock):
     """
-    ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -161,7 +107,7 @@ class ResNeXt(HybridBlock):
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(ResNeXt, self).__init__(**kwargs)
+        super(SEResNeXt, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -177,7 +123,7 @@ class ResNeXt(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResNeXtUnit(
+                        stage.add(SEResNeXtUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
@@ -202,16 +148,16 @@ class ResNeXt(HybridBlock):
         return x
 
 
-def get_resnext(blocks,
-                cardinality,
-                bottleneck_width,
-                model_name=None,
-                pretrained=False,
-                ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
-                **kwargs):
+def get_seresnext(blocks,
+                  cardinality,
+                  bottleneck_width,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
+                  **kwargs):
     """
-    Create ResNeXt model with specific parameters.
+    Create SE-ResNeXt model with specific parameters.
 
     Parameters:
     ----------
@@ -236,14 +182,14 @@ def get_resnext(blocks,
     elif blocks == 101:
         layers = [3, 4, 23, 3]
     else:
-        raise ValueError("Unsupported ResNeXt with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported SE-ResNeXt with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
     channels_per_layers = [256, 512, 1024, 2048]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = ResNeXt(
+    net = SEResNeXt(
         channels=channels,
         init_block_channels=init_block_channels,
         cardinality=cardinality,
@@ -263,10 +209,9 @@ def get_resnext(blocks,
     return net
 
 
-def resnext50_32x4d(**kwargs):
+def seresnext50_32x4d(**kwargs):
     """
-    ResNeXt-50 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-50 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -277,13 +222,12 @@ def resnext50_32x4d(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="resnext50_32x4d", **kwargs)
+    return get_seresnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="seresnext50_32x4d", **kwargs)
 
 
-def resnext101_32x4d(**kwargs):
+def seresnext101_32x4d(**kwargs):
     """
-    ResNeXt-101 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-101 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -294,13 +238,12 @@ def resnext101_32x4d(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="resnext101_32x4d", **kwargs)
+    return get_seresnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="seresnext101_32x4d", **kwargs)
 
 
-def resnext101_64x4d(**kwargs):
+def seresnext101_64x4d(**kwargs):
     """
-    ResNeXt-101 (64x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-101 (64x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -311,7 +254,7 @@ def resnext101_64x4d(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="resnext101_64x4d", **kwargs)
+    return get_seresnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="seresnext101_64x4d", **kwargs)
 
 
 def _test():
@@ -321,9 +264,9 @@ def _test():
     pretrained = False
 
     models = [
-        resnext50_32x4d,
-        resnext101_32x4d,
-        resnext101_64x4d,
+        seresnext50_32x4d,
+        seresnext101_32x4d,
+        seresnext101_64x4d,
     ]
 
     for model in models:
@@ -341,9 +284,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnext50_32x4d or weight_count == 25028904)
-        assert (model != resnext101_32x4d or weight_count == 44177704)
-        assert (model != resnext101_64x4d or weight_count == 83455272)
+        assert (model != seresnext50_32x4d or weight_count == 27559896)
+        assert (model != seresnext101_32x4d or weight_count == 48955416)
+        assert (model != seresnext101_64x4d or weight_count == 88232984)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

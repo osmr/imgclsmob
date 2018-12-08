@@ -1,77 +1,97 @@
 """
-    SE-ResNet, implemented in PyTorch.
+    SE-ResNet, implemented in Keras.
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SEResNet', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b',
+__all__ = ['seresnet', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b',
            'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
-from .common import conv1x1_block, SEBlock
-from .resnet import ResBlock, ResBottleneck, ResInitBlock
+from keras import backend as K
+from keras import layers as nn
+from keras.models import Model
+from .common import conv1x1_block, se_block
+from .resnet import res_block, res_bottleneck_block, res_init_block
 
 
-class SEResUnit(nn.Module):
+def seres_unit(x,
+               in_channels,
+               out_channels,
+               strides,
+               bottleneck,
+               conv1_stride,
+               name="seres_unit"):
     """
     SE-ResNet unit.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    name : str, default 'seres_unit'
+        Unit name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bottleneck,
-                 conv1_stride):
-        super(SEResUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+    resize_identity = (in_channels != out_channels) or (strides != 1)
+    if resize_identity:
+        identity = conv1x1_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=strides,
+            activate=False,
+            name=name + "/identity_conv")
+    else:
+        identity = x
 
-        if bottleneck:
-            self.body = ResBottleneck(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                conv1_stride=conv1_stride)
-        else:
-            self.body = ResBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride)
-        self.se = SEBlock(channels=out_channels)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                activate=False)
-        self.activ = nn.ReLU(inplace=True)
+    if bottleneck:
+        x = res_bottleneck_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=strides,
+            conv1_stride=conv1_stride,
+            name=name + "/body")
+    else:
+        x = res_block(
+            x=x,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=strides,
+            name=name + "/body")
 
-    def forward(self, x):
-        if self.resize_identity:
-            identity = self.identity_conv(x)
-        else:
-            identity = x
-        x = self.body(x)
-        x = self.se(x)
-        x = x + identity
-        x = self.activ(x)
-        return x
+    x = se_block(
+        x=x,
+        channels=out_channels,
+        name=name + "/se")
+
+    x = nn.add([x, identity], name=name + "/add")
+
+    x = nn.Activation('relu', name=name + "/activ")(x)
+    return x
 
 
-class SEResNet(nn.Module):
+def seresnet(channels,
+             init_block_channels,
+             bottleneck,
+             conv1_stride,
+             in_channels=3,
+             in_size=(224, 224),
+             classes=1000):
     """
     SE-ResNet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
@@ -89,67 +109,52 @@ class SEResNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
-    def __init__(self,
-                 channels,
-                 init_block_channels,
-                 bottleneck,
-                 conv1_stride,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
-        super(SEResNet, self).__init__()
-        self.in_size = in_size
-        self.num_classes = num_classes
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input = nn.Input(shape=input_shape)
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", ResInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), SEResUnit(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride,
-                    bottleneck=bottleneck,
-                    conv1_stride=conv1_stride))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+    x = res_init_block(
+        x=input,
+        in_channels=in_channels,
+        out_channels=init_block_channels,
+        name="features/init_block")
+    in_channels = init_block_channels
+    for i, channels_per_stage in enumerate(channels):
+        for j, out_channels in enumerate(channels_per_stage):
+            strides = 2 if (j == 0) and (i != 0) else 1
+            x = seres_unit(
+                x=x,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                bottleneck=bottleneck,
+                conv1_stride=conv1_stride,
+                name="features/stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
+    x = nn.AvgPool2D(
+        pool_size=7,
+        strides=1,
+        name="features/final_pool")(x)
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+    x = nn.Flatten()(x)
+    x = nn.Dense(
+        units=classes,
+        input_dim=in_channels,
+        name="output")(x)
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.size(0), -1)
-        x = self.output(x)
-        return x
+    model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
+    return model
 
 
 def get_seresnet(blocks,
                  conv1_stride=True,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.torch', 'models'),
+                 root=os.path.join('~', '.keras', 'models'),
                  **kwargs):
     """
     Create SE-ResNet model with specific parameters.
@@ -164,7 +169,7 @@ def get_seresnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
 
@@ -194,7 +199,7 @@ def get_seresnet(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = SEResNet(
+    net = seresnet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -204,11 +209,11 @@ def get_seresnet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 
@@ -221,7 +226,7 @@ def seresnet18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=18, model_name="seresnet18", **kwargs)
@@ -235,7 +240,7 @@ def seresnet34(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=34, model_name="seresnet34", **kwargs)
@@ -249,7 +254,7 @@ def seresnet50(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=50, model_name="seresnet50", **kwargs)
@@ -264,7 +269,7 @@ def seresnet50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=50, conv1_stride=False, model_name="seresnet50b", **kwargs)
@@ -278,7 +283,7 @@ def seresnet101(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=101, model_name="seresnet101", **kwargs)
@@ -293,7 +298,7 @@ def seresnet101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=101, conv1_stride=False, model_name="seresnet101b", **kwargs)
@@ -307,7 +312,7 @@ def seresnet152(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=152, model_name="seresnet152", **kwargs)
@@ -322,7 +327,7 @@ def seresnet152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=152, conv1_stride=False, model_name="seresnet152b", **kwargs)
@@ -337,7 +342,7 @@ def seresnet200(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=200, model_name="seresnet200", **kwargs)
@@ -352,24 +357,15 @@ def seresnet200b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=200, conv1_stride=False, model_name="seresnet200b", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import keras
 
     pretrained = False
 
@@ -389,10 +385,8 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        # net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != seresnet18 or weight_count == 11778592)
         assert (model != seresnet34 or weight_count == 21958868)
@@ -405,9 +399,9 @@ def _test():
         assert (model != seresnet200 or weight_count == 71835864)
         assert (model != seresnet200b or weight_count == 71835864)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
-        y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        x = np.zeros((1, 3, 224, 224), np.float32)
+        y = net.predict(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -170,8 +170,6 @@ def get_seresnet(blocks,
         Number of blocks.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    width_scale : float
-        Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False

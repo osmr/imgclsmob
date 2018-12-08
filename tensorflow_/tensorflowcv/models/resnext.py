@@ -6,12 +6,13 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_bottleneck']
 
 import os
 import math
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, se_block
+from .common import conv1x1_block, conv3x3_block, se_block
+from .resnet import res_init_block
 
 
 def resnext_bottleneck(x,
@@ -150,48 +151,6 @@ def resnext_unit(x,
     return x
 
 
-def resnext_init_block(x,
-                       in_channels,
-                       out_channels,
-                       training,
-                       name="resnext_init_block"):
-    """
-    ResNeXt specific initial block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'resnext_init_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv7x7_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        strides=2,
-        training=training,
-        name=name + "/conv")
-    x = maxpool2d(
-        x=x,
-        pool_size=3,
-        strides=2,
-        padding=1,
-        name=name + "/pool")
-    return x
-
-
 class ResNeXt(object):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
@@ -255,7 +214,7 @@ class ResNeXt(object):
             Resulted tensor.
         """
         in_channels = self.in_channels
-        x = resnext_init_block(
+        x = res_init_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.init_block_channels,

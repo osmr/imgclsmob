@@ -6,13 +6,14 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'ResNeXtBottleneck']
 
 import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock
+from .resnet import ResInitBlock
 
 
 class ResNeXtBottleneck(HybridBlock):
@@ -137,42 +138,6 @@ class ResNeXtUnit(HybridBlock):
         return x
 
 
-class ResNeXtInitBlock(HybridBlock):
-    """
-    ResNeXt specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(ResNeXtInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = conv7x7_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=2,
-                bn_use_global_stats=bn_use_global_stats)
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
 class ResNeXt(HybridBlock):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
@@ -217,7 +182,7 @@ class ResNeXt(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(ResNeXtInitBlock(
+            self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats))

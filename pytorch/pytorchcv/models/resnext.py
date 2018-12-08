@@ -6,13 +6,14 @@
 """
 
 __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'ResNeXtBottleneck']
 
 import os
 import math
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock
+from .resnet import ResInitBlock
 
 
 class ResNeXtBottleneck(nn.Module):
@@ -122,36 +123,6 @@ class ResNeXtUnit(nn.Module):
         return x
 
 
-class ResNeXtInitBlock(nn.Module):
-    """
-    ResNeXt specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(ResNeXtInitBlock, self).__init__()
-        self.conv = conv7x7_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
 class ResNeXt(nn.Module):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
@@ -190,7 +161,7 @@ class ResNeXt(nn.Module):
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ResNeXtInitBlock(
+        self.features.add_module("init_block", ResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels

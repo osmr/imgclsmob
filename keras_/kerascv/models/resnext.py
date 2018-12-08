@@ -6,14 +6,15 @@
 """
 
 __all__ = ['resnext', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'conv3x3_block', 'conv1x1_block']
+           'seresnext101_32x4d', 'seresnext101_64x4d', 'resnext_bottleneck']
 
 import os
 import math
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, se_block
+from .common import conv1x1_block, conv3x3_block, se_block
+from .resnet import res_init_block
 
 
 def resnext_bottleneck(x,
@@ -142,43 +143,6 @@ def resnext_unit(x,
     return x
 
 
-def resnext_init_block(x,
-                       in_channels,
-                       out_channels,
-                       name="resnext_init_block"):
-    """
-    ResNeXt specific initial block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'resnext_init_block'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv7x7_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        strides=2,
-        name=name + "/conv")
-    x = nn.MaxPool2D(
-        pool_size=3,
-        strides=2,
-        padding='same',
-        name=name + "/pool")(x)
-    return x
-
-
 def resnext(channels,
             init_block_channels,
             cardinality,
@@ -213,7 +177,7 @@ def resnext(channels,
     input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
-    x = resnext_init_block(
+    x = res_init_block(
         x=input,
         in_channels=in_channels,
         out_channels=init_block_channels,

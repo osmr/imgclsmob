@@ -9,119 +9,8 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, GluonBatchNormalization
-
-
-def dense_conv(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides,
-               padding,
-               name="dense_conv"):
-    """
-    DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    name : str, default 'dense_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    return x
-
-
-def dense_conv1x1(x,
-                  in_channels,
-                  out_channels,
-                  name="dense_conv1x1"):
-    """
-    1x1 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'dense_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    return dense_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        name=name)
-
-
-def dense_conv3x3(x,
-                  in_channels,
-                  out_channels,
-                  name="dense_conv3x3"):
-    """
-    3x3 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'dense_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    return dense_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1,
-        name=name)
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .preresnet import preres_init_block, preres_activation
 
 
 def dense_unit(x,
@@ -156,12 +45,12 @@ def dense_unit(x,
 
     identity = x
 
-    x = dense_conv1x1(
+    x = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         name=name + "/conv1")
-    x = dense_conv3x3(
+    x = pre_conv3x3_block(
         x=x,
         in_channels=mid_channels,
         out_channels=inc_channels,
@@ -202,7 +91,7 @@ def transition_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor.
     """
-    x = dense_conv1x1(
+    x = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -212,70 +101,6 @@ def transition_block(x,
         strides=2,
         padding="valid",
         name=name + "/pool")(x)
-    return x
-
-
-def dense_init_block(x,
-                     in_channels,
-                     out_channels,
-                     name="dense_init_block"):
-    """
-    DenseNet specific initial block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'dense_init_block'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=7,
-        strides=2,
-        padding=3,
-        use_bias=False,
-        name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    x = nn.MaxPool2D(
-        pool_size=3,
-        strides=2,
-        padding="same",
-        name=name + "/pool")(x)
-    return x
-
-
-def post_activation(x,
-                    name="post_activation"):
-    """
-    DenseNet final block, which performs the same function of postactivation as in PreResNet.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    name : str, default 'post_activation'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 
@@ -303,10 +128,10 @@ def densenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
-    x = dense_init_block(
+    x = preres_init_block(
         x=input,
         in_channels=in_channels,
         out_channels=init_block_channels,
@@ -328,7 +153,7 @@ def densenet(channels,
                 dropout_rate=dropout_rate,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
-    x = post_activation(
+    x = preres_activation(
         x=x,
         name="features/post_activ")
     x = nn.AvgPool2D(

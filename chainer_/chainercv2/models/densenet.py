@@ -11,89 +11,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class DenseConv(Chain):
-    """
-    DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(DenseConv, self).__init__()
-        with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
-            self.activ = F.relu
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-
-    def __call__(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.conv(x)
-        return x
-
-
-def dense_conv1x1(in_channels,
-                  out_channels):
-    """
-    1x1 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DenseConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0)
-
-
-def dense_conv3x3(in_channels,
-                  out_channels):
-    """
-    3x3 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DenseConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=1,
-        pad=1)
+from .common import pre_conv1x1_block, pre_conv3x3_block, SimpleSequential
+from .preresnet import PreResInitBlock, PreResActivation
 
 
 class DenseUnit(Chain):
@@ -120,10 +39,10 @@ class DenseUnit(Chain):
         mid_channels = inc_channels * bn_size
 
         with self.init_scope():
-            self.conv1 = dense_conv1x1(
+            self.conv1 = pre_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels)
-            self.conv2 = dense_conv3x3(
+            self.conv2 = pre_conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=inc_channels)
             if self.use_dropout:
@@ -158,7 +77,7 @@ class TransitionBlock(Chain):
                  out_channels):
         super(TransitionBlock, self).__init__()
         with self.init_scope():
-            self.conv = dense_conv1x1(
+            self.conv = pre_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels)
             self.pool = partial(
@@ -170,68 +89,6 @@ class TransitionBlock(Chain):
     def __call__(self, x):
         x = self.conv(x)
         x = self.pool(x)
-        return x
-
-
-class DenseInitBlock(Chain):
-    """
-    DenseNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(DenseInitBlock, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=7,
-                stride=2,
-                pad=3,
-                nobias=True)
-            self.bn = L.BatchNormalization(size=out_channels)
-            self.activ = F.relu
-            self.pool = partial(
-                F.max_pooling_2d,
-                ksize=3,
-                stride=2,
-                pad=1,
-                cover_all=False)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.pool(x)
-        return x
-
-
-class PostActivation(Chain):
-    """
-    DenseNet final block, which performs the same function of postactivation as in PreResNet.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(PostActivation, self).__init__()
-        with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
         return x
 
 
@@ -268,7 +125,7 @@ class DenseNet(Chain):
         with self.init_scope():
             self.features = SimpleSequential()
             with self.features.init_scope():
-                setattr(self.features, "init_block", DenseInitBlock(
+                setattr(self.features, "init_block", PreResInitBlock(
                     in_channels=in_channels,
                     out_channels=init_block_channels))
                 in_channels = init_block_channels
@@ -287,19 +144,19 @@ class DenseNet(Chain):
                                 dropout_rate=dropout_rate))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'post_activ', PostActivation(
+                setattr(self.features, "post_activ", PreResActivation(
                     in_channels=in_channels))
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 
@@ -437,7 +294,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
         densenet121,

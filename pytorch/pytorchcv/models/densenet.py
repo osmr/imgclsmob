@@ -9,87 +9,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-
-
-class DenseConv(nn.Module):
-    """
-    DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(DenseConv, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-
-    def forward(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.conv(x)
-        return x
-
-
-def dense_conv1x1(in_channels,
-                  out_channels):
-    """
-    1x1 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DenseConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0)
-
-
-def dense_conv3x3(in_channels,
-                  out_channels):
-    """
-    3x3 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DenseConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=1,
-        padding=1)
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .preresnet import PreResInitBlock, PreResActivation
 
 
 class DenseUnit(nn.Module):
@@ -115,10 +36,10 @@ class DenseUnit(nn.Module):
         inc_channels = out_channels - in_channels
         mid_channels = inc_channels * bn_size
 
-        self.conv1 = dense_conv1x1(
+        self.conv1 = pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels)
-        self.conv2 = dense_conv3x3(
+        self.conv2 = pre_conv3x3_block(
             in_channels=mid_channels,
             out_channels=inc_channels)
         if self.use_dropout:
@@ -150,7 +71,7 @@ class TransitionBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(TransitionBlock, self).__init__()
-        self.conv = dense_conv1x1(
+        self.conv = pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels)
         self.pool = nn.AvgPool2d(
@@ -161,64 +82,6 @@ class TransitionBlock(nn.Module):
     def forward(self, x):
         x = self.conv(x)
         x = self.pool(x)
-        return x
-
-
-class DenseInitBlock(nn.Module):
-    """
-    DenseNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(DenseInitBlock, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=7,
-            stride=2,
-            padding=3,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        x = self.pool(x)
-        return x
-
-
-class PostActivation(nn.Module):
-    """
-    DenseNet final block, which performs the same function of postactivation as in PreResNet.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(PostActivation, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
         return x
 
 
@@ -253,7 +116,7 @@ class DenseNet(nn.Module):
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", DenseInitBlock(
+        self.features.add_module("init_block", PreResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels
@@ -271,8 +134,8 @@ class DenseNet(nn.Module):
                     dropout_rate=dropout_rate))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PostActivation(in_channels=in_channels))
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

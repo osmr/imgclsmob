@@ -7,133 +7,8 @@ __all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, maxpool2d
-
-
-def dense_conv(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides,
-               padding,
-               training,
-               name="dense_conv"):
-    """
-    DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dense_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    return x
-
-
-def dense_conv1x1(x,
-                  in_channels,
-                  out_channels,
-                  training,
-                  name="dense_conv1x1"):
-    """
-    1x1 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dense_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return dense_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        training=training,
-        name=name)
-
-
-def dense_conv3x3(x,
-                  in_channels,
-                  out_channels,
-                  training,
-                  name="dense_conv3x3"):
-    """
-    3x3 version of the DenseNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dense_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return dense_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1,
-        training=training,
-        name=name)
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .preresnet import preres_init_block, preres_activation
 
 
 def dense_unit(x,
@@ -171,13 +46,13 @@ def dense_unit(x,
 
     identity = x
 
-    x = dense_conv1x1(
+    x = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
         training=training,
         name=name + "/conv1")
-    x = dense_conv3x3(
+    x = pre_conv3x3_block(
         x=x,
         in_channels=mid_channels,
         out_channels=inc_channels,
@@ -223,7 +98,7 @@ def transition_block(x,
     Tensor
         Resulted tensor.
     """
-    x = dense_conv1x1(
+    x = pre_conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
@@ -235,83 +110,6 @@ def transition_block(x,
         strides=2,
         data_format='channels_first',
         name=name + "/pool")
-    return x
-
-
-def dense_init_block(x,
-                     in_channels,
-                     out_channels,
-                     training,
-                     name="dense_init_block"):
-    """
-    DenseNet specific initial block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'dense_init_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=7,
-        strides=2,
-        padding=3,
-        use_bias=False,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
-    x = maxpool2d(
-        x=x,
-        pool_size=3,
-        strides=2,
-        padding=1,
-        name=name + "/pool")
-    return x
-
-
-def post_activation(x,
-                    training,
-                    name="post_activation"):
-    """
-    DenseNet final block, which performs the same function of postactivation as in PreResNet.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'post_activation'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
     return x
 
 
@@ -369,7 +167,7 @@ class DenseNet(object):
             Resulted tensor.
         """
         in_channels = self.in_channels
-        x = dense_init_block(
+        x = preres_init_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.init_block_channels,
@@ -394,7 +192,7 @@ class DenseNet(object):
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = post_activation(
+        x = preres_activation(
             x=x,
             training=training,
             name="features/post_activ")
@@ -402,7 +200,7 @@ class DenseNet(object):
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format="channels_first",
             name="features/final_pool")
 
         x = tf.layers.flatten(x)

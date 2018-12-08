@@ -85,7 +85,7 @@ def senet_unit(x,
                training,
                name="senet_unit"):
     """
-    SENet unit with residual connection.
+    SENet unit.
 
     Parameters:
     ----------
@@ -297,7 +297,7 @@ class SENet(object):
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format="channels_first",
             name="features/final_pool")
 
         x = tf.layers.flatten(x)
@@ -458,9 +458,9 @@ def _test():
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 44659416)  # 22623272
-        assert (model != senet103 or weight_count == 60963096)  # 38908456
-        assert (model != senet154 or weight_count == 115088984)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)
+        assert (model != senet103 or weight_count == 60963096)
+        assert (model != senet154 or weight_count == 115088984)
 
         with tf.Session() as sess:
             if pretrained:

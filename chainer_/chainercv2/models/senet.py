@@ -12,7 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, SimpleSequential, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock, SimpleSequential
 
 
 class SENetBottleneck(Chain):
@@ -67,7 +67,7 @@ class SENetBottleneck(Chain):
 
 class SENetUnit(Chain):
     """
-    SENet unit with residual connection.
+    SENet unit.
 
     Parameters:
     ----------
@@ -92,7 +92,6 @@ class SENetUnit(Chain):
                  bottleneck_width,
                  identity_conv3x3):
         super(SENetUnit, self).__init__()
-        self.use_se = True
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         with self.init_scope():
@@ -102,8 +101,7 @@ class SENetUnit(Chain):
                 stride=stride,
                 cardinality=cardinality,
                 bottleneck_width=bottleneck_width)
-            if self.use_se:
-                self.se = SEBlock(channels=out_channels)
+            self.se = SEBlock(channels=out_channels)
             if self.resize_identity:
                 if identity_conv3x3:
                     self.identity_conv = conv3x3_block(
@@ -125,8 +123,7 @@ class SENetUnit(Chain):
         else:
             identity = x
         x = self.body(x)
-        if self.use_se:
-            x = self.se(x)
+        x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x
@@ -230,20 +227,20 @@ class SENet(Chain):
                                 identity_conv3x3=identity_conv3x3))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'dropout', partial(
+                setattr(self.output, "dropout", partial(
                     F.dropout,
                     ratio=0.2))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 
@@ -359,11 +356,11 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
-        # senet52,
-        # senet103,
+        senet52,
+        senet103,
         senet154,
     ]
 
@@ -372,9 +369,9 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 44659416)  # 22623272
-        assert (model != senet103 or weight_count == 60963096)  # 38908456
-        assert (model != senet154 or weight_count == 115088984)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)
+        assert (model != senet103 or weight_count == 60963096)
+        assert (model != senet154 or weight_count == 115088984)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

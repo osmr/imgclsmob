@@ -80,7 +80,7 @@ def senet_unit(x,
                identity_conv3x3,
                name="senet_unit"):
     """
-    SENet unit with residual connection.
+    SENet unit.
 
     Parameters:
     ----------
@@ -136,12 +136,10 @@ def senet_unit(x,
         bottleneck_width=bottleneck_width,
         name=name + "/body")
 
-    use_se = True
-    if use_se:
-        x = se_block(
-            x=x,
-            channels=out_channels,
-            name=name + "/se")
+    x = se_block(
+        x=x,
+        channels=out_channels,
+        name=name + "/se")
 
     x = nn.add([x, identity], name=name + "/add")
 
@@ -226,7 +224,7 @@ def senet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = senet_init_block(
@@ -386,9 +384,9 @@ def _test():
         # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 44659416)  # 22623272
-        assert (model != senet103 or weight_count == 60963096)  # 38908456
-        assert (model != senet154 or weight_count == 115088984)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)
+        assert (model != senet103 or weight_count == 60963096)
+        assert (model != senet154 or weight_count == 115088984)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net.predict(x)

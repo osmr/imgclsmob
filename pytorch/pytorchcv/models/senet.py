@@ -63,7 +63,7 @@ class SENetBottleneck(nn.Module):
 
 class SENetUnit(nn.Module):
     """
-    SENet unit with residual connection.
+    SENet unit.
 
     Parameters:
     ----------
@@ -88,7 +88,6 @@ class SENetUnit(nn.Module):
                  bottleneck_width,
                  identity_conv3x3):
         super(SENetUnit, self).__init__()
-        self.use_se = True
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         self.body = SENetBottleneck(
@@ -97,8 +96,7 @@ class SENetUnit(nn.Module):
             stride=stride,
             cardinality=cardinality,
             bottleneck_width=bottleneck_width)
-        if self.use_se:
-            self.se = SEBlock(channels=out_channels)
+        self.se = SEBlock(channels=out_channels)
         if self.resize_identity:
             if identity_conv3x3:
                 self.identity_conv = conv3x3_block(
@@ -120,8 +118,7 @@ class SENetUnit(nn.Module):
         else:
             identity = x
         x = self.body(x)
-        if self.use_se:
-            x = self.se(x)
+        x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x
@@ -219,13 +216,13 @@ class SENet(nn.Module):
                     identity_conv3x3=identity_conv3x3))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=0.2))
-        self.output.add_module('fc', nn.Linear(
+        self.output.add_module("dropout", nn.Dropout(p=0.2))
+        self.output.add_module("fc", nn.Linear(
             in_features=in_channels,
             out_features=num_classes))
 
@@ -360,8 +357,8 @@ def _test():
     pretrained = False
 
     models = [
-        # senet52,
-        # senet103,
+        senet52,
+        senet103,
         senet154,
     ]
 
@@ -373,9 +370,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 44659416)  # 22623272
-        assert (model != senet103 or weight_count == 60963096)  # 38908456
-        assert (model != senet154 or weight_count == 115088984)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)
+        assert (model != senet103 or weight_count == 60963096)
+        assert (model != senet154 or weight_count == 115088984)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

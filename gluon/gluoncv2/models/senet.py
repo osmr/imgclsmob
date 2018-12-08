@@ -71,7 +71,7 @@ class SENetBottleneck(HybridBlock):
 
 class SENetUnit(HybridBlock):
     """
-    SENet unit with residual connection.
+    SENet unit.
 
     Parameters:
     ----------
@@ -126,7 +126,7 @@ class SENetUnit(HybridBlock):
                         strides=strides,
                         bn_use_global_stats=bn_use_global_stats,
                         activate=False)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
@@ -234,7 +234,7 @@ class SENet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 identity_conv3x3 = (i != 0)
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
@@ -382,8 +382,8 @@ def _test():
     pretrained = False
 
     models = [
-        # senet52,
-        # senet103,
+        senet52,
+        senet103,
         senet154,
     ]
 
@@ -395,6 +395,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
@@ -402,9 +403,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != senet52 or weight_count == 44659416)  # 22623272
-        assert (model != senet103 or weight_count == 60963096)  # 38908456
-        assert (model != senet154 or weight_count == 115088984)  # 93018024
+        assert (model != senet52 or weight_count == 44659416)
+        assert (model != senet103 or weight_count == 60963096)
+        assert (model != senet154 or weight_count == 115088984)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

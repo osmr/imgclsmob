@@ -8,7 +8,7 @@ __all__ = ['SEResNet', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, se_block
+from .common import conv1x1_block, se_block
 from .resnet import res_block, res_bottleneck_block, res_init_block
 
 

@@ -1,28 +1,28 @@
 """
-    ResNeXt, implemented in Keras.
-    Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt, implemented in Keras.
+    Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['resnext', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'resnext_bottleneck']
+__all__ = ['seresnext', 'seresnext50_32x4d', 'seresnext101_32x4d', 'seresnext101_64x4d']
 
 import os
-import math
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block
+from .common import conv1x1_block, se_block
 from .resnet import res_init_block
+from .resnext import resnext_bottleneck
 
 
-def resnext_bottleneck(x,
-                       in_channels,
-                       out_channels,
-                       strides,
-                       cardinality,
-                       bottleneck_width,
-                       name="resnext_bottleneck"):
+def seresnext_unit(x,
+                   in_channels,
+                   out_channels,
+                   strides,
+                   cardinality,
+                   bottleneck_width,
+                   name="seresnext_unit"):
     """
-    ResNeXt bottleneck block for residual path in ResNeXt unit.
+    SE-ResNeXt unit.
 
     Parameters:
     ----------
@@ -38,64 +38,7 @@ def resnext_bottleneck(x,
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    name : str, default 'resnext_bottleneck'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    mid_channels = out_channels // 4
-    D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
-    group_width = cardinality * D
-
-    x = conv1x1_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=group_width,
-        name=name + "/conv1")
-    x = conv3x3_block(
-        x=x,
-        in_channels=group_width,
-        out_channels=group_width,
-        strides=strides,
-        groups=cardinality,
-        name=name + "/conv2")
-    x = conv1x1_block(
-        x=x,
-        in_channels=group_width,
-        out_channels=out_channels,
-        activate=False,
-        name=name + "/conv3")
-    return x
-
-
-def resnext_unit(x,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 cardinality,
-                 bottleneck_width,
-                 name="resnext_unit"):
-    """
-    ResNeXt unit with residual connection.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    cardinality: int
-        Number of groups.
-    bottleneck_width: int
-        Width of bottleneck block.
-    name : str, default 'resnext_unit'
+    name : str, default 'seresnext_unit'
         Unit name.
 
     Returns
@@ -124,6 +67,11 @@ def resnext_unit(x,
         bottleneck_width=bottleneck_width,
         name=name + "/body")
 
+    x = se_block(
+        x=x,
+        channels=out_channels,
+        name=name + "/se")
+
     x = nn.add([x, identity], name=name + "/add")
 
     activ = nn.Activation('relu', name=name + "/activ")
@@ -131,15 +79,15 @@ def resnext_unit(x,
     return x
 
 
-def resnext(channels,
-            init_block_channels,
-            cardinality,
-            bottleneck_width,
-            in_channels=3,
-            in_size=(224, 224),
-            classes=1000):
+def seresnext(channels,
+              init_block_channels,
+              cardinality,
+              bottleneck_width,
+              in_channels=3,
+              in_size=(224, 224),
+              classes=1000):
     """
-    ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -170,7 +118,7 @@ def resnext(channels,
     for i, channels_per_stage in enumerate(channels):
         for j, out_channels in enumerate(channels_per_stage):
             strides = 2 if (j == 0) and (i != 0) else 1
-            x = resnext_unit(
+            x = seresnext_unit(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -196,15 +144,15 @@ def resnext(channels,
     return model
 
 
-def get_resnext(blocks,
-                cardinality,
-                bottleneck_width,
-                model_name=None,
-                pretrained=False,
-                root=os.path.join('~', '.keras', 'models'),
-                **kwargs):
+def get_seresnext(blocks,
+                  cardinality,
+                  bottleneck_width,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join('~', '.keras', 'models'),
+                  **kwargs):
     """
-    Create ResNeXt model with specific parameters.
+    Create SE-ResNeXt model with specific parameters.
 
     Parameters:
     ----------
@@ -227,14 +175,14 @@ def get_resnext(blocks,
     elif blocks == 101:
         layers = [3, 4, 23, 3]
     else:
-        raise ValueError("Unsupported ResNeXt with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported SE-ResNeXt with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
     channels_per_layers = [256, 512, 1024, 2048]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = resnext(
+    net = seresnext(
         channels=channels,
         init_block_channels=init_block_channels,
         cardinality=cardinality,
@@ -253,10 +201,9 @@ def get_resnext(blocks,
     return net
 
 
-def resnext50_32x4d(**kwargs):
+def seresnext50_32x4d(**kwargs):
     """
-    ResNeXt-50 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-50 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -265,13 +212,12 @@ def resnext50_32x4d(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="resnext50_32x4d", **kwargs)
+    return get_seresnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="seresnext50_32x4d", **kwargs)
 
 
-def resnext101_32x4d(**kwargs):
+def seresnext101_32x4d(**kwargs):
     """
-    ResNeXt-101 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-101 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -280,13 +226,12 @@ def resnext101_32x4d(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="resnext101_32x4d", **kwargs)
+    return get_seresnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="seresnext101_32x4d", **kwargs)
 
 
-def resnext101_64x4d(**kwargs):
+def seresnext101_64x4d(**kwargs):
     """
-    ResNeXt-101 (64x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
-    http://arxiv.org/abs/1611.05431.
+    SE-ResNeXt-101 (64x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -295,7 +240,7 @@ def resnext101_64x4d(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="resnext101_64x4d", **kwargs)
+    return get_seresnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="seresnext101_64x4d", **kwargs)
 
 
 def _test():
@@ -305,9 +250,9 @@ def _test():
     pretrained = False
 
     models = [
-        resnext50_32x4d,
-        resnext101_32x4d,
-        resnext101_64x4d,
+        seresnext50_32x4d,
+        seresnext101_32x4d,
+        seresnext101_64x4d,
     ]
 
     for model in models:
@@ -316,9 +261,9 @@ def _test():
         # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnext50_32x4d or weight_count == 25028904)
-        assert (model != resnext101_32x4d or weight_count == 44177704)
-        assert (model != resnext101_64x4d or weight_count == 83455272)
+        assert (model != seresnext50_32x4d or weight_count == 27559896)
+        assert (model != seresnext101_32x4d or weight_count == 48955416)
+        assert (model != seresnext101_64x4d or weight_count == 88232984)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net.predict(x)

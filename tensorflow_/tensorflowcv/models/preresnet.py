@@ -9,7 +9,8 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
            'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
-           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
+           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b',
+           'preres_block', 'preres_bottleneck_block', 'preres_init_block', 'preres_activation']
 
 import os
 import tensorflow as tf
@@ -366,7 +367,7 @@ class PreResNet(object):
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format="channels_first",
             name="features/final_pool")
 
         x = tf.layers.flatten(x)
@@ -433,7 +434,7 @@ def get_preresnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 

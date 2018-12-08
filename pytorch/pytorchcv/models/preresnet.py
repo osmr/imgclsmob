@@ -9,7 +9,8 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
            'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
-           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
+           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b',
+           'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
 
 import os
 import torch.nn as nn
@@ -266,8 +267,8 @@ class PreResNet(nn.Module):
                     use_se=use_se))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PreResActivation(in_channels=in_channels))
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 
@@ -341,7 +342,7 @@ def get_preresnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 

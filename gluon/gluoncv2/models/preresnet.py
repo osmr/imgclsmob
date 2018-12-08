@@ -9,7 +9,8 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
            'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101', 'sepreresnet101b',
-           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
+           'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b',
+           'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
 
 import os
 from mxnet import cpu
@@ -205,7 +206,7 @@ class PreResInitBlock(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -239,7 +240,7 @@ class PreResActivation(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -297,7 +298,7 @@ class PreResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -383,7 +384,7 @@ def get_preresnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 

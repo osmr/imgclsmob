@@ -336,7 +336,7 @@ class PreConvBlock(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,

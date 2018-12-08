@@ -1,19 +1,19 @@
 """
-    SE-ResNeXt, implemented in Gluon.
+    SE-ResNeXt, implemented in PyTorch.
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
 __all__ = ['SEResNeXt', 'seresnext50_32x4d', 'seresnext101_32x4d', 'seresnext101_64x4d']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import torch.nn as nn
+import torch.nn.init as init
 from .common import conv1x1_block, SEBlock
 from .resnet import ResInitBlock
 from .resnext import ResNeXtBottleneck
 
 
-class SEResNeXtUnit(HybridBlock):
+class SEResNeXtUnit(nn.Module):
     """
     SE-ResNeXt unit.
 
@@ -23,45 +23,38 @@ class SEResNeXtUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the convolution.
     cardinality: int
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
+                 stride,
                  cardinality,
-                 bottleneck_width,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(SEResNeXtUnit, self).__init__(**kwargs)
-        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+                 bottleneck_width):
+        super(SEResNeXtUnit, self).__init__()
+        self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        with self.name_scope():
-            self.body = ResNeXtBottleneck(
+        self.body = ResNeXtBottleneck(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            stride=stride,
+            cardinality=cardinality,
+            bottleneck_width=bottleneck_width)
+        self.se = SEBlock(channels=out_channels)
+        if self.resize_identity:
+            self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                strides=strides,
-                cardinality=cardinality,
-                bottleneck_width=bottleneck_width,
-                bn_use_global_stats=bn_use_global_stats)
-            self.se = SEBlock(channels=out_channels)
-            if self.resize_identity:
-                self.identity_conv = conv1x1_block(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
-            self.activ = nn.Activation("relu")
+                stride=stride,
+                activate=False)
+        self.activ = nn.ReLU(inplace=True)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -73,7 +66,7 @@ class SEResNeXtUnit(HybridBlock):
         return x
 
 
-class SEResNeXt(HybridBlock):
+class SEResNeXt(nn.Module):
     """
     SE-ResNeXt model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
@@ -87,14 +80,11 @@ class SEResNeXt(HybridBlock):
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -102,48 +92,50 @@ class SEResNeXt(HybridBlock):
                  init_block_channels,
                  cardinality,
                  bottleneck_width,
-                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(SEResNeXt, self).__init__(**kwargs)
+                 num_classes=1000):
+        super(SEResNeXt, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.num_classes = num_classes
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
-            self.features.add(ResInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(SEResNeXtUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            cardinality=cardinality,
-                            bottleneck_width=bottleneck_width,
-                            bn_use_global_stats=bn_use_global_stats))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+        self.features = nn.Sequential()
+        self.features.add_module("init_block", ResInitBlock(
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                stride = 2 if (j == 0) and (i != 0) else 1
+                stage.add_module("unit{}".format(j + 1), SEResNeXtUnit(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    cardinality=cardinality,
+                    bottleneck_width=bottleneck_width))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module("final_pool", nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
-    def hybrid_forward(self, F, x):
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
+    def forward(self, x):
         x = self.features(x)
+        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -153,8 +145,7 @@ def get_seresnext(blocks,
                   bottleneck_width,
                   model_name=None,
                   pretrained=False,
-                  ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join('~', '.torch', 'models'),
                   **kwargs):
     """
     Create SE-ResNeXt model with specific parameters.
@@ -171,9 +162,7 @@ def get_seresnext(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
 
@@ -199,12 +188,11 @@ def get_seresnext(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -217,9 +205,7 @@ def seresnext50_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_seresnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="seresnext50_32x4d", **kwargs)
@@ -233,9 +219,7 @@ def seresnext101_32x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_seresnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="seresnext101_32x4d", **kwargs)
@@ -249,17 +233,24 @@ def seresnext101_64x4d(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_seresnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="seresnext101_64x4d", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
-    import mxnet as mx
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
 
     pretrained = False
 
@@ -273,24 +264,17 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != seresnext50_32x4d or weight_count == 27559896)
         assert (model != seresnext101_32x4d or weight_count == 48955416)
         assert (model != seresnext101_64x4d or weight_count == 88232984)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

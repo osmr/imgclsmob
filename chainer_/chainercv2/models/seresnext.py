@@ -18,7 +18,7 @@ from .resnext import ResNeXtBottleneck
 
 class SEResNeXtUnit(Chain):
     """
-    SE-ResNeXt unit with residual connection.
+    SE-ResNeXt unit.
 
     Parameters:
     ----------

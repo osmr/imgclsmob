@@ -1,18 +1,15 @@
 """
-    ResNeXt & SE-ResNeXt, implemented in PyTorch.
-    Original papers:
-    - 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
-    - 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    ResNeXt, implemented in PyTorch.
+    Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'seresnext50_32x4d',
-           'seresnext101_32x4d', 'seresnext101_64x4d', 'ResNeXtBottleneck']
+__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'ResNeXtBottleneck']
 
 import os
 import math
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, SEBlock
+from .common import conv1x1_block, conv3x3_block
 from .resnet import ResInitBlock
 
 
@@ -80,18 +77,14 @@ class ResNeXtUnit(nn.Module):
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    use_se : bool
-        Whether to use SE block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
                  cardinality,
-                 bottleneck_width,
-                 use_se):
+                 bottleneck_width):
         super(ResNeXtUnit, self).__init__()
-        self.use_se = use_se
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
         self.body = ResNeXtBottleneck(
@@ -100,8 +93,6 @@ class ResNeXtUnit(nn.Module):
             stride=stride,
             cardinality=cardinality,
             bottleneck_width=bottleneck_width)
-        if self.use_se:
-            self.se = SEBlock(channels=out_channels)
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
@@ -116,8 +107,6 @@ class ResNeXtUnit(nn.Module):
         else:
             identity = x
         x = self.body(x)
-        if self.use_se:
-            x = self.se(x)
         x = x + identity
         x = self.activ(x)
         return x
@@ -126,7 +115,6 @@ class ResNeXtUnit(nn.Module):
 class ResNeXt(nn.Module):
     """
     ResNeXt model from 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
-    Also this class implements SE-ResNeXt from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -138,8 +126,6 @@ class ResNeXt(nn.Module):
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    use_se : bool
-        Whether to use SE block.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -152,7 +138,6 @@ class ResNeXt(nn.Module):
                  init_block_channels,
                  cardinality,
                  bottleneck_width,
-                 use_se,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -174,8 +159,7 @@ class ResNeXt(nn.Module):
                     out_channels=out_channels,
                     stride=stride,
                     cardinality=cardinality,
-                    bottleneck_width=bottleneck_width,
-                    use_se=use_se))
+                    bottleneck_width=bottleneck_width))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("final_pool", nn.AvgPool2d(
@@ -205,13 +189,12 @@ class ResNeXt(nn.Module):
 def get_resnext(blocks,
                 cardinality,
                 bottleneck_width,
-                use_se=False,
                 model_name=None,
                 pretrained=False,
                 root=os.path.join('~', '.torch', 'models'),
                 **kwargs):
     """
-    Create ResNeXt or SE-ResNeXt model with specific parameters.
+    Create ResNeXt model with specific parameters.
 
     Parameters:
     ----------
@@ -221,8 +204,6 @@ def get_resnext(blocks,
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
-    use_se : bool
-        Whether to use SE block.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -248,7 +229,6 @@ def get_resnext(blocks,
         init_block_channels=init_block_channels,
         cardinality=cardinality,
         bottleneck_width=bottleneck_width,
-        use_se=use_se,
         **kwargs)
 
     if pretrained:
@@ -308,51 +288,6 @@ def resnext101_64x4d(**kwargs):
     return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="resnext101_64x4d", **kwargs)
 
 
-def seresnext50_32x4d(**kwargs):
-    """
-    SE-ResNeXt-50 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnext(blocks=50, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext50_32x4d",
-                       **kwargs)
-
-
-def seresnext101_32x4d(**kwargs):
-    """
-    SE-ResNeXt-101 (32x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnext(blocks=101, cardinality=32, bottleneck_width=4, use_se=True, model_name="seresnext101_32x4d",
-                       **kwargs)
-
-
-def seresnext101_64x4d(**kwargs):
-    """
-    SE-ResNeXt-101 (64x4d) model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnext(blocks=101, cardinality=64, bottleneck_width=4, use_se=True, model_name="seresnext101_64x4d",
-                       **kwargs)
-
-
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -369,12 +304,9 @@ def _test():
     pretrained = False
 
     models = [
-        # resnext50_32x4d,
+        resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
-        seresnext50_32x4d,
-        seresnext101_32x4d,
-        # seresnext101_64x4d,
     ]
 
     for model in models:
@@ -388,9 +320,6 @@ def _test():
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)
-        assert (model != seresnext50_32x4d or weight_count == 27559896)
-        assert (model != seresnext101_32x4d or weight_count == 48955416)
-        assert (model != seresnext101_64x4d or weight_count == 88232984)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

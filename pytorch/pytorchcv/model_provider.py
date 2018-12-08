@@ -4,6 +4,7 @@ from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
 from .models.seresnet import *
+from .models.seresnext import *
 from .models.senet import *
 from .models.airnet import *
 from .models.airnext import *
@@ -109,9 +110,6 @@ _models = {
     'resnext50_32x4d': resnext50_32x4d,
     'resnext101_32x4d': resnext101_32x4d,
     'resnext101_64x4d': resnext101_64x4d,
-    'seresnext50_32x4d': seresnext50_32x4d,
-    'seresnext101_32x4d': seresnext101_32x4d,
-    'seresnext101_64x4d': seresnext101_64x4d,
 
     'seresnet18': seresnet18,
     'seresnet34': seresnet34,
@@ -123,6 +121,10 @@ _models = {
     'seresnet152b': seresnet152b,
     'seresnet200': seresnet200,
     'seresnet200b': seresnet200b,
+
+    'seresnext50_32x4d': seresnext50_32x4d,
+    'seresnext101_32x4d': seresnext101_32x4d,
+    'seresnext101_64x4d': seresnext101_64x4d,
 
     'senet52': senet52,
     'senet103': senet103,

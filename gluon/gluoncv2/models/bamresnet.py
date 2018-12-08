@@ -229,8 +229,7 @@ class BamResUnit(HybridBlock):
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 bottleneck=bottleneck,
-                conv1_stride=False,
-                use_se=False)
+                conv1_stride=False)
 
     def hybrid_forward(self, F, x):
         if self.use_bam:

@@ -190,8 +190,7 @@ class BamResUnit(nn.Module):
             out_channels=out_channels,
             stride=stride,
             bottleneck=bottleneck,
-            conv1_stride=False,
-            use_se=False)
+            conv1_stride=False)
 
     def forward(self, x):
         if self.use_bam:

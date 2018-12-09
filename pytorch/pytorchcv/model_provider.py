@@ -304,7 +304,7 @@ _models = {
 
     'resnet50_ibn_a': resnet50_ibn_a,
     'resnet101_ibn_a': resnet101_ibn_a,
-    'resnet101_ibn_b': resnet101_ibn_b,
+    'resnet50_ibn_b': resnet50_ibn_b,
 
     'resnext101_ibn_a': resnext101_ibn_a,
 

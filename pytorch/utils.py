@@ -95,7 +95,7 @@ def prepare_model(model_name,
             if remove_module:
                 net_tmp = torch.nn.DataParallel(net)
                 net_tmp.load_state_dict(checkpoint)
-                net.load_state_dict(net_tmp.module.state_dict())
+                net.load_state_dict(net_tmp.module.cpu().state_dict())
             else:
                 net.load_state_dict(checkpoint)
 

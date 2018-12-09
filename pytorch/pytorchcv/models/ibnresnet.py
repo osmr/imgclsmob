@@ -10,7 +10,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from .common import conv1x1_block, conv3x3_block
 from .resnet import ResInitBlock
 
 

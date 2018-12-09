@@ -41,6 +41,10 @@ def parse_args():
         type=str,
         default='',
         help='destination model parameter file path')
+    parser.add_argument(
+        '--remove-module',
+        action='store_true',
+        help='enable if stored PyTorch model has module')
 
     parser.add_argument(
         '--save-dir',
@@ -61,7 +65,8 @@ def prepare_src_model(src_fwk,
                       src_params_file_path,
                       dst_fwk,
                       ctx,
-                      use_cuda):
+                      use_cuda,
+                      remove_module=False):
 
     ext_src_param_keys = None
     ext_src_param_keys2 = None
@@ -103,7 +108,8 @@ def prepare_src_model(src_fwk,
             use_pretrained=False,
             pretrained_model_file_path=src_params_file_path,
             use_cuda=use_cuda,
-            use_data_parallel=False)
+            use_data_parallel=False,
+            remove_module=remove_module)
         src_params = src_net.state_dict()
         src_param_keys = list(src_params.keys())
         if dst_fwk != "pytorch":
@@ -721,7 +727,8 @@ def main():
         src_params_file_path=args.src_params,
         dst_fwk=args.dst_fwk,
         ctx=ctx,
-        use_cuda=use_cuda)
+        use_cuda=use_cuda,
+        remove_module=args.remove_module)
 
     dst_params, dst_param_keys, dst_net = prepare_dst_model(
         dst_fwk=args.dst_fwk,

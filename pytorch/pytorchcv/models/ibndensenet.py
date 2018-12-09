@@ -1,21 +1,23 @@
 """
-    IBN-ResNet, implemented in PyTorch.
+    IBN-DenseNet, implemented in PyTorch.
     Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 """
 
-__all__ = ['IBNResNet', 'ibn_resnet50', 'ibn_resnet101', 'ibn_resnet152']
+__all__ = ['IBNDenseNet', 'ibn_densenet121', 'ibn_densenet161', 'ibn_densenet169', 'ibn_densenet201']
 
 import os
+import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, IBN
-from .resnet import ResInitBlock
+from .common import pre_conv3x3_block, IBN
+from .preresnet import PreResInitBlock, PreResActivation
+from .densenet import TransitionBlock
 
 
-class IBNConvBlock(nn.Module):
+class IBNPreConvBlock(nn.Module):
     """
-    IBN-Net specific convolution block with BN/IBN normalization and ReLU activation.
+    IBN-Net specific convolution block with BN/IBN normalization and ReLU pre-activation.
 
     Parameters:
     ----------
@@ -29,69 +31,61 @@ class IBNConvBlock(nn.Module):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.
-    activate : bool, default True
-        Whether activate the convolution block.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
                  stride,
                  padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
                  use_ibn=False,
-                 activate=True):
-        super(IBNConvBlock, self).__init__()
-        self.activate = activate
+                 return_preact=False):
+        super(IBNPreConvBlock, self).__init__()
         self.use_ibn = use_ibn
+        self.return_preact = return_preact
 
+        if self.use_ibn:
+            self.ibn = IBN(
+                channels=in_channels,
+                first_fraction=0.6,
+                inst_first=False)
+        else:
+            self.bn = nn.BatchNorm2d(num_features=in_channels)
+        self.activ = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
             kernel_size=kernel_size,
             stride=stride,
             padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        if self.use_ibn:
-            self.ibn = IBN(channels=out_channels)
-        else:
-            self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+            bias=False)
 
     def forward(self, x):
-        x = self.conv(x)
         if self.use_ibn:
             x = self.ibn(x)
         else:
             x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
+        x = self.activ(x)
+        if self.return_preact:
+            x_pre_activ = x
+        x = self.conv(x)
+        if self.return_preact:
+            return x, x_pre_activ
+        else:
+            return x
 
 
-def ibn_conv1x1_block(in_channels,
-                      out_channels,
-                      stride=1,
-                      groups=1,
-                      bias=False,
-                      use_ibn=False,
-                      activate=True):
+def ibn_pre_conv1x1_block(in_channels,
+                          out_channels,
+                          stride=1,
+                          use_ibn=False,
+                          return_preact=False):
     """
-    1x1 version of the IBN-Net specific convolution block.
+    1x1 version of the IBN-Net specific pre-activated convolution block.
 
     Parameters:
     ----------
@@ -101,30 +95,24 @@ def ibn_conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.
-    activate : bool, default True
-        Whether activate the convolution block.
+    return_preact : bool, default False
+        Whether return pre-activation.
     """
-    return IBNConvBlock(
+    return IBNPreConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
         stride=stride,
         padding=0,
-        groups=groups,
-        bias=bias,
         use_ibn=use_ibn,
-        activate=activate)
+        return_preact=return_preact)
 
 
-class IBNResBottleneck(nn.Module):
+class IBNDenseUnit(nn.Module):
     """
-    IBN-ResNet bottleneck block for residual path in IBN-ResNet unit.
+    IBN-DenseNet unit.
 
     Parameters:
     ----------
@@ -132,89 +120,45 @@ class IBNResBottleneck(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
+    dropout_rate : bool
+        Parameter of Dropout layer. Faction of the input units to drop.
     conv1_ibn : bool
         Whether to use IBN normalization in the first convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
+                 dropout_rate,
                  conv1_ibn):
-        super(IBNResBottleneck, self).__init__()
-        mid_channels = out_channels // 4
+        super(IBNDenseUnit, self).__init__()
+        self.use_dropout = (dropout_rate != 0.0)
+        bn_size = 4
+        inc_channels = out_channels - in_channels
+        mid_channels = inc_channels * bn_size
 
-        self.conv1 = ibn_conv1x1_block(
+        self.conv1 = ibn_pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
             use_ibn=conv1_ibn)
-        self.conv2 = conv3x3_block(
+        self.conv2 = pre_conv3x3_block(
             in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            activate=False)
+            out_channels=inc_channels)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
+        identity = x
         x = self.conv1(x)
         x = self.conv2(x)
-        x = self.conv3(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        x = torch.cat((identity, x), dim=1)
         return x
 
 
-class IBNResUnit(nn.Module):
+class IBNDenseNet(nn.Module):
     """
-    IBN-ResNet unit with residual connection.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    conv1_ibn : bool
-        Whether to use IBN normalization in the first convolution layer of the block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 conv1_ibn):
-        super(IBNResUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
-
-        self.body = IBNResBottleneck(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            conv1_ibn=conv1_ibn)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                activate=False)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        if self.resize_identity:
-            identity = self.identity_conv(x)
-        else:
-            identity = x
-        x = self.body(x)
-        x = x + identity
-        x = self.activ(x)
-        return x
-
-
-class IBNResNet(nn.Module):
-    """
-    IBN-ResNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-DenseNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -223,6 +167,8 @@ class IBNResNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    dropout_rate : float, default 0.0
+        Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -233,30 +179,36 @@ class IBNResNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 dropout_rate=0.0,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(IBNResNet, self).__init__()
+        super(IBNDenseNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ResInitBlock(
+        self.features.add_module("init_block", PreResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
+            conv1_ibn = (i < 3)
+            if i != 0:
+                stage.add_module("trans{}".format(i + 1), TransitionBlock(
+                    in_channels=in_channels,
+                    out_channels=(in_channels // 2)))
+                in_channels = in_channels // 2
             for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                conv1_ibn = (out_channels < 2048)
-                stage.add_module("unit{}".format(j + 1), IBNResUnit(
+                stage.add_module("unit{}".format(j + 1), IBNDenseUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    stride=stride,
+                    dropout_rate=dropout_rate,
                     conv1_ibn=conv1_ibn))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
         self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
@@ -281,18 +233,18 @@ class IBNResNet(nn.Module):
         return x
 
 
-def get_ibnresnet(blocks,
-                  model_name=None,
-                  pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
-                  **kwargs):
+def get_ibndensenet(num_layers,
+                    model_name=None,
+                    pretrained=False,
+                    root=os.path.join('~', '.torch', 'models'),
+                    **kwargs):
     """
-    Create IBN-ResNet model with specific parameters.
+    Create IBN-DenseNet model with specific parameters.
 
     Parameters:
     ----------
-    blocks : int
-        Number of blocks.
+    num_layers : int
+        Number of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -301,20 +253,35 @@ def get_ibnresnet(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 50:
-        layers = [3, 4, 6, 3]
-    elif blocks == 101:
-        layers = [3, 4, 23, 3]
-    elif blocks == 152:
-        layers = [3, 8, 36, 3]
+    if num_layers == 121:
+        init_block_channels = 64
+        growth_rate = 32
+        layers = [6, 12, 24, 16]
+    elif num_layers == 161:
+        init_block_channels = 96
+        growth_rate = 48
+        layers = [6, 12, 36, 24]
+    elif num_layers == 169:
+        init_block_channels = 64
+        growth_rate = 32
+        layers = [6, 12, 32, 32]
+    elif num_layers == 201:
+        init_block_channels = 64
+        growth_rate = 32
+        layers = [6, 12, 48, 32]
     else:
-        raise ValueError("Unsupported IBN-ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported IBN-DenseNet version with number of layers {}".format(num_layers))
 
-    init_block_channels = 64
-    channels_per_layers = [256, 512, 1024, 2048]
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+    from functools import reduce
+    channels = reduce(
+        lambda xi, yi: xi + [reduce(
+            lambda xj, yj: xj + [xj[-1] + yj],
+            [growth_rate] * yi,
+            [xi[-1][-1] // 2])[1:]],
+        layers,
+        [[init_block_channels * 2]])[1:]
 
-    net = IBNResNet(
+    net = IBNDenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
         **kwargs)
@@ -331,9 +298,9 @@ def get_ibnresnet(blocks,
     return net
 
 
-def ibn_resnet50(**kwargs):
+def ibn_densenet121(**kwargs):
     """
-    IBN-ResNet-50 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-DenseNet-121 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -343,12 +310,12 @@ def ibn_resnet50(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=50, model_name="ibn_resnet50", **kwargs)
+    return get_ibndensenet(num_layers=121, model_name="ibn_densenet121", **kwargs)
 
 
-def ibn_resnet101(**kwargs):
+def ibn_densenet161(**kwargs):
     """
-    IBN-ResNet-101 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-DenseNet-161 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -358,12 +325,12 @@ def ibn_resnet101(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=101, model_name="ibn_resnet101", **kwargs)
+    return get_ibndensenet(num_layers=161, model_name="ibn_densenet161", **kwargs)
 
 
-def ibn_resnet152(**kwargs):
+def ibn_densenet169(**kwargs):
     """
-    IBN-ResNet-152 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-DenseNet-169 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -373,7 +340,22 @@ def ibn_resnet152(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=152, model_name="ibn_resnet152", **kwargs)
+    return get_ibndensenet(num_layers=169, model_name="ibn_densenet169", **kwargs)
+
+
+def ibn_densenet201(**kwargs):
+    """
+    IBN-DenseNet-201 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_ibndensenet(num_layers=201, model_name="ibn_densenet201", **kwargs)
 
 
 def _calc_width(net):
@@ -392,9 +374,10 @@ def _test():
     pretrained = False
 
     models = [
-        ibn_resnet50,
-        ibn_resnet101,
-        ibn_resnet152,
+        ibn_densenet121,
+        ibn_densenet161,
+        ibn_densenet169,
+        ibn_densenet201,
     ]
 
     for model in models:
@@ -405,9 +388,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ibn_resnet50 or weight_count == 25557032)
-        assert (model != ibn_resnet101 or weight_count == 44549160)
-        assert (model != ibn_resnet152 or weight_count == 60192808)
+        assert (model != ibn_densenet121 or weight_count == 7978856)
+        assert (model != ibn_densenet161 or weight_count == 28681000)
+        assert (model != ibn_densenet169 or weight_count == 14149480)
+        assert (model != ibn_densenet201 or weight_count == 20013928)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

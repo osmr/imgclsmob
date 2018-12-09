@@ -3,9 +3,10 @@
 """
 
 __all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN',
            'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
 
+import math
 import torch
 import torch.nn as nn
 
@@ -513,6 +514,52 @@ class SEBlock(nn.Module):
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = x * w
+        return x
+
+
+class IBN(nn.Module):
+    """
+    Instance-Batch Normalization block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    inst_fraction : float, default 0.5
+        The first fraction of channels for normalization.
+    inst_first : bool, default True
+        Whether instance normalization be on the first part of channels.
+    """
+    def __init__(self,
+                 channels,
+                 first_fraction=0.5,
+                 inst_first=True):
+        super(IBN, self).__init__()
+        self.inst_first = inst_first
+        h1_channels = int(math.ceil(channels * first_fraction))
+        h2_channels = channels - h1_channels
+        self.split_sections = [h1_channels, h2_channels]
+
+        if self.inst_first:
+            self.inst_norm = nn.InstanceNorm2d(
+                num_features=h1_channels,
+                affine=True)
+            self.batch_norm = nn.BatchNorm2d(num_features=h2_channels)
+        else:
+            self.batch_norm = nn.BatchNorm2d(num_features=h1_channels)
+            self.inst_norm = nn.InstanceNorm2d(
+                num_features=h2_channels,
+                affine=True)
+
+    def forward(self, x):
+        x1, x2 = torch.split(x, split_size_or_sections=self.split_sections, dim=1)
+        if self.inst_first:
+            x1 = self.inst_norm(x1.contiguous())
+            x2 = self.batch_norm(x2.contiguous())
+        else:
+            x1 = self.batch_norm(x1.contiguous())
+            x2 = self.inst_norm(x2.contiguous())
+        x = torch.cat((x1, x2), dim=1)
         return x
 
 

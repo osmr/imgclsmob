@@ -3,7 +3,7 @@
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
+__all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201', 'TransitionBlock']
 
 import os
 import torch

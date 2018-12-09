@@ -2,7 +2,6 @@
     IBN-ResNet, implemented in PyTorch.
     Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
-    https://github.com/XingangPan/IBN-Net
 """
 
 __all__ = ['IBNResNet', 'ibnresnet50', 'ibnresnet101', 'ibnresnet152']
@@ -12,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from .resnet import ResInitBlock
 
 
 class IBN(nn.Module):
@@ -236,36 +236,6 @@ class IBNResUnit(nn.Module):
         x = self.body(x)
         x = x + identity
         x = self.activ(x)
-        return x
-
-
-class ResInitBlock(nn.Module):
-    """
-    ResNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(ResInitBlock, self).__init__()
-        self.conv = conv7x7_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
         return x
 
 

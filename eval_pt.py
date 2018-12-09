@@ -26,7 +26,7 @@ def parse_args():
     parser.add_argument(
         '--use-pretrained',
         action='store_true',
-        help='enable using pretrained model from gluon.')
+        help='enable using pretrained model from github.')
     parser.add_argument(
         '--resume',
         type=str,
@@ -37,6 +37,10 @@ def parse_args():
         dest='calc_flops',
         action='store_true',
         help='calculate FLOPs')
+    parser.add_argument(
+        '--remove-module',
+        action='store_true',
+        help='enable if stored model has module')
 
     parser.add_argument(
         '--input-size',
@@ -145,7 +149,8 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        use_cuda=use_cuda)
+        use_cuda=use_cuda,
+        remove_module=args.remove_module)
     if hasattr(net, 'module'):
         input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
     else:

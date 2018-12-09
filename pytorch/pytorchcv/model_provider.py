@@ -40,6 +40,9 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.ibnresnet import *
+from .models.others.oth_resnet_ibn_a import *
+
 __all__ = ['get_model']
 
 
@@ -274,6 +277,14 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'ibnresnet50': ibnresnet50,
+    'ibnresnet101': ibnresnet101,
+    'ibnresnet152': ibnresnet152,
+
+    'resnet50_ibn_a': resnet50_ibn_a,
+    'resnet101_ibn_a': resnet101_ibn_a,
+    'resnet152_ibn_a': resnet152_ibn_a,
 }
 
 

@@ -7,6 +7,7 @@
 __all__ = ['IBNResNet', 'ibnresnet50', 'ibnresnet101', 'ibnresnet152']
 
 import os
+import math
 import torch
 import torch.nn as nn
 import torch.nn.init as init
@@ -26,19 +27,20 @@ class IBN(nn.Module):
     def __init__(self,
                  channels):
         super(IBN, self).__init__()
-        h1_channels = channels // 2
+        h1_channels = int(math.ceil(channels / 2))
         h2_channels = channels - h1_channels
-        self.h1_channels = h1_channels
 
-        self.inst_norm = nn.InstanceNorm2d(h1_channels, affine=True)
-        self.batch_norm = nn.BatchNorm2d(h2_channels)
+        self.inst_norm = nn.InstanceNorm2d(
+            num_features=h1_channels,
+            affine=True)
+        self.batch_norm = nn.BatchNorm2d(num_features=h2_channels)
 
-    def forward(self, x_out):
-        x_split = torch.split(x_out, split_size_or_sections=self.h1_channels, dim=1)
-        x1 = self.inst_norm(x_split[0].contiguous())
-        x2 = self.batch_norm(x_split[1].contiguous())
-        x_out = torch.cat((x1, x2), dim=1)
-        return x_out
+    def forward(self, x):
+        x1, x2 = torch.chunk(x, chunks=2, dim=1)
+        x1 = self.inst_norm(x1.contiguous())
+        x2 = self.batch_norm(x2.contiguous())
+        x = torch.cat((x1, x2), dim=1)
+        return x
 
 
 class IBNNetConv(nn.Module):

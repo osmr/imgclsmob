@@ -7,6 +7,10 @@ from .models.seresnet import *
 from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
+from .models.ibnresnet import *
+from .models.ibnbresnet import *
+from .models.ibnresnext import *
+from .models.ibndensenet import *
 from .models.airnet import *
 from .models.airnext import *
 from .models.bamresnet import *
@@ -39,16 +43,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.ibnresnet import *
-from .models.ibnbresnet import *
-from .models.ibnresnext import *
-from .models.ibndensenet import *
-
-from .models.others.oth_resnet_ibn_a import *
-from .models.others.oth_resnet_ibn_b import *
-from .models.others.oth_resnext_ibn_a import *
-from .models.others.oth_densenet_ibn_a import *
 
 __all__ = ['get_model']
 
@@ -140,6 +134,23 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'ibn_resnet50': ibn_resnet50,
+    'ibn_resnet101': ibn_resnet101,
+    'ibn_resnet152': ibn_resnet152,
+
+    'ibnb_resnet50': ibnb_resnet50,
+    'ibnb_resnet101': ibnb_resnet101,
+    'ibnb_resnet152': ibnb_resnet152,
+
+    'ibn_resnext50_32x4d': ibn_resnext50_32x4d,
+    'ibn_resnext101_32x4d': ibn_resnext101_32x4d,
+    'ibn_resnext101_64x4d': ibn_resnext101_64x4d,
+
+    'ibn_densenet121': ibn_densenet121,
+    'ibn_densenet161': ibn_densenet161,
+    'ibn_densenet169': ibn_densenet169,
+    'ibn_densenet201': ibn_densenet201,
 
     'airnet50_1x64d_r2': airnet50_1x64d_r2,
     'airnet50_1x64d_r16': airnet50_1x64d_r16,
@@ -284,32 +295,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'ibn_resnet50': ibn_resnet50,
-    'ibn_resnet101': ibn_resnet101,
-    'ibn_resnet152': ibn_resnet152,
-
-    'ibnb_resnet50': ibnb_resnet50,
-    'ibnb_resnet101': ibnb_resnet101,
-    'ibnb_resnet152': ibnb_resnet152,
-
-    'ibn_resnext50_32x4d': ibn_resnext50_32x4d,
-    'ibn_resnext101_32x4d': ibn_resnext101_32x4d,
-    'ibn_resnext101_64x4d': ibn_resnext101_64x4d,
-
-    'ibn_densenet121': ibn_densenet121,
-    'ibn_densenet161': ibn_densenet161,
-    'ibn_densenet169': ibn_densenet169,
-    'ibn_densenet201': ibn_densenet201,
-
-    'resnet50_ibn_a': resnet50_ibn_a,
-    'resnet101_ibn_a': resnet101_ibn_a,
-    'resnet50_ibn_b': resnet50_ibn_b,
-
-    'resnext101_ibn_a': resnext101_ibn_a,
-
-    'densenet121_ibn_a': densenet121_ibn_a,
-    'densenet169_ibn_a': densenet169_ibn_a,
 }
 
 

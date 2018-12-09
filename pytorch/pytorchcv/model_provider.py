@@ -278,9 +278,9 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
-    'ibnresnet50': ibnresnet50,
-    'ibnresnet101': ibnresnet101,
-    'ibnresnet152': ibnresnet152,
+    'ibn_resnet50': ibn_resnet50,
+    'ibn_resnet101': ibn_resnet101,
+    'ibn_resnet152': ibn_resnet152,
 
     'resnet50_ibn_a': resnet50_ibn_a,
     'resnet101_ibn_a': resnet101_ibn_a,

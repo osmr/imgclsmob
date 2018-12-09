@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1807.09441.
 """
 
-__all__ = ['IBNResNet', 'ibnresnet50', 'ibnresnet101', 'ibnresnet152']
+__all__ = ['IBNResNet', 'ibn_resnet50', 'ibn_resnet101', 'ibn_resnet152']
 
 import os
 import math
@@ -23,12 +23,16 @@ class IBN(nn.Module):
     ----------
     channels : int
         Number of channels.
+    inst_fraction : float, default 0.5
+        Instance normalization fraction.
     """
     def __init__(self,
-                 channels):
+                 channels,
+                 inst_fraction=0.5):
         super(IBN, self).__init__()
-        h1_channels = int(math.ceil(channels / 2))
+        h1_channels = int(math.ceil(channels * inst_fraction))
         h2_channels = channels - h1_channels
+        self.split_sections = [h1_channels, h2_channels]
 
         self.inst_norm = nn.InstanceNorm2d(
             num_features=h1_channels,
@@ -36,7 +40,7 @@ class IBN(nn.Module):
         self.batch_norm = nn.BatchNorm2d(num_features=h2_channels)
 
     def forward(self, x):
-        x1, x2 = torch.chunk(x, chunks=2, dim=1)
+        x1, x2 = torch.split(x, split_size_or_sections=self.split_sections, dim=1)
         x1 = self.inst_norm(x1.contiguous())
         x2 = self.batch_norm(x2.contiguous())
         x = torch.cat((x1, x2), dim=1)
@@ -67,6 +71,8 @@ class IBNNetConv(nn.Module):
         Whether the layer uses a bias vector.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.
+    inst_fraction : float, default 0.5
+        Instance normalization fraction for IBN module.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -81,6 +87,7 @@ class IBNNetConv(nn.Module):
                  groups=1,
                  bias=False,
                  use_ibn=False,
+                 inst_fraction=0.5,
                  activate=True):
         super(IBNNetConv, self).__init__()
         self.activate = activate
@@ -96,7 +103,9 @@ class IBNNetConv(nn.Module):
             groups=groups,
             bias=bias)
         if self.use_ibn:
-            self.ibn = IBN(channels=out_channels)
+            self.ibn = IBN(
+                channels=out_channels,
+                inst_fraction=inst_fraction)
         else:
             self.bn = nn.BatchNorm2d(num_features=out_channels)
         if self.activate:
@@ -119,6 +128,7 @@ def ibnnet_conv1x1(in_channels,
                    groups=1,
                    bias=False,
                    use_ibn=False,
+                   inst_fraction=0.5,
                    activate=True):
     """
     1x1 version of the IBN-Net specific convolution block.
@@ -137,6 +147,8 @@ def ibnnet_conv1x1(in_channels,
         Whether the layer uses a bias vector.
     use_ibn : bool, default False
         Whether use Instance-Batch Normalization.
+    inst_fraction : float, default 0.5
+        Instance normalization fraction for IBN module.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -149,6 +161,7 @@ def ibnnet_conv1x1(in_channels,
         groups=groups,
         bias=bias,
         use_ibn=use_ibn,
+        inst_fraction=inst_fraction,
         activate=activate)
 
 
@@ -361,7 +374,7 @@ def get_ibnresnet(blocks,
     return net
 
 
-def ibnresnet50(**kwargs):
+def ibn_resnet50(**kwargs):
     """
     IBN-ResNet-50 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
@@ -376,7 +389,7 @@ def ibnresnet50(**kwargs):
     return get_ibnresnet(blocks=50, model_name="ibnresnet50", **kwargs)
 
 
-def ibnresnet101(**kwargs):
+def ibn_resnet101(**kwargs):
     """
     IBN-ResNet-101 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
@@ -391,7 +404,7 @@ def ibnresnet101(**kwargs):
     return get_ibnresnet(blocks=101, model_name="ibnresnet101", **kwargs)
 
 
-def ibnresnet152(**kwargs):
+def ibn_resnet152(**kwargs):
     """
     IBN-ResNet-152 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
@@ -422,9 +435,9 @@ def _test():
     pretrained = False
 
     models = [
-        ibnresnet50,
-        ibnresnet101,
-        ibnresnet152,
+        ibn_resnet50,
+        ibn_resnet101,
+        ibn_resnet152,
     ]
 
     for model in models:
@@ -435,9 +448,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ibnresnet50 or weight_count == 25557032)
-        assert (model != ibnresnet101 or weight_count == 44549160)
-        assert (model != ibnresnet152 or weight_count == 60192808)
+        assert (model != ibn_resnet50 or weight_count == 25557032)
+        assert (model != ibn_resnet101 or weight_count == 44549160)
+        assert (model != ibn_resnet152 or weight_count == 60192808)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

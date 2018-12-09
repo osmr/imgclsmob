@@ -28,13 +28,13 @@ class IBN(nn.Module):
         super(IBN, self).__init__()
         h1_channels = channels // 2
         h2_channels = channels - h1_channels
-        self.half = h1_channels
+        self.h1_channels = h1_channels
 
         self.inst_norm = nn.InstanceNorm2d(h1_channels, affine=True)
         self.batch_norm = nn.BatchNorm2d(h2_channels)
 
     def forward(self, x_out):
-        x_split = torch.split(x_out, split_size_or_sections=self.half, dim=1)
+        x_split = torch.split(x_out, split_size_or_sections=self.h1_channels, dim=1)
         x1 = self.inst_norm(x_split[0].contiguous())
         x2 = self.batch_norm(x_split[1].contiguous())
         x_out = torch.cat((x1, x2), dim=1)
@@ -63,8 +63,8 @@ class IBNNetConv(nn.Module):
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    norm_type : str, default 'bn'
-        Name of normalization function to use.
+    use_ibn : bool, default False
+        Whether use Instance-Batch Normalization.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -78,11 +78,11 @@ class IBNNetConv(nn.Module):
                  dilation=1,
                  groups=1,
                  bias=False,
-                 norm_type="bn",
+                 use_ibn=False,
                  activate=True):
         super(IBNNetConv, self).__init__()
-        assert (norm_type in ["bn", "ibn"])
         self.activate = activate
+        self.use_ibn = use_ibn
 
         self.conv = nn.Conv2d(
             in_channels=in_channels,
@@ -93,18 +93,19 @@ class IBNNetConv(nn.Module):
             dilation=dilation,
             groups=groups,
             bias=bias)
-        if norm_type == "bn":
-            self.norm = nn.BatchNorm2d(num_features=out_channels)
-        elif norm_type == "ibn":
-            self.norm = IBN(channels=out_channels)
+        if self.use_ibn:
+            self.ibn = IBN(channels=out_channels)
         else:
-            raise NotImplementedError()
+            self.bn = nn.BatchNorm2d(num_features=out_channels)
         if self.activate:
             self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
         x = self.conv(x)
-        x = self.norm(x)
+        if self.use_ibn:
+            x = self.ibn(x)
+        else:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         return x
@@ -115,7 +116,7 @@ def ibnnet_conv1x1(in_channels,
                    stride=1,
                    groups=1,
                    bias=False,
-                   norm_type="bn",
+                   use_ibn=False,
                    activate=True):
     """
     1x1 version of the IBN-Net specific convolution block.
@@ -132,8 +133,8 @@ def ibnnet_conv1x1(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    norm_type : str, default 'bn'
-        Name of normalization function to use.
+    use_ibn : bool, default False
+        Whether use Instance-Batch Normalization.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -145,7 +146,7 @@ def ibnnet_conv1x1(in_channels,
         padding=0,
         groups=groups,
         bias=bias,
-        norm_type=norm_type,
+        use_ibn=use_ibn,
         activate=activate)
 
 
@@ -175,7 +176,7 @@ class IBNResBottleneck(nn.Module):
         self.conv1 = ibnnet_conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
-            norm_type=("ibn" if conv1_ibn else "bn"))
+            use_ibn=conv1_ibn)
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
@@ -276,7 +277,7 @@ class IBNResNet(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
-                conv1_ibn = (in_channels >= 512)
+                conv1_ibn = (out_channels < 2048)
                 stage.add_module("unit{}".format(j + 1), IBNResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,

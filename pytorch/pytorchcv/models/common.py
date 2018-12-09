@@ -519,7 +519,8 @@ class SEBlock(nn.Module):
 
 class IBN(nn.Module):
     """
-    Instance-Batch Normalization block.
+    Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
 
     Parameters:
     ----------

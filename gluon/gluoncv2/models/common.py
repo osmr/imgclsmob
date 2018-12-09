@@ -4,8 +4,9 @@
 
 __all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
+           'IBN', 'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
 
+import math
 from mxnet.gluon import nn, HybridBlock
 
 
@@ -545,6 +546,91 @@ class SEBlock(HybridBlock):
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = F.broadcast_mul(x, w)
+        return x
+
+
+def split(x,
+          sizes,
+          axis=1):
+    """
+    Splits an array along a particular axis into multiple sub-arrays.
+
+    Parameters:
+    ----------
+    x : NDArray/symbol
+        Input tensor.
+    sizes : tuple/list of int
+        Sizes of chunks.
+    axis : int, default 1
+        Axis along which to split.
+
+    Returns
+    -------
+    Tuple of NDArray/symbol
+        Resulted tensor.
+    """
+    x_outs = []
+    begin = 0
+    for size in sizes:
+        end = begin + size
+        x_outs += [x.slice_axis(axis=axis, begin=begin, end=end)]
+        begin = end
+    return tuple(x_outs)
+
+
+class IBN(HybridBlock):
+    """
+    Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    inst_fraction : float, default 0.5
+        The first fraction of channels for normalization.
+    inst_first : bool, default True
+        Whether instance normalization be on the first part of channels.
+    """
+    def __init__(self,
+                 channels,
+                 bn_use_global_stats=False,
+                 first_fraction=0.5,
+                 inst_first=True,
+                 **kwargs):
+        super(IBN, self).__init__(**kwargs)
+        self.inst_first = inst_first
+        h1_channels = int(math.floor(channels * first_fraction))
+        h2_channels = channels - h1_channels
+        self.split_sections = [h1_channels, h2_channels]
+
+        if self.inst_first:
+            self.inst_norm = nn.InstanceNorm(
+                in_channels=h1_channels,
+                scale=True)
+            self.batch_norm = nn.BatchNorm(
+                in_channels=h2_channels,
+                use_global_stats=bn_use_global_stats)
+
+        else:
+            self.batch_norm = nn.BatchNorm(
+                in_channels=h1_channels,
+                use_global_stats=bn_use_global_stats)
+            self.inst_norm = nn.InstanceNorm(
+                in_channels=h2_channels,
+                scale=True)
+
+    def hybrid_forward(self, F, x):
+        x1, x2 = split(x, sizes=self.split_sections, axis=1)
+        if self.inst_first:
+            x1 = self.inst_norm(x1)
+            x2 = self.batch_norm(x2)
+        else:
+            x1 = self.batch_norm(x1)
+            x2 = self.inst_norm(x2)
+        x = F.concat(x1, x2, dim=1)
         return x
 
 

@@ -1,130 +1,22 @@
 """
-    IBN-ResNet, implemented in PyTorch.
-    Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
-    https://arxiv.org/abs/1807.09441.
+    IBN-ResNeXt, implemented in PyTorch.
+    Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['IBNResNet', 'ibn_resnet50', 'ibn_resnet101', 'ibn_resnet152']
+__all__ = ['IBNResNeXt', 'ibn_resnext50_32x4d', 'ibn_resnext101_32x4d', 'ibn_resnext101_64x4d']
 
 import os
+import math
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, IBN
+from .common import conv1x1_block, conv3x3_block
 from .resnet import ResInitBlock
+from .ibnresnet import ibn_conv1x1_block
 
 
-class IBNConvBlock(nn.Module):
+class IBNResNeXtBottleneck(nn.Module):
     """
-    IBN-Net specific convolution block with BN/IBN normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_ibn : bool, default False
-        Whether use Instance-Batch Normalization.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_ibn=False,
-                 activate=True):
-        super(IBNConvBlock, self).__init__()
-        self.activate = activate
-        self.use_ibn = use_ibn
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        if self.use_ibn:
-            self.ibn = IBN(channels=out_channels)
-        else:
-            self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        if self.use_ibn:
-            x = self.ibn(x)
-        else:
-            x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def ibn_conv1x1_block(in_channels,
-                      out_channels,
-                      stride=1,
-                      groups=1,
-                      bias=False,
-                      use_ibn=False,
-                      activate=True):
-    """
-    1x1 version of the IBN-Net specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_ibn : bool, default False
-        Whether use Instance-Batch Normalization.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return IBNConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        groups=groups,
-        bias=bias,
-        use_ibn=use_ibn,
-        activate=activate)
-
-
-class IBNResBottleneck(nn.Module):
-    """
-    IBN-ResNet bottleneck block for residual path in IBN-ResNet unit.
+    IBN-ResNeXt bottleneck block for residual path in IBN-ResNeXt unit.
 
     Parameters:
     ----------
@@ -134,6 +26,10 @@ class IBNResBottleneck(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     conv1_ibn : bool
         Whether to use IBN normalization in the first convolution layer of the block.
     """
@@ -141,20 +37,25 @@ class IBNResBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
+                 cardinality,
+                 bottleneck_width,
                  conv1_ibn):
-        super(IBNResBottleneck, self).__init__()
+        super(IBNResNeXtBottleneck, self).__init__()
         mid_channels = out_channels // 4
+        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
+        group_width = cardinality * D
 
         self.conv1 = ibn_conv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels,
+            out_channels=group_width,
             use_ibn=conv1_ibn)
         self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride)
+            in_channels=group_width,
+            out_channels=group_width,
+            stride=stride,
+            groups=cardinality)
         self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
+            in_channels=group_width,
             out_channels=out_channels,
             activate=False)
 
@@ -165,9 +66,9 @@ class IBNResBottleneck(nn.Module):
         return x
 
 
-class IBNResUnit(nn.Module):
+class IBNResNeXtUnit(nn.Module):
     """
-    IBN-ResNet unit.
+    IBN-ResNeXt unit.
 
     Parameters:
     ----------
@@ -177,6 +78,10 @@ class IBNResUnit(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     conv1_ibn : bool
         Whether to use IBN normalization in the first convolution layer of the block.
     """
@@ -184,14 +89,18 @@ class IBNResUnit(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
+                 cardinality,
+                 bottleneck_width,
                  conv1_ibn):
-        super(IBNResUnit, self).__init__()
+        super(IBNResNeXtUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        self.body = IBNResBottleneck(
+        self.body = IBNResNeXtBottleneck(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride,
+            cardinality=cardinality,
+            bottleneck_width=bottleneck_width,
             conv1_ibn=conv1_ibn)
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
@@ -212,9 +121,9 @@ class IBNResUnit(nn.Module):
         return x
 
 
-class IBNResNet(nn.Module):
+class IBNResNeXt(nn.Module):
     """
-    IBN-ResNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-ResNeXt model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -223,6 +132,10 @@ class IBNResNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -233,10 +146,12 @@ class IBNResNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 cardinality,
+                 bottleneck_width,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(IBNResNet, self).__init__()
+        super(IBNResNeXt, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -250,10 +165,12 @@ class IBNResNet(nn.Module):
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
                 conv1_ibn = (out_channels < 2048)
-                stage.add_module("unit{}".format(j + 1), IBNResUnit(
+                stage.add_module("unit{}".format(j + 1), IBNResNeXtUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
+                    cardinality=cardinality,
+                    bottleneck_width=bottleneck_width,
                     conv1_ibn=conv1_ibn))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
@@ -281,18 +198,24 @@ class IBNResNet(nn.Module):
         return x
 
 
-def get_ibnresnet(blocks,
-                  model_name=None,
-                  pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
-                  **kwargs):
+def get_ibnresnext(blocks,
+                   cardinality,
+                   bottleneck_width,
+                   model_name=None,
+                   pretrained=False,
+                   root=os.path.join('~', '.torch', 'models'),
+                   **kwargs):
     """
-    Create IBN-ResNet model with specific parameters.
+    Create IBN-ResNeXt model with specific parameters.
 
     Parameters:
     ----------
     blocks : int
         Number of blocks.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -305,18 +228,19 @@ def get_ibnresnet(blocks,
         layers = [3, 4, 6, 3]
     elif blocks == 101:
         layers = [3, 4, 23, 3]
-    elif blocks == 152:
-        layers = [3, 8, 36, 3]
     else:
-        raise ValueError("Unsupported IBN-ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported IBN-ResNeXt with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
     channels_per_layers = [256, 512, 1024, 2048]
+
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = IBNResNet(
+    net = IBNResNeXt(
         channels=channels,
         init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
         **kwargs)
 
     if pretrained:
@@ -331,9 +255,9 @@ def get_ibnresnet(blocks,
     return net
 
 
-def ibn_resnet50(**kwargs):
+def ibn_resnext50_32x4d(**kwargs):
     """
-    IBN-ResNet-50 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-ResNeXt-50 (32x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -343,12 +267,12 @@ def ibn_resnet50(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=50, model_name="ibn_resnet50", **kwargs)
+    return get_ibnresnext(blocks=50, cardinality=32, bottleneck_width=4, model_name="ibn_resnext50_32x4d", **kwargs)
 
 
-def ibn_resnet101(**kwargs):
+def ibn_resnext101_32x4d(**kwargs):
     """
-    IBN-ResNet-101 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-ResNeXt-101 (32x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -358,12 +282,12 @@ def ibn_resnet101(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=101, model_name="ibn_resnet101", **kwargs)
+    return get_ibnresnext(blocks=101, cardinality=32, bottleneck_width=4, model_name="ibn_resnext101_32x4d", **kwargs)
 
 
-def ibn_resnet152(**kwargs):
+def ibn_resnext101_64x4d(**kwargs):
     """
-    IBN-ResNet-152 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    IBN-ResNeXt-101 (64x4d) model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 
     Parameters:
@@ -373,7 +297,7 @@ def ibn_resnet152(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_ibnresnet(blocks=152, model_name="ibn_resnet152", **kwargs)
+    return get_ibnresnext(blocks=101, cardinality=64, bottleneck_width=4, model_name="ibn_resnext101_64x4d", **kwargs)
 
 
 def _calc_width(net):
@@ -392,9 +316,9 @@ def _test():
     pretrained = False
 
     models = [
-        ibn_resnet50,
-        ibn_resnet101,
-        ibn_resnet152,
+        ibn_resnext50_32x4d,
+        ibn_resnext101_32x4d,
+        ibn_resnext101_64x4d,
     ]
 
     for model in models:
@@ -405,9 +329,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ibn_resnet50 or weight_count == 25557032)
-        assert (model != ibn_resnet101 or weight_count == 44549160)
-        assert (model != ibn_resnet152 or weight_count == 60192808)
+        assert (model != ibn_resnext50_32x4d or weight_count == 25028904)
+        assert (model != ibn_resnext101_32x4d or weight_count == 44177704)
+        assert (model != ibn_resnext101_64x4d or weight_count == 83455272)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

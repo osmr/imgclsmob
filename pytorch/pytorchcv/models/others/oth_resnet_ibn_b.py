@@ -196,3 +196,45 @@ def resnet152_ibn_b(pretrained=False, **kwargs):
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['resnet152']))
     return model
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        resnet50_ibn_b,
+        resnet101_ibn_b,
+        resnet152_ibn_b,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resnet50_ibn_b or weight_count == 25558568)
+        assert (model != resnet101_ibn_b or weight_count == 44550696)
+        assert (model != resnet152_ibn_b or weight_count == 60194344)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

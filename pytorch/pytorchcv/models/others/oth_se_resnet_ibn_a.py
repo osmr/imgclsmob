@@ -1,4 +1,3 @@
-from .se_module import SELayer
 import torch.nn as nn
 import torch
 import math
@@ -7,6 +6,24 @@ __all__ = ['se_resnet50_ibn_a', 'se_resnet101_ibn_a', 'se_resnet152_ibn_a']
 
 def conv3x3(in_planes, out_planes, stride=1):
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+
+
+class SELayer(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(SELayer, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+                nn.Linear(channel, int(channel/reduction), bias=False),
+                nn.ReLU(inplace=True),
+                nn.Linear(int(channel/reduction), channel, bias=False),
+                nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        y = self.avg_pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
+        return x * y.expand_as(x)
 
 
 class IBN(nn.Module):
@@ -169,7 +186,7 @@ class ResNet(nn.Module):
         return x
 
 
-def se_resnet50_ibn_a(num_classes=1000):
+def se_resnet50_ibn_a(num_classes=1000, pretrained=False):
     """Constructs a ResNet-50 model.
 
     Args:
@@ -180,7 +197,7 @@ def se_resnet50_ibn_a(num_classes=1000):
     return model
 
 
-def se_resnet101_ibn_a(num_classes=1000):
+def se_resnet101_ibn_a(num_classes=1000, pretrained=False):
     """Constructs a ResNet-101 model.
 
     Args:
@@ -191,7 +208,7 @@ def se_resnet101_ibn_a(num_classes=1000):
     return model
 
 
-def se_resnet152_ibn_a(num_classes):
+def se_resnet152_ibn_a(num_classes=1000, pretrained=False):
     """Constructs a ResNet-152 model.
 
     Args:
@@ -200,3 +217,45 @@ def se_resnet152_ibn_a(num_classes):
     model = ResNet(SEBottleneck, [3, 8, 36, 3], num_classes=num_classes)
     model.avgpool = nn.AdaptiveAvgPool2d(1)
     return model
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        se_resnet50_ibn_a,
+        se_resnet101_ibn_a,
+        se_resnet152_ibn_a,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        # assert (model != se_resnet50_ibn_a or weight_count == 28071976)
+        # assert (model != se_resnet101_ibn_a or weight_count == 49292328)
+        # assert (model != se_resnet152_ibn_a or weight_count == 66770984)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

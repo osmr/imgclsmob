@@ -41,10 +41,12 @@ from .models.nasnet import *
 from .models.pnasnet import *
 
 from .models.ibnresnet import *
+from .models.ibnbresnet import *
 from .models.ibnresnext import *
 from .models.ibndensenet import *
 
 from .models.others.oth_resnet_ibn_a import *
+from .models.others.oth_resnet_ibn_b import *
 from .models.others.oth_resnext_ibn_a import *
 from .models.others.oth_densenet_ibn_a import *
 
@@ -287,6 +289,10 @@ _models = {
     'ibn_resnet101': ibn_resnet101,
     'ibn_resnet152': ibn_resnet152,
 
+    'ibnb_resnet50': ibnb_resnet50,
+    'ibnb_resnet101': ibnb_resnet101,
+    'ibnb_resnet152': ibnb_resnet152,
+
     'ibn_resnext50_32x4d': ibn_resnext50_32x4d,
     'ibn_resnext101_32x4d': ibn_resnext101_32x4d,
     'ibn_resnext101_64x4d': ibn_resnext101_64x4d,
@@ -298,14 +304,12 @@ _models = {
 
     'resnet50_ibn_a': resnet50_ibn_a,
     'resnet101_ibn_a': resnet101_ibn_a,
-    'resnet152_ibn_a': resnet152_ibn_a,
+    'resnet101_ibn_b': resnet101_ibn_b,
 
     'resnext101_ibn_a': resnext101_ibn_a,
 
     'densenet121_ibn_a': densenet121_ibn_a,
-    'densenet161_ibn_a': densenet161_ibn_a,
     'densenet169_ibn_a': densenet169_ibn_a,
-    'densenet201_ibn_a': densenet201_ibn_a,
 }
 
 

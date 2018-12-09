@@ -103,7 +103,7 @@ def measure_layer(layer, x):
         delta_params = get_layer_param(layer)
 
     elif type_name in ['BatchNorm2d', 'BatchNorm1d', 'Dropout2d', 'DropChannel', 'Dropout', 'LambdaReduce', 'Lambda',
-                       'ZeroPad2d', 'Identity', 'Sequential']:
+                       'ZeroPad2d', 'Identity', 'Sequential', 'InstanceNorm2d']:
         delta_params = get_layer_param(layer)
 
     else:

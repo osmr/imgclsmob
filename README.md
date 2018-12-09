@@ -15,6 +15,7 @@ scripts for training/validating/converting models. All models are designed for u
 - PreResNet (['Identity Mappings in Deep Residual Networks'](https://arxiv.org/abs/1603.05027))
 - ResNeXt (['Aggregated Residual Transformations for Deep Neural Networks'](http://arxiv.org/abs/1611.05431))
 - SENet/SE-ResNet/SE-PreResNet/SE-ResNeXt (['Squeeze-and-Excitation Networks'](https://arxiv.org/abs/1709.01507))
+- IBN-ResNet/IBN-ResNeXt/IBN-DenseNet (['Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net'](https://arxiv.org/abs/1807.09441))
 - AirNet/AirNeXt (['Attention Inspiring Receptive-Fields Network for Learning Invariant Representations'](https://ieeexplore.ieee.org/document/8510896))
 - BAM-ResNet (['BAM: Bottleneck Attention Module'](https://arxiv.org/abs/1807.06514))
 - CBAM-ResNet (['CBAM: Convolutional Block Attention Module'](https://arxiv.org/abs/1807.06521))
@@ -233,6 +234,12 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNeXt-50 (32x4d) | 21.06 | 5.58 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext50_32x4d-0558-a49f8fb0.params.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.99 | 5.00 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext101_32x4d-0500-cf161260.params.log)) |
 | SENet-154 | 18.84 | 4.65 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.13/senet154-0465-dd244507.params.log)) |
+| IBN-ResNet-50 | 23.56 | 6.68 | 25,557,032 | 4,100.70M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnet50-0668-db527596.params.log)) |
+| IBN-ResNet-101 | 21.89 | 5.87 | 44,549,160 | 7,818.04M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnet101-0587-946e7f10.params.log)) |
+| IBN(b)-ResNet-50 | 23.91 | 6.97 | 25,558,568 | 4,100.70M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibnb_resnet50-0697-0aea51d2.params.log)) |
+| IBN-ResNeXt-101 (32x4d) | 21.43 | 5.62 | 44,177,704 | 7,991.62M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnext101_32x4d-0562-05ddba79.params.log)) |
+| IBN-DenseNet-121 | 24.98 | 7.47 | 7,978,856 | 2,852.39M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_densenet121-0747-1434d379.params.log)) |
+| IBN-DenseNet-169 | 23.78 | 6.82 | 14,149,480 | 3,381.48M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_densenet169-0682-6d7c48c5.params.log)) |
 | AirNet50-1x64d (r=2) | 22.48 | 6.21 | 27,425,864 | 4,757.77M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0621-347358cc.params.log)) |
 | AirNet50-1x64d (r=16) | 22.91 | 6.46 | 25,714,952 | 4,385.54M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0646-0b847b99.params.log)) |
 | BAM-ResNet-50 | 23.68 | 6.96 | 25,915,099 | 4,211.08M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.124/bam_resnet50-0696-7e573b61.params.log)) |
@@ -344,6 +351,12 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-ResNeXt-50 (32x4d) | 21.00 | 5.54 | 27,559,896 | 4,253.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext50_32x4d-0554-99e0e9aa.pth.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.96 | 5.05 | 48,955,416 | 8,005.33M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.12/seresnext101_32x4d-0505-0924f0a2.pth.log)) |
 | SENet-154 | 18.62 | 4.61 | 115,088,984 | 20,742.40M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.13/senet154-0461-6512228c.pth.log)) |
+| IBN-ResNet-50 | 22.76 | 6.41 | 25,557,032 | 4,100.70M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnet50-0641-e48a1fe5.pth.log)) |
+| IBN-ResNet-101 | 21.29 | 5.61 | 44,549,160 | 7,818.04M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnet101-0561-5279c78a.pth.log)) |
+| IBN(b)-ResNet-50 | 23.64 | 6.86 | 25,558,568 | 4,100.70M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibnb_resnet50-0686-e138995e.pth.log)) |
+| IBN-ResNeXt-101 (32x4d) | 20.88 | 5.42 | 44,177,704 | 7,991.62M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_resnext101_32x4d-0542-b5233c66.pth.log)) |
+| IBN-DenseNet-121 | 24.47 | 7.25 | 7,978,856 | 2,852.39M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_densenet121-0725-b90b0615.pth.log)) |
+| IBN-DenseNet-169 | 23.25 | 6.51 | 14,149,480 | 3,381.48M | From [XingangPan/IBN-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.127/ibn_densenet169-0651-96dd755e.pth.log)) |
 | AirNet50-1x64d (r=2) | 21.84 | 5.90 | 27,425,864 | 4,757.77M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r2-0590-3ec42212.pth.log)) |
 | AirNet50-1x64d (r=16) | 22.11 | 6.19 | 25,714,952 | 4,385.54M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnet50_1x64d_r16-0619-090179e7.pth.log)) |
 | AirNeXt50-32x4d (r=2) | 20.87 | 5.51 | 27,604,296 | 5,321.18M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.120/airnext50_32x4d_r2-0551-c68156e5.pth.log)) |
@@ -700,3 +713,4 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 [homles11/IGCV3]: https://github.com/homles11/IGCV3
 [soeaver/AirNet-PyTorch]: https://github.com/soeaver/AirNet-PyTorch
 [Jongchan/attention-module]: https://github.com/Jongchan/attention-module
+[XingangPan/IBN-Net]: https://github.com/XingangPan/IBN-Net

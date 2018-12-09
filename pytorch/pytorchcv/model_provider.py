@@ -41,7 +41,9 @@ from .models.nasnet import *
 from .models.pnasnet import *
 
 from .models.ibnresnet import *
+from .models.ibndensenet import *
 from .models.others.oth_resnet_ibn_a import *
+from .models.others.oth_densenet_ibn_a import *
 
 __all__ = ['get_model']
 
@@ -282,9 +284,19 @@ _models = {
     'ibn_resnet101': ibn_resnet101,
     'ibn_resnet152': ibn_resnet152,
 
+    'ibn_densenet121': ibn_densenet121,
+    'ibn_densenet161': ibn_densenet161,
+    'ibn_densenet169': ibn_densenet169,
+    'ibn_densenet201': ibn_densenet201,
+
     'resnet50_ibn_a': resnet50_ibn_a,
     'resnet101_ibn_a': resnet101_ibn_a,
     'resnet152_ibn_a': resnet152_ibn_a,
+
+    'densenet121_ibn_a': densenet121_ibn_a,
+    'densenet161_ibn_a': densenet161_ibn_a,
+    'densenet169_ibn_a': densenet169_ibn_a,
+    'densenet201_ibn_a': densenet201_ibn_a,
 }
 
 

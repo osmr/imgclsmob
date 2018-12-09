@@ -194,13 +194,13 @@ class IBNDenseNet(nn.Module):
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
-            conv1_ibn = (i < 3)
             if i != 0:
                 stage.add_module("trans{}".format(i + 1), TransitionBlock(
                     in_channels=in_channels,
                     out_channels=(in_channels // 2)))
                 in_channels = in_channels // 2
             for j, out_channels in enumerate(channels_per_stage):
+                conv1_ibn = (i < 3) and (j % 3 == 0)
                 stage.add_module("unit{}".format(j + 1), IBNDenseUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,

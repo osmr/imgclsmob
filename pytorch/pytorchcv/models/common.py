@@ -536,7 +536,7 @@ class IBN(nn.Module):
                  inst_first=True):
         super(IBN, self).__init__()
         self.inst_first = inst_first
-        h1_channels = int(math.ceil(channels * first_fraction))
+        h1_channels = int(math.floor(channels * first_fraction))
         h2_channels = channels - h1_channels
         self.split_sections = [h1_channels, h2_channels]
 

@@ -438,7 +438,6 @@ def train_epoch(epoch,
                 epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
-        print("batch_size_extend_count={}".format(batch_size_extend_count))
         trainer.step(batch_size * batch_size_extend_count)
         for p in net.collect_params().values():
             p.zero_grad()

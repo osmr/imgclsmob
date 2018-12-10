@@ -104,6 +104,11 @@ def parse_args():
         default=512,
         help='training batch size per device (CPU/GPU).')
     parser.add_argument(
+        '--batch-size-scale',
+        type=int,
+        default=1,
+        help='manual batch-size increasing factor.')
+    parser.add_argument(
         '--num-epochs',
         type=int,
         default=120,
@@ -366,9 +371,11 @@ def train_epoch(epoch,
                 label_smoothing,
                 num_classes,
                 num_epochs,
-                grad_clip_value):
+                grad_clip_value,
+                batch_size_scale):
 
     labels_list_inds = None
+    batch_size_extend_count = 0
     tic = time.time()
     if use_rec:
         train_data.reset()
@@ -405,7 +412,16 @@ def train_epoch(epoch,
             grads = [v.grad(ctx[0]) for v in net.collect_params().values() if v._grad is not None]
             gluon.utils.clip_global_norm(grads, max_norm=grad_clip_value)
 
-        trainer.step(batch_size)
+        if batch_size_scale == 1:
+            trainer.step(batch_size)
+        else:
+            if (i + 1) % batch_size_scale == 0:
+                batch_size_extend_count = 0
+                trainer.step(batch_size * batch_size_scale)
+                for p in net.collect_params().values():
+                    p.zero_grad()
+            else:
+                batch_size_extend_count += 1
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
@@ -420,6 +436,12 @@ def train_epoch(epoch,
             err_top1_train = 1.0 - top1
             logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.5f}'.format(
                 epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+
+    if (batch_size_scale != 1) and (batch_size_extend_count > 0):
+        print("batch_size_extend_count={}".format(batch_size_extend_count))
+        trainer.step(batch_size * batch_size_extend_count)
+        for p in net.collect_params().values():
+            p.zero_grad()
 
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
     logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
@@ -452,9 +474,14 @@ def train_net(batch_size,
               label_smoothing,
               num_classes,
               grad_clip_value,
+              batch_size_scale,
               ctx):
 
     assert (not (mixup and label_smoothing))
+
+    if batch_size_scale != 1:
+        for p in net.collect_params().values():
+            p.grad_req = 'add'
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
@@ -502,7 +529,8 @@ def train_net(batch_size,
             label_smoothing=label_smoothing,
             num_classes=num_classes,
             num_epochs=num_epochs,
-            grad_clip_value=grad_clip_value)
+            grad_clip_value=grad_clip_value,
+            batch_size_scale=batch_size_scale)
 
         err_top1_val, err_top5_val = validate(
             acc_top1=acc_top1_val,
@@ -639,6 +667,7 @@ def main():
         label_smoothing=args.label_smoothing,
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
+        batch_size_scale=args.batch_size_scale,
         ctx=ctx)
 
 

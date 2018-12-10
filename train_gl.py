@@ -185,14 +185,24 @@ def parse_args():
         default=0.0001,
         help='weight decay rate. default is 0.0001.')
     parser.add_argument(
-        '--no-wd',
-        action='store_true',
-        help='whether to remove weight decay on bias, and beta/gamma for batchnorm layers.')
+        '--gamma-wd-mult',
+        type=float,
+        default=1.0,
+        help='weight decay multiplier for batchnorm gamma. default is 1.0.')
+    parser.add_argument(
+        '--beta-wd-mult',
+        type=float,
+        default=1.0,
+        help='weight decay multiplier for batchnorm beta. default is 1.0.')
     parser.add_argument(
         '--grad-clip',
         type=float,
         default=None,
         help='max_norm for gradient clipping.')
+    parser.add_argument(
+        '--label-smoothing',
+        action='store_true',
+        help='use label smoothing. default is false.')
 
     parser.add_argument(
         '--mixup',
@@ -277,12 +287,17 @@ def prepare_trainer(net,
                     num_epochs,
                     num_training_samples,
                     dtype,
-                    no_wd=False,
+                    gamma_wd_mult=1.0,
+                    beta_wd_mult=1.0,
                     state_file_path=None):
 
-    if no_wd:
-        for k, v in net.collect_params('.*beta|.*gamma|.*bias').items():
-            v.wd_mult = 0.0
+    if gamma_wd_mult != 1.0:
+        for k, v in net.collect_params('.*gamma').items():
+            v.wd_mult = gamma_wd_mult
+
+    if beta_wd_mult != 1.0:
+        for k, v in net.collect_params('.*beta').items():
+            v.wd_mult = beta_wd_mult
 
     if lr_decay_period > 0:
         lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
@@ -348,6 +363,7 @@ def train_epoch(epoch,
                 log_interval,
                 mixup,
                 mixup_epoch_tail,
+                label_smoothing,
                 num_classes,
                 num_epochs,
                 grad_clip_value):
@@ -365,16 +381,22 @@ def train_epoch(epoch,
 
         if mixup:
             labels_list_inds = labels_list
-            labels_list = [mx.nd.one_hot(Y, depth=num_classes) for Y in labels_list]
+            labels_list = [Y.one_hot(depth=num_classes) for Y in labels_list]
             if epoch < num_epochs - mixup_epoch_tail:
                 alpha = 1
                 lam = np.random.beta(alpha, alpha)
                 data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
                 labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
+        elif label_smoothing:
+            eta = 0.1
+            on_value = 1 - eta + eta / num_classes
+            off_value = eta / num_classes
+            labels_list_inds = labels_list
+            labels_list = [Y.one_hot(depth=num_classes, on_value=on_value, off_value=off_value) for Y in labels_list]
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-            loss_list = [loss_func(yhat, y) for yhat, y in zip(outputs_list, labels_list)]
+            loss_list = [loss_func(yhat, y.astype(dtype, copy=False)) for yhat, y in zip(outputs_list, labels_list)]
         for loss in loss_list:
             loss.backward()
         lr_scheduler.update(i, epoch)
@@ -388,7 +410,7 @@ def train_epoch(epoch,
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
         acc_top1_train.update(
-            labels=(labels_list if not mixup else labels_list_inds),
+            labels=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
@@ -427,9 +449,12 @@ def train_net(batch_size,
               log_interval,
               mixup,
               mixup_epoch_tail,
+              label_smoothing,
               num_classes,
               grad_clip_value,
               ctx):
+
+    assert (not (mixup and label_smoothing))
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
@@ -438,7 +463,7 @@ def train_net(batch_size,
     acc_top5_val = mx.metric.TopKAccuracy(5)
     acc_top1_train = mx.metric.Accuracy()
 
-    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not mixup))
+    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
@@ -474,6 +499,7 @@ def train_net(batch_size,
             log_interval=log_interval,
             mixup=mixup,
             mixup_epoch_tail=mixup_epoch_tail,
+            label_smoothing=label_smoothing,
             num_classes=num_classes,
             num_epochs=num_epochs,
             grad_clip_value=grad_clip_value)
@@ -567,7 +593,8 @@ def main():
         num_epochs=args.num_epochs,
         num_training_samples=num_training_samples,
         dtype=args.dtype,
-        no_wd=args.no_wd,
+        gamma_wd_mult=args.gamma_wd_mult,
+        beta_wd_mult=args.beta_wd_mult,
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:
@@ -609,6 +636,7 @@ def main():
         log_interval=args.log_interval,
         mixup=args.mixup,
         mixup_epoch_tail=args.mixup_epoch_tail,
+        label_smoothing=args.label_smoothing,
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         ctx=ctx)

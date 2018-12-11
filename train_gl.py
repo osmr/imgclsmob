@@ -266,6 +266,16 @@ def parse_args():
         type=str,
         default='',
         help='Regexp for selecting layers for fine tuning')
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=1000,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=3,
+        help='number of input channels')
     args = parser.parse_args()
     return args
 
@@ -588,7 +598,12 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
         tune_layers=args.tune_layers,
+        classes=args.num_classes,
+        in_channels=args.in_channels,
         ctx=ctx)
+
+    assert (hasattr(net, 'classes'))
+    assert (hasattr(net, 'in_size'))
     num_classes = net.classes if hasattr(net, 'classes') else 1000
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 

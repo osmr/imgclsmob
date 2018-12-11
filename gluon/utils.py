@@ -174,9 +174,15 @@ def prepare_model(model_name,
                   pretrained_model_file_path,
                   dtype,
                   tune_layers,
-                  ctx):
+                  classes=None,
+                  in_channels=None,
+                  ctx=mx.cpu()):
     kwargs = {'ctx': ctx,
               'pretrained': use_pretrained}
+    if classes is not None:
+        kwargs["classes"] = classes
+    if in_channels is not None:
+        kwargs["in_channels"] = in_channels
 
     net = get_model(model_name, **kwargs)
 

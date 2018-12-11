@@ -200,6 +200,11 @@ def parse_args():
         default=1.0,
         help='weight decay multiplier for batchnorm beta. default is 1.0.')
     parser.add_argument(
+        '--bias-wd-mult',
+        type=float,
+        default=1.0,
+        help='weight decay multiplier for bias. default is 1.0.')
+    parser.add_argument(
         '--grad-clip',
         type=float,
         default=None,
@@ -294,6 +299,7 @@ def prepare_trainer(net,
                     dtype,
                     gamma_wd_mult=1.0,
                     beta_wd_mult=1.0,
+                    bias_wd_mult=1.0,
                     state_file_path=None):
 
     if gamma_wd_mult != 1.0:
@@ -303,6 +309,10 @@ def prepare_trainer(net,
     if beta_wd_mult != 1.0:
         for k, v in net.collect_params('.*beta').items():
             v.wd_mult = beta_wd_mult
+
+    if bias_wd_mult != 1.0:
+        for k, v in net.collect_params('.*bias').items():
+            v.wd_mult = bias_wd_mult
 
     if lr_decay_period > 0:
         lr_decay_epoch = list(range(lr_decay_period, num_epochs, lr_decay_period))
@@ -622,6 +632,7 @@ def main():
         dtype=args.dtype,
         gamma_wd_mult=args.gamma_wd_mult,
         beta_wd_mult=args.beta_wd_mult,
+        bias_wd_mult=args.bias_wd_mult,
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:

@@ -265,7 +265,7 @@ def parse_args():
         '--tune-layers',
         type=str,
         default='',
-        help='list of layers for fine tuning')
+        help='Regexp for selecting layers for fine tuning')
     args = parser.parse_args()
     return args
 

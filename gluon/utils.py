@@ -2,6 +2,7 @@ import math
 import logging
 import os
 import numpy as np
+import re
 
 import mxnet as mx
 from mxnet import gluon
@@ -201,14 +202,12 @@ def prepare_model(model_name,
         net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
     if tune_layers:
-        tune_layers_ptrn = tuple(tune_layers.split(','))
-        params = net._collect_params_with_prefix()
-        param_keys = list(params.keys())
-        for key in param_keys:
-            if not key.startswith(tune_layers_ptrn):
-                params[key].grad_req = 'null'
+        tune_layers_pattern = re.compile(tune_layers)
+        for k, v in net._collect_params_with_prefix().items():
+            if tune_layers_pattern.match(k):
+                logging.info('Fine-tune parameter: {}'.format(k))
             else:
-                logging.info('Fine-tune parameter: {}'.format(key))
+                v.grad_req = 'null'
         for param in net.collect_params().values():
             if param._data is not None:
                 continue

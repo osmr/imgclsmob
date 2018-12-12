@@ -47,6 +47,27 @@ def parse_args():
         help='enable if stored PyTorch model has module')
 
     parser.add_argument(
+        '--src-num-classes',
+        type=int,
+        default=1000,
+        help='number of classes for source model')
+    parser.add_argument(
+        '--src-in-channels',
+        type=int,
+        default=3,
+        help='number of input channels for source model')
+    parser.add_argument(
+        '--dst-num-classes',
+        type=int,
+        default=1000,
+        help='number of classes for destination model')
+    parser.add_argument(
+        '--dst-in-channels',
+        type=int,
+        default=3,
+        help='number of input channels for destination model')
+
+    parser.add_argument(
         '--save-dir',
         type=str,
         default='',
@@ -66,7 +87,9 @@ def prepare_src_model(src_fwk,
                       dst_fwk,
                       ctx,
                       use_cuda,
-                      remove_module=False):
+                      remove_module=False,
+                      num_classes=None,
+                      in_channels=None):
 
     ext_src_param_keys = None
     ext_src_param_keys2 = None
@@ -79,6 +102,8 @@ def prepare_src_model(src_fwk,
             pretrained_model_file_path=src_params_file_path,
             dtype=np.float32,
             tune_layers="",
+            classes=num_classes,
+            in_channels=in_channels,
             ctx=ctx)
         src_params = src_net._collect_params_with_prefix()
         src_param_keys = list(src_params.keys())
@@ -150,7 +175,9 @@ def prepare_dst_model(dst_fwk,
                       dst_model,
                       src_fwk,
                       ctx,
-                      use_cuda):
+                      use_cuda,
+                      num_classes=None,
+                      in_channels=None):
 
     if dst_fwk == "gluon":
         from gluon.utils import prepare_model as prepare_model_gl
@@ -160,6 +187,8 @@ def prepare_dst_model(dst_fwk,
             pretrained_model_file_path="",
             dtype=np.float32,
             tune_layers="",
+            classes=num_classes,
+            in_channels=in_channels,
             ctx=ctx)
         dst_params = dst_net._collect_params_with_prefix()
         dst_param_keys = list(dst_params.keys())
@@ -373,10 +402,19 @@ def convert_gl2gl(dst_net,
                   dst_param_keys,
                   src_params,
                   src_param_keys,
+                  finetune,
                   ctx):
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-        assert (dst_params[dst_key].shape == src_params[src_key].shape)
-        assert (dst_key.split('.')[-1] == src_key.split('.')[-1])
+        if dst_params[dst_key].shape != src_params[src_key].shape:
+            logging.warning('dst_param.shape != src_param.shape, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.
+                format(src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
+            if finetune:
+                continue
+            else:
+                raise ValueError
+        if dst_key.split('.')[-1] != src_key.split('.')[-1]:
+            logging.warning('dst_key.suff != src_key.suff, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.
+                format(src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
         dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
     dst_net.save_parameters(dst_params_file_path)
 
@@ -728,14 +766,18 @@ def main():
         dst_fwk=args.dst_fwk,
         ctx=ctx,
         use_cuda=use_cuda,
-        remove_module=args.remove_module)
+        remove_module=args.remove_module,
+        num_classes=args.src_num_classes,
+        in_channels=args.src_in_channels)
 
     dst_params, dst_param_keys, dst_net = prepare_dst_model(
         dst_fwk=args.dst_fwk,
         dst_model=args.dst_model,
         src_fwk=args.src_fwk,
         ctx=ctx,
-        use_cuda=use_cuda)
+        use_cuda=use_cuda,
+        num_classes=args.dst_num_classes,
+        in_channels=args.dst_in_channels)
 
     if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]):
         assert (len(src_param_keys) <= len(dst_param_keys))
@@ -750,6 +792,7 @@ def main():
             dst_param_keys=dst_param_keys,
             src_params=src_params,
             src_param_keys=src_param_keys,
+            finetune=((args.src_num_classes != args.dst_num_classes) or (args.src_in_channels != args.dst_in_channels)),
             ctx=ctx)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         convert_pt2pt(

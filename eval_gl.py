@@ -73,6 +73,16 @@ def parse_args():
         type=float,
         default=0.875,
         help='inverted ratio for input image crop. default is 0.875')
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=1000,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=3,
+        help='number of input channels')
 
     parser.add_argument(
         '--num-gpus',
@@ -172,6 +182,8 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
         tune_layers="",
+        classes=args.num_classes,
+        in_channels=args.in_channels,
         ctx=ctx)
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 

@@ -6,7 +6,9 @@ import mxnet as mx
 
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
-from gluon.imagenet1k import add_dataset_parser_arguments, batch_fn, get_val_data_source
+from gluon.imagenet1k import add_dataset_parser_arguments
+from gluon.imagenet1k import get_batch_fn
+from gluon.imagenet1k import get_val_data_source
 
 
 def parse_args():
@@ -166,6 +168,7 @@ def main():
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
+    batch_fn = get_batch_fn(dataset_args=args)
 
     assert (args.use_pretrained or args.resume.strip())
     test(

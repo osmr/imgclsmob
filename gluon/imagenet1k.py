@@ -121,8 +121,7 @@ def get_train_data_rec(rec_train,
         brightness=jitter_param,
         saturation=jitter_param,
         contrast=jitter_param,
-        pca_noise=lighting_param,
-    )
+        pca_noise=lighting_param)
 
 
 def get_val_data_rec(rec_val,
@@ -148,8 +147,7 @@ def get_val_data_rec(rec_val,
         mean_b=mean_rgb[2],
         std_r=std_rgb[0],
         std_g=std_rgb[1],
-        std_b=std_rgb[2],
-    )
+        std_b=std_rgb[2])
 
 
 def get_train_data_loader(data_dir,

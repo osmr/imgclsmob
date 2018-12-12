@@ -58,7 +58,7 @@ class KHPA(Dataset):
                  split_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'split.csv'),
                  generate_split=False,
                  split_ratio=0.1,
-                 num_classes=600,
+                 num_classes=28,
                  train=True,
                  transform=None):
         super(KHPA, self).__init__()

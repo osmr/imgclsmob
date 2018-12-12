@@ -13,8 +13,17 @@ from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
-from gluon.imagenet1k import add_dataset_parser_arguments, batch_fn, get_train_data_source, get_val_data_source,\
-    num_training_samples
+
+from gluon.imagenet1k import add_dataset_parser_arguments as in1k_add_dataset_parser_arguments
+from gluon.imagenet1k import get_batch_fn as in1k_get_batch_fn
+from gluon.imagenet1k import get_train_data_source as in1k_get_train_data_source
+from gluon.imagenet1k import get_val_data_source as in1k_get_val_data_source
+from gluon.imagenet1k import num_training_samples as in1k_num_training_samples
+
+from gluon.khpa import add_dataset_parser_arguments as khpa_add_dataset_parser_arguments
+from gluon.khpa import get_batch_fn as khpa_get_batch_fn
+from gluon.khpa import get_train_data_source as khpa_get_train_data_source
+from gluon.khpa import get_val_data_source as khpa_get_val_data_source
 
 
 def parse_args():
@@ -22,8 +31,14 @@ def parse_args():
         description='Train a model for image classification (Gluon)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    add_dataset_parser_arguments(parser)
+    in1k_add_dataset_parser_arguments(parser)
+    khpa_add_dataset_parser_arguments(parser)
 
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default='imagenet1k',
+        help='name of dataset. options are imagenet1k and khpa')
     parser.add_argument(
         '--model',
         type=str,
@@ -37,7 +52,7 @@ def parse_args():
         '--dtype',
         type=str,
         default='float32',
-        help='data type for training. default is float32')
+        help='data type for training')
     parser.add_argument(
         '--resume',
         type=str,
@@ -53,12 +68,12 @@ def parse_args():
         '--input-size',
         type=int,
         default=224,
-        help='size of the input for model. default is 224')
+        help='size of the input for model')
     parser.add_argument(
         '--resize-inv-factor',
         type=float,
         default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
+        help='inverted ratio for input image crop')
 
     parser.add_argument(
         '--num-gpus',
@@ -108,7 +123,7 @@ def parse_args():
         '--lr',
         type=float,
         default=0.1,
-        help='learning rate. default is 0.1')
+        help='learning rate')
     parser.add_argument(
         '--lr-mode',
         type=str,
@@ -118,7 +133,7 @@ def parse_args():
         '--lr-decay',
         type=float,
         default=0.1,
-        help='decay rate of learning rate. default is 0.1')
+        help='decay rate of learning rate')
     parser.add_argument(
         '--lr-decay-period',
         type=int,
@@ -128,12 +143,12 @@ def parse_args():
         '--lr-decay-epoch',
         type=str,
         default='40,60',
-        help='epoches at which learning rate decays. default is 40,60.')
+        help='epoches at which learning rate decays')
     parser.add_argument(
         '--target-lr',
         type=float,
         default=1e-8,
-        help='ending learning rate; default is 1e-8')
+        help='ending learning rate')
     parser.add_argument(
         '--poly-power',
         type=float,
@@ -148,7 +163,7 @@ def parse_args():
         '--warmup-lr',
         type=float,
         default=1e-8,
-        help='starting warmup learning rate; default is 1e-8')
+        help='starting warmup learning rate')
     parser.add_argument(
         '--warmup-mode',
         type=str,
@@ -158,36 +173,36 @@ def parse_args():
         '--momentum',
         type=float,
         default=0.9,
-        help='momentum value for optimizer; default is 0.9')
+        help='momentum value for optimizer')
     parser.add_argument(
         '--wd',
         type=float,
         default=0.0001,
-        help='weight decay rate. default is 0.0001.')
+        help='weight decay rate')
     parser.add_argument(
         '--gamma-wd-mult',
         type=float,
         default=1.0,
-        help='weight decay multiplier for batchnorm gamma. default is 1.0.')
+        help='weight decay multiplier for batchnorm gamma')
     parser.add_argument(
         '--beta-wd-mult',
         type=float,
         default=1.0,
-        help='weight decay multiplier for batchnorm beta. default is 1.0.')
+        help='weight decay multiplier for batchnorm beta')
     parser.add_argument(
         '--bias-wd-mult',
         type=float,
         default=1.0,
-        help='weight decay multiplier for bias. default is 1.0.')
+        help='weight decay multiplier for bias')
     parser.add_argument(
         '--grad-clip',
         type=float,
         default=None,
-        help='max_norm for gradient clipping.')
+        help='max_norm for gradient clipping')
     parser.add_argument(
         '--label-smoothing',
         action='store_true',
-        help='use label smoothing. default is false.')
+        help='use label smoothing')
 
     parser.add_argument(
         '--mixup',
@@ -555,6 +570,7 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
+    assert args.dataset in ("imagenet1k", "khpa")
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
@@ -582,17 +598,37 @@ def main():
     num_classes = net.classes if hasattr(net, 'classes') else 1000
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
-    train_data = get_train_data_source(
-        dataset_args=args,
-        batch_size=batch_size,
-        num_workers=args.num_workers,
-        input_image_size=input_image_size)
-    val_data = get_val_data_source(
-        dataset_args=args,
-        batch_size=batch_size,
-        num_workers=args.num_workers,
-        input_image_size=input_image_size,
-        resize_inv_factor=args.resize_inv_factor)
+    data_source_needs_reset = False
+    if args.dataset == "imagenet1k":
+        train_data = in1k_get_train_data_source(
+            dataset_args=args,
+            batch_size=batch_size,
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
+        val_data = in1k_get_val_data_source(
+            dataset_args=args,
+            batch_size=batch_size,
+            num_workers=args.num_workers,
+            input_image_size=input_image_size,
+            resize_inv_factor=args.resize_inv_factor)
+        batch_fn = in1k_get_batch_fn(dataset_args=args)
+        num_training_samples = in1k_num_training_samples
+        data_source_needs_reset = args.in1k_use_rec
+    if args.dataset == "khpa":
+        train_data = khpa_get_train_data_source(
+            dataset_args=args,
+            batch_size=batch_size,
+            num_workers=args.num_workers,
+            input_image_size=input_image_size)
+        val_data = khpa_get_val_data_source(
+            dataset_args=args,
+            batch_size=batch_size,
+            num_workers=args.num_workers,
+            input_image_size=input_image_size,
+            resize_inv_factor=args.resize_inv_factor)
+        batch_fn = khpa_get_batch_fn()
+        num_training_samples = len(train_data._dataset)
+        data_source_needs_reset = False
 
     trainer, lr_scheduler = prepare_trainer(
         net=net,
@@ -648,7 +684,7 @@ def main():
         train_data=train_data,
         val_data=val_data,
         batch_fn=batch_fn,
-        data_source_needs_reset=args.use_rec,
+        data_source_needs_reset=data_source_needs_reset,
         dtype=args.dtype,
         net=net,
         trainer=trainer,

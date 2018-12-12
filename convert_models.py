@@ -406,15 +406,17 @@ def convert_gl2gl(dst_net,
                   ctx):
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if dst_params[dst_key].shape != src_params[src_key].shape:
-            logging.warning('dst_param.shape != src_param.shape, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.
-                format(src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
+            logging.warning(
+                'dst_param.shape != src_param.shape, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.format(
+                    src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
             if finetune:
                 continue
             else:
                 raise ValueError
         if dst_key.split('.')[-1] != src_key.split('.')[-1]:
-            logging.warning('dst_key.suff != src_key.suff, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.
-                format(src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
+            logging.warning(
+                'dst_key.suff != src_key.suff, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.format(
+                    src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
         dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
     dst_net.save_parameters(dst_params_file_path)
 

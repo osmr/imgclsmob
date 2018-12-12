@@ -12,42 +12,17 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, get_data_rec, get_data_loader, validate
+from gluon.utils import prepare_mx_context, prepare_model, validate
+from gluon.imagenet1k import add_dataset_parser_arguments, batch_fn, get_train_data_source, get_val_data_source,\
+    num_training_samples
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Train a model for image classification (Gluon)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        default='../imgclsmob_data/imagenet',
-        help='training and validation pictures to use.')
-    parser.add_argument(
-        '--rec-train',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/train.rec',
-        help='the training data')
-    parser.add_argument(
-        '--rec-train-idx',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/train.idx',
-        help='the index of training data')
-    parser.add_argument(
-        '--rec-val',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/val.rec',
-        help='the validation data')
-    parser.add_argument(
-        '--rec-val-idx',
-        type=str,
-        default='../imgclsmob_data/imagenet/rec/val.idx',
-        help='the index of validation data')
-    parser.add_argument(
-        '--use-rec',
-        action='store_true',
-        help='use image record iter for data input. default is false.')
+
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -378,7 +353,7 @@ def train_epoch(epoch,
                 acc_top1_train,
                 train_data,
                 batch_fn,
-                use_rec,
+                data_source_needs_reset,
                 dtype,
                 ctx,
                 loss_func,
@@ -397,7 +372,7 @@ def train_epoch(epoch,
     labels_list_inds = None
     batch_size_extend_count = 0
     tic = time.time()
-    if use_rec:
+    if data_source_needs_reset:
         train_data.reset()
     acc_top1_train.reset()
     train_loss = 0.0
@@ -481,7 +456,7 @@ def train_net(batch_size,
               train_data,
               val_data,
               batch_fn,
-              use_rec,
+              data_source_needs_reset,
               dtype,
               net,
               trainer,
@@ -521,7 +496,7 @@ def train_net(batch_size,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
-            use_rec=use_rec,
+            data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
         logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
@@ -535,7 +510,7 @@ def train_net(batch_size,
             acc_top1_train=acc_top1_train,
             train_data=train_data,
             batch_fn=batch_fn,
-            use_rec=use_rec,
+            data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx,
             loss_func=loss_func,
@@ -557,7 +532,7 @@ def train_net(batch_size,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
-            use_rec=use_rec,
+            data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
 
@@ -607,25 +582,18 @@ def main():
     num_classes = net.classes if hasattr(net, 'classes') else 1000
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
-    if args.use_rec:
-        train_data, val_data, batch_fn = get_data_rec(
-            rec_train=args.rec_train,
-            rec_train_idx=args.rec_train_idx,
-            rec_val=args.rec_val,
-            rec_val_idx=args.rec_val_idx,
-            batch_size=batch_size,
-            num_workers=args.num_workers,
-            input_image_size=input_image_size,
-            resize_inv_factor=args.resize_inv_factor)
-    else:
-        train_data, val_data, batch_fn = get_data_loader(
-            data_dir=args.data_dir,
-            batch_size=batch_size,
-            num_workers=args.num_workers,
-            input_image_size=input_image_size,
-            resize_inv_factor=args.resize_inv_factor)
+    train_data = get_train_data_source(
+        dataset_args=args,
+        batch_size=batch_size,
+        num_workers=args.num_workers,
+        input_image_size=input_image_size)
+    val_data = get_val_data_source(
+        dataset_args=args,
+        batch_size=batch_size,
+        num_workers=args.num_workers,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
-    num_training_samples = 1281167
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -680,7 +648,7 @@ def main():
         train_data=train_data,
         val_data=val_data,
         batch_fn=batch_fn,
-        use_rec=args.use_rec,
+        data_source_needs_reset=args.use_rec,
         dtype=args.dtype,
         net=net,
         trainer=trainer,

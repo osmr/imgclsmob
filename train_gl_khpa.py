@@ -248,12 +248,12 @@ def parse_args():
     parser.add_argument(
         '--num-classes',
         type=int,
-        default=1000,
+        default=28,
         help='number of classes')
     parser.add_argument(
         '--in-channels',
         type=int,
-        default=3,
+        default=4,
         help='number of input channels')
     args = parser.parse_args()
     return args

@@ -13,7 +13,6 @@ import pandas as pd
 import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon.data import Dataset
-from mxnet.gluon.data.vision import transforms
 from imgaug import augmenters as iaa
 from imgaug import parameters as iap
 

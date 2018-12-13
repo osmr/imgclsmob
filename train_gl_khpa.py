@@ -355,7 +355,7 @@ def validate(rmse_calc,
         val_data.reset()
     rmse_calc.reset()
     for batch in val_data:
-        data_list, labels_list = batch_fn(batch, ctx)
+        data_list, labels_list, _ = batch_fn(batch, ctx)
         outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
         rmse_calc.update(labels_list, outputs_list)
     _, rmse_value = rmse_calc.get()
@@ -382,8 +382,6 @@ def train_epoch(epoch,
                 lr_scheduler,
                 batch_size,
                 log_interval,
-                num_classes,
-                num_epochs,
                 grad_clip_value,
                 batch_size_scale):
 
@@ -396,11 +394,12 @@ def train_epoch(epoch,
 
     btic = time.time()
     for i, batch in enumerate(train_data):
-        data_list, labels_list = batch_fn(batch, ctx)
+        data_list, labels_list, weight_list = batch_fn(batch, ctx)
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-            loss_list = [loss_func(yhat, y.astype(dtype, copy=False)) for yhat, y in zip(outputs_list, labels_list)]
+            loss_list = [loss_func(yhat, y.astype(dtype, copy=False), w) for yhat, y, w in
+                         zip(outputs_list, labels_list, weight_list)]
         for loss in loss_list:
             loss.backward()
         lr_scheduler.update(i, epoch)
@@ -463,7 +462,6 @@ def train_net(batch_size,
               lr_scheduler,
               lp_saver,
               log_interval,
-              num_classes,
               grad_clip_value,
               batch_size_scale,
               ctx):
@@ -511,8 +509,6 @@ def train_net(batch_size,
             lr_scheduler=lr_scheduler,
             batch_size=batch_size,
             log_interval=log_interval,
-            num_classes=num_classes,
-            num_epochs=num_epochs,
             grad_clip_value=grad_clip_value,
             batch_size_scale=batch_size_scale)
 
@@ -647,7 +643,6 @@ def main():
         lr_scheduler=lr_scheduler,
         lp_saver=lp_saver,
         log_interval=args.log_interval,
-        num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
         ctx=ctx)

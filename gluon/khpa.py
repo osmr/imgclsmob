@@ -115,6 +115,16 @@ class KHPA(Dataset):
                 columns=['Id', 'Category'],
                 index=False)
 
+        label_counts = np.zeros((num_classes, ), np.int32)
+        for train_file_label in train_file_labels:
+            label_str_list = train_file_label.split()
+            for label_str in label_str_list:
+                label_int = int(label_str)
+                assert (0 <= label_int < num_classes)
+                label_counts[label_int] += 1
+        total_label_count = label_counts.sum()
+        self.label_widths = (1.0 / label_counts) / num_classes * total_label_count
+
         mask = (categories == (1 if train else 2))
         self.train_file_ids = train_file_ids[mask]
         self.train_file_labels = train_file_labels[mask]
@@ -122,6 +132,8 @@ class KHPA(Dataset):
         self.suffices = ("red", "green", "blue", "yellow")
         self.num_classes = num_classes
         self.train = train
+
+
 
     def __str__(self):
         return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
@@ -144,20 +156,22 @@ class KHPA(Dataset):
         if self.train:
             img = self.flip(img)
 
-        labels = self.train_file_labels[idx].split()
+        label_str_list = self.train_file_labels[idx].split()
 
+        weight = 0.0
         label = np.zeros((self.num_classes, ), np.int32)
-        for each_label_str in labels:
+        for each_label_str in label_str_list:
             each_label_int = int(each_label_str)
             assert (0 <= each_label_int < self.num_classes)
             label[each_label_int] = 1
+            weight += self.label_widths[each_label_int]
         label = mx.nd.array(label)
 
         # mx.nd.image.normalize(x, self._mean, self._std)
 
         if self._transform is not None:
             return self._transform(img, label)
-        return img, label
+        return img, label, weight
 
     @staticmethod
     def flip(x):
@@ -184,7 +198,8 @@ def get_batch_fn():
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
         label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-        return data, label
+        weight = gluon.utils.split_and_load(batch[2].astype(np.float32, copy=False), ctx_list=ctx, batch_axis=0)
+        return data, label, weight
     return batch_fn
 
 

@@ -249,6 +249,7 @@ class KHPA(Dataset):
                 img = mx.image.imread(image_file_path, flag=0).asnumpy()
                 imgs += [img]
             imgs = np.concatenate(tuple(imgs), axis=2)
+            print("i={}, imgs.shape={}, imgs.dtype={}".format(i, imgs.shape, imgs.dtype))
             mean_rgby[i] = imgs.mean()
             std_rgby[i] = imgs.std()
         return mean_rgby, std_rgby

@@ -18,32 +18,32 @@ num_training_samples = 1281167
 
 def add_dataset_parser_arguments(parser):
     parser.add_argument(
-        '--in1k-data-dir',
+        '--data-dir',
         type=str,
         default='../imgclsmob_data/imagenet',
         help='path to directory with ImageNet-1K dataset')
     parser.add_argument(
-        '--in1k-rec-train',
+        '--rec-train',
         type=str,
         default='../imgclsmob_data/imagenet/rec/train.rec',
         help='the ImageNet-1K training data')
     parser.add_argument(
-        '--in1k-rec-train-idx',
+        '--rec-train-idx',
         type=str,
         default='../imgclsmob_data/imagenet/rec/train.idx',
         help='the index of ImageNet-1K training data')
     parser.add_argument(
-        '--in1k-rec-val',
+        '--rec-val',
         type=str,
         default='../imgclsmob_data/imagenet/rec/val.rec',
         help='the ImageNet-1K validation data')
     parser.add_argument(
-        '--in1k-rec-val-idx',
+        '--rec-val-idx',
         type=str,
         default='../imgclsmob_data/imagenet/rec/val.idx',
         help='the index of ImageNet-1K validation data')
     parser.add_argument(
-        '--in1k-use-rec',
+        '--use-rec',
         action='store_true',
         help='use image record iter for ImageNet-1K data input')
 
@@ -74,7 +74,7 @@ class ImageNet(ImageFolderDataset):
 
 
 def get_batch_fn(dataset_args):
-    if dataset_args.in1k_use_rec:
+    if dataset_args.use_rec:
         def batch_fn(batch, ctx):
             data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
             label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
@@ -212,7 +212,7 @@ def get_train_data_source(dataset_args,
     jitter_param = 0.4
     lighting_param = 0.1
 
-    if dataset_args.in1k_use_rec:
+    if dataset_args.use_rec:
         if isinstance(input_image_size, int):
             input_image_size = (input_image_size, input_image_size)
         data_shape = (3,) + input_image_size
@@ -220,8 +220,8 @@ def get_train_data_source(dataset_args,
         std_rgb = (58.393, 57.12, 57.375)
 
         return get_train_data_rec(
-            rec_train=dataset_args.in1k_rec_train,
-            rec_train_idx=dataset_args.in1k_rec_train_idx,
+            rec_train=dataset_args.rec_train,
+            rec_train_idx=dataset_args.rec_train_idx,
             batch_size=batch_size,
             num_workers=num_workers,
             data_shape=data_shape,
@@ -234,7 +234,7 @@ def get_train_data_source(dataset_args,
         std_rgb = (0.229, 0.224, 0.225)
 
         return get_train_data_loader(
-            data_dir=dataset_args.in1k_data_dir,
+            data_dir=dataset_args.data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
             input_image_size=input_image_size,
@@ -254,14 +254,14 @@ def get_val_data_source(dataset_args,
         input_image_size = (input_image_size, input_image_size)
     resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
-    if dataset_args.in1k_use_rec:
+    if dataset_args.use_rec:
         data_shape = (3,) + input_image_size
         mean_rgb = (123.68, 116.779, 103.939)
         std_rgb = (58.393, 57.12, 57.375)
 
         return get_val_data_rec(
-            rec_val=dataset_args.in1k_rec_val,
-            rec_val_idx=dataset_args.in1k_rec_val_idx,
+            rec_val=dataset_args.rec_val,
+            rec_val_idx=dataset_args.rec_val_idx,
             batch_size=batch_size,
             num_workers=num_workers,
             data_shape=data_shape,
@@ -273,7 +273,7 @@ def get_val_data_source(dataset_args,
         std_rgb = (0.229, 0.224, 0.225)
 
         return get_val_data_loader(
-            data_dir=dataset_args.in1k_data_dir,
+            data_dir=dataset_args.data_dir,
             batch_size=batch_size,
             num_workers=num_workers,
             input_image_size=input_image_size,

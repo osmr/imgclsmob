@@ -14,16 +14,15 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
 
-from gluon.imagenet1k import add_dataset_parser_arguments
-from gluon.imagenet1k import get_batch_fn
-from gluon.imagenet1k import get_train_data_source
-from gluon.imagenet1k import get_val_data_source
-from gluon.imagenet1k import num_training_samples
+from gluon.khpa import add_dataset_parser_arguments
+from gluon.khpa import get_batch_fn
+from gluon.khpa import get_train_data_source
+from gluon.khpa import get_val_data_source
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Gluon/ImageNet1-K)',
+        description='Train a model for image classification (Gluon/KHPA)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)
@@ -559,6 +558,7 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
+    assert args.dataset in ("imagenet1k", "khpa")
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
@@ -597,8 +597,9 @@ def main():
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_args=args)
-    data_source_needs_reset = args.use_rec
+    batch_fn = get_batch_fn()
+    num_training_samples = len(train_data._dataset)
+    data_source_needs_reset = False
 
     trainer, lr_scheduler = prepare_trainer(
         net=net,

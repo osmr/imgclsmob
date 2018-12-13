@@ -17,21 +17,21 @@ from mxnet.gluon.data.vision import transforms
 
 def add_dataset_parser_arguments(parser):
     parser.add_argument(
-        '--khpa-data-path',
+        '--data-path',
         type=str,
         default='../imgclsmob_data/khpa',
         help='path to KHPA dataset')
     parser.add_argument(
-        '--khpa-split-file',
+        '--split-file',
         type=str,
         default='../imgclsmob_data/khpa/split.csv',
         help='path to file with splitting training subset on training and validation ones')
     parser.add_argument(
-        '--khpa-generate-split',
+        '--generate-split',
         action='store_true',
         help='whether generate split file')
     parser.add_argument(
-        '--khpa-split-ratio',
+        '--split-ratio',
         type=float,
         default=0.1,
         help='fraction of validation subset')
@@ -135,15 +135,20 @@ class KHPA(Dataset):
         for suffix in self.suffices:
             image_file_path = "{}_{}.png".format(image_prefix_path, suffix)
             img = mx.image.imread(image_file_path, flag=0)
-            imgs += img
+            imgs += [img]
 
-        img = np.concatenate(imgs, axis=0)
+        img = mx.nd.concat(*imgs, dim=2)
 
         labels = self.train_file_labels[idx].split()
 
         label = np.zeros((self.num_classes, ), np.int32)
-        for each_label in labels:
-            label[each_label] = 1
+        for each_label_str in labels:
+            each_label_int = int(each_label_str)
+            assert (0 <= each_label_int < self.num_classes)
+            label[each_label_int] = 1
+        label = mx.nd.array(label)
+
+        # mx.nd.image.normalize(x, self._mean, self._std)
 
         if self._transform is not None:
             return self._transform(img, label)
@@ -244,19 +249,19 @@ def get_train_data_source(dataset_args,
     jitter_param = 0.4
     lighting_param = 0.1
 
-    mean_rgb = (0.485, 0.456, 0.406)
-    std_rgb = (0.229, 0.224, 0.225)
+    mean_rgby = (0.485, 0.456, 0.406, 0.406)
+    std_rgby = (0.229, 0.224, 0.225, 0.225)
 
     return get_train_data_loader(
-        data_dir_path=dataset_args.khpa_data_path,
-        split_file_path=dataset_args.khpa_split_file,
-        generate_split=dataset_args.khpa_generate_split,
-        split_ratio=dataset_args.khpa_split_ratio,
+        data_dir_path=dataset_args.data_path,
+        split_file_path=dataset_args.split_file,
+        generate_split=dataset_args.generate_split,
+        split_ratio=dataset_args.split_ratio,
         batch_size=batch_size,
         num_workers=num_workers,
         input_image_size=input_image_size,
-        mean_rgb=mean_rgb,
-        std_rgb=std_rgb,
+        mean_rgb=mean_rgby,
+        std_rgb=std_rgby,
         jitter_param=jitter_param,
         lighting_param=lighting_param)
 
@@ -271,17 +276,17 @@ def get_val_data_source(dataset_args,
         input_image_size = (input_image_size, input_image_size)
     resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
-    mean_rgb = (0.485, 0.456, 0.406)
-    std_rgb = (0.229, 0.224, 0.225)
+    mean_rgby = (0.485, 0.456, 0.406, 0.406)
+    std_rgby = (0.229, 0.224, 0.225, 0.225)
 
     return get_val_data_loader(
-        data_dir_path=dataset_args.khpa_data_path,
-        split_file_path=dataset_args.khpa_split_file,
-        generate_split=dataset_args.khpa_generate_split,
-        split_ratio=dataset_args.khpa_split_ratio,
+        data_dir_path=dataset_args.data_path,
+        split_file_path=dataset_args.split_file,
+        generate_split=dataset_args.generate_split,
+        split_ratio=dataset_args.split_ratio,
         batch_size=batch_size,
         num_workers=num_workers,
         input_image_size=input_image_size,
         resize_value=resize_value,
-        mean_rgb=mean_rgb,
-        std_rgb=std_rgb)
+        mean_rgb=mean_rgby,
+        std_rgb=std_rgby)

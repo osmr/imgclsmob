@@ -6,7 +6,7 @@ __all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_sourc
 
 import os
 import math
-import random
+import json
 import logging
 import numpy as np
 import pandas as pd
@@ -14,6 +14,8 @@ import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon.data import Dataset
 from mxnet.gluon.data.vision import transforms
+from imgaug import augmenters as iaa
+from imgaug import parameters as iap
 
 
 def add_dataset_parser_arguments(parser):
@@ -28,7 +30,7 @@ def add_dataset_parser_arguments(parser):
         default='../imgclsmob_data/khpa/split.csv',
         help='path to file with splitting training subset on training and validation ones')
     parser.add_argument(
-        '--generate-split',
+        '--gen-split',
         action='store_true',
         help='whether generate split file')
     parser.add_argument(
@@ -36,6 +38,15 @@ def add_dataset_parser_arguments(parser):
         type=float,
         default=0.1,
         help='fraction of validation subset')
+    parser.add_argument(
+        '--stats-file',
+        type=str,
+        default='../imgclsmob_data/khpa/stats.json',
+        help='path to file with the dataset statistics')
+    parser.add_argument(
+        '--gen-stats',
+        action='store_true',
+        help='whether generate a file with the dataset statistics')
 
 
 class KHPA(Dataset):
@@ -59,11 +70,13 @@ class KHPA(Dataset):
                  split_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'split.csv'),
                  generate_split=False,
                  split_ratio=0.1,
+                 stats_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'stats.json'),
+                 generate_stats=False,
                  num_classes=28,
-                 train=True,
-                 transform=None):
+                 model_input_image_size=(224, 224),
+                 train=True):
         super(KHPA, self).__init__()
-        self._transform = transform
+        self.suffices = ("red", "green", "blue", "yellow")
 
         root_dir_path = os.path.expanduser(root)
         assert os.path.exists(root_dir_path)
@@ -115,25 +128,45 @@ class KHPA(Dataset):
                 columns=['Id', 'Category'],
                 index=False)
 
-        label_counts = np.zeros((num_classes, ), np.int32)
-        for train_file_label in train_file_labels:
-            label_str_list = train_file_label.split()
-            for label_str in label_str_list:
-                label_int = int(label_str)
-                assert (0 <= label_int < num_classes)
-                label_counts[label_int] += 1
-        total_label_count = label_counts.sum()
-        self.label_widths = (1.0 / label_counts) / num_classes * total_label_count
+        if os.path.exists(stats_file_path):
+            if generate_stats:
+                logging.info('Stats file already exists: {}'.format(stats_file_path))
+
+            with open(stats_file_path, 'r') as f:
+                stats_dict = json.load(f)
+
+            mean_rgby = np.array(stats_dict["mean_rgby"], np.float32)
+            std_rgby = np.array(stats_dict["std_rgby"], np.float32)
+            label_counts = np.array(stats_dict["label_counts"], np.int32)
+        else:
+            if not generate_split:
+                raise Exception("Stats file doesn't exist: {}".format(stats_file_path))
+
+            label_counts = self.calc_label_counts(train_file_labels, num_classes)
+            mean_rgby, std_rgby = self.calc_image_widths(train_file_ids, self.suffices, images_dir_path)
+            stats_dict = {
+                "mean_rgby": [float(x) for x in mean_rgby],
+                "std_rgby": [float(x) for x in std_rgby],
+                "label_counts": [int(x) for x in label_counts],
+            }
+            with open(stats_file_path, 'w') as f:
+                json.dump(stats_dict, f)
+
+        self.label_widths = self.calc_label_widths(label_counts, num_classes)
+
+        self.mean_rgby = mean_rgby
+        self.std_rgby = std_rgby
 
         mask = (categories == (1 if train else 2))
         self.train_file_ids = train_file_ids[mask]
         self.train_file_labels = train_file_labels[mask]
         self.images_dir_path = images_dir_path
-        self.suffices = ("red", "green", "blue", "yellow")
         self.num_classes = num_classes
         self.train = train
 
-
+        self._transform = KHPATrainTransform(mean=self.mean_rgby, std=self.std_rgby,
+                                             crop_image_size=model_input_image_size) if train else \
+            KHPAValTransform(mean=self.mean_rgby, std=self.std_rgby)
 
     def __str__(self):
         return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
@@ -153,11 +186,7 @@ class KHPA(Dataset):
 
         img = mx.nd.concat(*imgs, dim=2)
 
-        if self.train:
-            img = self.flip(img)
-
         label_str_list = self.train_file_labels[idx].split()
-
         weight = 0.0
         label = np.zeros((self.num_classes, ), np.int32)
         for each_label_str in label_str_list:
@@ -167,19 +196,9 @@ class KHPA(Dataset):
             weight += self.label_widths[each_label_int]
         label = mx.nd.array(label)
 
-        # mx.nd.image.normalize(x, self._mean, self._std)
-
         if self._transform is not None:
             return self._transform(img, label)
         return img, label, weight
-
-    @staticmethod
-    def flip(x):
-        if bool(random.getrandbits(1)):
-            x = mx.nd.flip(x, axis=0)
-        if bool(random.getrandbits(1)):
-            x = mx.nd.flip(x, axis=1)
-        return x
 
     @staticmethod
     def create_slice_category_list(count, slice_fraction):
@@ -192,6 +211,181 @@ class KHPA(Dataset):
         category_list = np.ones((count,), np.uint8)
         category_list[sliced2_index_array] = 2
         return category_list
+
+    @staticmethod
+    def calc_label_counts(train_file_labels, num_classes):
+        label_counts = np.zeros((num_classes, ), np.int32)
+        for train_file_label in train_file_labels:
+            label_str_list = train_file_label.split()
+            for label_str in label_str_list:
+                label_int = int(label_str)
+                assert (0 <= label_int < num_classes)
+                label_counts[label_int] += 1
+        return label_counts
+
+    @staticmethod
+    def calc_label_widths(label_counts, num_classes):
+        total_label_count = label_counts.sum()
+        label_widths = (1.0 / label_counts) / num_classes * total_label_count
+        return label_widths
+
+    @staticmethod
+    def calc_image_widths(train_file_ids, suffices, images_dir_path):
+        mean_rgby = np.zeros((len(suffices),), np.float32)
+        std_rgby = np.zeros((len(suffices),), np.float32)
+        for i, suffix in enumerate(suffices):
+            imgs = []
+            for image_prefix in train_file_ids:
+                image_prefix_path = os.path.join(images_dir_path, image_prefix)
+                image_file_path = "{}_{}.png".format(image_prefix_path, suffix)
+                img = mx.image.imread(image_file_path, flag=0).asnumpy()
+                imgs += [img]
+                if len(imgs) > 10:
+                    break
+            imgs = np.concatenate(tuple(imgs), axis=2)
+            mean_rgby[i] = imgs.mean()
+            std_rgby[i] = imgs.std()
+        return mean_rgby, std_rgby
+
+
+class KHPATrainTransform(object):
+    def __init__(self,
+                 mean=(0.0, 0.0, 0.0, 0.0),
+                 std=(1.0, 1.0, 1.0, 1.0),
+                 crop_image_size=(224, 224)):
+        if isinstance(crop_image_size, int):
+            crop_image_size = (crop_image_size, crop_image_size)
+        self._mean = mean
+        self._std = std
+        self.crop_image_size = crop_image_size
+
+        self.seq = iaa.Sequential(
+            children=[
+                iaa.Sequential(
+                    children=[
+                        iaa.Fliplr(
+                            p=0.5,
+                            name="Fliplr"),
+                        iaa.Flipud(
+                            p=0.5,
+                            name="Flipud"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Affine(
+                                    scale={"x": (0.9, 1.1), "y": (0.9, 1.1)},
+                                    translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
+                                    rotate=(-45, 45),
+                                    shear=(-16, 16),
+                                    order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
+                                    mode="reflect",
+                                    name="Affine"),
+                                iaa.Sometimes(
+                                    p=0.01,
+                                    then_list=iaa.PiecewiseAffine(
+                                        scale=(0.0, 0.01),
+                                        nb_rows=(4, 20),
+                                        nb_cols=(4, 20),
+                                        order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
+                                        mode="reflect",
+                                        name="PiecewiseAffine"))],
+                            random_order=True,
+                            name="GeomTransform"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.75,
+                                    then_list=iaa.Add(
+                                        value=(-10, 10),
+                                        per_channel=0.5,
+                                        name="Brightness")),
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.Emboss(
+                                        alpha=(0.0, 0.5),
+                                        strength=(0.5, 1.2),
+                                        name="Emboss")),
+                                iaa.Sometimes(
+                                    p=0.1,
+                                    then_list=iaa.Sharpen(
+                                        alpha=(0.0, 0.5),
+                                        lightness=(0.5, 1.2),
+                                        name="Sharpen")),
+                                iaa.Sometimes(
+                                    p=0.25,
+                                    then_list=iaa.ContrastNormalization(
+                                        alpha=(0.5, 1.5),
+                                        per_channel=0.5,
+                                        name="ContrastNormalization"))
+                            ],
+                            random_order=True,
+                            name="ColorTransform"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.5,
+                                    then_list=iaa.AdditiveGaussianNoise(
+                                        loc=0,
+                                        scale=(0.0, 10.0),
+                                        per_channel=0.5,
+                                        name="AdditiveGaussianNoise")),
+                                iaa.Sometimes(
+                                    p=0.1,
+                                    then_list=iaa.SaltAndPepper(
+                                        p=(0, 0.001),
+                                        per_channel=0.5,
+                                        name="SaltAndPepper"))],
+                            random_order=True,
+                            name="Noise"),
+                        iaa.OneOf(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.MedianBlur(
+                                        k=3,
+                                        name="MedianBlur")),
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.AverageBlur(
+                                        k=(2, 4),
+                                        name="AverageBlur")),
+                                iaa.Sometimes(
+                                    p=0.5,
+                                    then_list=iaa.GaussianBlur(
+                                        sigma=(0.0, 2.0),
+                                        name="GaussianBlur"))],
+                            name="Blur"),
+                    ],
+                    random_order=True,
+                    name="MainProcess")])
+
+    def __call__(self, img, label):
+
+        seq_det = self.seq.to_deterministic()
+        imgs_aug = seq_det.augment_images(img.asnumpy().transpose((2, 0, 1)))
+        img_np = imgs_aug.transpose((1, 2, 0))
+        img_np = img_np.astype(np.float32) / 255.0
+        img_np = (img_np - self._mean) / self._std
+        img = mx.nd.array(img_np, ctx=img.context)
+        img = mx.image.random_size_crop(
+            img,
+            size=self.crop_image_size,
+            area=(0.08, 1.0),
+            ratio=(3.0 / 4.0, 4.0 / 3.0),
+            interp=1)[0]
+        return img, label
+
+
+class KHPAValTransform(object):
+    def __init__(self,
+                 mean=(0.0, 0.0, 0.0, 0.0),
+                 std=(1.0, 1.0, 1.0, 1.0)):
+        self._mean = mean
+        self._std = std
+
+    def __call__(self, img, label):
+        img = mx.nd.image.to_tensor(img)
+        img = (img - mx.nd.array(self._mean, ctx=img.context)) / mx.nd.array(self._std, ctx=img.context)
+        return img, label
 
 
 def get_batch_fn():
@@ -207,33 +401,21 @@ def get_train_data_loader(data_dir_path,
                           split_file_path,
                           generate_split,
                           split_ratio,
+                          stats_file_path,
+                          generate_stats,
                           batch_size,
                           num_workers,
-                          input_image_size,
-                          mean_rgb,
-                          std_rgb,
-                          jitter_param,
-                          lighting_param):
-    transform_train = transforms.Compose([
-        transforms.RandomResizedCrop(input_image_size),
-        # transforms.RandomFlipLeftRight(),
-        # transforms.RandomColorJitter(
-        #     brightness=jitter_param,
-        #     contrast=jitter_param,
-        #     saturation=jitter_param),
-        # transforms.RandomLighting(lighting_param),
-        transforms.ToTensor(),
-        # transforms.Normalize(
-        #     mean=mean_rgb,
-        #     std=std_rgb)
-    ])
+                          model_input_image_size):
     return gluon.data.DataLoader(
         dataset=KHPA(
             root=data_dir_path,
             split_file_path=split_file_path,
             generate_split=generate_split,
             split_ratio=split_ratio,
-            train=True).transform_first(fn=transform_train),
+            stats_file_path=stats_file_path,
+            generate_stats=generate_stats,
+            model_input_image_size=model_input_image_size,
+            train=True),
         batch_size=batch_size,
         shuffle=True,
         last_batch='discard',
@@ -244,15 +426,17 @@ def get_val_data_loader(data_dir_path,
                         split_file_path,
                         generate_split,
                         split_ratio,
+                        stats_file_path,
+                        generate_stats,
                         batch_size,
                         num_workers,
-                        input_image_size,
+                        model_input_image_size,
                         resize_value,
                         mean_rgb,
                         std_rgb):
     transform_test = transforms.Compose([
         transforms.Resize(resize_value, keep_ratio=True),
-        transforms.CenterCrop(input_image_size),
+        transforms.CenterCrop(model_input_image_size),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=mean_rgb,
@@ -264,6 +448,9 @@ def get_val_data_loader(data_dir_path,
             split_file_path=split_file_path,
             generate_split=generate_split,
             split_ratio=split_ratio,
+            stats_file_path=stats_file_path,
+            generate_stats=generate_stats,
+            model_input_image_size=model_input_image_size,
             train=False).transform_first(fn=transform_test),
         batch_size=batch_size,
         shuffle=False,
@@ -274,24 +461,16 @@ def get_train_data_source(dataset_args,
                           batch_size,
                           num_workers,
                           input_image_size=(224, 224)):
-    jitter_param = 0.4
-    lighting_param = 0.1
-
-    mean_rgby = (0.485, 0.456, 0.406, 0.406)
-    std_rgby = (0.229, 0.224, 0.225, 0.225)
-
     return get_train_data_loader(
         data_dir_path=dataset_args.data_path,
         split_file_path=dataset_args.split_file,
-        generate_split=dataset_args.generate_split,
+        generate_split=dataset_args.gen_split,
         split_ratio=dataset_args.split_ratio,
+        stats_file_path=dataset_args.stats_file,
+        generate_stats=dataset_args.gen_stats,
         batch_size=batch_size,
         num_workers=num_workers,
-        input_image_size=input_image_size,
-        mean_rgb=mean_rgby,
-        std_rgb=std_rgby,
-        jitter_param=jitter_param,
-        lighting_param=lighting_param)
+        model_input_image_size=input_image_size)
 
 
 def get_val_data_source(dataset_args,
@@ -310,8 +489,10 @@ def get_val_data_source(dataset_args,
     return get_val_data_loader(
         data_dir_path=dataset_args.data_path,
         split_file_path=dataset_args.split_file,
-        generate_split=dataset_args.generate_split,
+        generate_split=dataset_args.gen_split,
         split_ratio=dataset_args.split_ratio,
+        stats_file_path=dataset_args.stats_file,
+        generate_stats=dataset_args.gen_stats,
         batch_size=batch_size,
         num_workers=num_workers,
         input_image_size=input_image_size,

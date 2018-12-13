@@ -564,7 +564,7 @@ def main():
 
     assert (hasattr(net, 'classes'))
     assert (hasattr(net, 'in_size'))
-    num_classes = net.classes if hasattr(net, 'classes') else 1000
+    # num_classes = net.classes if hasattr(net, 'classes') else 1000
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     train_data = get_train_data_source(

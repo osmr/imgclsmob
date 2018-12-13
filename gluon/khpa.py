@@ -166,7 +166,7 @@ class KHPA(Dataset):
 
         self._transform = KHPATrainTransform(mean=self.mean_rgby, std=self.std_rgby,
                                              crop_image_size=model_input_image_size) if train else \
-            KHPAValTransform(mean=self.mean_rgby, std=self.std_rgby)
+            KHPAValTransform(mean=self.mean_rgby, std=self.std_rgby, crop_image_size=model_input_image_size)
 
     def __str__(self):
         return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
@@ -197,7 +197,7 @@ class KHPA(Dataset):
         label = mx.nd.array(label)
 
         if self._transform is not None:
-            return self._transform(img, label)
+            img, label = self._transform(img, label)
         return img, label, weight
 
     @staticmethod
@@ -378,9 +378,13 @@ class KHPATrainTransform(object):
 class KHPAValTransform(object):
     def __init__(self,
                  mean=(0.0, 0.0, 0.0, 0.0),
-                 std=(1.0, 1.0, 1.0, 1.0)):
+                 std=(1.0, 1.0, 1.0, 1.0),
+                 crop_image_size=(224, 224)):
+        if isinstance(crop_image_size, int):
+            crop_image_size = (crop_image_size, crop_image_size)
         self._mean = mean
         self._std = std
+        self.crop_image_size = crop_image_size
 
     def __call__(self, img, label):
         img = mx.nd.image.to_tensor(img)
@@ -431,16 +435,10 @@ def get_val_data_loader(data_dir_path,
                         batch_size,
                         num_workers,
                         model_input_image_size,
-                        resize_value,
-                        mean_rgb,
-                        std_rgb):
+                        resize_value):
     transform_test = transforms.Compose([
         transforms.Resize(resize_value, keep_ratio=True),
         transforms.CenterCrop(model_input_image_size),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=mean_rgb,
-            std=std_rgb)
     ])
     return gluon.data.DataLoader(
         dataset=KHPA(
@@ -483,9 +481,6 @@ def get_val_data_source(dataset_args,
         input_image_size = (input_image_size, input_image_size)
     resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
-    mean_rgby = (0.485, 0.456, 0.406, 0.406)
-    std_rgby = (0.229, 0.224, 0.225, 0.225)
-
     return get_val_data_loader(
         data_dir_path=dataset_args.data_path,
         split_file_path=dataset_args.split_file,
@@ -495,7 +490,5 @@ def get_val_data_source(dataset_args,
         generate_stats=dataset_args.gen_stats,
         batch_size=batch_size,
         num_workers=num_workers,
-        input_image_size=input_image_size,
-        resize_value=resize_value,
-        mean_rgb=mean_rgby,
-        std_rgb=std_rgby)
+        model_input_image_size=input_image_size,
+        resize_value=resize_value)

@@ -6,14 +6,15 @@ import mxnet as mx
 
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
-from gluon.imagenet1k import add_dataset_parser_arguments
-from gluon.imagenet1k import get_batch_fn
-from gluon.imagenet1k import get_val_data_source
+from gluon.khpa import add_dataset_parser_arguments
+from gluon.khpa import get_batch_fn
+from gluon.khpa import get_val_data_source
+from gluon.khpa import validate
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Gluon/ImageNet-1K)',
+        description='Evaluate a model for image classification (Gluon/KHPA)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)
@@ -111,13 +112,11 @@ def test(net,
          ctx,
          calc_weight_count=False,
          extended_log=False):
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
+    rmse_calc = mx.metric.RMSE()
 
     tic = time.time()
-    err_top1_val, err_top5_val = validate(
-        acc_top1=acc_top1,
-        acc_top5=acc_top5,
+    rmse_val_value = validate(
+        rmse_calc=rmse_calc,
         net=net,
         val_data=val_data,
         batch_fn=batch_fn,
@@ -128,11 +127,11 @@ def test(net,
         weight_count = calc_net_weight_count(net)
         logging.info('Model: {} trainable parameters'.format(weight_count))
     if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-            top1=err_top1_val, top5=err_top5_val))
+        logging.info('Test: rmse={rmse:.4f} ({rmse})'.format(
+            rmse=rmse_val_value))
     else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-            top1=err_top1_val, top5=err_top5_val))
+        logging.info('Test: rmse={rmse:.4f}'.format(
+            rmse=rmse_val_value))
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
@@ -168,7 +167,7 @@ def main():
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_args=args)
+    batch_fn = get_batch_fn()
 
     assert (args.use_pretrained or args.resume.strip())
     test(

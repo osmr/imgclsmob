@@ -2,7 +2,7 @@
     KHPA dataset routines.
 """
 
-__all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_source', 'get_val_data_source']
+__all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_source', 'get_val_data_source', 'validate']
 
 import os
 import math
@@ -73,6 +73,7 @@ class KHPA(Dataset):
                  stats_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'stats.json'),
                  generate_stats=False,
                  num_classes=28,
+                 preproc_resize_image_size=(256, 256),
                  model_input_image_size=(224, 224),
                  train=True):
         super(KHPA, self).__init__()
@@ -164,9 +165,17 @@ class KHPA(Dataset):
         self.num_classes = num_classes
         self.train = train
 
-        self._transform = KHPATrainTransform(mean=self.mean_rgby, std=self.std_rgby,
-                                             crop_image_size=model_input_image_size) if train else \
-            KHPAValTransform(mean=self.mean_rgby, std=self.std_rgby, crop_image_size=model_input_image_size)
+        if train:
+            self._transform = KHPATrainTransform(
+                mean=self.mean_rgby,
+                std=self.std_rgby,
+                crop_image_size=model_input_image_size)
+        else:
+            self._transform = KHPAValTransform(
+                mean=self.mean_rgby,
+                std=self.std_rgby,
+                resize_image_size=preproc_resize_image_size,
+                crop_image_size=model_input_image_size)
 
     def __str__(self):
         return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
@@ -240,8 +249,6 @@ class KHPA(Dataset):
                 image_file_path = "{}_{}.png".format(image_prefix_path, suffix)
                 img = mx.image.imread(image_file_path, flag=0).asnumpy()
                 imgs += [img]
-                if len(imgs) > 10:
-                    break
             imgs = np.concatenate(tuple(imgs), axis=2)
             mean_rgby[i] = imgs.mean()
             std_rgby[i] = imgs.std()
@@ -363,11 +370,11 @@ class KHPATrainTransform(object):
         seq_det = self.seq.to_deterministic()
         imgs_aug = seq_det.augment_images(img.asnumpy().transpose((2, 0, 1)))
         img_np = imgs_aug.transpose((1, 2, 0))
-        img_np = img_np.astype(np.float32) / 255.0
+        img_np = img_np.astype(np.float32)
         img_np = (img_np - self._mean) / self._std
         img = mx.nd.array(img_np, ctx=img.context)
         img = mx.image.random_size_crop(
-            img,
+            src=img,
             size=self.crop_image_size,
             area=(0.08, 1.0),
             ratio=(3.0 / 4.0, 4.0 / 3.0),
@@ -380,16 +387,35 @@ class KHPAValTransform(object):
     def __init__(self,
                  mean=(0.0, 0.0, 0.0, 0.0),
                  std=(1.0, 1.0, 1.0, 1.0),
+                 resize_image_size=(256, 256),
                  crop_image_size=(224, 224)):
         if isinstance(crop_image_size, int):
             crop_image_size = (crop_image_size, crop_image_size)
         self._mean = mean
         self._std = std
+        self.resize_image_size = resize_image_size
         self.crop_image_size = crop_image_size
 
     def __call__(self, img, label):
-        img = mx.nd.image.to_tensor(img)
+        h, w, _ = img.shape
+        if h > w:
+            wsize = self.resize_image_size
+            hsize = int(h * wsize / w)
+        else:
+            hsize = self.resize_image_size
+            wsize = int(w * hsize / h)
+        img = mx.image.imresize(
+            src=img,
+            w=wsize,
+            h=hsize,
+            interp=1)
+        img = mx.image.center_crop(
+            src=img,
+            size=self.crop_image_size,
+            interp=1)[0]
+        img = img.astype(np.float32)
         img = (img - mx.nd.array(self._mean, ctx=img.context)) / mx.nd.array(self._std, ctx=img.context)
+        img = img.transpose((2, 0, 1))
         return img, label
 
 
@@ -436,11 +462,7 @@ def get_val_data_loader(data_dir_path,
                         batch_size,
                         num_workers,
                         model_input_image_size,
-                        resize_value):
-    transform_test = transforms.Compose([
-        transforms.Resize(resize_value, keep_ratio=True),
-        transforms.CenterCrop(model_input_image_size),
-    ])
+                        preproc_resize_image_size):
     return gluon.data.DataLoader(
         dataset=KHPA(
             root=data_dir_path,
@@ -449,8 +471,9 @@ def get_val_data_loader(data_dir_path,
             split_ratio=split_ratio,
             stats_file_path=stats_file_path,
             generate_stats=generate_stats,
+            preproc_resize_image_size=preproc_resize_image_size,
             model_input_image_size=model_input_image_size,
-            train=False).transform_first(fn=transform_test),
+            train=False),
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers)
@@ -492,4 +515,22 @@ def get_val_data_source(dataset_args,
         batch_size=batch_size,
         num_workers=num_workers,
         model_input_image_size=input_image_size,
-        resize_value=resize_value)
+        preproc_resize_image_size=resize_value)
+
+
+def validate(rmse_calc,
+             net,
+             val_data,
+             batch_fn,
+             data_source_needs_reset,
+             dtype,
+             ctx):
+    if data_source_needs_reset:
+        val_data.reset()
+    rmse_calc.reset()
+    for batch in val_data:
+        data_list, labels_list, _ = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        rmse_calc.update(labels_list, outputs_list)
+    _, rmse_value = rmse_calc.get()
+    return rmse_value

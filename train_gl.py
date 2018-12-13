@@ -23,7 +23,7 @@ from gluon.imagenet1k import num_training_samples
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Gluon/ImageNet1-K)',
+        description='Train a model for image classification (Gluon/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)

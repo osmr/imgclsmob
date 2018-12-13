@@ -18,6 +18,7 @@ from gluon.khpa import add_dataset_parser_arguments
 from gluon.khpa import get_batch_fn
 from gluon.khpa import get_train_data_source
 from gluon.khpa import get_val_data_source
+from gluon.khpa import validate
 
 
 def parse_args():
@@ -344,24 +345,6 @@ def prepare_trainer(net,
     return trainer, lr_scheduler
 
 
-def validate(rmse_calc,
-             net,
-             val_data,
-             batch_fn,
-             data_source_needs_reset,
-             dtype,
-             ctx):
-    if data_source_needs_reset:
-        val_data.reset()
-    rmse_calc.reset()
-    for batch in val_data:
-        data_list, labels_list, _ = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        rmse_calc.update(labels_list, outputs_list)
-    _, rmse_value = rmse_calc.get()
-    return rmse_value
-
-
 def save_params(file_stem,
                 net,
                 trainer):
@@ -482,7 +465,7 @@ def train_net(batch_size,
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch1))
-        err_top1_val, err_top5_val = validate(
+        rmse_val_value = validate(
             rmse_calc=rmse_val_calc,
             net=net,
             val_data=val_data,
@@ -490,8 +473,8 @@ def train_net(batch_size,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
-            start_epoch1 - 1, err_top1_val, err_top5_val))
+        logging.info('[Epoch {}] validation: rmse={:.4f}'.format(
+            start_epoch1 - 1, rmse_val_value))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):

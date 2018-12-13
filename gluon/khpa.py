@@ -372,6 +372,7 @@ class KHPATrainTransform(object):
             area=(0.08, 1.0),
             ratio=(3.0 / 4.0, 4.0 / 3.0),
             interp=1)[0]
+        img = img.transpose((2, 0, 1))
         return img, label
 
 

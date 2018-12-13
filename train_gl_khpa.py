@@ -12,7 +12,7 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, validate
+from gluon.utils import prepare_mx_context, prepare_model
 
 from gluon.khpa import add_dataset_parser_arguments
 from gluon.khpa import get_batch_fn
@@ -344,6 +344,24 @@ def prepare_trainer(net,
     return trainer, lr_scheduler
 
 
+def validate(rmse_calc,
+             net,
+             val_data,
+             batch_fn,
+             data_source_needs_reset,
+             dtype,
+             ctx):
+    if data_source_needs_reset:
+        val_data.reset()
+    rmse_calc.reset()
+    for batch in val_data:
+        data_list, labels_list = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        rmse_calc.update(labels_list, outputs_list)
+    _, rmse_value = rmse_calc.get()
+    return rmse_value
+
+
 def save_params(file_stem,
                 net,
                 trainer):
@@ -353,7 +371,7 @@ def save_params(file_stem,
 
 def train_epoch(epoch,
                 net,
-                acc_top1_train,
+                rmse_train_calc,
                 train_data,
                 batch_fn,
                 data_source_needs_reset,
@@ -364,40 +382,21 @@ def train_epoch(epoch,
                 lr_scheduler,
                 batch_size,
                 log_interval,
-                mixup,
-                mixup_epoch_tail,
-                label_smoothing,
                 num_classes,
                 num_epochs,
                 grad_clip_value,
                 batch_size_scale):
 
-    labels_list_inds = None
     batch_size_extend_count = 0
     tic = time.time()
     if data_source_needs_reset:
         train_data.reset()
-    acc_top1_train.reset()
+    rmse_train_calc.reset()
     train_loss = 0.0
 
     btic = time.time()
     for i, batch in enumerate(train_data):
         data_list, labels_list = batch_fn(batch, ctx)
-
-        if mixup:
-            labels_list_inds = labels_list
-            labels_list = [Y.one_hot(depth=num_classes) for Y in labels_list]
-            if epoch < num_epochs - mixup_epoch_tail:
-                alpha = 1
-                lam = np.random.beta(alpha, alpha)
-                data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
-                labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
-        elif label_smoothing:
-            eta = 0.1
-            on_value = 1 - eta + eta / num_classes
-            off_value = eta / num_classes
-            labels_list_inds = labels_list
-            labels_list = [Y.one_hot(depth=num_classes, on_value=on_value, off_value=off_value) for Y in labels_list]
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
@@ -423,17 +422,16 @@ def train_epoch(epoch,
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
-        acc_top1_train.update(
-            labels=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
+        rmse_train_calc.update(
+            labels=labels_list,
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             btic = time.time()
-            _, top1 = acc_top1_train.get()
-            err_top1_train = 1.0 - top1
-            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.5f}'.format(
-                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+            _, rmse_train_value = rmse_train_calc.get()
+            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\trmse={:.4f}\tlr={:.5f}'.format(
+                epoch + 1, i, speed, rmse_train_value, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -445,12 +443,11 @@ def train_epoch(epoch,
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
-    _, top1 = acc_top1_train.get()
-    err_top1_train = 1.0 - top1
-    logging.info('[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}'.format(
-        epoch + 1, err_top1_train, train_loss))
+    _, rmse_train_value = rmse_train_calc.get()
+    logging.info('[Epoch {}] training: rmse={:.4f}\tloss={:.4f}'.format(
+        epoch + 1, rmse_train_value, train_loss))
 
-    return err_top1_train, train_loss
+    return rmse_train_value, train_loss
 
 
 def train_net(batch_size,
@@ -466,15 +463,10 @@ def train_net(batch_size,
               lr_scheduler,
               lp_saver,
               log_interval,
-              mixup,
-              mixup_epoch_tail,
-              label_smoothing,
               num_classes,
               grad_clip_value,
               batch_size_scale,
               ctx):
-
-    assert (not (mixup and label_smoothing))
 
     if batch_size_scale != 1:
         for p in net.collect_params().values():
@@ -483,19 +475,17 @@ def train_net(batch_size,
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    acc_top1_val = mx.metric.Accuracy()
-    acc_top5_val = mx.metric.TopKAccuracy(5)
-    acc_top1_train = mx.metric.Accuracy()
+    rmse_val_calc = mx.metric.RMSE()
+    rmse_train_calc = mx.metric.RMSE()
 
-    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
+    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=False)
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch1))
         err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1_val,
-            acc_top5=acc_top5_val,
+            rmse_calc=rmse_val_calc,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -507,10 +497,10 @@ def train_net(batch_size,
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        err_top1_train, train_loss = train_epoch(
+        rmse_train_value, train_loss = train_epoch(
             epoch=epoch,
             net=net,
-            acc_top1_train=acc_top1_train,
+            rmse_train_calc=rmse_train_calc,
             train_data=train_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
@@ -521,17 +511,13 @@ def train_net(batch_size,
             lr_scheduler=lr_scheduler,
             batch_size=batch_size,
             log_interval=log_interval,
-            mixup=mixup,
-            mixup_epoch_tail=mixup_epoch_tail,
-            label_smoothing=label_smoothing,
             num_classes=num_classes,
             num_epochs=num_epochs,
             grad_clip_value=grad_clip_value,
             batch_size_scale=batch_size_scale)
 
-        err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1_val,
-            acc_top5=acc_top5_val,
+        rmse_val_value = validate(
+            rmse_calc=rmse_val_calc,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -539,14 +525,14 @@ def train_net(batch_size,
             dtype=dtype,
             ctx=ctx)
 
-        logging.info('[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}'.format(
-            epoch + 1, err_top1_val, err_top5_val))
+        logging.info('[Epoch {}] validation: rmse={:.4f}'.format(
+            epoch + 1, rmse_val_value))
 
         if lp_saver is not None:
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, err_top1_train, err_top5_val, train_loss, trainer.learning_rate],
+                params=[-rmse_val_value, -rmse_train_value, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
@@ -558,7 +544,6 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
-    assert args.dataset in ("imagenet1k", "khpa")
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
@@ -638,8 +623,8 @@ def main():
             checkpoint_file_exts=('.params', '.states'),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
-            acc_ind=2,
+            param_names=['Val.RMSE', 'Train.RMSE', 'Train.Loss', 'LR'],
+            acc_ind=0,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, 'score.log'),
@@ -662,9 +647,6 @@ def main():
         lr_scheduler=lr_scheduler,
         lp_saver=lp_saver,
         log_interval=args.log_interval,
-        mixup=args.mixup,
-        mixup_epoch_tail=args.mixup_epoch_tail,
-        label_smoothing=args.label_smoothing,
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,

@@ -6,6 +6,7 @@ __all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_sourc
 
 import os
 import math
+import random
 import logging
 import numpy as np
 import pandas as pd
@@ -120,6 +121,7 @@ class KHPA(Dataset):
         self.images_dir_path = images_dir_path
         self.suffices = ("red", "green", "blue", "yellow")
         self.num_classes = num_classes
+        self.train = train
 
     def __str__(self):
         return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
@@ -139,6 +141,9 @@ class KHPA(Dataset):
 
         img = mx.nd.concat(*imgs, dim=2)
 
+        if self.train:
+            img = self.flip(img)
+
         labels = self.train_file_labels[idx].split()
 
         label = np.zeros((self.num_classes, ), np.int32)
@@ -153,6 +158,14 @@ class KHPA(Dataset):
         if self._transform is not None:
             return self._transform(img, label)
         return img, label
+
+    @staticmethod
+    def flip(x):
+        if bool(random.getrandbits(1)):
+            x = mx.nd.flip(x, axis=0)
+        if bool(random.getrandbits(1)):
+            x = mx.nd.flip(x, axis=1)
+        return x
 
     @staticmethod
     def create_slice_category_list(count, slice_fraction):
@@ -188,16 +201,16 @@ def get_train_data_loader(data_dir_path,
                           lighting_param):
     transform_train = transforms.Compose([
         transforms.RandomResizedCrop(input_image_size),
-        transforms.RandomFlipLeftRight(),
-        transforms.RandomColorJitter(
-            brightness=jitter_param,
-            contrast=jitter_param,
-            saturation=jitter_param),
-        transforms.RandomLighting(lighting_param),
+        # transforms.RandomFlipLeftRight(),
+        # transforms.RandomColorJitter(
+        #     brightness=jitter_param,
+        #     contrast=jitter_param,
+        #     saturation=jitter_param),
+        # transforms.RandomLighting(lighting_param),
         transforms.ToTensor(),
-        transforms.Normalize(
-            mean=mean_rgb,
-            std=std_rgb)
+        # transforms.Normalize(
+        #     mean=mean_rgb,
+        #     std=std_rgb)
     ])
     return gluon.data.DataLoader(
         dataset=KHPA(

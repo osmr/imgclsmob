@@ -5,7 +5,7 @@ import logging
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
+from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.khpa import add_dataset_parser_arguments
 from gluon.khpa import get_batch_fn
 from gluon.khpa import get_val_data_source

@@ -239,19 +239,25 @@ class KHPA(Dataset):
 
     @staticmethod
     def calc_image_widths(train_file_ids, suffices, images_dir_path):
+        logging.info("Calculating image widths...")
         mean_rgby = np.zeros((len(suffices),), np.float32)
         std_rgby = np.zeros((len(suffices),), np.float32)
         for i, suffix in enumerate(suffices):
+            logging.info("Processing suffix: {}".format(suffix))
             imgs = []
             for image_prefix in train_file_ids:
                 image_prefix_path = os.path.join(images_dir_path, image_prefix)
                 image_file_path = "{}_{}.png".format(image_prefix_path, suffix)
                 img = mx.image.imread(image_file_path, flag=0).asnumpy()
                 imgs += [img]
-            imgs = np.concatenate(tuple(imgs), axis=2)
-            print("i={}, imgs.shape={}, imgs.dtype={}".format(i, imgs.shape, imgs.dtype))
+            imgs = np.concatenate(tuple(imgs), axis=2).flatten()
             mean_rgby[i] = imgs.mean()
-            std_rgby[i] = imgs.std()
+            imgs = imgs.astype(np.float32, copy=False)
+            imgs -= mean_rgby[i]
+            imgs **= 2
+            std = np.sqrt(imgs.mean() * len(imgs) / (len(imgs) - 1))
+            std_rgby[i] = std
+            logging.info("i={}, mean={}, std={}".format(i, mean_rgby[i], std_rgby[i]))
         return mean_rgby, std_rgby
 
 

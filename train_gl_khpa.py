@@ -377,7 +377,9 @@ def train_epoch(epoch,
 
     btic = time.time()
     for i, batch in enumerate(train_data):
-        data_list, labels_list, weight_list = batch_fn(batch, ctx)
+        data_list, labels_list_ones, weight_list = batch_fn(batch, ctx)
+        labels_list = [(Y.transpose() / Y.sum(axis=1)).transpose() for Y in labels_list_ones]
+        # assert (labels_list[0].sum().asscalar() == len(labels_list[0]))
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
@@ -405,7 +407,7 @@ def train_epoch(epoch,
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
         rmse_train_calc.update(
-            labels=labels_list,
+            labels=labels_list_ones,
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:

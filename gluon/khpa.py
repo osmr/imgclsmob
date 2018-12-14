@@ -409,9 +409,22 @@ class KHPATrainTransform(object):
 
     def __call__(self, img, label):
 
+        # import cv2
+        # cv2.imshow(winname="src_img1", mat=img.asnumpy()[:, :, :3])
+        # cv2.imshow(winname="src_img2", mat=img.asnumpy()[:, :, 1:])
+
         seq_det = self.seq.to_deterministic()
-        imgs_aug = seq_det.augment_images(img.asnumpy().transpose((2, 0, 1)))
-        img_np = imgs_aug.transpose((1, 2, 0))
+        imgs_aug = img.asnumpy().copy()
+        # imgs_aug = seq_det.augment_images(img.asnumpy().transpose((2, 0, 1)))
+        imgs_aug[:, :, :3] = seq_det.augment_image(imgs_aug[:, :, :3])
+        imgs_aug[:, :, 3:] = seq_det.augment_image(imgs_aug[:, :, 3:])
+        # img_np = imgs_aug.transpose((1, 2, 0))
+        img_np = imgs_aug
+
+        # cv2.imshow(winname="dst_img1", mat=img_np[:, :, :3])
+        # cv2.imshow(winname="dst_img2", mat=img_np[:, :, 1:])
+        # cv2.waitKey(0)
+
         img_np = img_np.astype(np.float32)
         img_np = (img_np - self._mean) / self._std
         img = mx.nd.array(img_np, ctx=img.context)

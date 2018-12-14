@@ -33,10 +33,10 @@ def add_dataset_parser_arguments(parser):
         action='store_true',
         help='whether generate split file')
     parser.add_argument(
-        '--split-ratio',
-        type=float,
-        default=0.1,
-        help='fraction of validation subset')
+        '--num-split-folders',
+        type=int,
+        default=10,
+        help='number of folders for validation subsets')
     parser.add_argument(
         '--stats-file',
         type=str,
@@ -52,23 +52,19 @@ class KHPA(Dataset):
     """
     Load the KHPA classification dataset.
 
-    Refer to :doc:`../build/examples_datasets/imagenet` for the description of
-    this dataset and how to prepare it.
-
     Parameters
     ----------
     root : str, default '~/.mxnet/datasets/imagenet'
         Path to the folder stored the dataset.
     train : bool, default True
         Whether to load the training or validation set.
-    transform : function, default None
-        A function that takes data and label and transforms them.
     """
     def __init__(self,
                  root=os.path.join('~', '.mxnet', 'datasets', 'khpa'),
                  split_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'split.csv'),
                  generate_split=False,
-                 split_ratio=0.1,
+                 num_split_folders=10,
+                 working_split_folder=0,
                  stats_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'stats.json'),
                  generate_stats=False,
                  num_classes=28,
@@ -108,25 +104,38 @@ class KHPA(Dataset):
                 split_file_path,
                 sep=',',
                 index_col=False,
-                dtype={'Id': np.unicode, 'Category': np.int32})
-            categories = slice_df['Category'].values
+            )
+            categories = slice_df['Folder{}'.format(working_split_folder + 1)].values.astype(np.uint8)
         else:
             if not generate_split:
                 raise Exception("Split file doesn't exist: {}".format(split_file_path))
 
-            categories = self.create_slice_category_list(
-                count=image_count,
-                slice_fraction=split_ratio)
+            label_position_lists, label_counts = self.calc_label_position_lists(
+                train_file_labels=train_file_labels,
+                num_classes=num_classes)
+            assert (num_split_folders <= label_counts.min())
+            unique_label_position_lists, unique_label_counts = self.calc_unique_label_position_lists(
+                label_position_lists=label_position_lists,
+                label_counts=label_counts)
+            assert (image_count == unique_label_counts.sum())
+            dataset_folder_table = self.create_dataset_folder_table(
+                num_samples=image_count,
+                num_folders=num_split_folders,
+                unique_label_position_lists=unique_label_position_lists)
+            assert (image_count == dataset_folder_table.sum())
 
-            slice_df = pd.DataFrame({
-                'Id': train_file_ids,
-                'Category': categories})
+            slice_df_dict = {'Id': train_file_ids}
+            slice_df_dict.update({"Folder{}".format(i + 1): dataset_folder_table[i]
+                                  for i in range(num_split_folders)})
+
+            slice_df = pd.DataFrame(slice_df_dict)
 
             slice_df.to_csv(
                 split_file_path,
                 sep=',',
-                columns=['Id', 'Category'],
                 index=False)
+
+            categories = slice_df['Folder{}'.format(working_split_folder + 1)].values.astype(np.uint8)
 
         if os.path.exists(stats_file_path):
             if generate_stats:
@@ -157,7 +166,7 @@ class KHPA(Dataset):
         self.mean_rgby = mean_rgby
         self.std_rgby = std_rgby
 
-        mask = (categories == (1 if train else 2))
+        mask = (categories == (0 if train else 1))
         self.train_file_ids = train_file_ids[mask]
         self.train_file_labels = train_file_labels[mask]
         self.images_dir_path = images_dir_path
@@ -209,16 +218,43 @@ class KHPA(Dataset):
         return img, label, weight
 
     @staticmethod
-    def create_slice_category_list(count, slice_fraction):
-        assert (count > 0.0)
-        assert (slice_fraction > 0.0)
-        index_array = np.arange(count)
-        np.random.shuffle(index_array)
-        split_at = int(count * slice_fraction)
-        sliced2_index_array = index_array[:split_at]
-        category_list = np.ones((count,), np.uint8)
-        category_list[sliced2_index_array] = 2
-        return category_list
+    def calc_label_position_lists(train_file_labels, num_classes):
+        label_counts = np.zeros((num_classes, ), np.int32)
+        label_position_lists = [[] for _ in range(num_classes)]
+        for sample_ind, train_file_label in enumerate(train_file_labels):
+            label_str_list = train_file_label.split()
+            for label_str in label_str_list:
+                label_int = int(label_str)
+                assert (0 <= label_int < num_classes)
+                label_counts[label_int] += 1
+                label_position_lists[label_int] += [sample_ind]
+        assert ([len(x) for x in label_position_lists] == list(label_counts))
+        return label_position_lists, label_counts
+
+    @staticmethod
+    def calc_unique_label_position_lists(label_position_lists, label_counts):
+        unique_label_position_lists = label_position_lists.copy()
+        unique_label_counts = label_counts.copy()
+        order_inds = np.argsort(label_counts)
+        for i, class_ind_i in enumerate(order_inds):
+            for sample_ind in unique_label_position_lists[class_ind_i]:
+                for class_ind_k in order_inds[(i + 1):]:
+                    if sample_ind in unique_label_position_lists[class_ind_k]:
+                        unique_label_position_lists[class_ind_k].remove(sample_ind)
+                        unique_label_counts[class_ind_k] -= 1
+        assert ([len(x) for x in unique_label_position_lists] == list(unique_label_counts))
+        return unique_label_position_lists, unique_label_counts
+
+    @staticmethod
+    def create_dataset_folder_table(num_samples, num_folders, unique_label_position_lists):
+        dataset_folder_table = np.zeros((num_folders, num_samples), np.uint8)
+        for label_position_list in unique_label_position_lists:
+            label_positions = np.array(label_position_list)
+            np.random.shuffle(label_positions)
+            split_list = np.array_split(label_positions, indices_or_sections=num_folders)
+            for folder_ind, folder_split_list in enumerate(split_list):
+                dataset_folder_table[folder_ind, folder_split_list] = 1
+        return dataset_folder_table
 
     @staticmethod
     def calc_label_counts(train_file_labels, num_classes):
@@ -437,7 +473,7 @@ def get_batch_fn():
 def get_train_data_loader(data_dir_path,
                           split_file_path,
                           generate_split,
-                          split_ratio,
+                          num_split_folders,
                           stats_file_path,
                           generate_stats,
                           batch_size,
@@ -448,7 +484,7 @@ def get_train_data_loader(data_dir_path,
             root=data_dir_path,
             split_file_path=split_file_path,
             generate_split=generate_split,
-            split_ratio=split_ratio,
+            num_split_folders=num_split_folders,
             stats_file_path=stats_file_path,
             generate_stats=generate_stats,
             model_input_image_size=model_input_image_size,
@@ -462,7 +498,7 @@ def get_train_data_loader(data_dir_path,
 def get_val_data_loader(data_dir_path,
                         split_file_path,
                         generate_split,
-                        split_ratio,
+                        num_split_folders,
                         stats_file_path,
                         generate_stats,
                         batch_size,
@@ -474,7 +510,7 @@ def get_val_data_loader(data_dir_path,
             root=data_dir_path,
             split_file_path=split_file_path,
             generate_split=generate_split,
-            split_ratio=split_ratio,
+            num_split_folders=num_split_folders,
             stats_file_path=stats_file_path,
             generate_stats=generate_stats,
             preproc_resize_image_size=preproc_resize_image_size,
@@ -493,7 +529,7 @@ def get_train_data_source(dataset_args,
         data_dir_path=dataset_args.data_path,
         split_file_path=dataset_args.split_file,
         generate_split=dataset_args.gen_split,
-        split_ratio=dataset_args.split_ratio,
+        num_split_folders=dataset_args.num_split_folders,
         stats_file_path=dataset_args.stats_file,
         generate_stats=dataset_args.gen_stats,
         batch_size=batch_size,
@@ -515,7 +551,7 @@ def get_val_data_source(dataset_args,
         data_dir_path=dataset_args.data_path,
         split_file_path=dataset_args.split_file,
         generate_split=dataset_args.gen_split,
-        split_ratio=dataset_args.split_ratio,
+        num_split_folders=dataset_args.num_split_folders,
         stats_file_path=dataset_args.stats_file,
         generate_stats=dataset_args.gen_stats,
         batch_size=batch_size,

@@ -248,7 +248,7 @@ def parse_args():
     parser.add_argument(
         '--num-classes',
         type=int,
-        default=28,
+        default=56,
         help='number of classes')
     parser.add_argument(
         '--in-channels',

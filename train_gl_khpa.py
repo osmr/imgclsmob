@@ -512,11 +512,11 @@ def train_net(batch_size,
 
         if lp_saver is not None:
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
-            val_metric_value_inc = val_metric_value
-            train_metric_value_inc = train_metric_value
+            val_metric_value_dec = -val_metric_value
+            train_metric_value_dec = -train_metric_value
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[val_metric_value_inc, train_metric_value_inc, train_loss, trainer.learning_rate],
+                params=[val_metric_value_dec, train_metric_value_dec, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))

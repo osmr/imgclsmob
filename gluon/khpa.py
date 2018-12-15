@@ -15,6 +15,7 @@ from mxnet import gluon
 from mxnet.gluon.data import Dataset
 from imgaug import augmenters as iaa
 from imgaug import parameters as iap
+from .weighted_random_sampler import WeightedRandomSampler
 
 
 def add_dataset_parser_arguments(parser):
@@ -64,7 +65,7 @@ class KHPA(Dataset):
                  split_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'split.csv'),
                  generate_split=False,
                  num_split_folders=10,
-                 working_split_folder=0,
+                 working_split_folder_ind1=1,
                  stats_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'stats.json'),
                  generate_stats=False,
                  num_classes=28,
@@ -105,7 +106,7 @@ class KHPA(Dataset):
                 sep=',',
                 index_col=False,
             )
-            categories = slice_df['Folder{}'.format(working_split_folder + 1)].values.astype(np.uint8)
+            categories = slice_df['Folder{}'.format(working_split_folder_ind1)].values.astype(np.uint8)
         else:
             if not generate_split:
                 raise Exception("Split file doesn't exist: {}".format(split_file_path))
@@ -135,7 +136,7 @@ class KHPA(Dataset):
                 sep=',',
                 index=False)
 
-            categories = slice_df['Folder{}'.format(working_split_folder + 1)].values.astype(np.uint8)
+            categories = slice_df['Folder{}'.format(working_split_folder_ind1)].values.astype(np.uint8)
 
         if os.path.exists(stats_file_path):
             if generate_stats:
@@ -178,6 +179,9 @@ class KHPA(Dataset):
                 mean=self.mean_rgby,
                 std=self.std_rgby,
                 crop_image_size=model_input_image_size)
+            self.sample_weights = self.calc_sample_weights(
+                label_widths=self.label_widths,
+                train_file_labels=self.train_file_labels)
         else:
             self._transform = KHPAValTransform(
                 mean=self.mean_rgby,
@@ -204,18 +208,34 @@ class KHPA(Dataset):
         img = mx.nd.concat(*imgs, dim=2)
 
         label_str_list = self.train_file_labels[idx].split()
-        weight = 0.0
+        # weight = 0.0
         label = np.zeros((self.num_classes, ), np.int32)
         for each_label_str in label_str_list:
             each_label_int = int(each_label_str)
             assert (0 <= each_label_int < self.num_classes)
             label[each_label_int] = 1
-            weight += self.label_widths[each_label_int]
+            # weight += self.label_widths[each_label_int]
         label = mx.nd.array(label)
 
         if self._transform is not None:
             img, label = self._transform(img, label)
-        return img, label, weight
+        return img, label
+
+    @staticmethod
+    def calc_sample_weights(label_widths, train_file_labels):
+        label_widths1 = label_widths / label_widths.sum()
+        num_samples = len(train_file_labels)
+        sample_weights = np.zeros((num_samples, ), np.float64)
+        for i, train_file_label in enumerate(train_file_labels):
+            label_str_list = train_file_label.split()
+            for label_str in label_str_list:
+                label_int = int(label_str)
+                # sample_weights[i] += label_widths1[label_int]
+                sample_weights[i] = max(sample_weights[i], label_widths1[label_int])
+        assert (sample_weights.min() > 0.0)
+        sample_weights /= sample_weights.sum()
+        sample_weights = sample_weights.astype(np.float32)
+        return sample_weights
 
     @staticmethod
     def calc_label_position_lists(train_file_labels, num_classes):
@@ -478,8 +498,8 @@ def get_batch_fn():
     def batch_fn(batch, ctx):
         data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
         label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-        weight = gluon.utils.split_and_load(batch[2].astype(np.float32, copy=False), ctx_list=ctx, batch_axis=0)
-        return data, label, weight
+        # weight = gluon.utils.split_and_load(batch[2].astype(np.float32, copy=False), ctx_list=ctx, batch_axis=0)
+        return data, label
     return batch_fn
 
 
@@ -492,18 +512,23 @@ def get_train_data_loader(data_dir_path,
                           batch_size,
                           num_workers,
                           model_input_image_size):
+    dataset = KHPA(
+        root=data_dir_path,
+        split_file_path=split_file_path,
+        generate_split=generate_split,
+        num_split_folders=num_split_folders,
+        stats_file_path=stats_file_path,
+        generate_stats=generate_stats,
+        model_input_image_size=model_input_image_size,
+        train=True)
+    sampler = WeightedRandomSampler(
+        length=len(dataset),
+        weights=dataset.sample_weights)
     return gluon.data.DataLoader(
-        dataset=KHPA(
-            root=data_dir_path,
-            split_file_path=split_file_path,
-            generate_split=generate_split,
-            num_split_folders=num_split_folders,
-            stats_file_path=stats_file_path,
-            generate_stats=generate_stats,
-            model_input_image_size=model_input_image_size,
-            train=True),
+        dataset=dataset,
         batch_size=batch_size,
-        shuffle=True,
+        # shuffle=True,
+        sampler=sampler,
         last_batch='discard',
         num_workers=num_workers)
 
@@ -584,7 +609,7 @@ def validate(rmse_calc,
         val_data.reset()
     rmse_calc.reset()
     for batch in val_data:
-        data_list, labels_list, _ = batch_fn(batch, ctx)
+        data_list, labels_list = batch_fn(batch, ctx)
         outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
         rmse_calc.update(labels_list, outputs_list)
     _, rmse_value = rmse_calc.get()

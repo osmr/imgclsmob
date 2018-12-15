@@ -616,7 +616,11 @@ def validate(metric_calc,
     metric_calc.reset()
     for batch in val_data:
         data_list, labels_list = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        metric_calc.update(labels_list, outputs_list)
+        onehot_outputs_list = [net(X.astype(dtype, copy=False)).reshape(0, -1, 2) for X in data_list]
+        labels_list_ = [Y.reshape(-1,) for Y in labels_list]
+        onehot_outputs_list_ = [Y.reshape(-1, 2) for Y in onehot_outputs_list]
+        metric_calc.update(
+            labels=labels_list_,
+            preds=onehot_outputs_list_)
     metric_name_value = metric_calc.get()
     return metric_name_value

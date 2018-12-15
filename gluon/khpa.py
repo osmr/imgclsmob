@@ -169,10 +169,14 @@ class KHPA(Dataset):
 
         mask = (categories == (0 if train else 1))
         self.train_file_ids = train_file_ids[mask]
-        self.train_file_labels = train_file_labels[mask]
+        list_labels = train_file_labels[mask]
+
         self.images_dir_path = images_dir_path
         self.num_classes = num_classes
         self.train = train
+        self.onehot_labels = self.calc_onehot_labels(
+            num_classes=num_classes,
+            list_labels=list_labels)
 
         if train:
             self._transform = KHPATrainTransform(
@@ -181,7 +185,7 @@ class KHPA(Dataset):
                 crop_image_size=model_input_image_size)
             self.sample_weights = self.calc_sample_weights(
                 label_widths=self.label_widths,
-                train_file_labels=self.train_file_labels)
+                list_labels=list_labels)
         else:
             self._transform = KHPAValTransform(
                 mean=self.mean_rgby,
@@ -204,29 +208,31 @@ class KHPA(Dataset):
             image_file_path = "{}_{}.png".format(image_prefix_path, suffix)
             img = mx.image.imread(image_file_path, flag=0)
             imgs += [img]
-
         img = mx.nd.concat(*imgs, dim=2)
 
-        label_str_list = self.train_file_labels[idx].split()
-        # weight = 0.0
-        label = np.zeros((self.num_classes, ), np.int32)
-        for each_label_str in label_str_list:
-            each_label_int = int(each_label_str)
-            assert (0 <= each_label_int < self.num_classes)
-            label[each_label_int] = 1
-            # weight += self.label_widths[each_label_int]
-        label = mx.nd.array(label)
+        label = mx.nd.array(self.onehot_labels[idx])
 
         if self._transform is not None:
             img, label = self._transform(img, label)
         return img, label
 
     @staticmethod
-    def calc_sample_weights(label_widths, train_file_labels):
+    def calc_onehot_labels(num_classes, list_labels):
+        num_samples = len(list_labels)
+        onehot_labels = np.zeros((num_samples, num_classes), np.int32)
+        for i, train_file_label in enumerate(list_labels):
+            label_str_list = train_file_label.split()
+            for label_str in label_str_list:
+                label_int = int(label_str)
+                onehot_labels[i, label_int] = 1
+        return onehot_labels
+
+    @staticmethod
+    def calc_sample_weights(label_widths, list_labels):
         label_widths1 = label_widths / label_widths.sum()
-        num_samples = len(train_file_labels)
+        num_samples = len(list_labels)
         sample_weights = np.zeros((num_samples, ), np.float64)
-        for i, train_file_label in enumerate(train_file_labels):
+        for i, train_file_label in enumerate(list_labels):
             label_str_list = train_file_label.split()
             for label_str in label_str_list:
                 label_int = int(label_str)
@@ -598,7 +604,7 @@ def get_val_data_source(dataset_args,
         preproc_resize_image_size=resize_value)
 
 
-def validate(rmse_calc,
+def validate(metric_calc,
              net,
              val_data,
              batch_fn,
@@ -607,10 +613,10 @@ def validate(rmse_calc,
              ctx):
     if data_source_needs_reset:
         val_data.reset()
-    rmse_calc.reset()
+    metric_calc.reset()
     for batch in val_data:
         data_list, labels_list = batch_fn(batch, ctx)
         outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        rmse_calc.update(labels_list, outputs_list)
-    _, rmse_value = rmse_calc.get()
-    return rmse_value
+        metric_calc.update(labels_list, outputs_list)
+    metric_name_value = metric_calc.get()
+    return metric_name_value

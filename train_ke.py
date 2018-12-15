@@ -45,7 +45,7 @@ def parse_args():
         '--model',
         type=str,
         required=True,
-        help='type of model to use. see vision_model for options.')
+        help='type of model to use. see model_provider for options.')
     parser.add_argument(
         '--use-pretrained',
         action='store_true',

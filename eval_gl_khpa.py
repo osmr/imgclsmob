@@ -23,7 +23,7 @@ def parse_args():
         '--model',
         type=str,
         required=True,
-        help='type of model to use. see vision_model for options.')
+        help='type of model to use. see model_provider for options.')
     parser.add_argument(
         '--use-pretrained',
         action='store_true',
@@ -116,7 +116,7 @@ def test(net,
 
     tic = time.time()
     rmse_val_value = validate(
-        rmse_calc=rmse_calc,
+        metric_calc=rmse_calc,
         net=net,
         val_data=val_data,
         batch_fn=batch_fn,

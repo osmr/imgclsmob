@@ -29,10 +29,21 @@ def parse_args():
     add_dataset_parser_arguments(parser)
 
     parser.add_argument(
+        '--loss',
+        type=str,
+        default='CE',
+        help='type of loss to use. options are BCE, CE, and L2')
+    parser.add_argument(
+        '--metric',
+        type=str,
+        default='RMSE',
+        help='type of metric to use. options are RMSE and F1')
+
+    parser.add_argument(
         '--model',
         type=str,
         required=True,
-        help='type of model to use. see vision_model for options.')
+        help='type of model to use. see model_provider for options.')
     parser.add_argument(
         '--use-pretrained',
         action='store_true',
@@ -354,7 +365,7 @@ def save_params(file_stem,
 
 def train_epoch(epoch,
                 net,
-                rmse_train_calc,
+                metric_calc,
                 train_data,
                 batch_fn,
                 data_source_needs_reset,
@@ -366,20 +377,29 @@ def train_epoch(epoch,
                 batch_size,
                 log_interval,
                 grad_clip_value,
-                batch_size_scale):
+                batch_size_scale,
+                loss_type):
 
     batch_size_extend_count = 0
     tic = time.time()
     if data_source_needs_reset:
         train_data.reset()
-    rmse_train_calc.reset()
+    metric_calc.reset()
     train_loss = 0.0
 
     btic = time.time()
     for i, batch in enumerate(train_data):
-        data_list, labels_list_ones = batch_fn(batch, ctx)
-        labels_list = [(Y.transpose() / Y.sum(axis=1)).transpose() for Y in labels_list_ones]
-        # assert (labels_list[0].sum().asscalar() == len(labels_list[0]))
+        data_list, labels_list = batch_fn(batch, ctx)
+
+        if loss_type == "BCE":
+            # labels_list_ones = labels_list.copy()
+            labels_list = [Y.one_hot(depth=2) for Y in labels_list]
+        elif loss_type == "CE":
+            labels_list_ones = labels_list.copy()
+            labels_list = [Y / Y.sum(axis=1).expand_dims(axis=1) for Y in labels_list]
+            # assert (labels_list[0].sum().asscalar() == len(labels_list[0]))
+        elif loss_type == "L2":
+            pass
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
@@ -405,16 +425,16 @@ def train_epoch(epoch,
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
-        rmse_train_calc.update(
-            labels=labels_list_ones,
+        metric_calc.update(
+            labels=(labels_list if (loss_type != "CE") else labels_list_ones),
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             btic = time.time()
-            _, rmse_train_value = rmse_train_calc.get()
-            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\trmse={:.4f}\tlr={:.5f}'.format(
-                epoch + 1, i, speed, rmse_train_value, trainer.learning_rate))
+            metric_name, metric_value = metric_calc.get()
+            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}={:.4f}\tlr={:.5f}'.format(
+                epoch + 1, i, speed, metric_name, metric_value, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -426,11 +446,11 @@ def train_epoch(epoch,
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
-    _, rmse_train_value = rmse_train_calc.get()
-    logging.info('[Epoch {}] training: rmse={:.4f}\tloss={:.4f}'.format(
-        epoch + 1, rmse_train_value, train_loss))
+    metric_name, metric_value = metric_calc.get()
+    logging.info('[Epoch {}] training: {}={:.4f}\tloss={:.4f}'.format(
+        epoch + 1, metric_name, metric_value, train_loss))
 
-    return rmse_train_value, train_loss
+    return metric_name, metric_value, train_loss
 
 
 def train_net(batch_size,
@@ -448,6 +468,8 @@ def train_net(batch_size,
               log_interval,
               grad_clip_value,
               batch_size_scale,
+              loss_type,
+              metric_type,
               ctx):
 
     if batch_size_scale != 1:
@@ -457,32 +479,44 @@ def train_net(batch_size,
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    rmse_val_calc = mx.metric.RMSE()
-    rmse_train_calc = mx.metric.RMSE()
+    val_metric_calc = None
+    train_metric_calc = None
+    if metric_type == "RMSE":
+        val_metric_calc = mx.metric.RMSE()
+        train_metric_calc = mx.metric.RMSE()
+    elif metric_type == "F1":
+        val_metric_calc = mx.metric.F1()
+        train_metric_calc = mx.metric.F1()
 
-    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=False)
+    loss_func = None
+    if loss_type == "BCE":
+        loss_func = gluon.loss.SigmoidBinaryCrossEntropyLoss()
+    elif loss_type == "CE":
+        loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=False)
+    elif loss_type == "L2":
+        loss_func = gluon.loss.L2Loss()
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info('Start training from [Epoch {}]'.format(start_epoch1))
-        rmse_val_value = validate(
-            rmse_calc=rmse_val_calc,
+        val_metric_name_value = validate(
+            metric_calc=val_metric_calc,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        logging.info('[Epoch {}] validation: rmse={:.4f}'.format(
-            start_epoch1 - 1, rmse_val_value))
+        logging.info('[Epoch {}] validation: {}={:.4f}'.format(
+            start_epoch1 - 1, val_metric_name_value[0], val_metric_name_value[1]))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        rmse_train_value, train_loss = train_epoch(
+        train_metric_name, train_metric_value, train_loss = train_epoch(
             epoch=epoch,
             net=net,
-            rmse_train_calc=rmse_train_calc,
+            metric_calc=train_metric_calc,
             train_data=train_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
@@ -494,10 +528,11 @@ def train_net(batch_size,
             batch_size=batch_size,
             log_interval=log_interval,
             grad_clip_value=grad_clip_value,
-            batch_size_scale=batch_size_scale)
+            batch_size_scale=batch_size_scale,
+            loss_type=loss_type)
 
-        rmse_val_value = validate(
-            rmse_calc=rmse_val_calc,
+        val_metric_name, val_metric_value = validate(
+            metric_calc=val_metric_calc,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -505,14 +540,16 @@ def train_net(batch_size,
             dtype=dtype,
             ctx=ctx)
 
-        logging.info('[Epoch {}] validation: rmse={:.4f}'.format(
-            epoch + 1, rmse_val_value))
+        logging.info('[Epoch {}] validation: {}={:.4f}'.format(
+            epoch + 1, val_metric_name, val_metric_value))
 
         if lp_saver is not None:
             lp_saver_kwargs = {'net': net, 'trainer': trainer}
+            val_metric_value_inc = val_metric_value if metric_type != "RMSE" else -val_metric_value
+            train_metric_value_inc = train_metric_value if metric_type != "RMSE" else -train_metric_value
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[-rmse_val_value, -rmse_train_value, train_loss, trainer.learning_rate],
+                params=[val_metric_value_inc, train_metric_value_inc, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
 
     logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
@@ -524,6 +561,10 @@ def train_net(batch_size,
 def main():
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
+
+    assert (args.loss in ("BCE", "CE", "L2"))
+    metric_type = args.metric
+    assert (args.metric in ("RMSE", "F1"))
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
@@ -603,7 +644,7 @@ def main():
             checkpoint_file_exts=('.params', '.states'),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=['Val.RMSE', 'Train.RMSE', 'Train.Loss', 'LR'],
+            param_names=['Val.' + metric_type, 'Train.' + metric_type, 'Train.Loss', 'LR'],
             acc_ind=0,
             # bigger=[True],
             # mask=None,
@@ -629,6 +670,8 @@ def main():
         log_interval=args.log_interval,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
+        loss_type=args.loss,
+        metric_type=metric_type,
         ctx=ctx)
 
 

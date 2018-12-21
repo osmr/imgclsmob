@@ -85,6 +85,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenetv2_wd2', '1460', '12376d2486b9409e0b41c2d46a9689c47ac32cb9', 'v0.0.82'),
     ('mobilenetv2_w3d4', '1124', '3531c997eb6a2052a715f2a37673151a1a0a075d', 'v0.0.82'),
     ('mobilenetv2_w1', '0990', 'e80f9fe41d03eed8734b7434e788e4230de42465', 'v0.0.82'),
+    ('igcv3_wd2', '1705', 'de0b98d950a3892b6d15d1c3ea248d41a34adf00', 'v0.0.132'),
     ('igcv3_w1', '0955', 'cb263e3aa49677b1b34bfa7af3b7d33be854dc4b', 'v0.0.126'),
     ('mnasnet', '1144', 'f2b84fc44eabe0722c84bdcb7748fa390c3c1162', 'v0.0.117')]}
 

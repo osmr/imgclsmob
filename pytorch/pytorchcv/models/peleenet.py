@@ -1,21 +1,21 @@
 """
-    DenseNet, implemented in PyTorch.
-    Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+    PeleeNet, implemented in PyTorch.
+    Original paper: 'Pelee: A Real-Time Object Detection System on Mobile Devices,' https://arxiv.org/abs/1804.06882.
 """
 
-__all__ = ['DenseNet', 'densenet121', 'densenet161', 'densenet169', 'densenet201', 'TransitionBlock']
+__all__ = ['PeleeNet', 'peleenet']
 
 import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import pre_conv1x1_block, pre_conv3x3_block
-from preresnet import PreResInitBlock, PreResActivation
+from common import conv1x1_block, conv3x3_block, Concurrent
+from densenet import TransitionBlock
 
 
-class DenseUnit(nn.Module):
+class PeleeBranch1(nn.Module):
     """
-    DenseNet unit.
+    PeleeNet branch type 1 block.
 
     Parameters:
     ----------
@@ -23,42 +23,71 @@ class DenseUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dropout_rate : bool
-        Parameter of Dropout layer. Faction of the input units to drop.
+    mid_channels : int
+        Number of intermediate channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the second convolution.
     """
+
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dropout_rate):
-        super(DenseUnit, self).__init__()
-        self.use_dropout = (dropout_rate != 0.0)
-        bn_size = 4
-        inc_channels = out_channels - in_channels
-        mid_channels = inc_channels * bn_size
-
-        self.conv1 = pre_conv1x1_block(
+                 mid_channels,
+                 stride=1):
+        super(PeleeBranch1, self).__init__()
+        self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels)
-        self.conv2 = pre_conv3x3_block(
+        self.conv2 = conv3x3_block(
             in_channels=mid_channels,
-            out_channels=inc_channels)
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=dropout_rate)
+            out_channels=out_channels,
+            stride=stride)
 
     def forward(self, x):
-        identity = x
         x = self.conv1(x)
         x = self.conv2(x)
-        if self.use_dropout:
-            x = self.dropout(x)
-        x = torch.cat((identity, x), dim=1)
         return x
 
 
-class TransitionBlock(nn.Module):
+class PeleeBranch2(nn.Module):
     """
-    DenseNet's auxiliary block, which can be treated as the initial part of the DenseNet unit, triggered only in the
-    first unit of each stage.
+    PeleeNet branch type 2 block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    mid_channels : int
+        Number of intermediate channels.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 mid_channels):
+        super(PeleeBranch2, self).__init__()
+        self.conv1 = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.conv2 = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=out_channels)
+        self.conv3 = conv3x3_block(
+            in_channels=out_channels,
+            out_channels=out_channels)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        return x
+
+
+class StemBlock(nn.Module):
+    """
+    PeleeNet stem block.
 
     Parameters:
     ----------
@@ -70,24 +99,78 @@ class TransitionBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(TransitionBlock, self).__init__()
-        self.conv = pre_conv1x1_block(
+        super(StemBlock, self).__init__()
+        mid1_channels = out_channels // 2
+        mid2_channels = out_channels * 2
+
+        self.first_conv = conv3x3_block(
             in_channels=in_channels,
-            out_channels=out_channels)
-        self.pool = nn.AvgPool2d(
+            out_channels=out_channels,
+            stride=2)
+
+        self.branches = Concurrent()
+        self.branches.add_module("branch1", PeleeBranch1(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            mid_channels=mid1_channels,
+            stride=2))
+        self.branches.add_module("branch2", nn.MaxPool2d(
             kernel_size=2,
             stride=2,
-            padding=0)
+            padding=0))
+
+        self.last_conv = conv1x1_block(
+            in_channels=mid2_channels,
+            out_channels=out_channels)
 
     def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
+        x = self.first_conv(x)
+        x = self.branches(x)
+        x = self.last_conv(x)
         return x
 
 
-class DenseNet(nn.Module):
+class DenseBlock(nn.Module):
     """
-    DenseNet model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+    PeleeNet dense block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bottleneck_size : int
+        Bottleneck width.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bottleneck_size):
+        super(DenseBlock, self).__init__()
+        inc_channels = (out_channels - in_channels) // 2
+        mid_channels = inc_channels * bottleneck_size
+
+        self.branch1 = PeleeBranch1(
+            in_channels=in_channels,
+            out_channels=inc_channels,
+            mid_channels=mid_channels)
+        self.branch2 = PeleeBranch2(
+            in_channels=in_channels,
+            out_channels=inc_channels,
+            mid_channels=mid_channels)
+
+    def forward(self, x):
+        x1 = self.branch1(x)
+        x2 = self.branch2(x)
+        x = torch.cat((x, x1, x2), dim=1)
+        return x
+
+
+class PeleeNet(nn.Module):
+    """
+    PeleeNet model from 'Pelee: A Real-Time Object Detection System on Mobile Devices,'
+    https://arxiv.org/abs/1804.06882.
 
     Parameters:
     ----------
@@ -95,7 +178,9 @@ class DenseNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    dropout_rate : float, default 0.0
+    bottleneck_sizes : list of int
+        Bottleneck sizes for each stage.
+    dropout_rate : float, default 0.5
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
@@ -107,41 +192,46 @@ class DenseNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 dropout_rate=0.0,
+                 bottleneck_sizes,
+                 dropout_rate=0.5,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(DenseNet, self).__init__()
+        super(PeleeNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", PreResInitBlock(
+        self.features.add_module("init_block", StemBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
+            bottleneck_size = bottleneck_sizes[i]
             stage = nn.Sequential()
             if i != 0:
                 stage.add_module("trans{}".format(i + 1), TransitionBlock(
                     in_channels=in_channels,
-                    out_channels=(in_channels // 2)))
-                in_channels = in_channels // 2
+                    out_channels=in_channels))
             for j, out_channels in enumerate(channels_per_stage):
-                stage.add_module("unit{}".format(j + 1), DenseUnit(
+                stage.add_module("unit{}".format(j + 1), DenseBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    dropout_rate=dropout_rate))
+                    bottleneck_size=bottleneck_size))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
+        self.features.add_module("final_block", conv1x1_block(
+            in_channels=in_channels,
+            out_channels=in_channels))
         self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 
-        self.output = nn.Linear(
+        self.output = nn.Sequential()
+        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
+        self.output.add_module('fc', nn.Linear(
             in_features=in_channels,
-            out_features=num_classes)
+            out_features=num_classes))
 
         self._init_params()
 
@@ -159,18 +249,15 @@ class DenseNet(nn.Module):
         return x
 
 
-def get_densenet(num_layers,
-                 model_name=None,
+def get_peleenet(model_name=None,
                  pretrained=False,
                  root=os.path.join('~', '.torch', 'models'),
                  **kwargs):
     """
-    Create DenseNet model with specific parameters.
+    Create PeleeNet model with specific parameters.
 
     Parameters:
     ----------
-    num_layers : int
-        Number of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -179,37 +266,24 @@ def get_densenet(num_layers,
         Location for keeping the model parameters.
     """
 
-    if num_layers == 121:
-        init_block_channels = 64
-        growth_rate = 32
-        layers = [6, 12, 24, 16]
-    elif num_layers == 161:
-        init_block_channels = 96
-        growth_rate = 48
-        layers = [6, 12, 36, 24]
-    elif num_layers == 169:
-        init_block_channels = 64
-        growth_rate = 32
-        layers = [6, 12, 32, 32]
-    elif num_layers == 201:
-        init_block_channels = 64
-        growth_rate = 32
-        layers = [6, 12, 48, 32]
-    else:
-        raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
+    init_block_channels = 32
+    growth_rate = 32
+    layers = [3, 4, 8, 6]
+    bottleneck_sizes = [1, 2, 4, 4]
 
     from functools import reduce
     channels = reduce(
         lambda xi, yi: xi + [reduce(
             lambda xj, yj: xj + [xj[-1] + yj],
             [growth_rate] * yi,
-            [xi[-1][-1] // 2])[1:]],
+            [xi[-1][-1]])[1:]],
         layers,
-        [[init_block_channels * 2]])[1:]
+        [[init_block_channels]])[1:]
 
-    net = DenseNet(
+    net = PeleeNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        bottleneck_sizes=bottleneck_sizes,
         **kwargs)
 
     if pretrained:
@@ -224,9 +298,10 @@ def get_densenet(num_layers,
     return net
 
 
-def densenet121(**kwargs):
+def peleenet(**kwargs):
     """
-    DenseNet-121 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+    PeleeNet model from 'Pelee: A Real-Time Object Detection System on Mobile Devices,'
+    https://arxiv.org/abs/1804.06882.
 
     Parameters:
     ----------
@@ -235,49 +310,7 @@ def densenet121(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
-
-
-def densenet161(**kwargs):
-    """
-    DenseNet-161 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
-
-
-def densenet169(**kwargs):
-    """
-    DenseNet-169 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
-
-
-def densenet201(**kwargs):
-    """
-    DenseNet-201 model from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
+    return get_peleenet(model_name="peleenet", **kwargs)
 
 
 def _calc_width(net):
@@ -296,10 +329,7 @@ def _test():
     pretrained = False
 
     models = [
-        densenet121,
-        densenet161,
-        densenet169,
-        densenet201,
+        peleenet,
     ]
 
     for model in models:
@@ -310,10 +340,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != densenet121 or weight_count == 7978856)
-        assert (model != densenet161 or weight_count == 28681000)
-        assert (model != densenet169 or weight_count == 14149480)
-        assert (model != densenet201 or weight_count == 20013928)
+        assert (model != peleenet or weight_count == 2802248)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

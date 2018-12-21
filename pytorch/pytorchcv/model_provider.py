@@ -20,6 +20,7 @@ from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
+from .models.peleenet import *
 from .models.wrn import *
 from .models.drn import *
 from .models.dpn import *
@@ -43,9 +44,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
-from .models.peleenet import *
-from .models.others.oth_peleenet import *
 
 __all__ = ['get_model']
 
@@ -196,6 +194,8 @@ _models = {
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,
 
+    'peleenet': peleenet,
+
     'wrn50_2': wrn50_2,
 
     'drnc26': drnc26,
@@ -298,9 +298,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'peleenet': peleenet,
-    'oth_peleenet': oth_peleenet,
 }
 
 

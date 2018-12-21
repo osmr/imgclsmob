@@ -24,6 +24,7 @@ scripts for training/validating/converting models. All models are designed for u
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
 - CondenseNet (['CondenseNet: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))
+- PeleeNet (['Pelee: A Real-Time Object Detection System on Mobile Devices'](https://arxiv.org/abs/1804.06882))
 - WRN (['Wide Residual Networks'](https://arxiv.org/abs/1605.07146))
 - DRN-C/DRN-D (['Dilated Residual Networks'](https://arxiv.org/abs/1705.09914))
 - DPN (['Dual Path Networks'](https://arxiv.org/abs/1707.01629))

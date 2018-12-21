@@ -3,6 +3,8 @@ import torch.nn as nn
 import math
 import torch.nn.functional as F
 
+__all__ = ['oth_peleenet']
+
 
 class Conv_bn_relu(nn.Module):
     def __init__(self,
@@ -131,7 +133,7 @@ class PeleeNet(nn.Module):
         #
         for i, b_w in enumerate(bottleneck_width):
 
-            print("i={}, b_w={}".format(i, b_w))
+            # print("i={}, b_w={}".format(i, b_w))
 
             inter_channel.append(int(self.half_growth_rate * b_w / 4) * 4)
 
@@ -169,11 +171,11 @@ class PeleeNet(nn.Module):
         layers = []
 
         for i in range(ndenseblocks):
-            print("_make: i={}, dense_inp={}, inter_channel={}".format(i, dense_inp, inter_channel))
+            # print("_make: i={}, dense_inp={}, inter_channel={}".format(i, dense_inp, inter_channel))
             layers.append(DenseBlock(dense_inp, inter_channel,self.half_growth_rate))
             dense_inp += self.half_growth_rate * 2
 
-        print("_make-trans: dense_inp={}, total_filter={}".format(dense_inp, total_filter))
+        # print("_make-trans: dense_inp={}, total_filter={}".format(dense_inp, total_filter))
         #Transition Layer without Compression
         layers.append(TransitionBlock(dense_inp,total_filter,with_pooling))
 
@@ -187,9 +189,9 @@ class PeleeNet(nn.Module):
         x = F.avg_pool2d(x,kernel_size=7)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
-        out = F.log_softmax(x,dim=1)
+        # out = F.log_softmax(x,dim=1)
 
-        return out
+        return x
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -217,8 +219,34 @@ class PeleeNet(nn.Module):
 #
 #     # torch.save(p.state_dict(), 'peleenet.pth.tar')
 
-def oth_pelinet(pretrained=False, **kwargs):
+def oth_peleenet(pretrained=False, **kwargs):
     return PeleeNet(**kwargs)
+
+
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
 
 
 def _calc_width(net):
@@ -237,7 +265,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_pelinet,
+        oth_peleenet,
     ]
 
     for model in models:
@@ -248,7 +276,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_pelinet or weight_count == 2802248)
+        assert (model != oth_peleenet or weight_count == 2802248)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

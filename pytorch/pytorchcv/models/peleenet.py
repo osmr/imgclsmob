@@ -9,8 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv1x1_block, conv3x3_block, Concurrent
-from densenet import TransitionBlock
+from .common import conv1x1_block, conv3x3_block, Concurrent
 
 
 class PeleeBranch1(nn.Module):
@@ -164,6 +163,36 @@ class DenseBlock(nn.Module):
         x1 = self.branch1(x)
         x2 = self.branch2(x)
         x = torch.cat((x, x1, x2), dim=1)
+        return x
+
+
+class TransitionBlock(nn.Module):
+    """
+    PeleeNet's transition block, like in DensNet, but with ordinary convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(TransitionBlock, self).__init__()
+        self.conv = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=out_channels)
+        self.pool = nn.AvgPool2d(
+            kernel_size=2,
+            stride=2,
+            padding=0)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.pool(x)
         return x
 
 

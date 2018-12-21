@@ -9,8 +9,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import pre_conv1x1_block, pre_conv3x3_block
-from preresnet import PreResInitBlock, PreResActivation
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .preresnet import PreResInitBlock, PreResActivation
 
 
 class DenseUnit(nn.Module):

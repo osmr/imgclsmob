@@ -10,7 +10,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, channel_shuffle, maxpool2d
+from .common import conv2d, batchnorm, channel_shuffle, maxpool2d, avgpool2d
 
 
 def depthwise_conv3x3(x,
@@ -164,14 +164,12 @@ def shuffle_unit(x,
         name=name + "/expand_bn3")
 
     if downsample:
-        identity = tf.layers.average_pooling2d(
-            inputs=identity,
+        identity = avgpool2d(
+            x=identity,
             pool_size=3,
             strides=2,
-            padding='same',
-            data_format='channels_first',
+            padding=1,
             name=name + "/avgpool")
-
         x = tf.concat([x, identity], axis=1, name=name + "/concat")
     else:
         x = x + identity

@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='tensorflowcv',
-    version='0.0.13',
+    version='0.0.14',
     description='Image classification models for TensorFlow',
     license='MIT',
     long_description=long_description,

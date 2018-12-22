@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='chainercv2',
-    version='0.0.24',
+    version='0.0.25',
     description='Image classification models for Chainer',
     license='MIT',
     long_description=long_description,

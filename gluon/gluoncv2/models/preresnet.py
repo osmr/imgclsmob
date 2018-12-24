@@ -6,7 +6,7 @@
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
-           'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
+           'preresnet269b', 'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
 
 import os
 from mxnet import cpu
@@ -363,6 +363,8 @@ def get_preresnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
+    elif blocks == 269:
+        layers = [3, 30, 48, 8]
     else:
         raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
@@ -684,6 +686,23 @@ def preresnet200b(**kwargs):
     return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
 
 
+def preresnet269b(**kwargs):
+    """
+    PreResNet-269 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=269, conv1_stride=False, model_name="preresnet269b", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -709,6 +728,8 @@ def _test():
         preresnet152b,
         preresnet200,
         preresnet200b,
+
+        preresnet269b,
     ]
 
     for model in models:
@@ -744,6 +765,7 @@ def _test():
         assert (model != preresnet152b or weight_count == 60185256)
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
+        assert (model != preresnet269b or weight_count == 102065832)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

@@ -521,15 +521,19 @@ class BNInception(nn.Module):
         inception_5a_pool_proj_bn_out = self.inception_5a_pool_proj_bn(inception_5a_pool_proj_out)
         inception_5a_relu_pool_proj_out = self.inception_5a_relu_pool_proj(inception_5a_pool_proj_bn_out)
         inception_5a_output_out = torch.cat([inception_5a_relu_1x1_out,inception_5a_relu_3x3_out,inception_5a_relu_double_3x3_2_out,inception_5a_relu_pool_proj_out], 1)
+
+
         inception_5b_1x1_out = self.inception_5b_1x1(inception_5a_output_out)
         inception_5b_1x1_bn_out = self.inception_5b_1x1_bn(inception_5b_1x1_out)
         inception_5b_relu_1x1_out = self.inception_5b_relu_1x1(inception_5b_1x1_bn_out)
+
         inception_5b_3x3_reduce_out = self.inception_5b_3x3_reduce(inception_5a_output_out)
         inception_5b_3x3_reduce_bn_out = self.inception_5b_3x3_reduce_bn(inception_5b_3x3_reduce_out)
         inception_5b_relu_3x3_reduce_out = self.inception_5b_relu_3x3_reduce(inception_5b_3x3_reduce_bn_out)
         inception_5b_3x3_out = self.inception_5b_3x3(inception_5b_relu_3x3_reduce_out)
         inception_5b_3x3_bn_out = self.inception_5b_3x3_bn(inception_5b_3x3_out)
         inception_5b_relu_3x3_out = self.inception_5b_relu_3x3(inception_5b_3x3_bn_out)
+
         inception_5b_double_3x3_reduce_out = self.inception_5b_double_3x3_reduce(inception_5a_output_out)
         inception_5b_double_3x3_reduce_bn_out = self.inception_5b_double_3x3_reduce_bn(inception_5b_double_3x3_reduce_out)
         inception_5b_relu_double_3x3_reduce_out = self.inception_5b_relu_double_3x3_reduce(inception_5b_double_3x3_reduce_bn_out)
@@ -539,6 +543,7 @@ class BNInception(nn.Module):
         inception_5b_double_3x3_2_out = self.inception_5b_double_3x3_2(inception_5b_relu_double_3x3_1_out)
         inception_5b_double_3x3_2_bn_out = self.inception_5b_double_3x3_2_bn(inception_5b_double_3x3_2_out)
         inception_5b_relu_double_3x3_2_out = self.inception_5b_relu_double_3x3_2(inception_5b_double_3x3_2_bn_out)
+
         inception_5b_pool_out = self.inception_5b_pool(inception_5a_output_out)
         inception_5b_pool_proj_out = self.inception_5b_pool_proj(inception_5b_pool_out)
         inception_5b_pool_proj_bn_out = self.inception_5b_pool_proj_bn(inception_5b_pool_proj_out)
@@ -631,6 +636,11 @@ def _test():
         assert (model != oth_bninception or weight_count == 11295240)
 
         x = Variable(torch.randn(1, 3, 224, 224))
+
+        import numpy as np
+        load_model(net=net, file_path="D:/langs/imgclsmob_data/pt-bninception-oth/bn_inception-52deb4733_c1000.pth")
+        x = torch.from_numpy(np.load('D:/langs/imgclsmob_data/x.npy'))
+
         y = net(x)
         assert (tuple(y.size()) == (1, 1000))
 

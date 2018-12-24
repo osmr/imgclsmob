@@ -119,23 +119,33 @@ class InceptionPoolBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool, default False
+    bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    avg_pool : bool
+        Whether use average pooling or max pooling.
     """
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_use_global_stats=False,
+                 bn_use_global_stats,
+                 avg_pool,
                  **kwargs):
         super(InceptionPoolBranch, self).__init__(**kwargs)
         with self.name_scope():
-            self.pool = nn.AvgPool2D(
-                pool_size=3,
-                strides=1,
-                padding=1,
-                ceil_mode=True,
-                count_include_pad=True)
+            if avg_pool:
+                self.pool = nn.AvgPool2D(
+                    pool_size=3,
+                    strides=1,
+                    padding=1,
+                    ceil_mode=True,
+                    count_include_pad=True)
+            else:
+                self.pool = nn.MaxPool2D(
+                    pool_size=3,
+                    strides=1,
+                    padding=1,
+                    ceil_mode=True)
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -170,7 +180,6 @@ class StemBlock(HybridBlock):
                  bn_use_global_stats,
                  **kwargs):
         super(StemBlock, self).__init__(**kwargs)
-
         with self.name_scope():
             self.conv1 = conv7x7_block(
                 in_channels=in_channels,
@@ -216,12 +225,15 @@ class InceptionBlock(HybridBlock):
         Number of middle channels for branches.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    avg_pool : bool
+        Whether use average pooling or max pooling.
     """
     def __init__(self,
                  in_channels,
                  mid1_channels_list,
                  mid2_channels_list,
                  bn_use_global_stats,
+                 avg_pool,
                  **kwargs):
         super(InceptionBlock, self).__init__(**kwargs)
         assert (len(mid1_channels_list) == 2)
@@ -247,7 +259,8 @@ class InceptionBlock(HybridBlock):
             self.branches.add(InceptionPoolBranch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[3],
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                avg_pool=avg_pool))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -364,11 +377,13 @@ class BNInception(HybridBlock):
                                 mid2_channels_list=mid2_channels_list_i[j],
                                 bn_use_global_stats=bn_use_global_stats))
                         else:
+                            avg_pool = (i != len(channels) - 1) or (j != len(channels_per_stage) - 1)
                             stage.add(InceptionBlock(
                                 in_channels=in_channels,
                                 mid1_channels_list=mid1_channels_list_i[j],
                                 mid2_channels_list=mid2_channels_list_i[j],
-                                bn_use_global_stats=bn_use_global_stats))
+                                bn_use_global_stats=bn_use_global_stats,
+                                avg_pool=avg_pool))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(

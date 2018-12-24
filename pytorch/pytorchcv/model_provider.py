@@ -45,6 +45,7 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.bninception import *
 from .models.others.oth_bninception import *
 
 __all__ = ['get_model']
@@ -302,6 +303,7 @@ _models = {
     'pnasnet5large': pnasnet5large,
 
     'oth_bninception': oth_bninception,
+    'bninception': bninception,
 }
 
 

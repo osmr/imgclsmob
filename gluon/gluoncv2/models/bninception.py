@@ -10,7 +10,7 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
-from common import conv1x1_block, conv3x3_block, conv7x7_block
+from .common import conv1x1_block, conv3x3_block, conv7x7_block
 
 
 class Inception3x3Branch(HybridBlock):
@@ -43,11 +43,13 @@ class Inception3x3Branch(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -86,15 +88,18 @@ class InceptionDouble3x3Branch(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -134,6 +139,7 @@ class InceptionPoolBranch(HybridBlock):
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -170,6 +176,7 @@ class StemBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=2,
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats)
             self.pool1 = nn.MaxPool2D(
                 pool_size=3,
@@ -225,6 +232,7 @@ class InceptionBlock(HybridBlock):
             self.branches.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[0],
+                use_bias=True,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(Inception3x3Branch(
                 in_channels=in_channels,
@@ -398,7 +406,6 @@ def get_bninception(model_name=None,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     init_block_channels_list = [64, 192]
     channels = [[256, 320], [576, 576, 576, 608, 608], [1056, 1024, 1024]]
     mid1_channels_list = [
@@ -489,7 +496,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != bninception or weight_count == 11285224)
+        assert (model != bninception or weight_count == 11295240)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

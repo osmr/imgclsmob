@@ -575,6 +575,32 @@ def oth_bninception(num_classes=1000, pretrained=False):
     return model
 
 
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -588,7 +614,7 @@ def _test():
     import torch
     from torch.autograd import Variable
 
-    pretrained = True
+    pretrained = False
 
     models = [
         oth_bninception,

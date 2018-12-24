@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1502.03167.
 """
 
-__all__ = ['BNInception299', 'bninception299']
+__all__ = ['BNInception', 'bninception']
 
 import os
 from mxnet import cpu
@@ -25,6 +25,8 @@ class Inception3x3Branch(HybridBlock):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the second convolution.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
@@ -33,6 +35,7 @@ class Inception3x3Branch(HybridBlock):
                  in_channels,
                  out_channels,
                  mid_channels,
+                 strides=1,
                  bn_use_global_stats=False,
                  **kwargs):
         super(Inception3x3Branch, self).__init__(**kwargs)
@@ -44,6 +47,7 @@ class Inception3x3Branch(HybridBlock):
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                strides=strides,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -52,9 +56,57 @@ class Inception3x3Branch(HybridBlock):
         return x
 
 
+class InceptionDouble3x3Branch(HybridBlock):
+    """
+    BN-Inception double 3x3 branch block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    mid_channels : int
+        Number of intermediate channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the second convolution.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 mid_channels,
+                 strides=1,
+                 bn_use_global_stats=False,
+                 **kwargs):
+        super(InceptionDouble3x3Branch, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv3 = conv3x3_block(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        return x
+
+
 class InceptionPoolBranch(HybridBlock):
     """
-    BN-Inception max-pool branch block.
+    BN-Inception avg-pool branch block.
 
     Parameters:
     ----------
@@ -73,10 +125,12 @@ class InceptionPoolBranch(HybridBlock):
                  **kwargs):
         super(InceptionPoolBranch, self).__init__(**kwargs)
         with self.name_scope():
-            self.pool = nn.MaxPool2D(
+            self.pool = nn.AvgPool2D(
                 pool_size=3,
                 strides=1,
-                padding=1)
+                padding=1,
+                ceil_mode=True,
+                count_include_pad=True)
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -120,7 +174,8 @@ class StemBlock(HybridBlock):
             self.pool1 = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
-                padding=0)
+                padding=0,
+                ceil_mode=True)
             self.conv2 = Inception3x3Branch(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -129,7 +184,8 @@ class StemBlock(HybridBlock):
             self.pool2 = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
-                padding=0)
+                padding=0,
+                ceil_mode=True)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -141,7 +197,7 @@ class StemBlock(HybridBlock):
 
 class InceptionBlock(HybridBlock):
     """
-    BN-Inception block.
+    BN-Inception unit.
 
     Parameters:
     ----------
@@ -175,7 +231,7 @@ class InceptionBlock(HybridBlock):
                 out_channels=mid2_channels_list[1],
                 mid_channels=mid1_channels_list[0],
                 bn_use_global_stats=bn_use_global_stats))
-            self.branches.add(Inception3x3Branch(
+            self.branches.add(InceptionDouble3x3Branch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[2],
                 mid_channels=mid1_channels_list[1],
@@ -190,7 +246,57 @@ class InceptionBlock(HybridBlock):
         return x
 
 
-class BNInception299(HybridBlock):
+class ReductionBlock(HybridBlock):
+    """
+    BN-Inception reduction block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    mid1_channels_list : list of int
+        Number of pre-middle channels for branches.
+    mid2_channels_list : list of int
+        Number of middle channels for branches.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 mid1_channels_list,
+                 mid2_channels_list,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(ReductionBlock, self).__init__(**kwargs)
+        assert (len(mid1_channels_list) == 2)
+        assert (len(mid2_channels_list) == 4)
+
+        with self.name_scope():
+            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches.add(Inception3x3Branch(
+                in_channels=in_channels,
+                out_channels=mid2_channels_list[1],
+                mid_channels=mid1_channels_list[0],
+                strides=2,
+                bn_use_global_stats=bn_use_global_stats))
+            self.branches.add(InceptionDouble3x3Branch(
+                in_channels=in_channels,
+                out_channels=mid2_channels_list[2],
+                mid_channels=mid1_channels_list[1],
+                strides=2,
+                bn_use_global_stats=bn_use_global_stats))
+            self.branches.add(nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=0,
+                ceil_mode=True))
+
+    def hybrid_forward(self, F, x):
+        x = self.branches(x)
+        return x
+
+
+class BNInception(HybridBlock):
     """
     BN-Inception model from 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
     Shift,' https://arxiv.org/abs/1502.03167.
@@ -208,11 +314,9 @@ class BNInception299(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
-    dropout_rate : float, default 0.2
-        Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (299, 299)
+    in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
@@ -223,12 +327,11 @@ class BNInception299(HybridBlock):
                  mid1_channels_list,
                  mid2_channels_list,
                  bn_use_global_stats=False,
-                 dropout_rate=0.2,
                  in_channels=3,
-                 in_size=(299, 299),
+                 in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(BNInception299, self).__init__(**kwargs)
+        super(BNInception, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -245,30 +348,30 @@ class BNInception299(HybridBlock):
                 mid2_channels_list_i = mid2_channels_list[i]
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
-                    if i != 0:
-                        stage.add(nn.MaxPool2D(
-                            pool_size=3,
-                            strides=2,
-                            padding=0))
                     for j, out_channels in enumerate(channels_per_stage):
-                        stage.add(InceptionBlock(
-                            in_channels=in_channels,
-                            mid1_channels_list=mid1_channels_list_i[j],
-                            mid2_channels_list=mid2_channels_list_i[j],
-                            bn_use_global_stats=bn_use_global_stats))
+                        if (j == 0) and (i != 0):
+                            stage.add(ReductionBlock(
+                                in_channels=in_channels,
+                                mid1_channels_list=mid1_channels_list_i[j],
+                                mid2_channels_list=mid2_channels_list_i[j],
+                                bn_use_global_stats=bn_use_global_stats))
+                        else:
+                            stage.add(InceptionBlock(
+                                in_channels=in_channels,
+                                mid1_channels_list=mid1_channels_list_i[j],
+                                mid2_channels_list=mid2_channels_list_i[j],
+                                bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
-                pool_size=1,
+                pool_size=7,
                 strides=1))
 
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Dropout(rate=dropout_rate))
-            self.output.add(conv1x1_block(
-                channels=classes,
-                kernel_size=1,
-                in_channels=in_channels))
             self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
@@ -276,11 +379,11 @@ class BNInception299(HybridBlock):
         return x
 
 
-def get_bninception299(model_name=None,
-                       pretrained=False,
-                       ctx=cpu(),
-                       root=os.path.join('~', '.mxnet', 'models'),
-                       **kwargs):
+def get_bninception(model_name=None,
+                    pretrained=False,
+                    ctx=cpu(),
+                    root=os.path.join('~', '.mxnet', 'models'),
+                    **kwargs):
     """
     Create BN-Inception model with specific parameters.
 
@@ -297,31 +400,33 @@ def get_bninception299(model_name=None,
     """
 
     init_block_channels_list = [64, 192]
-    channels = [[256, 480], [512, 512, 512, 528, 832], [832, 1024]]
+    channels = [[256, 320], [576, 576, 576, 608, 608], [1056, 1024, 1024]]
     mid1_channels_list = [
-        [[96, 16],
-         [128, 32]],
-        [[96, 16],
-         [112, 24],
-         [112, 24],
-         [144, 32],
-         [160, 32]],
-        [[160, 32],
-         [192, 48]],
+        [[64, 64],
+         [64, 64]],
+        [[128, 64],  # 3c
+         [64, 96],  # 4a
+         [96, 96],  # 4a
+         [128, 128],  # 4c
+         [128, 160]],  # 4d
+        [[128, 192],  # 4e
+         [192, 160],  # 5a
+         [192, 192]],
     ]
     mid2_channels_list = [
-        [[64, 128, 32, 32],
-         [128, 192, 96, 64]],
-        [[192, 208, 48, 64],
-         [160, 224, 64, 64],
-         [160, 224, 64, 64],
-         [112, 288, 64, 64],
-         [256, 320, 128, 128]],
-        [[256, 320, 128, 128],
-         [384, 384, 128, 128]],
+        [[64, 64, 96, 32],
+         [64, 96, 96, 64]],
+        [[0, 160, 96, 0],  # 3c
+         [224, 96, 128, 128],  # 4a
+         [192, 128, 128, 128],  # 4b
+         [160, 160, 160, 128],  # 4c
+         [96, 192, 192, 128]],  # 4d
+        [[0, 192, 256, 0],  # 4e
+         [352, 320, 224, 128],  # 5a
+         [352, 320, 224, 128]],
     ]
 
-    net = BNInception299(
+    net = BNInception(
         channels=channels,
         init_block_channels_list=init_block_channels_list,
         mid1_channels_list=mid1_channels_list,
@@ -341,7 +446,7 @@ def get_bninception299(model_name=None,
     return net
 
 
-def bninception299(**kwargs):
+def bninception(**kwargs):
     """
     BN-Inception model from 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate
     Shift,' https://arxiv.org/abs/1502.03167.
@@ -355,7 +460,7 @@ def bninception299(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_bninception299(model_name="bninception299", **kwargs)
+    return get_bninception(model_name="bninception", **kwargs)
 
 
 def _test():
@@ -365,7 +470,7 @@ def _test():
     pretrained = False
 
     models = [
-        bninception299,
+        bninception,
     ]
 
     for model in models:
@@ -384,9 +489,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != bninception299 or weight_count == 6563944)
+        assert (model != bninception or weight_count == 11285224)
 
-        x = mx.nd.zeros((1, 3, 299, 299), ctx=ctx)
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
         assert (y.shape == (1, 1000))
 

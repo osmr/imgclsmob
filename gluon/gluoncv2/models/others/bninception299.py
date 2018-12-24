@@ -130,7 +130,8 @@ class StemBlock(HybridBlock):
             self.pool2 = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
-                padding=0)
+                padding=0,
+                ceil_mode=True)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)

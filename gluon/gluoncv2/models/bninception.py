@@ -120,8 +120,7 @@ class StemBlock(HybridBlock):
             self.pool1 = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
-                padding=0,
-                ceil_mode=True)
+                padding=0)
             self.conv2 = Inception3x3Branch(
                 in_channels=mid_channels,
                 out_channels=out_channels,

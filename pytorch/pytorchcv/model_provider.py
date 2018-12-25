@@ -1,5 +1,6 @@
 from .models.alexnet import *
 from .models.vgg import *
+from .models.bninception import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -45,9 +46,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-from .models.bninception import *
-from .models.others.oth_bninception import *
-
 __all__ = ['get_model']
 
 
@@ -66,6 +64,8 @@ _models = {
     'bn_vgg13b': bn_vgg13b,
     'bn_vgg16b': bn_vgg16b,
     'bn_vgg19b': bn_vgg19b,
+
+    'bninception': bninception,
 
     'resnet10': resnet10,
     'resnet12': resnet12,
@@ -301,9 +301,6 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
-
-    'oth_bninception': oth_bninception,
-    'bninception': bninception,
 }
 
 

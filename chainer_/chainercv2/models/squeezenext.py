@@ -11,48 +11,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class SqnxtConv(Chain):
-    """
-    SqueezeNext specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int, default (0, 0)
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad=(0, 0)):
-        super(SqnxtConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad)
-            self.bn = L.BatchNormalization(size=out_channels)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
+from .common import ConvBlock, conv1x1_block, SimpleSequential
 
 
 class SqnxtUnit(Chain):
@@ -84,40 +43,40 @@ class SqnxtUnit(Chain):
             self.resize_identity = False
 
         with self.init_scope():
-            self.conv1 = SqnxtConv(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=(in_channels // reduction_den),
-                ksize=1,
-                stride=stride)
-            self.conv2 = SqnxtConv(
+                stride=stride,
+                use_bias=True)
+            self.conv2 = conv1x1_block(
                 in_channels=(in_channels // reduction_den),
                 out_channels=(in_channels // (2 * reduction_den)),
-                ksize=1,
-                stride=1)
-            self.conv3 = SqnxtConv(
+                use_bias=True)
+            self.conv3 = ConvBlock(
                 in_channels=(in_channels // (2 * reduction_den)),
                 out_channels=(in_channels // reduction_den),
                 ksize=(1, 3),
                 stride=1,
-                pad=(0, 1))
-            self.conv4 = SqnxtConv(
+                pad=(0, 1),
+                use_bias=True)
+            self.conv4 = ConvBlock(
                 in_channels=(in_channels // reduction_den),
                 out_channels=(in_channels // reduction_den),
                 ksize=(3, 1),
                 stride=1,
-                pad=(1, 0))
-            self.conv5 = SqnxtConv(
+                pad=(1, 0),
+                use_bias=True)
+            self.conv5 = conv1x1_block(
                 in_channels=(in_channels // reduction_den),
                 out_channels=out_channels,
-                ksize=1,
-                stride=1)
+                use_bias=True)
 
             if self.resize_identity:
-                self.identity_conv = SqnxtConv(
+                self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    ksize=1,
-                    stride=stride)
+                    stride=stride,
+                    use_bias=True)
             self.activ = F.relu
 
     def __call__(self, x):
@@ -151,12 +110,13 @@ class SqnxtInitBlock(Chain):
                  out_channels):
         super(SqnxtInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = SqnxtConv(
+            self.conv = ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 ksize=7,
                 stride=2,
-                pad=1)
+                pad=1,
+                use_bias=True)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -217,11 +177,10 @@ class SqueezeNext(Chain):
                                 stride=stride))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', SqnxtConv(
+                setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
-                    ksize=1,
-                    stride=1))
+                    use_bias=True))
                 in_channels = final_block_channels
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,

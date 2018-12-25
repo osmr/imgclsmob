@@ -7,59 +7,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, maxpool2d
-
-
-def sqnxt_conv(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides,
-               padding=(0, 0),
-               training=False,
-               name="sqnxt_conv"):
-    """
-    SqueezeNext specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default (0, 0)
-        Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'sqnxt_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=True,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
-    return x
+from .common import maxpool2d, conv_block, conv1x1_block
 
 
 def sqnxt_unit(x,
@@ -102,57 +50,57 @@ def sqnxt_unit(x,
         resize_identity = False
 
     if resize_identity:
-        identity = sqnxt_conv(
+        identity = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=1,
             strides=strides,
+            use_bias=True,
             training=training,
             name=name + "/identity_conv")
     else:
         identity = x
 
-    x = sqnxt_conv(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=(in_channels // reduction_den),
-        kernel_size=1,
         strides=strides,
+        use_bias=True,
         training=training,
         name=name + "/conv1")
-    x = sqnxt_conv(
+    x = conv1x1_block(
         x=x,
         in_channels=(in_channels // reduction_den),
         out_channels=(in_channels // (2 * reduction_den)),
-        kernel_size=1,
-        strides=1,
+        use_bias=True,
         training=training,
         name=name + "/conv2")
-    x = sqnxt_conv(
+    x = conv_block(
         x=x,
         in_channels=(in_channels // (2 * reduction_den)),
         out_channels=(in_channels // reduction_den),
         kernel_size=(1, 3),
         strides=1,
         padding=(0, 1),
+        use_bias=True,
         training=training,
         name=name + "/conv3")
-    x = sqnxt_conv(
+    x = conv_block(
         x=x,
         in_channels=(in_channels // reduction_den),
         out_channels=(in_channels // reduction_den),
         kernel_size=(3, 1),
         strides=1,
         padding=(1, 0),
+        use_bias=True,
         training=training,
         name=name + "/conv4")
-    x = sqnxt_conv(
+    x = conv1x1_block(
         x=x,
         in_channels=(in_channels // reduction_den),
         out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
+        use_bias=True,
         training=training,
         name=name + "/conv5")
 
@@ -187,13 +135,14 @@ def sqnxt_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = sqnxt_conv(
+    x = conv_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=7,
         strides=2,
         padding=1,
+        use_bias=True,
         training=training,
         name=name + "/conv")
     x = maxpool2d(
@@ -277,12 +226,11 @@ class SqueezeNext(object):
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = sqnxt_conv(
+        x = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
-            kernel_size=1,
-            strides=1,
+            use_bias=True,
             training=training,
             name="features/final_block")
         x = tf.layers.average_pooling2d(

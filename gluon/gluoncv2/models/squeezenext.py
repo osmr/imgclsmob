@@ -8,48 +8,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class SqnxtConv(HybridBlock):
-    """
-    SqueezeNext specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default (0, 0)
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding=(0, 0),
-                 **kwargs):
-        super(SqnxtConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
+from .common import ConvBlock, conv1x1_block
 
 
 class SqnxtUnit(HybridBlock):
@@ -82,40 +41,40 @@ class SqnxtUnit(HybridBlock):
             self.resize_identity = False
 
         with self.name_scope():
-            self.conv1 = SqnxtConv(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=(in_channels // reduction_den),
-                kernel_size=1,
-                strides=strides)
-            self.conv2 = SqnxtConv(
+                strides=strides,
+                use_bias=True)
+            self.conv2 = conv1x1_block(
                 in_channels=(in_channels // reduction_den),
                 out_channels=(in_channels // (2 * reduction_den)),
-                kernel_size=1,
-                strides=1)
-            self.conv3 = SqnxtConv(
+                use_bias=True)
+            self.conv3 = ConvBlock(
                 in_channels=(in_channels // (2 * reduction_den)),
                 out_channels=(in_channels // reduction_den),
                 kernel_size=(1, 3),
                 strides=1,
-                padding=(0, 1))
-            self.conv4 = SqnxtConv(
+                padding=(0, 1),
+                use_bias=True)
+            self.conv4 = ConvBlock(
                 in_channels=(in_channels // reduction_den),
                 out_channels=(in_channels // reduction_den),
                 kernel_size=(3, 1),
                 strides=1,
-                padding=(1, 0))
-            self.conv5 = SqnxtConv(
+                padding=(1, 0),
+                use_bias=True)
+            self.conv5 = conv1x1_block(
                 in_channels=(in_channels // reduction_den),
                 out_channels=out_channels,
-                kernel_size=1,
-                strides=1)
+                use_bias=True)
 
             if self.resize_identity:
-                self.identity_conv = SqnxtConv(
+                self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    kernel_size=1,
-                    strides=strides)
+                    strides=strides,
+                    use_bias=True)
             self.activ = nn.Activation('relu')
 
     def hybrid_forward(self, F, x):
@@ -150,12 +109,13 @@ class SqnxtInitBlock(HybridBlock):
                  **kwargs):
         super(SqnxtInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = SqnxtConv(
+            self.conv = ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=7,
                 strides=2,
-                padding=1)
+                padding=1,
+                use_bias=True)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -215,11 +175,10 @@ class SqueezeNext(HybridBlock):
                             strides=strides))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(SqnxtConv(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
-                kernel_size=1,
-                strides=1))
+                use_bias=True))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
@@ -419,7 +378,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        net.hybridize()
+        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():

@@ -1,4 +1,5 @@
 from .models.alexnet import *
+from .models.zfnet import *
 from .models.vgg import *
 from .models.bninception import *
 from .models.resnet import *
@@ -51,6 +52,8 @@ __all__ = ['get_model']
 
 _models = {
     'alexnet': alexnet,
+
+    'zfnet': zfnet,
 
     'vgg11': vgg11,
     'vgg13': vgg13,

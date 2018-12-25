@@ -10,6 +10,7 @@ scripts for training/validating/converting models. All models are designed for u
 ## List of models
 
 - AlexNet (['One weird trick for parallelizing convolutional neural networks'](https://arxiv.org/abs/1404.5997))
+- ZFNet (['Visualizing and Understanding Convolutional Networks'](https://arxiv.org/abs/1311.2901))
 - VGG/BN-VGG (['Very Deep Convolutional Networks for Large-Scale Image Recognition'](https://arxiv.org/abs/1409.1556))
 - BN-Inception (['Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift'](https://arxiv.org/abs/1502.03167))
 - ResNet (['Deep Residual Learning for Image Recognition'](https://arxiv.org/abs/1512.03385))

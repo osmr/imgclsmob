@@ -6,6 +6,7 @@ import mxnet as mx
 
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
+from gluon.model_stats import measure_model
 from gluon.imagenet1k import add_dataset_parser_arguments
 from gluon.imagenet1k import get_batch_fn
 from gluon.imagenet1k import get_val_data_source
@@ -37,6 +38,11 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved parameters if not None')
+    parser.add_argument(
+        '--calc-flops',
+        dest='calc_flops',
+        action='store_true',
+        help='calculate FLOPs')
 
     parser.add_argument(
         '--input-size',
@@ -109,10 +115,21 @@ def test(net,
          data_source_needs_reset,
          dtype,
          ctx,
+         input_image_size,
+         in_channels,
          calc_weight_count=False,
+         calc_flops=False,
          extended_log=False):
     acc_top1 = mx.metric.Accuracy()
     acc_top5 = mx.metric.TopKAccuracy(5)
+
+    if calc_weight_count:
+        weight_count = calc_net_weight_count(net)
+        logging.info('Model: {} trainable parameters'.format(weight_count))
+    if calc_flops:
+        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
+        logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M), MACs: {} ({:.2f}M)'.format(
+            num_params, num_params / 1e6, num_flops, num_flops / 1e6, num_macs, num_macs / 1e6))
 
     tic = time.time()
     err_top1_val, err_top5_val = validate(
@@ -124,9 +141,6 @@ def test(net,
         data_source_needs_reset=data_source_needs_reset,
         dtype=dtype,
         ctx=ctx)
-    if calc_weight_count:
-        weight_count = calc_net_weight_count(net)
-        logging.info('Model: {} trainable parameters'.format(weight_count))
     if extended_log:
         logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
             top1=err_top1_val, top5=err_top5_val))
@@ -159,6 +173,7 @@ def main():
         tune_layers="",
         classes=args.num_classes,
         in_channels=args.in_channels,
+        do_hybridize=(not args.calc_flops),
         ctx=ctx)
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
@@ -178,8 +193,11 @@ def main():
         data_source_needs_reset=args.use_rec,
         dtype=args.dtype,
         ctx=ctx,
+        input_image_size=input_image_size,
+        in_channels=args.in_channels,
         # calc_weight_count=(not log_file_exist),
         calc_weight_count=True,
+        calc_flops=args.calc_flops,
         extended_log=True)
 
 

@@ -20,6 +20,7 @@ def prepare_model(model_name,
                   tune_layers,
                   classes=None,
                   in_channels=None,
+                  do_hybridize=True,
                   ctx=mx.cpu()):
     kwargs = {'ctx': ctx,
               'pretrained': use_pretrained}
@@ -39,9 +40,10 @@ def prepare_model(model_name,
 
     net.cast(dtype)
 
-    net.hybridize(
-        static_alloc=True,
-        static_shape=True)
+    if do_hybridize:
+        net.hybridize(
+            static_alloc=True,
+            static_shape=True)
 
     if pretrained_model_file_path or use_pretrained:
         for param in net.collect_params().values():

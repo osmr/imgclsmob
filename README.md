@@ -257,6 +257,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,318.75M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0636-65b5d389.params.log)) |
 | CondenseNet-74 (C=G=4) | 26.82 | 8.64 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0864-cde68fa2.params.log)) |
 | CondenseNet-74 (C=G=8) | 29.76 | 10.49 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1049-4cf4a08e.params.log)) |
+| PeleeNet | 31.71 | 11.25 | 2,802,248 | 511.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.141/peleenet-1125-38d4fb24.params.log)) |
 | WRN-50-2 | 22.15 | 6.12 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0612-f8013e68.params.log)) |
 | DRN-C-26 | 25.68 | 7.89 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0789-ee56ffab.params.log)) |
 | DRN-C-42 | 23.80 | 6.92 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0692-f89c26d6.params.log)) |
@@ -380,6 +381,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 23.10 | 6.63 | 20,013,928 | 4,318.75M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0663-71ece4ad.pth.log)) |
 | CondenseNet-74 (C=G=4) | 26.25 | 8.28 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c4_g4-0828-5ba55049.pth.log)) |
 | CondenseNet-74 (C=G=8) | 28.93 | 10.06 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.4/condensenet74_c8_g8-1006-3574d874.pth.log)) |
+| PeleeNet | 31.81 | 11.51 | 2,802,248 | 511.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.141/peleenet-1151-9c47b802.pth.log)) |
 | WRN-50-2 | 22.53 | 6.41 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0641-83897ab9.pth.log)) |
 | DRN-C-26 | 24.86 | 7.55 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0755-35405bd5.pth.log)) |
 | DRN-C-42 | 22.94 | 6.57 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0657-7c99c460.pth.log)) |
@@ -497,6 +499,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 22.64 | 6.29 | 20,013,928 | 4,318.75M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.29/densenet201-0629-77702939.npz.log)) |
 | CondenseNet-74 (C=G=4) | 26.81 | 8.61 | 4,773,944 | 533.64M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.36/condensenet74_c4_g4-0861-ef6077ec.npz.log)) |
 | CondenseNet-74 (C=G=8) | 29.74 | 10.43 | 2,935,416 | 278.55M | From [ShichenLiu/CondenseNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.36/condensenet74_c8_g8-1043-277fbfb8.npz.log)) |
+| PeleeNet | 31.61 | 11.27 | 2,802,248 | 511.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.141/peleenet-1127-ef057fc9.npz.log)) |
 | WRN-50-2 | 22.06 | 6.13 | 68,849,128 | 11,412.82M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.113/wrn50_2-0613-d0cd9171.npz.log)) |
 | DRN-C-26 | 25.68 | 7.88 | 21,126,584 | 20,838.70M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc26-0788-762c34c1.npz.log)) |
 | DRN-C-42 | 23.72 | 6.93 | 31,234,744 | 31,236.97M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.116/drnc42-0693-ec938cc4.npz.log)) |

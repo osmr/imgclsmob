@@ -339,8 +339,8 @@ def oth_fishnet150(**kwargs):
         'num_down_sample': 3,
         'num_up_sample': 3,
     }
-    cfg = {**net_cfg, **kwargs}
-    return get_fishnet(**cfg)
+    # cfg = {**net_cfg, **kwargs}
+    return get_fishnet(**net_cfg)
 
 
 def _calc_width(net):

@@ -36,11 +36,14 @@ def measure_model(model,
     global num_flops
     global num_macs
     global num_params
+    global num_leaves
     num_flops = 0
     num_macs = 0
     num_params = 0
+    num_leaves = 0
 
     def call_hook(block, x, y):
+        assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
         if isinstance(block, nn.Dense):
             in_units = block._in_units
@@ -96,14 +99,6 @@ def measure_model(model,
         elif type(block) in [nn.MaxPool2D, nn.AvgPool2D, nn.GlobalAvgPool2D, nn.GlobalMaxPool2D]:
             assert (x[0].shape[1] == y.shape[1])
             pool_size = block._kwargs["kernel"]
-            # x_h = x[0].shape[2]
-            # x_w = x[0].shape[3]
-            # strides = block._kwargs["stride"]
-            # padding = block._kwargs["pad"]
-            # y_h = (x_h + 2 * padding[0] - pool_size[0]) // strides[0] + 1
-            # y_w = (x_w + 2 * padding[1] - pool_size[1]) // strides[1] + 1
-            # assert (y_h == y.shape[2])
-            # assert (y_w == y.shape[3])
             y_h = y.shape[2]
             y_w = y.shape[3]
             channels = x[0].shape[1]
@@ -133,12 +128,15 @@ def measure_model(model,
         global num_flops
         global num_macs
         global num_params
+        global num_leaves
         num_flops += extra_num_flops
         num_macs += extra_num_macs
         num_params += calc_block_num_params(block)
+        num_leaves += 1
 
     def register_forward_hooks(a_block):
         if len(a_block._children) > 0:
+            assert (calc_block_num_params(a_block) == 0)
             children_handles = []
             for child_block in a_block._children.values():
                 child_handles = register_forward_hooks(child_block)
@@ -153,6 +151,9 @@ def measure_model(model,
     ctx = mx.cpu()
     x = mx.nd.zeros((1, in_channels, in_size[0], in_size[1]), ctx=ctx)
     model(x)
+
+    num_params1 = calc_block_num_params(model)
+    assert(num_params == num_params1)
 
     [h.detach() for h in hook_handles]
 

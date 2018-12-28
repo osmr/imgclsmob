@@ -75,8 +75,8 @@ def calc_net_weight_count(net):
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-        if np.prod(param.shape) > 0:
-            print("name={}, d_weight_count={}".format(param.name, np.prod(param.shape)))
+        # if np.prod(param.shape) > 0:
+        #     print("name={}, d_weight_count={}".format(param.name, np.prod(param.shape)))
     return weight_count
 
 

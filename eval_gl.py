@@ -126,8 +126,27 @@ def test(net,
          calc_flops=False,
          calc_flops_only=True,
          extended_log=False):
-    acc_top1 = mx.metric.Accuracy()
-    acc_top5 = mx.metric.TopKAccuracy(5)
+    if not calc_flops_only:
+        acc_top1 = mx.metric.Accuracy()
+        acc_top5 = mx.metric.TopKAccuracy(5)
+        tic = time.time()
+        err_top1_val, err_top5_val = validate(
+            acc_top1=acc_top1,
+            acc_top5=acc_top5,
+            net=net,
+            val_data=val_data,
+            batch_fn=batch_fn,
+            data_source_needs_reset=data_source_needs_reset,
+            dtype=dtype,
+            ctx=ctx)
+        if extended_log:
+            logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+                top1=err_top1_val, top5=err_top5_val))
+        else:
+            logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+                top1=err_top1_val, top5=err_top5_val))
+        logging.info('Time cost: {:.4f} sec'.format(
+            time.time() - tic))
 
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
@@ -143,27 +162,6 @@ def test(net,
             flops=num_flops, flops_m=num_flops / 1e6,
             flops2=num_flops / 2, flops2_m=num_flops / 2 / 1e6,
             macs=num_macs, macs_m=num_macs / 1e6))
-    if calc_flops_only:
-        return
-
-    tic = time.time()
-    err_top1_val, err_top5_val = validate(
-        acc_top1=acc_top1,
-        acc_top5=acc_top5,
-        net=net,
-        val_data=val_data,
-        batch_fn=batch_fn,
-        data_source_needs_reset=data_source_needs_reset,
-        dtype=dtype,
-        ctx=ctx)
-    if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
-        time.time() - tic))
 
 
 def main():

@@ -7,14 +7,22 @@ from mxnet.gluon.contrib.nn import Identity
 __all__ = ['measure_model']
 
 
+def calc_block_num_params2(net):
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    return weight_count
+
+
 def calc_block_num_params(block):
     weight_count = 0
     for param in block.params.values():
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
-    # if weight_count > 0:
-    #     print("name={}, weight_count={}".format(block.name, weight_count))
     return weight_count
 
 
@@ -36,15 +44,16 @@ def measure_model(model,
     global num_flops
     global num_macs
     global num_params
-    global num_leaves
+    global names
     num_flops = 0
     num_macs = 0
     num_params = 0
-    num_leaves = 0
+    names = {}
 
     def call_hook(block, x, y):
         assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
+        assert (len(block._children) == 0)
         if isinstance(block, nn.Dense):
             in_units = block._in_units
             out_units = block._units
@@ -128,11 +137,12 @@ def measure_model(model,
         global num_flops
         global num_macs
         global num_params
-        global num_leaves
+        global names
         num_flops += extra_num_flops
         num_macs += extra_num_macs
-        num_params += calc_block_num_params(block)
-        num_leaves += 1
+        if block.name not in names:
+            names[block.name] = 1
+            num_params += calc_block_num_params(block)
 
     def register_forward_hooks(a_block):
         if len(a_block._children) > 0:
@@ -152,7 +162,7 @@ def measure_model(model,
     x = mx.nd.zeros((1, in_channels, in_size[0], in_size[1]), ctx=ctx)
     model(x)
 
-    num_params1 = calc_block_num_params(model)
+    num_params1 = calc_block_num_params2(model)
     assert(num_params == num_params1)
 
     [h.detach() for h in hook_handles]

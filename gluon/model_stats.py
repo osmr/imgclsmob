@@ -1,7 +1,8 @@
 import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
-from .gluoncv2.models.common import ReLU6
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2
+from mxnet.gluon.contrib.nn import Identity
 
 __all__ = ['measure_model']
 
@@ -12,6 +13,8 @@ def calc_block_num_params(block):
         if (param.shape is None) or (not param._differentiable):
             continue
         weight_count += np.prod(param.shape)
+    # if weight_count > 0:
+    #     print("name={}, weight_count={}".format(block.name, weight_count))
     return weight_count
 
 
@@ -56,6 +59,9 @@ def measure_model(model,
                 extra_num_macs = 0
             else:
                 raise TypeError('Unknown activation type: {}'.format(block._act_type))
+        elif isinstance(block, nn.LeakyReLU):
+            extra_num_flops = 2 * x[0].size
+            extra_num_macs = 0
         elif isinstance(block, ReLU6):
             extra_num_flops = x[0].size
             extra_num_macs = 0
@@ -71,31 +77,54 @@ def measure_model(model,
             out_channels = block._channels
             y_h = (x_h + 2 * padding[0] - dilation[0] * (kernel_size[0] - 1) - 1) // strides[0] + 1
             y_w = (x_w + 2 * padding[1] - dilation[1] * (kernel_size[1] - 1) - 1) // strides[1] + 1
+            assert (out_channels == y.shape[1])
             assert (y_h == y.shape[2])
             assert (y_w == y.shape[3])
             kernel_total_size = kernel_size[0] * kernel_size[1]
             y_size = y_h * y_w
-            extra_num_macs = kernel_total_size * y_size * in_channels * out_channels // groups
+            extra_num_macs = kernel_total_size * in_channels * y_size * out_channels // groups
             if block.bias is None:
-                extra_num_flops = (2 * kernel_total_size - 1) * y_size * in_channels * out_channels // groups
+                extra_num_flops = (2 * kernel_total_size * y_size - 1) * in_channels * out_channels // groups
             else:
-                extra_num_flops = 2 * kernel_total_size * y_size * in_channels * out_channels // groups
+                extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
         elif isinstance(block, nn.BatchNorm):
-            extra_num_flops = x[0].size
+            extra_num_flops = 4 * x[0].size
             extra_num_macs = 0
-        elif type(block) in [nn.MaxPool2D, nn.AvgPool2D]:
-            x_h = x[0].shape[2]
-            x_w = x[0].shape[3]
+        elif isinstance(block, nn.InstanceNorm):
+            extra_num_flops = 4 * x[0].size
+            extra_num_macs = 0
+        elif type(block) in [nn.MaxPool2D, nn.AvgPool2D, nn.GlobalAvgPool2D, nn.GlobalMaxPool2D]:
+            assert (x[0].shape[1] == y.shape[1])
             pool_size = block._kwargs["kernel"]
-            strides = block._kwargs["stride"]
-            padding = block._kwargs["pad"]
-            y_h = (x_h + 2 * padding[0] - pool_size[0]) // strides[0] + 1
-            y_w = (x_w + 2 * padding[1] - pool_size[1]) // strides[1] + 1
-            assert (y_h == y.shape[2])
-            assert (y_w == y.shape[3])
-            extra_num_flops = (x_h * x_w) * (y_h * y_w) * (pool_size[0] * pool_size[1])
+            # x_h = x[0].shape[2]
+            # x_w = x[0].shape[3]
+            # strides = block._kwargs["stride"]
+            # padding = block._kwargs["pad"]
+            # y_h = (x_h + 2 * padding[0] - pool_size[0]) // strides[0] + 1
+            # y_w = (x_w + 2 * padding[1] - pool_size[1]) // strides[1] + 1
+            # assert (y_h == y.shape[2])
+            # assert (y_w == y.shape[3])
+            y_h = y.shape[2]
+            y_w = y.shape[3]
+            channels = x[0].shape[1]
+            y_size = y_h * y_w
+            pool_total_size = pool_size[0] * pool_size[1]
+            extra_num_flops = channels * y_size * pool_total_size
+            extra_num_macs = 0
+        elif isinstance(block, nn.Dropout):
+            extra_num_flops = 0
             extra_num_macs = 0
         elif type(block) in [nn.Flatten]:
+            extra_num_flops = 0
+            extra_num_macs = 0
+        elif isinstance(block, nn.HybridSequential):
+            assert (len(block._children) == 0)
+            extra_num_flops = 0
+            extra_num_macs = 0
+        elif type(block) in [ChannelShuffle, ChannelShuffle2]:
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, Identity):
             extra_num_flops = 0
             extra_num_macs = 0
         else:

@@ -2,7 +2,7 @@
     Model store which provides pretrained models.
 """
 
-__all__ = ['get_model_file', 'load_model', 'download_model']
+__all__ = ['get_model_file', 'load_model', 'download_model', 'calc_num_params']
 
 import os
 import zipfile
@@ -357,3 +357,20 @@ def download_model(net,
             model_name=model_name,
             local_model_store_dir_path=local_model_store_dir_path),
         ignore_extra=ignore_extra)
+
+
+def calc_num_params(net):
+    """
+    Calculate the count of trainable parameters for a model.
+
+    Parameters
+    ----------
+    net : Module
+        Analyzed model.
+    """
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count

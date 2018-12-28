@@ -38,6 +38,11 @@ def parse_args():
         action='store_true',
         help='calculate FLOPs')
     parser.add_argument(
+        '--calc-flops-only',
+        dest='calc_flops_only',
+        action='store_true',
+        help='calculate FLOPs without quality estimation')
+    parser.add_argument(
         '--remove-module',
         action='store_true',
         help='enable if stored model has module')
@@ -52,6 +57,16 @@ def parse_args():
         type=float,
         default=0.875,
         help='inverted ratio for input image crop. default is 0.875')
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=1000,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=3,
+        help='number of input channels')
 
     parser.add_argument(
         '--num-gpus',
@@ -101,34 +116,44 @@ def test(net,
          val_data,
          use_cuda,
          input_image_size,
+         in_channels,
          calc_weight_count=False,
          calc_flops=False,
+         calc_flops_only=True,
          extended_log=False):
-    acc_top1 = AverageMeter()
-    acc_top5 = AverageMeter()
+    if not calc_flops_only:
+        acc_top1 = AverageMeter()
+        acc_top5 = AverageMeter()
+        tic = time.time()
+        err_top1_val, err_top5_val = validate(
+            acc_top1=acc_top1,
+            acc_top5=acc_top5,
+            net=net,
+            val_data=val_data,
+            use_cuda=use_cuda)
+        if extended_log:
+            logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+                top1=err_top1_val, top5=err_top5_val))
+        else:
+            logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+                top1=err_top1_val, top5=err_top5_val))
+        logging.info('Time cost: {:.4f} sec'.format(
+            time.time() - tic))
 
-    tic = time.time()
-    err_top1_val, err_top5_val = validate(
-        acc_top1=acc_top1,
-        acc_top5=acc_top5,
-        net=net,
-        val_data=val_data,
-        use_cuda=use_cuda)
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
-        logging.info('Model: {} trainable parameters'.format(weight_count))
+        if not calc_flops:
+            logging.info('Model: {} trainable parameters'.format(weight_count))
     if calc_flops:
-        n_flops, n_params = measure_model(net, input_image_size, input_image_size)
-        logging.info('Params: {} ({:.2f}M), FLOPs: {} ({:.2f}M)'.format(
-            n_params, n_params / 1e6, n_flops, n_flops / 1e6))
-    if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
-            top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
-        time.time() - tic))
+        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
+        assert (not calc_weight_count) or (weight_count == num_params)
+        stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
+                   " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"
+        logging.info(stat_msg.format(
+            params=num_params, params_m=num_params / 1e6,
+            flops=num_flops, flops_m=num_flops / 1e6,
+            flops2=num_flops / 2, flops2_m=num_flops / 2 / 1e6,
+            macs=num_macs, macs_m=num_macs / 1e6))
 
 
 def main():
@@ -163,15 +188,17 @@ def main():
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
 
-    assert (args.use_pretrained or args.resume.strip())
+    assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
         val_data=val_data,
         use_cuda=use_cuda,
         # calc_weight_count=(not log_file_exist),
-        input_image_size=input_image_size,
+        input_image_size=(input_image_size, input_image_size),
+        in_channels=args.in_channels,
         calc_weight_count=True,
         calc_flops=args.calc_flops,
+        calc_flops_only=args.calc_flops_only,
         extended_log=True)
 
 

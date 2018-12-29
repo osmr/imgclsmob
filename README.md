@@ -191,8 +191,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 - CondenseNet models are only so-called converted versions.
 - ShuffleNetV2/ShuffleNetV2b/ShuffleNetV2c are different implementations of the same architecture.
 - All models require the same ordinary normalization.
-- FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs. The number of FLOPs is
-determined only for the leaves of the computational graph. 
+- FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs.
 
 ### For Gluon
 

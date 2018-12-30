@@ -22,6 +22,7 @@ from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.condensenet import *
+from .models.sparsenet import *
 from .models.peleenet import *
 from .models.wrn import *
 from .models.drn import *
@@ -199,6 +200,12 @@ _models = {
 
     'condensenet74_c4_g4': condensenet74_c4_g4,
     'condensenet74_c8_g8': condensenet74_c8_g8,
+
+    'sparsenet121': sparsenet121,
+    'sparsenet161': sparsenet161,
+    'sparsenet169': sparsenet169,
+    'sparsenet201': sparsenet201,
+    'sparsenet264': sparsenet264,
 
     'peleenet': peleenet,
 

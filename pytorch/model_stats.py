@@ -17,6 +17,7 @@ def calc_block_num_params2(net):
 
 
 def calc_block_num_params(module):
+    assert isinstance(module, nn.Module)
     net_params = filter(lambda p: p.requires_grad, module.parameters(recurse=False))
     weight_count = 0
     for param in net_params:
@@ -171,7 +172,6 @@ def measure_model(model,
             return [handle]
 
     if use_cuda:
-        model_old = model
         model = model.cpu()
 
     hook_handles = register_forward_hooks(model)
@@ -185,8 +185,5 @@ def measure_model(model,
     num_params = calc_block_num_params2(model)
 
     [h.remove() for h in hook_handles]
-
-    if use_cuda:
-        model = model_old
 
     return num_flops, num_macs, num_params

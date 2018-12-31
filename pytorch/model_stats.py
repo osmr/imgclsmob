@@ -26,7 +26,8 @@ def calc_block_num_params(module):
 
 def measure_model(model,
                   in_channels,
-                  in_size):
+                  in_size,
+                  use_cuda):
     """
     Calculate model statistics.
 
@@ -38,6 +39,8 @@ def measure_model(model,
         Number of input channels.
     in_size : tuple of two ints
         Spatial size of the expected input image.
+    use_cuda : bool
+        Whether use GPU in model.
     """
     global num_flops
     global num_macs
@@ -167,6 +170,10 @@ def measure_model(model,
             handle = a_module.register_forward_hook(call_hook)
             return [handle]
 
+    if use_cuda:
+        model_old = model
+        model = model.cpu()
+
     hook_handles = register_forward_hooks(model)
 
     x = Variable(torch.zeros(1, in_channels, in_size[0], in_size[1]))
@@ -178,5 +185,8 @@ def measure_model(model,
     num_params = calc_block_num_params2(model)
 
     [h.remove() for h in hook_handles]
+
+    if use_cuda:
+        model = model_old
 
     return num_flops, num_macs, num_params

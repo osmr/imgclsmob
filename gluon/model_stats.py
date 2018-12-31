@@ -28,7 +28,8 @@ def calc_block_num_params(block):
 
 def measure_model(model,
                   in_channels,
-                  in_size):
+                  in_size,
+                  ctx=mx.cpu()):
     """
     Calculate model statistics.
 
@@ -40,6 +41,8 @@ def measure_model(model,
         Number of input channels.
     in_size : tuple of two ints
         Spatial size of the expected input image.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
     """
     global num_flops
     global num_macs
@@ -158,7 +161,6 @@ def measure_model(model,
 
     hook_handles = register_forward_hooks(model)
 
-    ctx = mx.cpu()
     x = mx.nd.zeros((1, in_channels, in_size[0], in_size[1]), ctx=ctx)
     model(x)
 

@@ -153,7 +153,7 @@ def test(net,
         if not calc_flops:
             logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
-        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size, ctx)
+        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size, ctx[0])
         assert (not calc_weight_count) or (weight_count == num_params)
         stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
                    " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"

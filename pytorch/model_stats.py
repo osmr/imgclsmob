@@ -18,17 +18,17 @@ def calc_block_num_params2(net):
 
 def calc_block_num_params(module):
     assert isinstance(module, nn.Module)
-    net_params = filter(lambda p: p.requires_grad, module.parameters(recurse=False))
+    net_params = filter(lambda p: isinstance(p[1], nn.parameter.Parameter) and
+                                  p[1].requires_grad, module._parameters.items())
     weight_count = 0
     for param in net_params:
-        weight_count += np.prod(param.size())
+        weight_count += np.prod(param[1].size())
     return weight_count
 
 
 def measure_model(model,
                   in_channels,
-                  in_size,
-                  use_cuda):
+                  in_size):
     """
     Calculate model statistics.
 
@@ -40,8 +40,6 @@ def measure_model(model,
         Number of input channels.
     in_size : tuple of two ints
         Spatial size of the expected input image.
-    use_cuda : bool
-        Whether use GPU in model.
     """
     global num_flops
     global num_macs
@@ -170,9 +168,6 @@ def measure_model(model,
         else:
             handle = a_module.register_forward_hook(call_hook)
             return [handle]
-
-    if use_cuda:
-        model = model.cpu()
 
     hook_handles = register_forward_hooks(model)
 

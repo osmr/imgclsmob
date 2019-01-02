@@ -48,10 +48,14 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.others.oth_senet import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'oth_senet154': oth_senet154,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

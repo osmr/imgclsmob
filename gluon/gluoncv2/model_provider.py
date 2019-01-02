@@ -48,20 +48,28 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-from .models.others.oth_mobilenet import *
+from .models.others.oth_resnet import *
+from .models.others.oth_resnetv1b import *
 
 __all__ = ['get_model']
 
 
 _models = {
-    'oth_mobilenet1_0': oth_mobilenet1_0,
-    'oth_mobilenet0_75': oth_mobilenet0_75,
-    'oth_mobilenet0_5': oth_mobilenet0_5,
-    'oth_mobilenet0_25': oth_mobilenet0_25,
-    'oth_mobilenet_v2_1_0': oth_mobilenet_v2_1_0,
-    'oth_mobilenet_v2_0_75': oth_mobilenet_v2_0_75,
-    'oth_mobilenet_v2_0_5': oth_mobilenet_v2_0_5,
-    'oth_mobilenet_v2_0_25': oth_mobilenet_v2_0_25,
+    'oth_resnet18_v1': oth_resnet18_v1,
+    'oth_resnet34_v1': oth_resnet34_v1,
+    'oth_resnet50_v1': oth_resnet50_v1,
+    'oth_resnet101_v1': oth_resnet101_v1,
+    'oth_resnet152_v1': oth_resnet152_v1,
+    'oth_resnet18_v2': oth_resnet18_v2,
+    'oth_resnet34_v2': oth_resnet34_v2,
+    'oth_resnet50_v2': oth_resnet50_v2,
+    'oth_resnet101_v2': oth_resnet101_v2,
+    'oth_resnet152_v2': oth_resnet152_v2,
+    'oth_resnet18_v1b': oth_resnet18_v1b,
+    'oth_resnet34_v1b': oth_resnet34_v1b,
+    'oth_resnet50_v1b': oth_resnet50_v1b,
+    'oth_resnet101_v1b': oth_resnet101_v1b,
+    'oth_resnet152_v1b': oth_resnet152_v1b,
 
     'alexnet': alexnet,
 

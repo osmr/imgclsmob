@@ -8,102 +8,13 @@ __all__ = ['DarkNet', 'darknet_ref', 'darknet_tiny', 'darknet19']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class DarkConv(HybridBlock):
-    """
-    DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 padding,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(DarkConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            # self.bn = nn.BatchNorm(in_channels=out_channels, momentum=0.01)
-            self.activ = nn.LeakyReLU(alpha=0.1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def dark_conv1x1(in_channels,
-                 out_channels,
-                 bn_use_global_stats):
-    """
-    1x1 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    return DarkConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        padding=0,
-        bn_use_global_stats=bn_use_global_stats)
-
-
-def dark_conv3x3(in_channels,
-                 out_channels,
-                 bn_use_global_stats):
-    """
-    3x3 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    return DarkConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        padding=1,
-        bn_use_global_stats=bn_use_global_stats)
+from .common import conv1x1_block, conv3x3_block
 
 
 def dark_convYxY(in_channels,
                  out_channels,
                  bn_use_global_stats,
+                 alpha,
                  pointwise=True):
     """
     DarkNet unit.
@@ -116,19 +27,23 @@ def dark_convYxY(in_channels,
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    alpha : float
+        Slope coefficient for Leaky ReLU activation.
     pointwise : bool
         Whether use 1x1 (pointwise) convolution or 3x3 convolution.
     """
     if pointwise:
-        return dark_conv1x1(
+        return conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            bn_use_global_stats=bn_use_global_stats)
+            bn_use_global_stats=bn_use_global_stats,
+            activ_func=(lambda: nn.LeakyReLU(alpha=alpha)))
     else:
-        return dark_conv3x3(
+        return conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            bn_use_global_stats=bn_use_global_stats)
+            bn_use_global_stats=bn_use_global_stats,
+            activ_func=(lambda: nn.LeakyReLU(alpha=alpha)))
 
 
 class DarkNet(HybridBlock):
@@ -145,6 +60,8 @@ class DarkNet(HybridBlock):
         Window size of the final average pooling.
     cls_activ : bool
         Whether classification convolution layer uses an activation.
+    alpha : float, default 0.1
+        Slope coefficient for Leaky ReLU activation.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -160,6 +77,7 @@ class DarkNet(HybridBlock):
                  odd_pointwise,
                  avg_pool_size,
                  cls_activ,
+                 alpha=0.1,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -179,6 +97,7 @@ class DarkNet(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             bn_use_global_stats=bn_use_global_stats,
+                            alpha=alpha,
                             pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
                         in_channels = out_channels
                     if i != len(channels) - 1:
@@ -193,7 +112,7 @@ class DarkNet(HybridBlock):
                 kernel_size=1,
                 in_channels=in_channels))
             if cls_activ:
-                self.output.add(nn.LeakyReLU(alpha=0.1))
+                self.output.add(nn.LeakyReLU(alpha=alpha))
             self.output.add(nn.AvgPool2D(
                 pool_size=avg_pool_size,
                 strides=1))
@@ -343,12 +262,14 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != darknet_ref or weight_count == 7319416)
         assert (model != darknet_tiny or weight_count == 1042104)
         assert (model != darknet19 or weight_count == 20842376)

@@ -55,7 +55,7 @@ def inv_res_unit(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         groups=groups,
-        act_type="relu6",
+        activation="relu6",
         activate=False,
         training=training,
         name=name + "/conv1")
@@ -67,7 +67,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
-        act_type="relu6",
+        activation="relu6",
         activate=True,
         training=training,
         name=name + "/conv2")
@@ -76,7 +76,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=out_channels,
         groups=groups,
-        act_type="relu6",
+        activation="relu6",
         activate=False,
         training=training,
         name=name + "/conv3")
@@ -147,7 +147,7 @@ class IGCV3(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             strides=2,
-            act_type="relu6",
+            activation="relu6",
             training=training,
             name="features/init_block")
         in_channels = self.init_block_channels
@@ -168,7 +168,7 @@ class IGCV3(object):
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
-            act_type="relu6",
+            activation="relu6",
             training=training,
             name="features/final_block")
         x = tf.layers.average_pooling2d(

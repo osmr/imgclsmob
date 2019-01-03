@@ -15,7 +15,7 @@ def dark_convYxY(in_channels,
                  out_channels,
                  bn_use_global_stats,
                  alpha,
-                 pointwise=True):
+                 pointwise):
     """
     DarkNet unit.
 

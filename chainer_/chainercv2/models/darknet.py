@@ -11,90 +11,13 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class DarkConv(Chain):
-    """
-    DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 pad):
-        super(DarkConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(size=out_channels)
-            self.activ = partial(
-                F.leaky_relu,
-                slope=0.1)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def dark_conv1x1(in_channels,
-                 out_channels):
-    """
-    1x1 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DarkConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        pad=0)
-
-
-def dark_conv3x3(in_channels,
-                 out_channels):
-    """
-    3x3 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return DarkConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        pad=1)
+from .common import conv1x1_block, conv3x3_block, SimpleSequential
 
 
 def dark_convYxY(in_channels,
                  out_channels,
-                 pointwise=True):
+                 alpha,
+                 pointwise):
     """
     DarkNet unit.
 
@@ -104,17 +27,25 @@ def dark_convYxY(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    alpha : float
+        Slope coefficient for Leaky ReLU activation.
     pointwise : bool
         Whether use 1x1 (pointwise) convolution or 3x3 convolution.
     """
     if pointwise:
-        return dark_conv1x1(
+        return conv1x1_block(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            activation=partial(
+                F.leaky_relu,
+                slope=alpha))
     else:
-        return dark_conv3x3(
+        return conv3x3_block(
             in_channels=in_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            activation=partial(
+                F.leaky_relu,
+                slope=alpha))
 
 
 class DarkNet(Chain):
@@ -131,6 +62,8 @@ class DarkNet(Chain):
         Window size of the final average pooling.
     cls_activ : bool
         Whether classification convolution layer uses an activation.
+    alpha : float, default 0.1
+        Slope coefficient for Leaky ReLU activation.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -143,6 +76,7 @@ class DarkNet(Chain):
                  odd_pointwise,
                  avg_pool_size,
                  cls_activ,
+                 alpha=0.1,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -160,6 +94,7 @@ class DarkNet(Chain):
                             setattr(stage, "unit{}".format(j + 1), dark_convYxY(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
+                                alpha=alpha,
                                 pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise)))
                             in_channels = out_channels
                         if i != len(channels) - 1:
@@ -179,7 +114,7 @@ class DarkNet(Chain):
                 if cls_activ:
                     setattr(self.output, 'final_activ', partial(
                         F.leaky_relu,
-                        slope=0.1))
+                        slope=alpha))
                 setattr(self.output, 'final_pool', partial(
                     F.average_pooling_2d,
                     ksize=avg_pool_size,
@@ -309,12 +244,12 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
-        # darknet_ref,
+        darknet_ref,
         darknet_tiny,
-        # darknet19,
+        darknet19,
     ]
 
     for model in models:

@@ -45,7 +45,7 @@ class InvResUnit(Chain):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=groups,
-                act_type="relu6",
+                activation="relu6",
                 activate=False)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
@@ -54,13 +54,13 @@ class InvResUnit(Chain):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=stride,
-                act_type="relu6",
+                activation="relu6",
                 activate=True)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups,
-                act_type="relu6",
+                activation="relu6",
                 activate=False)
 
     def __call__(self, x):
@@ -113,7 +113,7 @@ class IGCV3(Chain):
                     in_channels=in_channels,
                     out_channels=init_block_channels,
                     stride=2,
-                    act_type="relu6"))
+                    activation="relu6"))
                 in_channels = init_block_channels
                 for i, channels_per_stage in enumerate(channels):
                     stage = SimpleSequential()
@@ -131,7 +131,7 @@ class IGCV3(Chain):
                 setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
-                    act_type="relu6"))
+                    activation="relu6"))
                 in_channels = final_block_channels
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,

@@ -7,6 +7,7 @@ __all__ = ['conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_bl
            'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
 
 import math
+from inspect import isfunction
 import torch
 import torch.nn as nn
 
@@ -59,8 +60,8 @@ class ConvBlock(nn.Module):
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -74,7 +75,7 @@ class ConvBlock(nn.Module):
                  dilation=1,
                  groups=1,
                  bias=False,
-                 act_type="relu",
+                 activation=(lambda: nn.ReLU(inplace=True)),
                  activate=True):
         super(ConvBlock, self).__init__()
         self.activate = activate
@@ -90,12 +91,18 @@ class ConvBlock(nn.Module):
             bias=bias)
         self.bn = nn.BatchNorm2d(num_features=out_channels)
         if self.activate:
-            if act_type == "relu":
-                self.activ = nn.ReLU(inplace=True)
-            elif act_type == "relu6":
-                self.activ = nn.ReLU6(inplace=True)
+            assert (activation is not None)
+            if isfunction(activation):
+                self.activ = activation()
+            elif isinstance(activation, str):
+                if activation == "relu":
+                    self.activ = nn.ReLU(inplace=True)
+                elif activation == "relu6":
+                    self.activ = nn.ReLU6(inplace=True)
+                else:
+                    raise NotImplementedError()
             else:
-                raise NotImplementedError()
+                self.activ = activation
 
     def forward(self, x):
         x = self.conv(x)
@@ -110,7 +117,7 @@ def conv1x1_block(in_channels,
                   stride=1,
                   groups=1,
                   bias=False,
-                  act_type="relu",
+                  activation=(lambda: nn.ReLU(inplace=True)),
                   activate=True):
     """
     1x1 version of the standard convolution block.
@@ -127,8 +134,8 @@ def conv1x1_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -140,7 +147,7 @@ def conv1x1_block(in_channels,
         padding=0,
         groups=groups,
         bias=bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate)
 
 
@@ -151,7 +158,7 @@ def conv3x3_block(in_channels,
                   dilation=1,
                   groups=1,
                   bias=False,
-                  act_type="relu",
+                  activation=(lambda: nn.ReLU(inplace=True)),
                   activate=True):
     """
     3x3 version of the standard convolution block.
@@ -172,8 +179,8 @@ def conv3x3_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -186,7 +193,7 @@ def conv3x3_block(in_channels,
         dilation=dilation,
         groups=groups,
         bias=bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate)
 
 
@@ -195,7 +202,7 @@ def conv7x7_block(in_channels,
                   stride=1,
                   padding=3,
                   bias=False,
-                  act_type="relu",
+                  activation=(lambda: nn.ReLU(inplace=True)),
                   activate=True):
     """
     7x7 version of the standard convolution block.
@@ -212,8 +219,8 @@ def conv7x7_block(in_channels,
         Padding value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -224,7 +231,7 @@ def conv7x7_block(in_channels,
         stride=stride,
         padding=padding,
         bias=bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate)
 
 
@@ -234,7 +241,7 @@ def dwconv3x3_block(in_channels,
                     padding=1,
                     dilation=1,
                     bias=False,
-                    act_type="relu",
+                    activation=(lambda: nn.ReLU(inplace=True)),
                     activate=True):
     """
     3x3 depthwise version of the standard convolution block with ReLU6 activation.
@@ -253,8 +260,8 @@ def dwconv3x3_block(in_channels,
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     """
@@ -266,7 +273,7 @@ def dwconv3x3_block(in_channels,
         dilation=dilation,
         groups=out_channels,
         bias=bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate)
 
 

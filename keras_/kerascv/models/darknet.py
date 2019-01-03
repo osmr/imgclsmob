@@ -9,119 +9,14 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, GluonBatchNormalization
-
-
-def dark_conv(x,
-              in_channels,
-              out_channels,
-              kernel_size,
-              padding,
-              name="dark_conv"):
-    """
-    DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    name : str, default 'dark_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.LeakyReLU(alpha=0.1, name=name + "/activ")(x)
-    return x
-
-
-def dark_conv1x1(x,
-                 in_channels,
-                 out_channels,
-                 name="dark_conv1x1"):
-    """
-    1x1 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'dark_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return dark_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        padding=0,
-        name=name)
-
-
-def dark_conv3x3(x,
-                 in_channels,
-                 out_channels,
-                 name="dark_conv3x3"):
-    """
-    3x3 version of the DarkNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'dark_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return dark_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        padding=1,
-        name=name)
+from .common import conv1x1_block, conv3x3_block
 
 
 def dark_convYxY(x,
                  in_channels,
                  out_channels,
-                 pointwise=True,
+                 alpha,
+                 pointwise,
                  name="dark_convYxY"):
     """
     DarkNet unit.
@@ -134,6 +29,8 @@ def dark_convYxY(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
+    alpha : float
+        Slope coefficient for Leaky ReLU activation.
     pointwise : bool
         Whether use 1x1 (pointwise) convolution or 3x3 convolution.
     name : str, default 'dark_convYxY'
@@ -145,16 +42,18 @@ def dark_convYxY(x,
         Resulted tensor/variable/symbol.
     """
     if pointwise:
-        return dark_conv1x1(
+        return conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
+            activation=nn.LeakyReLU(alpha=alpha, name=name + "/activ"),
             name=name)
     else:
-        return dark_conv3x3(
+        return conv3x3_block(
             x=x,
             in_channels=in_channels,
             out_channels=out_channels,
+            activation=nn.LeakyReLU(alpha=alpha, name=name + "/activ"),
             name=name)
 
 
@@ -162,6 +61,7 @@ def darknet(channels,
             odd_pointwise,
             avg_pool_size,
             cls_activ,
+            alpha=0.1,
             in_channels=3,
             in_size=(224, 224),
             classes=1000):
@@ -178,6 +78,8 @@ def darknet(channels,
         Window size of the final average pooling.
     cls_activ : bool
         Whether classification convolution layer uses an activation.
+    alpha : float, default 0.1
+        Slope coefficient for Leaky ReLU activation.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -195,6 +97,7 @@ def darknet(channels,
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
+                alpha=alpha,
                 pointwise=(len(channels_per_stage) > 1) and not(((j + 1) % 2 == 1) ^ odd_pointwise),
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
@@ -209,7 +112,7 @@ def darknet(channels,
         kernel_size=1,
         name="output/final_conv")(x)
     if cls_activ:
-        x = nn.LeakyReLU(alpha=0.1, name="output/final_activ")(x)
+        x = nn.LeakyReLU(alpha=alpha, name="output/final_activ")(x)
     x = nn.AvgPool2D(
         pool_size=avg_pool_size,
         strides=1,

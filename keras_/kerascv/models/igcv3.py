@@ -54,7 +54,7 @@ def inv_res_unit(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         groups=groups,
-        act_type="relu6",
+        activation="relu6",
         activate=False,
         name=name + "/conv1")
     x = channel_shuffle_lambda(
@@ -66,7 +66,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
-        act_type="relu6",
+        activation="relu6",
         activate=True,
         name=name + "/conv2")
     x = conv1x1_block(
@@ -74,7 +74,7 @@ def inv_res_unit(x,
         in_channels=mid_channels,
         out_channels=out_channels,
         groups=groups,
-        act_type="relu6",
+        activation="relu6",
         activate=False,
         name=name + "/conv3")
 
@@ -117,7 +117,7 @@ def igcv3(channels,
         in_channels=in_channels,
         out_channels=init_block_channels,
         strides=2,
-        act_type="relu6",
+        activation="relu6",
         name="features/init_block")
     in_channels = init_block_channels
     for i, channels_per_stage in enumerate(channels):
@@ -136,7 +136,7 @@ def igcv3(channels,
         x=x,
         in_channels=in_channels,
         out_channels=final_block_channels,
-        act_type="relu6",
+        activation="relu6",
         name="features/final_block")
     in_channels = final_block_channels
     x = nn.AvgPool2D(

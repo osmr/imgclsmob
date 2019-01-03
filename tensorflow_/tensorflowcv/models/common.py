@@ -327,7 +327,7 @@ def conv_block(x,
                dilation=1,
                groups=1,
                use_bias=False,
-               act_type="relu",
+               activation="relu",
                activate=True,
                training=False,
                name="conv_block"):
@@ -354,8 +354,8 @@ def conv_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -384,12 +384,16 @@ def conv_block(x,
         training=training,
         name=name + "/bn")
     if activate:
-        if act_type == "relu":
-            x = tf.nn.relu(x, name=name + "/activ")
-        elif act_type == "relu6":
-            x = tf.nn.relu6(x, name=name + "/activ")
+        assert (activation is not None)
+        if isinstance(activation, str):
+            if activation == "relu":
+                x = tf.nn.relu(x, name=name + "/activ")
+            elif activation == "relu6":
+                x = tf.nn.relu6(x, name=name + "/activ")
+            else:
+                raise NotImplementedError()
         else:
-            raise NotImplementedError()
+            x = activation(x)
     return x
 
 
@@ -399,7 +403,7 @@ def conv1x1_block(x,
                   strides=1,
                   groups=1,
                   use_bias=False,
-                  act_type="relu",
+                  activation="relu",
                   activate=True,
                   training=False,
                   name="conv1x1_block"):
@@ -420,8 +424,8 @@ def conv1x1_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -443,7 +447,7 @@ def conv1x1_block(x,
         padding=0,
         groups=groups,
         use_bias=use_bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate,
         training=training,
         name=name)
@@ -457,7 +461,7 @@ def conv3x3_block(x,
                   dilation=1,
                   groups=1,
                   use_bias=False,
-                  act_type="relu",
+                  activation="relu",
                   activate=True,
                   training=False,
                   name="conv3x3_block"):
@@ -482,8 +486,8 @@ def conv3x3_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -506,7 +510,7 @@ def conv3x3_block(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate,
         training=training,
         name=name)
@@ -518,7 +522,7 @@ def conv7x7_block(x,
                   strides=1,
                   padding=3,
                   use_bias=False,
-                  act_type="relu",
+                  activation="relu",
                   activate=True,
                   training=False,
                   name="conv7x7_block"):
@@ -539,8 +543,8 @@ def conv7x7_block(x,
         Padding value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -561,7 +565,7 @@ def conv7x7_block(x,
         strides=strides,
         padding=padding,
         use_bias=use_bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate,
         training=training,
         name=name)
@@ -574,7 +578,7 @@ def dwconv3x3_block(x,
                     padding=1,
                     dilation=1,
                     use_bias=False,
-                    act_type="relu",
+                    activation="relu",
                     activate=True,
                     training=False,
                     name="dwconv3x3_block"):
@@ -597,8 +601,8 @@ def dwconv3x3_block(x,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    act_type : str, default 'relu'
-        Name of activation function to use.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -620,7 +624,7 @@ def dwconv3x3_block(x,
         dilation=dilation,
         groups=out_channels,
         use_bias=use_bias,
-        act_type=act_type,
+        activation=activation,
         activate=activate,
         training=training,
         name=name)

@@ -41,7 +41,7 @@ class InvResUnit(nn.Module):
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=groups,
-            act_type="relu6",
+            activation="relu6",
             activate=False)
         self.c_shuffle = ChannelShuffle(
             channels=mid_channels,
@@ -50,13 +50,13 @@ class InvResUnit(nn.Module):
             in_channels=mid_channels,
             out_channels=mid_channels,
             stride=stride,
-            act_type="relu6",
+            activation="relu6",
             activate=True)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             groups=groups,
-            act_type="relu6",
+            activation="relu6",
             activate=False)
 
     def forward(self, x):
@@ -107,7 +107,7 @@ class IGCV3(nn.Module):
             in_channels=in_channels,
             out_channels=init_block_channels,
             stride=2,
-            act_type="relu6"))
+            activation="relu6"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
@@ -124,7 +124,7 @@ class IGCV3(nn.Module):
         self.features.add_module('final_block', conv1x1_block(
             in_channels=in_channels,
             out_channels=final_block_channels,
-            act_type="relu6"))
+            activation="relu6"))
         in_channels = final_block_channels
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=7,

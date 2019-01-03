@@ -45,7 +45,7 @@ class InvResUnit(Chain):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=groups,
-                activation="relu6",
+                activation=None,
                 activate=False)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
@@ -54,13 +54,12 @@ class InvResUnit(Chain):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=stride,
-                activation="relu6",
-                activate=True)
+                activation="relu6")
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups,
-                activation="relu6",
+                activation=None,
                 activate=False)
 
     def __call__(self, x):

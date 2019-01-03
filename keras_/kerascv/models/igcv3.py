@@ -54,7 +54,7 @@ def inv_res_unit(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         groups=groups,
-        activation="relu6",
+        activation=None,
         activate=False,
         name=name + "/conv1")
     x = channel_shuffle_lambda(
@@ -67,14 +67,13 @@ def inv_res_unit(x,
         out_channels=mid_channels,
         strides=strides,
         activation="relu6",
-        activate=True,
         name=name + "/conv2")
     x = conv1x1_block(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
         groups=groups,
-        activation="relu6",
+        activation=None,
         activate=False,
         name=name + "/conv3")
 

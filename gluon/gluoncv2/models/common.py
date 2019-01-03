@@ -108,6 +108,8 @@ class ConvBlock(HybridBlock):
             if self.activate:
                 if act_type == "relu6":
                     self.activ = ReLU6()
+                elif act_type == "leakyrelu01":
+                    self.activ = nn.LeakyReLU(alpha=0.1)
                 else:
                     self.activ = nn.Activation(act_type)
 

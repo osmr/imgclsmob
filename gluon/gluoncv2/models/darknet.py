@@ -37,13 +37,13 @@ def dark_convYxY(in_channels,
             in_channels=in_channels,
             out_channels=out_channels,
             bn_use_global_stats=bn_use_global_stats,
-            activ_func=(lambda: nn.LeakyReLU(alpha=alpha)))
+            activation=nn.LeakyReLU(alpha=alpha))
     else:
         return conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             bn_use_global_stats=bn_use_global_stats,
-            activ_func=(lambda: nn.LeakyReLU(alpha=alpha)))
+            activation=nn.LeakyReLU(alpha=alpha))
 
 
 class DarkNet(HybridBlock):

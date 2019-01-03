@@ -47,7 +47,7 @@ class InvResUnit(HybridBlock):
                 out_channels=mid_channels,
                 groups=groups,
                 bn_use_global_stats=bn_use_global_stats,
-                activ_func=(lambda: ReLU6()),
+                activation=None,
                 activate=False)
             self.c_shuffle = ChannelShuffle(
                 channels=mid_channels,
@@ -57,14 +57,13 @@ class InvResUnit(HybridBlock):
                 out_channels=mid_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
-                activ_func=(lambda: ReLU6()),
-                activate=True)
+                activation=ReLU6())
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups,
                 bn_use_global_stats=bn_use_global_stats,
-                activ_func=(lambda: ReLU6()),
+                activation=None,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -122,7 +121,7 @@ class IGCV3(HybridBlock):
                 out_channels=init_block_channels,
                 strides=2,
                 bn_use_global_stats=bn_use_global_stats,
-                activ_func=(lambda: ReLU6())))
+                activation=ReLU6()))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -142,7 +141,7 @@ class IGCV3(HybridBlock):
                 in_channels=in_channels,
                 out_channels=final_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activ_func=(lambda: ReLU6())))
+                activation=ReLU6()))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,

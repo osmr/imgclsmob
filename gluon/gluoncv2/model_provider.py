@@ -49,14 +49,10 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-from .models.others.oth_darknet import *
-
 __all__ = ['get_model']
 
 
 _models = {
-    'oth_darknet53': oth_darknet53,
-
     'alexnet': alexnet,
 
     'zfnet': zfnet,

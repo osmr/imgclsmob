@@ -7,7 +7,7 @@ import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon import nn
 
-__all__ = ['DarknetV3', 'get_darknet', 'darknet53']
+__all__ = ['oth_darknet53']
 
 def _conv2d(channel, kernel, padding, stride, num_sync_bn_devices=-1):
     """A common conv-bn-leakyrelu cell"""
@@ -140,12 +140,10 @@ def get_darknet(darknet_version, num_layers, pretrained=False, ctx=mx.cpu(),
     darknet_class = darknet_versions[darknet_version]
     net = darknet_class(layers, channels, **kwargs)
     if pretrained:
-        from ..model_store import get_model_file
-        net.load_parameters(get_model_file(
-            'darknet%d'%(num_layers), tag=pretrained, root=root), ctx=ctx)
+        pass
     return net
 
-def darknet53(**kwargs):
+def oth_darknet53(in_channels=3, **kwargs):
     """Darknet v3 53 layer network.
     Reference: https://arxiv.org/pdf/1804.02767.pdf.
 
@@ -156,3 +154,40 @@ def darknet53(**kwargs):
 
     """
     return get_darknet('v3', 53, **kwargs)
+
+
+def _ttest():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_darknet53,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_darknet53 or weight_count == 7319416)
+
+
+if __name__ == "__main__":
+    _ttest()

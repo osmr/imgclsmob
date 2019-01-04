@@ -28,6 +28,7 @@ from .models.wrn import *
 from .models.drn import *
 from .models.dpn import *
 from .models.darknet import *
+from .models.darknet53 import *
 from .models.channelnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -48,10 +49,15 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.others.oth_darknet import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'darknet53': darknet53,
+    'oth_darknet53': oth_darknet53,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

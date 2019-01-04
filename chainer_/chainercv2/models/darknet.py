@@ -165,14 +165,6 @@ def get_darknet(version,
         odd_pointwise = False
         avg_pool_size = 7
         cls_activ = False
-    # elif version == '53':
-    #     init_block_channels = 32
-    #     layers = [2, 8, 8, 4]
-    #     channels_per_layers = [64, 128, 256, 512, 1024]
-    #     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
-    #     odd_pointwise = False
-    #     avg_pool_size = 7
-    #     cls_activ = False
     else:
         raise ValueError("Unsupported DarkNet version {}".format(version))
 

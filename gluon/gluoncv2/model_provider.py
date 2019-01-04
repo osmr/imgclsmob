@@ -55,7 +55,6 @@ __all__ = ['get_model']
 
 
 _models = {
-    'darknet53': darknet53,
     'oth_darknet53': oth_darknet53,
 
     'alexnet': alexnet,
@@ -235,6 +234,7 @@ _models = {
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
+    'darknet53': darknet53,
 
     'channelnet': channelnet,
 

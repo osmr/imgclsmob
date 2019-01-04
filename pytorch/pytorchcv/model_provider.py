@@ -28,6 +28,7 @@ from .models.wrn import *
 from .models.drn import *
 from .models.dpn import *
 from .models.darknet import *
+from .models.darknet53 import *
 from .models.channelnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -228,6 +229,7 @@ _models = {
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
+    'darknet53': darknet53,
 
     'channelnet': channelnet,
 

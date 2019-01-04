@@ -31,7 +31,8 @@ scripts for training/validating/converting models. All models are designed for u
 - WRN (['Wide Residual Networks'](https://arxiv.org/abs/1605.07146))
 - DRN-C/DRN-D (['Dilated Residual Networks'](https://arxiv.org/abs/1705.09914))
 - DPN (['Dual Path Networks'](https://arxiv.org/abs/1707.01629))
-- DarkNet (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet)) 
+- DarkNet Ref/Tiny/19 (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet))
+- DarkNet-53 (['YOLOv3: An Incremental Improvement'](https://arxiv.org/abs/1804.02767))
 - ChannelNet (['ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise Convolutions'](https://arxiv.org/abs/1809.01330))
 - SqueezeNet/SqueezeResNet (['SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'](https://arxiv.org/abs/1602.07360))
 - SqueezeNext (['SqueezeNext: Hardware-Aware Neural Network Design'](https://arxiv.org/abs/1803.10615))
@@ -274,6 +275,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DPN-131 | 20.03 | 5.22 | 79,254,504 | 16,076.15M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0522-35ac2f82.params.log)) |
 | DarkNet Tiny | 40.31 | 17.46 | 1,042,104 | 500.85M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-16501793.params.log)) |
 | DarkNet Ref | 38.00 | 16.68 | 7,319,416 | 367.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1668-3011b4e1.params.log)) |
+| DarkNet-53 | 21.44 | 5.56 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0556-e9486353.params.log)) |
 | SqueezeNet v1.0 | 38.73 | 17.34 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1734-e6f8b0e8.params.log)) |
 | SqueezeNet v1.1 | 39.09 | 17.39 | 1,235,496 | 352.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-d7a1483a.params.log)) |
 | SqueezeResNet v1.1 | 39.83 | 17.84 | 1,235,496 | 352.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-26064b82.params.log)) |
@@ -399,6 +401,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DPN-131 | 20.54 | 5.48 | 79,254,504 | 16,076.15M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.17/dpn131-0548-0c53e5b3.pth.log)) |
 | DarkNet Tiny | 40.74 | 17.84 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1784-4561e1ad.pth.log)) |
 | DarkNet Ref | 38.58 | 17.18 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1718-034595b4.pth.log)) |
+| DarkNet-53 | 21.75 | 5.64 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0564-b36bef6b.pth.log)) |
 | SqueezeNet v1.0 | 39.29 | 17.66 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1766-afdbcf1a.pth.log)) |
 | SqueezeNet v1.1 | 39.31 | 17.72 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1772-25b77bc3.pth.log)) |
 | SqueezeResNet v1.1 | 40.09 | 18.21 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1821-c27ed88f.pth.log)) |
@@ -518,6 +521,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DPN-131 | 20.04 | 5.23 | 79,254,504 | 16,076.15M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.34/dpn131-0523-e3721599.npz.log)) |
 | DarkNet Tiny | 40.33 | 17.46 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-b04fa463.npz.log)) |
 | DarkNet Ref | 38.09 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1671-b2d5721f.npz.log)) |
+| DarkNet-53 | 21.41 | 5.56 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0556-42c57951.npz.log)) |
 | SqueezeNet v1.0 | 38.76 | 17.38 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1738-4c55a6a5.npz.log)) |
 | SqueezeNet v1.1 | 39.13 | 17.40 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1740-b236c204.npz.log)) |
 | SqueezeResNet v1.1 | 39.85 | 17.87 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1787-f40e6051.npz.log)) |
@@ -614,6 +618,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 22.69 | 6.35 | 20,013,928 | 4,347.15M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.55/densenet201-0635-cf3afbb2.h5.log)) |
 | DarkNet Tiny | 40.31 | 17.46 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.69/darknet_tiny-1746-147e949b.h5.log)) |
 | DarkNet Ref | 37.99 | 16.68 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1668-2ef080bb.h5.log)) |
+| DarkNet-53 | 21.43 | 5.56 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0556-d6c6e7dc.h5.log)) |
 | SqueezeNet v1.0 | 39.17 | 17.56 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1756-a4890923.h5.log)) |
 | SqueezeNet v1.1 | 39.08 | 17.39 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-b9a8f9ea.h5.log)) |
 | SqueezeResNet v1.1 | 39.82 | 17.84 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.70/squeezeresnet_v1_1-1784-43ee9cbb.h5.log)) |
@@ -698,6 +703,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DenseNet-201 | 22.70 | 6.35 | 20,013,928 | 4,347.15M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.77/densenet201-0635-5eda7895.tf.npz.log)) |
 | DarkNet Tiny | 40.35 | 17.51 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_tiny-1751-750ff8d9.tf.npz.log)) |
 | DarkNet Ref | 37.99 | 16.72 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.71/darknet_ref-1672-3c8ed62a.tf.npz.log)) |
+| DarkNet-53 | 21.42 | 5.55 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0555-49816dbf.tf.npz.log)) |
 | SqueezeNet v1.0 | 39.18 | 17.58 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1758-fc6384ff.tf.npz.log)) |
 | SqueezeNet v1.1 | 39.14 | 17.39 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-48945577.tf.npz.log)) |
 | SqueezeResNet v1.1 | 39.75 | 17.92 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.79/squeezeresnet_v1_1-1792-44c17928.tf.npz.log)) |

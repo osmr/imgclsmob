@@ -251,7 +251,113 @@ def convert_mx2gl(dst_net,
                   src_param_keys,
                   src_model,
                   ctx):
-    if src_model in ["igcv3_w1"]:
+    if src_model in ["crunet56", "crunet116"]:
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        src_param_keys = [re.sub('^conv', 'features.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('^fc6', 'output.1.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-a', '.body.conv1.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c3x3-b', '.body.conv2A.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-b', '.body.conv2B.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-c', '.body.conv3.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_x__x_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convT.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__x_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convT.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(1\)_1x1_bases\[dim3\]_weight$', '_x__1.body.conv1.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(1\)_3x3_bases\[dim21\]_weight$', '_x__1.body.conv2.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(2\)_1x1_bases\[dim3\]_weight$', '_x__7.body.conv1.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(2\)_3x3_bases\[dim21\]_weight$', '_x__7.body.conv2.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(3\)_1x1_bases\[dim3\]_weight$', '_x__14.body.conv1.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__\(3\)_3x3_bases\[dim21\]_weight$', '_x__14.body.conv2.convQ.weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-w\(s\/2\)', '.input_convZ.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-w_weight$', '.input_convZ.conv.weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-w\(s\/1\)', '.input_conv.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_c1x1-w\(s\/key\)', '.identity_conv.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('__conv_weight$', '.conv.weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('__bn__bn_beta$', '.bn.beta', key) for key in src_param_keys]
+        src_param_keys = [re.sub('__bn__bn_gamma$', '.bn.gamma', key) for key in src_param_keys]
+        src_param_keys = [re.sub('__bn__bn_moving_mean$', '.bn.running_mean', key) for key in src_param_keys]
+        src_param_keys = [re.sub('__bn__bn_moving_var$', '.bn.running_var', key) for key in src_param_keys]
+        src_param_keys = [re.sub('1_x_1__relu-sp__bn_', '1_x_1.conv.bnA.', key) for key in src_param_keys]
+
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        dst_param_keys.sort()
+        dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        src_param_keys = [re.sub('^features\.', 'conv', key) for key in src_param_keys]
+        src_param_keys = [re.sub('^output\.1\.', 'fc6', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_x__1\.body\.conv1\.convT\.weight$', '_x__x_1x1_bases[dim3]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__1\.body\.conv2\.convT\.weight$', '_x__x_3x3_bases[dim21]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__1\.body\.conv1\.convQ\.weight$', '_x__(1)_1x1_bases[dim3]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__1\.body\.conv2\.convQ\.weight$', '_x__(1)_3x3_bases[dim21]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__7\.body\.conv1\.convQ\.weight$', '_x__(2)_1x1_bases[dim3]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__7\.body\.conv2\.convQ\.weight$', '_x__(2)_3x3_bases[dim21]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__14\.body\.conv1\.convQ\.weight$', '_x__(3)_1x1_bases[dim3]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('_x__14\.body\.conv2\.convQ\.weight$', '_x__(3)_3x3_bases[dim21]_weight', key)
+                          for key in src_param_keys]
+        src_param_keys = [re.sub('\.body\.conv1\.', '_c1x1-a', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.body\.conv2A\.', '_c3x3-b', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.body\.conv2B\.', '_c1x1-b', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.body\.conv3\.', '_c1x1-c', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.input_convZ\.conv\.weight$', '_c1x1-w_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.input_convZ\.', '_c1x1-w(s/2)', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.input_conv\.', '_c1x1-w(s/1)', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.identity_conv\.', '_c1x1-w(s/key)', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.conv\.weight$', '__conv_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.bn\.beta$', '__bn__bn_beta', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.bn\.gamma$', '__bn__bn_gamma', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.bn\.running_mean$', '__bn__bn_moving_mean', key) for key in src_param_keys]
+        src_param_keys = [re.sub('\.bn\.running_var$', '__bn__bn_moving_var', key) for key in src_param_keys]
+        src_param_keys = [re.sub('1_x_1\.conv\.bnA\.', '1_x_1__relu-sp__bn_', key) for key in src_param_keys]
+
+        dst_i = 0
+        for src_i, src_key in enumerate(src_param_keys):
+            dst_key = dst_param_keys[dst_i]
+            for tt in range(10):
+                if (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1]) and\
+                        (dst_params[dst_key].shape == src_params[src_key].shape):
+                    break
+                assert (dst_key.split('.')[-1].split('_')[-1] == "weight")
+                dst_i += 1
+                dst_key = dst_param_keys[dst_i]
+            dst_i += 1
+            assert (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1])
+            assert (dst_params[dst_key].shape == src_params[src_key].shape), \
+                "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                    src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape)
+            dst_params[dst_key]._load_init(src_params[src_key], ctx)
+
+        for param in dst_net.collect_params().values():
+            if param._data is not None:
+                continue
+            print('param={}'.format(param))
+            param.initialize(ctx=ctx)
+
+        dst_net.save_parameters(dst_params_file_path)
+
+        return
+
+    elif src_model in ["igcv3_w1"]:
         src_param_keys = [key.replace('seq-', 'features.') for key in src_param_keys]
         src_param_keys = [key.replace('fc_', 'output.1.') for key in src_param_keys]
         src_param_keys = [key.replace('-batchnorm_beta', '.bn.beta') for key in src_param_keys]
@@ -294,7 +400,7 @@ def convert_mx2gl(dst_net,
         dst_param_keys = [key.replace('features.A.', 'features.0.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.B.', 'features.6.') for key in dst_param_keys]
 
-    for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+    for src_i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         assert (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1])
         assert (dst_params[dst_key].shape == src_params[src_key].shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
@@ -783,7 +889,8 @@ def main():
         num_classes=args.dst_num_classes,
         in_channels=args.dst_in_channels)
 
-    if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]):
+    if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]) or\
+            ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

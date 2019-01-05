@@ -49,10 +49,15 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
+from .models.crunet import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'crunet56': crunet56,
+    'crunet116': crunet116,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

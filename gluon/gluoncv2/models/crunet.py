@@ -4,17 +4,54 @@
     https://www.ijcai.org/proceedings/2018/88.
 """
 
-__all__ = ['CRUNet', 'crunet56']
+__all__ = ['CRUNet', 'crunet56', 'crunet116']
 
 import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from gluon.gluoncv2.models.common import conv1x1, conv3x3, pre_conv1x1_block, pre_conv3x3_block
-from gluon.gluoncv2.models.resnet import ResInitBlock
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .resnet import ResInitBlock
+from .preresnet import PreResActivation
 
 
-class CRUConv(HybridBlock):
+def cru_conv3x3(in_channels,
+                out_channels,
+                strides=1,
+                padding=1,
+                groups=1,
+                use_bias=False,
+                conv_params=None):
+    """
+    CRU-Net specific convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        groups=groups,
+        use_bias=use_bias,
+        in_channels=in_channels,
+        params=conv_params)
+
+
+class CRUConvBlock(HybridBlock):
     """
     CRU-Net specific convolution block.
 
@@ -36,8 +73,8 @@ class CRUConv(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
-    conv : nn.Conv2D, default None
-        Predefined convolution layer.
+    conv_params : ParameterDict, default None
+        Weights for the convolution layer.
     """
     def __init__(self,
                  in_channels,
@@ -48,9 +85,9 @@ class CRUConv(HybridBlock):
                  groups=1,
                  bn_use_global_stats=False,
                  return_preact=False,
-                 conv=None,
+                 conv_params=None,
                  **kwargs):
-        super(CRUConv, self).__init__(**kwargs)
+        super(CRUConvBlock, self).__init__(**kwargs)
         self.return_preact = return_preact
 
         with self.name_scope():
@@ -58,17 +95,15 @@ class CRUConv(HybridBlock):
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
             self.activ = nn.Activation("relu")
-            if conv is not None:
-                self.conv = conv
-            else:
-                self.conv = nn.Conv2D(
-                    channels=out_channels,
-                    kernel_size=kernel_size,
-                    strides=strides,
-                    padding=padding,
-                    groups=groups,
-                    use_bias=False,
-                    in_channels=in_channels)
+            self.conv = nn.Conv2D(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                groups=groups,
+                use_bias=False,
+                in_channels=in_channels,
+                params=conv_params)
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -82,12 +117,12 @@ class CRUConv(HybridBlock):
             return x
 
 
-def cru_conv1x1(in_channels,
-                out_channels,
-                strides=1,
-                bn_use_global_stats=False,
-                return_preact=False,
-                conv=None):
+def cru_conv1x1_block(in_channels,
+                      out_channels,
+                      strides=1,
+                      bn_use_global_stats=False,
+                      return_preact=False,
+                      conv_params=None):
     """
     1x1 version of the CRU-Net specific convolution block.
 
@@ -103,10 +138,10 @@ def cru_conv1x1(in_channels,
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
-    conv : nn.Conv2D, default None
-        Predefined convolution layer.
+    conv_params : ParameterDict, default None
+        Weights for the convolution layer.
     """
-    return CRUConv(
+    return CRUConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
@@ -114,16 +149,16 @@ def cru_conv1x1(in_channels,
         padding=0,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
-        conv=conv)
+        conv_params=conv_params)
 
 
-def cru_conv3x3(in_channels,
-                out_channels,
-                strides=1,
-                groups=1,
-                bn_use_global_stats=False,
-                return_preact=False,
-                conv=None):
+def cru_conv3x3_block(in_channels,
+                      out_channels,
+                      strides=1,
+                      groups=1,
+                      bn_use_global_stats=False,
+                      return_preact=False,
+                      conv_params=None):
     """
     3x3 version of the CRU-Net specific convolution block.
 
@@ -141,10 +176,10 @@ def cru_conv3x3(in_channels,
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
-    conv : nn.Conv2D, default None
-        Predefined convolution layer.
+    conv_params : ParameterDict, default None
+        Weights for the convolution layer.
     """
-    return CRUConv(
+    return CRUConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
@@ -153,7 +188,7 @@ def cru_conv3x3(in_channels,
         groups=groups,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
-        conv=conv)
+        conv_params=conv_params)
 
 
 class ResBottleneck(HybridBlock):
@@ -223,45 +258,38 @@ class CRUBottleneck(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    cardinality: int
-        Number of groups.
-    bottleneck_width: int
-        Width of bottleneck block.
+    group_width: int
+        Group width parameter.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    conv1 : nn.Conv2D, default None
-        Predefined 1x1 convolution layer.
-    conv2 : nn.Conv2D, default None
-        Predefined 3x3 convolution layer.
+    conv1_params : ParameterDict, default None
+        Weights for the convolution layer #1.
+    conv2_params : ParameterDict, default None
+        Weights for the convolution layer #2.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 cardinality,
-                 bottleneck_width,
+                 group_width,
                  bn_use_global_stats,
-                 conv1=None,
-                 conv2=None,
+                 conv1_params=None,
+                 conv2_params=None,
                  **kwargs):
         super(CRUBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // 4
-        D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
-        group_width = cardinality * D
 
         with self.name_scope():
-            self.conv1 = cru_conv1x1(
+            self.conv1 = cru_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=group_width,
                 bn_use_global_stats=bn_use_global_stats,
-                conv=conv1)
+                conv_params=conv1_params)
             self.conv2 = cru_conv3x3(
                 in_channels=group_width,
                 out_channels=group_width,
                 strides=strides,
-                groups=cardinality,
-                bn_use_global_stats=bn_use_global_stats,
-                conv=conv2)
+                groups=group_width,
+                conv_params=conv2_params)
             self.conv3 = pre_conv1x1_block(
                 in_channels=group_width,
                 out_channels=group_width,
@@ -346,86 +374,62 @@ class CRUUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    cardinality: int
-        Number of groups.
-    bottleneck_width: int
-        Width of bottleneck block.
+    group_width: int
+        Group width parameter.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    conv1 : nn.Conv2D, default None
-        Predefined 1x1 convolution layer.
-    conv2 : nn.Conv2D, default None
-        Predefined 3x3 convolution layer with strides.
+    conv1_params : ParameterDict, default None
+        Weights for the convolution layer #1.
+    conv2_params : ParameterDict, default None
+        Weights for the convolution layer #2.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 cardinality,
-                 bottleneck_width,
+                 group_width,
                  bn_use_global_stats,
-                 conv1=None,
-                 conv2=None,
+                 conv1_params=None,
+                 conv2_params=None,
                  **kwargs):
         super(CRUUnit, self).__init__(**kwargs)
+        assert (strides == 1) or ((conv1_params is None) and (conv2_params is None))
+        self.resize_input = (in_channels != out_channels)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
+            if self.resize_input:
+                self.input_conv = pre_conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    bn_use_global_stats=bn_use_global_stats)
             self.body = CRUBottleneck(
-                in_channels=in_channels,
+                in_channels=out_channels,
                 out_channels=out_channels,
                 strides=strides,
-                cardinality=cardinality,
-                bottleneck_width=bottleneck_width,
+                group_width=group_width,
                 bn_use_global_stats=bn_use_global_stats,
-                conv1=conv1,
-                conv2=(conv2 if strides == 1 else None))
+                conv1_params=conv1_params,
+                conv2_params=conv2_params)
             if self.resize_identity:
-                self.identity_conv = pre_conv1x1_block(
+                self.identity_conv = cru_conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
-                    bn_use_global_stats=bn_use_global_stats)
+                    bn_use_global_stats=bn_use_global_stats,
+                    conv_params=self.input_conv.params)
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
             identity = x
+        if self.resize_input:
+            x = self.input_conv(x)
         x = self.body(x)
         x = x + identity
         return x
 
-
-def predefine_convs(in_channels,
-                    out_channels,
-                    cardinality,
-                    bottleneck_width):
-    """
-    Predefine CRU-Net specific shared convolution blocks.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    cardinality: int
-        Number of groups.
-    bottleneck_width: int
-        Width of bottleneck block.
-    """
-    mid_channels = out_channels // 4
-    D = int(math.floor(mid_channels * (bottleneck_width / 64.0)))
-    group_width = cardinality * D
-    conv1 = conv1x1(
-        in_channels=in_channels,
-        out_channels=group_width)
-    conv2 = conv3x3(
-        in_channels=group_width,
-        out_channels=group_width,
-        groups=cardinality)
-    return conv1, conv2
 
 class CRUNet(HybridBlock):
     """
@@ -442,6 +446,10 @@ class CRUNet(HybridBlock):
         Number of groups.
     bottleneck_width: int
         Width of bottleneck block.
+    group_widths: list of int
+        List of group width parameters.
+    refresh_steps: list of int
+        List of refresh step parameters.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -457,6 +465,8 @@ class CRUNet(HybridBlock):
                  init_block_channels,
                  cardinality,
                  bottleneck_width,
+                 group_widths,
+                 refresh_steps,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -475,27 +485,27 @@ class CRUNet(HybridBlock):
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                group_width = group_widths[i]
+                refresh_step = refresh_steps[i]
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        if i == 2:
-                            if j == 0:
-                                conv1, conv2 = None, None
-                            elif j == 1:
-                                conv1, conv2 = predefine_convs(
-                                    in_channels=in_channels,
-                                    out_channels=out_channels,
-                                    cardinality=cardinality,
-                                    bottleneck_width=bottleneck_width)
-                            stage.add(CRUUnit(
+                        if group_width != 0:
+                            if (refresh_step == 0) or (j % refresh_step == 0):
+                                conv1_params = None
+                                conv2_params = None
+                            unit = CRUUnit(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 strides=strides,
-                                cardinality=cardinality,
-                                bottleneck_width=bottleneck_width,
+                                group_width=group_width,
                                 bn_use_global_stats=bn_use_global_stats,
-                                conv1=conv1,
-                                conv2=conv2))
+                                conv1_params=conv1_params,
+                                conv2_params=conv2_params)
+                            if conv1_params is None:
+                                conv1_params = unit.body.conv1.conv.params
+                                conv2_params = unit.body.conv2.params
+                            stage.add(unit)
                         else:
                             stage.add(ResUnit(
                                 in_channels=in_channels,
@@ -506,6 +516,9 @@ class CRUNet(HybridBlock):
                                 bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
+            self.features.add(PreResActivation(
+                in_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))
@@ -549,8 +562,12 @@ def get_crunet(blocks,
 
     if blocks == 56:
         layers = [3, 4, 6, 3]
+        group_widths = [0, 0, 640, 0]
+        refresh_steps = [0, 0, 0, 0]
     elif blocks == 116:
         layers = [3, 6, 18, 3]
+        group_widths = [0, 352, 704, 0]
+        refresh_steps = [0, 0, 6, 0]
     else:
         raise ValueError("Unsupported CRU-Net with number of blocks: {}".format(blocks))
 
@@ -564,6 +581,8 @@ def get_crunet(blocks,
         init_block_channels=init_block_channels,
         cardinality=cardinality,
         bottleneck_width=bottleneck_width,
+        group_widths=group_widths,
+        refresh_steps=refresh_steps,
         **kwargs)
 
     if pretrained:
@@ -640,8 +659,8 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != crunet56 or weight_count == 24207912)
-        assert (model != crunet116 or weight_count == 34271784)
+        assert (model != crunet56 or weight_count == 26133672)
+        assert (model != crunet116 or weight_count == 42857032)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

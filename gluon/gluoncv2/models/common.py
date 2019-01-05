@@ -2,9 +2,10 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'IBN', 'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
+__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent',
+           'Hourglass']
 
 import math
 from inspect import isfunction
@@ -44,6 +45,40 @@ def conv1x1(in_channels,
         channels=out_channels,
         kernel_size=1,
         strides=strides,
+        use_bias=use_bias,
+        in_channels=in_channels)
+
+
+def conv3x3(in_channels,
+            out_channels,
+            strides=1,
+            padding=1,
+            groups=1,
+            use_bias=False):
+    """
+    Convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2D(
+        channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        groups=groups,
         use_bias=use_bias,
         in_channels=in_channels)
 
@@ -331,7 +366,9 @@ class PreConvBlock(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
-    bn_use_global_stats : bool
+    groups : int, default 1
+        Number of groups.
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
@@ -342,7 +379,8 @@ class PreConvBlock(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
-                 bn_use_global_stats,
+                 groups=1,
+                 bn_use_global_stats=False,
                  return_preact=False,
                  **kwargs):
         super(PreConvBlock, self).__init__(**kwargs)
@@ -358,6 +396,7 @@ class PreConvBlock(HybridBlock):
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
+                groups=groups,
                 use_bias=False,
                 in_channels=in_channels)
 
@@ -407,6 +446,7 @@ def pre_conv1x1_block(in_channels,
 def pre_conv3x3_block(in_channels,
                       out_channels,
                       strides=1,
+                      groups=1,
                       bn_use_global_stats=False,
                       return_preact=False):
     """
@@ -420,6 +460,8 @@ def pre_conv3x3_block(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -431,6 +473,7 @@ def pre_conv3x3_block(in_channels,
         kernel_size=3,
         strides=strides,
         padding=1,
+        groups=groups,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact)
 

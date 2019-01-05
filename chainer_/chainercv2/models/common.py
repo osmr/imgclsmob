@@ -2,10 +2,10 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent',
-           'Hourglass']
+__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ParametricConcurrent', 'Hourglass']
 
 from inspect import isfunction
 from chainer import Chain
@@ -47,6 +47,40 @@ def conv1x1(in_channels,
         out_channels=out_channels,
         ksize=1,
         stride=stride,
+        nobias=(not use_bias))
+
+
+def conv3x3(in_channels,
+            out_channels,
+            stride=1,
+            pad=1,
+            groups=1,
+            use_bias=False):
+    """
+    Convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return L.Convolution2D(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=3,
+        stride=stride,
+        pad=pad,
+        groups=groups,
         nobias=(not use_bias))
 
 

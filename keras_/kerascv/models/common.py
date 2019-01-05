@@ -2,9 +2,9 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda',
-           'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block',
+           'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
 
 import math
 from inspect import isfunction
@@ -148,6 +148,50 @@ def conv1x1(out_channels,
         strides=strides,
         use_bias=use_bias,
         name=name + "/conv")
+
+
+def conv3x3(x,
+            in_channels,
+            out_channels,
+            strides=1,
+            padding=1,
+            groups=1,
+            name="conv3x3"):
+    """
+    Convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    name : str, default 'conv3x3'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    return conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        groups=groups,
+        use_bias=False,
+        name=name)
 
 
 def max_pool2d_ceil(x,

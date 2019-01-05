@@ -11,7 +11,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, channel_shuffle_lambda, GluonBatchNormalization
+from .common import conv2d, conv1x1, conv3x3, channel_shuffle_lambda, GluonBatchNormalization
 
 
 def depthwise_conv3x3(x,
@@ -81,43 +81,6 @@ def group_conv1x1(x,
         out_channels=out_channels,
         kernel_size=1,
         groups=groups,
-        use_bias=False,
-        name=name)
-
-
-def conv3x3(x,
-            in_channels,
-            out_channels,
-            strides,
-            name="conv3x3"):
-    """
-    Convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
         use_bias=False,
         name=name)
 

@@ -9,7 +9,7 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1, batchnorm, channel_shuffle, maxpool2d, avgpool2d
+from .common import conv2d, conv1x1, conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d
 
 
 def depthwise_conv3x3(x,
@@ -79,43 +79,6 @@ def group_conv1x1(x,
         out_channels=out_channels,
         kernel_size=1,
         groups=groups,
-        use_bias=False,
-        name=name)
-
-
-def conv3x3(x,
-            in_channels,
-            out_channels,
-            strides,
-            name="conv3x3"):
-    """
-    Convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
         use_bias=False,
         name=name)
 

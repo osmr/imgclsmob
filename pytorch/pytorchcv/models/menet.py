@@ -11,7 +11,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, ChannelShuffle
+from .common import conv1x1, conv3x3, ChannelShuffle
 
 
 def depthwise_conv3x3(channels,
@@ -56,30 +56,6 @@ def group_conv1x1(in_channels,
         out_channels=out_channels,
         kernel_size=1,
         groups=groups,
-        bias=False)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            stride):
-    """
-    Convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
         bias=False)
 
 

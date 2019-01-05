@@ -10,7 +10,7 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, ChannelShuffle
+from .common import conv1x1, conv3x3, ChannelShuffle
 
 
 def depthwise_conv3x3(channels,
@@ -54,30 +54,6 @@ def group_conv1x1(in_channels,
         channels=out_channels,
         kernel_size=1,
         groups=groups,
-        use_bias=False,
-        in_channels=in_channels)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            strides):
-    """
-    Convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
         use_bias=False,
         in_channels=in_channels)
 

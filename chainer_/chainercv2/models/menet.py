@@ -13,7 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, conv1x1, ChannelShuffle
+from .common import conv1x1, conv3x3, ChannelShuffle, SimpleSequential
 
 
 def depthwise_conv3x3(channels,
@@ -59,30 +59,6 @@ def group_conv1x1(in_channels,
         ksize=1,
         nobias=True,
         groups=groups)
-
-
-def conv3x3(in_channels,
-            out_channels,
-            stride):
-    """
-    Convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    return L.Convolution2D(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        nobias=True)
 
 
 class MEUnit(Chain):

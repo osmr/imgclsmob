@@ -216,7 +216,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 49.16 | 24.45 | 831,096 | 137.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2445-28d15cf4.params.log)) |
 | ResNet-18 x0.5 | 36.54 | 14.96 | 3,055,880 | 486.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1496-d839c509.params.log)) |
 | ResNet-18 x0.75 | 33.25 | 12.54 | 6,675,352 | 1,047.53M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.18/resnet18_w3d4-1254-d6548612.params.log)) |
-| ResNet-18 | 28.21 | 9.67 | 11,689,512 | 1,820.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.151/resnet18-0967-dbc58dee.params.log)) |
+| ResNet-18 | 28.09 | 9.51 | 11,689,512 | 1,820.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0951-98a2545b.params.log)) |
 | ResNet-34 | 25.34 | 7.92 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet34-0792-5b875f49.params.log)) |
 | ResNet-50 | 22.65 | 6.41 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0641-1eaa883b.params.log)) |
 | ResNet-50b | 22.32 | 6.18 | 25,557,032 | 4,110.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.146/resnet50b-0618-8e2541fb.params.log)) |
@@ -342,7 +342,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 49.50 | 24.83 | 831,096 | 137.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2483-6ef2515c.pth.log)) |
 | ResNet-18 x0.5 | 37.04 | 15.38 | 3,055,880 | 486.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1538-671466b5.pth.log)) |
 | ResNet-18 x0.75 | 33.61 | 12.85 | 6,675,352 | 1,047.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.18/resnet18_w3d4-1285-94713e0e.pth.log)) |
-| ResNet-18 | 28.53 | 9.90 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.151/resnet18-0990-1cf297b3.pth.log)) |
+| ResNet-18 | 28.53 | 9.82 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0982-0126861b.pth.log)) |
 | ResNet-34 | 25.66 | 8.18 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet34-0818-6f947d40.pth.log)) |
 | ResNet-50 | 22.96 | 6.58 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0658-828686d7.pth.log)) |
 | ResNet-50b | 22.61 | 6.45 | 25,557,032 | 4,110.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.146/resnet50b-0645-a53df64c.pth.log)) |
@@ -468,7 +468,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 49.08 | 24.48 | 831,096 | 137.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2448-58c4a007.npz.log)) |
 | ResNet-18 x0.5 | 36.55 | 14.99 | 3,055,880 | 486.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.46/resnet18_wd2-1499-542ed773.npz.log)) |
 | ResNet-18 x0.75 | 33.27 | 12.56 | 6,675,352 | 1,047.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet18_w3d4-1256-ce2011df.npz.log)) |
-| ResNet-18 | 28.22 | 9.67 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.151/resnet18-0967-53f35c84.npz.log)) |
+| ResNet-18 | 28.08 | 9.59 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0959-d80fbe60.npz.log)) |
 | ResNet-34 | 25.35 | 7.95 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.22/resnet34-0795-0b392267.npz.log)) |
 | ResNet-50 | 22.61 | 6.41 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0641-ca0cd7a1.npz.log)) |
 | ResNet-50b | 22.34 | 6.18 | 25,557,032 | 4,110.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.146/resnet50b-0618-42fffef9.npz.log)) |
@@ -587,7 +587,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 49.14 | 24.45 | 831,096 | 137.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet18_wd4-2445-dd6ba54d.h5.log)) |
 | ResNet-18 x0.5 | 36.54 | 14.96 | 3,055,880 | 486.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet18_wd2-1496-9bc78e3b.h5.log)) |
 | ResNet-18 x0.75 | 33.24 | 12.54 | 6,675,352 | 1,047.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet18_w3d4-1254-f6374cc3.h5.log)) |
-| ResNet-18 | 28.20 | 9.67 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.151/resnet18-0967-4a0a9110.h5.log)) |
+| ResNet-18 | 28.08 | 9.52 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0952-0817d058.h5.log)) |
 | ResNet-34 | 25.32 | 7.92 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.49/resnet34-0792-3ea662f5.h5.log)) |
 | ResNet-50 | 22.63 | 6.41 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0641-38a4c231.h5.log)) |
 | ResNet-50b | 22.31 | 6.18 | 25,557,032 | 4,110.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.146/resnet50b-0618-6be0de5f.h5.log)) |
@@ -672,7 +672,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 49.12 | 24.50 | 831,096 | 137.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet18_wd4-2450-b536eea5.tf.npz.log)) |
 | ResNet-18 x0.5 | 36.51 | 14.93 | 3,055,880 | 486.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet18_wd2-1493-dfb5d150.tf.npz.log)) |
 | ResNet-18 x0.75 | 33.28 | 12.50 | 6,675,352 | 1,047.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet18_w3d4-1250-2040e339.tf.npz.log)) |
-| ResNet-18 | 28.25 | 9.69 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.151/resnet18-0969-e8b92f28.tf.npz.log)) |
+| ResNet-18 | 28.16 | 9.56 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0956-b4fc7198.tf.npz.log)) |
 | ResNet-34 | 25.32 | 7.93 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet34-0793-aaf4f066.tf.npz.log)) |
 | ResNet-50 | 22.61 | 6.42 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0642-39e88383.tf.npz.log)) |
 | ResNet-50b | 22.36 | 6.21 | 25,557,032 | 4,110.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.146/resnet50b-0621-22a3e9a9.tf.npz.log)) |

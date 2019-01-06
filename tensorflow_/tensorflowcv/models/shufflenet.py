@@ -10,7 +10,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1, depthwise_conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d
+from .common import conv1x1, conv3x3, depthwise_conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d
 
 
 def shuffle_unit(x,
@@ -133,14 +133,11 @@ def shuffle_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = conv2d(
+    x = conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=2,
-        padding=1,
-        use_bias=False,
         name=name + "/conv")
     x = batchnorm(
         x=x,

@@ -11,7 +11,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, depthwise_conv3x3, ChannelShuffle
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle
 
 
 class ShuffleUnit(HybridBlock):
@@ -106,13 +106,10 @@ class ShuffleInitBlock(HybridBlock):
                  **kwargs):
         super(ShuffleInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1,
-                use_bias=False,
-                in_channels=in_channels)
+            self.conv = conv3x3(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=2)
             self.bn = nn.BatchNorm(in_channels=out_channels)
             self.activ = nn.Activation('relu')
             self.pool = nn.MaxPool2D(

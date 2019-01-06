@@ -14,7 +14,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, depthwise_conv3x3, SimpleSequential, ChannelShuffle
+from .common import conv1x1, conv3x3, depthwise_conv3x3, SimpleSequential, ChannelShuffle
 
 
 class ShuffleUnit(Chain):
@@ -108,13 +108,10 @@ class ShuffleInitBlock(Chain):
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = L.Convolution2D(
+            self.conv = conv3x3(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                ksize=3,
-                stride=2,
-                pad=1,
-                nobias=True)
+                stride=2)
             self.bn = L.BatchNormalization(size=out_channels)
             self.activ = F.relu
             self.pool = partial(

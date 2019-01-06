@@ -12,7 +12,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, depthwise_conv3x3, ChannelShuffle
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle
 
 
 class ShuffleUnit(nn.Module):
@@ -101,13 +101,10 @@ class ShuffleInitBlock(nn.Module):
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
 
-        self.conv = nn.Conv2d(
+        self.conv = conv3x3(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=3,
-            stride=2,
-            padding=1,
-            bias=False)
+            stride=2)
         self.bn = nn.BatchNorm2d(num_features=out_channels)
         self.activ = nn.ReLU(inplace=True)
         self.pool = nn.MaxPool2d(

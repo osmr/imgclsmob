@@ -12,7 +12,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, depthwise_conv3x3, channel_shuffle_lambda, GluonBatchNormalization
+from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, GluonBatchNormalization
 
 
 def shuffle_unit(x,
@@ -124,14 +124,11 @@ def shuffle_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = conv2d(
+    x = conv3x3(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=2,
-        padding=1,
-        use_bias=False,
         name=name + "/conv")
     x = GluonBatchNormalization(name=name + "/bn")(x)
     x = nn.Activation("relu", name=name + "/activ")(x)

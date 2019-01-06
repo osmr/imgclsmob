@@ -72,9 +72,11 @@ def sepreres_unit(x,
     resize_identity = (in_channels != out_channels) or (strides != 1)
     if resize_identity:
         identity = conv1x1(
+            x=x_pre_activ,
+            in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            name=name + "/identity_conv")(x_pre_activ)
+            name=name + "/identity_conv")
 
     x = nn.add([x, identity], name=name + "/add")
     return x

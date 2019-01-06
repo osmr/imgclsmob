@@ -124,9 +124,11 @@ def conv2d(x,
     return x
 
 
-def conv1x1(out_channels,
+def conv1x1(x,
+            in_channels,
+            out_channels,
             strides=1,
-            # groups=1,
+            groups=1,
             use_bias=False,
             name="conv1x1"):
     """
@@ -134,6 +136,10 @@ def conv1x1(out_channels,
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    in_channels : int
+        Number of input channels.
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
@@ -144,14 +150,28 @@ def conv1x1(out_channels,
         Whether the layer uses a bias vector.
     name : str, default 'conv1x1'
         Layer name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    return nn.Conv2D(
-        filters=out_channels,
+    # return nn.Conv2D(
+    #     filters=out_channels,
+    #     kernel_size=1,
+    #     strides=strides,
+    #     # groups=groups,
+    #     use_bias=use_bias,
+    #     name=name + "/conv")(x)
+    return conv2d(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
         kernel_size=1,
         strides=strides,
-        # groups=groups,
+        groups=groups,
         use_bias=use_bias,
-        name=name + "/conv")
+        name=name)
 
 
 def conv3x3(x,
@@ -760,28 +780,27 @@ def se_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    mid_cannels = channels // reduction
-
-    conv1 = conv1x1(
-        out_channels=mid_cannels,
-        use_bias=True,
-        name=name + "/conv1")
-    relu = nn.Activation('relu', name=name + "/relu")
-    conv2 = conv1x1(
-        out_channels=channels,
-        use_bias=True,
-        name=name + "/conv2")
-    sigmoid = nn.Activation('sigmoid', name=name + "/sigmoid")
-
     assert(len(x.shape) == 4)
+    mid_cannels = channels // reduction
     pool_size = x.shape[2:4] if K.image_data_format() == 'channels_first' else x.shape[1:3]
+
     w = nn.AvgPool2D(
         pool_size=pool_size,
         name=name + "/pool")(x)
-    w = conv1(w)
-    w = relu(w)
-    w = conv2(w)
-    w = sigmoid(w)
+    w = conv1x1(
+        x=w,
+        in_channels=channels,
+        out_channels=mid_cannels,
+        use_bias=True,
+        name=name + "/conv1")
+    w = nn.Activation('relu', name=name + "/relu")(w)
+    w = conv1x1(
+        x=w,
+        in_channels=mid_cannels,
+        out_channels=channels,
+        use_bias=True,
+        name=name + "/conv2")
+    w = nn.Activation('sigmoid', name=name + "/sigmoid")(w)
     x = nn.multiply([x, w], name=name + "/mul")
     return x
 

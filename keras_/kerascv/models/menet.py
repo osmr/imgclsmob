@@ -144,8 +144,10 @@ def me_unit(x,
 
     # merging
     y = conv1x1(
+        x=x,
+        in_channels=mid_channels,
         out_channels=side_channels,
-        name=name + "/s_merge_conv")(x)
+        name=name + "/s_merge_conv")
     y = GluonBatchNormalization(name=name + "/s_merge_bn")(y)
     y = nn.Activation("relu", name=name + "/s_merge_activ")(y)
 
@@ -168,8 +170,10 @@ def me_unit(x,
     y = nn.Activation("relu", name=name + "/s_conv_activ")(y)
 
     y = conv1x1(
+        x=y,
+        in_channels=side_channels,
         out_channels=mid_channels,
-        name=name + "/s_evolve_conv")(y)
+        name=name + "/s_evolve_conv")
     y = GluonBatchNormalization(name=name + "/s_evolve_bn")(y)
     y = nn.Activation('sigmoid', name=name + "/s_evolve_activ")(y)
 

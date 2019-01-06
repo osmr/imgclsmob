@@ -169,8 +169,10 @@ def shuffle_unit(x,
             name=name + "/dw_conv4")
         y1 = GluonBatchNormalization(name=name + "/dw_bn4")(y1)
         y1 = conv1x1(
+            x=y1,
+            in_channels=in_channels,
             out_channels=mid_channels,
-            name=name + "/expand_conv5")(y1)
+            name=name + "/expand_conv5")
         y1 = GluonBatchNormalization(name=name + "/expand_bn5")(y1)
         y1 = nn.Activation("relu", name=name + "/expand_activ5")(y1)
         x2 = x
@@ -180,8 +182,10 @@ def shuffle_unit(x,
         x2 = nn.Lambda(lambda z: z[:, in_split2_channels:, :, :])(x)
 
     y2 = conv1x1(
+        x=x2,
+        in_channels=(in_channels if downsample else mid_channels),
         out_channels=mid_channels,
-        name=name + "/compress_conv1")(x2)
+        name=name + "/compress_conv1")
     y2 = GluonBatchNormalization(name=name + "/compress_bn1")(y2)
     y2 = nn.Activation("relu", name=name + "/compress_activ1")(y2)
 
@@ -193,8 +197,10 @@ def shuffle_unit(x,
     y2 = GluonBatchNormalization(name=name + "/dw_bn2")(y2)
 
     y2 = conv1x1(
+        x=y2,
+        in_channels=mid_channels,
         out_channels=mid_channels,
-        name=name + "/expand_conv3")(y2)
+        name=name + "/expand_conv3")
     y2 = GluonBatchNormalization(name=name + "/expand_bn3")(y2)
     y2 = nn.Activation("relu", name=name + "/expand_activ3")(y2)
 

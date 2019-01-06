@@ -156,7 +156,7 @@ def conv1x1(x,
         strides=strides,
         groups=groups,
         use_bias=use_bias,
-        name=name + "/conv")
+        name=name)
 
 
 def conv3x3(x,
@@ -967,14 +967,14 @@ def se_block(x,
         in_channels=channels,
         out_channels=mid_cannels,
         use_bias=True,
-        name=name + "/conv1")
+        name=name + "/conv1/conv")
     w = tf.nn.relu(w, name=name + "/relu")
     w = conv1x1(
         x=w,
         in_channels=mid_cannels,
         out_channels=channels,
         use_bias=True,
-        name=name + "/conv2")
+        name=name + "/conv2/conv")
     w = tf.nn.sigmoid(w, name=name + "/sigmoid")
     x = x * w
     return x

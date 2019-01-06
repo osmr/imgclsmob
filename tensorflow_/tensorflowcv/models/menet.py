@@ -80,7 +80,7 @@ def me_unit(x,
         x=x,
         in_channels=mid_channels,
         out_channels=side_channels,
-        name=name + "/s_merge_conv")
+        name=name + "/s_merge_conv/conv")
     y = batchnorm(
         x=y,
         training=training,
@@ -115,7 +115,7 @@ def me_unit(x,
         x=y,
         in_channels=side_channels,
         out_channels=mid_channels,
-        name=name + "/s_evolve_conv")
+        name=name + "/s_evolve_conv/conv")
     y = batchnorm(
         x=y,
         training=training,

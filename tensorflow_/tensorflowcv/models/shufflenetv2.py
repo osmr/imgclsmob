@@ -186,7 +186,7 @@ def shuffle_unit(x,
             x=y1,
             in_channels=in_channels,
             out_channels=mid_channels,
-            name=name + "/expand_conv5")
+            name=name + "/expand_conv5/conv")
         y1 = batchnorm(
             x=y1,
             training=training,
@@ -200,7 +200,7 @@ def shuffle_unit(x,
         x=x2,
         in_channels=(in_channels if downsample else mid_channels),
         out_channels=mid_channels,
-        name=name + "/compress_conv1")
+        name=name + "/compress_conv1/conv")
     y2 = batchnorm(
         x=y2,
         training=training,
@@ -221,7 +221,7 @@ def shuffle_unit(x,
         x=y2,
         in_channels=mid_channels,
         out_channels=mid_channels,
-        name=name + "/expand_conv3")
+        name=name + "/expand_conv3/conv")
     y2 = batchnorm(
         x=y2,
         training=training,

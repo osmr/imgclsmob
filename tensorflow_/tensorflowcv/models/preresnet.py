@@ -179,7 +179,7 @@ def preres_unit(x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            name=name + "/identity_conv")
+            name=name + "/identity_conv/conv")
 
     x = x + identity
     return x

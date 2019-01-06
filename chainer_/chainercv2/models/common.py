@@ -27,6 +27,7 @@ class ReLU6(Chain):
 def conv1x1(in_channels,
             out_channels,
             stride=1,
+            groups=1,
             use_bias=False):
     """
     Convolution 1x1 layer.
@@ -39,6 +40,8 @@ def conv1x1(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     """
@@ -47,7 +50,8 @@ def conv1x1(in_channels,
         out_channels=out_channels,
         ksize=1,
         stride=stride,
-        nobias=(not use_bias))
+        nobias=(not use_bias),
+        groups=groups)
 
 
 def conv3x3(in_channels,

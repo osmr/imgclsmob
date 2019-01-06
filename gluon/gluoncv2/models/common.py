@@ -26,6 +26,7 @@ class ReLU6(nn.HybridBlock):
 def conv1x1(in_channels,
             out_channels,
             strides=1,
+            groups=1,
             use_bias=False):
     """
     Convolution 1x1 layer.
@@ -38,6 +39,8 @@ def conv1x1(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     """
@@ -45,6 +48,7 @@ def conv1x1(in_channels,
         channels=out_channels,
         kernel_size=1,
         strides=strides,
+        groups=groups,
         use_bias=use_bias,
         in_channels=in_channels)
 

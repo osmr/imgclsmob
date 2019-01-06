@@ -120,6 +120,7 @@ def conv1x1(x,
             in_channels,
             out_channels,
             strides=1,
+            groups=1,
             use_bias=False,
             name="conv1x1"):
     """
@@ -135,6 +136,8 @@ def conv1x1(x,
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
     name : str, default 'conv1x1'
@@ -151,6 +154,7 @@ def conv1x1(x,
         out_channels=out_channels,
         kernel_size=1,
         strides=strides,
+        groups=groups,
         use_bias=use_bias,
         name=name + "/conv")
 

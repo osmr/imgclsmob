@@ -15,6 +15,7 @@ import torch.nn as nn
 def conv1x1(in_channels,
             out_channels,
             stride=1,
+            groups=1,
             bias=False):
     """
     Convolution 1x1 layer.
@@ -27,6 +28,8 @@ def conv1x1(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
     """
@@ -35,6 +38,7 @@ def conv1x1(in_channels,
         out_channels=out_channels,
         kernel_size=1,
         stride=stride,
+        groups=groups,
         bias=bias)
 
 

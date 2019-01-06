@@ -47,42 +47,6 @@ def depthwise_conv3x3(x,
         name=name)
 
 
-def group_conv1x1(x,
-                  in_channels,
-                  out_channels,
-                  groups,
-                  name="group_conv1x1"):
-    """
-    Group convolution 1x1 layer. This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    name : str, default 'depthwise_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        use_bias=False,
-        name=name)
-
-
 def me_unit(x,
             in_channels,
             out_channels,
@@ -129,7 +93,7 @@ def me_unit(x,
     identity = x
 
     # pointwise group convolution 1
-    x = group_conv1x1(
+    x = conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
@@ -196,7 +160,7 @@ def me_unit(x,
     x = x * y
 
     # pointwise group convolution 2
-    x = group_conv1x1(
+    x = conv1x1(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,

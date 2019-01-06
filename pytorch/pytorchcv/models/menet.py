@@ -36,29 +36,6 @@ def depthwise_conv3x3(channels,
         bias=False)
 
 
-def group_conv1x1(in_channels,
-                  out_channels,
-                  groups):
-    """
-    Group convolution 1x1 layer. This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        bias=False)
-
-
 class MEUnit(nn.Module):
     """
     MENet unit.
@@ -93,7 +70,7 @@ class MEUnit(nn.Module):
             out_channels -= in_channels
 
         # residual branch
-        self.compress_conv1 = group_conv1x1(
+        self.compress_conv1 = conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=(1 if ignore_group else groups))
@@ -105,7 +82,7 @@ class MEUnit(nn.Module):
             channels=mid_channels,
             stride=(2 if self.downsample else 1))
         self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
-        self.expand_conv3 = group_conv1x1(
+        self.expand_conv3 = conv1x1(
             in_channels=mid_channels,
             out_channels=out_channels,
             groups=groups)

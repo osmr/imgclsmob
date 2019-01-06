@@ -156,13 +156,6 @@ def conv1x1(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    # return nn.Conv2D(
-    #     filters=out_channels,
-    #     kernel_size=1,
-    #     strides=strides,
-    #     # groups=groups,
-    #     use_bias=use_bias,
-    #     name=name + "/conv")(x)
     return conv2d(
         x=x,
         in_channels=in_channels,

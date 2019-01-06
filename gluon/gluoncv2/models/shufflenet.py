@@ -11,52 +11,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle
-
-
-def depthwise_conv3x3(channels,
-                      strides):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2D(
-        channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        in_channels=channels)
-
-
-def group_conv1x1(in_channels,
-                  out_channels,
-                  groups):
-    """
-    Group convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        use_bias=False,
-        in_channels=in_channels)
+from .common import conv1x1, depthwise_conv3x3, ChannelShuffle
 
 
 class ShuffleUnit(HybridBlock):
@@ -91,7 +46,7 @@ class ShuffleUnit(HybridBlock):
             out_channels -= in_channels
 
         with self.name_scope():
-            self.compress_conv1 = group_conv1x1(
+            self.compress_conv1 = conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 groups=(1 if ignore_group else groups))
@@ -103,7 +58,7 @@ class ShuffleUnit(HybridBlock):
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
             self.dw_bn2 = nn.BatchNorm(in_channels=mid_channels)
-            self.expand_conv3 = group_conv1x1(
+            self.expand_conv3 = conv1x1(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 groups=groups)

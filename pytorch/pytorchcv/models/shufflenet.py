@@ -12,52 +12,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ChannelShuffle
-
-
-def depthwise_conv3x3(channels,
-                      stride):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2d(
-        in_channels=channels,
-        out_channels=channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        groups=channels,
-        bias=False)
-
-
-def group_conv1x1(in_channels,
-                  out_channels,
-                  groups):
-    """
-    Group convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        bias=False)
+from .common import conv1x1, depthwise_conv3x3, ChannelShuffle
 
 
 class ShuffleUnit(nn.Module):
@@ -90,7 +45,7 @@ class ShuffleUnit(nn.Module):
         if downsample:
             out_channels -= in_channels
 
-        self.compress_conv1 = group_conv1x1(
+        self.compress_conv1 = conv1x1(
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=(1 if ignore_group else groups))
@@ -102,7 +57,7 @@ class ShuffleUnit(nn.Module):
             channels=mid_channels,
             stride=(2 if self.downsample else 1))
         self.dw_bn2 = nn.BatchNorm2d(num_features=mid_channels)
-        self.expand_conv3 = group_conv1x1(
+        self.expand_conv3 = conv1x1(
             in_channels=mid_channels,
             out_channels=out_channels,
             groups=groups)

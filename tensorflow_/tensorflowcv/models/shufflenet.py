@@ -10,78 +10,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, channel_shuffle, maxpool2d, avgpool2d
-
-
-def depthwise_conv3x3(x,
-                      channels,
-                      strides,
-                      name="depthwise_conv3x3"):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'depthwise_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv2d(
-        x=x,
-        in_channels=channels,
-        out_channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        name=name)
-
-
-def group_conv1x1(x,
-                  in_channels,
-                  out_channels,
-                  groups,
-                  name="group_conv1x1"):
-    """
-    Group convolution 1x1 layer.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    groups : int
-        Number of groups.
-    name : str, default 'group_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        groups=groups,
-        use_bias=False,
-        name=name)
+from .common import conv2d, conv1x1, depthwise_conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d
 
 
 def shuffle_unit(x,
@@ -126,7 +55,7 @@ def shuffle_unit(x,
 
     identity = x
 
-    x = group_conv1x1(
+    x = conv1x1(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
@@ -152,7 +81,7 @@ def shuffle_unit(x,
         training=training,
         name=name + "/dw_bn2")
 
-    x = group_conv1x1(
+    x = conv1x1(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,

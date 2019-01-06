@@ -2,10 +2,10 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass']
+__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+           'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
 
 from inspect import isfunction
 from chainer import Chain
@@ -86,6 +86,28 @@ def conv3x3(in_channels,
         pad=pad,
         groups=groups,
         nobias=(not use_bias))
+
+
+def depthwise_conv3x3(channels,
+                      stride):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    """
+    return L.Convolution2D(
+        in_channels=channels,
+        out_channels=channels,
+        ksize=3,
+        stride=stride,
+        pad=1,
+        nobias=True,
+        groups=channels)
 
 
 class ConvBlock(Chain):

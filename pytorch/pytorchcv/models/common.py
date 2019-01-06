@@ -2,9 +2,10 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'IBN', 'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
+__all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ParametricConcurrent', 'Hourglass']
 
 import math
 from inspect import isfunction
@@ -74,6 +75,28 @@ def conv3x3(in_channels,
         padding=padding,
         groups=groups,
         bias=bias)
+
+
+def depthwise_conv3x3(channels,
+                      stride):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
+    return nn.Conv2d(
+        in_channels=channels,
+        out_channels=channels,
+        kernel_size=3,
+        stride=stride,
+        padding=1,
+        groups=channels,
+        bias=False)
 
 
 class ConvBlock(nn.Module):

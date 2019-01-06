@@ -2,10 +2,10 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential', 'ParametricConcurrent',
-           'Hourglass']
+__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+           'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential',
+           'ParametricConcurrent', 'Hourglass']
 
 import math
 from inspect import isfunction
@@ -85,6 +85,28 @@ def conv3x3(in_channels,
         groups=groups,
         use_bias=use_bias,
         in_channels=in_channels)
+
+
+def depthwise_conv3x3(channels,
+                      strides):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
+    return nn.Conv2D(
+        channels=channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=channels,
+        use_bias=False,
+        in_channels=channels)
 
 
 class ConvBlock(HybridBlock):

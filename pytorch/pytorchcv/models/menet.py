@@ -11,29 +11,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, conv3x3, ChannelShuffle
-
-
-def depthwise_conv3x3(channels,
-                      stride):
-    """
-    Depthwise convolution 3x3 layer. This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2d(
-        in_channels=channels,
-        out_channels=channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        groups=channels,
-        bias=False)
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle
 
 
 class MEUnit(nn.Module):

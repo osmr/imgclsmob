@@ -13,29 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1, conv3x3, ChannelShuffle, SimpleSequential
-
-
-def depthwise_conv3x3(channels,
-                      stride):
-    """
-    Depthwise convolution 3x3 layer. This is exactly the same layer as in ShuffleNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    return L.Convolution2D(
-        in_channels=channels,
-        out_channels=channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        nobias=True,
-        groups=channels)
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, SimpleSequential
 
 
 class MEUnit(Chain):

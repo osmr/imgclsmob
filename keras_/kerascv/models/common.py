@@ -2,9 +2,9 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block',
-           'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
+__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
 
 import math
 from inspect import isfunction
@@ -207,6 +207,41 @@ def conv3x3(x,
         strides=strides,
         padding=padding,
         groups=groups,
+        use_bias=False,
+        name=name)
+
+
+def depthwise_conv3x3(x,
+                      channels,
+                      strides,
+                      name="depthwise_conv3x3"):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    name : str, default 'depthwise_conv3x3'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    return conv2d(
+        x=x,
+        in_channels=channels,
+        out_channels=channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=channels,
         use_bias=False,
         name=name)
 

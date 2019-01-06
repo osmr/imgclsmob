@@ -2,8 +2,8 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
+__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
            'pre_conv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
 
 import math
@@ -203,6 +203,41 @@ def conv3x3(x,
         padding=padding,
         groups=groups,
         use_bias=use_bias,
+        name=name)
+
+
+def depthwise_conv3x3(x,
+                      channels,
+                      strides,
+                      name="depthwise_conv3x3"):
+    """
+    Depthwise convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    channels : int
+        Number of input/output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    name : str, default 'depthwise_conv3x3'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return conv2d(
+        x=x,
+        in_channels=channels,
+        out_channels=channels,
+        kernel_size=3,
+        strides=strides,
+        padding=1,
+        groups=channels,
+        use_bias=False,
         name=name)
 
 

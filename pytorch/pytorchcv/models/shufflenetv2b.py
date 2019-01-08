@@ -14,37 +14,6 @@ import torch.nn.init as init
 from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
 
 
-# class ShuffleDwConv3x3(nn.Module):
-#     """
-#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-#
-#     Parameters:
-#     ----------
-#     channels : int
-#         Number of input/output channels.
-#     stride : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     """
-#     def __init__(self,
-#                  channels,
-#                  stride):
-#         super(ShuffleDwConv3x3, self).__init__()
-#         self.conv = nn.Conv2d(
-#             in_channels=channels,
-#             out_channels=channels,
-#             kernel_size=3,
-#             stride=stride,
-#             padding=1,
-#             groups=channels,
-#             bias=False)
-#         self.bn = nn.BatchNorm2d(num_features=channels)
-#
-#     def forward(self, x):
-#         x = self.conv(x)
-#         x = self.bn(x)
-#         return x
-
-
 class ShuffleUnit(nn.Module):
     """
     ShuffleNetV2(b) unit.

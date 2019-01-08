@@ -13,40 +13,6 @@ from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
 
 
-# class ShuffleDwConv3x3(HybridBlock):
-#     """
-#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-#
-#     Parameters:
-#     ----------
-#     channels : int
-#         Number of input/output channels.
-#     strides : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     """
-#     def __init__(self,
-#                  channels,
-#                  strides,
-#                  **kwargs):
-#         super(ShuffleDwConv3x3, self).__init__(**kwargs)
-#         with self.name_scope():
-#             self.conv = nn.Conv2D(
-#                 channels=channels,
-#                 kernel_size=3,
-#                 strides=strides,
-#                 padding=1,
-#                 groups=channels,
-#                 use_bias=False,
-#                 in_channels=channels)
-#             self.bn = nn.BatchNorm(
-#                 in_channels=channels)
-#
-#     def hybrid_forward(self, F, x):
-#         x = self.conv(x)
-#         x = self.bn(x)
-#         return x
-
-
 class ShuffleUnit(HybridBlock):
     """
     ShuffleNetV2(b) unit.

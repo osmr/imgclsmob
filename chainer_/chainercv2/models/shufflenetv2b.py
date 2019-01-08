@@ -17,40 +17,6 @@ from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffl
     SimpleSequential
 
 
-# class ShuffleDwConv3x3(Chain):
-#     """
-#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-#
-#     Parameters:
-#     ----------
-#     channels : int
-#         Number of input/output channels.
-#     stride : int or tuple/list of 2 int
-#         Stride of the convolution.
-#     """
-#     def __init__(self,
-#                  channels,
-#                  stride):
-#         super(ShuffleDwConv3x3, self).__init__()
-#         with self.init_scope():
-#             self.conv = L.Convolution2D(
-#                 in_channels=channels,
-#                 out_channels=channels,
-#                 ksize=3,
-#                 stride=stride,
-#                 pad=1,
-#                 nobias=True,
-#                 groups=channels)
-#             self.bn = L.BatchNormalization(
-#                 size=channels,
-#                 eps=1e-5)
-#
-#     def __call__(self, x):
-#         x = self.conv(x)
-#         x = self.bn(x)
-#         return x
-
-
 class ShuffleUnit(Chain):
     """
     ShuffleNetV2(b) unit.

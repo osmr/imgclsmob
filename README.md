@@ -298,7 +298,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 352-MENet-12x1 (g=8) | 34.70 | 13.75 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1375-85779b8a.params.log)) |
 | 456-MENet-24x1 (g=3) | 29.57 | 10.43 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-1043-6e777068.params.log)) |
 | MobileNet x0.25 | 45.78 | 22.18 | 470,072 | 44.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2218-3185cdd2.params.log)) |
-| MobileNet x0.5 | 34.79 | 13.65 | 1,331,592 | 155.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.148/mobilenet_wd2-1365-59441ede.params.log)) |
+| MobileNet x0.5 | 33.94 | 13.30 | 1,331,592 | 155.42M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1330-94f13ae1.params.log)) |
 | MobileNet x0.75 | 29.85 | 10.51 | 2,585,560 | 333.99M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1051-6361d4b4.params.log)) |
 | MobileNet x1.0 | 26.43 | 8.65 | 4,231,976 | 579.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0865-eafd91e9.params.log)) |
 | FD-MobileNet x0.25 | 56.19 | 31.38 | 383,160 | 12.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3138-2fe432fd.params.log)) |
@@ -425,7 +425,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 352-MENet-12x1 (g=8) | 33.31 | 13.08 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1308-e91ec72c.pth.log)) |
 | 456-MENet-24x1 (g=3) | 28.40 | 9.93 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-0993-cb9fd376.pth.log)) |
 | MobileNet x0.25 | 46.26 | 22.49 | 470,072 | 44.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2249-1ad5e8fe.pth.log)) |
-| MobileNet x0.5 | 35.11 | 13.95 | 1,331,592 | 155.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.148/mobilenet_wd2-1395-364b4ca6.pth.log)) |
+| MobileNet x0.5 | 34.15 | 13.55 | 1,331,592 | 155.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1355-41a21242.pth.log)) |
 | MobileNet x0.75 | 30.14 | 10.76 | 2,585,560 | 333.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1076-d801bcae.pth.log)) |
 | MobileNet x1.0 | 26.61 | 8.95 | 4,231,976 | 579.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0895-7e1d739f.pth.log)) |
 | FD-MobileNet x0.25 | 55.77 | 31.32 | 383,160 | 12.95M | From [clavichord93/FD-MobileNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.8/fdmobilenet_wd4-3132-0b242eff.pth.log)) |
@@ -546,7 +546,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 352-MENet-12x1 (g=8) | 34.62 | 13.68 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet352_12x1_g8-1368-2d523fac.npz.log)) |
 | 456-MENet-24x1 (g=3) | 29.55 | 10.39 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.33/menet456_24x1_g3-1039-f68c36a2.npz.log)) |
 | MobileNet x0.25 | 45.85 | 22.16 | 470,072 | 44.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2216-09c50ab8.npz.log)) |
-| MobileNet x0.5 | 34.83 | 13.66 | 1,331,592 | 155.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.148/mobilenet_wd2-1366-dca3a965.npz.log)) |
+| MobileNet x0.5 | 33.89 | 13.37 | 1,331,592 | 155.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1337-48d12ee3.npz.log)) |
 | MobileNet x0.75 | 29.86 | 10.53 | 2,585,560 | 333.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1053-d7ec3192.npz.log)) |
 | MobileNet x1.0 | 26.47 | 8.66 | 4,231,976 | 579.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0866-b888f817.npz.log)) |
 | FD-MobileNet x0.25 | 56.11 | 31.45 | 383,160 | 12.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3145-6718fb07.npz.log)) |
@@ -641,7 +641,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 352-MENet-12x1 (g=8) | 34.69 | 13.75 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet352_12x1_g8-1375-9007c933.h5.log)) |
 | 456-MENet-24x1 (g=3) | 29.55 | 10.44 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.58/menet456_24x1_g3-1044-c090af59.h5.log)) |
 | MobileNet x0.25 | 45.80 | 22.17 | 470,072 | 44.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2217-fb7abda8.h5.log)) |
-| MobileNet x0.5 | 34.80 | 13.66 | 1,331,592 | 155.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.148/mobilenet_wd2-1366-e823a654.h5.log)) |
+| MobileNet x0.5 | 33.94 | 13.30 | 1,331,592 | 155.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1330-aa86f355.h5.log)) |
 | MobileNet x0.75 | 29.85 | 10.51 | 2,585,560 | 333.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1051-d200ad45.h5.log)) |
 | MobileNet x1.0 | 26.43 | 8.66 | 4,231,976 | 579.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0866-9661b555.h5.log)) |
 | FD-MobileNet x0.25 | 56.17 | 31.37 | 383,160 | 12.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3137-153934e4.h5.log)) |
@@ -730,7 +730,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 352-MENet-12x1 (g=8) | 34.65 | 13.71 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet352_12x1_g8-1371-3621d3c0.tf.npz.log)) |
 | 456-MENet-24x1 (g=3) | 29.56 | 10.46 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.87/menet456_24x1_g3-1046-6d70fb21.tf.npz.log)) |
 | MobileNet x0.25 | 45.78 | 22.21 | 470,072 | 44.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.80/mobilenet_wd4-2221-15ee9820.tf.npz.log)) |
-| MobileNet x0.5 | 34.74 | 13.66 | 1,331,592 | 155.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.148/mobilenet_wd2-1366-9ece12a0.tf.npz.log)) |
+| MobileNet x0.5 | 33.85 | 13.31 | 1,331,592 | 155.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1331-4c5b66f1.tf.npz.log)) |
 | MobileNet x0.75 | 29.82 | 10.49 | 2,585,560 | 333.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1049-3139bba7.tf.npz.log)) |
 | MobileNet x1.0 | 26.45 | 8.67 | 4,231,976 | 579.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0867-83beb02e.tf.npz.log)) |
 | FD-MobileNet x0.25 | 56.08 | 31.44 | 383,160 | 12.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.81/fdmobilenet_wd4-3144-3febaec9.tf.npz.log)) |

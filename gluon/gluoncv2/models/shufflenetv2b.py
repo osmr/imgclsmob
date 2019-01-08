@@ -10,41 +10,41 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
 
 
-class ShuffleDwConv3x3(HybridBlock):
-    """
-    ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    def __init__(self,
-                 channels,
-                 strides,
-                 **kwargs):
-        super(ShuffleDwConv3x3, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=channels,
-                kernel_size=3,
-                strides=strides,
-                padding=1,
-                groups=channels,
-                use_bias=False,
-                in_channels=channels)
-            self.bn = nn.BatchNorm(
-                in_channels=channels)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        return x
+# class ShuffleDwConv3x3(HybridBlock):
+#     """
+#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
+#
+#     Parameters:
+#     ----------
+#     channels : int
+#         Number of input/output channels.
+#     strides : int or tuple/list of 2 int
+#         Strides of the convolution.
+#     """
+#     def __init__(self,
+#                  channels,
+#                  strides,
+#                  **kwargs):
+#         super(ShuffleDwConv3x3, self).__init__(**kwargs)
+#         with self.name_scope():
+#             self.conv = nn.Conv2D(
+#                 channels=channels,
+#                 kernel_size=3,
+#                 strides=strides,
+#                 padding=1,
+#                 groups=channels,
+#                 use_bias=False,
+#                 in_channels=channels)
+#             self.bn = nn.BatchNorm(
+#                 in_channels=channels)
+#
+#     def hybrid_forward(self, F, x):
+#         x = self.conv(x)
+#         x = self.bn(x)
+#         return x
 
 
 class ShuffleUnit(HybridBlock):
@@ -89,18 +89,24 @@ class ShuffleUnit(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=y2_in_channels,
                 out_channels=mid_channels)
-            self.dconv = ShuffleDwConv3x3(
-                channels=mid_channels,
-                strides=(2 if self.downsample else 1))
+            self.dconv = dwconv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                strides=(2 if self.downsample else 1),
+                activation=None,
+                activate=False)
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=y2_out_channels)
             if self.use_se:
                 self.se = SEBlock(channels=y2_out_channels)
             if downsample:
-                self.shortcut_dconv = ShuffleDwConv3x3(
-                    channels=in_channels,
-                    strides=2)
+                self.shortcut_dconv = dwconv3x3_block(
+                    in_channels=in_channels,
+                    out_channels=in_channels,
+                    strides=2,
+                    activation=None,
+                    activate=False)
                 self.shortcut_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=in_channels)

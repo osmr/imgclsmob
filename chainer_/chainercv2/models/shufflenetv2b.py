@@ -13,41 +13,42 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock, SimpleSequential
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock,\
+    SimpleSequential
 
 
-class ShuffleDwConv3x3(Chain):
-    """
-    ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    def __init__(self,
-                 channels,
-                 stride):
-        super(ShuffleDwConv3x3, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=channels,
-                out_channels=channels,
-                ksize=3,
-                stride=stride,
-                pad=1,
-                nobias=True,
-                groups=channels)
-            self.bn = L.BatchNormalization(
-                size=channels,
-                eps=1e-5)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        return x
+# class ShuffleDwConv3x3(Chain):
+#     """
+#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
+#
+#     Parameters:
+#     ----------
+#     channels : int
+#         Number of input/output channels.
+#     stride : int or tuple/list of 2 int
+#         Stride of the convolution.
+#     """
+#     def __init__(self,
+#                  channels,
+#                  stride):
+#         super(ShuffleDwConv3x3, self).__init__()
+#         with self.init_scope():
+#             self.conv = L.Convolution2D(
+#                 in_channels=channels,
+#                 out_channels=channels,
+#                 ksize=3,
+#                 stride=stride,
+#                 pad=1,
+#                 nobias=True,
+#                 groups=channels)
+#             self.bn = L.BatchNormalization(
+#                 size=channels,
+#                 eps=1e-5)
+#
+#     def __call__(self, x):
+#         x = self.conv(x)
+#         x = self.bn(x)
+#         return x
 
 
 class ShuffleUnit(Chain):
@@ -91,18 +92,24 @@ class ShuffleUnit(Chain):
             self.conv1 = conv1x1_block(
                 in_channels=y2_in_channels,
                 out_channels=mid_channels)
-            self.dconv = ShuffleDwConv3x3(
-                channels=mid_channels,
-                stride=(2 if self.downsample else 1))
+            self.dconv = dwconv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=(2 if self.downsample else 1),
+                activation=None,
+                activate=False)
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=y2_out_channels)
             if self.use_se:
                 self.se = SEBlock(channels=y2_out_channels)
             if downsample:
-                self.shortcut_dconv = ShuffleDwConv3x3(
-                    channels=in_channels,
-                    stride=2)
+                self.shortcut_dconv = dwconv3x3_block(
+                    in_channels=in_channels,
+                    out_channels=in_channels,
+                    stride=2,
+                    activation=None,
+                    activate=False)
                 self.shortcut_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=in_channels)

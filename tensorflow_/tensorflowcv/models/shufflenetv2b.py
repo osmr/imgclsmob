@@ -9,51 +9,51 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block, conv2d, batchnorm, channel_shuffle, channel_shuffle2, maxpool2d,\
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle, channel_shuffle2, maxpool2d,\
     se_block
 
 
-def shuffle_depthwise_conv3x3(x,
-                              channels,
-                              strides,
-                              training,
-                              name="shuffle_depthwise_conv3x3"):
-    """
-    ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'shuffle_depthwise_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=channels,
-        out_channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        name=name)
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    return x
+# def shuffle_depthwise_conv3x3(x,
+#                               channels,
+#                               strides,
+#                               training,
+#                               name="shuffle_depthwise_conv3x3"):
+#     """
+#     ShuffleNetV2(b) specific depthwise convolution 3x3 layer.
+#
+#     Parameters:
+#     ----------
+#     x : Tensor
+#         Input tensor.
+#     channels : int
+#         Number of input/output channels.
+#     strides : int or tuple/list of 2 int
+#         Strides of the convolution.
+#     training : bool, or a TensorFlow boolean scalar tensor
+#       Whether to return the output in training mode or in inference mode.
+#     name : str, default 'shuffle_depthwise_conv3x3'
+#         Block name.
+#
+#     Returns
+#     -------
+#     Tensor
+#         Resulted tensor.
+#     """
+#     x = conv2d(
+#         x=x,
+#         in_channels=channels,
+#         out_channels=channels,
+#         kernel_size=3,
+#         strides=strides,
+#         padding=1,
+#         groups=channels,
+#         use_bias=False,
+#         name=name)
+#     x = batchnorm(
+#         x=x,
+#         training=training,
+#         name=name + "/bn")
+#     return x
 
 
 def shuffle_unit(x,
@@ -99,10 +99,13 @@ def shuffle_unit(x,
     assert (in_channels % 2 == 0)
 
     if downsample:
-        y1 = shuffle_depthwise_conv3x3(
+        y1 = dwconv3x3_block(
             x=x,
-            channels=in_channels,
+            in_channels=in_channels,
+            out_channels=in_channels,
             strides=2,
+            activation=None,
+            activate=False,
             training=training,
             name=name + "/shortcut_dconv")
         y1 = conv1x1_block(
@@ -124,10 +127,13 @@ def shuffle_unit(x,
         out_channels=mid_channels,
         training=training,
         name=name + "/conv1")
-    y2 = shuffle_depthwise_conv3x3(
+    y2 = dwconv3x3_block(
         x=y2,
-        channels=mid_channels,
+        in_channels=mid_channels,
+        out_channels=mid_channels,
         strides=(2 if downsample else 1),
+        activation=None,
+        activate=False,
         training=training,
         name=name + "/dconv")
     y2 = conv1x1_block(

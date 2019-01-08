@@ -13,71 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, ChannelShuffle, ChannelShuffle2, SEBlock
-
-
-class ShuffleConv(Chain):
-    """
-    ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(ShuffleConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def shuffle_conv1x1(in_channels,
-                    out_channels):
-    """
-    1x1 version of the ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return ShuffleConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0)
+from .common import conv1x1_block, conv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock, SimpleSequential
 
 
 class ShuffleDwConv3x3(Chain):
@@ -152,13 +88,13 @@ class ShuffleUnit(Chain):
         y2_out_channels = out_channels - y2_in_channels
 
         with self.init_scope():
-            self.conv1 = shuffle_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=y2_in_channels,
                 out_channels=mid_channels)
             self.dconv = ShuffleDwConv3x3(
                 channels=mid_channels,
                 stride=(2 if self.downsample else 1))
-            self.conv2 = shuffle_conv1x1(
+            self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=y2_out_channels)
             if self.use_se:
@@ -167,7 +103,7 @@ class ShuffleUnit(Chain):
                 self.shortcut_dconv = ShuffleDwConv3x3(
                     channels=in_channels,
                     stride=2)
-                self.shortcut_conv = shuffle_conv1x1(
+                self.shortcut_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=in_channels)
 
@@ -215,12 +151,10 @@ class ShuffleInitBlock(Chain):
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = ShuffleConv(
+            self.conv = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                ksize=3,
-                stride=2,
-                pad=1)
+                stride=2)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -295,7 +229,7 @@ class ShuffleNetV2b(Chain):
                                 shuffle_group_first=shuffle_group_first))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', shuffle_conv1x1(
+                setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels))
                 in_channels = final_block_channels
@@ -497,12 +431,12 @@ def _test():
     pretrained = False
 
     models = [
-        # shufflenetv2b_wd2,
-        # shufflenetv2b_w1,
-        # shufflenetv2b_w3d2,
-        # shufflenetv2b_w2,
+        shufflenetv2b_wd2,
+        shufflenetv2b_w1,
+        shufflenetv2b_w3d2,
+        shufflenetv2b_w2,
         shufflenetv2c_wd2,
-        # shufflenetv2c_w1,
+        shufflenetv2c_w1,
     ]
 
     for model in models:

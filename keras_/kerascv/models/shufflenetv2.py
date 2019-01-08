@@ -10,121 +10,8 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, max_pool2d_ceil, channel_shuffle_lambda, se_block, GluonBatchNormalization
-
-
-def shuffle_conv(x,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 name="shuffle_conv"):
-    """
-    ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    name : str, default 'shuffle_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor and preactivated input tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    return x
-
-
-def shuffle_conv1x1(x,
-                    in_channels,
-                    out_channels,
-                    name="shuffle_conv1x1"):
-    """
-    1x1 version of the ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    name : str, default 'shuffle_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return shuffle_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        name=name)
-
-
-def depthwise_conv3x3(x,
-                      channels,
-                      strides,
-                      name="depthwise_conv3x3"):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    name : str, default 'depthwise_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return conv2d(
-        x=x,
-        in_channels=channels,
-        out_channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        name=name)
+from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, max_pool2d_ceil, channel_shuffle_lambda,\
+    se_block, GluonBatchNormalization
 
 
 def shuffle_unit(x,
@@ -247,13 +134,11 @@ def shuffle_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = shuffle_conv(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=2,
-        padding=1,
         name=name + "/conv")
     x = max_pool2d_ceil(
         x=x,
@@ -316,7 +201,7 @@ def shufflenetv2(channels,
                 use_residual=use_residual,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
-    x = shuffle_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=final_block_channels,

@@ -9,93 +9,7 @@ __all__ = ['ShuffleNetV2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1, ChannelShuffle, SEBlock
-
-
-class ShuffleConv(HybridBlock):
-    """
-    ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 **kwargs):
-        super(ShuffleConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def shuffle_conv1x1(in_channels,
-                    out_channels):
-    """
-    1x1 version of the ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return ShuffleConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0)
-
-
-def depthwise_conv3x3(channels,
-                      strides):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    return nn.Conv2D(
-        channels=channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=channels,
-        use_bias=False,
-        in_channels=channels)
+from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, ChannelShuffle, SEBlock
 
 
 class ShuffleUnit(HybridBlock):
@@ -202,12 +116,10 @@ class ShuffleInitBlock(HybridBlock):
                  **kwargs):
         super(ShuffleInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = ShuffleConv(
+            self.conv = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1)
+                strides=2)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -277,7 +189,7 @@ class ShuffleNetV2(HybridBlock):
                             use_residual=use_residual))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(shuffle_conv1x1(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels))
             in_channels = final_block_channels
@@ -428,8 +340,8 @@ def _test():
     models = [
         shufflenetv2_wd2,
         shufflenetv2_w1,
-        # shufflenetv2_w3d2,
-        # shufflenetv2_w2,
+        shufflenetv2_w3d2,
+        shufflenetv2_w2,
     ]
 
     for model in models:

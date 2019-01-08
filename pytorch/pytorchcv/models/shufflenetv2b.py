@@ -11,70 +11,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ChannelShuffle, ChannelShuffle2, SEBlock
-
-
-class ShuffleConv(nn.Module):
-    """
-    ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(ShuffleConv, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def shuffle_conv1x1(in_channels,
-                    out_channels):
-    """
-    1x1 version of the ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return ShuffleConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0)
+from .common import conv1x1_block, conv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
 
 
 class ShuffleDwConv3x3(nn.Module):
@@ -145,13 +82,13 @@ class ShuffleUnit(nn.Module):
         y2_in_channels = (in_channels if downsample else in_channels2)
         y2_out_channels = out_channels - y2_in_channels
 
-        self.conv1 = shuffle_conv1x1(
+        self.conv1 = conv1x1_block(
             in_channels=y2_in_channels,
             out_channels=mid_channels)
         self.dconv = ShuffleDwConv3x3(
             channels=mid_channels,
             stride=(2 if self.downsample else 1))
-        self.conv2 = shuffle_conv1x1(
+        self.conv2 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=y2_out_channels)
         if self.use_se:
@@ -160,7 +97,7 @@ class ShuffleUnit(nn.Module):
             self.shortcut_dconv = ShuffleDwConv3x3(
                 channels=in_channels,
                 stride=2)
-            self.shortcut_conv = shuffle_conv1x1(
+            self.shortcut_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=in_channels)
 
@@ -208,12 +145,10 @@ class ShuffleInitBlock(nn.Module):
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
 
-        self.conv = ShuffleConv(
+        self.conv = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=3,
-            stride=2,
-            padding=1)
+            stride=2)
         self.pool = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -284,7 +219,7 @@ class ShuffleNetV2b(nn.Module):
                     shuffle_group_first=shuffle_group_first))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', shuffle_conv1x1(
+        self.features.add_module('final_block', conv1x1_block(
             in_channels=in_channels,
             out_channels=final_block_channels))
         in_channels = final_block_channels
@@ -496,12 +431,12 @@ def _test():
     pretrained = False
 
     models = [
-        # shufflenetv2b_wd2,
-        # shufflenetv2b_w1,
-        # shufflenetv2b_w3d2,
-        # shufflenetv2b_w2,
+        shufflenetv2b_wd2,
+        shufflenetv2b_w1,
+        shufflenetv2b_w3d2,
+        shufflenetv2b_w2,
         shufflenetv2c_wd2,
-        # shufflenetv2c_w1,
+        shufflenetv2c_w1,
     ]
 
     for model in models:

@@ -10,71 +10,7 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ChannelShuffle, ChannelShuffle2, SEBlock
-
-
-class ShuffleConv(HybridBlock):
-    """
-    ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 **kwargs):
-        super(ShuffleConv, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels)
-            self.activ = nn.Activation('relu')
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def shuffle_conv1x1(in_channels,
-                    out_channels):
-    """
-    1x1 version of the ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return ShuffleConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0)
+from .common import conv1x1_block, conv3x3_block, ChannelShuffle, ChannelShuffle2, SEBlock
 
 
 class ShuffleDwConv3x3(HybridBlock):
@@ -150,13 +86,13 @@ class ShuffleUnit(HybridBlock):
         y2_out_channels = out_channels - y2_in_channels
 
         with self.name_scope():
-            self.conv1 = shuffle_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=y2_in_channels,
                 out_channels=mid_channels)
             self.dconv = ShuffleDwConv3x3(
                 channels=mid_channels,
                 strides=(2 if self.downsample else 1))
-            self.conv2 = shuffle_conv1x1(
+            self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=y2_out_channels)
             if self.use_se:
@@ -165,7 +101,7 @@ class ShuffleUnit(HybridBlock):
                 self.shortcut_dconv = ShuffleDwConv3x3(
                     channels=in_channels,
                     strides=2)
-                self.shortcut_conv = shuffle_conv1x1(
+                self.shortcut_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=in_channels)
 
@@ -214,12 +150,10 @@ class ShuffleInitBlock(HybridBlock):
                  **kwargs):
         super(ShuffleInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = ShuffleConv(
+            self.conv = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=3,
-                strides=2,
-                padding=1)
+                strides=2)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -293,7 +227,7 @@ class ShuffleNetV2b(HybridBlock):
                             shuffle_group_first=shuffle_group_first))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(shuffle_conv1x1(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels))
             in_channels = final_block_channels
@@ -504,12 +438,12 @@ def _test():
     pretrained = False
 
     models = [
-        # shufflenetv2b_wd2,
-        # shufflenetv2b_w1,
-        # shufflenetv2b_w3d2,
-        # shufflenetv2b_w2,
+        shufflenetv2b_wd2,
+        shufflenetv2b_w1,
+        shufflenetv2b_w3d2,
+        shufflenetv2b_w2,
         shufflenetv2c_wd2,
-        # shufflenetv2c_w1,
+        shufflenetv2c_w1,
     ]
 
     for model in models:

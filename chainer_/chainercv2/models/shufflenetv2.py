@@ -12,93 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, conv1x1, ChannelShuffle, SEBlock
-
-
-class ShuffleConv(Chain):
-    """
-    ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(ShuffleConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def shuffle_conv1x1(in_channels,
-                    out_channels):
-    """
-    1x1 version of the ShuffleNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return ShuffleConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0)
-
-
-def depthwise_conv3x3(channels,
-                      stride):
-    """
-    Depthwise convolution 3x3 layer.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    return L.Convolution2D(
-        in_channels=channels,
-        out_channels=channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        nobias=True,
-        groups=channels)
+from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, ChannelShuffle, SEBlock, SimpleSequential
 
 
 class ShuffleUnit(Chain):
@@ -213,12 +127,10 @@ class ShuffleInitBlock(Chain):
                  out_channels):
         super(ShuffleInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = ShuffleConv(
+            self.conv = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                ksize=3,
-                stride=2,
-                pad=1)
+                stride=2)
             self.pool = partial(
                 F.max_pooling_2d,
                 ksize=3,
@@ -289,7 +201,7 @@ class ShuffleNetV2(Chain):
                                 use_residual=use_residual))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', shuffle_conv1x1(
+                setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels))
                 in_channels = final_block_channels
@@ -430,13 +342,13 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
         shufflenetv2_wd2,
         shufflenetv2_w1,
-        # shufflenetv2_w3d2,
-        # shufflenetv2_w2,
+        shufflenetv2_w3d2,
+        shufflenetv2_w2,
     ]
 
     for model in models:

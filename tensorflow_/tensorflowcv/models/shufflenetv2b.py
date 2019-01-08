@@ -9,96 +9,8 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, channel_shuffle, channel_shuffle2, maxpool2d, se_block
-
-
-def shuffle_conv(x,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 training,
-                 name="shuffle_conv"):
-    """
-    ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'shuffle_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=False,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    x = tf.nn.relu(x, name=name + "/activ")
-    return x
-
-
-def shuffle_conv1x1(x,
-                    in_channels,
-                    out_channels,
-                    training,
-                    name="shuffle_conv1x1"):
-    """
-    1x1 version of the ShuffleNetV2(b) specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'shuffle_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return shuffle_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        training=training,
-        name=name)
+from .common import conv1x1_block, conv3x3_block, conv2d, batchnorm, channel_shuffle, channel_shuffle2, maxpool2d,\
+    se_block
 
 
 def shuffle_depthwise_conv3x3(x,
@@ -193,7 +105,7 @@ def shuffle_unit(x,
             strides=2,
             training=training,
             name=name + "/shortcut_dconv")
-        y1 = shuffle_conv1x1(
+        y1 = conv1x1_block(
             x=y1,
             in_channels=in_channels,
             out_channels=in_channels,
@@ -206,7 +118,7 @@ def shuffle_unit(x,
     y2_in_channels = (in_channels if downsample else in_channels2)
     y2_out_channels = out_channels - y2_in_channels
 
-    y2 = shuffle_conv1x1(
+    y2 = conv1x1_block(
         x=x2,
         in_channels=y2_in_channels,
         out_channels=mid_channels,
@@ -218,7 +130,7 @@ def shuffle_unit(x,
         strides=(2 if downsample else 1),
         training=training,
         name=name + "/dconv")
-    y2 = shuffle_conv1x1(
+    y2 = conv1x1_block(
         x=y2,
         in_channels=mid_channels,
         out_channels=y2_out_channels,
@@ -276,13 +188,11 @@ def shuffle_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = shuffle_conv(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
         strides=2,
-        padding=1,
         training=training,
         name=name + "/conv")
     x = maxpool2d(
@@ -383,7 +293,7 @@ class ShuffleNetV2b(object):
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = shuffle_conv1x1(
+        x = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
@@ -614,15 +524,15 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
-    pretrained = True
+    pretrained = False
 
     models = [
         shufflenetv2b_wd2,
-        # shufflenetv2b_w1,
-        # shufflenetv2b_w3d2,
-        # shufflenetv2b_w2,
-        # shufflenetv2c_wd2,
-        # shufflenetv2c_w1,
+        shufflenetv2b_w1,
+        shufflenetv2b_w3d2,
+        shufflenetv2b_w2,
+        shufflenetv2c_wd2,
+        shufflenetv2c_w1,
     ]
 
     for model in models:

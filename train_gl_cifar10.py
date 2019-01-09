@@ -614,7 +614,7 @@ def main():
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
             param_names=['Val.Err', 'Train.Err', 'Train.Loss', 'LR'],
-            acc_ind=1,
+            acc_ind=0,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, 'score.log'),

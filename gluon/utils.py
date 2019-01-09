@@ -100,7 +100,7 @@ def validate(acc_top1,
     return 1.0 - top1, 1.0 - top5
 
 
-def validate1(acc_top1,
+def validate1(accuracy_metric,
               net,
               val_data,
               batch_fn,
@@ -109,10 +109,10 @@ def validate1(acc_top1,
               ctx):
     if data_source_needs_reset:
         val_data.reset()
-    acc_top1.reset()
+    accuracy_metric.reset()
     for batch in val_data:
         data_list, labels_list = batch_fn(batch, ctx)
         outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        acc_top1.update(labels_list, outputs_list)
-    _, top1 = acc_top1.get()
-    return 1.0 - top1
+        accuracy_metric.update(labels_list, outputs_list)
+    _, accuracy_value = accuracy_metric.get()
+    return 1.0 - accuracy_value

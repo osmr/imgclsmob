@@ -116,10 +116,10 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        acc_top1 = mx.metric.Accuracy()
+        accuracy_metric = mx.metric.Accuracy()
         tic = time.time()
-        err_top1_val = validate1(
-            acc_top1=acc_top1,
+        err_val = validate1(
+            accuracy_metric=accuracy_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -127,11 +127,11 @@ def test(net,
             dtype=dtype,
             ctx=ctx)
         if extended_log:
-            logging.info('Test: err-top1={top1:.4f} ({top1}))'.format(
-                top1=err_top1_val))
+            logging.info('Test: err={err:.4f} ({err}))'.format(
+                err=err_val))
         else:
-            logging.info('Test: err-top1={top1:.4f}'.format(
-                top1=err_top1_val))
+            logging.info('Test: err={err:.4f}'.format(
+                err=err_val))
         logging.info('Time cost: {:.4f} sec'.format(
             time.time() - tic))
 

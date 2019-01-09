@@ -175,7 +175,7 @@ def main():
         in_channels=args.in_channels,
         do_hybridize=(not args.calc_flops),
         ctx=ctx)
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (32, 32)
 
     val_data = get_val_data_source(
         dataset_args=args,

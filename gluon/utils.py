@@ -98,3 +98,21 @@ def validate(acc_top1,
     _, top1 = acc_top1.get()
     _, top5 = acc_top5.get()
     return 1.0 - top1, 1.0 - top5
+
+
+def validate1(acc_top1,
+              net,
+              val_data,
+              batch_fn,
+              data_source_needs_reset,
+              dtype,
+              ctx):
+    if data_source_needs_reset:
+        val_data.reset()
+    acc_top1.reset()
+    for batch in val_data:
+        data_list, labels_list = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+        acc_top1.update(labels_list, outputs_list)
+    _, top1 = acc_top1.get()
+    return 1.0 - top1

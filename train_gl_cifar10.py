@@ -79,7 +79,7 @@ def parse_args():
     parser.add_argument(
         '--num-epochs',
         type=int,
-        default=120,
+        default=200,
         help='number of training epochs.')
     parser.add_argument(
         '--start-epoch',
@@ -195,7 +195,7 @@ def parse_args():
     parser.add_argument(
         '--log-interval',
         type=int,
-        default=50,
+        default=200,
         help='number of batches to wait before logging.')
     parser.add_argument(
         '--save-interval',

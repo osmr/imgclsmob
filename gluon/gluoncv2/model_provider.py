@@ -50,16 +50,16 @@ from .models.nasnet import *
 from .models.pnasnet import *
 
 from .models.crunet import *
-from .models.cifar10_resnet import *
+from .models.resnet_cifar10 import *
 from .models.others.oth_cifar_resnet import *
 
 __all__ = ['get_model']
 
 
 _models = {
-    'cifar10_resnet20': cifar10_resnet20,
-    'cifar10_resnet56': cifar10_resnet56,
-    'cifar10_resnet110': cifar10_resnet110,
+    'resnet20_cifar10': resnet20_cifar10,
+    'resnet56_cifar10': resnet56_cifar10,
+    'resnet110_cifar10': resnet110_cifar10,
 
     'oth_cifar_resnet20_v1': oth_cifar_resnet20_v1,
     'oth_cifar_resnet56_v1': oth_cifar_resnet56_v1,

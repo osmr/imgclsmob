@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['CIFAR10ResNet', 'cifar10_resnet20', 'cifar10_resnet56', 'cifar10_resnet110']
+__all__ = ['CIFAR10ResNet', 'resnet20_cifar10', 'resnet56_cifar10', 'resnet110_cifar10']
 
 import os
 from mxnet import cpu
@@ -83,12 +83,12 @@ class CIFAR10ResNet(HybridBlock):
         return x
 
 
-def get_cifar_resnet(blocks,
-                     model_name=None,
-                     pretrained=False,
-                     ctx=cpu(),
-                     root=os.path.join('~', '.mxnet', 'models'),
-                     **kwargs):
+def get_resnet_cifar10(blocks,
+                       model_name=None,
+                       pretrained=False,
+                       ctx=cpu(),
+                       root=os.path.join('~', '.mxnet', 'models'),
+                       **kwargs):
     """
     Create CIFAR-10 ResNet model with specific parameters.
 
@@ -131,7 +131,7 @@ def get_cifar_resnet(blocks,
     return net
 
 
-def cifar10_resnet20(**kwargs):
+def resnet20_cifar10(**kwargs):
     """
     CIFAR-10 ResNet-20 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -144,10 +144,10 @@ def cifar10_resnet20(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_cifar_resnet(blocks=20, model_name="cifar10_resnet20", **kwargs)
+    return get_resnet_cifar10(blocks=20, model_name="resnet20_cifar10", **kwargs)
 
 
-def cifar10_resnet56(**kwargs):
+def resnet56_cifar10(**kwargs):
     """
     CIFAR-10 ResNet-56 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -160,10 +160,10 @@ def cifar10_resnet56(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_cifar_resnet(blocks=56, model_name="cifar10_resnet56", **kwargs)
+    return get_resnet_cifar10(blocks=56, model_name="resnet56_cifar10", **kwargs)
 
 
-def cifar10_resnet110(**kwargs):
+def resnet110_cifar10(**kwargs):
     """
     CIFAR-10 ResNet-110 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -176,7 +176,7 @@ def cifar10_resnet110(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_cifar_resnet(blocks=110, model_name="cifar10_resnet110", **kwargs)
+    return get_resnet_cifar10(blocks=110, model_name="resnet110_cifar10", **kwargs)
 
 
 def _test():
@@ -186,9 +186,9 @@ def _test():
     pretrained = False
 
     models = [
-        cifar10_resnet20,
-        cifar10_resnet56,
-        cifar10_resnet110,
+        resnet20_cifar10,
+        resnet56_cifar10,
+        resnet110_cifar10,
     ]
 
     for model in models:
@@ -207,9 +207,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != cifar10_resnet20 or weight_count == 272474)
-        assert (model != cifar10_resnet56 or weight_count == 855770)
-        assert (model != cifar10_resnet110 or weight_count == 1730714)
+        assert (model != resnet20_cifar10 or weight_count == 272474)
+        assert (model != resnet56_cifar10 or weight_count == 855770)
+        assert (model != resnet110_cifar10 or weight_count == 1730714)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

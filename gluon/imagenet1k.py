@@ -47,6 +47,28 @@ def add_dataset_parser_arguments(parser):
         action='store_true',
         help='use image record iter for ImageNet-1K data input')
 
+    parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop')
+
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=1000,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=3,
+        help='number of input channels')
+
 
 class ImageNet(ImageFolderDataset):
     """

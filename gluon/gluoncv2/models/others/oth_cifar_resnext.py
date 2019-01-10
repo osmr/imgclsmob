@@ -1,26 +1,7 @@
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-
-# coding: utf-8
-# pylint: disable= arguments-differ,unused-argument
 """ResNets, implemented in Gluon."""
 from __future__ import division
 
-__all__ = ['get_cifar_resnext', 'cifar_resnext29_32x4d', 'cifar_resnext29_16x64d']
+__all__ = ['oth_cifar_resnext29_32x4d', 'oth_cifar_resnext29_16x64d']
 
 import os
 import math
@@ -154,7 +135,7 @@ class CIFARResNext(HybridBlock):
 
 
 # Constructor
-def get_cifar_resnext(num_layers, cardinality=16, bottleneck_width=64,
+def get_cifar_resnext(num_layers, cardinality=16, bottleneck_width=64, in_channels=3,
                       pretrained=False, ctx=cpu(),
                       root=os.path.join('~', '.mxnet', 'models'), **kwargs):
     r"""ResNext model from `"Aggregated Residual Transformations for Deep Neural Networks"
@@ -192,7 +173,7 @@ def get_cifar_resnext(num_layers, cardinality=16, bottleneck_width=64,
                                            tag=pretrained, root=root), ctx=ctx)
     return net
 
-def cifar_resnext29_32x4d(**kwargs):
+def oth_cifar_resnext29_32x4d(**kwargs):
     r"""ResNext-29 32x4d model from `"Aggregated Residual Transformations for Deep Neural Networks"
     <http://arxiv.org/abs/1611.05431>`_ paper.
 
@@ -219,7 +200,7 @@ def cifar_resnext29_32x4d(**kwargs):
     """
     return get_cifar_resnext(29, 32, 4, **kwargs)
 
-def cifar_resnext29_16x64d(**kwargs):
+def oth_cifar_resnext29_16x64d(**kwargs):
     r"""ResNext-29 16x64d model from `"Aggregated Residual Transformations for Deep Neural Networks"
     <http://arxiv.org/abs/1611.05431>`_ paper.
 
@@ -243,3 +224,42 @@ def cifar_resnext29_16x64d(**kwargs):
         for :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
     """
     return get_cifar_resnext(29, 16, 64, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_cifar_resnext29_32x4d,
+        oth_cifar_resnext29_16x64d,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 10))
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_cifar_resnext29_32x4d or weight_count == 4775754)
+        assert (model != oth_cifar_resnext29_16x64d or weight_count == 68155210)
+
+
+if __name__ == "__main__":
+    _test()

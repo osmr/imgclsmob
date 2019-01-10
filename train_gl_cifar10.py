@@ -234,16 +234,6 @@ def parse_args():
         type=str,
         default='',
         help='Regexp for selecting layers for fine tuning')
-    parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=10,
-        help='number of classes')
-    parser.add_argument(
-        '--in-channels',
-        type=int,
-        default=3,
-        help='number of input channels')
     args = parser.parse_args()
     return args
 

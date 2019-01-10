@@ -48,6 +48,28 @@ def add_dataset_parser_arguments(parser):
         action='store_true',
         help='whether generate a file with the dataset statistics')
 
+    parser.add_argument(
+        '--input-size',
+        type=int,
+        default=224,
+        help='size of the input for model')
+    parser.add_argument(
+        '--resize-inv-factor',
+        type=float,
+        default=0.875,
+        help='inverted ratio for input image crop')
+
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=56,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=4,
+        help='number of input channels')
+
 
 class KHPA(Dataset):
     """

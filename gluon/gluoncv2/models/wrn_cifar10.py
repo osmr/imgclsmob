@@ -1,20 +1,20 @@
 """
-    ResNet for CIFAR-10, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    WRN for CIFAR-10, implemented in Gluon.
+    Original paper: 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 """
 
-__all__ = ['CIFAR10ResNet', 'resnet20_cifar10', 'resnet56_cifar10', 'resnet110_cifar10']
+__all__ = ['CIFAR10WRN', 'wrn16_10_cifar10', 'wrn28_10_cifar10', 'wrn40_8_cifar10']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv3x3_block
-from .resnet import ResUnit
+from .preresnet import PreResUnit, PreResActivation
 
 
-class CIFAR10ResNet(HybridBlock):
+class CIFAR10WRN(HybridBlock):
     """
-    ResNet model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    CIFAR-10 WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -40,7 +40,7 @@ class CIFAR10ResNet(HybridBlock):
                  in_size=(32, 32),
                  classes=10,
                  **kwargs):
-        super(CIFAR10ResNet, self).__init__(**kwargs)
+        super(CIFAR10WRN, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -54,11 +54,11 @@ class CIFAR10ResNet(HybridBlock):
                 activate=False))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResUnit(
+                        stage.add(PreResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
@@ -67,6 +67,9 @@ class CIFAR10ResNet(HybridBlock):
                             conv1_stride=False))
                         in_channels = out_channels
                 self.features.add(stage)
+            self.features.add(PreResActivation(
+                in_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=8,
                 strides=1))
@@ -83,19 +86,22 @@ class CIFAR10ResNet(HybridBlock):
         return x
 
 
-def get_resnet_cifar10(blocks,
-                       model_name=None,
-                       pretrained=False,
-                       ctx=cpu(),
-                       root=os.path.join('~', '.mxnet', 'models'),
-                       **kwargs):
+def get_wrn(blocks,
+            width_factor,
+            model_name=None,
+            pretrained=False,
+            ctx=cpu(),
+            root=os.path.join('~', '.mxnet', 'models'),
+            **kwargs):
     """
-    Create ResNet model for CIFAR-10 with specific parameters.
+    Create WRN model for CIFAR-10 with specific parameters.
 
     Parameters:
     ----------
     blocks : int
         Number of blocks.
+    width_factor : int
+        Wide scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -106,14 +112,14 @@ def get_resnet_cifar10(blocks,
         Location for keeping the model parameters.
     """
 
-    assert ((blocks - 2) % 6 == 0)
-    layers = [(blocks - 2) // 6] * 3
+    assert ((blocks - 4) % 6 == 0)
+    layers = [(blocks - 4) // 6] * 3
     channels_per_layers = [16, 32, 64]
     init_block_channels = 16
 
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+    channels = [[ci * width_factor] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = CIFAR10ResNet(
+    net = CIFAR10WRN(
         channels=channels,
         init_block_channels=init_block_channels,
         **kwargs)
@@ -131,9 +137,9 @@ def get_resnet_cifar10(blocks,
     return net
 
 
-def resnet20_cifar10(**kwargs):
+def wrn16_10_cifar10(**kwargs):
     """
-    ResNet-20 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -144,12 +150,12 @@ def resnet20_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=20, model_name="resnet20_cifar10", **kwargs)
+    return get_wrn(blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
 
 
-def resnet56_cifar10(**kwargs):
+def wrn28_10_cifar10(**kwargs):
     """
-    ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -160,12 +166,12 @@ def resnet56_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=56, model_name="resnet56_cifar10", **kwargs)
+    return get_wrn(blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
 
 
-def resnet110_cifar10(**kwargs):
+def wrn40_8_cifar10(**kwargs):
     """
-    ResNet-110 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -176,7 +182,7 @@ def resnet110_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=110, model_name="resnet110_cifar10", **kwargs)
+    return get_wrn(blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
 
 
 def _test():
@@ -186,9 +192,9 @@ def _test():
     pretrained = False
 
     models = [
-        resnet20_cifar10,
-        resnet56_cifar10,
-        resnet110_cifar10,
+        wrn16_10_cifar10,
+        wrn28_10_cifar10,
+        wrn40_8_cifar10,
     ]
 
     for model in models:
@@ -199,7 +205,6 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
@@ -207,9 +212,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet20_cifar10 or weight_count == 272474)
-        assert (model != resnet56_cifar10 or weight_count == 855770)
-        assert (model != resnet110_cifar10 or weight_count == 1730714)
+        assert (model != wrn16_10_cifar10 or weight_count == 17116666)
+        assert (model != wrn28_10_cifar10 or weight_count == 36479226)
+        assert (model != wrn40_8_cifar10 or weight_count == 35748346)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

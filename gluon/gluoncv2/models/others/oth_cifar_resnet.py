@@ -426,7 +426,6 @@ def oth_cifar_resnet110_v2(**kwargs):
     return get_cifar_resnet(2, 110, **kwargs)
 
 
-
 def _test():
     import numpy as np
     import mxnet as mx
@@ -437,6 +436,10 @@ def _test():
         oth_cifar_resnet20_v1,
         oth_cifar_resnet56_v1,
         oth_cifar_resnet110_v1,
+
+        oth_cifar_resnet20_v2,
+        oth_cifar_resnet56_v2,
+        oth_cifar_resnet110_v2,
     ]
 
     for model in models:
@@ -462,6 +465,9 @@ def _test():
         assert (model != oth_cifar_resnet20_v1 or weight_count == 272474)
         assert (model != oth_cifar_resnet56_v1 or weight_count == 855770)
         assert (model != oth_cifar_resnet110_v1 or weight_count == 1730714)
+        assert (model != oth_cifar_resnet20_v2 or weight_count == 272282)
+        assert (model != oth_cifar_resnet56_v2 or weight_count == 855578)
+        assert (model != oth_cifar_resnet110_v2 or weight_count == 1730522)
 
 
 if __name__ == "__main__":

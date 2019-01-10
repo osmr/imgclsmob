@@ -1,11 +1,8 @@
-import math
 import logging
 import os
 import numpy as np
 
 import torch.utils.data
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
 
 from .pytorchcv.model_provider import get_model
 
@@ -15,54 +12,6 @@ def prepare_pt_context(num_gpus,
     use_cuda = (num_gpus > 0)
     batch_size *= max(1, num_gpus)
     return use_cuda, batch_size
-
-
-def get_data_loader(data_dir,
-                    batch_size,
-                    num_workers,
-                    input_image_size=224,
-                    resize_inv_factor=0.875):
-    assert (resize_inv_factor > 0.0)
-    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
-
-    normalize = transforms.Normalize(
-        mean=[0.485, 0.456, 0.406],
-        std=[0.229, 0.224, 0.225])
-    jitter_param = 0.4
-
-    train_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'train'),
-            transform=transforms.Compose([
-                transforms.RandomResizedCrop(input_image_size),
-                transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(
-                    brightness=jitter_param,
-                    contrast=jitter_param,
-                    saturation=jitter_param),
-                transforms.ToTensor(),
-                normalize,
-            ])),
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=True)
-
-    val_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'val'),
-            transform=transforms.Compose([
-                transforms.Resize(resize_value),
-                transforms.CenterCrop(input_image_size),
-                transforms.ToTensor(),
-                normalize,
-            ])),
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True)
-
-    return train_loader, val_loader
 
 
 def prepare_model(model_name,

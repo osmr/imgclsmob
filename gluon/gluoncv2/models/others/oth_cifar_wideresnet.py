@@ -1,27 +1,8 @@
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-
-# coding: utf-8
-# pylint: disable= arguments-differ,unused-argument
 """ResNets, implemented in Gluon."""
 from __future__ import division
 
-__all__ = ['get_cifar_wide_resnet', 'cifar_wideresnet16_10',
-           'cifar_wideresnet28_10', 'cifar_wideresnet40_8']
+__all__ = ['oth_cifar_wideresnet16_10',
+           'oth_cifar_wideresnet28_10', 'oth_cifar_wideresnet40_8']
 
 import os
 from mxnet.gluon.block import HybridBlock
@@ -154,7 +135,7 @@ class CIFARWideResNet(HybridBlock):
         return x
 
 # Constructor
-def get_cifar_wide_resnet(num_layers, width_factor=1, drop_rate=0.0,
+def get_cifar_wide_resnet(num_layers, width_factor=1, drop_rate=0.0, in_channels=3,
                           pretrained=False, ctx=cpu(),
                           root=os.path.join('~', '.mxnet', 'models'), **kwargs):
     r"""ResNet V1 model from `"Deep Residual Learning for Image Recognition"
@@ -196,7 +177,7 @@ def get_cifar_wide_resnet(num_layers, width_factor=1, drop_rate=0.0,
                                            tag=pretrained, root=root), ctx=ctx)
     return net
 
-def cifar_wideresnet16_10(**kwargs):
+def oth_cifar_wideresnet16_10(**kwargs):
     r"""WideResNet-16-10 model for CIFAR10 from `"Wide Residual Networks"
     <https://arxiv.org/abs/1605.07146>`_ paper.
 
@@ -219,7 +200,7 @@ def cifar_wideresnet16_10(**kwargs):
     """
     return get_cifar_wide_resnet(16, 10, **kwargs)
 
-def cifar_wideresnet28_10(**kwargs):
+def oth_cifar_wideresnet28_10(**kwargs):
     r"""WideResNet-28-10 model for CIFAR10 from `"Wide Residual Networks"
     <https://arxiv.org/abs/1605.07146>`_ paper.
 
@@ -242,7 +223,7 @@ def cifar_wideresnet28_10(**kwargs):
     """
     return get_cifar_wide_resnet(28, 10, **kwargs)
 
-def cifar_wideresnet40_8(**kwargs):
+def oth_cifar_wideresnet40_8(**kwargs):
     r"""WideResNet-40-8 model for CIFAR10 from `"Wide Residual Networks"
     <https://arxiv.org/abs/1605.07146>`_ paper.
 
@@ -264,3 +245,44 @@ def cifar_wideresnet40_8(**kwargs):
         for :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
     """
     return get_cifar_wide_resnet(40, 8, **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_cifar_wideresnet16_10,
+        oth_cifar_wideresnet28_10,
+        oth_cifar_wideresnet40_8,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 10))
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_cifar_wideresnet16_10 or weight_count == 17116666)
+        assert (model != oth_cifar_wideresnet28_10 or weight_count == 36479226)
+        assert (model != oth_cifar_wideresnet40_8 or weight_count == 35748346)
+
+
+if __name__ == "__main__":
+    _test()

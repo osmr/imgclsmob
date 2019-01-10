@@ -4,19 +4,16 @@ import logging
 
 from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
-from pytorch.utils import prepare_pt_context, prepare_model, get_data_loader, calc_net_weight_count, validate,\
-    AverageMeter
+from pytorch.imagenet1k import add_dataset_parser_arguments, get_val_data_loader
+from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate, AverageMeter
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (PyTorch)',
+        description='Evaluate a model for image classification (PyTorch/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        default='../imgclsmob_data/imagenet',
-        help='training and validation pictures to use.')
+
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -46,27 +43,6 @@ def parse_args():
         '--remove-module',
         action='store_true',
         help='enable if stored model has module')
-
-    parser.add_argument(
-        '--input-size',
-        type=int,
-        default=224,
-        help='size of the input for model. default is 224')
-    parser.add_argument(
-        '--resize-inv-factor',
-        type=float,
-        default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
-    parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=1000,
-        help='number of classes')
-    parser.add_argument(
-        '--in-channels',
-        type=int,
-        default=3,
-        help='number of input channels')
 
     parser.add_argument(
         '--num-gpus',
@@ -181,7 +157,7 @@ def main():
     else:
         input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
-    train_data, val_data = get_data_loader(
+    val_data = get_val_data_loader(
         data_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,

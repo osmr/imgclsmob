@@ -50,17 +50,6 @@ def parse_args():
         help='calculate FLOPs without quality estimation')
 
     parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=10,
-        help='number of classes')
-    parser.add_argument(
-        '--in-channels',
-        type=int,
-        default=3,
-        help='number of input channels')
-
-    parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,

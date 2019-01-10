@@ -51,7 +51,12 @@ from .models.pnasnet import *
 
 from .models.crunet import *
 from .models.resnet_cifar10 import *
+from .models.preresnet_cifar10 import *
+from .models.resnext_cifar10 import *
+from .models.wrn_cifar10 import *
 from .models.others.oth_cifar_resnet import *
+from .models.others.oth_cifar_resnext import *
+from .models.others.oth_cifar_wideresnet import *
 
 __all__ = ['get_model']
 
@@ -61,9 +66,30 @@ _models = {
     'resnet56_cifar10': resnet56_cifar10,
     'resnet110_cifar10': resnet110_cifar10,
 
+    'preresnet20_cifar10': preresnet20_cifar10,
+    'preresnet56_cifar10': preresnet56_cifar10,
+    'preresnet110_cifar10': preresnet110_cifar10,
+
+    'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
+    'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
+
+    'wrn16_10_cifar10': wrn16_10_cifar10,
+    'wrn28_10_cifar10': wrn28_10_cifar10,
+    'wrn40_8_cifar10': wrn40_8_cifar10,
+
     'oth_cifar_resnet20_v1': oth_cifar_resnet20_v1,
     'oth_cifar_resnet56_v1': oth_cifar_resnet56_v1,
     'oth_cifar_resnet110_v1': oth_cifar_resnet110_v1,
+    'oth_cifar_resnet20_v2': oth_cifar_resnet20_v2,
+    'oth_cifar_resnet56_v2': oth_cifar_resnet56_v2,
+    'oth_cifar_resnet110_v2': oth_cifar_resnet110_v2,
+
+    'oth_cifar_resnext29_32x4d': oth_cifar_resnext29_32x4d,
+    'oth_cifar_resnext29_16x64d': oth_cifar_resnext29_16x64d,
+
+    'oth_cifar_wideresnet16_10': oth_cifar_wideresnet16_10,
+    'oth_cifar_wideresnet28_10': oth_cifar_wideresnet28_10,
+    'oth_cifar_wideresnet40_8': oth_cifar_wideresnet40_8,
 
     'crunet56': crunet56,
     'crunet116': crunet116,

@@ -20,7 +20,18 @@ def add_dataset_parser_arguments(parser):
         '--data-dir',
         type=str,
         default='../imgclsmob_data/cifar10',
-        help='path to directory with CIFAR10 dataset')
+        help='path to directory with CIFAR-10 dataset')
+
+    parser.add_argument(
+        '--num-classes',
+        type=int,
+        default=10,
+        help='number of classes')
+    parser.add_argument(
+        '--in-channels',
+        type=int,
+        default=3,
+        help='number of input channels')
 
 
 class RandomCrop(Block):

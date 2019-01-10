@@ -12,18 +12,16 @@ import torch.utils.data
 
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
-from pytorch.utils import prepare_pt_context, prepare_model, get_data_loader, validate, accuracy, AverageMeter
+from pytorch.imagenet1k import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
+from pytorch.utils import prepare_pt_context, prepare_model, validate, accuracy, AverageMeter
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (PyTorch)',
+        description='Train a model for image classification (PyTorch/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        default='../imgclsmob_data/imagenet',
-        help='training and validation pictures to use.')
+
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -44,17 +42,6 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved optimizer state if not None')
-
-    parser.add_argument(
-        '--input-size',
-        type=int,
-        default=224,
-        help='size of the input for model. default is 224')
-    parser.add_argument(
-        '--resize-inv-factor',
-        type=float,
-        default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
 
     parser.add_argument(
         '--num-gpus',
@@ -430,7 +417,13 @@ def main():
     else:
         input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
-    train_data, val_data = get_data_loader(
+    train_data = get_train_data_loader(
+        data_dir=args.data_dir,
+        batch_size=batch_size,
+        num_workers=args.num_workers,
+        input_image_size=input_image_size)
+
+    val_data = get_val_data_loader(
         data_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,

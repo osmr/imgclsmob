@@ -46,6 +46,11 @@ class CIFAR10PreResNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
+            self.features.add(nn.BatchNorm(
+                in_channels=in_channels,
+                center=False,
+                scale=False,
+                use_global_stats=bn_use_global_stats))
             self.features.add(conv3x3(
                 in_channels=in_channels,
                 out_channels=init_block_channels))

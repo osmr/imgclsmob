@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
@@ -165,8 +166,11 @@ def measure_model(model,
     model(x)
 
     num_params1 = calc_block_num_params2(model)
-    assert(num_params == num_params1)
+    if num_params != num_params1:
+        logging.warning(
+            'Calculated number of parameters are different. Standard method: {},\tper leaf method: {}'.format(
+                num_params1, num_params))
 
     [h.detach() for h in hook_handles]
 
-    return num_flops, num_macs, num_params
+    return num_flops, num_macs, num_params1

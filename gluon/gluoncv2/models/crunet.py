@@ -491,7 +491,7 @@ class CRUNet(HybridBlock):
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
                         if group_width != 0:
-                            if (refresh_step == 0) or (j % refresh_step == 0):
+                            if ((refresh_step == 0) and (j == 0)) or ((refresh_step != 0) and (j % refresh_step == 0)):
                                 conv1_params = None
                                 conv2_params = None
                             unit = CRUUnit(
@@ -660,7 +660,7 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != crunet56 or weight_count == 26133672)
-        assert (model != crunet116 or weight_count == 42857032)
+        assert (model != crunet116 or weight_count == 44311496)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

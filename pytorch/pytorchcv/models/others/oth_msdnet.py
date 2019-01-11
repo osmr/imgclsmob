@@ -49,8 +49,13 @@ class _DynamicInputDenseBlock(nn.Module):
 
 class MSDLayer(nn.Module):
 
-    def __init__(self, in_channels, out_channels,
-                 in_scales, out_scales, orig_scales, args):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 in_scales,
+                 out_scales,
+                 orig_scales,
+                 args):
         """
         Creates a regular/transition MSDLayer. this layer uses DenseNet like concatenation on each scale,
         and performs spatial reduction between scales. if input and output scales are different, than this
@@ -71,13 +76,13 @@ class MSDLayer(nn.Module):
         self.out_scales = out_scales
         self.orig_scales = orig_scales
         self.args = args
-        self.bottleneck = args.msd_bottleneck
-        self.bottleneck_factor = args.msd_bottleneck_factor
-        self.growth_factor = self.args.msd_growth_factor
-        self.debug = self.args.debug
+        self.bottleneck = args["msd_bottleneck"]
+        self.bottleneck_factor = args["msd_bottleneck_factor"]
+        self.growth_factor = self.args["msd_growth_factor"]
+        self.debug = self.args["debug"]
 
         # Define Conv2d/GCN params
-        self.use_gcn = args.msd_all_gcn
+        self.use_gcn = args["msd_all_gcn"]
         self.conv_l, self.ks, self.pad = get_conv_params(self.use_gcn, args)
 
         # Calculate number of channels to drop and number of
@@ -277,7 +282,7 @@ class MSDFirstLayer(nn.Module):
         self.out_channels = out_channels
         self.num_scales = num_scales
         self.args = args
-        self.use_gcn = args.msd_gcn
+        self.use_gcn = args["msd_gcn"]
         self.conv_l, self.ks, self.pad = get_conv_params(self.use_gcn, args)
         if self.use_gcn:
             print('|          First layer with GCN           |')
@@ -290,9 +295,9 @@ class MSDFirstLayer(nn.Module):
 
         # Create first scale features
         modules = nn.ModuleList()
-        if 'cifar' in self.args.data:
+        if 'cifar' in self.args["data"]:
             current_channels = int(self.out_channels *
-                                   self.args.msd_growth_factor[0])
+                                   self.args["msd_growth_factor"][0])
 
             current_m = nn.Sequential(
                 self.conv_l(self.in_channels,
@@ -310,7 +315,7 @@ class MSDFirstLayer(nn.Module):
 
             # Calculate desired output channels
             out_channels = int(self.out_channels *
-                               self.args.msd_growth_factor[scale])
+                               self.args["msd_growth_factor"][scale])
 
             # Use a strided convolution to create next scale features
             current_m = nn.Sequential(
@@ -392,12 +397,12 @@ class Transition(nn.Sequential):
         :param x: input to the transition layer
         :return: list of scales' outputs
         """
-        if self.args.debug:
+        if self.args["debug"]:
             print ("In transition forward!")
 
         output = []
         for scale, scale_net in enumerate(self.scales):
-            if self.args.debug:
+            if self.args["debug"]:
                 print ("Size of x[{}]: {}".format(scale, x[scale].size()))
                 print ("scale_net[0]: {}".format(scale_net[0]))
             output.append(scale_net(x[scale]))
@@ -511,12 +516,12 @@ def get_conv_params(use_gcn, args):
     """
 
     if use_gcn:
-        GCN.share_weights = args.msd_share_weights
+        GCN.share_weights = args["msd_share_weights"]
         conv_l = GCN
-        ks = args.msd_gcn_kernel
+        ks = args["msd_gcn_kernel"]
     else:
         conv_l = nn.Conv2d
-        ks = args.msd_kernel
+        ks = args["msd_kernel"]
     pad = int(math.floor(ks / 2))
     return conv_l, ks, pad
 
@@ -535,31 +540,31 @@ class MSDNet(nn.Module):
 
         # Init arguments
         self.args = args
-        self.base = self.args.msd_base
-        self.step = self.args.msd_step
-        self.step_mode = self.args.msd_stepmode
-        self.msd_prune = self.args.msd_prune
-        self.num_blocks = self.args.msd_blocks
-        self.reduction_rate = self.args.reduction
-        self.growth = self.args.msd_growth
-        self.growth_factor = args.msd_growth_factor
-        self.bottleneck = self.args.msd_bottleneck
-        self.bottleneck_factor = args.msd_bottleneck_factor
+        self.base = self.args["msd_base"]
+        self.step = self.args["msd_step"]
+        self.step_mode = self.args["msd_stepmode"]
+        self.msd_prune = self.args["msd_prune"]
+        self.num_blocks = self.args["msd_blocks"]
+        self.reduction_rate = self.args["reduction"]
+        self.growth = self.args["msd_growth"]
+        self.growth_factor = args["msd_growth_factor"]
+        self.bottleneck = self.args["msd_bottleneck"]
+        self.bottleneck_factor = args["msd_bottleneck_factor"]
 
 
         # Set progress
-        if args.data in ['cifar10', 'cifar100']:
+        if args["data"] in ['cifar10', 'cifar100']:
             self.image_channels = 3
             self.num_channels = 32
             self.num_scales = 3
-            self.num_classes = int(args.data.strip('cifar'))
+            self.num_classes = int(args["data"].strip('cifar'))
         else:
             raise NotImplementedError
 
         # Init MultiScale graph and fill with Blocks and Classifiers
         print('| MSDNet-Block {}-{}-{}'.format(self.num_blocks,
                                                self.step,
-                                               self.args.data))
+                                               self.args["data"]))
         (self.num_layers, self.steps) = self.calc_steps()
 
         print('Building network with the steps: {}'.format(self.steps))
@@ -720,14 +725,14 @@ class MSDNet(nn.Module):
         for block_num in range(0, self.num_blocks):
 
             # Get the current block's output
-            if self.args.debug:
+            if self.args["debug"]:
                 print("")
                 print("Forwarding to block %s:" % str(block_num + 1))
             block = self.subnets[block_num]
             cur_input = block_output = block(cur_input)
 
             # Classify and add current output
-            if self.args.debug:
+            if self.args["debug"]:
                 print("- Getting %s block's output" % str(block_num + 1))
                 for s, b in enumerate(block_output):
                     print("- Output size of this block's scale {}: ".format(s),
@@ -739,3 +744,62 @@ class MSDNet(nn.Module):
         return outputs
 
 
+def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
+    args = {
+        "msd_blocks": 10,
+        "msd_base": 3,
+        "msd_step": 1,
+        "msd_stepmode": "even",
+        "growth": "6-12-24",
+        "msd_gcn_kernel": 5,
+        "msd_share_weights": True,
+        "msd_prune": "max",
+        "reduction": 0.5,
+        "msd_growth": 6,
+        "msd_growth_factor": [1,2,4,4],
+        "msd_bottleneck": True,
+        "msd_bottleneck_factor": [1,2,4,4],
+        "data": "cifar10",
+        "msd_gcn": True,
+        "msd_kernel": 3,
+        "debug": False,
+        "msd_all_gcn": True,
+    }
+    return MSDNet(args)
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_msdnet_cifar10,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+
+        x = Variable(torch.randn(1, 3, 32, 32))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 10))
+
+
+if __name__ == "__main__":
+    _test()

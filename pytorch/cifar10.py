@@ -1,6 +1,3 @@
-import math
-import os
-
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets

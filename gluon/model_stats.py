@@ -168,7 +168,7 @@ def measure_model(model,
     num_params1 = calc_block_num_params2(model)
     if num_params != num_params1:
         logging.warning(
-            'Calculated number of parameters are different. Standard method: {},\tper leaf method: {}'.format(
+            'Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}'.format(
                 num_params1, num_params))
 
     [h.detach() for h in hook_handles]

@@ -126,7 +126,7 @@ def get_val_data_source(dataset_args,
 
     data_dir = dataset_args.data_dir
 
-    transform_test = transforms.Compose([
+    transform_val = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(
             mean=mean_rgb,
@@ -135,7 +135,7 @@ def get_val_data_source(dataset_args,
     return gluon.data.DataLoader(
         dataset=gluon.data.vision.CIFAR10(
             root=data_dir,
-            train=False).transform_first(fn=transform_test),
+            train=False).transform_first(fn=transform_val),
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers)

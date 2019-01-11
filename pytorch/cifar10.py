@@ -29,27 +29,29 @@ def add_dataset_parser_arguments(parser):
 
 def get_train_data_loader(data_dir,
                           batch_size,
-                          num_workers,
-                          input_image_size=224):
+                          num_workers):
     mean_rgb = (0.4914, 0.4822, 0.4465)
     std_rgb = (0.2023, 0.1994, 0.2010)
     jitter_param = 0.4
 
+    transform_train = transforms.Compose([
+        transforms.RandomCrop(size=32, padding=4),
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(
+            brightness=jitter_param,
+            contrast=jitter_param,
+            saturation=jitter_param),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=mean_rgb,
+            std=std_rgb),
+    ])
     train_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'train'),
-            transform=transforms.Compose([
-                transforms.RandomResizedCrop(input_image_size),
-                transforms.RandomHorizontalFlip(),
-                transforms.ColorJitter(
-                    brightness=jitter_param,
-                    contrast=jitter_param,
-                    saturation=jitter_param),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=mean_rgb,
-                    std=std_rgb),
-            ])),
+        dataset=datasets.CIFAR10(
+            root=data_dir,
+            train=True,
+            transform=transform_train,
+            download=True),
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
@@ -60,26 +62,22 @@ def get_train_data_loader(data_dir,
 
 def get_val_data_loader(data_dir,
                         batch_size,
-                        num_workers,
-                        input_image_size=224,
-                        resize_inv_factor=0.875):
-    assert (resize_inv_factor > 0.0)
-    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
-
+                        num_workers):
     mean_rgb = (0.4914, 0.4822, 0.4465)
     std_rgb = (0.2023, 0.1994, 0.2010)
 
+    transform_val = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=mean_rgb,
+            std=std_rgb),
+    ])
     val_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'val'),
-            transform=transforms.Compose([
-                transforms.Resize(resize_value),
-                transforms.CenterCrop(input_image_size),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=mean_rgb,
-                    std=std_rgb),
-            ])),
+        dataset=datasets.CIFAR10(
+            root=data_dir,
+            train=False,
+            transform=transform_val,
+            download=True),
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,

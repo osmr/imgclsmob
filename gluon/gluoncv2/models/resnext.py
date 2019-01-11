@@ -3,7 +3,7 @@
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'ResNeXtBottleneck']
+__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'ResNeXtBottleneck', 'ResNeXtUnit']
 
 import os
 import math

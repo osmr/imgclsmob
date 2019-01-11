@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import torch
 import torch.nn as nn
@@ -175,10 +176,12 @@ def measure_model(model,
     model.eval()
     model(x)
 
-    # num_params1 = calc_block_num_params2(model)
-    # assert(num_params == num_params1)
-    num_params = calc_block_num_params2(model)
+    num_params1 = calc_block_num_params2(model)
+    if num_params != num_params1:
+        logging.warning(
+            'Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}'.format(
+                num_params1, num_params))
 
     [h.remove() for h in hook_handles]
 
-    return num_flops, num_macs, num_params
+    return num_flops, num_macs, num_params1

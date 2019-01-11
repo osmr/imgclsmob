@@ -20,6 +20,7 @@ from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
+from .models.crunet import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.sparsenet import *
@@ -49,7 +50,6 @@ from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
 
-from .models.crunet import *
 from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
@@ -90,9 +90,6 @@ _models = {
     'oth_cifar_wideresnet16_10': oth_cifar_wideresnet16_10,
     'oth_cifar_wideresnet28_10': oth_cifar_wideresnet28_10,
     'oth_cifar_wideresnet40_8': oth_cifar_wideresnet40_8,
-
-    'crunet56': crunet56,
-    'crunet116': crunet116,
 
     'alexnet': alexnet,
 
@@ -235,6 +232,9 @@ _models = {
 
     'diracnet18v2': diracnet18v2,
     'diracnet34v2': diracnet34v2,
+
+    'crunet56': crunet56,
+    'crunet116': crunet116,
 
     'densenet121': densenet121,
     'densenet161': densenet161,

@@ -8,7 +8,7 @@ __all__ = ['CIFAR10WRN', 'wrn16_10_cifar10', 'wrn28_10_cifar10', 'wrn40_8_cifar1
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv3x3_block
+from .common import conv3x3
 from .preresnet import PreResUnit, PreResActivation
 
 
@@ -46,17 +46,9 @@ class CIFAR10WRN(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(nn.BatchNorm(
+            self.features.add(conv3x3(
                 in_channels=in_channels,
-                center=False,
-                scale=False,
-                use_global_stats=bn_use_global_stats))
-            self.features.add(conv3x3_block(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False))
+                out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -217,9 +209,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != wrn16_10_cifar10 or weight_count == 17116666)
-        assert (model != wrn28_10_cifar10 or weight_count == 36479226)
-        assert (model != wrn40_8_cifar10 or weight_count == 35748346)
+        assert (model != wrn16_10_cifar10 or weight_count == 17116634)
+        assert (model != wrn28_10_cifar10 or weight_count == 36479194)
+        assert (model != wrn40_8_cifar10 or weight_count == 35748314)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

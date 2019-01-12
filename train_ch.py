@@ -2,29 +2,23 @@ import argparse
 import numpy as np
 
 import chainer
+from chainer import cuda
 from chainer import training
 from chainer.training import extensions
-
 from chainer.serializers import save_npz
-from chainer import cuda
-
-# from chainercv.utils import apply_to_iterator
-# from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.utils_cv import get_data_iterators
 from chainer_.utils import prepare_model
+from chainer_.imagenet1k import add_dataset_parser_arguments
+from chainer_.imagenet1k import get_data_iterators
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Chainer)',
+        description='Train a model for image classification (Chainer/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        default='../imgclsmob_data/imagenet',
-        help='training and validation pictures to use.')
+
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -45,17 +39,6 @@ def parse_args():
         type=str,
         default='',
         help='resume from previously saved optimizer state if not None')
-
-    parser.add_argument(
-        '--input-size',
-        type=int,
-        default=224,
-        help='size of the input for model. default is 224')
-    parser.add_argument(
-        '--resize-inv-factor',
-        type=float,
-        default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
 
     parser.add_argument(
         '--num-gpus',

@@ -6,7 +6,7 @@
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
            'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
-           'PreResBlock', 'PreResBottleneck', 'PreResInitBlock', 'PreResActivation']
+           'PreResBlock', 'PreResBottleneck', 'PreResUnit', 'PreResInitBlock', 'PreResActivation']
 
 import os
 import chainer.functions as F

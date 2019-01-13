@@ -48,7 +48,6 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-
 from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
@@ -58,21 +57,6 @@ __all__ = ['get_model']
 
 
 _models = {
-    'resnet20_cifar10': resnet20_cifar10,
-    'resnet56_cifar10': resnet56_cifar10,
-    'resnet110_cifar10': resnet110_cifar10,
-
-    'preresnet20_cifar10': preresnet20_cifar10,
-    'preresnet56_cifar10': preresnet56_cifar10,
-    'preresnet110_cifar10': preresnet110_cifar10,
-
-    'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
-    'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
-
-    'wrn16_10_cifar10': wrn16_10_cifar10,
-    'wrn28_10_cifar10': wrn28_10_cifar10,
-    'wrn40_8_cifar10': wrn40_8_cifar10,
-
     'alexnet': alexnet,
 
     'zfnet': zfnet,
@@ -333,6 +317,21 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'resnet20_cifar10': resnet20_cifar10,
+    'resnet56_cifar10': resnet56_cifar10,
+    'resnet110_cifar10': resnet110_cifar10,
+
+    'preresnet20_cifar10': preresnet20_cifar10,
+    'preresnet56_cifar10': preresnet56_cifar10,
+    'preresnet110_cifar10': preresnet110_cifar10,
+
+    'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
+    'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
+
+    'wrn16_10_cifar10': wrn16_10_cifar10,
+    'wrn28_10_cifar10': wrn28_10_cifar10,
+    'wrn40_8_cifar10': wrn40_8_cifar10,
 }
 
 

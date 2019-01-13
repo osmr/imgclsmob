@@ -21,6 +21,7 @@ from .models.resattnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.crunet import *
+from .models.crunetb import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.sparsenet import *
@@ -202,6 +203,9 @@ _models = {
 
     'crunet56': crunet56,
     'crunet116': crunet116,
+
+    'crunet56b': crunet56b,
+    'crunet116b': crunet116b,
 
     'densenet121': densenet121,
     'densenet161': densenet161,

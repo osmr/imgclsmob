@@ -8,7 +8,7 @@ __all__ = ['CIFAR10WRN', 'wrn16_10_cifar10', 'wrn28_10_cifar10', 'wrn40_8_cifar1
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3_block
+from .common import conv3x3
 from .preresnet import PreResUnit, PreResActivation
 
 
@@ -40,14 +40,9 @@ class CIFAR10WRN(nn.Module):
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block_pre", nn.BatchNorm2d(
-            num_features=in_channels,
-            affine=False))
-        self.features.add_module("init_block", conv3x3_block(
+        self.features.add_module("init_block", conv3x3(
             in_channels=in_channels,
-            out_channels=init_block_channels,
-            activation=None,
-            activate=False))
+            out_channels=init_block_channels))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
@@ -204,9 +199,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != wrn16_10_cifar10 or weight_count == 17116666)
-        assert (model != wrn28_10_cifar10 or weight_count == 36479226)
-        assert (model != wrn40_8_cifar10 or weight_count == 35748346)
+        assert (model != wrn16_10_cifar10 or weight_count == 17116634)
+        assert (model != wrn28_10_cifar10 or weight_count == 36479194)
+        assert (model != wrn40_8_cifar10 or weight_count == 35748314)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

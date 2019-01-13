@@ -133,7 +133,18 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('polynet', '0452', '6a1b295dad3f261b48e845f1b283e4eef3ab5a0b', 'v0.0.96'),
     ('nasnet_4a1056', '0816', 'd21bbaf5e937c2e06134fa40e7bdb1f501423b86', 'v0.0.97'),
     ('nasnet_6a4032', '0421', 'f354d28f4acdde399e081260c3f46152eca5d27e', 'v0.0.101'),
-    ('pnasnet5large', '0428', '65de46ebd049e494c13958d5671aba5abf803ff3', 'v0.0.114')]}
+    ('pnasnet5large', '0428', '65de46ebd049e494c13958d5671aba5abf803ff3', 'v0.0.114'),
+    ('resnet20_cifar10', '0597', '9b0024ac4c2f374cde2c5052e0d0344a75871cdb', 'v0.0.163'),
+    ('resnet56_cifar10', '0452', '628c42a26fe347b84060136212e018df2bb35e0f', 'v0.0.163'),
+    ('resnet110_cifar10', '0369', '4d6ca1fc02eaeed724f4f596011e391528536049', 'v0.0.163'),
+    ('preresnet20_cifar10', '0651', '76cec68d11de5b25be2ea5935681645b76195f1d', 'v0.0.164'),
+    ('preresnet56_cifar10', '0449', 'e9124fcf167d8ca50addef00c3afa4da9f828f29', 'v0.0.164'),
+    ('preresnet110_cifar10', '0386', 'cc08946a2126a1224d1d2560a47cf766a763c52c', 'v0.0.164'),
+    ('resnext29_32x4d_cifar10', '0345', '8e587812a1804783c0775e240b5c1764b134443b', 'v0.0.165'),
+    ('resnext29_16x64d_cifar10', '0275', '367989771fe961b689682f2c96b1a25abdc50b6d', 'v0.0.165'),
+    ('wrn16_10_cifar10', '0293', 'ce810d8a17a2deb73eddb5bec8709f93278bc53e', 'v0.0.166'),
+    ('wrn28_10_cifar10', '0239', 'fe97dcd6d0dd8dda8e9e38e6cfa320cffb9955ce', 'v0.0.166'),
+    ('wrn40_8_cifar10', '0237', '8dc84ec730f35c4b8968a022bc045c0665410840', 'v0.0.166')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

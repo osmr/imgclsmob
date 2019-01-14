@@ -5,7 +5,7 @@
 __all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass']
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
 
 import math
 from inspect import isfunction
@@ -354,6 +354,8 @@ class PreConvBlock(nn.Module):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     """
@@ -363,6 +365,7 @@ class PreConvBlock(nn.Module):
                  kernel_size,
                  stride,
                  padding,
+                 dilation=1,
                  return_preact=False):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
@@ -375,6 +378,7 @@ class PreConvBlock(nn.Module):
             kernel_size=kernel_size,
             stride=stride,
             padding=padding,
+            dilation=dilation,
             bias=False)
 
     def forward(self, x):
@@ -419,6 +423,8 @@ def pre_conv1x1_block(in_channels,
 def pre_conv3x3_block(in_channels,
                       out_channels,
                       stride=1,
+                      padding=1,
+                      dilation=1,
                       return_preact=False):
     """
     3x3 version of the pre-activated convolution block.
@@ -431,6 +437,10 @@ def pre_conv3x3_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation.
     """
@@ -439,7 +449,8 @@ def pre_conv3x3_block(in_channels,
         out_channels=out_channels,
         kernel_size=3,
         stride=stride,
-        padding=1,
+        padding=padding,
+        dilation=dilation,
         return_preact=return_preact)
 
 
@@ -787,3 +798,73 @@ class Hourglass(nn.Module):
             return x, y
         else:
             return x
+
+
+class SesquialteralHourglass(nn.Module):
+    """
+    A sesquialteral hourglass block.
+
+    Parameters:
+    ----------
+    down1_seq : nn.Sequential
+        The first down modules as sequential.
+    skip1_seq : nn.Sequential
+        The first skip connection modules as sequential.
+    up_seq : nn.Sequential
+        Up modules as sequential.
+    down2_seq : nn.Sequential
+        The second down modules as sequential.
+    skip2_seq : nn.Sequential
+        The second skip connection modules as sequential.
+    merge_type : str, default 'con'
+        Type of concatenation of up and skip outputs.
+    """
+    def __init__(self,
+                 down1_seq,
+                 skip1_seq,
+                 up_seq,
+                 down2_seq,
+                 skip2_seq,
+                 merge_type="cat"):
+        super(SesquialteralHourglass, self).__init__()
+        assert (len(down1_seq) == len(up_seq))
+        assert (len(down1_seq) == len(down2_seq))
+        assert (len(skip1_seq) == len(skip2_seq))
+        assert (len(down1_seq) == len(skip1_seq) - 1)
+        assert (merge_type in ["cat", "add"])
+        self.merge_type = merge_type
+        self.depth = len(down1_seq)
+
+        self.down1_seq = down1_seq
+        self.skip1_seq = skip1_seq
+        self.up_seq = up_seq
+        self.down2_seq = down2_seq
+        self.skip2_seq = skip2_seq
+
+    def _merge(self, x, y):
+        if self.merge_type == "cat":
+            x = torch.cat((x, y), dim=1)
+        elif self.merge_type == "add":
+            x = x + y
+        return x
+
+    def forward(self, x, **kwargs):
+        down1_outs = [x]
+        for i in range(self.depth):
+            x = self.down1_seq[i](x)
+            down1_outs.append(x)
+        x = self.skip1_seq[-1](x)
+        up_outs = [x]
+        for i in range(self.depth):
+            x = self.up_seq[i](x)
+            y = down1_outs[self.depth - 2 - i]
+            y = self.skip1_seq[self.depth - 2 - i](y)
+            x = self._merge(x, y)
+            up_outs.append(x)
+        x = self.skip2_seq[0](x)
+        for i in range(self.depth):
+            x = self.down2_seq[i](x)
+            y = up_outs[self.depth - 2 - i]
+            y = self.skip2_seq[self.depth - 2 - i](y)
+            x = self._merge(x, y)
+        return x

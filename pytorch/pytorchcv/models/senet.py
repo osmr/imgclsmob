@@ -3,7 +3,7 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SENet', 'senet52', 'senet103', 'senet154']
+__all__ = ['SENet', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
 
 import os
 import math

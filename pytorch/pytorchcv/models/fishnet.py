@@ -10,8 +10,49 @@ import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from pytorch.pytorchcv.models.common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass
-from pytorch.pytorchcv.models.senet import SEInitBlock
+from common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass, conv3x3_block
+# from .senet import SEInitBlock
+
+
+class SEInitBlock(nn.Module):
+    """
+    SENet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(SEInitBlock, self).__init__()
+        mid_channels = out_channels // 2
+
+        self.conv1 = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stride=2)
+        self.conv2 = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.conv3 = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=out_channels)
+        self.pool = nn.MaxPool2d(
+            kernel_size=3,
+            stride=2,
+            padding=1)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = self.pool(x)
+        return x
 
 
 def channel_squeeze(x,
@@ -199,7 +240,6 @@ class DownUnit(nn.Module):
                  in_channels,
                  out_channels_list):
         super(DownUnit, self).__init__()
-
         self.blocks = nn.Sequential()
         for i, out_channels in enumerate(out_channels_list):
             self.blocks.add_module("block{}".format(i + 1), FishBlock(
@@ -230,7 +270,6 @@ class UpUnit(nn.Module):
                  in_channels,
                  out_channels_list):
         super(UpUnit, self).__init__()
-
         self.blocks = nn.Sequential()
         for i, out_channels in enumerate(out_channels_list):
             self.blocks.add_module("block{}".format(i + 1), FishBlock(
@@ -259,7 +298,33 @@ class SkipUnit(nn.Module):
                  in_channels,
                  out_channels_list):
         super(SkipUnit, self).__init__()
+        self.blocks = nn.Sequential()
+        for i, out_channels in enumerate(out_channels_list):
+            self.blocks.add_module("block{}".format(i + 1), FishBlock(
+                in_channels=in_channels,
+                out_channels=out_channels))
+            in_channels = out_channels
 
+    def forward(self, x):
+        x = self.blocks(x)
+        return x
+
+
+class SkipAttUnit(nn.Module):
+    """
+    FishNet skip connection unit with attention block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels_list : list of int
+        Number of output channels for each block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels_list):
+        super(SkipAttUnit, self).__init__()
         self.blocks = nn.Sequential()
         for i, out_channels in enumerate(out_channels_list):
             self.blocks.add_module("block{}".format(i + 1), FishBlock(
@@ -282,7 +347,7 @@ class FishNet(nn.Module):
     direct_channels : list of list of list of int
         Number of output channels for each unit along the straight path.
     skip_channels : list of list of list of int
-        Number of output channels for each unit along the straight path.
+        Number of output channels for each skip connection unit.
     init_block_channels : int
         Number of output channels for the initial unit.
     in_channels : int, default 3
@@ -303,38 +368,60 @@ class FishNet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
 
+        depth = len(direct_channels[0])
+        down1_channels = direct_channels[0]
+        up_channels = direct_channels[1]
+        down2_channels = direct_channels[2]
+        skip1_channels = skip_channels[0]
+        skip2_channels = skip_channels[1]
+
         self.features = nn.Sequential()
         self.features.add_module("init_block", SEInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels))
         in_channels = init_block_channels
 
-        depth = len(direct_channels[0])
-
-        down2_seq = nn.Sequential()
-        skip2_seq = nn.Sequential()
-
         down1_seq = nn.Sequential()
         skip1_seq = nn.Sequential()
         for i in range(depth + 1):
-            skip1_channels_per_stage = skip_channels[0][i]
-            skip1_seq.add_module("stage{}".format(i + 1), DownUnit(
+            skip1_channels_list = skip1_channels[i]
+            skip1_seq.add_module("skip_a{}".format(i + 1), DownUnit(
                 in_channels=in_channels,
-                out_channels=skip1_channels_per_stage[0],
-                layers=len(skip1_channels_per_stage)))
+                out_channels_list=skip1_channels_list))
             if i < depth:
-                down1_channels_per_stage = direct_channels[0][i]
-                down1_seq.add_module("stage{}".format(i + 1), DownUnit(
+                down1_channels_list = down1_channels[i]
+                down1_seq.add_module("down_a{}".format(i + 1), DownUnit(
                     in_channels=in_channels,
-                    out_channels=down1_channels_per_stage[0],
-                    layers=len(down1_channels_per_stage)))
-                in_channels = down1_channels_per_stage[0]
+                    out_channels_list=down1_channels_list))
+                in_channels = down1_channels_list[-1]
             else:
-                in_channels = skip1_channels_per_stage[0]
+                in_channels = skip1_channels_list[-1]
 
         up_seq = nn.Sequential()
+        for i in range(depth):
+            up_channels_list = up_channels[i]
+            up_seq.add_module("up{}".format(i + 1), DownUnit(
+                in_channels=in_channels,
+                out_channels_list=up_channels_list))
+            in_channels = up_channels_list[-1] + skip1_channels[depth - 2 - i][-1]
 
-        self.features.add_module("sesquialteral_hourglass", SesquialteralHourglass(
+        down2_seq = nn.Sequential()
+        skip2_seq = nn.Sequential()
+        for i in range(depth + 1):
+            skip2_channels_list = skip2_channels[i]
+            skip2_seq.add_module("skip_b{}".format(i + 1), DownUnit(
+                in_channels=in_channels,
+                out_channels_list=skip2_channels_list))
+            if i < depth:
+                down2_channels_list = down2_channels[i]
+                down2_seq.add_module("down_b{}".format(i + 1), DownUnit(
+                    in_channels=in_channels,
+                    out_channels_list=down2_channels_list))
+                in_channels = down2_channels_list[-1]
+            else:
+                in_channels = skip2_channels_list[-1]
+
+        self.features.add_module("hg", SesquialteralHourglass(
             down1_seq=down1_seq,
             skip1_seq=skip1_seq,
             up_seq=up_seq,
@@ -347,7 +434,8 @@ class FishNet(nn.Module):
         self.output = nn.Sequential()
         self.output.add_module("final_conv", conv1x1(
             in_channels=in_channels,
-            out_channels=num_classes))
+            out_channels=num_classes,
+            bias=True))
 
         self._init_params()
 
@@ -386,19 +474,21 @@ def get_fishnet(blocks,
     """
 
     if blocks == 99:
-        raise ValueError("Unsupported FishNet with number of blocks: {}".format(blocks))
+        direct_layers = [[2, 2, 6], [1, 1, 1], [1, 2, 2]]
+        skip_layers = [[1, 1, 1, 1], [1, 1, 4, 1]]
     elif blocks == 150:
         direct_layers = [[2, 4, 8], [2, 2, 2], [2, 2, 4]]
         skip_layers = [[2, 2, 2, 2], [2, 2, 2, 2]]
-        direct_channels_per_layers = [[128, 256, 512], [512, 512, 384], [256, 320, 832]]
-        skip_channels_per_layers = [[64, 128, 256, 512], [64, 128, 256, 512]]
     else:
         raise ValueError("Unsupported FishNet with number of blocks: {}".format(blocks))
 
-    direct_channels = [([cij] * lij for (cij, lij) in zip(ci, li)) for (ci, li) in
-                       zip(direct_channels_per_layers, direct_layers)]
-    skip_channels = [([cij] * lij for (cij, lij) in zip(ci, li)) for (ci, li) in
-                     zip(skip_channels_per_layers, skip_layers)]
+    direct_channels_per_layers = [[128, 256, 512], [512, 512, 384], [256, 320, 832]]
+    skip_channels_per_layers = [[64, 128, 256, 512], [64, 128, 256, 512]]
+
+    direct_channels = [[[b] * c for (b, c) in zip(*a)] for a in
+                       ([(ci, li) for (ci, li) in zip(direct_channels_per_layers, direct_layers)])]
+    skip_channels = [[[b] * c for (b, c) in zip(*a)] for a in
+                     ([(ci, li) for (ci, li) in zip(skip_channels_per_layers, skip_layers)])]
 
     init_block_channels = 64
 
@@ -466,8 +556,8 @@ def _test():
     pretrained = False
 
     models = [
-        # fishnet99,
-        fishnet150,
+        fishnet99,
+        # fishnet150,
     ]
 
     for model in models:

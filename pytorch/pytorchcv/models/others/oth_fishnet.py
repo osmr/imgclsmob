@@ -7,72 +7,43 @@ __all__ = ['oth_fishnet99', 'oth_fishnet150']
 
 
 class Bottleneck(nn.Module):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride=1,
-                 mode='NORM',
-                 k=1,
-                 dilation=1):
+    def __init__(self, inplanes, planes, stride=1, mode='NORM', k=1, dilation=1):
         """
         Pre-act residual block, the middle transformations are bottle-necked
-        :param in_channels:
-        :param out_channels:
+        :param inplanes:
+        :param planes:
         :param stride:
         :param downsample:
         :param mode: NORM | UP
         :param k: times of additive
         """
+
         super(Bottleneck, self).__init__()
-        btnk_ch = out_channels // 4
         self.mode = mode
+        self.relu = nn.ReLU(inplace=True)
         self.k = k
 
-        self.relu = nn.ReLU(inplace=True)
-        self.bn1 = nn.BatchNorm2d(in_channels)
-        self.conv1 = nn.Conv2d(
-            in_channels,
-            btnk_ch,
-            kernel_size=1,
-            bias=False)
+        btnk_ch = planes // 4
+        self.bn1 = nn.BatchNorm2d(inplanes)
+        self.conv1 = nn.Conv2d(inplanes, btnk_ch, kernel_size=1, bias=False)
 
         self.bn2 = nn.BatchNorm2d(btnk_ch)
-        self.conv2 = nn.Conv2d(
-            btnk_ch,
-            btnk_ch,
-            kernel_size=3,
-            stride=stride,
-            padding=dilation,
-            dilation=dilation,
-            bias=False)
+        self.conv2 = nn.Conv2d(btnk_ch, btnk_ch, kernel_size=3, stride=stride, padding=dilation,
+                               dilation=dilation, bias=False)
 
         self.bn3 = nn.BatchNorm2d(btnk_ch)
-        self.conv3 = nn.Conv2d(
-            btnk_ch,
-            out_channels,
-            kernel_size=1,
-            bias=False)
+        self.conv3 = nn.Conv2d(btnk_ch, planes, kernel_size=1, bias=False)
 
         if mode == 'UP':
             self.shortcut = None
-        elif in_channels != out_channels or stride > 1:
+        elif inplanes != planes or stride > 1:
             self.shortcut = nn.Sequential(
-                nn.BatchNorm2d(in_channels),
+                nn.BatchNorm2d(inplanes),
                 self.relu,
-                nn.Conv2d(
-                    in_channels,
-                    out_channels,
-                    kernel_size=1,
-                    stride=stride,
-                    bias=False)
+                nn.Conv2d(inplanes, planes, kernel_size=1, stride=stride, bias=False)
             )
         else:
             self.shortcut = None
-
-    def squeeze_idt(self, idt):
-        n, c, h, w = idt.size()
-        return idt.view(n, c // self.k, self.k, h, w).sum(2)
 
     def _pre_act_forward(self, x):
         residual = x
@@ -98,21 +69,18 @@ class Bottleneck(nn.Module):
 
         return out
 
+    def squeeze_idt(self, idt):
+        n, c, h, w = idt.size()
+        return idt.view(n, c // self.k, self.k, h, w).sum(2)
+
     def forward(self, x):
         out = self._pre_act_forward(x)
         return out
 
 
 class Fish(nn.Module):
-    def __init__(self,
-                 block,
-                 num_cls=1000,
-                 num_down_sample=5,
-                 num_up_sample=3,
-                 trans_map=(2, 1, 0, 6, 5, 4),
-                 network_planes=None,
-                 num_res_blks=None,
-                 num_trans_blks=None):
+    def __init__(self, block, num_cls=1000, num_down_sample=5, num_up_sample=3, trans_map=(2, 1, 0, 6, 5, 4),
+                 network_planes=None, num_res_blks=None, num_trans_blks=None):
         super(Fish, self).__init__()
         self.block = block
         self.trans_map = trans_map
@@ -127,10 +95,7 @@ class Fish(nn.Module):
         self.num_res_blks = num_res_blks
         self.fish = self._make_fish(network_planes[0])
 
-    def _make_score(self,
-                    in_ch,
-                    out_ch=1000,
-                    has_pool=False):
+    def _make_score(self, in_ch, out_ch=1000, has_pool=False):
         bn = nn.BatchNorm2d(in_ch)
         relu = nn.ReLU(inplace=True)
         conv_trans = nn.Conv2d(in_ch, in_ch // 2, kernel_size=1, bias=False)
@@ -144,28 +109,19 @@ class Fish(nn.Module):
             fc = nn.Conv2d(in_ch // 2, out_ch, kernel_size=1, bias=True)
         return [conv, fc]
 
-    def _make_se_block(self,
-                       in_ch,
-                       out_ch):
+    def _make_se_block(self, in_ch, out_ch):
         bn = nn.BatchNorm2d(in_ch)
         sq_conv = nn.Conv2d(in_ch, out_ch // 16, kernel_size=1)
         ex_conv = nn.Conv2d(out_ch // 16, out_ch, kernel_size=1)
-        return nn.Sequential(
-            bn,
-            nn.ReLU(inplace=True),
-            nn.AdaptiveAvgPool2d(1),
-            sq_conv,
-            nn.ReLU(inplace=True),
-            ex_conv,
-            nn.Sigmoid())
+        return nn.Sequential(bn,
+                             nn.ReLU(inplace=True),
+                             nn.AdaptiveAvgPool2d(1),
+                             sq_conv,
+                             nn.ReLU(inplace=True),
+                             ex_conv,
+                             nn.Sigmoid())
 
-    def _make_residual_block(self,
-                             inplanes,
-                             outplanes,
-                             nstage,
-                             is_up=False,
-                             k=1,
-                             dilation=1):
+    def _make_residual_block(self, inplanes, outplanes, nstage, is_up=False, k=1, dilation=1):
         layers = []
 
         if is_up:
@@ -176,17 +132,8 @@ class Fish(nn.Module):
             layers.append(self.block(outplanes, outplanes, stride=1, dilation=dilation))
         return nn.Sequential(*layers)
 
-    def _make_stage(self,
-                    is_down_sample,
-                    inplanes,
-                    outplanes,
-                    n_blk,
-                    has_trans=True,
-                    has_score=False,
-                    trans_planes=0,
-                    no_sampling=False,
-                    num_trans=2,
-                    **kwargs):
+    def _make_stage(self, is_down_sample, inplanes, outplanes, n_blk, has_trans=True,
+                    has_score=False, trans_planes=0, no_sampling=False, num_trans=2, **kwargs):
         sample_block = []
         if has_score:
             sample_block.extend(self._make_score(outplanes, outplanes * 2, has_pool=False))
@@ -210,7 +157,6 @@ class Fish(nn.Module):
         return nn.ModuleList(sample_block)
 
     def _make_fish(self, in_planes):
-
         def get_trans_planes(index):
             map_id = self.trans_map[index-self.num_down-1] - 1
             p = in_planes if map_id == -1 else cated_planes[map_id]
@@ -228,13 +174,10 @@ class Fish(nn.Module):
         cated_planes, fish = [in_planes] * self.depth, []
         for i in range(self.depth):
             # even num for down-sample, odd for up-sample
-            is_down = (i not in range(self.num_down, self.num_down+self.num_up+1))
-            has_trans = (i > self.num_down)
-            no_sampling = (i == self.num_down)
-            cur_planes = get_cur_planes(i)
-            trans_planes = get_trans_planes(i)
-            cur_blocks = get_blk_num(i)
-            num_trans = get_trans_blk(i)
+            is_down, has_trans, no_sampling = i not in range(self.num_down, self.num_down+self.num_up+1),\
+                                              i > self.num_down, i == self.num_down
+            cur_planes, trans_planes, cur_blocks, num_trans =\
+                get_cur_planes(i), get_trans_planes(i), get_blk_num(i), get_trans_blk(i)
 
             stg_args = [is_down, cated_planes[i - 1], cur_planes, cur_blocks]
 
@@ -243,16 +186,9 @@ class Fish(nn.Module):
             else:
                 k, dilation = cated_planes[i - 1] // cur_planes, 2 ** (i-self.num_down-1)
 
-            sample_block = self._make_stage(
-                *stg_args,
-                has_trans=has_trans,
-                trans_planes=trans_planes,
-                has_score=(i == self.num_down),
-                num_trans=num_trans,
-                k=k,
-                dilation=dilation,
-                no_sampling=no_sampling)
-
+            sample_block = self._make_stage(*stg_args, has_trans=has_trans, trans_planes=trans_planes,
+                                            has_score=(i==self.num_down), num_trans=num_trans, k=k, dilation=dilation,
+                                            no_sampling=no_sampling)
             if i == self.depth - 1:
                 sample_block.extend(self._make_score(cur_planes + trans_planes, has_pool=True))
             elif i == self.num_down:
@@ -264,12 +200,10 @@ class Fish(nn.Module):
                 cated_planes[i] = cur_planes + trans_planes
             else:
                 cated_planes[i] = cur_planes
-
             fish.append(sample_block)
         return nn.ModuleList(fish)
 
     def _fish_forward(self, all_feat):
-
         def _concat(a, b):
             return torch.cat([a, b], dim=1)
 
@@ -314,9 +248,7 @@ class Fish(nn.Module):
 
 
 class FishNet(nn.Module):
-    def __init__(self,
-                 block,
-                 **kwargs):
+    def __init__(self, block, **kwargs):
         super(FishNet, self).__init__()
 
         inplanes = kwargs['network_planes'][0]
@@ -329,20 +261,10 @@ class FishNet(nn.Module):
         self.fish = Fish(block, **kwargs)
         self._init_weights()
 
-    def _conv_bn_relu(self,
-                      in_ch,
-                      out_ch,
-                      stride=1):
-        return nn.Sequential(
-            nn.Conv2d(
-                in_ch,
-                out_ch,
-                kernel_size=3,
-                padding=1,
-                stride=stride,
-                bias=False),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True))
+    def _conv_bn_relu(self, in_ch, out_ch, stride=1):
+        return nn.Sequential(nn.Conv2d(in_ch, out_ch, kernel_size=3, padding=1, stride=stride, bias=False),
+                             nn.BatchNorm2d(out_ch),
+                             nn.ReLU(inplace=True))
 
     def _init_weights(self):
         for m in self.modules():
@@ -417,7 +339,7 @@ def _test():
     pretrained = False
 
     models = [
-        # oth_fishnet99,
+        oth_fishnet99,
         oth_fishnet150,
     ]
 

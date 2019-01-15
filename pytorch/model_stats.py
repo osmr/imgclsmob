@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity
-from .pytorchcv.models.fishnet import InterpolationBlock
+from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 
 __all__ = ['measure_model']
 
@@ -145,6 +145,9 @@ def measure_model(model,
             extra_num_flops = 0
             extra_num_macs = 0
         elif isinstance(module, InterpolationBlock):
+            extra_num_flops = x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, ChannelSqueeze):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
         else:

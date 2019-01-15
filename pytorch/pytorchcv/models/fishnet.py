@@ -255,12 +255,13 @@ class DownUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels))
             in_channels = out_channels
-        self.blocks.add_module("pool", nn.MaxPool2d(
+        self.pool = nn.MaxPool2d(
             kernel_size=2,
-            stride=2))
+            stride=2)
 
     def forward(self, x):
         x = self.blocks(x)
+        x = self.pool(x)
         return x
 
 
@@ -291,10 +292,11 @@ class UpUnit(nn.Module):
                 dilation=dilation,
                 squeeze=squeeze))
             in_channels = out_channels
-        self.blocks.add_module("upsample", InterpolationBlock(scale_factor=2))
+        self.upsample = InterpolationBlock(scale_factor=2)
 
     def forward(self, x):
         x = self.blocks(x)
+        x = self.upsample(x)
         return x
 
 

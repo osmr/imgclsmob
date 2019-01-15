@@ -216,12 +216,12 @@ class PreResActivation(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 bn_use_global_stats,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(PreResActivation, self).__init__(**kwargs)
         with self.name_scope():

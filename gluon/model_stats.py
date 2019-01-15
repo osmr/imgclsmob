@@ -2,8 +2,9 @@ import logging
 import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2
 from mxnet.gluon.contrib.nn import Identity
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2
+from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 
 __all__ = ['measure_model']
 
@@ -134,6 +135,12 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(block, Identity):
             extra_num_flops = 0
+            extra_num_macs = 0
+        elif isinstance(block, InterpolationBlock):
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, ChannelSqueeze):
+            extra_num_flops = x[0].size
             extra_num_macs = 0
         else:
             raise TypeError('Unknown layer type: {}'.format(type(block)))

@@ -55,10 +55,15 @@ from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
 
+from .models.fishnet import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'fishnet99': fishnet99,
+    'fishnet150': fishnet150,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

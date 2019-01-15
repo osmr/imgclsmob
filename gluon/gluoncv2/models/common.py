@@ -5,7 +5,7 @@
 __all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass']
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
 
 import math
 from inspect import isfunction
@@ -392,8 +392,12 @@ class PreConvBlock(HybridBlock):
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -405,7 +409,9 @@ class PreConvBlock(HybridBlock):
                  kernel_size,
                  strides,
                  padding,
+                 dilation=1,
                  groups=1,
+                 use_bias=False,
                  bn_use_global_stats=False,
                  return_preact=False,
                  **kwargs):
@@ -422,8 +428,9 @@ class PreConvBlock(HybridBlock):
                 kernel_size=kernel_size,
                 strides=strides,
                 padding=padding,
+                dilation=dilation,
                 groups=groups,
-                use_bias=False,
+                use_bias=use_bias,
                 in_channels=in_channels)
 
     def hybrid_forward(self, F, x):
@@ -441,6 +448,7 @@ class PreConvBlock(HybridBlock):
 def pre_conv1x1_block(in_channels,
                       out_channels,
                       strides=1,
+                      use_bias=False,
                       bn_use_global_stats=False,
                       return_preact=False):
     """
@@ -454,6 +462,8 @@ def pre_conv1x1_block(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -465,6 +475,7 @@ def pre_conv1x1_block(in_channels,
         kernel_size=1,
         strides=strides,
         padding=0,
+        use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact)
 
@@ -472,6 +483,8 @@ def pre_conv1x1_block(in_channels,
 def pre_conv3x3_block(in_channels,
                       out_channels,
                       strides=1,
+                      padding=1,
+                      dilation=1,
                       groups=1,
                       bn_use_global_stats=False,
                       return_preact=False):
@@ -486,6 +499,10 @@ def pre_conv3x3_block(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     bn_use_global_stats : bool, default False
@@ -498,7 +515,8 @@ def pre_conv3x3_block(in_channels,
         out_channels=out_channels,
         kernel_size=3,
         strides=strides,
-        padding=1,
+        padding=padding,
+        dilation=dilation,
         groups=groups,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact)
@@ -858,3 +876,77 @@ class Hourglass(HybridBlock):
             return x, y
         else:
             return x
+
+
+class SesquialteralHourglass(HybridBlock):
+    """
+    A sesquialteral hourglass block.
+
+    Parameters:
+    ----------
+    down1_seq : nn.Sequential
+        The first down modules as sequential.
+    skip1_seq : nn.Sequential
+        The first skip connection modules as sequential.
+    up_seq : nn.Sequential
+        Up modules as sequential.
+    skip2_seq : nn.Sequential
+        The second skip connection modules as sequential.
+    down2_seq : nn.Sequential
+        The second down modules as sequential.
+    merge_type : str, default 'con'
+        Type of concatenation of up and skip outputs.
+    """
+    def __init__(self,
+                 down1_seq,
+                 skip1_seq,
+                 up_seq,
+                 skip2_seq,
+                 down2_seq,
+                 merge_type="cat",
+                 **kwargs):
+        super(SesquialteralHourglass, self).__init__(**kwargs)
+        assert (len(down1_seq) == len(up_seq))
+        assert (len(down1_seq) == len(down2_seq))
+        assert (len(skip1_seq) == len(skip2_seq))
+        assert (len(down1_seq) == len(skip1_seq) - 1)
+        assert (merge_type in ["cat", "add"])
+        self.merge_type = merge_type
+        self.depth = len(down1_seq)
+
+        self.down1_seq = down1_seq
+        self.skip1_seq = skip1_seq
+        self.up_seq = up_seq
+        self.skip2_seq = skip2_seq
+        self.down2_seq = down2_seq
+
+    def _merge(self, F, x, y):
+        if y is not None:
+            if self.merge_type == "cat":
+                x = F.concat(x, y, dim=1)
+            elif self.merge_type == "add":
+                x = x + y
+        return x
+
+    def hybrid_forward(self, F, x):
+        y = self.skip1_seq[0](x)
+        skip1_outs = [y]
+        for i in range(self.depth):
+            x = self.down1_seq[i](x)
+            y = self.skip1_seq[i + 1](x)
+            skip1_outs.append(y)
+        x = skip1_outs[self.depth]
+        y = self.skip2_seq[0](x)
+        skip2_outs = [y]
+        for i in range(self.depth):
+            x = self.up_seq[i](x)
+            y = skip1_outs[self.depth - 1 - i]
+            x = self._merge(F, x, y)
+            y = self.skip2_seq[i + 1](x)
+            skip2_outs.append(y)
+        x = self.skip2_seq[self.depth](x)
+        for i in range(self.depth):
+            x = self.down2_seq[i](x)
+            y = skip2_outs[self.depth - 1 - i]
+            x = self._merge(F, x, y)
+        return x

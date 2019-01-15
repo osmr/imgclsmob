@@ -3,7 +3,7 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SENet', 'senet52', 'senet103', 'senet154']
+__all__ = ['SENet', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
 
 import os
 import math
@@ -150,13 +150,13 @@ class SEInitBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_use_global_stats,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(SEInitBlock, self).__init__(**kwargs)
         mid_channels = out_channels // 2

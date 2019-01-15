@@ -9,19 +9,8 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1
+from .common import conv1x1, Identity
 from .nasnet import nasnet_dual_path_sequential
-
-
-class Identity(nn.Module):
-    """
-    Identity block.
-    """
-    def __init__(self):
-        super(Identity, self).__init__()
-
-    def forward(self, x):
-        return x
 
 
 class DwsConv(nn.Module):

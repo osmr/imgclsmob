@@ -444,7 +444,6 @@ class FishNet(nn.Module):
 
         down1_seq = nn.Sequential()
         skip1_seq = nn.Sequential()
-
         for i in range(depth + 1):
             skip1_channels_list = skip1_channels[i]
             if i < depth:
@@ -464,7 +463,6 @@ class FishNet(nn.Module):
 
         up_seq = nn.Sequential()
         skip2_seq = nn.Sequential()
-
         for i in range(depth + 1):
             skip2_channels_list = skip2_channels[i]
             if i > 0:
@@ -628,7 +626,7 @@ def _test():
     pretrained = False
 
     models = [
-        # fishnet99,
+        fishnet99,
         fishnet150,
     ]
 

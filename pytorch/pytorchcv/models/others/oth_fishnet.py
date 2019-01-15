@@ -3,7 +3,7 @@ import torch
 import math
 import torch.nn as nn
 
-__all__ = ['oth_fishnet150']
+__all__ = ['oth_fishnet99', 'oth_fishnet150']
 
 
 class Bottleneck(nn.Module):

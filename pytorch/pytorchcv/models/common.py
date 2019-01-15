@@ -874,9 +874,9 @@ class SesquialteralHourglass(nn.Module):
             x = self.down1_seq[i](x)
             y = self.skip1_seq[i + 1](x)
             skip1_outs.append(y)
+        x = skip1_outs[self.depth]
         y = self.skip2_seq[0](x)
         skip2_outs = [y]
-        x = skip1_outs[-1]
         for i in range(self.depth):
             x = self.up_seq[i](x)
             y = skip1_outs[self.depth - 1 - i]

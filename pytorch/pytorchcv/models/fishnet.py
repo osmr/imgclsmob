@@ -628,7 +628,7 @@ def _test():
     pretrained = False
 
     models = [
-        fishnet99,
+        # fishnet99,
         fishnet150,
     ]
 

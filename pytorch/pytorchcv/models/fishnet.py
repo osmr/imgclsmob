@@ -448,16 +448,16 @@ class FishNet(nn.Module):
         for i in range(depth + 1):
             skip1_channels_list = skip1_channels[i]
             if i < depth:
-                skip1_seq.add_module("skip_a{}".format(i + 1), SkipUnit(
+                skip1_seq.add_module("unit{}".format(i + 1), SkipUnit(
                     in_channels=in_channels,
                     out_channels_list=skip1_channels_list))
                 down1_channels_list = down1_channels[i]
-                down1_seq.add_module("down_a{}".format(i + 1), DownUnit(
+                down1_seq.add_module("unit{}".format(i + 1), DownUnit(
                     in_channels=in_channels,
                     out_channels_list=down1_channels_list))
                 in_channels = down1_channels_list[-1]
             else:
-                skip1_seq.add_module("skip_a{}".format(i + 1), SkipAttUnit(
+                skip1_seq.add_module("unit{}".format(i + 1), SkipAttUnit(
                     in_channels=in_channels,
                     out_channels_list=skip1_channels_list))
                 in_channels = skip1_channels_list[-1]
@@ -470,23 +470,23 @@ class FishNet(nn.Module):
             if i > 0:
                 in_channels += skip1_channels[depth - i][-1]
             if i < depth:
-                skip2_seq.add_module("skip_b{}".format(i + 1), SkipUnit(
+                skip2_seq.add_module("unit{}".format(i + 1), SkipUnit(
                     in_channels=in_channels,
                     out_channels_list=skip2_channels_list))
                 up_channels_list = up_channels[i]
                 dilation = 2 ** i
-                up_seq.add_module("up{}".format(i + 1), UpUnit(
+                up_seq.add_module("unit{}".format(i + 1), UpUnit(
                     in_channels=in_channels,
                     out_channels_list=up_channels_list,
                     dilation=dilation))
                 in_channels = up_channels_list[-1]
             else:
-                skip2_seq.add_module("skip_b{}".format(i + 1), Identity())
+                skip2_seq.add_module("unit{}".format(i + 1), Identity())
 
         down2_seq = nn.Sequential()
         for i in range(depth):
             down2_channels_list = down2_channels[i]
-            down2_seq.add_module("down_b{}".format(i + 1), DownUnit(
+            down2_seq.add_module("unit{}".format(i + 1), DownUnit(
                 in_channels=in_channels,
                 out_channels_list=down2_channels_list))
             in_channels = down2_channels_list[-1] + skip2_channels[depth - 1 - i][-1]

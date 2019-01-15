@@ -688,7 +688,30 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
-    if dst_model == "bam_resnet50":
+    if dst_model == "fishnet150":
+        src1 = list(filter(re.compile("^(conv|fish\.fish\.[0-2])").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src2 = list(filter(re.compile("^fish\.fish\.6\.1").search, src1n))
+        src2n = [key for key in src1n if key not in src2]
+        src3 = list(filter(re.compile("^fish\.fish\.5\.1").search, src2n))
+        src3n = [key for key in src2n if key not in src3]
+        src4 = list(filter(re.compile("^fish\.fish\.4\.1").search, src3n))
+        src4n = [key for key in src3n if key not in src4]
+        src5 = list(filter(re.compile("^fish\.fish\.3\.[0-1]").search, src4n))
+        src5n = [key for key in src4n if key not in src5]
+        src6 = list(filter(re.compile("^fish\.fish\.3\.3").search, src5n))
+        src6n = [key for key in src5n if key not in src6]
+        src7 = list(filter(re.compile("^fish\.fish\.[3-6]").search, src6n))
+        src7n = [key for key in src6n if key not in src7]
+        src8 = list(filter(re.compile("^fish\.fish\.9\.1").search, src7n))
+        src8n = [key for key in src7n if key not in src8]
+        src9 = list(filter(re.compile("^fish\.fish\.8\.1").search, src8n))
+        src9n = [key for key in src8n if key not in src9]
+        src10 = list(filter(re.compile("^fish\.fish\.7\.1").search, src9n))
+        src10n = [key for key in src9n if key not in src10]
+        src_param_keys = src1 + src2 + src3 + src4 + src5 + src6 + src7 + src8 + src9 + src10 + src10n
+
+    elif dst_model == "bam_resnet50":
         src_bams = list(filter(re.compile("^bam").search, src_param_keys))
         src_param_keys = [key for key in src_param_keys if key not in src_bams]
         src_param_keys = src_param_keys + src_bams

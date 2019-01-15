@@ -417,8 +417,8 @@ def _test():
     pretrained = False
 
     models = [
-        oth_fishnet99,
-        # oth_fishnet150,
+        # oth_fishnet99,
+        oth_fishnet150,
     ]
 
     for model in models:

@@ -4,7 +4,7 @@
 
 __all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
            'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
 
 import math
@@ -356,6 +356,8 @@ class PreConvBlock(nn.Module):
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     """
@@ -366,6 +368,7 @@ class PreConvBlock(nn.Module):
                  stride,
                  padding,
                  dilation=1,
+                 bias=False,
                  return_preact=False):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
@@ -379,7 +382,7 @@ class PreConvBlock(nn.Module):
             stride=stride,
             padding=padding,
             dilation=dilation,
-            bias=False)
+            bias=bias)
 
     def forward(self, x):
         x = self.bn(x)
@@ -396,6 +399,7 @@ class PreConvBlock(nn.Module):
 def pre_conv1x1_block(in_channels,
                       out_channels,
                       stride=1,
+                      bias=False,
                       return_preact=False):
     """
     1x1 version of the pre-activated convolution block.
@@ -408,6 +412,8 @@ def pre_conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation.
     """
@@ -417,6 +423,7 @@ def pre_conv1x1_block(in_channels,
         kernel_size=1,
         stride=stride,
         padding=0,
+        bias=bias,
         return_preact=return_preact)
 
 
@@ -643,6 +650,17 @@ class IBN(nn.Module):
         return x
 
 
+class Identity(nn.Module):
+    """
+    Identity block.
+    """
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
+
+
 class DualPathSequential(nn.Sequential):
     """
     A sequential container for modules with dual inputs/outputs.
@@ -812,10 +830,10 @@ class SesquialteralHourglass(nn.Module):
         The first skip connection modules as sequential.
     up_seq : nn.Sequential
         Up modules as sequential.
-    down2_seq : nn.Sequential
-        The second down modules as sequential.
     skip2_seq : nn.Sequential
         The second skip connection modules as sequential.
+    down2_seq : nn.Sequential
+        The second down modules as sequential.
     merge_type : str, default 'con'
         Type of concatenation of up and skip outputs.
     """
@@ -823,8 +841,8 @@ class SesquialteralHourglass(nn.Module):
                  down1_seq,
                  skip1_seq,
                  up_seq,
-                 down2_seq,
                  skip2_seq,
+                 down2_seq,
                  merge_type="cat"):
         super(SesquialteralHourglass, self).__init__()
         assert (len(down1_seq) == len(up_seq))
@@ -838,33 +856,36 @@ class SesquialteralHourglass(nn.Module):
         self.down1_seq = down1_seq
         self.skip1_seq = skip1_seq
         self.up_seq = up_seq
-        self.down2_seq = down2_seq
         self.skip2_seq = skip2_seq
+        self.down2_seq = down2_seq
 
     def _merge(self, x, y):
-        if self.merge_type == "cat":
-            x = torch.cat((x, y), dim=1)
-        elif self.merge_type == "add":
-            x = x + y
+        if y is not None:
+            if self.merge_type == "cat":
+                x = torch.cat((x, y), dim=1)
+            elif self.merge_type == "add":
+                x = x + y
         return x
 
     def forward(self, x, **kwargs):
-        down1_outs = [x]
+        y = self.skip1_seq[0](x)
+        skip1_outs = [y]
         for i in range(self.depth):
             x = self.down1_seq[i](x)
-            down1_outs.append(x)
-        x = self.skip1_seq[-1](x)
-        up_outs = [x]
+            y = self.skip1_seq[i + 1](x)
+            skip1_outs.append(y)
+        y = self.skip2_seq[0](x)
+        skip2_outs = [y]
+        x = skip1_outs[-1]
         for i in range(self.depth):
             x = self.up_seq[i](x)
-            y = down1_outs[self.depth - 2 - i]
-            y = self.skip1_seq[self.depth - 2 - i](y)
+            y = skip1_outs[self.depth - 1 - i]
             x = self._merge(x, y)
-            up_outs.append(x)
-        x = self.skip2_seq[0](x)
+            y = self.skip2_seq[i + 1](x)
+            skip2_outs.append(y)
+        x = self.skip2_seq[self.depth](x)
         for i in range(self.depth):
             x = self.down2_seq[i](x)
-            y = up_outs[self.depth - 2 - i]
-            y = self.skip2_seq[self.depth - 2 - i](y)
+            y = skip2_outs[self.depth - 1 - i]
             x = self._merge(x, y)
         return x

@@ -30,6 +30,7 @@ from .models.dpn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
+from .models.fishnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -53,16 +54,12 @@ from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
 
-from .models.fishnet import *
 from .models.others.oth_fishnet import *
 
 __all__ = ['get_model']
 
 
 _models = {
-    'fishnet99': fishnet99,
-    'fishnet150': fishnet150,
-
     'oth_fishnet99': oth_fishnet99,
     'oth_fishnet150': oth_fishnet150,
 
@@ -245,6 +242,9 @@ _models = {
     'darknet53': darknet53,
 
     'channelnet': channelnet,
+
+    'fishnet99': fishnet99,
+    'fishnet150': fishnet150,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

@@ -4,10 +4,172 @@ from __future__ import print_function
 from __future__ import division
 
 import math
+from inspect import isfunction
 import torch
 import torch.nn as nn
 
 __all__ = ['oth_msdnet_cifar10']
+
+
+class ConvBlock(nn.Module):
+    """
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 activation=(lambda: nn.ReLU(inplace=True)),
+                 activate=True):
+        super(ConvBlock, self).__init__()
+        self.activate = activate
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        if self.activate:
+            assert (activation is not None)
+            if isfunction(activation):
+                self.activ = activation()
+            elif isinstance(activation, str):
+                if activation == "relu":
+                    self.activ = nn.ReLU(inplace=True)
+                elif activation == "relu6":
+                    self.activ = nn.ReLU6(inplace=True)
+                else:
+                    raise NotImplementedError()
+            else:
+                self.activ = activation
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def conv3x3_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=1,
+                  dilation=1,
+                  groups=1,
+                  bias=False,
+                  activation=(lambda: nn.ReLU(inplace=True)),
+                  activate=True):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+        activation=activation,
+        activate=activate)
+
+
+class MSDFirstLayer(nn.Module):
+    """
+    Creates the first layer of the MSD network, which takes
+    an input tensor (image) and generates a list of size num_scales
+    with deeper features with smaller (spatial) dimensions.
+
+    :param in_channels: number of input channels to the first layer
+    :param out_channels: number of output channels in the first scale
+    :param num_scales: number of output scales in the first layer
+    :param msd_growth_factor: ...
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 num_scales,
+                 msd_growth_factor):
+        super(MSDFirstLayer, self).__init__()
+        self.num_scales = num_scales
+
+        self.subnets = nn.ModuleList()
+        for i in range(self.num_scales):
+            stride = 1 if i == 0 else 2
+            mid_channels = int(out_channels * msd_growth_factor[i])
+            self.subnets.append(conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=stride))
+            in_channels = mid_channels
+
+    def forward(self, x):
+        output = [None] * self.num_scales
+        current_input = x
+        for scale in range(0, self.num_scales):
+
+            # Use upper scale as an input
+            if scale > 0:
+                current_input = output[scale-1]
+            output[scale] = self.subnets[scale](current_input)
+        return output
 
 
 class _DynamicInputDenseBlock(nn.Module):
@@ -81,9 +243,10 @@ class MSDLayer(nn.Module):
         self.growth_factor = self.args["msd_growth_factor"]
         self.debug = self.args["debug"]
 
-        # Define Conv2d/GCN params
-        self.use_gcn = args["msd_all_gcn"]
-        self.conv_l, self.ks, self.pad = get_conv_params(self.use_gcn, args)
+        # Define Conv2d params
+        self.conv_l = nn.Conv2d
+        self.ks = 3
+        self.pad = 1
 
         # Calculate number of channels to drop and number of
         # all dropped channels
@@ -262,88 +425,6 @@ class MSDLayer(nn.Module):
         return outputs
 
 
-class MSDFirstLayer(nn.Module):
-
-    def __init__(self, in_channels, out_channels, num_scales, args):
-        """
-        Creates the first layer of the MSD network, which takes
-        an input tensor (image) and generates a list of size num_scales
-        with deeper features with smaller (spatial) dimensions.
-
-        :param in_channels: number of input channels to the first layer
-        :param out_channels: number of output channels in the first scale
-        :param num_scales: number of output scales in the first layer
-        :param args: other arguments
-        """
-        super(MSDFirstLayer, self).__init__()
-
-        # Init params
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.num_scales = num_scales
-        self.args = args
-        self.use_gcn = args["msd_gcn"]
-        self.conv_l, self.ks, self.pad = get_conv_params(self.use_gcn, args)
-        if self.use_gcn:
-            print('|          First layer with GCN           |')
-        else:
-            print('|         First layer without GCN         |')
-
-        self.subnets = self.create_modules()
-
-    def create_modules(self):
-
-        # Create first scale features
-        modules = nn.ModuleList()
-        if 'cifar' in self.args["data"]:
-            current_channels = int(self.out_channels *
-                                   self.args["msd_growth_factor"][0])
-
-            current_m = nn.Sequential(
-                self.conv_l(self.in_channels,
-                       current_channels, kernel_size=self.ks,
-                       stride=1, padding=self.pad),
-                nn.BatchNorm2d(current_channels),
-                nn.ReLU(inplace=True)
-            )
-            modules.append(current_m)
-        else:
-            raise NotImplementedError
-
-        # Create second scale features and down
-        for scale in range(1, self.num_scales):
-
-            # Calculate desired output channels
-            out_channels = int(self.out_channels *
-                               self.args["msd_growth_factor"][scale])
-
-            # Use a strided convolution to create next scale features
-            current_m = nn.Sequential(
-                self.conv_l(current_channels, out_channels,
-                       kernel_size=self.ks,
-                       stride=2, padding=self.pad),
-                nn.BatchNorm2d(out_channels),
-                nn.ReLU(inplace=True)
-            )
-
-            # Use the output channels size for the next scale
-            current_channels = out_channels
-
-            # Append module
-            modules.append(current_m)
-
-        return modules
-
-    def forward(self, x):
-        output = [None] * self.num_scales
-        current_input = x
-        for scale in range(0, self.num_scales):
-
-            # Use upper scale as an input
-            if scale > 0:
-                current_input = output[scale-1]
-            output[scale] = self.subnets[scale](current_input)
-        return output
 
 
 class Transition(nn.Sequential):
@@ -450,80 +531,6 @@ class CifarClassifier(nn.Module):
         x = x.view(x.size(0), self.inner_channels)
         x = self.classifier(x)
         return x
-
-
-class GCN(nn.Module):
-
-    def __init__(self, in_channels, out_channels, kernel_size=7, stride=1, padding=1):
-        """
-        Global convolutional network module implementation
-
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param kernel_size: size of conv kernel
-        :param stride: stride to use in the conv parts
-        :param padding: padding to use in the conv parts
-        :param share_weights: use shared weights for every side of GCN
-        """
-        super(GCN, self).__init__()
-        self.conv_l1 = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1),
-                                 padding=(padding, 0), stride=(stride, 1))
-        self.conv_l2 = nn.Conv2d(out_channels, out_channels, kernel_size=(1, kernel_size),
-                                 padding=(0, padding), stride=(1, stride))
-        self.conv_r1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, kernel_size),
-                                 padding=(0, padding), stride=(1, stride))
-        self.conv_r2 = nn.Conv2d(out_channels, out_channels, kernel_size=(kernel_size, 1),
-                                 padding=(padding, 0), stride=(stride, 1))
-
-
-    def forward(self, x):
-
-        if GCN.share_weights:
-
-            # Prepare input and state
-            self.conv_l1.shared = 2
-            self.conv_l2.shared = 2
-            xt = x.transpose(2,3)
-
-            # Left convs
-            xl = self.conv_l1(x)
-            xl = self.conv_l2(xl)
-
-            # Right convs
-            xrt = self.conv_l1(xt)
-            xrt = self.conv_l2(xrt)
-            xr = xrt.transpose(2,3)
-        else:
-
-            # Left convs
-            xl = self.conv_l1(x)
-            xl = self.conv_l2(xl)
-
-            # Right convs
-            xr = self.conv_r1(x)
-            xr = self.conv_r2(xr)
-
-        return xl + xr
-
-
-def get_conv_params(use_gcn, args):
-    """
-    Calculates and returns the convulotion parameters
-
-    :param use_gcn: flag to use GCN or not
-    :param args: user defined arguments
-    :return: convolution type, kernel size and padding
-    """
-
-    if use_gcn:
-        GCN.share_weights = args["msd_share_weights"]
-        conv_l = GCN
-        ks = args["msd_gcn_kernel"]
-    else:
-        conv_l = nn.Conv2d
-        ks = args["msd_kernel"]
-    pad = int(math.floor(ks / 2))
-    return conv_l, ks, pad
 
 
 class MSDNet(nn.Module):
@@ -652,7 +659,7 @@ class MSDNet(nn.Module):
             block.add_module('MSD_first', MSDFirstLayer(self.image_channels,
                                                         num_channels,
                                                         self.num_scales,
-                                                        self.args))
+                                                        self.args["msd_growth_factor"]))
 
         # Add regular layers
         current_channels = num_channels
@@ -754,7 +761,6 @@ def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
         "msd_step": 2,
         "msd_stepmode": "even",
         "growth": [6, 12, 24],
-        "msd_gcn_kernel": 7,
         "msd_share_weights": False,
         "msd_prune": "max",
         "reduction": 0.5,
@@ -763,10 +769,7 @@ def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
         "msd_bottleneck": True,
         "msd_bottleneck_factor": [1, 2, 4, 4],
         "data": "cifar10",
-        "msd_gcn": False,
-        "msd_kernel": 3,
         "debug": False,
-        "msd_all_gcn": False,
     }
     return MSDNet(args)
 

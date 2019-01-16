@@ -64,7 +64,7 @@ class InterpolationBlock(HybridBlock):
 
     Parameters:
     ----------
-    scale_factor : float
+    scale_factor : int
         Multiplier for spatial size.
     """
     def __init__(self,
@@ -576,7 +576,7 @@ def get_fishnet(blocks,
                 model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join('~', '.mxnet', 'models'),
                 **kwargs):
     """
     Create FishNet model with specific parameters.
@@ -644,7 +644,7 @@ def fishnet99(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_fishnet(blocks=99, model_name="fishnet99", **kwargs)
@@ -661,7 +661,7 @@ def fishnet150(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_fishnet(blocks=150, model_name="fishnet150", **kwargs)

@@ -914,11 +914,12 @@ class SesquialteralHourglass(HybridBlock):
         self.merge_type = merge_type
         self.depth = len(down1_seq)
 
-        self.down1_seq = down1_seq
-        self.skip1_seq = skip1_seq
-        self.up_seq = up_seq
-        self.skip2_seq = skip2_seq
-        self.down2_seq = down2_seq
+        with self.name_scope():
+            self.down1_seq = down1_seq
+            self.skip1_seq = skip1_seq
+            self.up_seq = up_seq
+            self.skip2_seq = skip2_seq
+            self.down2_seq = down2_seq
 
     def _merge(self, F, x, y):
         if y is not None:

@@ -5,7 +5,7 @@
 __all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass']
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
 
 from inspect import isfunction
 from chainer import Chain
@@ -367,6 +367,10 @@ class PreConvBlock(Chain):
         Stride of the convolution.
     pad : int or tuple/list of 2 int
         Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     """
@@ -376,6 +380,8 @@ class PreConvBlock(Chain):
                  ksize,
                  stride,
                  pad,
+                 dilate=1,
+                 use_bias=False,
                  return_preact=False):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
@@ -391,7 +397,8 @@ class PreConvBlock(Chain):
                 ksize=ksize,
                 stride=stride,
                 pad=pad,
-                nobias=True)
+                nobias=(not use_bias),
+                dilate=dilate)
 
     def __call__(self, x):
         x = self.bn(x)
@@ -408,6 +415,7 @@ class PreConvBlock(Chain):
 def pre_conv1x1_block(in_channels,
                       out_channels,
                       stride=1,
+                      use_bias=False,
                       return_preact=False):
     """
     1x1 version of the pre-activated convolution block.
@@ -420,6 +428,8 @@ def pre_conv1x1_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation.
     """
@@ -429,12 +439,15 @@ def pre_conv1x1_block(in_channels,
         ksize=1,
         stride=stride,
         pad=0,
+        use_bias=use_bias,
         return_preact=return_preact)
 
 
 def pre_conv3x3_block(in_channels,
                       out_channels,
                       stride=1,
+                      pad=1,
+                      dilate=1,
                       return_preact=False):
     """
     3x3 version of the pre-activated convolution block.
@@ -447,6 +460,10 @@ def pre_conv3x3_block(in_channels,
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
         Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation.
     """
@@ -455,7 +472,8 @@ def pre_conv3x3_block(in_channels,
         out_channels=out_channels,
         ksize=3,
         stride=stride,
-        pad=1,
+        pad=pad,
+        dilate=dilate,
         return_preact=return_preact)
 
 
@@ -782,3 +800,77 @@ class Hourglass(Chain):
             return x, y
         else:
             return x
+
+
+class SesquialteralHourglass(Chain):
+    """
+    A sesquialteral hourglass block.
+
+    Parameters:
+    ----------
+    down1_seq : nn.Sequential
+        The first down modules as sequential.
+    skip1_seq : nn.Sequential
+        The first skip connection modules as sequential.
+    up_seq : nn.Sequential
+        Up modules as sequential.
+    skip2_seq : nn.Sequential
+        The second skip connection modules as sequential.
+    down2_seq : nn.Sequential
+        The second down modules as sequential.
+    merge_type : str, default 'con'
+        Type of concatenation of up and skip outputs.
+    """
+    def __init__(self,
+                 down1_seq,
+                 skip1_seq,
+                 up_seq,
+                 skip2_seq,
+                 down2_seq,
+                 merge_type="cat"):
+        super(SesquialteralHourglass, self).__init__()
+        assert (len(down1_seq) == len(up_seq))
+        assert (len(down1_seq) == len(down2_seq))
+        assert (len(skip1_seq) == len(skip2_seq))
+        assert (len(down1_seq) == len(skip1_seq) - 1)
+        assert (merge_type in ["cat", "add"])
+        self.merge_type = merge_type
+        self.depth = len(down1_seq)
+
+        with self.init_scope():
+            self.down1_seq = down1_seq
+            self.skip1_seq = skip1_seq
+            self.up_seq = up_seq
+            self.skip2_seq = skip2_seq
+            self.down2_seq = down2_seq
+
+    def _merge(self, x, y):
+        if y is not None:
+            if self.merge_type == "cat":
+                x = F.concat((x, y), axis=1)
+            elif self.merge_type == "add":
+                x = x + y
+        return x
+
+    def __call__(self, x):
+        y = self.skip1_seq[self.skip1_seq.layer_names[0]](x)
+        skip1_outs = [y]
+        for i in range(self.depth):
+            x = self.down1_seq[self.down1_seq.layer_names[i]](x)
+            y = self.skip1_seq[self.skip1_seq.layer_names[i + 1]](x)
+            skip1_outs.append(y)
+        x = skip1_outs[self.depth]
+        y = self.skip2_seq[self.skip2_seq.layer_names[0]](x)
+        skip2_outs = [y]
+        for i in range(self.depth):
+            x = self.up_seq[self.up_seq.layer_names[i]](x)
+            y = skip1_outs[self.depth - 1 - i]
+            x = self._merge(x, y)
+            y = self.skip2_seq[self.skip2_seq.layer_names[i + 1]](x)
+            skip2_outs.append(y)
+        x = self.skip2_seq[self.skip2_seq.layer_names[self.depth]](x)
+        for i in range(self.depth):
+            x = self.down2_seq[self.down2_seq.layer_names[i]](x)
+            y = skip2_outs[self.depth - 1 - i]
+            x = self._merge(x, y)
+        return x

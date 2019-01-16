@@ -432,6 +432,7 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('features/final_conv/', 'features/stageN/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/hg/', '/stage1_hg/') for key in dst_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
@@ -447,6 +448,7 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('features/stageN/final_conv/', 'features/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stage1_hg/', '/hg/') for key in dst_param_keys]
 
     ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
     ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]

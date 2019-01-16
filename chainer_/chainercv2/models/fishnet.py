@@ -78,7 +78,10 @@ class InterpolationBlock(Chain):
         self.scale_factor = scale_factor
 
     def __call__(self, x):
-        return F.unpooling_2d(x, ksize=self.scale_factor)
+        return F.unpooling_2d(
+            x=x,
+            ksize=self.scale_factor,
+            cover_all=False)
 
 
 class PreSEAttBlock(Chain):

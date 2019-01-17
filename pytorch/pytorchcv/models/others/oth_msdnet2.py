@@ -11,6 +11,39 @@ import torch.nn as nn
 __all__ = ['oth_msdnet_cifar10_2']
 
 
+class MultiOutputSequential(nn.Sequential):
+    """
+    A sequential container for modules.
+    Blocks will be executed in the order they are added.
+    Output value contains results from all modules.
+    """
+    def __init__(self, *args):
+        super(MultiOutputSequential, self).__init__(*args)
+
+    def forward(self, x):
+        out = []
+        for module in self._modules.values():
+            x = module(x)
+            out.append(x)
+        return out
+
+
+class SesquialteralSequential(nn.Sequential):
+    """
+    A sequential container for modules with double results. The first result is forwarded sequentially. The second
+    results are collected. Blocks will be executed in the order they are added.
+    """
+    def __init__(self, *args):
+        super(SesquialteralSequential, self).__init__(*args)
+
+    def forward(self, x):
+        out = []
+        for module in self._modules.values():
+            x, y = module(x)
+            out.append(y)
+        return out
+
+
 class ConvBlock(nn.Module):
     """
     Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
@@ -171,29 +204,20 @@ def conv3x3_block(in_channels,
 
 
 class MSDFirstLayer(nn.Module):
-    """
-    Creates the first layer of the MSD network, which takes
-    an input tensor (image) and generates a list of size num_scales
-    with deeper features with smaller (spatial) dimensions.
 
-    :param in_channels: number of input channels to the first layer
-    :param out_channels: number of output channels in the first scale
-    :param num_scales: number of output scales in the first layer
-    :param msd_growth_factor: ...
-    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  num_scales,
-                 msd_growth_factor):
+                 growth_factors):
         super(MSDFirstLayer, self).__init__()
         self.num_scales = num_scales
 
-        self.subnets = nn.ModuleList()
+        self.scale_blocks = MultiOutputSequential()
         for i in range(self.num_scales):
             stride = 1 if i == 0 else 2
-            mid_channels = int(out_channels * msd_growth_factor[i])
-            self.subnets.append(conv3x3_block(
+            mid_channels = int(out_channels * growth_factors[i])
+            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 stride=stride,
@@ -201,11 +225,8 @@ class MSDFirstLayer(nn.Module):
             in_channels = mid_channels
 
     def forward(self, x):
-        out = []
-        for i in range(self.num_scales):
-            x = self.subnets[i](x)
-            out.append(x)
-        return out
+        y = self.scale_blocks(x)
+        return y
 
 
 class _DynamicInputDenseBlock(nn.Module):
@@ -495,12 +516,7 @@ class Transition(nn.Sequential):
 
 
 class CifarClassifier(nn.Module):
-    """
-    Classifier of a cifar10/100 image.
 
-    :param num_channels: Number of input channels to the classifier
-    :param num_classes: Number of classes to classify
-    """
     def __init__(self,
                  in_channels,
                  num_classes):
@@ -528,14 +544,6 @@ class CifarClassifier(nn.Module):
             out_features=num_classes)
 
     def forward(self, x):
-        """
-        Drive features to classification.
-
-        :param x: Input of the lowest scale of the last layer of
-                  the last block
-        :return: Cifar object classification result
-        """
-
         x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
@@ -544,212 +552,184 @@ class CifarClassifier(nn.Module):
 
 class MSDNet(nn.Module):
 
-    def __init__(self, args):
-        """
-        The main module for Multi Scale Dense Network.
-        It holds the different blocks with layers and classifiers of the MSDNet layers
-
-        :param args: Network argument
-        """
-
+    def __init__(self,
+                 init_block_out_channels,
+                 scales,
+                 num_scales,
+                 num_blocks,
+                 base,
+                 steps,
+                 reduction_rate,
+                 growth,
+                 growth_factor,
+                 bottleneck,
+                 bottleneck_factor,
+                 in_channels,
+                 num_classes):
         super(MSDNet, self).__init__()
 
         # Init arguments
-        self.base = args["msd_base"]
-        self.step = args["msd_step"]
-        self.step_mode = args["msd_stepmode"]
-        self.num_blocks = args["msd_blocks"]
-        self.reduction_rate = args["reduction"]
-        self.growth = args["msd_growth"]
-        self.growth_factor = args["msd_growth_factor"]
-        self.bottleneck = args["msd_bottleneck"]
-        self.bottleneck_factor = args["msd_bottleneck_factor"]
-        self.msd_growth_factor = args["msd_growth_factor"]
+        self.num_blocks = num_blocks
+        self.base = base
+        self.reduction_rate = reduction_rate
+        self.growth = growth
+        self.growth_factor = growth_factor
+        self.bottleneck = bottleneck
+        self.bottleneck_factor = bottleneck_factor
 
         # Set progress
-        if args["data"] in ['cifar10', 'cifar100']:
-            self.image_channels = 3
-            self.num_channels = 32
-            self.num_scales = 3
-            self.num_classes = int(args["data"].strip('cifar'))
-        else:
-            raise NotImplementedError
-
-        # Init MultiScale graph and fill with Blocks and Classifiers
-        (self.num_layers, self.steps) = self.calc_steps()
+        self.image_channels = in_channels
+        self.num_classes = num_classes
 
         self.cur_layer = 1
-        self.cur_transition_layer = 1
-        self.subnets = nn.ModuleList(self.build_modules(self.num_channels))
 
-        # initialize
-        for m in self.subnets:
-            self.init_weights(m)
-            if hasattr(m,'__iter__'):
-                for sub_m in m:
-                    self.init_weights(sub_m)
+        self.init_block = MSDFirstLayer(
+            in_channels=self.image_channels,
+            out_channels=init_block_out_channels,
+            num_scales=num_scales,
+            growth_factors=self.growth_factor)
+        num_channels = init_block_out_channels
 
-    def init_weights(self, m):
-        if isinstance(m, nn.Conv2d):
-            n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-            m.weight.data.normal_(0, math.sqrt(2. / n))
-        elif isinstance(m, nn.BatchNorm2d):
-            m.weight.data.fill_(1)
-            m.bias.data.zero_()
-        elif isinstance(m, nn.Linear):
-            m.bias.data.zero_()
-
-    def calc_steps(self):
-        """Calculates the number of layers required in each
-        Block and the total number of layers, according to
-        the step and stepmod.
-
-        :return: number of total layers and list of layers/steps per blocks
-        """
-
-        # Init steps array
-        steps = [None]*self.num_blocks
-        steps[0] = num_layers = self.base
-
-        # Fill steps and num_layers
-        for i in range(1, self.num_blocks):
-
-            # Take even steps or calc next linear growth of a step
-            steps[i] = (self.step_mode == 'even' and self.step) or self.step*(i-1)+1
-            num_layers += steps[i]
-
-        return num_layers, steps
-
-    def build_modules(self, num_channels):
-        """Builds all blocks and classifiers and add it
-        into an array in the order of the format:
-        [[block]*num_blocks [classifier]*num_blocks]
-        where the i'th block corresponds to the (i+num_block) classifier.
-
-        :param num_channels: number of input channels
-        :return: An array with all blocks and classifiers
-        """
-
-        # Init the blocks & classifiers data structure
-        modules = [None] * self.num_blocks * 2
-        for i in range(0, self.num_blocks):
-
-            # Add block
-            modules[i], num_channels = self.create_block(num_channels, i)
-
-            # Calculate the last scale (smallest) channels size
-            channels_in_last_layer = num_channels * self.growth_factor[self.num_scales]
-
-            # Add a classifier that belongs to the i'th block
-            modules[i + self.num_blocks] = CifarClassifier(channels_in_last_layer, self.num_classes)
-        return modules
+        feature_blocks = []
+        classifiers = []
+        in_scales = scales[0][0]
+        for i in range(self.num_blocks):
+            out_scales_list = scales[i]
+            block, num_channels = self.create_block(
+                in_scales=in_scales,
+                out_scales_list=out_scales_list,
+                in_channels=num_channels,
+                num_steps=steps[i],
+                num_scales=num_scales,
+                growth=self.growth,
+                growth_factor=self.growth_factor,
+                bottleneck=self.bottleneck,
+                bottleneck_factor=self.bottleneck_factor,
+                reduction_rate=self.reduction_rate)
+            feature_blocks.append(block)
+            out_channels = num_channels * self.growth_factor[num_scales]
+            classifiers.append(CifarClassifier(out_channels, self.num_classes))
+            in_scales = out_scales_list[-1]
+        self.feature_blocks = nn.ModuleList(feature_blocks)
+        self.classifiers = nn.ModuleList(classifiers)
 
     def create_block(self,
-                     num_channels,
-                     block_num):
-        '''
-        :param num_channels: number of input channels to the block
-        :param block_num: the number of the block (among all blocks)
-        :return: A sequential container with steps[block_num] MSD layers
-        '''
+                     in_scales,
+                     out_scales_list,
+                     in_channels,
+                     num_steps,
+                     num_scales,
+                     growth,
+                     growth_factor,
+                     bottleneck,
+                     bottleneck_factor,
+                     reduction_rate):
 
         block = nn.Sequential()
 
-        # Add the first layer if needed
-        if block_num == 0:
-            block.add_module('MSD_first', MSDFirstLayer(
-                self.image_channels,
-                num_channels,
-                self.num_scales,
-                self.msd_growth_factor))
-
         # Add regular layers
-        current_channels = num_channels
-        for _ in range(0, self.steps[block_num]):
-
-            # Calculate in and out scales of the layer (use paper heuristics)
-            interval = math.ceil(self.num_layers / self.num_scales)
-            in_scales = int(self.num_scales - math.floor((max(0, self.cur_layer - 2)) / interval))
-            out_scales = int(self.num_scales - math.floor((self.cur_layer - 1) / interval))
+        for j in range(num_steps):
+            out_scales = out_scales_list[j]
 
             self.cur_layer += 1
 
             # Add an MSD layer
             block.add_module('MSD_layer_{}'.format(self.cur_layer - 1), MSDLayer(
-                in_channels=current_channels,
-                out_channels=self.growth,
+                in_channels=in_channels,
+                out_channels=growth,
                 in_scales=in_scales,
                 out_scales=out_scales,
-                orig_scales=self.num_scales,
-                bottleneck=self.bottleneck,
-                bottleneck_factor=self.bottleneck_factor,
-                growth_factor=self.msd_growth_factor))
+                orig_scales=num_scales,
+                bottleneck=bottleneck,
+                bottleneck_factor=bottleneck_factor,
+                growth_factor=growth_factor))
 
             # Increase number of channel (as in densenet pattern)
-            current_channels += self.growth
+            in_channels += growth
 
             # Add a transition layer if required
-            if (in_scales > out_scales) and self.reduction_rate:
+            if (in_scales > out_scales) and reduction_rate:
 
                 # Calculate scales transition and add a Transition layer
-                offset = self.num_scales - out_scales
-                new_channels = int(math.floor(current_channels * self.reduction_rate))
+                offset = num_scales - out_scales
+                new_channels = int(math.floor(in_channels * reduction_rate))
                 block.add_module('Transition', Transition(
-                    in_channels=current_channels,
+                    in_channels=in_channels,
                     out_channels=new_channels,
                     out_scales=out_scales,
                     offset=offset,
-                    growth_factor=self.growth_factor))
-                current_channels = new_channels
+                    growth_factor=growth_factor))
+                in_channels = new_channels
 
-                # Increment counters
-                self.cur_transition_layer += 1
+            in_scales = out_scales
 
-        return block, current_channels
+        return block, in_channels
 
-    def forward(self, x, all=False, progress=None):
-        """
-        Propagate Input image in all blocks of MSD layers and classifiers
-        and return a list of classifications
-
-        :param x: Input image / batch
-        :return: a list of classification outputs
-        """
-
-        outputs = [None] * self.num_blocks
-        cur_input = x
-        for block_num in range(0, self.num_blocks):
-
-            # Get the current block's output
-            block = self.subnets[block_num]
-            cur_input = block_output = block(cur_input)
-
-            # Classify and add current output
-            class_output = self.subnets[block_num+self.num_blocks](block_output[-1])
-            outputs[block_num] = class_output
-
-        if all:
-            return outputs
+    def forward(self, x, only_last=True):
+        x = self.init_block(x)
+        outs = []
+        for i in range(self.num_blocks):
+            x = self.feature_blocks[i](x)
+            y = self.classifiers[i](x[-1])
+            outs.append(y)
+        if only_last:
+            return outs[-1]
         else:
-            return outputs[-1]
+            return outs
+
+
+def get_oth_msdnet_cifar10(in_channels,
+                           num_classes):
+    num_scales = 3
+    num_blocks = 10
+    base = 4
+    step = 2
+    step_mode = "even"
+    reduction_rate = 0.5
+    growth = 6  # [6, 12, 24]
+    growth_factor = [1, 2, 4, 4]
+    bottleneck = True
+    bottleneck_factor = [1, 2, 4, 4]
+
+    steps = [base]
+    for i in range(num_blocks - 1):
+        steps.append(step if step_mode == 'even' else step * i + 1)
+    num_layers = sum(steps)
+
+    cur_layer = 1
+    scales = []
+    for i in range(num_blocks):
+        num_steps = steps[i]
+        scales_i = []
+        for _ in range(num_steps):
+            interval = math.ceil(num_layers / num_scales)
+            out_scales = int(num_scales - math.floor((cur_layer - 1) / interval))
+            cur_layer += 1
+            scales_i += [out_scales]
+        scales += [scales_i]
+
+    init_block_out_channels = 32
+
+    return MSDNet(
+        init_block_out_channels=init_block_out_channels,
+        scales=scales,
+        num_scales=num_scales,
+        num_blocks=num_blocks,
+        base=base,
+        steps=steps,
+        reduction_rate=reduction_rate,
+        growth=growth,
+        growth_factor=growth_factor,
+        bottleneck=bottleneck,
+        bottleneck_factor=bottleneck_factor,
+        in_channels=in_channels,
+        num_classes=num_classes)
 
 
 def oth_msdnet_cifar10_2(in_channels=3, num_classes=10, pretrained=False):
-    args = {
-        "msd_blocks": 10,
-        "msd_base": 4,
-        "msd_step": 2,
-        "msd_stepmode": "even",
-        "growth": [6, 12, 24],
-        "msd_share_weights": False,
-        "reduction": 0.5,
-        "msd_growth": 6,
-        "msd_growth_factor": [1, 2, 4, 4],
-        "msd_bottleneck": True,
-        "msd_bottleneck_factor": [1, 2, 4, 4],
-        "data": "cifar10",
-    }
-    return MSDNet(args)
+    return get_oth_msdnet_cifar10(
+        in_channels=in_channels,
+        num_classes=num_classes)
 
 
 def load_model(net,

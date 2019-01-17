@@ -824,6 +824,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_msdnet_cifar10 or weight_count == 5440864)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

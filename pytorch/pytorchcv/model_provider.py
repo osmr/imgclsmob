@@ -54,10 +54,16 @@ from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
 
+from .models.others.oth_msdnet import *
+from .models.others.oth_msdnet2 import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'oth_msdnet_cifar10': oth_msdnet_cifar10,
+    'oth_msdnet_cifar10_2': oth_msdnet_cifar10_2,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

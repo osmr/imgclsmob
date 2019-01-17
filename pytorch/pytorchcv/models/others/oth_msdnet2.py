@@ -8,7 +8,7 @@ from inspect import isfunction
 import torch
 import torch.nn as nn
 
-__all__ = ['oth_msdnet_cifar10']
+__all__ = ['oth_msdnet_cifar10_2']
 
 
 class ConvBlock(nn.Module):
@@ -85,6 +85,45 @@ class ConvBlock(nn.Module):
         return x
 
 
+def conv1x1_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  groups=1,
+                  bias=False,
+                  activation=(lambda: nn.ReLU(inplace=True)),
+                  activate=True):
+    """
+    1x1 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=0,
+        groups=groups,
+        bias=bias,
+        activation=activation,
+        activate=activate)
+
+
 def conv3x3_block(in_channels,
                   out_channels,
                   stride=1,
@@ -157,27 +196,23 @@ class MSDFirstLayer(nn.Module):
             self.subnets.append(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=stride))
+                stride=stride,
+                bias=True))
             in_channels = mid_channels
 
     def forward(self, x):
-        output = [None] * self.num_scales
-        current_input = x
-        for scale in range(0, self.num_scales):
-
-            # Use upper scale as an input
-            if scale > 0:
-                current_input = output[scale-1]
-            output[scale] = self.subnets[scale](current_input)
-        return output
+        out = []
+        for i in range(self.num_scales):
+            x = self.subnets[i](x)
+            out.append(x)
+        return out
 
 
 class _DynamicInputDenseBlock(nn.Module):
 
-    def __init__(self, conv_modules, debug):
+    def __init__(self, conv_modules):
         super(_DynamicInputDenseBlock, self).__init__()
         self.conv_modules = conv_modules
-        self.debug = debug
 
     def forward(self, x):
         """
@@ -189,46 +224,36 @@ class _DynamicInputDenseBlock(nn.Module):
         :param x: Input
         :return: Concatenation of the input with 1 or more module outputs
         """
-        if self.debug:
-            for i, t in enumerate(x):
-                print("Current input size[{}]: {}".format(i,
-                                                          t.size()))
-
         # Init output
         out = x[0]
 
         # Apply all given modules and return output
-        for calc, m in enumerate(self.conv_modules):
-            out = torch.cat([out, m(x[calc + 1])], 1)
-
-            if self.debug:
-                print("Working on input number: %s" % calc)
-                print("Added: ", m(x[calc + 1]).size())
-                print("Current out size {}".format(out.size()))
-
+        for i, module in enumerate(self.conv_modules):
+            out = torch.cat((out, module(x[i + 1])), dim=1)
         return out
 
 
 class MSDLayer(nn.Module):
+    """
+    Creates a regular/transition MSDLayer. this layer uses DenseNet like concatenation on each scale,
+    and performs spatial reduction between scales. if input and output scales are different, than this
+    class creates a transition layer and the first layer (with the largest spatial size) is dropped.
 
+    :param current_channels: number of input channels
+    :param in_scales: number of input scales
+    :param out_scales: number of output scales
+    :param orig_scales: number of scales in the first layer of the MSDNet
+    :param args: other arguments
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  in_scales,
                  out_scales,
                  orig_scales,
-                 args):
-        """
-        Creates a regular/transition MSDLayer. this layer uses DenseNet like concatenation on each scale,
-        and performs spatial reduction between scales. if input and output scales are different, than this
-        class creates a transition layer and the first layer (with the largest spatial size) is dropped.
-
-        :param current_channels: number of input channels
-        :param in_scales: number of input scales
-        :param out_scales: number of output scales
-        :param orig_scales: number of scales in the first layer of the MSDNet
-        :param args: other arguments
-        """
+                 bottleneck,
+                 bottleneck_factor,
+                 growth_factor):
         super(MSDLayer, self).__init__()
 
         # Init vars
@@ -237,16 +262,9 @@ class MSDLayer(nn.Module):
         self.in_scales = in_scales
         self.out_scales = out_scales
         self.orig_scales = orig_scales
-        self.args = args
-        self.bottleneck = args["msd_bottleneck"]
-        self.bottleneck_factor = args["msd_bottleneck_factor"]
-        self.growth_factor = self.args["msd_growth_factor"]
-        self.debug = self.args["debug"]
-
-        # Define Conv2d params
-        self.conv_l = nn.Conv2d
-        self.ks = 3
-        self.pad = 1
+        self.bottleneck = bottleneck
+        self.bottleneck_factor = bottleneck_factor
+        self.growth_factor = growth_factor
 
         # Calculate number of channels to drop and number of
         # all dropped channels
@@ -266,54 +284,53 @@ class MSDLayer(nn.Module):
         if self.to_drop:
             # Create a reduced feature map for the first scale
             # self.dropped > 0 since out_scales < in_scales < orig_scales
-            in_channels1 = self.current_channels *\
-                          self.growth_factor[self.dropped - 1]
-            in_channels2 = self.current_channels *\
-                           self.growth_factor[self.dropped]
-            out_channels = self.out_channels *\
-                           self.growth_factor[self.dropped]
+            in_channels1 = self.current_channels * self.growth_factor[self.dropped - 1]
+            in_channels2 = self.current_channels * self.growth_factor[self.dropped]
+            out_channels = self.out_channels * self.growth_factor[self.dropped]
             bn_width1 = self.bottleneck_factor[self.dropped - 1]
             bn_width2 = self.bottleneck_factor[self.dropped]
-            subnets.append(self.build_down_densenet(in_channels1,
-                                                    in_channels2,
-                                                    out_channels,
-                                                    self.bottleneck,
-                                                    bn_width1,
-                                                    bn_width2))
+            subnets.append(self.build_down_densenet(
+                in_channels1,
+                in_channels2,
+                out_channels,
+                self.bottleneck,
+                bn_width1,
+                bn_width2))
         else:
             # Create a normal first scale
-            in_channels = self.current_channels *\
-                          self.growth_factor[self.dropped]
-            out_channels = self.out_channels *\
-                           self.growth_factor[self.dropped]
+            in_channels = self.current_channels * self.growth_factor[self.dropped]
+            out_channels = self.out_channels * self.growth_factor[self.dropped]
             bn_width = self.bottleneck_factor[self.dropped]
-            subnets.append(self.build_densenet(in_channels,
-                                               out_channels,
-                                               self.bottleneck,
-                                               bn_width))
-
+            subnets.append(self.build_densenet(
+                in_channels,
+                out_channels,
+                self.bottleneck,
+                bn_width))
 
         # Build second+ scales
         for scale in range(1, self.out_scales):
-            in_channels1 = self.current_channels *\
-                          self.growth_factor[self.dropped + scale - 1]
-            in_channels2 = self.current_channels *\
-                           self.growth_factor[self.dropped + scale]
-            out_channels = self.out_channels *\
-                           self.growth_factor[self.dropped + scale]
+            in_channels1 = self.current_channels * self.growth_factor[self.dropped + scale - 1]
+            in_channels2 = self.current_channels * self.growth_factor[self.dropped + scale]
+            out_channels = self.out_channels * self.growth_factor[self.dropped + scale]
             bn_width1 = self.bottleneck_factor[self.dropped + scale - 1]
             bn_width2 = self.bottleneck_factor[self.dropped + scale]
-            subnets.append(self.build_down_densenet(in_channels1,
-                                                    in_channels2,
-                                                    out_channels,
-                                                    self.bottleneck,
-                                                    bn_width1,
-                                                    bn_width2))
+            subnets.append(self.build_down_densenet(
+                in_channels1,
+                in_channels2,
+                out_channels,
+                self.bottleneck,
+                bn_width1,
+                bn_width2))
 
         return subnets
 
-    def build_down_densenet(self, in_channels1, in_channels2, out_channels,
-                            bottleneck, bn_width1, bn_width2):
+    def build_down_densenet(self,
+                            in_channels1,
+                            in_channels2,
+                            out_channels,
+                            bottleneck,
+                            bn_width1,
+                            bn_width2):
         """
         Builds a scale sub-network for scales 2 and up.
 
@@ -325,15 +342,26 @@ class MSDLayer(nn.Module):
         :param bn_width2: The first input width of the bottleneck factor
         :return: A scale module
         """
-        conv_module1 = self.convolve(in_channels1, int(out_channels/2), 'down',
-                                    bottleneck, bn_width1)
-        conv_module2 = self.convolve(in_channels2, int(out_channels/2), 'normal',
-                                    bottleneck, bn_width2)
+        conv_module1 = self.convolve(
+            in_channels1,
+            int(out_channels/2),
+            'down',
+            bottleneck,
+            bn_width1)
+        conv_module2 = self.convolve(
+            in_channels2,
+            int(out_channels/2),
+            'normal',
+            bottleneck,
+            bn_width2)
         conv_modules = [conv_module1, conv_module2]
-        return _DynamicInputDenseBlock(nn.ModuleList(conv_modules),
-                                       self.debug)
+        return _DynamicInputDenseBlock(nn.ModuleList(conv_modules))
 
-    def build_densenet(self, in_channels, out_channels, bottleneck, bn_width):
+    def build_densenet(self,
+                       in_channels,
+                       out_channels,
+                       bottleneck,
+                       bn_width):
         """
         Builds a scale sub-network for the first layer
 
@@ -343,13 +371,20 @@ class MSDLayer(nn.Module):
         :param bn_width: The width of the bottleneck factor
         :return: A scale module
         """
-        conv_module = self.convolve(in_channels, out_channels, 'normal',
-                                    bottleneck, bn_width)
-        return _DynamicInputDenseBlock(nn.ModuleList([conv_module]),
-                                       self.debug)
+        conv_module = self.convolve(
+            in_channels,
+            out_channels,
+            'normal',
+            bottleneck,
+            bn_width)
+        return _DynamicInputDenseBlock(nn.ModuleList([conv_module]))
 
-    def convolve(self, in_channels, out_channels, conv_type,
-                 bottleneck, bn_width=4):
+    def convolve(self,
+                 in_channels,
+                 out_channels,
+                 conv_type,
+                 bottleneck,
+                 bn_width=4):
         """
         Doing the main convolution of a specific scale in the
         MSD network
@@ -367,29 +402,25 @@ class MSDLayer(nn.Module):
         # Bottleneck before the convolution
         if bottleneck:
             tmp_channels = int(min([in_channels, bn_width * out_channels]))
-            conv.add_module('Bottleneck_1x1', nn.Conv2d(in_channels,
-                                                        tmp_channels,
-                                                        kernel_size=1,
-                                                        stride=1,
-                                                        padding=0))
-            conv.add_module('Bottleneck_BN', nn.BatchNorm2d(tmp_channels))
-            conv.add_module('Bottleneck_ReLU', nn.ReLU(inplace=True))
+            conv.add_module('Bottleneck', conv1x1_block(
+                in_channels=in_channels,
+                out_channels=tmp_channels,
+                bias=True))
+
         if conv_type == 'normal':
-            conv.add_module('Spatial_forward', self.conv_l(tmp_channels,
-                                                           out_channels,
-                                                           kernel_size=self.ks,
-                                                           stride=1,
-                                                           padding=self.pad))
+            conv.add_module('Spatial_forward', conv3x3_block(
+                in_channels=tmp_channels,
+                out_channels=out_channels,
+                bias=True))
         elif conv_type == 'down':
-            conv.add_module('Spatial_down', self.conv_l(tmp_channels, out_channels,
-                                                        kernel_size=self.ks,
-                                                        stride=2,
-                                                        padding=self.pad))
-        else: # Leaving an option to change the main conv type
+            conv.add_module('Spatial_down', conv3x3_block(
+                in_channels=tmp_channels,
+                out_channels=out_channels,
+                stride=2,
+                bias=True))
+        else:
             raise NotImplementedError
 
-        conv.add_module('BN_out', nn.BatchNorm2d(out_channels))
-        conv.add_module('ReLU_out', nn.ReLU(inplace=True))
         return conv
 
     def forward(self, x):
@@ -425,98 +456,76 @@ class MSDLayer(nn.Module):
         return outputs
 
 
-
-
 class Transition(nn.Sequential):
+    """
+    Performs 1x1 convolution to increase channels size after reducing a spatial size reduction
+    in transition layer.
 
-    def __init__(self, channels_in, channels_out,
-                 out_scales, offset, growth_factor, args):
-        """
-        Performs 1x1 convolution to increase channels size after reducing a spatial size reduction
-        in transition layer.
-
-        :param channels_in: channels before the transition
-        :param channels_out: channels after reduction
-        :param out_scales: number of scales after the transition
-        :param offset: gap between original number of scales to out_scales
-        :param growth_factor: densenet channel growth factor
-        :return: A Parallel trainable array with the scales after channel
-                 reduction
-        """
-
+    :param channels_in: channels before the transition
+    :param channels_out: channels after reduction
+    :param out_scales: number of scales after the transition
+    :param offset: gap between original number of scales to out_scales
+    :param growth_factor: densenet channel growth factor
+    :return: A Parallel trainable array with the scales after channel
+             reduction
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 out_scales,
+                 offset,
+                 growth_factor):
         super(Transition, self).__init__()
-        self.args = args
 
         # Define a parallel stream for the different scales
-        self.scales = nn.ModuleList()
-        for i in range(0, out_scales):
-            cur_in = channels_in * growth_factor[offset + i]
-            cur_out = channels_out * growth_factor[offset + i]
-            self.scales.append(self.conv1x1(cur_in, cur_out))
-
-    def conv1x1(self, in_channels, out_channels):
-        """
-        Inner function to define the basic operation
-
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :return: A Sequential module to perform 1x1 convolution
-        """
-        scale = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels,
-                      kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
-        )
-
-        return scale
+        self.scale_nets = nn.ModuleList()
+        for i in range(out_scales):
+            in_channels_i = in_channels * growth_factor[offset + i]
+            out_channels_i = out_channels * growth_factor[offset + i]
+            self.scale_nets.append(conv1x1_block(
+                in_channels=in_channels_i,
+                out_channels=out_channels_i,
+                bias=True))
 
     def forward(self, x):
-        """
-        Propegate output through different scales.
-
-        :param x: input to the transition layer
-        :return: list of scales' outputs
-        """
-        if self.args["debug"]:
-            print ("In transition forward!")
-
-        output = []
-        for scale, scale_net in enumerate(self.scales):
-            if self.args["debug"]:
-                print ("Size of x[{}]: {}".format(scale, x[scale].size()))
-                print ("scale_net[0]: {}".format(scale_net[0]))
-            output.append(scale_net(x[scale]))
-
-        return output
+        out = []
+        for i, scale_net in enumerate(self.scale_nets):
+            out.append(scale_net(x[i]))
+        return out
 
 
 class CifarClassifier(nn.Module):
+    """
+    Classifier of a cifar10/100 image.
 
-    def __init__(self, num_channels, num_classes):
-        """
-        Classifier of a cifar10/100 image.
-
-        :param num_channels: Number of input channels to the classifier
-        :param num_classes: Number of classes to classify
-        """
-
+    :param num_channels: Number of input channels to the classifier
+    :param num_classes: Number of classes to classify
+    """
+    def __init__(self,
+                 in_channels,
+                 num_classes):
         super(CifarClassifier, self).__init__()
-        self.inner_channels = 128
+        mid_channels = 128
 
         self.features = nn.Sequential(
-            nn.Conv2d(num_channels, self.inner_channels, kernel_size=3,
-                      stride=2, padding=1),
-            nn.BatchNorm2d(self.inner_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(self.inner_channels, self.inner_channels, kernel_size=3,
-                      stride=2, padding=1),
-            nn.BatchNorm2d(self.inner_channels),
-            nn.ReLU(inplace=True),
-            nn.AvgPool2d(2, 2)
+            conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=2,
+                bias=True),
+            conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=2,
+                bias=True),
+            nn.AvgPool2d(
+                kernel_size=2,
+                stride=2)
         )
 
-        self.classifier = nn.Linear(self.inner_channels, num_classes)
+        self.classifier = nn.Linear(
+            in_features=mid_channels,
+            out_features=num_classes)
 
     def forward(self, x):
         """
@@ -528,7 +537,7 @@ class CifarClassifier(nn.Module):
         """
 
         x = self.features(x)
-        x = x.view(x.size(0), self.inner_channels)
+        x = x.view(x.size(0), -1)
         x = self.classifier(x)
         return x
 
@@ -546,18 +555,16 @@ class MSDNet(nn.Module):
         super(MSDNet, self).__init__()
 
         # Init arguments
-        self.args = args
-        self.base = self.args["msd_base"]
-        self.step = self.args["msd_step"]
-        self.step_mode = self.args["msd_stepmode"]
-        self.msd_prune = self.args["msd_prune"]
-        self.num_blocks = self.args["msd_blocks"]
-        self.reduction_rate = self.args["reduction"]
-        self.growth = self.args["msd_growth"]
+        self.base = args["msd_base"]
+        self.step = args["msd_step"]
+        self.step_mode = args["msd_stepmode"]
+        self.num_blocks = args["msd_blocks"]
+        self.reduction_rate = args["reduction"]
+        self.growth = args["msd_growth"]
         self.growth_factor = args["msd_growth_factor"]
-        self.bottleneck = self.args["msd_bottleneck"]
+        self.bottleneck = args["msd_bottleneck"]
         self.bottleneck_factor = args["msd_bottleneck_factor"]
-
+        self.msd_growth_factor = args["msd_growth_factor"]
 
         # Set progress
         if args["data"] in ['cifar10', 'cifar100']:
@@ -569,12 +576,8 @@ class MSDNet(nn.Module):
             raise NotImplementedError
 
         # Init MultiScale graph and fill with Blocks and Classifiers
-        print('| MSDNet-Block {}-{}-{}'.format(self.num_blocks,
-                                               self.step,
-                                               self.args["data"]))
         (self.num_layers, self.steps) = self.calc_steps()
 
-        print('Building network with the steps: {}'.format(self.steps))
         self.cur_layer = 1
         self.cur_transition_layer = 1
         self.subnets = nn.ModuleList(self.build_modules(self.num_channels))
@@ -612,8 +615,7 @@ class MSDNet(nn.Module):
         for i in range(1, self.num_blocks):
 
             # Take even steps or calc next linear growth of a step
-            steps[i] = (self.step_mode == 'even' and self.step) or \
-                        self.step*(i-1)+1
+            steps[i] = (self.step_mode == 'even' and self.step) or self.step*(i-1)+1
             num_layers += steps[i]
 
         return num_layers, steps
@@ -631,21 +633,20 @@ class MSDNet(nn.Module):
         # Init the blocks & classifiers data structure
         modules = [None] * self.num_blocks * 2
         for i in range(0, self.num_blocks):
-            print ('|-----------------Block {:0>2d}----------------|'.format(i+1))
 
             # Add block
             modules[i], num_channels = self.create_block(num_channels, i)
 
             # Calculate the last scale (smallest) channels size
-            channels_in_last_layer = num_channels *\
-                                     self.growth_factor[self.num_scales]
+            channels_in_last_layer = num_channels * self.growth_factor[self.num_scales]
 
             # Add a classifier that belongs to the i'th block
-            modules[i + self.num_blocks] = \
-                CifarClassifier(channels_in_last_layer, self.num_classes)
+            modules[i + self.num_blocks] = CifarClassifier(channels_in_last_layer, self.num_classes)
         return modules
 
-    def create_block(self, num_channels, block_num):
+    def create_block(self,
+                     num_channels,
+                     block_num):
         '''
         :param num_channels: number of input channels to the block
         :param block_num: the number of the block (among all blocks)
@@ -656,67 +657,55 @@ class MSDNet(nn.Module):
 
         # Add the first layer if needed
         if block_num == 0:
-            block.add_module('MSD_first', MSDFirstLayer(self.image_channels,
-                                                        num_channels,
-                                                        self.num_scales,
-                                                        self.args["msd_growth_factor"]))
+            block.add_module('MSD_first', MSDFirstLayer(
+                self.image_channels,
+                num_channels,
+                self.num_scales,
+                self.msd_growth_factor))
 
         # Add regular layers
         current_channels = num_channels
         for _ in range(0, self.steps[block_num]):
 
             # Calculate in and out scales of the layer (use paper heuristics)
-            if self.msd_prune == 'max':
-                interval = math.ceil(self.num_layers/
-                                      self.num_scales)
-                in_scales = int(self.num_scales - \
-                            math.floor((max(0, self.cur_layer - 2))/interval))
-                out_scales = int(self.num_scales - \
-                             math.floor((self.cur_layer - 1)/interval))
-            else:
-                raise NotImplementedError
+            interval = math.ceil(self.num_layers / self.num_scales)
+            in_scales = int(self.num_scales - math.floor((max(0, self.cur_layer - 2)) / interval))
+            out_scales = int(self.num_scales - math.floor((self.cur_layer - 1) / interval))
 
-            self.print_layer(in_scales, out_scales)
             self.cur_layer += 1
 
             # Add an MSD layer
-            block.add_module('MSD_layer_{}'.format(self.cur_layer - 1),
-                             MSDLayer(current_channels,
-                                      self.growth,
-                                      in_scales,
-                                      out_scales,
-                                      self.num_scales,
-                                      self.args))
+            block.add_module('MSD_layer_{}'.format(self.cur_layer - 1), MSDLayer(
+                in_channels=current_channels,
+                out_channels=self.growth,
+                in_scales=in_scales,
+                out_scales=out_scales,
+                orig_scales=self.num_scales,
+                bottleneck=self.bottleneck,
+                bottleneck_factor=self.bottleneck_factor,
+                growth_factor=self.msd_growth_factor))
 
             # Increase number of channel (as in densenet pattern)
             current_channels += self.growth
 
             # Add a transition layer if required
-            if (self.msd_prune == 'max' and in_scales > out_scales and
-                self.reduction_rate):
+            if (in_scales > out_scales) and self.reduction_rate:
 
                 # Calculate scales transition and add a Transition layer
                 offset = self.num_scales - out_scales
-                new_channels = int(math.floor(current_channels*
-                                              self.reduction_rate))
+                new_channels = int(math.floor(current_channels * self.reduction_rate))
                 block.add_module('Transition', Transition(
-                    current_channels, new_channels, out_scales,
-                    offset, self.growth_factor, self.args))
-                print('|      Transition layer {} was added!      |'.
-                      format(self.cur_transition_layer))
+                    in_channels=current_channels,
+                    out_channels=new_channels,
+                    out_scales=out_scales,
+                    offset=offset,
+                    growth_factor=self.growth_factor))
                 current_channels = new_channels
 
                 # Increment counters
                 self.cur_transition_layer += 1
 
-            elif self.msd_prune != 'max':
-                raise NotImplementedError
-
         return block, current_channels
-
-    def print_layer(self, in_scales, out_scales):
-        print('| Layer {:0>2d} input scales {} output scales {} |'.
-              format(self.cur_layer, in_scales, out_scales))
 
     def forward(self, x, all=False, progress=None):
         """
@@ -732,20 +721,11 @@ class MSDNet(nn.Module):
         for block_num in range(0, self.num_blocks):
 
             # Get the current block's output
-            if self.args["debug"]:
-                print("")
-                print("Forwarding to block %s:" % str(block_num + 1))
             block = self.subnets[block_num]
             cur_input = block_output = block(cur_input)
 
             # Classify and add current output
-            if self.args["debug"]:
-                print("- Getting %s block's output" % str(block_num + 1))
-                for s, b in enumerate(block_output):
-                    print("- Output size of this block's scale {}: ".format(s),
-                          b.size())
-            class_output = \
-                self.subnets[block_num+self.num_blocks](block_output[-1])
+            class_output = self.subnets[block_num+self.num_blocks](block_output[-1])
             outputs[block_num] = class_output
 
         if all:
@@ -754,7 +734,7 @@ class MSDNet(nn.Module):
             return outputs[-1]
 
 
-def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
+def oth_msdnet_cifar10_2(in_channels=3, num_classes=10, pretrained=False):
     args = {
         "msd_blocks": 10,
         "msd_base": 4,
@@ -762,14 +742,12 @@ def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
         "msd_stepmode": "even",
         "growth": [6, 12, 24],
         "msd_share_weights": False,
-        "msd_prune": "max",
         "reduction": 0.5,
         "msd_growth": 6,
         "msd_growth_factor": [1, 2, 4, 4],
         "msd_bottleneck": True,
         "msd_bottleneck_factor": [1, 2, 4, 4],
         "data": "cifar10",
-        "debug": False,
     }
     return MSDNet(args)
 
@@ -816,7 +794,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_msdnet_cifar10,
+        oth_msdnet_cifar10_2,
     ]
 
     for model in models:
@@ -827,6 +805,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_msdnet_cifar10_2 or weight_count == 5440864)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

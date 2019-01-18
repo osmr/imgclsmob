@@ -404,7 +404,7 @@ class SkipAttUnit(HybridBlock):
         x = self.conv2(x)
         w = self.se(x)
         x = self.blocks(x)
-        x = x * w + w
+        x = F.broadcast_add(F.broadcast_mul(x, w), w)
         return x
 
 
@@ -686,6 +686,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():

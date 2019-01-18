@@ -220,6 +220,123 @@ def conv3x3_block(in_channels,
         activate=activate)
 
 
+class MSDBlock(nn.Module):
+    """
+    MSDNet base block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bottleneck : bool
+        Whether to use a bottleneck.
+    bottleneck_factor : int
+        Bottleneck factor.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 bottleneck,
+                 bottleneck_factor):
+        super(MSDBlock, self).__init__()
+        self.bottleneck = bottleneck
+        mid_channels = min(in_channels, bottleneck_factor * out_channels) if bottleneck else in_channels
+
+        if self.bottleneck:
+            self.bn_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bias=True)
+        self.conv = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            stride=stride,
+            bias=True)
+
+    def forward(self, x):
+        if self.bottleneck:
+            x = self.bn_conv(x)
+        x = self.conv(x)
+        return x
+
+
+class MSDDenseBlock(nn.Module):
+    """
+    MSDNet dense block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bottleneck : bool
+        Whether to use a bottleneck.
+    bottleneck_factors : list/tuple of int
+        Bottleneck factors.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 bottleneck,
+                 bottleneck_factors):
+        super(MSDDenseBlock, self).__init__()
+        assert (len(bottleneck_factors) > 0)
+        self.down_conv = (stride > 1)
+
+        if self.down_conv:
+            mid1_channels = out_channels // 2
+            mid2_channels = out_channels - mid1_channels
+            self.conv1 = MSDBlock(
+                in_channels=in_channels,
+                out_channels=mid1_channels,
+                stride=stride,
+                bottleneck=bottleneck,
+                bottleneck_factor=bottleneck_factors[0])
+            self.conv1 = MSDBlock(
+                in_channels=in_channels,
+                out_channels=mid2_channels,
+                stride=stride,
+                bottleneck=bottleneck,
+                bottleneck_factor=bottleneck_factors[0])
+        else:
+            self.conv = MSDBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                bottleneck=bottleneck,
+                bottleneck_factor=bottleneck_factors[0])
+
+        # conv_module1 = self.convolve(
+        #     in_channels1,
+        #     int(out_channels/2),
+        #     'down',
+        #     bottleneck,
+        #     bn_width1)
+        # conv_module2 = self.convolve(
+        #     in_channels2,
+        #     int(out_channels/2),
+        #     'normal',
+        #     bottleneck,
+        #     bn_width2)
+
+    def forward(self, x):
+        identity = x
+        x = self.conv(x)
+        x = torch.cat((identity, x), dim=1)
+        return x
+
+
 class MSDFirstLayer(nn.Module):
 
     def __init__(self,

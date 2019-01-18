@@ -664,7 +664,7 @@ class Identity(nn.Module):
 class DualPathSequential(nn.Sequential):
     """
     A sequential container for modules with dual inputs/outputs.
-    Blocks will be executed in the order they are added.
+    Modules will be executed in the order they are added.
 
     Parameters:
     ----------
@@ -729,7 +729,7 @@ class Concurrent(nn.Sequential):
 class ParametricSequential(nn.Sequential):
     """
     A sequential container for modules with parameters.
-    Blocks will be executed in the order they are added.
+    Modules will be executed in the order they are added.
     """
     def __init__(self, *args):
         super(ParametricSequential, self).__init__(*args)

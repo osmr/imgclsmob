@@ -14,7 +14,7 @@ __all__ = ['oth_msdnet_cifar10_2']
 class MultiOutputSequential(nn.Sequential):
     """
     A sequential container for modules.
-    Blocks will be executed in the order they are added.
+    Modules will be executed in the order they are added.
     Output value contains results from all modules.
     """
     def __init__(self, *args):
@@ -28,10 +28,27 @@ class MultiOutputSequential(nn.Sequential):
         return out
 
 
+class MultiBlockSequential(nn.Sequential):
+    """
+    A sequential container for modules.
+    Modules will be executed in the order they are added.
+    Input is a list with length equal to number of modules.
+    """
+    def __init__(self, *args):
+        super(MultiBlockSequential, self).__init__(*args)
+
+    def forward(self, x):
+        out = []
+        for module, x_i in zip(self._modules.values(), x):
+            y = module(x_i)
+            out.append(y)
+        return out
+
+
 class SesquialteralSequential(nn.Sequential):
     """
     A sequential container for modules with double results. The first result is forwarded sequentially. The second
-    results are collected. Blocks will be executed in the order they are added.
+    results are collected. Modules will be executed in the order they are added.
     """
     def __init__(self, *args):
         super(SesquialteralSequential, self).__init__(*args)
@@ -276,8 +293,6 @@ class MSDLayer(nn.Module):
                  bottleneck_factor,
                  growth_factor):
         super(MSDLayer, self).__init__()
-
-        # Init vars
         self.current_channels = in_channels
         self.out_channels = out_channels
         self.in_scales = in_scales
@@ -287,10 +302,9 @@ class MSDLayer(nn.Module):
         self.bottleneck_factor = bottleneck_factor
         self.growth_factor = growth_factor
 
-        # Calculate number of channels to drop and number of
-        # all dropped channels
         self.to_drop = in_scales - out_scales
-        self.dropped = orig_scales - out_scales # Use this as an offset
+        self.dropped = orig_scales - out_scales
+
         self.subnets = self.get_subnets()
 
     def get_subnets(self):
@@ -418,24 +432,22 @@ class MSDLayer(nn.Module):
         :return: A Sequential module of the main convolution
         """
         conv = nn.Sequential()
-        tmp_channels = in_channels
+        mid_channels = min(in_channels, bn_width * out_channels) if bottleneck else in_channels
 
-        # Bottleneck before the convolution
         if bottleneck:
-            tmp_channels = int(min([in_channels, bn_width * out_channels]))
             conv.add_module('Bottleneck', conv1x1_block(
                 in_channels=in_channels,
-                out_channels=tmp_channels,
+                out_channels=mid_channels,
                 bias=True))
 
         if conv_type == 'normal':
             conv.add_module('Spatial_forward', conv3x3_block(
-                in_channels=tmp_channels,
+                in_channels=mid_channels,
                 out_channels=out_channels,
                 bias=True))
         elif conv_type == 'down':
             conv.add_module('Spatial_down', conv3x3_block(
-                in_channels=tmp_channels,
+                in_channels=mid_channels,
                 out_channels=out_channels,
                 stride=2,
                 bias=True))
@@ -478,18 +490,7 @@ class MSDLayer(nn.Module):
 
 
 class Transition(nn.Sequential):
-    """
-    Performs 1x1 convolution to increase channels size after reducing a spatial size reduction
-    in transition layer.
 
-    :param channels_in: channels before the transition
-    :param channels_out: channels after reduction
-    :param out_scales: number of scales after the transition
-    :param offset: gap between original number of scales to out_scales
-    :param growth_factor: densenet channel growth factor
-    :return: A Parallel trainable array with the scales after channel
-             reduction
-    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -498,21 +499,18 @@ class Transition(nn.Sequential):
                  growth_factor):
         super(Transition, self).__init__()
 
-        # Define a parallel stream for the different scales
-        self.scale_nets = nn.ModuleList()
+        self.scale_blocks = MultiBlockSequential()
         for i in range(out_scales):
             in_channels_i = in_channels * growth_factor[offset + i]
             out_channels_i = out_channels * growth_factor[offset + i]
-            self.scale_nets.append(conv1x1_block(
+            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv1x1_block(
                 in_channels=in_channels_i,
                 out_channels=out_channels_i,
                 bias=True))
 
     def forward(self, x):
-        out = []
-        for i, scale_net in enumerate(self.scale_nets):
-            out.append(scale_net(x[i]))
-        return out
+        y = self.scale_blocks(x)
+        return y
 
 
 class CifarClassifier(nn.Module):

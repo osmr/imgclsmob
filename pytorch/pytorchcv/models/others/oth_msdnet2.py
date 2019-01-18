@@ -11,38 +11,64 @@ import torch.nn as nn
 __all__ = ['oth_msdnet_cifar10_2']
 
 
+class Identity(nn.Module):
+    """
+    Identity block.
+    """
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
+
+
+class MultiInputSequential(nn.Sequential):
+    """
+    A sequential container for modules. Modules will be executed in the order they are added.
+    Input is a list with length equal to number of modules. Output value concatenates results from all modules.
+    """
+    def __init__(self, *args):
+        super(MultiInputSequential, self).__init__(*args)
+
+    def forward(self, x):
+        outs = []
+        for module, x_i in zip(self._modules.values(), x):
+            y = module(x_i)
+            outs.append(y)
+        out = torch.cat(tuple(outs), dim=1)
+        return out
+
+
 class MultiOutputSequential(nn.Sequential):
     """
-    A sequential container for modules.
-    Modules will be executed in the order they are added.
+    A sequential container for modules. Modules will be executed in the order they are added.
     Output value contains results from all modules.
     """
     def __init__(self, *args):
         super(MultiOutputSequential, self).__init__(*args)
 
     def forward(self, x):
-        out = []
+        outs = []
         for module in self._modules.values():
             x = module(x)
-            out.append(x)
-        return out
+            outs.append(x)
+        return outs
 
 
 class MultiBlockSequential(nn.Sequential):
     """
-    A sequential container for modules.
-    Modules will be executed in the order they are added.
+    A sequential container for modules. Modules will be executed in the order they are added.
     Input is a list with length equal to number of modules.
     """
     def __init__(self, *args):
         super(MultiBlockSequential, self).__init__(*args)
 
     def forward(self, x):
-        out = []
+        outs = []
         for module, x_i in zip(self._modules.values(), x):
             y = module(x_i)
-            out.append(y)
-        return out
+            outs.append(y)
+        return outs
 
 
 class SesquialteralSequential(nn.Sequential):
@@ -220,7 +246,7 @@ def conv3x3_block(in_channels,
         activate=activate)
 
 
-class MSDBlock(nn.Module):
+class MSDBaseBlock(nn.Module):
     """
     MSDNet base block.
 
@@ -244,7 +270,7 @@ class MSDBlock(nn.Module):
                  stride,
                  bottleneck,
                  bottleneck_factor):
-        super(MSDBlock, self).__init__()
+        super(MSDBaseBlock, self).__init__()
         self.bottleneck = bottleneck
         mid_channels = min(in_channels, bottleneck_factor * out_channels) if bottleneck else in_channels
 
@@ -266,9 +292,9 @@ class MSDBlock(nn.Module):
         return x
 
 
-class MSDDenseBlock(nn.Module):
+class MSDFirstScaleBlock(nn.Module):
     """
-    MSDNet dense block.
+    MSDNet first scale dense block.
 
     Parameters:
     ----------
@@ -276,75 +302,91 @@ class MSDDenseBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
     bottleneck : bool
         Whether to use a bottleneck.
-    bottleneck_factors : list/tuple of int
-        Bottleneck factors.
+    bottleneck_factor : int
+        Bottleneck factor.
     """
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
                  bottleneck,
-                 bottleneck_factors):
-        super(MSDDenseBlock, self).__init__()
-        assert (len(bottleneck_factors) > 0)
-        self.down_conv = (stride > 1)
-
-        if self.down_conv:
-            mid1_channels = out_channels // 2
-            mid2_channels = out_channels - mid1_channels
-            self.conv1 = MSDBlock(
-                in_channels=in_channels,
-                out_channels=mid1_channels,
-                stride=stride,
-                bottleneck=bottleneck,
-                bottleneck_factor=bottleneck_factors[0])
-            self.conv1 = MSDBlock(
-                in_channels=in_channels,
-                out_channels=mid2_channels,
-                stride=stride,
-                bottleneck=bottleneck,
-                bottleneck_factor=bottleneck_factors[0])
-        else:
-            self.conv = MSDBlock(
+                 bottleneck_factor):
+        super(MSDFirstScaleBlock, self).__init__()
+        self.block = MSDBaseBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
+                stride=1,
                 bottleneck=bottleneck,
-                bottleneck_factor=bottleneck_factors[0])
-
-        # conv_module1 = self.convolve(
-        #     in_channels1,
-        #     int(out_channels/2),
-        #     'down',
-        #     bottleneck,
-        #     bn_width1)
-        # conv_module2 = self.convolve(
-        #     in_channels2,
-        #     int(out_channels/2),
-        #     'normal',
-        #     bottleneck,
-        #     bn_width2)
+                bottleneck_factor=bottleneck_factor)
 
     def forward(self, x):
         identity = x
-        x = self.conv(x)
+        x = self.block(x)
         x = torch.cat((identity, x), dim=1)
         return x
 
 
-class MSDFirstLayer(nn.Module):
+class MSDScaleBlock(nn.Module):
+    """
+    MSDNet ordinary scale dense block.
+
+    Parameters:
+    ----------
+    in_channels_prev : int
+        Number of input channels for the previous scale.
+    in_channels_curr : int
+        Number of input channels for the current scale.
+    out_channels : int
+        Number of output channels.
+    bottleneck : bool
+        Whether to use a bottleneck.
+    bottleneck_factor_prev : int
+        Bottleneck factor for the previous scale.
+    bottleneck_factor_curr : int
+        Bottleneck factor for the current scale.
+    """
+
+    def __init__(self,
+                 in_channels_prev,
+                 in_channels_curr,
+                 out_channels,
+                 bottleneck,
+                 bottleneck_factor_prev,
+                 bottleneck_factor_curr):
+        super(MSDScaleBlock, self).__init__()
+        assert (out_channels % 2 == 0)
+        mid_channels = out_channels // 2
+
+        self.down_block = MSDBaseBlock(
+            in_channels=in_channels_prev,
+            out_channels=mid_channels,
+            stride=2,
+            bottleneck=bottleneck,
+            bottleneck_factor=bottleneck_factor_prev)
+        self.curr_block = MSDBaseBlock(
+            in_channels=in_channels_curr,
+            out_channels=mid_channels,
+            stride=1,
+            bottleneck=bottleneck,
+            bottleneck_factor=bottleneck_factor_curr)
+
+    def forward(self, x_prev, x):
+        y_prev = self.down_block(x_prev)
+        y = self.curr_block(x)
+        x = torch.cat((x, y_prev, y), dim=1)
+        return x
+
+
+class MSDInitLayer(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  num_scales,
                  growth_factors):
-        super(MSDFirstLayer, self).__init__()
+        super(MSDInitLayer, self).__init__()
         self.num_scales = num_scales
 
         self.scale_blocks = MultiOutputSequential()
@@ -361,31 +403,6 @@ class MSDFirstLayer(nn.Module):
     def forward(self, x):
         y = self.scale_blocks(x)
         return y
-
-
-class _DynamicInputDenseBlock(nn.Module):
-
-    def __init__(self, conv_modules):
-        super(_DynamicInputDenseBlock, self).__init__()
-        self.conv_modules = conv_modules
-
-    def forward(self, x):
-        """
-        Use the first element as raw input, and stream the rest of
-        the inputs through the list of modules, then apply concatenation.
-        expect x to be [identity, first input, second input, ..]
-        and len(x) - len(self.conv_modules) = 1 for identity
-
-        :param x: Input
-        :return: Concatenation of the input with 1 or more module outputs
-        """
-        # Init output
-        out = x[0]
-
-        # Apply all given modules and return output
-        for i, module in enumerate(self.conv_modules):
-            out = torch.cat((out, module(x[i + 1])), dim=1)
-        return out
 
 
 class MSDLayer(nn.Module):
@@ -410,199 +427,47 @@ class MSDLayer(nn.Module):
                  bottleneck_factor,
                  growth_factor):
         super(MSDLayer, self).__init__()
-        self.current_channels = in_channels
-        self.out_channels = out_channels
-        self.in_scales = in_scales
         self.out_scales = out_scales
-        self.orig_scales = orig_scales
-        self.bottleneck = bottleneck
-        self.bottleneck_factor = bottleneck_factor
-        self.growth_factor = growth_factor
-
         self.to_drop = in_scales - out_scales
-        self.dropped = orig_scales - out_scales
+        dropped = orig_scales - out_scales
 
-        self.subnets = self.get_subnets()
+        # print("in_channels={}".format(in_channels))
 
-    def get_subnets(self):
-        """
-        Builds the different scales of the MSD network layer.
-
-        :return: A list of scale modules
-        """
-        subnets = nn.ModuleList()
-
-        # If this is a transition layer
-        if self.to_drop:
-            # Create a reduced feature map for the first scale
-            # self.dropped > 0 since out_scales < in_scales < orig_scales
-            in_channels1 = self.current_channels * self.growth_factor[self.dropped - 1]
-            in_channels2 = self.current_channels * self.growth_factor[self.dropped]
-            out_channels = self.out_channels * self.growth_factor[self.dropped]
-            bn_width1 = self.bottleneck_factor[self.dropped - 1]
-            bn_width2 = self.bottleneck_factor[self.dropped]
-            subnets.append(self.build_down_densenet(
-                in_channels1,
-                in_channels2,
-                out_channels,
-                self.bottleneck,
-                bn_width1,
-                bn_width2))
-        else:
-            # Create a normal first scale
-            in_channels = self.current_channels * self.growth_factor[self.dropped]
-            out_channels = self.out_channels * self.growth_factor[self.dropped]
-            bn_width = self.bottleneck_factor[self.dropped]
-            subnets.append(self.build_densenet(
-                in_channels,
-                out_channels,
-                self.bottleneck,
-                bn_width))
-
-        # Build second+ scales
-        for scale in range(1, self.out_scales):
-            in_channels1 = self.current_channels * self.growth_factor[self.dropped + scale - 1]
-            in_channels2 = self.current_channels * self.growth_factor[self.dropped + scale]
-            out_channels = self.out_channels * self.growth_factor[self.dropped + scale]
-            bn_width1 = self.bottleneck_factor[self.dropped + scale - 1]
-            bn_width2 = self.bottleneck_factor[self.dropped + scale]
-            subnets.append(self.build_down_densenet(
-                in_channels1,
-                in_channels2,
-                out_channels,
-                self.bottleneck,
-                bn_width1,
-                bn_width2))
-
-        return subnets
-
-    def build_down_densenet(self,
-                            in_channels1,
-                            in_channels2,
-                            out_channels,
-                            bottleneck,
-                            bn_width1,
-                            bn_width2):
-        """
-        Builds a scale sub-network for scales 2 and up.
-
-        :param in_channels1: number of same scale input channels
-        :param in_channels2: number of upper scale input channels
-        :param out_channels: number of output channels
-        :param bottleneck: A flag to perform a channel dimension bottleneck
-        :param bn_width1: The first input width of the bottleneck factor
-        :param bn_width2: The first input width of the bottleneck factor
-        :return: A scale module
-        """
-        conv_module1 = self.convolve(
-            in_channels1,
-            int(out_channels/2),
-            'down',
-            bottleneck,
-            bn_width1)
-        conv_module2 = self.convolve(
-            in_channels2,
-            int(out_channels/2),
-            'normal',
-            bottleneck,
-            bn_width2)
-        conv_modules = [conv_module1, conv_module2]
-        return _DynamicInputDenseBlock(nn.ModuleList(conv_modules))
-
-    def build_densenet(self,
-                       in_channels,
-                       out_channels,
-                       bottleneck,
-                       bn_width):
-        """
-        Builds a scale sub-network for the first layer
-
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param bottleneck: A flag to perform a channel dimension bottleneck
-        :param bn_width: The width of the bottleneck factor
-        :return: A scale module
-        """
-        conv_module = self.convolve(
-            in_channels,
-            out_channels,
-            'normal',
-            bottleneck,
-            bn_width)
-        return _DynamicInputDenseBlock(nn.ModuleList([conv_module]))
-
-    def convolve(self,
-                 in_channels,
-                 out_channels,
-                 conv_type,
-                 bottleneck,
-                 bn_width=4):
-        """
-        Doing the main convolution of a specific scale in the
-        MSD network
-
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param conv_type: convolution type
-        :param bottleneck: A flag to perform a channel dimension bottleneck
-        :param bn_width: The width of the bottleneck factor
-        :return: A Sequential module of the main convolution
-        """
-        conv = nn.Sequential()
-        mid_channels = min(in_channels, bn_width * out_channels) if bottleneck else in_channels
-
-        if bottleneck:
-            conv.add_module('Bottleneck', conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                bias=True))
-
-        if conv_type == 'normal':
-            conv.add_module('Spatial_forward', conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                bias=True))
-        elif conv_type == 'down':
-            conv.add_module('Spatial_down', conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                stride=2,
-                bias=True))
-        else:
-            raise NotImplementedError
-
-        return conv
+        self.scale_blocks = nn.ModuleList()
+        for i in range(self.out_scales):
+            if (i == 0) and (self.to_drop == 0):
+                in_channels_i = in_channels * growth_factor[dropped]
+                out_channels_i = out_channels * growth_factor[dropped]
+                bottleneck_factor_i = bottleneck_factor[dropped]
+                self.scale_blocks.append(MSDFirstScaleBlock(
+                    in_channels=in_channels_i,
+                    out_channels=out_channels_i,
+                    bottleneck=bottleneck,
+                    bottleneck_factor=bottleneck_factor_i))
+            else:
+                in_channels_i1 = in_channels * growth_factor[dropped + i - 1]
+                in_channels_i2 = in_channels * growth_factor[dropped + i]
+                out_channels_i = out_channels * growth_factor[dropped + i]
+                bottleneck_factor_i1 = bottleneck_factor[dropped + i - 1]
+                bottleneck_factor_i2 = bottleneck_factor[dropped + i]
+                self.scale_blocks.append(MSDScaleBlock(
+                    in_channels_prev=in_channels_i1,
+                    in_channels_curr=in_channels_i2,
+                    out_channels=out_channels_i,
+                    bottleneck=bottleneck,
+                    bottleneck_factor_prev=bottleneck_factor_i1,
+                    bottleneck_factor_curr=bottleneck_factor_i2))
 
     def forward(self, x):
-        cur_input = []
         outputs = []
-
-        # Prepare the different scales' inputs of the
-        # current transition/regular layer
-        if self.to_drop: # Transition
-            for scale in range(0, self.out_scales):
-                last_same_scale = x[self.to_drop + scale]
-                last_upper_scale = x[self.to_drop + scale - 1]
-                cur_input.append([last_same_scale,
-                                  last_upper_scale,
-                                  last_same_scale])
-        else: # Regular
-
-            # Add first scale's input
-            cur_input.append([x[0], x[0]])
-
-            # Add second+ scales' input
-            for scale in range(1, self.out_scales):
-                last_same_scale = x[scale]
-                last_upper_scale = x[scale - 1]
-                cur_input.append([last_same_scale,
-                                  last_upper_scale,
-                                  last_same_scale])
-
-        # Flow inputs in subnets and fill outputs
-        for scale in range(0, self.out_scales):
-            outputs.append(self.subnets[scale](cur_input[scale]))
-
+        for i in range(0, self.out_scales):
+            if (i == 0) and (self.to_drop == 0):
+                y = self.scale_blocks[i](x[i])
+            else:
+                y = self.scale_blocks[i](
+                    x_prev=x[self.to_drop + i - 1],
+                    x=x[self.to_drop + i])
+            outputs.append(y)
         return outputs
 
 
@@ -615,6 +480,8 @@ class Transition(nn.Sequential):
                  offset,
                  growth_factor):
         super(Transition, self).__init__()
+
+        # print("in_channels={}".format(in_channels))
 
         self.scale_blocks = MultiBlockSequential()
         for i in range(out_scales):
@@ -665,9 +532,70 @@ class CifarClassifier(nn.Module):
         return x
 
 
+class MSDSubNet(nn.Module):
+    """
+    MSDNet subnet (block containing layers and classifier).
+
+    Parameters:
+    ----------
+    """
+
+    def __init__(self,
+                 in_scales,
+                 out_scales_list,
+                 in_channels,
+                 num_layers,
+                 num_scales,
+                 growth,
+                 growth_factor,
+                 bottleneck,
+                 bottleneck_factor,
+                 reduction_rate,
+                 num_classes):
+        super(MSDSubNet, self).__init__()
+
+        self.features = nn.Sequential()
+
+        for i in range(num_layers):
+            out_scales = out_scales_list[i]
+            self.features.add_module('layer{}'.format(i + 1), MSDLayer(
+                in_channels=in_channels,
+                out_channels=growth,
+                in_scales=in_scales,
+                out_scales=out_scales,
+                orig_scales=num_scales,
+                bottleneck=bottleneck,
+                bottleneck_factor=bottleneck_factor,
+                growth_factor=growth_factor))
+            in_channels += growth
+
+            if (in_scales > out_scales) and reduction_rate:
+                offset = num_scales - out_scales
+                new_channels = int(math.floor(in_channels * reduction_rate))
+                self.features.add_module('trans{}'.format(i + 1), Transition(
+                    in_channels=in_channels,
+                    out_channels=new_channels,
+                    out_scales=out_scales,
+                    offset=offset,
+                    growth_factor=growth_factor))
+                in_channels = new_channels
+            in_scales = out_scales
+
+        in_channels = in_scales * self.growth_factor[num_scales]
+        self.classifier = CifarClassifier(
+            in_channels=in_channels,
+            num_classes=num_classes)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.classifier(x[-1])
+        return x
+
+
 class MSDNet(nn.Module):
 
     def __init__(self,
+                 channels,
                  init_block_out_channels,
                  scales,
                  num_scales,
@@ -698,7 +626,7 @@ class MSDNet(nn.Module):
 
         self.cur_layer = 1
 
-        self.init_block = MSDFirstLayer(
+        self.init_block = MSDInitLayer(
             in_channels=self.image_channels,
             out_channels=init_block_out_channels,
             num_scales=num_scales,
@@ -714,6 +642,7 @@ class MSDNet(nn.Module):
                 in_scales=in_scales,
                 out_scales_list=out_scales_list,
                 in_channels=num_channels,
+                out_channels_list=channels[i],
                 num_steps=steps[i],
                 num_scales=num_scales,
                 growth=self.growth,
@@ -732,6 +661,7 @@ class MSDNet(nn.Module):
                      in_scales,
                      out_scales_list,
                      in_channels,
+                     out_channels_list,
                      num_steps,
                      num_scales,
                      growth,
@@ -806,6 +736,8 @@ def get_oth_msdnet_cifar10(in_channels,
     bottleneck = True
     bottleneck_factor = [1, 2, 4, 4]
 
+    init_block_out_channels = 32
+
     steps = [base]
     for i in range(num_blocks - 1):
         steps.append(step if step_mode == 'even' else step * i + 1)
@@ -821,11 +753,31 @@ def get_oth_msdnet_cifar10(in_channels,
             out_scales = int(num_scales - math.floor((cur_layer - 1) / interval))
             cur_layer += 1
             scales_i += [out_scales]
+
         scales += [scales_i]
 
-    init_block_out_channels = 32
+    channels = []
+    in_channels0 = init_block_out_channels
+    in_scales = scales[0][0]
+    for i in range(num_blocks):
+        out_scales_list = scales[i]
+        num_steps = steps[i]
+        channels_i = []
+        for j in range(num_steps):
+            out_scales = out_scales_list[j]
+
+            channels_i += [in_channels0]
+            in_channels0 += growth
+            if (in_scales > out_scales) and reduction_rate:
+                channels_i += [in_channels0]
+                in_channels0 = int(math.floor(in_channels0 * reduction_rate))
+            in_scales = out_scales
+        in_scales = out_scales_list[-1]
+        channels += [channels_i]
+    # print("channels={}".format(channels))
 
     return MSDNet(
+        channels=channels,
         init_block_out_channels=init_block_out_channels,
         scales=scales,
         num_scales=num_scales,

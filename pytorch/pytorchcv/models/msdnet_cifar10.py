@@ -8,184 +8,15 @@ __all__ = ['CIFAR10MSDNet', 'msdnet22_cifar10']
 
 import os
 import math
-import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block
+from .common import conv3x3_block
+from .msdnet import MultiOutputSequential, MSDFeatureBlock
 
 
-class MultiOutputSequential(nn.Sequential):
+class CIFAR10MSDInitLayer(nn.Module):
     """
-    A sequential container for modules. Modules will be executed in the order they are added. Output value contains
-    results from all modules.
-    """
-    def __init__(self, *args):
-        super(MultiOutputSequential, self).__init__(*args)
-
-    def forward(self, x):
-        outs = []
-        for module in self._modules.values():
-            x = module(x)
-            outs.append(x)
-        return outs
-
-
-class MultiBlockSequential(nn.Sequential):
-    """
-    A sequential container for modules. Modules will be executed in the order they are added. Input is a list with
-    length equal to number of modules.
-    """
-    def __init__(self, *args):
-        super(MultiBlockSequential, self).__init__(*args)
-
-    def forward(self, x):
-        outs = []
-        for module, x_i in zip(self._modules.values(), x):
-            y = module(x_i)
-            outs.append(y)
-        return outs
-
-
-class MSDBaseBlock(nn.Module):
-    """
-    MSDNet base block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    use_bottleneck : bool
-        Whether to use a bottleneck.
-    bottleneck_factor : int
-        Bottleneck factor.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 use_bottleneck,
-                 bottleneck_factor):
-        super(MSDBaseBlock, self).__init__()
-        self.use_bottleneck = use_bottleneck
-        mid_channels = min(in_channels, bottleneck_factor * out_channels) if use_bottleneck else in_channels
-
-        if self.use_bottleneck:
-            self.bn_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                bias=True)
-        self.conv = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=stride,
-            bias=True)
-
-    def forward(self, x):
-        if self.use_bottleneck:
-            x = self.bn_conv(x)
-        x = self.conv(x)
-        return x
-
-
-class MSDFirstScaleBlock(nn.Module):
-    """
-    MSDNet first scale dense block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    use_bottleneck : bool
-        Whether to use a bottleneck.
-    bottleneck_factor : int
-        Bottleneck factor.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 use_bottleneck,
-                 bottleneck_factor):
-        super(MSDFirstScaleBlock, self).__init__()
-        assert (out_channels > in_channels)
-        inc_channels = out_channels - in_channels
-
-        self.block = MSDBaseBlock(
-                in_channels=in_channels,
-                out_channels=inc_channels,
-                stride=1,
-                use_bottleneck=use_bottleneck,
-                bottleneck_factor=bottleneck_factor)
-
-    def forward(self, x):
-        y = self.block(x)
-        y = torch.cat((x, y), dim=1)
-        return y
-
-
-class MSDScaleBlock(nn.Module):
-    """
-    MSDNet ordinary scale dense block.
-
-    Parameters:
-    ----------
-    in_channels_prev : int
-        Number of input channels for the previous scale.
-    in_channels : int
-        Number of input channels for the current scale.
-    out_channels : int
-        Number of output channels.
-    use_bottleneck : bool
-        Whether to use a bottleneck.
-    bottleneck_factor_prev : int
-        Bottleneck factor for the previous scale.
-    bottleneck_factor : int
-        Bottleneck factor for the current scale.
-    """
-
-    def __init__(self,
-                 in_channels_prev,
-                 in_channels,
-                 out_channels,
-                 use_bottleneck,
-                 bottleneck_factor_prev,
-                 bottleneck_factor):
-        super(MSDScaleBlock, self).__init__()
-        assert (out_channels > in_channels)
-        assert (out_channels % 2 == 0)
-        inc_channels = out_channels - in_channels
-        mid_channels = inc_channels // 2
-
-        self.down_block = MSDBaseBlock(
-            in_channels=in_channels_prev,
-            out_channels=mid_channels,
-            stride=2,
-            use_bottleneck=use_bottleneck,
-            bottleneck_factor=bottleneck_factor_prev)
-        self.curr_block = MSDBaseBlock(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            use_bottleneck=use_bottleneck,
-            bottleneck_factor=bottleneck_factor)
-
-    def forward(self, x_prev, x):
-        y_prev = self.down_block(x_prev)
-        y = self.curr_block(x)
-        x = torch.cat((x, y_prev, y), dim=1)
-        return x
-
-
-class MSDInitLayer(nn.Module):
-    """
-    MSDNet initial (so-called first) layer.
+    MSDNet initial (so-called first) layer for CIFAR-10.
 
     Parameters:
     ----------
@@ -198,7 +29,7 @@ class MSDInitLayer(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels):
-        super(MSDInitLayer, self).__init__()
+        super(CIFAR10MSDInitLayer, self).__init__()
 
         self.scale_blocks = MultiOutputSequential()
         for i, out_channels_per_scale in enumerate(out_channels):
@@ -206,8 +37,7 @@ class MSDInitLayer(nn.Module):
             self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels_per_scale,
-                stride=stride,
-                bias=True))
+                stride=stride))
             in_channels = out_channels_per_scale
 
     def forward(self, x):
@@ -215,136 +45,7 @@ class MSDInitLayer(nn.Module):
         return y
 
 
-class MSDLayer(nn.Module):
-    """
-    MSDNet ordinary layer.
-
-    Parameters:
-    ----------
-    in_channels : list/tuple of int
-        Number of input channels for each input scale.
-    out_channels : list/tuple of int
-        Number of output channels for each output scale.
-    use_bottleneck : bool
-        Whether to use a bottleneck.
-    bottleneck_factors : list/tuple of int
-        Bottleneck factor for each input scale.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 use_bottleneck,
-                 bottleneck_factors):
-        super(MSDLayer, self).__init__()
-        in_scales = len(in_channels)
-        out_scales = len(out_channels)
-        self.dec_scales = in_scales - out_scales
-        assert (self.dec_scales >= 0)
-
-        self.scale_blocks = nn.Sequential()
-        for i in range(out_scales):
-            if (i == 0) and (self.dec_scales == 0):
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDFirstScaleBlock(
-                    in_channels=in_channels[self.dec_scales + i],
-                    out_channels=out_channels[i],
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
-            else:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDScaleBlock(
-                    in_channels_prev=in_channels[self.dec_scales + i - 1],
-                    in_channels=in_channels[self.dec_scales + i],
-                    out_channels=out_channels[i],
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factor_prev=bottleneck_factors[self.dec_scales + i - 1],
-                    bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
-
-    def forward(self, x):
-        outputs = []
-        for i in range(len(self.scale_blocks)):
-            if (i == 0) and (self.dec_scales == 0):
-                y = self.scale_blocks[i](x[i])
-            else:
-                y = self.scale_blocks[i](
-                    x_prev=x[self.dec_scales + i - 1],
-                    x=x[self.dec_scales + i])
-            outputs.append(y)
-        return outputs
-
-
-class MSDTransitionLayer(nn.Module):
-    """
-    MSDNet transition layer.
-
-    Parameters:
-    ----------
-    in_channels : list/tuple of int
-        Number of input channels for each scale.
-    out_channels : list/tuple of int
-        Number of output channels for each scale.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(MSDTransitionLayer, self).__init__()
-        assert (len(in_channels) == len(out_channels))
-
-        self.scale_blocks = MultiBlockSequential()
-        for i in range(len(out_channels)):
-            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv1x1_block(
-                in_channels=in_channels[i],
-                out_channels=out_channels[i],
-                bias=True))
-
-    def forward(self, x):
-        y = self.scale_blocks(x)
-        return y
-
-
-class MSDFeatureBlock(nn.Module):
-    """
-    MSDNet feature block (stage of cascade, so-called block).
-
-    Parameters:
-    ----------
-    in_channels : list of list of int
-        Number of input channels for each layer and for each input scale.
-    out_channels : list of list of int
-        Number of output channels for each layer and for each output scale.
-    use_bottleneck : bool
-        Whether to use a bottleneck.
-    bottleneck_factors : list of list of int
-        Bottleneck factor for each layer and for each input scale.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 use_bottleneck,
-                 bottleneck_factors):
-        super(MSDFeatureBlock, self).__init__()
-
-        self.blocks = nn.Sequential()
-        for i, out_channels_per_layer in enumerate(out_channels):
-            if len(bottleneck_factors[i]) == 0:
-                self.blocks.add_module('trans{}'.format(i + 1), MSDTransitionLayer(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_layer))
-            else:
-                self.blocks.add_module('layer{}'.format(i + 1), MSDLayer(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_layer,
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factors=bottleneck_factors[i]))
-            in_channels = out_channels_per_layer
-
-    def forward(self, x):
-        x = self.blocks(x)
-        return x
-
-
-class MSDClassifier(nn.Module):
+class CIFAR10MSDClassifier(nn.Module):
     """
     MSDNet classifier for CIFAR-10.
 
@@ -359,20 +60,18 @@ class MSDClassifier(nn.Module):
     def __init__(self,
                  in_channels,
                  num_classes):
-        super(MSDClassifier, self).__init__()
+        super(CIFAR10MSDClassifier, self).__init__()
         mid_channels = 128
 
         self.features = nn.Sequential()
         self.features.add_module("conv1", conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=2,
-            bias=True))
+            stride=2))
         self.features.add_module("conv2", conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=2,
-            bias=True))
+            stride=2))
         self.features.add_module("pool", nn.AvgPool2d(
             kernel_size=2,
             stride=2))
@@ -425,7 +124,7 @@ class CIFAR10MSDNet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
 
-        self.init_layer = MSDInitLayer(
+        self.init_layer = CIFAR10MSDInitLayer(
             in_channels=in_channels,
             out_channels=init_layer_channels)
         in_channels = init_layer_channels
@@ -439,7 +138,7 @@ class CIFAR10MSDNet(nn.Module):
                 use_bottleneck=use_bottleneck,
                 bottleneck_factors=bottleneck_factors[i]))
             in_channels = channels[i][-1]
-            self.classifiers.add_module("classifier{}".format(i + 1), MSDClassifier(
+            self.classifiers.add_module("classifier{}".format(i + 1), CIFAR10MSDClassifier(
                 in_channels=in_channels[-1],
                 num_classes=num_classes))
 
@@ -498,7 +197,7 @@ def get_msdnet_cifar10(blocks,
     bottleneck_factor_per_scales = [1, 2, 4, 4]
 
     assert (reduction_rate > 0.0)
-    init_layer_channels = [32 * c for c in growth_factor[:3]]
+    init_layer_channels = [16 * c for c in growth_factor[:num_scales]]
 
     step_mode = "even"
     layers_per_subnets = [base]
@@ -610,7 +309,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != msdnet22_cifar10 or weight_count == 5440864)
+        assert (model != msdnet22_cifar10 or weight_count == 4839544)  # 5440864
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

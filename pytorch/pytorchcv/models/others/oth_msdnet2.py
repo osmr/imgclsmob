@@ -587,8 +587,11 @@ class MSDNet(nn.Module):
                  use_bottleneck,
                  bottleneck_factors,
                  in_channels,
-                 num_classes):
+                 in_size=(32, 32),
+                 num_classes=10):
         super(MSDNet, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         self.init_layer = MSDInitLayer(
             in_channels=in_channels,
@@ -708,6 +711,7 @@ def get_oth_msdnet_cifar10(in_channels,
 def oth_msdnet_cifar10_2(in_channels=3, num_classes=10, in_size=(32, 32), pretrained=False):
     return get_oth_msdnet_cifar10(
         in_channels=in_channels,
+        in_size=in_size,
         num_classes=num_classes)
 
 

@@ -768,7 +768,9 @@ def oth_msdnet_cifar10(in_channels=3, num_classes=10, in_size=(32, 32), pretrain
         "debug": False,
         "msd_all_gcn": False,
     }
-    return MSDNet(args)
+    net = MSDNet(args)
+    net.in_size = in_size
+    return net
 
 
 def load_model(net,

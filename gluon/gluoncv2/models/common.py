@@ -783,7 +783,7 @@ class DualPathSequential(nn.HybridSequential):
 
 class ParametricSequential(nn.HybridSequential):
     """
-    A sequential container for modules with parameters.
+    A sequential container for blocks with parameters.
     Blocks will be executed in the order they are added.
     """
     def __init__(self,
@@ -798,7 +798,7 @@ class ParametricSequential(nn.HybridSequential):
 
 class ParametricConcurrent(nn.HybridSequential):
     """
-    A container for concatenation of modules with parameters.
+    A container for concatenation of blocks with parameters.
 
     Parameters:
     ----------

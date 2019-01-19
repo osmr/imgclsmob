@@ -56,10 +56,14 @@ from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
 
+from .models.msdnet import *
+
 __all__ = ['get_model']
 
 
 _models = {
+    'msdnet22': msdnet22,
+
     'alexnet': alexnet,
 
     'zfnet': zfnet,

@@ -178,13 +178,13 @@ class ResInitBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_use_global_stats,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(ResInitBlock, self).__init__(**kwargs)
         with self.name_scope():

@@ -1,5 +1,5 @@
 """
-    MSDNet, implemented in PyTorch.
+    MSDNet, implemented in Gluon.
     Original paper: 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 """
@@ -8,46 +8,45 @@ __all__ = ['MSDNet', 'msdnet22', 'MultiOutputSequential', 'MSDFeatureBlock']
 
 import os
 import math
-import torch
-import torch.nn as nn
-import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
+from .common import conv1x1_block, conv3x3_block, DualPathSequential
 from .resnet import ResInitBlock
 
 
-class MultiOutputSequential(nn.Sequential):
+class MultiOutputSequential(nn.HybridSequential):
     """
-    A sequential container for modules. Modules will be executed in the order they are added. Output value contains
-    results from all modules.
+    A sequential container for blocks. Blocks will be executed in the order they are added. Output value contains
+    results from all blocks.
     """
-    def __init__(self, *args):
-        super(MultiOutputSequential, self).__init__(*args)
+    def __init__(self, **kwargs):
+        super(MultiOutputSequential, self).__init__(**kwargs)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         outs = []
-        for module in self._modules.values():
-            x = module(x)
+        for block in self._children.values():
+            x = block(x)
             outs.append(x)
         return outs
 
 
-class MultiBlockSequential(nn.Sequential):
+class MultiBlockSequential(nn.HybridSequential):
     """
-    A sequential container for modules. Modules will be executed in the order they are added. Input is a list with
-    length equal to number of modules.
+    A sequential container for blocks. Blocks will be executed in the order they are added. Input is a list with
+    length equal to number of blocks.
     """
-    def __init__(self, *args):
-        super(MultiBlockSequential, self).__init__(*args)
+    def __init__(self, **kwargs):
+        super(MultiBlockSequential, self).__init__(**kwargs)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x0, x_rest):
         outs = []
-        for module, x_i in zip(self._modules.values(), x):
-            y = module(x_i)
+        for block, x_i in zip(self._children.values(), [x0] + x_rest):
+            y = block(x_i)
             outs.append(y)
         return outs
 
 
-class MSDBaseBlock(nn.Module):
+class MSDBaseBlock(HybridBlock):
     """
     MSDNet base block.
 
@@ -57,7 +56,7 @@ class MSDBaseBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     use_bottleneck : bool
         Whether to use a bottleneck.
@@ -68,30 +67,32 @@ class MSDBaseBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
+                 strides,
                  use_bottleneck,
-                 bottleneck_factor):
-        super(MSDBaseBlock, self).__init__()
+                 bottleneck_factor,
+                 **kwargs):
+        super(MSDBaseBlock, self).__init__(**kwargs)
         self.use_bottleneck = use_bottleneck
         mid_channels = min(in_channels, bottleneck_factor * out_channels) if use_bottleneck else in_channels
 
-        if self.use_bottleneck:
-            self.bn_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels)
-        self.conv = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=stride)
+        with self.name_scope():
+            if self.use_bottleneck:
+                self.bn_conv = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=mid_channels)
+            self.conv = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                strides=strides)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.use_bottleneck:
             x = self.bn_conv(x)
         x = self.conv(x)
         return x
 
 
-class MSDFirstScaleBlock(nn.Module):
+class MSDFirstScaleBlock(HybridBlock):
     """
     MSDNet first scale dense block.
 
@@ -111,25 +112,27 @@ class MSDFirstScaleBlock(nn.Module):
                  in_channels,
                  out_channels,
                  use_bottleneck,
-                 bottleneck_factor):
-        super(MSDFirstScaleBlock, self).__init__()
+                 bottleneck_factor,
+                 **kwargs):
+        super(MSDFirstScaleBlock, self).__init__(**kwargs)
         assert (out_channels > in_channels)
         inc_channels = out_channels - in_channels
 
-        self.block = MSDBaseBlock(
-            in_channels=in_channels,
-            out_channels=inc_channels,
-            stride=1,
-            use_bottleneck=use_bottleneck,
-            bottleneck_factor=bottleneck_factor)
+        with self.name_scope():
+            self.block = MSDBaseBlock(
+                in_channels=in_channels,
+                out_channels=inc_channels,
+                strides=1,
+                use_bottleneck=use_bottleneck,
+                bottleneck_factor=bottleneck_factor)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         y = self.block(x)
-        y = torch.cat((x, y), dim=1)
+        y = F.concat(x, y, dim=1)
         return y
 
 
-class MSDScaleBlock(nn.Module):
+class MSDScaleBlock(HybridBlock):
     """
     MSDNet ordinary scale dense block.
 
@@ -155,34 +158,36 @@ class MSDScaleBlock(nn.Module):
                  out_channels,
                  use_bottleneck,
                  bottleneck_factor_prev,
-                 bottleneck_factor):
-        super(MSDScaleBlock, self).__init__()
+                 bottleneck_factor,
+                 **kwargs):
+        super(MSDScaleBlock, self).__init__(**kwargs)
         assert (out_channels > in_channels)
         assert (out_channels % 2 == 0)
         inc_channels = out_channels - in_channels
         mid_channels = inc_channels // 2
 
-        self.down_block = MSDBaseBlock(
-            in_channels=in_channels_prev,
-            out_channels=mid_channels,
-            stride=2,
-            use_bottleneck=use_bottleneck,
-            bottleneck_factor=bottleneck_factor_prev)
-        self.curr_block = MSDBaseBlock(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=1,
-            use_bottleneck=use_bottleneck,
-            bottleneck_factor=bottleneck_factor)
+        with self.name_scope():
+            self.down_block = MSDBaseBlock(
+                in_channels=in_channels_prev,
+                out_channels=mid_channels,
+                strides=2,
+                use_bottleneck=use_bottleneck,
+                bottleneck_factor=bottleneck_factor_prev)
+            self.curr_block = MSDBaseBlock(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                strides=1,
+                use_bottleneck=use_bottleneck,
+                bottleneck_factor=bottleneck_factor)
 
-    def forward(self, x_prev, x):
+    def hybrid_forward(self, F, x_prev, x):
         y_prev = self.down_block(x_prev)
         y = self.curr_block(x)
-        x = torch.cat((x, y_prev, y), dim=1)
+        x = F.concat(x, y_prev, y, dim=1)
         return x
 
 
-class MSDInitLayer(nn.Module):
+class MSDInitLayer(HybridBlock):
     """
     MSDNet initial (so-called first) layer.
 
@@ -196,27 +201,29 @@ class MSDInitLayer(nn.Module):
 
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(MSDInitLayer, self).__init__()
-        self.scale_blocks = MultiOutputSequential()
-        for i, out_channels_per_scale in enumerate(out_channels):
-            if i == 0:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), ResInitBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_scale))
-            else:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv3x3_block(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_scale,
-                    stride=2))
-            in_channels = out_channels_per_scale
+                 out_channels,
+                 **kwargs):
+        super(MSDInitLayer, self).__init__(**kwargs)
+        with self.name_scope():
+            self.scale_blocks = MultiOutputSequential()
+            for i, out_channels_per_scale in enumerate(out_channels):
+                if i == 0:
+                    self.scale_blocks.add(ResInitBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels_per_scale))
+                else:
+                    self.scale_blocks.add(conv3x3_block(
+                        in_channels=in_channels,
+                        out_channels=out_channels_per_scale,
+                        strides=2))
+                in_channels = out_channels_per_scale
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         y = self.scale_blocks(x)
         return y
 
 
-class MSDLayer(nn.Module):
+class MSDLayer(HybridBlock):
     """
     MSDNet ordinary layer.
 
@@ -236,44 +243,47 @@ class MSDLayer(nn.Module):
                  in_channels,
                  out_channels,
                  use_bottleneck,
-                 bottleneck_factors):
-        super(MSDLayer, self).__init__()
+                 bottleneck_factors,
+                 **kwargs):
+        super(MSDLayer, self).__init__(**kwargs)
         in_scales = len(in_channels)
         out_scales = len(out_channels)
         self.dec_scales = in_scales - out_scales
         assert (self.dec_scales >= 0)
 
-        self.scale_blocks = nn.Sequential()
-        for i in range(out_scales):
-            if (i == 0) and (self.dec_scales == 0):
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDFirstScaleBlock(
-                    in_channels=in_channels[self.dec_scales + i],
-                    out_channels=out_channels[i],
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
-            else:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDScaleBlock(
-                    in_channels_prev=in_channels[self.dec_scales + i - 1],
-                    in_channels=in_channels[self.dec_scales + i],
-                    out_channels=out_channels[i],
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factor_prev=bottleneck_factors[self.dec_scales + i - 1],
-                    bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
+        with self.name_scope():
+            self.scale_blocks = nn.HybridSequential(prefix='')
+            for i in range(out_scales):
+                if (i == 0) and (self.dec_scales == 0):
+                    self.scale_blocks.add(MSDFirstScaleBlock(
+                        in_channels=in_channels[self.dec_scales + i],
+                        out_channels=out_channels[i],
+                        use_bottleneck=use_bottleneck,
+                        bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
+                else:
+                    self.scale_blocks.add(MSDScaleBlock(
+                        in_channels_prev=in_channels[self.dec_scales + i - 1],
+                        in_channels=in_channels[self.dec_scales + i],
+                        out_channels=out_channels[i],
+                        use_bottleneck=use_bottleneck,
+                        bottleneck_factor_prev=bottleneck_factors[self.dec_scales + i - 1],
+                        bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x0, x_rest):
+        x = [x0] + x_rest
         outs = []
         for i in range(len(self.scale_blocks)):
             if (i == 0) and (self.dec_scales == 0):
                 y = self.scale_blocks[i](x[i])
             else:
                 y = self.scale_blocks[i](
-                    x_prev=x[self.dec_scales + i - 1],
-                    x=x[self.dec_scales + i])
+                    x[self.dec_scales + i - 1],
+                    x[self.dec_scales + i])
             outs.append(y)
-        return outs
+        return outs[0], outs[1:]
 
 
-class MSDTransitionLayer(nn.Module):
+class MSDTransitionLayer(HybridBlock):
     """
     MSDNet transition layer.
 
@@ -287,22 +297,24 @@ class MSDTransitionLayer(nn.Module):
 
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(MSDTransitionLayer, self).__init__()
+                 out_channels,
+                 **kwargs):
+        super(MSDTransitionLayer, self).__init__(**kwargs)
         assert (len(in_channels) == len(out_channels))
 
-        self.scale_blocks = MultiBlockSequential()
-        for i in range(len(out_channels)):
-            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv1x1_block(
-                in_channels=in_channels[i],
-                out_channels=out_channels[i]))
+        with self.name_scope():
+            self.scale_blocks = MultiBlockSequential()
+            for i in range(len(out_channels)):
+                self.scale_blocks.add(conv1x1_block(
+                    in_channels=in_channels[i],
+                    out_channels=out_channels[i]))
 
-    def forward(self, x):
-        y = self.scale_blocks(x)
-        return y
+    def hybrid_forward(self, F, x0, x_rest):
+        y = self.scale_blocks(x0, x_rest)
+        return y[0], y[1:]
 
 
-class MSDFeatureBlock(nn.Module):
+class MSDFeatureBlock(HybridBlock):
     """
     MSDNet feature block (stage of cascade, so-called block).
 
@@ -322,28 +334,30 @@ class MSDFeatureBlock(nn.Module):
                  in_channels,
                  out_channels,
                  use_bottleneck,
-                 bottleneck_factors):
-        super(MSDFeatureBlock, self).__init__()
-        self.blocks = nn.Sequential()
-        for i, out_channels_per_layer in enumerate(out_channels):
-            if len(bottleneck_factors[i]) == 0:
-                self.blocks.add_module('trans{}'.format(i + 1), MSDTransitionLayer(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_layer))
-            else:
-                self.blocks.add_module('layer{}'.format(i + 1), MSDLayer(
-                    in_channels=in_channels,
-                    out_channels=out_channels_per_layer,
-                    use_bottleneck=use_bottleneck,
-                    bottleneck_factors=bottleneck_factors[i]))
-            in_channels = out_channels_per_layer
+                 bottleneck_factors,
+                 **kwargs):
+        super(MSDFeatureBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.blocks = DualPathSequential(prefix='')
+            for i, out_channels_per_layer in enumerate(out_channels):
+                if len(bottleneck_factors[i]) == 0:
+                    self.blocks.add(MSDTransitionLayer(
+                        in_channels=in_channels,
+                        out_channels=out_channels_per_layer))
+                else:
+                    self.blocks.add(MSDLayer(
+                        in_channels=in_channels,
+                        out_channels=out_channels_per_layer,
+                        use_bottleneck=use_bottleneck,
+                        bottleneck_factors=bottleneck_factors[i]))
+                in_channels = out_channels_per_layer
 
-    def forward(self, x):
-        x = self.blocks(x)
-        return x
+    def hybrid_forward(self, F, x0, x_rest):
+        x0, x_rest = self.blocks(x0, x_rest)
+        return [x0] + x_rest
 
 
-class MSDClassifier(nn.Module):
+class MSDClassifier(HybridBlock):
     """
     MSDNet classifier.
 
@@ -351,39 +365,42 @@ class MSDClassifier(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    num_classes : int
+    classes : int
         Number of classification classes.
     """
 
     def __init__(self,
                  in_channels,
-                 num_classes):
-        super(MSDClassifier, self).__init__()
-        self.features = nn.Sequential()
-        self.features.add_module("conv1", conv3x3_block(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            stride=2))
-        self.features.add_module("conv2", conv3x3_block(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            stride=2))
-        self.features.add_module("pool", nn.AvgPool2d(
-            kernel_size=2,
-            stride=2))
+                 classes,
+                 **kwargs):
+        super(MSDClassifier, self).__init__(**kwargs)
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(conv3x3_block(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                strides=2))
+            self.features.add(conv3x3_block(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                strides=2))
+            self.features.add(nn.AvgPool2D(
+                pool_size=2,
+                strides=2))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
 
-class MSDNet(nn.Module):
+class MSDNet(HybridBlock):
     """
     MSDNet model from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
@@ -404,7 +421,7 @@ class MSDNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -415,43 +432,36 @@ class MSDNet(nn.Module):
                  bottleneck_factors,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(MSDNet, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(MSDNet, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.init_layer = MSDInitLayer(
-            in_channels=in_channels,
-            out_channels=init_layer_channels)
-        in_channels = init_layer_channels
-
-        self.feature_blocks = nn.Sequential()
-        self.classifiers = nn.Sequential()
-        for i in range(num_feature_blocks):
-            self.feature_blocks.add_module("block{}".format(i + 1), MSDFeatureBlock(
+        with self.name_scope():
+            self.init_layer = MSDInitLayer(
                 in_channels=in_channels,
-                out_channels=channels[i],
-                use_bottleneck=use_bottleneck,
-                bottleneck_factors=bottleneck_factors[i]))
-            in_channels = channels[i][-1]
-            self.classifiers.add_module("classifier{}".format(i + 1), MSDClassifier(
-                in_channels=in_channels[-1],
-                num_classes=num_classes))
+                out_channels=init_layer_channels)
+            in_channels = init_layer_channels
 
-        self._init_params()
+            self.feature_blocks = nn.HybridSequential(prefix='')
+            self.classifiers = nn.HybridSequential(prefix='')
+            for i in range(num_feature_blocks):
+                self.feature_blocks.add(MSDFeatureBlock(
+                    in_channels=in_channels,
+                    out_channels=channels[i],
+                    use_bottleneck=use_bottleneck,
+                    bottleneck_factors=bottleneck_factors[i]))
+                in_channels = channels[i][-1]
+                self.classifiers.add(MSDClassifier(
+                    in_channels=in_channels[-1],
+                    classes=classes))
 
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x, only_last=True):
+    def hybrid_forward(self, F, x, only_last=True):
         x = self.init_layer(x)
         outs = []
         for feature_block, classifier in zip(self.feature_blocks, self.classifiers):
-            x = feature_block(x)
+            x = feature_block(x[0], x[1:])
             y = classifier(x[-1])
             outs.append(y)
         if only_last:
@@ -463,7 +473,8 @@ class MSDNet(nn.Module):
 def get_msdnet(blocks,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
+               ctx=cpu(),
+               root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
     Create MSDNet model with specific parameters.
@@ -476,7 +487,9 @@ def get_msdnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
 
@@ -554,11 +567,12 @@ def get_msdnet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -572,24 +586,17 @@ def msdnet22(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_msdnet(blocks=22, model_name="msdnet22", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -601,15 +608,23 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != msdnet22 or weight_count == 20106676)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -625,6 +625,7 @@ class MSDNet(nn.Module):
 
 
 def get_oth_msdnet_cifar10(in_channels,
+                           in_size,
                            num_classes):
     num_scales = 3
     num_feature_blocks = 10
@@ -705,6 +706,7 @@ def get_oth_msdnet_cifar10(in_channels,
         use_bottleneck=use_bottleneck,
         bottleneck_factors=bottleneck_factors_list,
         in_channels=in_channels,
+        in_size=in_size,
         num_classes=num_classes)
 
 

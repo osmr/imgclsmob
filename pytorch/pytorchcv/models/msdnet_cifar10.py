@@ -1,37 +1,23 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
+"""
+    MSDNet for CIFAR-10, implemented in PyTorch.
+    Original paper: 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
+    https://arxiv.org/abs/1703.09844.
+"""
 
+__all__ = ['CIFAR10MSDNet', 'msdnet22_cifar10']
+
+import os
 import math
-from inspect import isfunction
 import torch
 import torch.nn as nn
-
-__all__ = ['oth_msdnet_cifar10_2']
-
-
-class MultiInputSequential(nn.Sequential):
-    """
-    A sequential container for modules. Modules will be executed in the order they are added.
-    Input is a list with length equal to number of modules. Output value concatenates results from all modules.
-    """
-    def __init__(self, *args):
-        super(MultiInputSequential, self).__init__(*args)
-
-    def forward(self, x):
-        outs = []
-        for module, x_i in zip(self._modules.values(), x):
-            y = module(x_i)
-            outs.append(y)
-        out = torch.cat(tuple(outs), dim=1)
-        return out
+import torch.nn.init as init
+from .common import conv1x1_block, conv3x3_block
 
 
 class MultiOutputSequential(nn.Sequential):
     """
-    A sequential container for modules. Modules will be executed in the order they are added.
-    Output value contains results from all modules.
+    A sequential container for modules. Modules will be executed in the order they are added. Output value contains
+    results from all modules.
     """
     def __init__(self, *args):
         super(MultiOutputSequential, self).__init__(*args)
@@ -46,8 +32,8 @@ class MultiOutputSequential(nn.Sequential):
 
 class MultiBlockSequential(nn.Sequential):
     """
-    A sequential container for modules. Modules will be executed in the order they are added.
-    Input is a list with length equal to number of modules.
+    A sequential container for modules. Modules will be executed in the order they are added. Input is a list with
+    length equal to number of modules.
     """
     def __init__(self, *args):
         super(MultiBlockSequential, self).__init__(*args)
@@ -58,181 +44,6 @@ class MultiBlockSequential(nn.Sequential):
             y = module(x_i)
             outs.append(y)
         return outs
-
-
-class SesquialteralSequential(nn.Sequential):
-    """
-    A sequential container for modules with double results. The first result is forwarded sequentially. The second
-    results are collected. Modules will be executed in the order they are added.
-    """
-    def __init__(self, *args):
-        super(SesquialteralSequential, self).__init__(*args)
-
-    def forward(self, x):
-        out = []
-        for module in self._modules.values():
-            x, y = module(x)
-            out.append(y)
-        return out
-
-
-class ConvBlock(nn.Module):
-    """
-    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 activation=(lambda: nn.ReLU(inplace=True)),
-                 activate=True):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            assert (activation is not None)
-            if isfunction(activation):
-                self.activ = activation()
-            elif isinstance(activation, str):
-                if activation == "relu":
-                    self.activ = nn.ReLU(inplace=True)
-                elif activation == "relu6":
-                    self.activ = nn.ReLU6(inplace=True)
-                else:
-                    raise NotImplementedError()
-            else:
-                self.activ = activation
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  groups=1,
-                  bias=False,
-                  activation=(lambda: nn.ReLU(inplace=True)),
-                  activate=True):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        groups=groups,
-        bias=bias,
-        activation=activation,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  padding=1,
-                  dilation=1,
-                  groups=1,
-                  bias=False,
-                  activation=(lambda: nn.ReLU(inplace=True)),
-                  activate=True):
-    """
-    3x3 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=padding,
-        dilation=dilation,
-        groups=groups,
-        bias=bias,
-        activation=activation,
-        activate=activate)
 
 
 class MSDBaseBlock(nn.Module):
@@ -374,7 +185,7 @@ class MSDScaleBlock(nn.Module):
 
 class MSDInitLayer(nn.Module):
     """
-    MSDNet initial (first) layer.
+    MSDNet initial (so-called first) layer.
 
     Parameters:
     ----------
@@ -493,7 +304,7 @@ class MSDTransitionLayer(nn.Module):
 
 class MSDFeatureBlock(nn.Module):
     """
-    MSDNet feature block (stage of cascade).
+    MSDNet feature block (stage of cascade, so-called block).
 
     Parameters:
     ----------
@@ -577,19 +388,40 @@ class MSDClassifier(nn.Module):
         return x
 
 
-class MSDNet(nn.Module):
+class CIFAR10MSDNet(nn.Module):
+    """
+    MSDNet model for CIFAR-10 from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
+    https://arxiv.org/abs/1703.09844.
 
+    Parameters:
+    ----------
+    channels : list of list of list of int
+        Number of output channels for each unit.
+    init_layer_channels : list of int
+        Number of output channels for the initial layer.
+    num_feature_blocks : int
+        Number of subnets.
+    use_bottleneck : bool
+        Whether to use a bottleneck.
+    bottleneck_factors : list of list of int
+        Bottleneck factor for each layers and for each input scale.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (32, 32)
+        Spatial size of the expected input image.
+    num_classes : int, default 10
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  init_layer_channels,
-                 cls_channels,
                  num_feature_blocks,
                  use_bottleneck,
                  bottleneck_factors,
-                 in_channels,
+                 in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
-        super(MSDNet, self).__init__()
+        super(CIFAR10MSDNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -607,10 +439,18 @@ class MSDNet(nn.Module):
                 use_bottleneck=use_bottleneck,
                 bottleneck_factors=bottleneck_factors[i]))
             in_channels = channels[i][-1]
-            assert(in_channels[-1] == cls_channels[i])
             self.classifiers.add_module("classifier{}".format(i + 1), MSDClassifier(
-                in_channels=cls_channels[i],
+                in_channels=in_channels[-1],
                 num_classes=num_classes))
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x, only_last=True):
         x = self.init_layer(x)
@@ -625,123 +465,122 @@ class MSDNet(nn.Module):
             return outs
 
 
-def get_oth_msdnet_cifar10(in_channels,
-                           in_size,
-                           num_classes):
+def get_msdnet_cifar10(blocks,
+                       model_name=None,
+                       pretrained=False,
+                       root=os.path.join('~', '.torch', 'models'),
+                       **kwargs):
+    """
+    Create MSDNet model for CIFAR-10 with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+
+    assert (blocks == 22)
+
     num_scales = 3
     num_feature_blocks = 10
     base = 4
     step = 2
-    step_mode = "even"
     reduction_rate = 0.5
     growth = 6
     growth_factor = [1, 2, 4, 4]
     use_bottleneck = True
-    total_bottleneck_factor = [1, 2, 4, 4]
+    bottleneck_factor_per_scales = [1, 2, 4, 4]
 
     assert (reduction_rate > 0.0)
-    init_layer_out_channels = [32 * c for c in growth_factor[:3]]
+    init_layer_channels = [32 * c for c in growth_factor[:3]]
 
+    step_mode = "even"
     layers_per_subnets = [base]
     for i in range(num_feature_blocks - 1):
         layers_per_subnets.append(step if step_mode == 'even' else step * i + 1)
     total_layers = sum(layers_per_subnets)
 
     interval = math.ceil(total_layers / num_scales)
-    total_layer_ind = 0
-    scales = []
+    global_layer_ind = 0
 
-    total_out_channels = []
-    cls_channels = []
-    bottleneck_factors_list = []
+    channels = []
+    bottleneck_factors = []
 
-    in_channels_tmp = init_layer_out_channels
+    in_channels_tmp = init_layer_channels
     in_scales = num_scales
     for i in range(num_feature_blocks):
         layers_per_subnet = layers_per_subnets[i]
         scales_i = []
-
         channels_i = []
         bottleneck_factors_i = []
         for j in range(layers_per_subnet):
-            out_scales = int(num_scales - math.floor(total_layer_ind / interval))
-            total_layer_ind += 1
+            out_scales = int(num_scales - math.floor(global_layer_ind / interval))
+            global_layer_ind += 1
             scales_i += [out_scales]
             scale_offset = num_scales - out_scales
 
             in_dec_scales = num_scales - len(in_channels_tmp)
-            out_channels = [in_channels_tmp[scale_offset - in_dec_scales + k] + growth * growth_factor[scale_offset + k] for
-                            k in range(out_scales)]
+            out_channels = [in_channels_tmp[scale_offset - in_dec_scales + k] + growth * growth_factor[scale_offset + k]
+                            for k in range(out_scales)]
             in_dec_scales = num_scales - len(in_channels_tmp)
-            bottleneck_factors = total_bottleneck_factor[in_dec_scales:][:len(in_channels_tmp)]
+            bottleneck_factors_ij = bottleneck_factor_per_scales[in_dec_scales:][:len(in_channels_tmp)]
 
             in_channels_tmp = out_channels
             channels_i += [out_channels]
-            bottleneck_factors_i += [bottleneck_factors]
+            bottleneck_factors_i += [bottleneck_factors_ij]
 
             if in_scales > out_scales:
-                out_channels1 = int(math.floor(float(in_channels_tmp[0]) / growth_factor[scale_offset] * reduction_rate))
+                assert (in_channels_tmp[0] % growth_factor[scale_offset] == 0)
+                out_channels1 = int(math.floor(in_channels_tmp[0] / growth_factor[scale_offset] * reduction_rate))
                 out_channels = [out_channels1 * growth_factor[scale_offset + k] for k in range(out_scales)]
                 in_channels_tmp = out_channels
                 channels_i += [out_channels]
                 bottleneck_factors_i += [[]]
             in_scales = out_scales
 
-        in_dec_scales = num_scales - len(in_channels_tmp)
-        in_channels1 = in_channels_tmp[0] // growth_factor[in_dec_scales]
-        cls_channels_i = in_channels1 * growth_factor[num_scales]
-        cls_channels += [cls_channels_i]
-        bottleneck_factors_list += [bottleneck_factors_i]
-
-        scales += [scales_i]
         in_scales = scales_i[-1]
-        total_out_channels += [channels_i]
+        channels += [channels_i]
+        bottleneck_factors += [bottleneck_factors_i]
 
-    # print("total_out_channels={}".format(total_out_channels))
-
-    return MSDNet(
-        channels=total_out_channels,
-        init_layer_channels=init_layer_out_channels,
-        cls_channels=cls_channels,
+    net = CIFAR10MSDNet(
+        channels=channels,
+        init_layer_channels=init_layer_channels,
         num_feature_blocks=num_feature_blocks,
         use_bottleneck=use_bottleneck,
-        bottleneck_factors=bottleneck_factors_list,
-        in_channels=in_channels,
-        in_size=in_size,
-        num_classes=num_classes)
+        bottleneck_factors=bottleneck_factors,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
 
 
-def oth_msdnet_cifar10_2(in_channels=3, num_classes=10, in_size=(32, 32), pretrained=False):
-    return get_oth_msdnet_cifar10(
-        in_channels=in_channels,
-        in_size=in_size,
-        num_classes=num_classes)
-
-
-def load_model(net,
-               file_path,
-               ignore_extra=True):
+def msdnet22_cifar10(**kwargs):
     """
-    Load model state dictionary from a file.
+    MSDNet-22 model for CIFAR-10 from 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
+    https://arxiv.org/abs/1703.09844.
 
-    Parameters
+    Parameters:
     ----------
-    net : Module
-        Network in which weights are loaded.
-    file_path : str
-        Path to the file.
-    ignore_extra : bool, default True
-        Whether to silently ignore parameters from the file that are not present in this Module.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    import torch
-
-    if ignore_extra:
-        pretrained_state = torch.load(file_path)
-        model_dict = net.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
-    else:
-        net.load_state_dict(torch.load(file_path))
+    return get_msdnet_cifar10(blocks=22, model_name="msdnet22_cifar10", **kwargs)
 
 
 def _calc_width(net):
@@ -760,7 +599,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_msdnet_cifar10_2,
+        msdnet22_cifar10,
     ]
 
     for model in models:
@@ -771,7 +610,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_msdnet_cifar10_2 or weight_count == 5440864)
+        assert (model != msdnet22_cifar10 or weight_count == 5440864)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

@@ -747,7 +747,7 @@ class MSDNet(nn.Module):
             return outputs[-1]
 
 
-def oth_msdnet_cifar10(in_channels=3, num_classes=10, pretrained=False):
+def oth_msdnet_cifar10(in_channels=3, num_classes=10, in_size=(32, 32), pretrained=False):
     args = {
         "msd_blocks": 10,
         "msd_base": 4,

@@ -7,154 +7,154 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm
+from .common import conv2d, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
-def mobnet_conv(x,
-                in_channels,
-                out_channels,
-                kernel_size,
-                strides,
-                padding,
-                groups,
-                activate,
-                training,
-                name="mobnet_conv"):
-    """
-    MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        groups=groups,
-        use_bias=False,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        name=name + "/bn")
-    if activate:
-        x = tf.nn.relu6(x, name=name + "/activ")
-    return x
-
-
-def mobnet_conv1x1(x,
-                   in_channels,
-                   out_channels,
-                   activate,
-                   training,
-                   name="mobnet_conv1x1"):
-    """
-    1x1 version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_conv1x1'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return mobnet_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        groups=1,
-        activate=activate,
-        training=training,
-        name=name)
-
-
-def mobnet_dwconv3x3(x,
-                     in_channels,
-                     out_channels,
-                     strides,
-                     activate,
-                     training,
-                     name="mobnet_dwconv3x3"):
-    """
-    3x3 depthwise version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    name : str, default 'mobnet_dwconv3x3'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return mobnet_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=out_channels,
-        activate=activate,
-        training=training,
-        name=name)
+# def conv_block(x,
+#                in_channels,
+#                out_channels,
+#                kernel_size,
+#                strides,
+#                padding,
+#                groups,
+#                activate,
+#                training,
+#                name="mobnet_conv"):
+#     """
+#     MobileNetV2 specific convolution block.
+#
+#     Parameters:
+#     ----------
+#     x : Tensor
+#         Input tensor.
+#     in_channels : int
+#         Number of input channels.
+#     out_channels : int
+#         Number of output channels.
+#     kernel_size : int or tuple/list of 2 int
+#         Convolution window size.
+#     strides : int or tuple/list of 2 int
+#         Strides of the convolution.
+#     padding : int or tuple/list of 2 int
+#         Padding value for convolution layer.
+#     groups : int
+#         Number of groups.
+#     activate : bool
+#         Whether activate the convolution block.
+#     training : bool, or a TensorFlow boolean scalar tensor
+#       Whether to return the output in training mode or in inference mode.
+#     name : str, default 'mobnet_conv'
+#         Block name.
+#
+#     Returns
+#     -------
+#     Tensor
+#         Resulted tensor.
+#     """
+#     x = conv2d(
+#         x=x,
+#         in_channels=in_channels,
+#         out_channels=out_channels,
+#         kernel_size=kernel_size,
+#         strides=strides,
+#         padding=padding,
+#         groups=groups,
+#         use_bias=False,
+#         name=name + "/conv")
+#     x = batchnorm(
+#         x=x,
+#         training=training,
+#         name=name + "/bn")
+#     if activate:
+#         x = tf.nn.relu6(x, name=name + "/activ")
+#     return x
+#
+#
+# def conv1x1_block(x,
+#                   in_channels,
+#                   out_channels,
+#                   activate,
+#                   training,
+#                   name="mobnet_conv1x1"):
+#     """
+#     1x1 version of the MobileNetV2 specific convolution block.
+#
+#     Parameters:
+#     ----------
+#     x : Tensor
+#         Input tensor.
+#     in_channels : int
+#         Number of input channels.
+#     out_channels : int
+#         Number of output channels.
+#     activate : bool
+#         Whether activate the convolution block.
+#     training : bool, or a TensorFlow boolean scalar tensor
+#       Whether to return the output in training mode or in inference mode.
+#     name : str, default 'mobnet_conv1x1'
+#         Block name.
+#
+#     Returns
+#     -------
+#     Tensor
+#         Resulted tensor.
+#     """
+#     return conv_block(
+#         x=x,
+#         in_channels=in_channels,
+#         out_channels=out_channels,
+#         kernel_size=1,
+#         strides=1,
+#         padding=0,
+#         groups=1,
+#         activate=activate,
+#         training=training,
+#         name=name)
+#
+#
+# def dwconv3x3_block(x,
+#                     in_channels,
+#                     out_channels,
+#                     strides,
+#                     activate,
+#                     training,
+#                     name="mobnet_dwconv3x3"):
+#     """
+#     3x3 depthwise version of the MobileNetV2 specific convolution block.
+#
+#     Parameters:
+#     ----------
+#     x : Tensor
+#         Input tensor.
+#     in_channels : int
+#         Number of input channels.
+#     out_channels : int
+#         Number of output channels.
+#     strides : int or tuple/list of 2 int
+#         Strides of the convolution.
+#     activate : bool
+#         Whether activate the convolution block.
+#     training : bool, or a TensorFlow boolean scalar tensor
+#       Whether to return the output in training mode or in inference mode.
+#     name : str, default 'mobnet_dwconv3x3'
+#         Block name.
+#
+#     Returns
+#     -------
+#     Tensor
+#         Resulted tensor.
+#     """
+#     return conv_block(
+#         x=x,
+#         in_channels=in_channels,
+#         out_channels=out_channels,
+#         kernel_size=3,
+#         strides=strides,
+#         padding=1,
+#         groups=out_channels,
+#         activate=activate,
+#         training=training,
+#         name=name)
 
 
 def linear_bottleneck(x,
@@ -195,25 +195,26 @@ def linear_bottleneck(x,
     if residual:
         identity = x
 
-    x = mobnet_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
-        activate=True,
+        activation="relu6",
         training=training,
         name=name + "/conv1")
-    x = mobnet_dwconv3x3(
+    x = dwconv3x3_block(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
-        activate=True,
+        activation="relu6",
         training=training,
         name=name + "/conv2")
-    x = mobnet_conv1x1(
+    x = conv1x1_block(
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
+        activation=None,
         activate=False,
         training=training,
         name=name + "/conv3")
@@ -278,15 +279,12 @@ class MobileNetV2(object):
             Resulted tensor.
         """
         in_channels = self.in_channels
-        x = mobnet_conv(
+        x = conv3x3_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.init_block_channels,
-            kernel_size=3,
             strides=2,
-            padding=1,
-            groups=1,
-            activate=True,
+            activation="relu6",
             training=training,
             name="features/init_block")
         in_channels = self.init_block_channels
@@ -303,11 +301,11 @@ class MobileNetV2(object):
                     training=training,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = mobnet_conv1x1(
+        x = conv1x1_block(
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
-            activate=True,
+            activation="relu6",
             training=training,
             name="features/final_block")
         in_channels = self.final_block_channels

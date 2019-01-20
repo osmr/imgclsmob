@@ -11,113 +11,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import ReLU6, SimpleSequential
-
-
-class MobnetConv(Chain):
-    """
-    MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 groups,
-                 activate):
-        super(MobnetConv, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True,
-                groups=groups)
-            self.bn = L.BatchNormalization(size=out_channels)
-            if self.activate:
-                self.activ = ReLU6()
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def mobnet_conv1x1(in_channels,
-                   out_channels,
-                   activate):
-    """
-    1x1 version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return MobnetConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=1,
-        pad=0,
-        groups=1,
-        activate=activate)
-
-
-def mobnet_dwconv3x3(in_channels,
-                     out_channels,
-                     stride,
-                     activate):
-    """
-    3x3 depthwise version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return MobnetConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        groups=out_channels,
-        activate=activate)
+from .common import ReLU6, conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential
 
 
 class LinearBottleneck(Chain):
@@ -145,18 +39,19 @@ class LinearBottleneck(Chain):
         mid_channels = in_channels * 6 if expansion else in_channels
 
         with self.init_scope():
-            self.conv1 = mobnet_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                activate=True)
-            self.conv2 = mobnet_dwconv3x3(
+                activation=ReLU6())
+            self.conv2 = dwconv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=stride,
-                activate=True)
-            self.conv3 = mobnet_conv1x1(
+                activation=ReLU6())
+            self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                activation=None,
                 activate=False)
 
     def __call__(self, x):
@@ -203,14 +98,11 @@ class MobileNetV2(Chain):
         with self.init_scope():
             self.features = SimpleSequential()
             with self.features.init_scope():
-                setattr(self.features, "init_block", MobnetConv(
+                setattr(self.features, "init_block", conv3x3_block(
                     in_channels=in_channels,
                     out_channels=init_block_channels,
-                    ksize=3,
                     stride=2,
-                    pad=1,
-                    groups=1,
-                    activate=True))
+                    activation=ReLU6()))
                 in_channels = init_block_channels
                 for i, channels_per_stage in enumerate(channels):
                     stage = SimpleSequential()
@@ -225,10 +117,10 @@ class MobileNetV2(Chain):
                                 expansion=expansion))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', mobnet_conv1x1(
+                setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
-                    activate=True))
+                    activation=ReLU6()))
                 in_channels = final_block_channels
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,

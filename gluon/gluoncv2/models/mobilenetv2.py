@@ -8,127 +8,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ReLU6
-
-
-class MobnetConv(HybridBlock):
-    """
-    MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 groups,
-                 bn_use_global_stats,
-                 activate,
-                 **kwargs):
-        super(MobnetConv, self).__init__(**kwargs)
-        self.activate = activate
-
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = ReLU6()
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def mobnet_conv1x1(in_channels,
-                   out_channels,
-                   bn_use_global_stats,
-                   activate):
-    """
-    1x1 version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return MobnetConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        groups=1,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
-
-
-def mobnet_dwconv3x3(in_channels,
-                     out_channels,
-                     strides,
-                     bn_use_global_stats,
-                     activate):
-    """
-    3x3 depthwise version of the MobileNetV2 specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return MobnetConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=strides,
-        padding=1,
-        groups=out_channels,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+from .common import ReLU6, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 class LinearBottleneck(HybridBlock):
@@ -160,21 +40,22 @@ class LinearBottleneck(HybridBlock):
         mid_channels = in_channels * 6 if expansion else in_channels
 
         with self.name_scope():
-            self.conv1 = mobnet_conv1x1(
+            self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = mobnet_dwconv3x3(
+                activation=ReLU6())
+            self.conv2 = dwconv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv3 = mobnet_conv1x1(
+                activation=ReLU6())
+            self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
+                activation=None,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -225,15 +106,12 @@ class MobileNetV2(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
-            self.features.add(MobnetConv(
+            self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                kernel_size=3,
                 strides=2,
-                padding=1,
-                groups=1,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=True))
+                activation=ReLU6()))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
@@ -249,11 +127,11 @@ class MobileNetV2(HybridBlock):
                             expansion=expansion))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(mobnet_conv1x1(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=True))
+                activation=ReLU6()))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
@@ -403,7 +281,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = True
+    pretrained = False
 
     models = [
         mobilenetv2_w1,

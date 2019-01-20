@@ -92,6 +92,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('squeezenet_v1_1', '1772', '25b77bc39e35612abbe7c2344d2c3e1e6756c2f8', 'v0.0.88'),
     ('squeezeresnet_v1_1', '1821', 'c27ed88f1b19eb233d3925efc71c71d25e4c434e', 'v0.0.70'),
     ('sqnxt23_w1', '1906', '97b74e0c4d6bf9fc939771d94b2f6dd97de34024', 'v0.0.171'),
+    ('sqnxt23v5_w1', '1785', '2fe3ad67d73313193a77690b10c17cbceef92340', 'v0.0.172'),
     ('shufflenet_g1_wd4', '3729', '47dbd0f279da6d3056079bb79ad39cabbb3b9415', 'v0.0.134'),
     ('shufflenet_g3_wd4', '3653', '6abdd65e087e71f80345415cdf7ada6ed2762d60', 'v0.0.135'),
     ('shufflenet_g3_wd2', '2080', 'ccaacfc8d9ac112c6143269df6e258fd55b662a7', 'v0.0.167'),

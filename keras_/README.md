@@ -1,5 +1,8 @@
 # Large-scale image classification models on Keras with MXNet backend
 
+[![PyPI](https://img.shields.io/pypi/v/kerascv.svg)](https://pypi.python.org/pypi/kerascv)
+[![Downloads](https://pepy.tech/badge/kerascv)](https://pepy.tech/project/kerascv)
+
 This is a collection of large-scale image classification models. Many of them are pretrained on ImageNet-1K dataset
 and loaded automatically during use. All pretrained models require the same ordinary normalization. Scripts for
 training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.

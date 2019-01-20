@@ -1,5 +1,8 @@
 # Large-scale image classification models on TensorFlow
 
+[![PyPI](https://img.shields.io/pypi/v/tensorflowcv.svg)](https://pypi.python.org/pypi/tensorflowcv)
+[![Downloads](https://pepy.tech/badge/tensorflowcv)](https://pepy.tech/project/tensorflowcv)
+
 This is a collection of large-scale image classification models. Many of them are pretrained on ImageNet-1K dataset
 and loaded automatically during use. All pretrained models require the same ordinary normalization. Scripts for
 training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.

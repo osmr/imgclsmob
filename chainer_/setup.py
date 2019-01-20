@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='chainercv2',
-    version='0.0.29',
+    version='0.0.30',
     description='Image classification models for Chainer',
     license='MIT',
     long_description=long_description,
@@ -25,8 +25,8 @@ setup(
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
     keywords='machine-learning deep-learning neuralnetwork image-classification chainer vgg resnet pyramidnet diracnet '
-             'densenet condensenet wrn drn dpn darknet fishnet squeezenet shufflenet menet mobilenet igcv3 mnasnet '
-             'darts xception inception polynet nasnet pnasnet',
+             'densenet condensenet wrn drn dpn darknet fishnet squeezenet squeezenext shufflenet menet mobilenet igcv3 '
+             'mnasnet darts xception inception polynet nasnet pnasnet',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
     install_requires=['requests', 'chainer>=5.0.0'],

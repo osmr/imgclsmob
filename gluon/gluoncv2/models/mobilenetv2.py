@@ -8,7 +8,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ReLU6, conv1x1_block, conv3x3_block, dwconv3x3_block
+from .common import ReLU6, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 class LinearBottleneck(HybridBlock):
@@ -138,11 +138,10 @@ class MobileNetV2(HybridBlock):
                 strides=1))
 
             self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Conv2D(
-                channels=classes,
-                kernel_size=1,
-                use_bias=False,
-                in_channels=in_channels))
+            self.output.add(conv1x1(
+                in_channels=in_channels,
+                out_channels=classes,
+                use_bias=False))
             self.output.add(nn.Flatten())
 
     def hybrid_forward(self, F, x):

@@ -7,11 +7,10 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 
 import os
 import chainer.functions as F
-import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import ReLU6, conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential
+from .common import ReLU6, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential
 
 
 class LinearBottleneck(Chain):
@@ -129,11 +128,10 @@ class MobileNetV2(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', L.Convolution2D(
+                setattr(self.output, 'final_conv', conv1x1(
                     in_channels=in_channels,
                     out_channels=classes,
-                    ksize=1,
-                    nobias=True))
+                    use_bias=False))
                 setattr(self.output, 'final_flatten', partial(
                     F.reshape,
                     shape=(-1, classes)))

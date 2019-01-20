@@ -8,7 +8,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 class LinearBottleneck(nn.Module):
@@ -119,10 +119,9 @@ class MobileNetV2(nn.Module):
             kernel_size=7,
             stride=1))
 
-        self.output = nn.Conv2d(
+        self.output = conv1x1(
             in_channels=in_channels,
             out_channels=num_classes,
-            kernel_size=1,
             bias=False)
 
         self._init_params()

@@ -9,140 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
-
-
-# def conv_block(x,
-#                in_channels,
-#                out_channels,
-#                kernel_size,
-#                strides,
-#                padding,
-#                groups,
-#                activate,
-#                name="mobnet_conv"):
-#     """
-#     MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : keras.backend tensor/variable/symbol
-#         Input tensor/variable/symbol.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     kernel_size : int or tuple/list of 2 int
-#         Convolution window size.
-#     strides : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     padding : int or tuple/list of 2 int
-#         Padding value for convolution layer.
-#     groups : int
-#         Number of groups.
-#     activate : bool
-#         Whether activate the convolution block.
-#     name : str, default 'mobnet_conv'
-#         Block name.
-#
-#     Returns
-#     -------
-#     keras.backend tensor/variable/symbol
-#         Resulted tensor/variable/symbol.
-#     """
-#     x = conv2d(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=kernel_size,
-#         strides=strides,
-#         padding=padding,
-#         groups=groups,
-#         use_bias=False,
-#         name=name + "/conv")
-#     x = GluonBatchNormalization(name=name + "/bn")(x)
-#     if activate:
-#         x = nn.ReLU(max_value=6.0, name=name + "/activ")(x)
-#     return x
-#
-#
-# def conv1x1_block(x,
-#                   in_channels,
-#                   out_channels,
-#                   activate,
-#                   name="mobnet_conv1x1"):
-#     """
-#     1x1 version of the MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : keras.backend tensor/variable/symbol
-#         Input tensor/variable/symbol.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     activate : bool
-#         Whether activate the convolution block.
-#     name : str, default 'mobnet_conv1x1'
-#         Block name.
-#
-#     Returns
-#     -------
-#     keras.backend tensor/variable/symbol
-#         Resulted tensor/variable/symbol.
-#     """
-#     return conv_block(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=1,
-#         strides=1,
-#         padding=0,
-#         groups=1,
-#         activate=activate,
-#         name=name)
-#
-#
-# def dwconv3x3_block(x,
-#                     in_channels,
-#                     out_channels,
-#                     strides,
-#                     activate,
-#                     name="mobnet_dwconv3x3"):
-#     """
-#     3x3 depthwise version of the MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : keras.backend tensor/variable/symbol
-#         Input tensor/variable/symbol.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     strides : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     activate : bool
-#         Whether activate the convolution block.
-#     name : str, default 'mobnet_dwconv3x3'
-#         Block name.
-#
-#     Returns
-#     -------
-#     keras.backend tensor/variable/symbol
-#         Resulted tensor/variable/symbol.
-#     """
-#     return conv_block(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=3,
-#         strides=strides,
-#         padding=1,
-#         groups=out_channels,
-#         activate=activate,
-#         name=name)
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 def linear_bottleneck(x,
@@ -266,11 +133,12 @@ def mobilenetv2(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Conv2D(
-        filters=classes,
-        kernel_size=1,
+    x = conv1x1(
+        x=x,
+        in_channels=in_channels,
+        out_channels=classes,
         use_bias=False,
-        name="output")(x)
+        name="output")
     x = nn.Flatten()(x)
 
     model = Model(inputs=input, outputs=x)

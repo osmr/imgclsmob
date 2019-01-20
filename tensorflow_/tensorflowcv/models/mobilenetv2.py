@@ -7,154 +7,7 @@ __all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1_block, conv3x3_block, dwconv3x3_block
-
-
-# def conv_block(x,
-#                in_channels,
-#                out_channels,
-#                kernel_size,
-#                strides,
-#                padding,
-#                groups,
-#                activate,
-#                training,
-#                name="mobnet_conv"):
-#     """
-#     MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : Tensor
-#         Input tensor.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     kernel_size : int or tuple/list of 2 int
-#         Convolution window size.
-#     strides : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     padding : int or tuple/list of 2 int
-#         Padding value for convolution layer.
-#     groups : int
-#         Number of groups.
-#     activate : bool
-#         Whether activate the convolution block.
-#     training : bool, or a TensorFlow boolean scalar tensor
-#       Whether to return the output in training mode or in inference mode.
-#     name : str, default 'mobnet_conv'
-#         Block name.
-#
-#     Returns
-#     -------
-#     Tensor
-#         Resulted tensor.
-#     """
-#     x = conv2d(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=kernel_size,
-#         strides=strides,
-#         padding=padding,
-#         groups=groups,
-#         use_bias=False,
-#         name=name + "/conv")
-#     x = batchnorm(
-#         x=x,
-#         training=training,
-#         name=name + "/bn")
-#     if activate:
-#         x = tf.nn.relu6(x, name=name + "/activ")
-#     return x
-#
-#
-# def conv1x1_block(x,
-#                   in_channels,
-#                   out_channels,
-#                   activate,
-#                   training,
-#                   name="mobnet_conv1x1"):
-#     """
-#     1x1 version of the MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : Tensor
-#         Input tensor.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     activate : bool
-#         Whether activate the convolution block.
-#     training : bool, or a TensorFlow boolean scalar tensor
-#       Whether to return the output in training mode or in inference mode.
-#     name : str, default 'mobnet_conv1x1'
-#         Block name.
-#
-#     Returns
-#     -------
-#     Tensor
-#         Resulted tensor.
-#     """
-#     return conv_block(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=1,
-#         strides=1,
-#         padding=0,
-#         groups=1,
-#         activate=activate,
-#         training=training,
-#         name=name)
-#
-#
-# def dwconv3x3_block(x,
-#                     in_channels,
-#                     out_channels,
-#                     strides,
-#                     activate,
-#                     training,
-#                     name="mobnet_dwconv3x3"):
-#     """
-#     3x3 depthwise version of the MobileNetV2 specific convolution block.
-#
-#     Parameters:
-#     ----------
-#     x : Tensor
-#         Input tensor.
-#     in_channels : int
-#         Number of input channels.
-#     out_channels : int
-#         Number of output channels.
-#     strides : int or tuple/list of 2 int
-#         Strides of the convolution.
-#     activate : bool
-#         Whether activate the convolution block.
-#     training : bool, or a TensorFlow boolean scalar tensor
-#       Whether to return the output in training mode or in inference mode.
-#     name : str, default 'mobnet_dwconv3x3'
-#         Block name.
-#
-#     Returns
-#     -------
-#     Tensor
-#         Resulted tensor.
-#     """
-#     return conv_block(
-#         x=x,
-#         in_channels=in_channels,
-#         out_channels=out_channels,
-#         kernel_size=3,
-#         strides=strides,
-#         padding=1,
-#         groups=out_channels,
-#         activate=activate,
-#         training=training,
-#         name=name)
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
 
 
 def linear_bottleneck(x,
@@ -316,11 +169,10 @@ class MobileNetV2(object):
             data_format='channels_first',
             name="features/final_pool")
 
-        x = conv2d(
+        x = conv1x1(
             x=x,
             in_channels=in_channels,
             out_channels=self.classes,
-            kernel_size=1,
             use_bias=False,
             name="output")
         x = tf.layers.flatten(x)

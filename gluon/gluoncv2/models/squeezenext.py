@@ -8,7 +8,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ConvBlock, conv1x1_block
+from .common import ConvBlock, conv1x1_block, conv7x7_block
 
 
 class SqnxtUnit(HybridBlock):
@@ -109,10 +109,9 @@ class SqnxtInitBlock(HybridBlock):
                  **kwargs):
         super(SqnxtInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv = ConvBlock(
+            self.conv = conv7x7_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                kernel_size=7,
                 strides=2,
                 padding=1,
                 use_bias=True)

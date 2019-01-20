@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv_block, conv1x1_block
+from .common import max_pool2d_ceil, conv_block, conv1x1_block, conv7x7_block
 
 
 def sqnxt_unit(x,
@@ -125,11 +125,10 @@ def sqnxt_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = conv_block(
+    x = conv7x7_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=7,
         strides=2,
         padding=1,
         use_bias=True,

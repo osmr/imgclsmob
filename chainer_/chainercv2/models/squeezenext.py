@@ -11,7 +11,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import ConvBlock, conv1x1_block, SimpleSequential
+from .common import ConvBlock, conv1x1_block, conv7x7_block, SimpleSequential
 
 
 class SqnxtUnit(Chain):
@@ -110,10 +110,9 @@ class SqnxtInitBlock(Chain):
                  out_channels):
         super(SqnxtInitBlock, self).__init__()
         with self.init_scope():
-            self.conv = ConvBlock(
+            self.conv = conv7x7_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                ksize=7,
                 stride=2,
                 pad=1,
                 use_bias=True)

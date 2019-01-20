@@ -8,7 +8,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import ConvBlock, conv1x1_block
+from .common import ConvBlock, conv1x1_block, conv7x7_block
 
 
 class SqnxtUnit(nn.Module):
@@ -105,10 +105,9 @@ class SqnxtInitBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(SqnxtInitBlock, self).__init__()
-        self.conv = ConvBlock(
+        self.conv = conv7x7_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=7,
             stride=2,
             padding=1,
             bias=True)

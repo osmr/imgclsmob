@@ -7,7 +7,7 @@ __all__ = ['SqueezeNext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 
 import os
 import tensorflow as tf
-from .common import maxpool2d, conv_block, conv1x1_block
+from .common import maxpool2d, conv_block, conv1x1_block, conv7x7_block
 
 
 def sqnxt_unit(x,
@@ -135,11 +135,10 @@ def sqnxt_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = conv_block(
+    x = conv7x7_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=7,
         strides=2,
         padding=1,
         use_bias=True,

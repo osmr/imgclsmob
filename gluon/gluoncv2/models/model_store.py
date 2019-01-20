@@ -142,7 +142,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('preresnet20_cifar10', '0651', 'daa895737a34edda75c40f2d8566660590c84a3f', 'v0.0.164'),
     ('preresnet56_cifar10', '0449', 'cb37cb9d4524d4e0f5724aeed9face455f527efc', 'v0.0.164'),
     ('preresnet110_cifar10', '0386', 'd6d4b7bd9f154eca242482a7559413d5c7b6d465', 'v0.0.164'),
-    ('resnext29_32x4d_cifar10', '0345', '454e14dc9c090d809de1fb5fd58e462ce7f8b7d8', 'v0.0.165'),
+    ('resnext29_32x4d_cifar10', '0315', 'c8a1beda8ba616dc9af682d3ac172bfdd7a2472d', 'v0.0.169'),
     ('resnext29_16x64d_cifar10', '0275', '13e5b172dd36366687f224e2e95ce0a751855d07', 'v0.0.165'),
     ('wrn16_10_cifar10', '0293', 'ecf1c17c0814763095df562cb27d15a5aeb51836', 'v0.0.166'),
     ('wrn28_10_cifar10', '0239', '16f3c8a249993f23b0f81d9ce3650faef5e455d8', 'v0.0.166'),

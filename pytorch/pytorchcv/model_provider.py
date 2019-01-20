@@ -30,6 +30,7 @@ from .models.dpn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
+from .models.msdnet import *
 from .models.fishnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -53,17 +54,12 @@ from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
-
-from .models.msdnet import *
 from .models.msdnet_cifar10 import *
 
 __all__ = ['get_model']
 
 
 _models = {
-    'msdnet22': msdnet22,
-    'msdnet22_cifar10': msdnet22_cifar10,
-
     'alexnet': alexnet,
 
     'zfnet': zfnet,
@@ -244,6 +240,8 @@ _models = {
 
     'channelnet': channelnet,
 
+    'msdnet22': msdnet22,
+
     'fishnet99': fishnet99,
     'fishnet150': fishnet150,
 
@@ -342,6 +340,8 @@ _models = {
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn28_10_cifar10': wrn28_10_cifar10,
     'wrn40_8_cifar10': wrn40_8_cifar10,
+
+    'msdnet22_cifar10': msdnet22_cifar10,
 }
 
 

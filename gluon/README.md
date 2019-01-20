@@ -60,7 +60,7 @@ To use the models in your project, simply install the `gluoncv2` package with `m
 ```
 pip install gluoncv2 mxnet>=1.2.1
 ```
-To enable different hardware supports such as GPUs, check out [MXNet variants](https://pypi.org/project/mxnet/).
+To enable different hardware supports such as GPUs, check out [MXNet variants](https://pypi.org/project/mxnet).
 For example, you can install with CUDA-9.2 supported MXNet:
 ```
 pip install gluoncv2 mxnet-cu92>=1.2.1

@@ -36,7 +36,7 @@ To use the models in your project, simply install the `tensorflowcv` package wit
 ```
 pip install tensorflowcv tensorflow-gpu>=1.11.0
 ```
-To enable/disable different hardware supports, check out TensorFlow installation [instructions](https://www.tensorflow.org/).
+To enable/disable different hardware supports, check out TensorFlow installation [instructions](https://www.tensorflow.org).
 
 Note that the models use NCHW data format. The current version of TensorFlow cannot work with them on CPU.
 

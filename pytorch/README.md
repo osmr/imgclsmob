@@ -60,7 +60,7 @@ To use the models in your project, simply install the `pytorchcv` package with `
 ```
 pip install pytorchcv torch>=0.4.0
 ```
-To enable/disable different hardware supports such as GPUs, check out PyTorch installation [instructions](https://pytorch.org/).
+To enable/disable different hardware supports such as GPUs, check out PyTorch installation [instructions](https://pytorch.org).
 
 ## Usage
 

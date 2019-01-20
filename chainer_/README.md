@@ -58,7 +58,7 @@ To use the models in your project, simply install the `chainercv2` package:
 ```
 pip install chainercv2
 ```
-To enable/disable different hardware supports, check out Chainer installation [instructions](https://chainer.org/).
+To enable/disable different hardware supports, check out Chainer installation [instructions](https://chainer.org).
 
 ## Usage
 

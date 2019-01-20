@@ -46,7 +46,7 @@ Some remarks:
 - `B` means the implementation of a model for CIFAR-10.
 - `A+` and `B+` means having a pre-trained model for ImageNet-1K and CIFAR-10, respectively.
 
-| Model | Gluon | PyTorch | Chainer | Keras | TensorFlow | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TensorFlow](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlexNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1404.5997) | - | 2012 |
 | ZFNet | A | A | A | - | - | [link](https://arxiv.org/abs/1311.2901) | - | 2013 |

@@ -38,7 +38,13 @@ git clone git@github.com:osmr/imgclsmob.git
 pip install -r requirements.txt
 ```
 
-## Table of implemented models (...in the process of filling...)
+## Table of implemented models
+
+Some remarks:
+- `Repo` is an author repository, if it exists.
+- `A` means the implementation of a model for ImageNet-1K.
+- `B` means the implementation of a model for CIFAR-10.
+- `A+` and `B+` means having a pre-trained model for ImageNet-1K and CIFAR-10, respectively.
 
 | Model | Gluon | PyTorch | Chainer | Keras | TensorFlow | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

@@ -1,7 +1,8 @@
 # Large-scale image classification models on Keras with MXNet backend
 
 This is a collection of large-scale image classification models. Many of them are pretrained on ImageNet-1K dataset
-and loaded automatically during use. All pretrained models require the same ordinary normalization.
+and loaded automatically during use. All pretrained models require the same ordinary normalization. Scripts for
+training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo .
 
 ## List of implemented models
 

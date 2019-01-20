@@ -42,7 +42,7 @@ Note that the models use NCHW data format. The current version of TensorFlow can
 
 ## Usage
 
-Example of using the pretrained ResNet-18 model on TensorFlow:
+Example of using the pretrained ResNet-18 model:
 ```
 from tensorflowcv.model_provider import get_model as tfcv_get_model
 from tensorflowcv.model_provider import init_variables_from_state_dict as tfcv_init_variables_from_state_dict
@@ -158,6 +158,7 @@ Some remarks:
 | MnasNet | 31.29 | 11.44 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-f2b84fc4.tf.npz.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
+[tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
 [tensorpack/tensorpack]: https://github.com/tensorpack/tensorpack
 [clavichord93/MENet]: https://github.com/clavichord93/MENet

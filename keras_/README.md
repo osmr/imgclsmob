@@ -150,6 +150,7 @@ Some remarks:
 | MnasNet | 31.30 | 11.45 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1145-11b6acf1.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
+[tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
 [clavichord93/MENet]: https://github.com/clavichord93/MENet
 [homles11/IGCV3]: https://github.com/homles11/IGCV3

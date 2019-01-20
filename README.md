@@ -787,6 +787,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 ## Links to the extra descriptions 
 
+- [Gluon models](gluon/README.md)
 - [PyTorch models](pytorch/README.md)
 - [Chainer models](chainer_/README.md)
 - [Keras models](keras_/README.md)

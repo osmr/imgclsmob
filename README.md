@@ -788,6 +788,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 ## Links to the extra descriptions 
 
 [Keras models](keras_/README.md)
+[TensorFlow models](tensorflow_/README.md)
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

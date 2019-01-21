@@ -185,7 +185,7 @@ Some remarks:
 | 160-MENet-8x1 (g=8) | 43.84 | 20.84 | 850,120 | 45.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.154/menet160_8x1_g8-2084-0f4fce43.pth.log)) |
 | 228-MENet-12x1 (g=3) | 34.11 | 13.16 | 1,806,568 | 152.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.131/menet228_12x1_g3-1316-5b670c42.pth.log)) |
 | 256-MENet-12x1 (g=4) | 32.65 | 12.52 | 1,888,240 | 150.65M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.152/menet256_12x1_g4-1252-14c6c86d.pth.log)) |
-| 348-MENet-12x1 (g=3) | 30.10 | 10.92 | 3,368,128 | 312.00M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet348_12x1_g3-1092-66be1a18.pth.log)) |
+| 348-MENet-12x1 (g=3) | 28.24 | 9.58 | 3,368,128 | 312.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.173/menet348_12x1_g3-0958-ad50f635.pth.log)) |
 | 352-MENet-12x1 (g=8) | 33.31 | 13.08 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1308-e91ec72c.pth.log)) |
 | 456-MENet-24x1 (g=3) | 28.40 | 9.93 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-0993-cb9fd376.pth.log)) |
 | MobileNet x0.25 | 46.26 | 22.49 | 470,072 | 44.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2249-1ad5e8fe.pth.log)) |

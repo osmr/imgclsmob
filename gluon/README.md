@@ -192,7 +192,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | 128-MENet-8x1 (g=4) | 42.10 | 19.13 | 750,796 | 45.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.103/menet128_8x1_g4-1913-0c890a76.params.log)) |
 | 160-MENet-8x1 (g=8) | 43.47 | 20.28 | 850,120 | 45.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.154/menet160_8x1_g8-2028-4f28279a.params.log)) |
 | 256-MENet-12x1 (g=4) | 32.23 | 12.16 | 1,888,240 | 150.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.152/menet256_12x1_g4-1216-7caf63d1.params.log)) |
-| 348-MENet-12x1 (g=3) | 31.17 | 11.41 | 3,368,128 | 312.00M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet348_12x1_g3-1141-ac69b246.params.log)) |
+| 348-MENet-12x1 (g=3) | 27.85 | 9.36 | 3,368,128 | 312.00M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.173/menet348_12x1_g3-0936-62c72b0b.params.log)) |
 | 352-MENet-12x1 (g=8) | 34.70 | 13.75 | 2,272,872 | 157.35M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet352_12x1_g8-1375-85779b8a.params.log)) |
 | 456-MENet-24x1 (g=3) | 29.57 | 10.43 | 5,304,784 | 567.90M | From [clavichord93/MENet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.6/menet456_24x1_g3-1043-6e777068.params.log)) |
 | MobileNet x0.25 | 45.78 | 22.18 | 470,072 | 44.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.62/mobilenet_wd4-2218-3185cdd2.params.log)) |

@@ -48,7 +48,7 @@ Some remarks:
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TensorFlow](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AlexNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1404.5997) | - | 2012 |
+| AlexNet | A+ | A+ | A+ | A+ | A+ | [link](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) | [link](https://code.google.com/archive/p/cuda-convnet2) | 2012 |
 | ZFNet | A | A | A | - | - | [link](https://arxiv.org/abs/1311.2901) | - | 2013 |
 | VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |

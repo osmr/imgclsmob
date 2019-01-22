@@ -56,6 +56,7 @@ from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
+from .models.nin_cifar10 import *
 
 __all__ = ['get_model']
 
@@ -348,6 +349,8 @@ _models = {
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn28_10_cifar10': wrn28_10_cifar10,
     'wrn40_8_cifar10': wrn40_8_cifar10,
+
+    'nin_cifar10': nin_cifar10,
 }
 
 

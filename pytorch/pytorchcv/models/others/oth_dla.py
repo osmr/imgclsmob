@@ -2,23 +2,16 @@ import math
 
 import torch
 from torch import nn
-import torch.utils.model_zoo as model_zoo
 
-from collections import namedtuple
-import json
-from os.path import exists, join
-
-import dataset
-
+__all__ = ['oth_dla34', 'oth_dla46_c', 'oth_dla46x_c', 'oth_dla60x_c', 'oth_dla60', 'oth_dla60x', 'oth_dla102',
+           'oth_dla102x', 'oth_dla102x2', 'oth_dla169']
 
 BatchNorm = nn.BatchNorm2d
 
-WEB_ROOT = 'http://dl.yf.io/dla/models'
-
-
-def get_model_url(data, name):
-    return join(WEB_ROOT, data.name,
-                '{}-{}.pth'.format(name, data.model_hash[name]))
+# WEB_ROOT = 'http://dl.yf.io/dla/models'
+# def get_model_url(data, name):
+#     return join(WEB_ROOT, data.name,
+#                 '{}-{}.pth'.format(name, data.model_hash[name]))
 
 
 def conv3x3(in_planes, out_planes, stride=1):
@@ -304,21 +297,22 @@ class DLA(nn.Module):
             return x
 
     def load_pretrained_model(self, data_name, name):
-        assert data_name in self.__dict__, \
-            'No pretrained model for {}'.format(data_name)
-        data = dataset.__dict__[data_name]
-        fc = self.fc
-        if self.num_classes != data.classes:
-            self.fc = nn.Conv2d(
-                self.channels[-1], data.classes,
-                kernel_size=1, stride=1, padding=0, bias=True)
-        try:
-            model_url = get_model_url(data, name)
-        except KeyError:
-            raise ValueError(
-                '{} trained on {} does not exist.'.format(data.name, name))
-        self.load_state_dict(model_zoo.load_url(model_url))
-        self.fc = fc
+        # assert data_name in dataset.__dict__, \
+        #     'No pretrained model for {}'.format(data_name)
+        # data = dataset.__dict__[data_name]
+        # fc = self.fc
+        # if self.num_classes != data.classes:
+        #     self.fc = nn.Conv2d(
+        #         self.channels[-1], data.classes,
+        #         kernel_size=1, stride=1, padding=0, bias=True)
+        # try:
+        #     model_url = get_model_url(data, name)
+        # except KeyError:
+        #     raise ValueError(
+        #         '{} trained on {} does not exist.'.format(data.name, name))
+        # self.load_state_dict(model_zoo.load_url(model_url))
+        # self.fc = fc
+        pass
 
 
 def oth_dla34(pretrained=None, **kwargs):  # DLA-34
@@ -452,6 +446,16 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_dla34 or weight_count == 15783832)
+        assert (model != oth_dla46_c or weight_count == 1309848)
+        assert (model != oth_dla46x_c or weight_count == 1076888)
+        assert (model != oth_dla60x_c or weight_count == 1336728)
+        assert (model != oth_dla60 or weight_count == 22334104)
+        assert (model != oth_dla60x or weight_count == 17649816)
+        assert (model != oth_dla102 or weight_count == 33731736)
+        assert (model != oth_dla102x or weight_count == 26772120)
+        assert (model != oth_dla102x2 or weight_count == 41745048)
+        assert (model != oth_dla169 or weight_count == 53989016)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

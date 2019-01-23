@@ -50,6 +50,7 @@ Some remarks:
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlexNet | A+ | A+ | A+ | A+ | A+ | [link](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) | [link](https://code.google.com/archive/p/cuda-convnet2) | 2012 |
 | ZFNet | A | A | A | - | - | [link](https://arxiv.org/abs/1311.2901) | - | 2013 |
+| NIN | B+ | B+ | B+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
 | VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |
 | BN-Inception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |

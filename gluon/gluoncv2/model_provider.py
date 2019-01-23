@@ -52,11 +52,11 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
+from .models.nin_cifar10 import *
 from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
 from .models.wrn_cifar10 import *
-from .models.nin_cifar10 import *
 
 __all__ = ['get_model']
 
@@ -335,6 +335,8 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
+    'nin_cifar10': nin_cifar10,
+
     'resnet20_cifar10': resnet20_cifar10,
     'resnet56_cifar10': resnet56_cifar10,
     'resnet110_cifar10': resnet110_cifar10,
@@ -349,8 +351,6 @@ _models = {
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn28_10_cifar10': wrn28_10_cifar10,
     'wrn40_8_cifar10': wrn40_8_cifar10,
-
-    'nin_cifar10': nin_cifar10,
 }
 
 

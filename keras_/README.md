@@ -137,7 +137,7 @@ Some remarks:
 | MobileNet x0.5 | 33.94 | 13.30 | 1,331,592 | 155.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1330-aa86f355.h5.log)) |
 | MobileNet x0.75 | 29.85 | 10.51 | 2,585,560 | 333.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1051-d200ad45.h5.log)) |
 | MobileNet x1.0 | 26.43 | 8.66 | 4,231,976 | 579.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0866-9661b555.h5.log)) |
-| FD-MobileNet x0.25 | 56.17 | 31.37 | 383,160 | 12.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3137-153934e4.h5.log)) |
+| FD-MobileNet x0.25 | 55.42 | 30.52 | 383,160 | 12.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.177/fdmobilenet_wd4-3052-6c219205.h5.log)) |
 | FD-MobileNet x0.5 | 42.61 | 19.69 | 993,928 | 41.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.83/fdmobilenet_wd2-1969-5678a212.h5.log)) |
 | FD-MobileNet x0.75 | 37.90 | 16.01 | 1,833,304 | 86.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.159/fdmobilenet_w3d4-1601-2ea5eba9.h5.log)) |
 | FD-MobileNet x1.0 | 33.80 | 13.12 | 2,901,288 | 147.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.162/fdmobilenet_w1-1312-e11d0dce.h5.log)) |

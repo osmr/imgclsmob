@@ -201,7 +201,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | MobileNet x0.5 | 33.94 | 13.30 | 1,331,592 | 155.42M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.156/mobilenet_wd2-1330-94f13ae1.params.log)) |
 | MobileNet x0.75 | 29.85 | 10.51 | 2,585,560 | 333.99M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.130/mobilenet_w3d4-1051-6361d4b4.params.log)) |
 | MobileNet x1.0 | 26.43 | 8.65 | 4,231,976 | 579.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.155/mobilenet_w1-0865-eafd91e9.params.log)) |
-| FD-MobileNet x0.25 | 56.19 | 31.38 | 383,160 | 12.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.68/fdmobilenet_wd4-3138-2fe432fd.params.log)) |
+| FD-MobileNet x0.25 | 55.44 | 30.53 | 383,160 | 12.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.177/fdmobilenet_wd4-3053-d4f18e5b.params.log)) |
 | FD-MobileNet x0.5 | 42.62 | 19.69 | 993,928 | 41.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.83/fdmobilenet_wd2-1969-242b9fa8.params.log)) |
 | FD-MobileNet x0.75 | 37.91 | 16.01 | 1,833,304 | 86.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.159/fdmobilenet_w3d4-1601-cb10c3e1.params.log)) |
 | FD-MobileNet x1.0 | 33.80 | 13.12 | 2,901,288 | 147.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.162/fdmobilenet_w1-1312-95fa0092.params.log)) |

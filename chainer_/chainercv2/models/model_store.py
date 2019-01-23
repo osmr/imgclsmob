@@ -111,7 +111,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mobilenet_wd2', '1337', '48d12ee398fa6dc23596f669fb202f08108a6ccc', 'v0.0.156'),
     ('mobilenet_w3d4', '1053', 'd7ec3192f88b7017d477fdb704ad6ad77a4c5cc1', 'v0.0.130'),
     ('mobilenet_w1', '0866', 'b888f817a2978cdeb00a09fd5e71c3f2a52ddd8c', 'v0.0.155'),
-    ('fdmobilenet_wd4', '3145', '6718fb0745135de28d98700e15fa66cae3d9bcfe', 'v0.0.68'),
+    ('fdmobilenet_wd4', '3063', '55407f3a3e3370fa2951f651f14faac3bf9a9f28', 'v0.0.177'),
     ('fdmobilenet_wd2', '1976', '6299d44272390440be808e58059219b0d57907e4', 'v0.0.83'),
     ('fdmobilenet_w3d4', '1599', 'cdfc2e043017be0166cf06cb9f49e0f516aa5d15', 'v0.0.159'),
     ('fdmobilenet_w1', '1316', '0ed6f00cbb5095eff002882e31c006edb1c5235e', 'v0.0.162'),

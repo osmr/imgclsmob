@@ -373,6 +373,8 @@ class PreConvBlock(Chain):
         Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     def __init__(self,
                  in_channels,
@@ -382,15 +384,18 @@ class PreConvBlock(Chain):
                  pad,
                  dilate=1,
                  use_bias=False,
-                 return_preact=False):
+                 return_preact=False,
+                 activate=True):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
+        self.activate = activate
 
         with self.init_scope():
             self.bn = L.BatchNormalization(
                 size=in_channels,
                 eps=1e-5)
-            self.activ = F.relu
+            if self.activate:
+                self.activ = F.relu
             self.conv = L.Convolution2D(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -402,7 +407,8 @@ class PreConvBlock(Chain):
 
     def __call__(self, x):
         x = self.bn(x)
-        x = self.activ(x)
+        if self.activate:
+            x = self.activ(x)
         if self.return_preact:
             x_pre_activ = x
         x = self.conv(x)
@@ -416,7 +422,8 @@ def pre_conv1x1_block(in_channels,
                       out_channels,
                       stride=1,
                       use_bias=False,
-                      return_preact=False):
+                      return_preact=False,
+                      activate=True):
     """
     1x1 version of the pre-activated convolution block.
 
@@ -432,6 +439,8 @@ def pre_conv1x1_block(in_channels,
         Whether the layer uses a bias vector.
     return_preact : bool, default False
         Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -440,7 +449,8 @@ def pre_conv1x1_block(in_channels,
         stride=stride,
         pad=0,
         use_bias=use_bias,
-        return_preact=return_preact)
+        return_preact=return_preact,
+        activate=activate)
 
 
 def pre_conv3x3_block(in_channels,
@@ -448,7 +458,8 @@ def pre_conv3x3_block(in_channels,
                       stride=1,
                       pad=1,
                       dilate=1,
-                      return_preact=False):
+                      return_preact=False,
+                      activate=True):
     """
     3x3 version of the pre-activated convolution block.
 
@@ -466,6 +477,8 @@ def pre_conv3x3_block(in_channels,
         Dilation value for convolution layer.
     return_preact : bool, default False
         Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -474,7 +487,8 @@ def pre_conv3x3_block(in_channels,
         stride=stride,
         pad=pad,
         dilate=dilate,
-        return_preact=return_preact)
+        return_preact=return_preact,
+        activate=activate)
 
 
 def channel_shuffle(x,

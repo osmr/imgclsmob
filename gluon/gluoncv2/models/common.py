@@ -402,6 +402,8 @@ class PreConvBlock(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     def __init__(self,
                  in_channels,
@@ -414,15 +416,18 @@ class PreConvBlock(HybridBlock):
                  use_bias=False,
                  bn_use_global_stats=False,
                  return_preact=False,
+                 activate=True,
                  **kwargs):
         super(PreConvBlock, self).__init__(**kwargs)
         self.return_preact = return_preact
+        self.activate = activate
 
         with self.name_scope():
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation("relu")
+            if self.activate:
+                self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -435,7 +440,8 @@ class PreConvBlock(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
-        x = self.activ(x)
+        if self.activate:
+            x = self.activ(x)
         if self.return_preact:
             x_pre_activ = x
         x = self.conv(x)
@@ -450,7 +456,8 @@ def pre_conv1x1_block(in_channels,
                       strides=1,
                       use_bias=False,
                       bn_use_global_stats=False,
-                      return_preact=False):
+                      return_preact=False,
+                      activate=True):
     """
     1x1 version of the pre-activated convolution block.
 
@@ -468,6 +475,8 @@ def pre_conv1x1_block(in_channels,
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -477,7 +486,8 @@ def pre_conv1x1_block(in_channels,
         padding=0,
         use_bias=use_bias,
         bn_use_global_stats=bn_use_global_stats,
-        return_preact=return_preact)
+        return_preact=return_preact,
+        activate=activate)
 
 
 def pre_conv3x3_block(in_channels,
@@ -487,7 +497,8 @@ def pre_conv3x3_block(in_channels,
                       dilation=1,
                       groups=1,
                       bn_use_global_stats=False,
-                      return_preact=False):
+                      return_preact=False,
+                      activate=True):
     """
     3x3 version of the pre-activated convolution block.
 
@@ -509,6 +520,8 @@ def pre_conv3x3_block(in_channels,
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
     """
     return PreConvBlock(
         in_channels=in_channels,
@@ -519,7 +532,8 @@ def pre_conv3x3_block(in_channels,
         dilation=dilation,
         groups=groups,
         bn_use_global_stats=bn_use_global_stats,
-        return_preact=return_preact)
+        return_preact=return_preact,
+        activate=activate)
 
 
 def channel_shuffle(x,

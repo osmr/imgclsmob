@@ -11,112 +11,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class PyrConv(Chain):
-    """
-    PyramidNet specific convolution block, with pre-activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 activate):
-        super(PyrConv, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.bn = L.BatchNormalization(
-                size=in_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = F.relu
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-
-    def __call__(self, x):
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        x = self.conv(x)
-        return x
-
-
-def pyr_conv1x1(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    1x1 version of the PyramidNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return PyrConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0,
-        activate=activate)
-
-
-def pyr_conv3x3(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    3x3 version of the PyramidNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return PyrConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=1,
-        activate=activate)
+from .common import pre_conv1x1_block, pre_conv3x3_block, SimpleSequential
+from .preresnet import PreResActivation
 
 
 class PyrBlock(Chain):
@@ -138,16 +34,14 @@ class PyrBlock(Chain):
                  stride):
         super(PyrBlock, self).__init__()
         with self.init_scope():
-            self.conv1 = pyr_conv3x3(
+            self.conv1 = pre_conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
                 activate=False)
-            self.conv2 = pyr_conv3x3(
+            self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
-                out_channels=out_channels,
-                stride=1,
-                activate=True)
+                out_channels=out_channels)
 
     def __call__(self, x):
         x = self.conv1(x)
@@ -176,21 +70,17 @@ class PyrBottleneck(Chain):
         mid_channels = out_channels // 4
 
         with self.init_scope():
-            self.conv1 = pyr_conv1x1(
+            self.conv1 = pre_conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                stride=1,
                 activate=False)
-            self.conv2 = pyr_conv3x3(
+            self.conv2 = pre_conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=stride,
-                activate=True)
-            self.conv3 = pyr_conv1x1(
+                stride=stride)
+            self.conv3 = pre_conv1x1_block(
                 in_channels=mid_channels,
-                out_channels=out_channels,
-                stride=1,
-                activate=True)
+                out_channels=out_channels)
 
     def __call__(self, x):
         x = self.conv1(x)
@@ -297,30 +187,6 @@ class PyrInitBlock(Chain):
         return x
 
 
-class PreActivation(Chain):
-    """
-    PyramidNet pure pre-activation block without convolution layer. It's used by itself as the final block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(PreActivation, self).__init__()
-        with self.init_scope():
-            self.bn = L.BatchNormalization(
-                size=in_channels,
-                eps=1e-5)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
 class PyramidNet(Chain):
     """
     PyramidNet model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
@@ -370,8 +236,7 @@ class PyramidNet(Chain):
                                 bottleneck=bottleneck))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'post_activ', PreActivation(
-                    in_channels=in_channels))
+                setattr(self.features, 'post_activ', PreResActivation(in_channels=in_channels))
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,
                     ksize=7,

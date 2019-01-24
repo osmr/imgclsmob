@@ -201,7 +201,9 @@ class PreResActivation(Chain):
                  in_channels):
         super(PreResActivation, self).__init__()
         with self.init_scope():
-            self.bn = L.BatchNormalization(size=in_channels)
+            self.bn = L.BatchNormalization(
+                size=in_channels,
+                eps=1e-5)
             self.activ = F.relu
 
     def __call__(self, x):

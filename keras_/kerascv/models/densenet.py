@@ -173,7 +173,7 @@ def densenet(channels,
     return model
 
 
-def get_densenet(num_layers,
+def get_densenet(blocks,
                  model_name=None,
                  pretrained=False,
                  root=os.path.join('~', '.keras', 'models'),
@@ -183,8 +183,8 @@ def get_densenet(num_layers,
 
     Parameters:
     ----------
-    num_layers : int
-        Number of layers.
+    blocks : int
+        Number of blocks.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -193,24 +193,24 @@ def get_densenet(num_layers,
         Location for keeping the model parameters.
     """
 
-    if num_layers == 121:
+    if blocks == 121:
         init_block_channels = 64
         growth_rate = 32
         layers = [6, 12, 24, 16]
-    elif num_layers == 161:
+    elif blocks == 161:
         init_block_channels = 96
         growth_rate = 48
         layers = [6, 12, 36, 24]
-    elif num_layers == 169:
+    elif blocks == 169:
         init_block_channels = 64
         growth_rate = 32
         layers = [6, 12, 32, 32]
-    elif num_layers == 201:
+    elif blocks == 201:
         init_block_channels = 64
         growth_rate = 32
         layers = [6, 12, 48, 32]
     else:
-        raise ValueError("Unsupported DenseNet version with number of layers {}".format(num_layers))
+        raise ValueError("Unsupported DenseNet version with number of layers {}".format(blocks))
 
     from functools import reduce
     channels = reduce(lambda xi, yi:
@@ -249,7 +249,7 @@ def densenet121(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_densenet(num_layers=121, model_name="densenet121", **kwargs)
+    return get_densenet(blocks=121, model_name="densenet121", **kwargs)
 
 
 def densenet161(**kwargs):
@@ -263,7 +263,7 @@ def densenet161(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_densenet(num_layers=161, model_name="densenet161", **kwargs)
+    return get_densenet(blocks=161, model_name="densenet161", **kwargs)
 
 
 def densenet169(**kwargs):
@@ -277,7 +277,7 @@ def densenet169(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_densenet(num_layers=169, model_name="densenet169", **kwargs)
+    return get_densenet(blocks=169, model_name="densenet169", **kwargs)
 
 
 def densenet201(**kwargs):
@@ -291,7 +291,7 @@ def densenet201(**kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_densenet(num_layers=201, model_name="densenet201", **kwargs)
+    return get_densenet(blocks=201, model_name="densenet201", **kwargs)
 
 
 def _test():

@@ -54,6 +54,7 @@ from .models.nin_cifar10 import *
 from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
+from .models.densenet_cifar10 import *
 from .models.wrn_cifar10 import *
 from .models.msdnet_cifar10 import *
 
@@ -339,6 +340,8 @@ _models = {
 
     'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
+
+    'densenet100_cifar10': densenet100_cifar10,
 
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn28_10_cifar10': wrn28_10_cifar10,

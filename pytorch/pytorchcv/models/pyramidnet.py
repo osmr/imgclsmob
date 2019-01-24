@@ -9,6 +9,7 @@ import os
 import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
+from .preresnet import PreResActivation
 
 
 class PyrConv(nn.Module):
@@ -281,27 +282,6 @@ class PyrInitBlock(nn.Module):
         return x
 
 
-class PreActivation(nn.Module):
-    """
-    PyramidNet pure pre-activation block without convolution layer. It's used by itself as the final block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(PreActivation, self).__init__()
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
 class PyramidNet(nn.Module):
     """
     PyramidNet model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
@@ -348,7 +328,7 @@ class PyramidNet(nn.Module):
                     bottleneck=bottleneck))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PreActivation(in_channels=in_channels))
+        self.features.add_module('post_activ', PreResActivation(in_channels=in_channels))
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=7,
             stride=1))

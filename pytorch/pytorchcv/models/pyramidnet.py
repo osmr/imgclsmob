@@ -3,14 +3,14 @@
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 
-__all__ = ['PyramidNet', 'pyramidnet101_a360']
+__all__ = ['PyramidNet', 'pyramidnet101_a360', 'PyrUnit']
 
 import os
 import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
-from .common import pre_conv1x1_block, pre_conv3x3_block
-from .preresnet import PreResActivation
+from common import pre_conv1x1_block, pre_conv3x3_block
+from preresnet import PreResActivation
 
 
 class PyrBlock(nn.Module):
@@ -106,7 +106,7 @@ class PyrUnit(nn.Module):
                  stride,
                  bottleneck):
         super(PyrUnit, self).__init__()
-        assert (out_channels > in_channels)
+        assert (out_channels >= in_channels)
         self.resize_identity = (stride != 1)
         self.identity_pad_width = (0, 0, 0, 0, 0, out_channels - in_channels)
 

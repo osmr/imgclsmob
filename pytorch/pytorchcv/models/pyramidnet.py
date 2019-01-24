@@ -9,109 +9,8 @@ import os
 import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
+from .common import pre_conv1x1_block, pre_conv3x3_block
 from .preresnet import PreResActivation
-
-
-class PyrConv(nn.Module):
-    """
-    PyramidNet specific convolution block, with pre-activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 activate):
-        super(PyrConv, self).__init__()
-        self.activate = activate
-
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-
-    def forward(self, x):
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        x = self.conv(x)
-        return x
-
-
-def pyr_conv1x1(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    1x1 version of the PyramidNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return PyrConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        activate=activate)
-
-
-def pyr_conv3x3(in_channels,
-                out_channels,
-                stride,
-                activate):
-    """
-    3x3 version of the PyramidNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool
-        Whether activate the convolution block.
-    """
-    return PyrConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=1,
-        activate=activate)
 
 
 class PyrBlock(nn.Module):
@@ -132,16 +31,14 @@ class PyrBlock(nn.Module):
                  out_channels,
                  stride):
         super(PyrBlock, self).__init__()
-        self.conv1 = pyr_conv3x3(
+        self.conv1 = pre_conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride,
             activate=False)
-        self.conv2 = pyr_conv3x3(
+        self.conv2 = pre_conv3x3_block(
             in_channels=out_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=True)
+            out_channels=out_channels)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -169,21 +66,17 @@ class PyrBottleneck(nn.Module):
         super(PyrBottleneck, self).__init__()
         mid_channels = out_channels // 4
 
-        self.conv1 = pyr_conv1x1(
+        self.conv1 = pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=1,
             activate=False)
-        self.conv2 = pyr_conv3x3(
+        self.conv2 = pre_conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=stride,
-            activate=True)
-        self.conv3 = pyr_conv1x1(
+            stride=stride)
+        self.conv3 = pre_conv1x1_block(
             in_channels=mid_channels,
-            out_channels=out_channels,
-            stride=1,
-            activate=True)
+            out_channels=out_channels)
 
     def forward(self, x):
         x = self.conv1(x)

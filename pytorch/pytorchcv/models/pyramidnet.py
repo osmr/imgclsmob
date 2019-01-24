@@ -9,8 +9,8 @@ import os
 import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
-from common import pre_conv1x1_block, pre_conv3x3_block
-from preresnet import PreResActivation
+from .common import pre_conv1x1_block, pre_conv3x3_block
+from .preresnet import PreResActivation
 
 
 class PyrBlock(nn.Module):

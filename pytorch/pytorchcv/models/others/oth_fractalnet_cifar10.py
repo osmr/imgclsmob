@@ -153,8 +153,8 @@ class FractalBlock(nn.Module):
 
         if self.training:
             mask = self.drop_mask(out.size(1), global_cols, n_cols).to(out.device) # [n_cols, B]
-            mask_size = mask.size()
-            mask = mask.view(*mask_size, 1, 1, 1)  # unsqueeze to [n_cols, B, 1, 1, 1]
+            n_cols, B = mask.size()
+            mask = mask.view(n_cols, B, 1, 1, 1)  # unsqueeze to [n_cols, B, 1, 1, 1]
             n_alive = mask.sum(dim=0) # [B, 1, 1, 1]
             masked_out = out * mask # [n_cols, B, C, H, W]
             n_alive[n_alive == 0.] = 1. # all-dead cases

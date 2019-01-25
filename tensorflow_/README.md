@@ -118,6 +118,7 @@ Some remarks:
 | DarkNet-53 | 21.42 | 5.55 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0555-49816dbf.tf.npz.log)) |
 | SqueezeNet v1.0 | 39.18 | 17.58 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1758-fc6384ff.tf.npz.log)) |
 | SqueezeNet v1.1 | 39.14 | 17.39 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-48945577.tf.npz.log)) |
+| SqueezeResNet v1.0 | 39.36 | 17.82 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.178/squeezeresnet_v1_0-1782-bafdf6ae.tf.npz.log)) |
 | SqueezeResNet v1.1 | 39.75 | 17.92 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.79/squeezeresnet_v1_1-1792-44c17928.tf.npz.log)) |
 | 1.0-SqNxt-23 | 45.41 | 21.08 | 724,056 | 287.28M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.171/sqnxt23_w1-2108-62670200.tf.npz.log)) |
 | 1.0-SqNxt-23v5 | 44.68 | 20.77 | 921,816 | 285.82M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.172/sqnxt23v5_w1-2077-ebc0c53d.tf.npz.log)) |

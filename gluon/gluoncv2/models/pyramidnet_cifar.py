@@ -165,12 +165,14 @@ def get_pyramidnet_cifar(classes,
     return net
 
 
-def pyramidnet110_a48_cifar10(**kwargs):
+def pyramidnet110_a48_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=48) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -179,7 +181,7 @@ def pyramidnet110_a48_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=110,
         alpha=48,
         bottleneck=False,
@@ -187,12 +189,14 @@ def pyramidnet110_a48_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet110_a48_cifar100(**kwargs):
+def pyramidnet110_a48_cifar100(classes=100, **kwargs):
     """
     PyramidNet-110 (a=48) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -201,7 +205,7 @@ def pyramidnet110_a48_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=110,
         alpha=48,
         bottleneck=False,
@@ -209,12 +213,14 @@ def pyramidnet110_a48_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet110_a84_cifar10(**kwargs):
+def pyramidnet110_a84_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=84) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -223,7 +229,7 @@ def pyramidnet110_a84_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=110,
         alpha=84,
         bottleneck=False,
@@ -231,12 +237,14 @@ def pyramidnet110_a84_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet110_a84_cifar100(**kwargs):
+def pyramidnet110_a84_cifar100(classes=100, **kwargs):
     """
     PyramidNet-110 (a=84) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -245,7 +253,7 @@ def pyramidnet110_a84_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=110,
         alpha=84,
         bottleneck=False,
@@ -253,12 +261,14 @@ def pyramidnet110_a84_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet110_a270_cifar10(**kwargs):
+def pyramidnet110_a270_cifar10(classes=10, **kwargs):
     """
     PyramidNet-110 (a=270) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -267,7 +277,7 @@ def pyramidnet110_a270_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=110,
         alpha=270,
         bottleneck=False,
@@ -275,13 +285,15 @@ def pyramidnet110_a270_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet110_a270_cifar100(**kwargs):
+def pyramidnet110_a270_cifar100(classes=100, **kwargs):
     """
     PyramidNet-110 (a=270) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -290,7 +302,7 @@ def pyramidnet110_a270_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=110,
         alpha=270,
         bottleneck=False,
@@ -298,13 +310,15 @@ def pyramidnet110_a270_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet164_a270_bn_cifar10(**kwargs):
+def pyramidnet164_a270_bn_cifar10(classes=10, **kwargs):
     """
     PyramidNet-164 (a=270, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -313,7 +327,7 @@ def pyramidnet164_a270_bn_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=164,
         alpha=270,
         bottleneck=True,
@@ -321,13 +335,15 @@ def pyramidnet164_a270_bn_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet164_a270_bn_cifar100(**kwargs):
+def pyramidnet164_a270_bn_cifar100(classes=100, **kwargs):
     """
     PyramidNet-164 (a=270, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -336,7 +352,7 @@ def pyramidnet164_a270_bn_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=164,
         alpha=270,
         bottleneck=True,
@@ -344,13 +360,15 @@ def pyramidnet164_a270_bn_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet200_a240_bn_cifar10(**kwargs):
+def pyramidnet200_a240_bn_cifar10(classes=10, **kwargs):
     """
     PyramidNet-200 (a=240, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -359,7 +377,7 @@ def pyramidnet200_a240_bn_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=200,
         alpha=240,
         bottleneck=True,
@@ -367,13 +385,15 @@ def pyramidnet200_a240_bn_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet200_a240_bn_cifar100(**kwargs):
+def pyramidnet200_a240_bn_cifar100(classes=100, **kwargs):
     """
     PyramidNet-200 (a=240, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -382,7 +402,7 @@ def pyramidnet200_a240_bn_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=200,
         alpha=240,
         bottleneck=True,
@@ -390,13 +410,15 @@ def pyramidnet200_a240_bn_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet236_a220_bn_cifar10(**kwargs):
+def pyramidnet236_a220_bn_cifar10(classes=10, **kwargs):
     """
     PyramidNet-236 (a=220, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -405,7 +427,7 @@ def pyramidnet236_a220_bn_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=236,
         alpha=220,
         bottleneck=True,
@@ -413,13 +435,15 @@ def pyramidnet236_a220_bn_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet236_a220_bn_cifar100(**kwargs):
+def pyramidnet236_a220_bn_cifar100(classes=100, **kwargs):
     """
     PyramidNet-236 (a=220, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -428,7 +452,7 @@ def pyramidnet236_a220_bn_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=236,
         alpha=220,
         bottleneck=True,
@@ -436,13 +460,15 @@ def pyramidnet236_a220_bn_cifar100(**kwargs):
         **kwargs)
 
 
-def pyramidnet272_a200_bn_cifar10(**kwargs):
+def pyramidnet272_a200_bn_cifar10(classes=10, **kwargs):
     """
     PyramidNet-272 (a=200, bn) model for CIFAR-10 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -451,7 +477,7 @@ def pyramidnet272_a200_bn_cifar10(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=10,
+        classes=classes,
         blocks=272,
         alpha=200,
         bottleneck=True,
@@ -459,13 +485,15 @@ def pyramidnet272_a200_bn_cifar10(**kwargs):
         **kwargs)
 
 
-def pyramidnet272_a200_bn_cifar100(**kwargs):
+def pyramidnet272_a200_bn_cifar100(classes=100, **kwargs):
     """
     PyramidNet-272 (a=200, bn) model for CIFAR-100 from 'Deep Pyramidal Residual Networks,'
     https://arxiv.org/abs/1610.02915.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -474,7 +502,7 @@ def pyramidnet272_a200_bn_cifar100(**kwargs):
         Location for keeping the model parameters.
     """
     return get_pyramidnet_cifar(
-        classes=100,
+        classes=classes,
         blocks=272,
         alpha=200,
         bottleneck=True,
@@ -507,7 +535,7 @@ def _test():
 
     for model, classes in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, classes=classes)
 
         ctx = mx.cpu()
         if not pretrained:

@@ -112,7 +112,7 @@ class PyrUnit(Chain):
         super(PyrUnit, self).__init__()
         assert (out_channels >= in_channels)
         self.resize_identity = (stride != 1)
-        if  out_channels > in_channels:
+        if out_channels > in_channels:
             self.identity_pad_width = ((0, 0), (0, out_channels - in_channels), (0, 0), (0, 0))
         else:
             self.identity_pad_width = None

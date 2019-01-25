@@ -49,6 +49,7 @@ from .models.nin_cifar10 import *
 from .models.resnet_cifar10 import *
 from .models.preresnet_cifar10 import *
 from .models.resnext_cifar10 import *
+from .models.pyramidnet_cifar import *
 from .models.densenet_cifar10 import *
 from .models.wrn_cifar10 import *
 
@@ -315,6 +316,21 @@ _models = {
 
     'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
+
+    'pyramidnet110_a48_cifar10': pyramidnet110_a48_cifar10,
+    'pyramidnet110_a48_cifar100': pyramidnet110_a48_cifar100,
+    'pyramidnet110_a84_cifar10': pyramidnet110_a84_cifar10,
+    'pyramidnet110_a84_cifar100': pyramidnet110_a84_cifar100,
+    'pyramidnet110_a270_cifar10': pyramidnet110_a270_cifar10,
+    'pyramidnet110_a270_cifar100': pyramidnet110_a270_cifar100,
+    'pyramidnet164_a270_bn_cifar10': pyramidnet164_a270_bn_cifar10,
+    'pyramidnet164_a270_bn_cifar100': pyramidnet164_a270_bn_cifar100,
+    'pyramidnet200_a240_bn_cifar10': pyramidnet200_a240_bn_cifar10,
+    'pyramidnet200_a240_bn_cifar100': pyramidnet200_a240_bn_cifar100,
+    'pyramidnet236_a220_bn_cifar10': pyramidnet236_a220_bn_cifar10,
+    'pyramidnet236_a220_bn_cifar100': pyramidnet236_a220_bn_cifar100,
+    'pyramidnet272_a200_bn_cifar10': pyramidnet272_a200_bn_cifar10,
+    'pyramidnet272_a200_bn_cifar100': pyramidnet272_a200_bn_cifar100,
 
     'densenet100_cifar10': densenet100_cifar10,
 

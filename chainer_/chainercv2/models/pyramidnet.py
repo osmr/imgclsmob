@@ -3,7 +3,7 @@
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 
-__all__ = ['PyramidNet', 'pyramidnet101_a360']
+__all__ = ['PyramidNet', 'pyramidnet101_a360', 'PyrUnit']
 
 import os
 import chainer.functions as F
@@ -110,9 +110,12 @@ class PyrUnit(Chain):
                  stride,
                  bottleneck):
         super(PyrUnit, self).__init__()
-        assert (out_channels > in_channels)
+        assert (out_channels >= in_channels)
         self.resize_identity = (stride != 1)
-        self.identity_pad_width = ((0, 0), (0, out_channels - in_channels), (0, 0), (0, 0))
+        if  out_channels > in_channels:
+            self.identity_pad_width = ((0, 0), (0, out_channels - in_channels), (0, 0), (0, 0))
+        else:
+            self.identity_pad_width = None
 
         with self.init_scope():
             if bottleneck:
@@ -140,7 +143,8 @@ class PyrUnit(Chain):
         x = self.bn(x)
         if self.resize_identity:
             identity = self.identity_pool(identity)
-        identity = F.pad(identity, pad_width=self.identity_pad_width, mode="constant", constant_values=0)
+        if self.identity_pad_width is not None:
+            identity = F.pad(identity, pad_width=self.identity_pad_width, mode="constant", constant_values=0)
         x = x + identity
         return x
 

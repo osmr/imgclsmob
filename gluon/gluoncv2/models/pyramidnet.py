@@ -3,7 +3,7 @@
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 
-__all__ = ['PyramidNet', 'pyramidnet101_a360']
+__all__ = ['PyramidNet', 'pyramidnet101_a360', 'PyrUnit']
 
 import os
 from mxnet import cpu
@@ -124,7 +124,7 @@ class PyrUnit(HybridBlock):
                  bottleneck,
                  **kwargs):
         super(PyrUnit, self).__init__(**kwargs)
-        assert (out_channels > in_channels)
+        assert (out_channels >= in_channels)
         self.resize_identity = (strides != 1)
         self.identity_pad_width = out_channels - in_channels
 
@@ -156,10 +156,11 @@ class PyrUnit(HybridBlock):
         x = self.bn(x)
         if self.resize_identity:
             identity = self.identity_pool(identity)
-        identity = F.concat(
-            identity,
-            F.zeros_like(F.slice_axis(x, axis=1, begin=0, end=self.identity_pad_width)),
-            dim=1)
+        if self.identity_pad_width > 0:
+            identity = F.concat(
+                identity,
+                F.zeros_like(F.slice_axis(x, axis=1, begin=0, end=self.identity_pad_width)),
+                dim=1)
         x = x + identity
         return x
 

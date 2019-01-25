@@ -42,8 +42,9 @@ class CIFAR10DenseNet(HybridBlock):
                  dropout_rate=0.0,
                  in_channels=3,
                  in_size=(32, 32),
-                 classes=10):
-        super(CIFAR10DenseNet, self).__init__()
+                 classes=10,
+                 **kwargs):
+        super(CIFAR10DenseNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 

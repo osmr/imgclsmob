@@ -1,3 +1,7 @@
+"""
+    CIFAR dataset routines.
+"""
+
 import numpy as np
 import chainer
 from chainer import iterators
@@ -5,15 +9,25 @@ from chainer import Chain
 from chainer.dataset import DatasetMixin
 from chainer.datasets import cifar
 
-__all__ = ['add_dataset_parser_arguments', 'get_val_data_iterator', 'get_data_iterators', 'CIFAR10Predictor']
+__all__ = ['add_dataset_parser_arguments', 'get_val_data_iterator', 'get_data_iterators', 'CIFARPredictor']
 
 
-def add_dataset_parser_arguments(parser):
-    parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=10,
-        help='number of classes')
+def add_dataset_parser_arguments(parser,
+                                 dataset_name):
+    if dataset_name == "CIFAR10":
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=10,
+            help='number of classes')
+    elif dataset_name == "CIFAR100":
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=100,
+            help='number of classes')
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
     parser.add_argument(
         '--in-channels',
         type=int,
@@ -21,13 +35,13 @@ def add_dataset_parser_arguments(parser):
         help='number of input channels')
 
 
-class CIFAR10Predictor(Chain):
+class CIFARPredictor(Chain):
 
     def __init__(self,
                  base_model,
                  mean=(0.4914, 0.4822, 0.4465),
                  std=(0.2023, 0.1994, 0.2010)):
-        super(CIFAR10Predictor, self).__init__()
+        super(CIFARPredictor, self).__init__()
         self.mean = np.array(mean, np.float32)[:, np.newaxis, np.newaxis]
         self.std = np.array(std, np.float32)[:, np.newaxis, np.newaxis]
         with self.init_scope():
@@ -49,10 +63,17 @@ class CIFAR10Predictor(Chain):
         return output
 
 
-def get_val_data_iterator(batch_size,
+def get_val_data_iterator(dataset_name,
+                          batch_size,
                           num_workers):
 
-    _, test_ds = cifar.get_cifar10()
+    if dataset_name == "CIFAR10":
+        _, test_ds = cifar.get_cifar10()
+    elif dataset_name == "CIFAR100":
+        _, test_ds = cifar.get_cifar100()
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
     val_dataset = test_ds
     val_dataset_len = len(val_dataset)
 
@@ -67,7 +88,7 @@ def get_val_data_iterator(batch_size,
     return val_iterator, val_dataset_len
 
 
-class PreprocessedCIFAR10Dataset(DatasetMixin):
+class PreprocessedCIFARDataset(DatasetMixin):
 
     def __init__(self,
                  train,
@@ -95,7 +116,7 @@ class PreprocessedCIFAR10Dataset(DatasetMixin):
 def get_data_iterators(batch_size,
                        num_workers):
 
-    train_dataset = PreprocessedCIFAR10Dataset(train=True)
+    train_dataset = PreprocessedCIFARDataset(train=True)
     train_iterator = iterators.MultiprocessIterator(
         dataset=train_dataset,
         batch_size=batch_size,
@@ -103,7 +124,7 @@ def get_data_iterators(batch_size,
         shuffle=True,
         n_processes=num_workers)
 
-    val_dataset = PreprocessedCIFAR10Dataset(train=False)
+    val_dataset = PreprocessedCIFARDataset(train=False)
     val_iterator = iterators.MultiprocessIterator(
         dataset=val_dataset,
         batch_size=batch_size,

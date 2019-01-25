@@ -1,9 +1,9 @@
 """
-    NIN for CIFAR-10, implemented in Chainer.
+    NIN for CIFAR, implemented in Chainer.
     Original paper: 'Network In Network,' https://arxiv.org/abs/1312.4400.
 """
 
-__all__ = ['CIFAR10NIN', 'nin_cifar10']
+__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100']
 
 import os
 import chainer.functions as F
@@ -55,9 +55,9 @@ class NINConv(Chain):
         return x
 
 
-class CIFAR10NIN(Chain):
+class CIFARNIN(Chain):
     """
-    NIN model for CIFAR-10 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+    NIN model for CIFAR from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
     Parameters:
     ----------
@@ -78,7 +78,7 @@ class CIFAR10NIN(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(CIFAR10NIN, self).__init__()
+        super(CIFARNIN, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -136,15 +136,18 @@ class CIFAR10NIN(Chain):
         return x
 
 
-def get_nin_cifar10(model_name=None,
-                    pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
-                    **kwargs):
+def get_nin_cifar(classes,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join('~', '.chainer', 'models'),
+                  **kwargs):
     """
-    Create NIN model for CIFAR-10 with specific parameters.
+    Create NIN model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -156,9 +159,10 @@ def get_nin_cifar10(model_name=None,
     channels = [[192, 160, 96], [192, 192, 192], [192, 192]]
     first_ksizes = [5, 5, 3]
 
-    net = CIFAR10NIN(
+    net = CIFARNIN(
         channels=channels,
         first_ksizes=first_ksizes,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -174,18 +178,36 @@ def get_nin_cifar10(model_name=None,
     return net
 
 
-def nin_cifar10(**kwargs):
+def nin_cifar10(classes=10, **kwargs):
     """
     NIN model for CIFAR-10 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_nin_cifar10(model_name="nin_cifar10", **kwargs)
+    return get_nin_cifar(classes=classes, model_name="nin_cifar10", **kwargs)
+
+
+def nin_cifar100(classes=100, **kwargs):
+    """
+    NIN model for CIFAR-100 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_nin_cifar(classes=classes, model_name="nin_cifar100", **kwargs)
 
 
 def _test():
@@ -197,19 +219,21 @@ def _test():
     pretrained = False
 
     models = [
-        nin_cifar10,
+        (nin_cifar10, 10),
+        (nin_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != nin_cifar10 or weight_count == 966986)
+        assert (model != nin_cifar100 or weight_count == 984356)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

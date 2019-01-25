@@ -11,17 +11,24 @@ from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
-from chainer_.cifar10 import add_dataset_parser_arguments
-from chainer_.cifar10 import get_val_data_iterator
-from chainer_.cifar10 import CIFAR10Predictor
+from chainer_.cifar import add_dataset_parser_arguments
+from chainer_.cifar import get_val_data_iterator
+from chainer_.cifar import CIFARPredictor
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Chainer/CIFAR-10)',
+        description='Evaluate a model for image classification (Chainer/CIFAR)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    add_dataset_parser_arguments(parser)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10 and CIFAR100')
+
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -90,7 +97,7 @@ def test(net,
          extended_log=False):
     tic = time.time()
 
-    predictor = CIFAR10Predictor(base_model=net)
+    predictor = CIFARPredictor(base_model=net)
 
     if num_gpus > 0:
         predictor.to_gpu()
@@ -149,6 +156,7 @@ def main():
         num_gpus=num_gpus)
 
     val_iterator, val_dataset_len = get_val_data_iterator(
+        dataset_name=args.dataset,
         batch_size=args.batch_size,
         num_workers=args.num_workers)
 

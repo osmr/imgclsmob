@@ -1,9 +1,10 @@
 """
-    PreResNet for CIFAR-10, implemented in PyTorch.
-    Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    WRN for CIFAR, implemented in PyTorch.
+    Original paper: 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 """
 
-__all__ = ['CIFAR10PreResNet', 'preresnet20_cifar10', 'preresnet56_cifar10', 'preresnet110_cifar10']
+__all__ = ['CIFARWRN', 'wrn16_10_cifar10', 'wrn16_10_cifar100', 'wrn28_10_cifar10', 'wrn28_10_cifar100',
+           'wrn40_8_cifar10', 'wrn40_8_cifar100']
 
 import os
 import torch.nn as nn
@@ -12,9 +13,9 @@ from .common import conv3x3
 from .preresnet import PreResUnit, PreResActivation
 
 
-class CIFAR10PreResNet(nn.Module):
+class CIFARWRN(nn.Module):
     """
-    PreResNet model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    CIFAR WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -35,7 +36,7 @@ class CIFAR10PreResNet(nn.Module):
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
-        super(CIFAR10PreResNet, self).__init__()
+        super(CIFARWRN, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -81,18 +82,24 @@ class CIFAR10PreResNet(nn.Module):
         return x
 
 
-def get_preresnet_cifar10(blocks,
-                          model_name=None,
-                          pretrained=False,
-                          root=os.path.join('~', '.torch', 'models'),
-                          **kwargs):
+def get_wrn(num_classes,
+            blocks,
+            width_factor,
+            model_name=None,
+            pretrained=False,
+            root=os.path.join('~', '.torch', 'models'),
+            **kwargs):
     """
-    Create PreResNet model for CIFAR-10 with specific parameters.
+    Create WRN model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    num_classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
+    width_factor : int
+        Wide scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -101,16 +108,17 @@ def get_preresnet_cifar10(blocks,
         Location for keeping the model parameters.
     """
 
-    assert ((blocks - 2) % 6 == 0)
-    layers = [(blocks - 2) // 6] * 3
+    assert ((blocks - 4) % 6 == 0)
+    layers = [(blocks - 4) // 6] * 3
     channels_per_layers = [16, 32, 64]
     init_block_channels = 16
 
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+    channels = [[ci * width_factor] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = CIFAR10PreResNet(
+    net = CIFARWRN(
         channels=channels,
         init_block_channels=init_block_channels,
+        num_classes=num_classes,
         **kwargs)
 
     if pretrained:
@@ -125,49 +133,100 @@ def get_preresnet_cifar10(blocks,
     return net
 
 
-def preresnet20_cifar10(**kwargs):
+def wrn16_10_cifar10(num_classes=10, **kwargs):
     """
-    PreResNet-20 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    num_classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar10(blocks=20, model_name="preresnet20_cifar10", **kwargs)
+    return get_wrn(num_classes=num_classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
 
 
-def preresnet56_cifar10(**kwargs):
+def wrn16_10_cifar100(num_classes=100, **kwargs):
     """
-    PreResNet-56 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    WRN-16-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    num_classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar10(blocks=56, model_name="preresnet56_cifar10", **kwargs)
+    return get_wrn(num_classes=num_classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar100", **kwargs)
 
 
-def preresnet110_cifar10(**kwargs):
+def wrn28_10_cifar10(num_classes=10, **kwargs):
     """
-    PreResNet-110 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    num_classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar10(blocks=110, model_name="preresnet110_cifar10", **kwargs)
+    return get_wrn(num_classes=num_classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
+
+
+def wrn28_10_cifar100(num_classes=100, **kwargs):
+    """
+    WRN-28-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(num_classes=num_classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar100", **kwargs)
+
+
+def wrn40_8_cifar10(num_classes=10, **kwargs):
+    """
+    WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(num_classes=num_classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
+
+
+def wrn40_8_cifar100(num_classes=100, **kwargs):
+    """
+    WRN-40-8 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(num_classes=num_classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar100", **kwargs)
 
 
 def _calc_width(net):
@@ -186,12 +245,15 @@ def _test():
     pretrained = False
 
     models = [
-        preresnet20_cifar10,
-        preresnet56_cifar10,
-        preresnet110_cifar10,
+        (wrn16_10_cifar10, 10),
+        (wrn16_10_cifar100, 100),
+        (wrn28_10_cifar10, 10),
+        (wrn28_10_cifar100, 100),
+        (wrn40_8_cifar10, 10),
+        (wrn40_8_cifar100, 100),
     ]
 
-    for model in models:
+    for model, num_classes in models:
 
         net = model(pretrained=pretrained)
 
@@ -199,13 +261,16 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != preresnet20_cifar10 or weight_count == 272282)
-        assert (model != preresnet56_cifar10 or weight_count == 855578)
-        assert (model != preresnet110_cifar10 or weight_count == 1730522)
+        assert (model != wrn16_10_cifar10 or weight_count == 17116634)
+        assert (model != wrn16_10_cifar100 or weight_count == 17174324)
+        assert (model != wrn28_10_cifar10 or weight_count == 36479194)
+        assert (model != wrn28_10_cifar100 or weight_count == 36536884)
+        assert (model != wrn40_8_cifar10 or weight_count == 35748314)
+        assert (model != wrn40_8_cifar100 or weight_count == 35794484)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)
-        assert (tuple(y.size()) == (1, 10))
+        assert (tuple(y.size()) == (1, num_classes))
 
 
 if __name__ == "__main__":

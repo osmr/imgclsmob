@@ -1,9 +1,10 @@
 """
-    ResNeXt for CIFAR-10, implemented in Chainer.
+    ResNeXt for CIFAR, implemented in Chainer.
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['CIFAR10ResNeXt', 'resnext29_32x4d_cifar10', 'resnext29_16x64d_cifar10']
+__all__ = ['CIFARResNeXt', 'resnext29_32x4d_cifar10', 'resnext29_32x4d_cifar100', 'resnext29_16x64d_cifar10',
+           'resnext29_16x64d_cifar100']
 
 import os
 import chainer.functions as F
@@ -15,9 +16,9 @@ from .common import conv3x3_block, SimpleSequential
 from .resnext import ResNeXtUnit
 
 
-class CIFAR10ResNeXt(Chain):
+class CIFARResNeXt(Chain):
     """
-    ResNeXt model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    ResNeXt model for CIFAR from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
     Parameters:
@@ -45,7 +46,7 @@ class CIFAR10ResNeXt(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(CIFAR10ResNeXt, self).__init__()
+        super(CIFARResNeXt, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -89,18 +90,21 @@ class CIFAR10ResNeXt(Chain):
         return x
 
 
-def get_resnext_cifar10(blocks,
-                        cardinality,
-                        bottleneck_width,
-                        model_name=None,
-                        pretrained=False,
-                        root=os.path.join('~', '.chainer', 'models'),
-                        **kwargs):
+def get_resnext_cifar(classes,
+                      blocks,
+                      cardinality,
+                      bottleneck_width,
+                      model_name=None,
+                      pretrained=False,
+                      root=os.path.join('~', '.chainer', 'models'),
+                      **kwargs):
     """
-    ResNeXt model for CIFAR-10 with specific parameters.
+    ResNeXt model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
     cardinality: int
@@ -122,11 +126,12 @@ def get_resnext_cifar10(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = CIFAR10ResNeXt(
+    net = CIFARResNeXt(
         channels=channels,
         init_block_channels=init_block_channels,
         cardinality=cardinality,
         bottleneck_width=bottleneck_width,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -142,36 +147,76 @@ def get_resnext_cifar10(blocks,
     return net
 
 
-def resnext29_32x4d_cifar10(**kwargs):
+def resnext29_32x4d_cifar10(classes=10, **kwargs):
     """
     ResNeXt-29 (32x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnext_cifar10(blocks=29, cardinality=32, bottleneck_width=4, model_name="resnext29_32x4d_cifar10",
-                               **kwargs)
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=32, bottleneck_width=4,
+                             model_name="resnext29_32x4d_cifar10", **kwargs)
 
 
-def resnext29_16x64d_cifar10(**kwargs):
+def resnext29_32x4d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-29 (32x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=32, bottleneck_width=4,
+                             model_name="resnext29_32x4d_cifar100", **kwargs)
+
+
+def resnext29_16x64d_cifar10(classes=10, **kwargs):
     """
     ResNeXt-29 (16x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
     http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnext_cifar10(blocks=29, cardinality=16, bottleneck_width=64, model_name="resnext29_16x64d_cifar10",
-                               **kwargs)
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=16, bottleneck_width=64,
+                             model_name="resnext29_16x64d_cifar10", **kwargs)
+
+
+def resnext29_16x64d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-29 (16x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=16, bottleneck_width=64,
+                             model_name="resnext29_16x64d_cifar100", **kwargs)
 
 
 def _test():
@@ -183,21 +228,25 @@ def _test():
     pretrained = False
 
     models = [
-        resnext29_32x4d_cifar10,
-        resnext29_16x64d_cifar10,
+        (resnext29_32x4d_cifar10, 10),
+        (resnext29_32x4d_cifar100, 100),
+        (resnext29_16x64d_cifar10, 10),
+        (resnext29_16x64d_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnext29_32x4d_cifar10 or weight_count == 4775754)
+        assert (model != resnext29_32x4d_cifar100 or weight_count == 4868004)
         assert (model != resnext29_16x64d_cifar10 or weight_count == 68155210)
+        assert (model != resnext29_16x64d_cifar100 or weight_count == 68247460)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

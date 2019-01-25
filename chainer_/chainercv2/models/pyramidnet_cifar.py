@@ -3,7 +3,7 @@
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 
-__all__ = ['PyramidNet', 'pyramidnet110_a48_cifar10', 'pyramidnet110_a48_cifar100', 'pyramidnet110_a84_cifar10',
+__all__ = ['CIFARPyramidNet', 'pyramidnet110_a48_cifar10', 'pyramidnet110_a48_cifar100', 'pyramidnet110_a84_cifar10',
            'pyramidnet110_a84_cifar100', 'pyramidnet110_a270_cifar10', 'pyramidnet110_a270_cifar100',
            'pyramidnet164_a270_bn_cifar10', 'pyramidnet164_a270_bn_cifar100', 'pyramidnet200_a240_bn_cifar10',
            'pyramidnet200_a240_bn_cifar100', 'pyramidnet236_a220_bn_cifar10', 'pyramidnet236_a220_bn_cifar100',
@@ -20,7 +20,7 @@ from .preresnet import PreResActivation
 from .pyramidnet import PyrUnit
 
 
-class PyramidNet(Chain):
+class CIFARPyramidNet(Chain):
     """
     PyramidNet model for CIFAR from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 
@@ -46,7 +46,7 @@ class PyramidNet(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(PyramidNet, self).__init__()
+        super(CIFARPyramidNet, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -141,7 +141,7 @@ def get_pyramidnet_cifar(classes,
     if bottleneck:
         channels = [[cij * 4 for cij in ci] for ci in channels]
 
-    net = PyramidNet(
+    net = CIFARPyramidNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,

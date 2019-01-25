@@ -52,13 +52,13 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-from .models.nin_cifar10 import *
-from .models.resnet_cifar10 import *
-from .models.preresnet_cifar10 import *
-from .models.resnext_cifar10 import *
+from .models.nin_cifar import *
+from .models.resnet_cifar import *
+from .models.preresnet_cifar import *
+from .models.resnext_cifar import *
 from .models.pyramidnet_cifar import *
-from .models.densenet_cifar10 import *
-from .models.wrn_cifar10 import *
+from .models.densenet_cifar import *
+from .models.wrn_cifar import *
 
 __all__ = ['get_model']
 
@@ -338,17 +338,38 @@ _models = {
     'pnasnet5large': pnasnet5large,
 
     'nin_cifar10': nin_cifar10,
+    'nin_cifar100': nin_cifar100,
 
     'resnet20_cifar10': resnet20_cifar10,
+    'resnet20_cifar100': resnet20_cifar100,
     'resnet56_cifar10': resnet56_cifar10,
+    'resnet56_cifar100': resnet56_cifar100,
     'resnet110_cifar10': resnet110_cifar10,
+    'resnet110_cifar100': resnet110_cifar100,
+    'resnet164bn_cifar10': resnet164bn_cifar10,
+    'resnet164bn_cifar100': resnet164bn_cifar100,
+    'resnet1001_cifar10': resnet1001_cifar10,
+    'resnet1001_cifar100': resnet1001_cifar100,
+    'resnet1202_cifar10': resnet1202_cifar10,
+    'resnet1202_cifar100': resnet1202_cifar100,
 
     'preresnet20_cifar10': preresnet20_cifar10,
+    'preresnet20_cifar100': preresnet20_cifar100,
     'preresnet56_cifar10': preresnet56_cifar10,
+    'preresnet56_cifar100': preresnet56_cifar100,
     'preresnet110_cifar10': preresnet110_cifar10,
+    'preresnet110_cifar100': preresnet110_cifar100,
+    'preresnet164bn_cifar10': preresnet164bn_cifar10,
+    'preresnet164bn_cifar100': preresnet164bn_cifar100,
+    'preresnet1001_cifar10': preresnet1001_cifar10,
+    'preresnet1001_cifar100': preresnet1001_cifar100,
+    'preresnet1202_cifar10': preresnet1202_cifar10,
+    'preresnet1202_cifar100': preresnet1202_cifar100,
 
     'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
+    'resnext29_32x4d_cifar100': resnext29_32x4d_cifar100,
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
+    'resnext29_16x64d_cifar100': resnext29_16x64d_cifar100,
 
     'pyramidnet110_a48_cifar10': pyramidnet110_a48_cifar10,
     'pyramidnet110_a48_cifar100': pyramidnet110_a48_cifar100,
@@ -366,10 +387,14 @@ _models = {
     'pyramidnet272_a200_bn_cifar100': pyramidnet272_a200_bn_cifar100,
 
     'densenet100_cifar10': densenet100_cifar10,
+    'densenet100_cifar100': densenet100_cifar100,
 
     'wrn16_10_cifar10': wrn16_10_cifar10,
+    'wrn16_10_cifar100': wrn16_10_cifar100,
     'wrn28_10_cifar10': wrn28_10_cifar10,
+    'wrn28_10_cifar100': wrn28_10_cifar100,
     'wrn40_8_cifar10': wrn40_8_cifar10,
+    'wrn40_8_cifar100': wrn40_8_cifar100,
 }
 
 

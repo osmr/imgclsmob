@@ -1,9 +1,9 @@
 """
-    DenseNet for CIFAR-10, implemented in Chainer.
+    DenseNet for CIFAR, implemented in Chainer.
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['CIFAR10DenseNet', 'densenet100_cifar10']
+__all__ = ['CIFARDenseNet', 'densenet100_cifar10', 'densenet100_cifar100']
 
 import os
 import chainer.functions as F
@@ -16,9 +16,9 @@ from .preresnet import PreResActivation
 from .densenet import DenseUnit, TransitionBlock
 
 
-class CIFAR10DenseNet(Chain):
+class CIFARDenseNet(Chain):
     """
-    DenseNet model for CIFAR-10 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+    DenseNet model for CIFAR from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
@@ -42,7 +42,7 @@ class CIFAR10DenseNet(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(CIFAR10DenseNet, self).__init__()
+        super(CIFARDenseNet, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -89,17 +89,20 @@ class CIFAR10DenseNet(Chain):
         return x
 
 
-def get_densenet_cifar10(blocks,
-                         growth_rate,
-                         model_name=None,
-                         pretrained=False,
-                         root=os.path.join('~', '.chainer', 'models'),
-                         **kwargs):
+def get_densenet_cifar(classes,
+                       blocks,
+                       growth_rate,
+                       model_name=None,
+                       pretrained=False,
+                       root=os.path.join('~', '.chainer', 'models'),
+                       **kwargs):
     """
     Create DenseNet model for CIFAR-10 with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
     growth_rate : int
@@ -125,9 +128,10 @@ def get_densenet_cifar10(blocks,
         layers,
         [[init_block_channels * 2]])[1:]
 
-    net = CIFAR10DenseNet(
+    net = CIFARDenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -143,18 +147,36 @@ def get_densenet_cifar10(blocks,
     return net
 
 
-def densenet100_cifar10(**kwargs):
+def densenet100_cifar10(classes=10, **kwargs):
     """
     DenseNet-100 model for CIFAR-10 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_densenet_cifar10(blocks=100, growth_rate=12, model_name="densenet100_cifar10", **kwargs)
+    return get_densenet_cifar(classes=classes, blocks=100, growth_rate=12, model_name="densenet100_cifar10", **kwargs)
+
+
+def densenet100_cifar100(classes=100, **kwargs):
+    """
+    DenseNet-100 model for CIFAR-100 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=100, growth_rate=12, model_name="densenet100_cifar100", **kwargs)
 
 
 def _test():
@@ -166,19 +188,21 @@ def _test():
     pretrained = False
 
     models = [
-        densenet100_cifar10,
+        (densenet100_cifar10, 10),
+        (densenet100_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != densenet100_cifar10 or weight_count == 769162)
+        assert (model != densenet100_cifar100 or weight_count == 800032)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

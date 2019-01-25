@@ -14,19 +14,25 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate1
 
-from gluon.cifar10 import add_dataset_parser_arguments
-from gluon.cifar10 import batch_fn
-from gluon.cifar10 import get_train_data_source
-from gluon.cifar10 import get_val_data_source
-from gluon.cifar10 import num_training_samples
+from gluon.cifar import add_dataset_parser_arguments
+from gluon.cifar import batch_fn
+from gluon.cifar import get_train_data_source
+from gluon.cifar import get_val_data_source
+from gluon.cifar import num_training_samples
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Gluon/CIFAR-10)',
+        description='Train a model for image classification (Gluon/CIFAR)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10 and CIFAR100')
 
-    add_dataset_parser_arguments(parser)
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -558,11 +564,13 @@ def main():
     num_classes = net.classes if hasattr(net, 'classes') else 10
 
     train_data = get_train_data_source(
-        dataset_args=args,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
     val_data = get_val_data_source(
-        dataset_args=args,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
 

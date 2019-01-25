@@ -1,20 +1,22 @@
 """
-    ResNet for CIFAR-10, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNeXt for CIFAR, implemented in Gluon.
+    Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['CIFAR10ResNet', 'resnet20_cifar10', 'resnet56_cifar10', 'resnet110_cifar10']
+__all__ = ['CIFARResNeXt', 'resnext29_32x4d_cifar10', 'resnext29_32x4d_cifar100', 'resnext29_16x64d_cifar10',
+           'resnext29_16x64d_cifar100']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv3x3_block
-from .resnet import ResUnit
+from .resnext import ResNeXtUnit
 
 
-class CIFAR10ResNet(HybridBlock):
+class CIFARResNeXt(HybridBlock):
     """
-    ResNet model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNeXt model for CIFAR from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
@@ -22,6 +24,10 @@ class CIFAR10ResNet(HybridBlock):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -35,12 +41,14 @@ class CIFAR10ResNet(HybridBlock):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 cardinality,
+                 bottleneck_width,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10,
                  **kwargs):
-        super(CIFAR10ResNet, self).__init__(**kwargs)
+        super(CIFARResNeXt, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -56,13 +64,13 @@ class CIFAR10ResNet(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResUnit(
+                        stage.add(ResNeXtUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=False,
-                            conv1_stride=False))
+                            cardinality=cardinality,
+                            bottleneck_width=bottleneck_width,
+                            bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -81,19 +89,28 @@ class CIFAR10ResNet(HybridBlock):
         return x
 
 
-def get_resnet_cifar10(blocks,
-                       model_name=None,
-                       pretrained=False,
-                       ctx=cpu(),
-                       root=os.path.join('~', '.mxnet', 'models'),
-                       **kwargs):
+def get_resnext_cifar(classes,
+                      blocks,
+                      cardinality,
+                      bottleneck_width,
+                      model_name=None,
+                      pretrained=False,
+                      ctx=cpu(),
+                      root=os.path.join('~', '.mxnet', 'models'),
+                      **kwargs):
     """
-    Create ResNet model for CIFAR-10 with specific parameters.
+    ResNeXt model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
+    cardinality: int
+        Number of groups.
+    bottleneck_width: int
+        Width of bottleneck block.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -104,16 +121,19 @@ def get_resnet_cifar10(blocks,
         Location for keeping the model parameters.
     """
 
-    assert ((blocks - 2) % 6 == 0)
-    layers = [(blocks - 2) // 6] * 3
-    channels_per_layers = [16, 32, 64]
-    init_block_channels = 16
+    assert (blocks - 2) % 9 == 0
+    layers = [(blocks - 2) // 9] * 3
+    channels_per_layers = [256, 512, 1024]
+    init_block_channels = 64
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = CIFAR10ResNet(
+    net = CIFARResNeXt(
         channels=channels,
         init_block_channels=init_block_channels,
+        cardinality=cardinality,
+        bottleneck_width=bottleneck_width,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -129,12 +149,15 @@ def get_resnet_cifar10(blocks,
     return net
 
 
-def resnet20_cifar10(**kwargs):
+def resnext29_32x4d_cifar10(classes=10, **kwargs):
     """
-    ResNet-20 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNeXt-29 (32x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -142,15 +165,19 @@ def resnet20_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=20, model_name="resnet20_cifar10", **kwargs)
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=32, bottleneck_width=4,
+                             model_name="resnext29_32x4d_cifar10", **kwargs)
 
 
-def resnet56_cifar10(**kwargs):
+def resnext29_32x4d_cifar100(classes=100, **kwargs):
     """
-    ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNeXt-29 (32x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
+    classes : int, default 100
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -158,15 +185,19 @@ def resnet56_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=56, model_name="resnet56_cifar10", **kwargs)
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=32, bottleneck_width=4,
+                             model_name="resnext29_32x4d_cifar100", **kwargs)
 
 
-def resnet110_cifar10(**kwargs):
+def resnext29_16x64d_cifar10(classes=10, **kwargs):
     """
-    ResNet-110 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ResNeXt-29 (16x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -174,7 +205,28 @@ def resnet110_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar10(blocks=110, model_name="resnet110_cifar10", **kwargs)
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=16, bottleneck_width=64,
+                             model_name="resnext29_16x64d_cifar10", **kwargs)
+
+
+def resnext29_16x64d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-29 (16x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=29, cardinality=16, bottleneck_width=64,
+                             model_name="resnext29_16x64d_cifar100", **kwargs)
 
 
 def _test():
@@ -184,12 +236,13 @@ def _test():
     pretrained = False
 
     models = [
-        resnet20_cifar10,
-        resnet56_cifar10,
-        resnet110_cifar10,
+        (resnext29_32x4d_cifar10, 10),
+        (resnext29_32x4d_cifar100, 100),
+        (resnext29_16x64d_cifar10, 10),
+        (resnext29_16x64d_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
 
@@ -197,7 +250,6 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        # net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
@@ -205,13 +257,14 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet20_cifar10 or weight_count == 272474)
-        assert (model != resnet56_cifar10 or weight_count == 855770)
-        assert (model != resnet110_cifar10 or weight_count == 1730714)
+        assert (model != resnext29_32x4d_cifar10 or weight_count == 4775754)
+        assert (model != resnext29_32x4d_cifar100 or weight_count == 4868004)
+        assert (model != resnext29_16x64d_cifar10 or weight_count == 68155210)
+        assert (model != resnext29_16x64d_cifar100 or weight_count == 68247460)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

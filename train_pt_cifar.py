@@ -12,16 +12,23 @@ import torch.utils.data
 
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
-from pytorch.cifar10 import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
+from pytorch.cifar import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
 from pytorch.utils import prepare_pt_context, prepare_model, validate1, accuracy, AverageMeter
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (PyTorch/CIFAR-10)',
+        description='Train a model for image classification (PyTorch/CIFAR)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    add_dataset_parser_arguments(parser)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10 and CIFAR100')
+
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -409,12 +416,14 @@ def main():
         use_cuda=use_cuda)
 
     train_data = get_train_data_loader(
-        data_dir=args.data_dir,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
 
     val_data = get_val_data_loader(
-        data_dir=args.data_dir,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
 

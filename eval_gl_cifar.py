@@ -2,18 +2,28 @@ import argparse
 import time
 import logging
 
+import mxnet as mx
+
 from common.logger_utils import initialize_logging
-from pytorch.model_stats import measure_model
-from pytorch.cifar10 import add_dataset_parser_arguments, get_val_data_loader
-from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate1, AverageMeter
+from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate1
+from gluon.model_stats import measure_model
+from gluon.cifar import add_dataset_parser_arguments
+from gluon.cifar import batch_fn
+from gluon.cifar import get_val_data_source
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (PyTorch/CIFAR-10)',
+        description='Evaluate a model for image classification (Gluon/CIFAR)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10 and CIFAR100')
 
-    add_dataset_parser_arguments(parser)
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -23,7 +33,12 @@ def parse_args():
     parser.add_argument(
         '--use-pretrained',
         action='store_true',
-        help='enable using pretrained model from github.')
+        help='enable using pretrained model from gluon.')
+    parser.add_argument(
+        '--dtype',
+        type=str,
+        default='float32',
+        help='data type for training. default is float32')
     parser.add_argument(
         '--resume',
         type=str,
@@ -39,10 +54,6 @@ def parse_args():
         dest='calc_flops_only',
         action='store_true',
         help='calculate FLOPs without quality estimation')
-    parser.add_argument(
-        '--remove-module',
-        action='store_true',
-        help='enable if stored model has module')
 
     parser.add_argument(
         '--num-gpus',
@@ -77,12 +88,12 @@ def parse_args():
     parser.add_argument(
         '--log-packages',
         type=str,
-        default='torch, torchvision',
+        default='mxnet',
         help='list of python packages for logging')
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='',
+        default='mxnet-cu92',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args
@@ -90,7 +101,9 @@ def parse_args():
 
 def test(net,
          val_data,
-         use_cuda,
+         data_source_needs_reset,
+         dtype,
+         ctx,
          input_image_size,
          in_channels,
          calc_weight_count=False,
@@ -98,15 +111,18 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        accuracy_metric = AverageMeter()
+        accuracy_metric = mx.metric.Accuracy()
         tic = time.time()
         err_val = validate1(
             accuracy_metric=accuracy_metric,
             net=net,
             val_data=val_data,
-            use_cuda=use_cuda)
+            batch_fn=batch_fn,
+            data_source_needs_reset=data_source_needs_reset,
+            dtype=dtype,
+            ctx=ctx)
         if extended_log:
-            logging.info('Test: err={err:.4f} ({err})'.format(
+            logging.info('Test: err={err:.4f} ({err}))'.format(
                 err=err_val))
         else:
             logging.info('Test: err={err:.4f}'.format(
@@ -117,9 +133,9 @@ def test(net,
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
         if not calc_flops:
-            logging.info('Model: {} trainable parameters'.format(weight_count))
+            logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
-        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
+        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size, ctx[0])
         assert (not calc_weight_count) or (weight_count == num_params)
         stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
                    " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"
@@ -140,7 +156,7 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
-    use_cuda, batch_size = prepare_pt_context(
+    ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
@@ -148,15 +164,17 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        use_cuda=use_cuda,
-        remove_module=args.remove_module)
-    if hasattr(net, 'module'):
-        input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
-    else:
-        input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
+        dtype=args.dtype,
+        tune_layers="",
+        classes=args.num_classes,
+        in_channels=args.in_channels,
+        do_hybridize=(not args.calc_flops),
+        ctx=ctx)
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (32, 32)
 
-    val_data = get_val_data_loader(
-        data_dir=args.data_dir,
+    val_data = get_val_data_source(
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
 
@@ -164,10 +182,12 @@ def main():
     test(
         net=net,
         val_data=val_data,
-        use_cuda=use_cuda,
-        # calc_weight_count=(not log_file_exist),
-        input_image_size=(input_image_size, input_image_size),
+        data_source_needs_reset=False,
+        dtype=args.dtype,
+        ctx=ctx,
+        input_image_size=input_image_size,
         in_channels=args.in_channels,
+        # calc_weight_count=(not log_file_exist),
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,

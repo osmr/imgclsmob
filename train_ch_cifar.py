@@ -9,16 +9,23 @@ from chainer.serializers import save_npz
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
-from chainer_.cifar10 import add_dataset_parser_arguments
-from chainer_.cifar10 import get_data_iterators
+from chainer_.cifar import add_dataset_parser_arguments
+from chainer_.cifar import get_data_iterators
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Chainer/CIFAR-10)',
+        description='Train a model for image classification (Chainer/CIFAR)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    add_dataset_parser_arguments(parser)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10 and CIFAR100')
+
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',

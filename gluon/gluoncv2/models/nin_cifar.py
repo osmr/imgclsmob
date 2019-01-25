@@ -1,9 +1,9 @@
 """
-    NIN for CIFAR-10, implemented in Gluon.
+    NIN for CIFAR, implemented in Gluon.
     Original paper: 'Network In Network,' https://arxiv.org/abs/1312.4400.
 """
 
-__all__ = ['CIFAR10NIN', 'nin_cifar10']
+__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100']
 
 import os
 from mxnet import cpu
@@ -52,9 +52,9 @@ class NINConv(HybridBlock):
         return x
 
 
-class CIFAR10NIN(HybridBlock):
+class CIFARNIN(HybridBlock):
     """
-    NIN model for CIFAR-10 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+    NIN model for CIFAR from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
     Parameters:
     ----------
@@ -76,7 +76,7 @@ class CIFAR10NIN(HybridBlock):
                  in_size=(32, 32),
                  classes=10,
                  **kwargs):
-        super(CIFAR10NIN, self).__init__(**kwargs)
+        super(CIFARNIN, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -124,16 +124,19 @@ class CIFAR10NIN(HybridBlock):
         return x
 
 
-def get_nin_cifar10(model_name=None,
-                    pretrained=False,
-                    ctx=cpu(),
-                    root=os.path.join('~', '.mxnet', 'models'),
-                    **kwargs):
+def get_nin_cifar(classes,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
+                  **kwargs):
     """
-    Create NIN model for CIFAR-10 with specific parameters.
+    Create NIN model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -147,9 +150,10 @@ def get_nin_cifar10(model_name=None,
     channels = [[192, 160, 96], [192, 192, 192], [192, 192]]
     first_kernel_sizes = [5, 5, 3]
 
-    net = CIFAR10NIN(
+    net = CIFARNIN(
         channels=channels,
         first_kernel_sizes=first_kernel_sizes,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -165,12 +169,14 @@ def get_nin_cifar10(model_name=None,
     return net
 
 
-def nin_cifar10(**kwargs):
+def nin_cifar10(classes=10, **kwargs):
     """
     NIN model for CIFAR-10 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -178,7 +184,25 @@ def nin_cifar10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_nin_cifar10(model_name="nin_cifar10", **kwargs)
+    return get_nin_cifar(classes=classes, model_name="nin_cifar10", **kwargs)
+
+
+def nin_cifar100(classes=100, **kwargs):
+    """
+    NIN model for CIFAR-100 from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_nin_cifar(classes=classes, model_name="nin_cifar100", **kwargs)
 
 
 def _test():
@@ -188,10 +212,11 @@ def _test():
     pretrained = False
 
     models = [
-        nin_cifar10,
+        (nin_cifar10, 10),
+        (nin_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
 
@@ -208,10 +233,11 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != nin_cifar10 or weight_count == 966986)
+        assert (model != nin_cifar100 or weight_count == 984356)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

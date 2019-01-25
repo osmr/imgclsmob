@@ -1,9 +1,10 @@
 """
-    WRN for CIFAR-10, implemented in Chainer.
+    WRN for CIFAR, implemented in Chainer.
     Original paper: 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 """
 
-__all__ = ['CIFAR10WRN', 'wrn16_10_cifar10', 'wrn28_10_cifar10', 'wrn40_8_cifar10']
+__all__ = ['CIFARWRN', 'wrn16_10_cifar10', 'wrn16_10_cifar100', 'wrn28_10_cifar10', 'wrn28_10_cifar100',
+           'wrn40_8_cifar10', 'wrn40_8_cifar100']
 
 import os
 import chainer.functions as F
@@ -15,9 +16,9 @@ from .common import conv3x3, SimpleSequential
 from .preresnet import PreResUnit, PreResActivation
 
 
-class CIFAR10WRN(Chain):
+class CIFARWRN(Chain):
     """
-    CIFAR-10 WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+    CIFAR WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -38,7 +39,7 @@ class CIFAR10WRN(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(CIFAR10WRN, self).__init__()
+        super(CIFARWRN, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -84,17 +85,20 @@ class CIFAR10WRN(Chain):
         return x
 
 
-def get_wrn(blocks,
+def get_wrn(classes,
+            blocks,
             width_factor,
             model_name=None,
             pretrained=False,
             root=os.path.join('~', '.chainer', 'models'),
             **kwargs):
     """
-    Create WRN model for CIFAR-10 with specific parameters.
+    Create WRN model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
     width_factor : int
@@ -114,9 +118,10 @@ def get_wrn(blocks,
 
     channels = [[ci * width_factor] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    net = CIFAR10WRN(
+    net = CIFARWRN(
         channels=channels,
         init_block_channels=init_block_channels,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -132,46 +137,100 @@ def get_wrn(blocks,
     return net
 
 
-def wrn16_10_cifar10(**kwargs):
+def wrn16_10_cifar10(classes=10, **kwargs):
     """
     WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
+    return get_wrn(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
 
 
-def wrn28_10_cifar10(**kwargs):
+def wrn16_10_cifar100(classes=100, **kwargs):
+    """
+    WRN-16-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar100", **kwargs)
+
+
+def wrn28_10_cifar10(classes=10, **kwargs):
     """
     WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
+    return get_wrn(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
 
 
-def wrn40_8_cifar10(**kwargs):
+def wrn28_10_cifar100(classes=100, **kwargs):
+    """
+    WRN-28-10 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar100", **kwargs)
+
+
+def wrn40_8_cifar10(classes=10, **kwargs):
     """
     WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
+    classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
+    return get_wrn(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
+
+
+def wrn40_8_cifar100(classes=100, **kwargs):
+    """
+    WRN-40-8 model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar100", **kwargs)
 
 
 def _test():
@@ -183,23 +242,29 @@ def _test():
     pretrained = False
 
     models = [
-        wrn16_10_cifar10,
-        wrn28_10_cifar10,
-        wrn40_8_cifar10,
+        (wrn16_10_cifar10, 10),
+        (wrn16_10_cifar100, 100),
+        (wrn28_10_cifar10, 10),
+        (wrn28_10_cifar100, 100),
+        (wrn40_8_cifar10, 10),
+        (wrn40_8_cifar100, 100),
     ]
 
-    for model in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != wrn16_10_cifar10 or weight_count == 17116634)
+        assert (model != wrn16_10_cifar100 or weight_count == 17174324)
         assert (model != wrn28_10_cifar10 or weight_count == 36479194)
+        assert (model != wrn28_10_cifar100 or weight_count == 36536884)
         assert (model != wrn40_8_cifar10 or weight_count == 35748314)
+        assert (model != wrn40_8_cifar100 or weight_count == 35794484)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)
-        assert (y.shape == (1, 10))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

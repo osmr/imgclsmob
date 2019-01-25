@@ -1,5 +1,5 @@
 """
-    CIFAR10 dataset routines.
+    CIFAR dataset routines.
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
@@ -15,18 +15,32 @@ from mxnet.gluon.data.vision import transforms
 num_training_samples = 50000
 
 
-def add_dataset_parser_arguments(parser):
-    parser.add_argument(
-        '--data-dir',
-        type=str,
-        default='../imgclsmob_data/cifar10',
-        help='path to directory with CIFAR-10 dataset')
-
-    parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=10,
-        help='number of classes')
+def add_dataset_parser_arguments(parser,
+                                 dataset_name):
+    if dataset_name == "CIFAR10":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/cifar10',
+            help='path to directory with CIFAR-10 dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=10,
+            help='number of classes')
+    elif dataset_name == "CIFAR100":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/cifar100',
+            help='path to directory with CIFAR-100 dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=100,
+            help='number of classes')
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
     parser.add_argument(
         '--in-channels',
         type=int,
@@ -85,15 +99,14 @@ def batch_fn(batch, ctx):
     return data, label
 
 
-def get_train_data_source(dataset_args,
+def get_train_data_source(dataset_name,
+                          dataset_dir,
                           batch_size,
                           num_workers):
     jitter_param = 0.4
     lighting_param = 0.1
     mean_rgb = (0.4914, 0.4822, 0.4465)
     std_rgb = (0.2023, 0.1994, 0.2010)
-
-    data_dir = dataset_args.data_dir
 
     transform_train = transforms.Compose([
         RandomCrop(size=32, pad=4),
@@ -108,9 +121,17 @@ def get_train_data_source(dataset_args,
             mean=mean_rgb,
             std=std_rgb)
     ])
+
+    if dataset_name == "CIFAR10":
+        dataset_class = gluon.data.vision.CIFAR10
+    elif dataset_name == "CIFAR100":
+        dataset_class = gluon.data.vision.CIFAR100
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
     return gluon.data.DataLoader(
-        dataset=gluon.data.vision.CIFAR10(
-            root=data_dir,
+        dataset=dataset_class(
+            root=dataset_dir,
             train=True).transform_first(fn=transform_train),
         batch_size=batch_size,
         shuffle=True,
@@ -118,13 +139,12 @@ def get_train_data_source(dataset_args,
         num_workers=num_workers)
 
 
-def get_val_data_source(dataset_args,
+def get_val_data_source(dataset_name,
+                        dataset_dir,
                         batch_size,
                         num_workers):
     mean_rgb = (0.4914, 0.4822, 0.4465)
     std_rgb = (0.2023, 0.1994, 0.2010)
-
-    data_dir = dataset_args.data_dir
 
     transform_val = transforms.Compose([
         transforms.ToTensor(),
@@ -132,9 +152,17 @@ def get_val_data_source(dataset_args,
             mean=mean_rgb,
             std=std_rgb)
     ])
+
+    if dataset_name == "CIFAR10":
+        dataset_class = gluon.data.vision.CIFAR10
+    elif dataset_name == "CIFAR100":
+        dataset_class = gluon.data.vision.CIFAR100
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
     return gluon.data.DataLoader(
-        dataset=gluon.data.vision.CIFAR10(
-            root=data_dir,
+        dataset=dataset_class(
+            root=dataset_dir,
             train=False).transform_first(fn=transform_val),
         batch_size=batch_size,
         shuffle=False,

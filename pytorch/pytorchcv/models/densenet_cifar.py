@@ -1,9 +1,9 @@
 """
-    DenseNet for CIFAR-10, implemented in PyTorch.
+    DenseNet for CIFAR, implemented in PyTorch.
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['CIFAR10DenseNet', 'densenet100_cifar10']
+__all__ = ['CIFARDenseNet', 'densenet100_cifar10', 'densenet100_cifar100']
 
 import os
 import torch.nn as nn
@@ -13,9 +13,9 @@ from .preresnet import PreResActivation
 from .densenet import DenseUnit, TransitionBlock
 
 
-class CIFAR10DenseNet(nn.Module):
+class CIFARDenseNet(nn.Module):
     """
-    DenseNet model for CIFAR-10 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+    DenseNet model for CIFAR from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
@@ -39,7 +39,7 @@ class CIFAR10DenseNet(nn.Module):
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
-        super(CIFAR10DenseNet, self).__init__()
+        super(CIFARDenseNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -87,17 +87,20 @@ class CIFAR10DenseNet(nn.Module):
         return x
 
 
-def get_densenet_cifar10(blocks,
-                         growth_rate,
-                         model_name=None,
-                         pretrained=False,
-                         root=os.path.join('~', '.torch', 'models'),
-                         **kwargs):
+def get_densenet_cifar(num_classes,
+                       blocks,
+                       growth_rate,
+                       model_name=None,
+                       pretrained=False,
+                       root=os.path.join('~', '.torch', 'models'),
+                       **kwargs):
     """
-    Create DenseNet model for CIFAR-10 with specific parameters.
+    Create DenseNet model for CIFAR with specific parameters.
 
     Parameters:
     ----------
+    num_classes : int
+        Number of classification classes.
     blocks : int
         Number of blocks.
     growth_rate : int
@@ -123,9 +126,10 @@ def get_densenet_cifar10(blocks,
         layers,
         [[init_block_channels * 2]])[1:]
 
-    net = CIFAR10DenseNet(
+    net = CIFARDenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        num_classes=num_classes,
         **kwargs)
 
     if pretrained:
@@ -140,18 +144,38 @@ def get_densenet_cifar10(blocks,
     return net
 
 
-def densenet100_cifar10(**kwargs):
+def densenet100_cifar10(num_classes=10, **kwargs):
     """
     DenseNet-100 model for CIFAR-10 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
+    num_classes : int, default 10
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_densenet_cifar10(blocks=100, growth_rate=12, model_name="densenet100_cifar10", **kwargs)
+    return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, model_name="densenet100_cifar10",
+                              **kwargs)
+
+
+def densenet100_cifar100(num_classes=100, **kwargs):
+    """
+    DenseNet-100 model for CIFAR-100 from 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(num_classes=num_classes, blocks=100, growth_rate=12, model_name="densenet100_cifar100",
+                              **kwargs)
 
 
 def _calc_width(net):
@@ -170,10 +194,11 @@ def _test():
     pretrained = False
 
     models = [
-        densenet100_cifar10,
+        (densenet100_cifar10, 10),
+        (densenet100_cifar100, 100),
     ]
 
-    for model in models:
+    for model, num_classes in models:
 
         net = model(pretrained=pretrained)
 
@@ -182,10 +207,11 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != densenet100_cifar10 or weight_count == 769162)
+        assert (model != densenet100_cifar100 or weight_count == 800032)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)
-        assert (tuple(y.size()) == (1, 10))
+        assert (tuple(y.size()) == (1, num_classes))
 
 
 if __name__ == "__main__":

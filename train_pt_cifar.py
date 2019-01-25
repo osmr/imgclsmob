@@ -448,7 +448,7 @@ def main():
 
     if args.save_dir and args.save_interval:
         lp_saver = TrainLogParamSaver(
-            checkpoint_file_name_prefix='cifar10_{}'.format(args.model),
+            checkpoint_file_name_prefix='{}_{}'.format(args.dataset.lower(), args.model),
             last_checkpoint_file_name_suffix="last",
             best_checkpoint_file_name_suffix=None,
             last_checkpoint_dir_path=args.save_dir,

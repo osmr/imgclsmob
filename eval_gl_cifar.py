@@ -122,7 +122,7 @@ def test(net,
             dtype=dtype,
             ctx=ctx)
         if extended_log:
-            logging.info('Test: err={err:.4f} ({err}))'.format(
+            logging.info('Test: err={err:.4f} ({err})'.format(
                 err=err_val))
         else:
             logging.info('Test: err={err:.4f}'.format(

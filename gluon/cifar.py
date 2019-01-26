@@ -48,6 +48,17 @@ def add_dataset_parser_arguments(parser,
         help='number of input channels')
 
 
+class CIFAR100Fine(gluon.data.vision.CIFAR100):
+
+    def __init__(self,
+                 root,
+                 train):
+        super(CIFAR100Fine, self).__init__(
+            root=root,
+            fine_label=True,
+            train=train)
+
+
 class RandomCrop(Block):
     """Randomly crop `src` with `size` (width, height).
     Padding is optional.
@@ -125,7 +136,7 @@ def get_train_data_source(dataset_name,
     if dataset_name == "CIFAR10":
         dataset_class = gluon.data.vision.CIFAR10
     elif dataset_name == "CIFAR100":
-        dataset_class = gluon.data.vision.CIFAR100
+        dataset_class = CIFAR100Fine
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -156,7 +167,7 @@ def get_val_data_source(dataset_name,
     if dataset_name == "CIFAR10":
         dataset_class = gluon.data.vision.CIFAR10
     elif dataset_name == "CIFAR100":
-        dataset_class = gluon.data.vision.CIFAR100
+        dataset_class = CIFAR100Fine
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

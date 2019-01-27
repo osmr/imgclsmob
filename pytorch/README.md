@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/pytorchcv.svg)](https://pypi.python.org/pypi/pytorchcv)
 [![Downloads](https://pepy.tech/badge/pytorchcv)](https://pepy.tech/project/pytorchcv)
 
-This is a collection of image classification models. Many of them are pretrained on ImageNet-1K and CIFAR-10
+This is a collection of image classification models. Many of them are pretrained on ImageNet-1K and CIFAR-10/100
 datasets and loaded automatically during use. All pretrained models require the same ordinary normalization.
 Scripts for training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
@@ -234,6 +234,15 @@ Some remarks:
 | WRN-16-10 | 2.93 | 17,116,634 | 2,414.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn16_10_cifar10-0293-ce810d8a.pth.log)) |
 | WRN-28-10 | 2.39 | 36,479,194 | 5,246.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn28_10_cifar10-0239-fe97dcd6.pth.log)) |
 | WRN-40-8 | 2.37 | 35,748,314 | 5,176.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn40_8_cifar10-0237-8dc84ec7.pth.log)) |
+
+### CIFAR-100
+
+Some remarks:
+- Testing subset is used for validation purpose.
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-20 | 29.64 | 278,324 | 41.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.180/resnet20_cifar100-2964-a5322afe.pth.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

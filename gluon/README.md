@@ -235,6 +235,7 @@ Some remarks:
 | ResNet-20 | 5.97 | 272,474 | 41.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.163/resnet20_cifar10-0597-13c5ab19.params.log)) |
 | ResNet-56 | 4.52 | 855,770 | 127.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.163/resnet56_cifar10-0452-a73e63e9.params.log)) |
 | ResNet-110 | 3.69 | 1,730,714 | 255.70M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.163/resnet110_cifar10-0369-f89f1c4d.params.log)) |
+| ResNet-164(BN) | 3.68 | 1,704,154 | 255.31M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.179/resnet164bn_cifar10-0368-e7941eee.params.log)) |
 | PreResNet-20 | 6.51 | 272,282 | 41.27M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.164/preresnet20_cifar10-0651-daa89573.params.log)) |
 | PreResNet-56 | 4.49 | 855,578 | 127.03M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.164/preresnet56_cifar10-0449-cb37cb9d.params.log)) |
 | PreResNet-110 | 3.86 | 1,730,522 | 255.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.164/preresnet110_cifar10-0386-d6d4b7bd.params.log)) |

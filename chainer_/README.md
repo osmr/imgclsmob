@@ -228,12 +228,10 @@ Some remarks:
 
 ### CIFAR-100
 
-Some remarks:
-- Testing subset is used for validation purpose.
-
 | Model | Error, % | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | --- |
 | ResNet-20 | 29.64 | 278,324 | 41.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.180/resnet20_cifar100-2964-6a85f07e.npz.log)) |
+| ResNet-56 | 24.88 | 861,620 | 127.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.181/resnet56_cifar100-2488-2d641cde.npz.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

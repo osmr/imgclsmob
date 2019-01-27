@@ -253,6 +253,7 @@ Some remarks:
 | Model | Error, % | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | --- |
 | ResNet-20 | 29.64 | 278,324 | 41.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.180/resnet20_cifar100-2964-4e144352.params.log)) |
+| ResNet-56 | 24.88 | 861,620 | 127.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.181/resnet56_cifar100-2488-59097710.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

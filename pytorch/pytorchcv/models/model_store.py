@@ -155,6 +155,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('preresnet56_cifar100', '2505', 'ca90a2be6002cd378769b9d4e7c497dd883d31d9', 'v0.0.188'),
     ('preresnet110_cifar10', '0386', 'cc08946a2126a1224d1d2560a47cf766a763c52c', 'v0.0.164'),
     ('preresnet110_cifar100', '2267', '3954e91581b7f3e5f689385d15f618fe16e995af', 'v0.0.191'),
+    ('preresnet164bn_cifar10', '0364', '429012d412e82df7961fa071f97c938530e1b005', 'v0.0.196'),
     ('preresnet164bn_cifar100', '2018', 'a8e67ca6e14f88b009d618b0e9b554312d862174', 'v0.0.192'),
     ('resnext29_32x4d_cifar10', '0315', '30413525cd4466dbef759294eda9b702bc39648f', 'v0.0.169'),
     ('resnext29_16x64d_cifar10', '0241', '4133d3d04f9b10b132dcb959601d36f10123f8c2', 'v0.0.176'),

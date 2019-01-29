@@ -24,11 +24,24 @@ class ShakeShake(torch.autograd.Function):
 class SkippingBranch(nn.Module):
     def __init__(self, inplanes, stride=2):
         super(SkippingBranch, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, inplanes, kernel_size=1, stride=1, 
-                              padding=0, bias=False)
-        self.conv2 = nn.Conv2d(inplanes, inplanes, kernel_size=1, stride=1, 
-                              padding=0, bias=False)
-        self.avg_pool = nn.AvgPool2d(kernel_size=1, stride=stride, padding=0)    
+        self.conv1 = nn.Conv2d(
+            inplanes,
+            inplanes,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False)
+        self.conv2 = nn.Conv2d(
+            inplanes,
+            inplanes,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            bias=False)
+        self.avg_pool = nn.AvgPool2d(
+            kernel_size=1,
+            stride=stride,
+            padding=0)
 
     def forward(self, x):
         out1 = self.conv1(self.avg_pool(x))

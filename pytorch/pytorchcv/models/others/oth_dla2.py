@@ -393,14 +393,14 @@ class Tree(nn.Module):
             root_dim += in_channels
         if levels == 1:
             self.tree1 = block(
-                in_channels,
-                out_channels,
-                stride,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
                 dilation=dilation)
             self.tree2 = block(
-                out_channels,
-                out_channels,
-                1,
+                in_channels=out_channels,
+                out_channels=out_channels,
+                stride=1,
                 dilation=dilation)
         else:
             self.tree1 = Tree(
@@ -424,10 +424,10 @@ class Tree(nn.Module):
                 root_residual=root_residual)
         if levels == 1:
             self.root = Root(
-                root_dim,
-                out_channels,
-                root_kernel_size,
-                root_residual)
+                in_channels=root_dim,
+                out_channels=out_channels,
+                kernel_size=root_kernel_size,
+                residual=root_residual)
         self.level_root = level_root
         self.root_dim = root_dim
         self.downsample = None

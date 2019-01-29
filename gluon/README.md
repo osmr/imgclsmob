@@ -25,6 +25,7 @@ Scripts for training/evaluating/converting models are in the [`imgclsmob`](https
 - ResAttNet (['Residual Attention Network for Image Classification'](https://arxiv.org/abs/1704.06904))
 - PyramidNet (['Deep Pyramidal Residual Networks'](https://arxiv.org/abs/1610.02915))
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
+- CRU-Net (['Sharing Residual Units Through Collective Tensor Factorization To Improve Deep Neural Networks'](https://www.ijcai.org/proceedings/2018/88))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
 - CondenseNet (['CondenseNet: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))
 - SparseNet (['Sparsely Aggregated Convolutional Networks'](https://arxiv.org/abs/1801.05895))
@@ -150,6 +151,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PyramidNet-101 (a=360) | 22.72 | 6.52 | 42,455,070 | 8,743.54M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.104/pyramidnet101_a360-0652-08d5a5d1.params.log)) |
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
 | DiracNetV2-34 | 27.93 | 9.46 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet34v2-0946-1faa6f12.params.log)) |
+| CRU-Net-56 | 25.72 | 8.25 | 25,609,384 | 5,660.66M | From [cypw/CRU-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.197/crunet56-0825-ad16523b.params.log)) |
 | DenseNet-121 | 25.11 | 7.80 | 7,978,856 | 2,872.13M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet121-0780-49b72d04.params.log)) |
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,793.16M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,403.89M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0689-281ec06b.params.log)) |

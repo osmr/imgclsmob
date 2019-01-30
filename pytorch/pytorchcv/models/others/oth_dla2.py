@@ -1,5 +1,3 @@
-import math
-
 import torch
 from torch import nn
 from inspect import isfunction
@@ -240,13 +238,13 @@ def conv7x7_block(in_channels,
         activate=activate)
 
 
-class BasicBlock(nn.Module):
+class SimpleBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride=1,
                  dilation=1):
-        super(BasicBlock, self).__init__()
+        super(SimpleBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -262,12 +260,12 @@ class BasicBlock(nn.Module):
             activate=False)
         self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, residual=None):
-        if residual is None:
-            residual = x
+    def forward(self, x, identity=None):
+        if identity is None:
+            identity = x
         x = self.conv1(x)
         x = self.conv2(x)
-        x += residual
+        x += identity
         x = self.relu(x)
         return x
 
@@ -282,6 +280,7 @@ class Bottleneck(nn.Module):
                  expansion=2):
         super(Bottleneck, self).__init__()
         mid_channels = out_channels // expansion
+
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels)
@@ -298,28 +297,28 @@ class Bottleneck(nn.Module):
             activate=False)
         self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, residual=None):
-        if residual is None:
-            residual = x
+    def forward(self, x, identity=None):
+        if identity is None:
+            identity = x
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x += residual
+        x += identity
         x = self.relu(x)
         return x
 
 
 class BottleneckX(nn.Module):
-    cardinality = 32
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride=1,
-                 dilation=1):
+                 dilation=1,
+                 cardinality=32):
         super(BottleneckX, self).__init__()
-        cardinality = BottleneckX.cardinality
         mid_channels = out_channels * cardinality // 32
+
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels)
@@ -337,13 +336,13 @@ class BottleneckX(nn.Module):
             activate=False)
         self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, residual=None):
-        if residual is None:
-            residual = x
+    def forward(self, x, identity=None):
+        if identity is None:
+            identity = x
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x += residual
+        x += identity
         x = self.relu(x)
         return x
 
@@ -355,6 +354,8 @@ class Root(nn.Module):
                  kernel_size,
                  residual):
         super(Root, self).__init__()
+        self.residual = residual
+
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -362,7 +363,6 @@ class Root(nn.Module):
             activation=None,
             activate=False)
         self.relu = nn.ReLU(inplace=True)
-        self.residual = residual
 
     def forward(self, *x):
         children = x
@@ -377,7 +377,7 @@ class Root(nn.Module):
 class Tree(nn.Module):
     def __init__(self,
                  levels,
-                 block,
+                 block_class,
                  in_channels,
                  out_channels,
                  stride=1,
@@ -392,12 +392,12 @@ class Tree(nn.Module):
         if level_root:
             root_dim += in_channels
         if levels == 1:
-            self.tree1 = block(
+            self.tree1 = block_class(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
                 dilation=dilation)
-            self.tree2 = block(
+            self.tree2 = block_class(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 stride=1,
@@ -405,7 +405,7 @@ class Tree(nn.Module):
         else:
             self.tree1 = Tree(
                 levels=levels - 1,
-                block=block,
+                block_class=block_class,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
@@ -415,7 +415,7 @@ class Tree(nn.Module):
                 root_residual=root_residual)
             self.tree2 = Tree(
                 levels=levels - 1,
-                block=block,
+                block_class=block_class,
                 in_channels=out_channels,
                 out_channels=out_channels,
                 root_dim=root_dim + out_channels,
@@ -429,28 +429,27 @@ class Tree(nn.Module):
                 kernel_size=root_kernel_size,
                 residual=root_residual)
         self.level_root = level_root
-        self.root_dim = root_dim
-        self.downsample = None
-        self.project = None
+        self.downsample_pool = None
+        self.project_conv = None
         self.levels = levels
         if stride > 1:
-            self.downsample = nn.MaxPool2d(
+            self.downsample_pool = nn.MaxPool2d(
                 kernel_size=stride,
                 stride=stride)
         if in_channels != out_channels:
-            self.project = conv1x1_block(
+            self.project_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 activation=None,
                 activate=False)
 
-    def forward(self, x, residual=None, children=None):
+    def forward(self, x, identity=None, children=None):
         children = [] if children is None else children
-        bottom = self.downsample(x) if self.downsample else x
-        residual = self.project(bottom) if self.project else bottom
+        bottom = self.downsample_pool(x) if self.downsample_pool else x
+        identity = self.project_conv(bottom) if self.project_conv else bottom
         if self.level_root:
             children.append(bottom)
-        x1 = self.tree1(x, residual)
+        x1 = self.tree1(x, identity)
         if self.levels == 1:
             x2 = self.tree2(x1)
             x = self.root(x2, x1, *children)
@@ -460,196 +459,196 @@ class Tree(nn.Module):
         return x
 
 
+class DLAInitBlock(nn.Module):
+    """
+    DLA specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels):
+        super(DLAInitBlock, self).__init__()
+        mid_channels = out_channels // 2
+
+        self.conv1 = conv7x7_block(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.conv2 = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
+        self.conv3 = conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            stride=2)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        return x
+
+
 class DLA(nn.Module):
     def __init__(self,
                  levels,
                  channels,
-                 num_classes=1000,
-                 block=BasicBlock,
-                 residual_root=False):
+                 init_block_channels,
+                 block_class,
+                 residual_root=False,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 num_classes=1000):
         super(DLA, self).__init__()
-        self.channels = channels
+        self.in_size = in_size
         self.num_classes = num_classes
-        self.base_layer = conv7x7_block(
-            in_channels=3,
-            out_channels=channels[0])
-        self.level0 = self._make_conv_level(
-            channels[0],
-            channels[0],
-            levels[0])
-        self.level1 = self._make_conv_level(
-            channels[0],
-            channels[1],
-            levels[1],
-            stride=2)
 
-        self.level2 = Tree(
-            levels[2],
-            block,
-            channels[1],
-            channels[2],
-            stride=2,
-            level_root=False,
-            root_residual=residual_root)
-        self.level3 = Tree(
-            levels[3],
-            block,
-            channels[2],
-            channels[3],
-            stride=2,
-            level_root=True,
-            root_residual=residual_root)
-        self.level4 = Tree(
-            levels[4],
-            block,
-            channels[3],
-            channels[4],
-            stride=2,
-            level_root=True,
-            root_residual=residual_root)
-        self.level5 = Tree(
-            levels[5],
-            block,
-            channels[4],
-            channels[5],
-            stride=2,
-            level_root=True,
-            root_residual=residual_root)
+        self.features = nn.Sequential()
+        self.features.add_module("init_block", DLAInitBlock(
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
 
-        self.avgpool = nn.AvgPool2d(kernel_size=7)
-        self.fc = conv1x1(
-            in_channels=channels[-1],
+        for i in range(len(levels)):
+            level_i = levels[i]
+            out_channels = channels[i]
+            level_root = (i != 0)
+            self.features.add_module("stage{}".format(i + 1), Tree(
+                levels=level_i,
+                block_class=block_class,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=2,
+                level_root=level_root,
+                root_residual=residual_root))
+            in_channels = out_channels
+
+        self.features.add_module("final_pool", nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
+
+        self.output = conv1x1(
+            in_channels=in_channels,
             out_channels=num_classes,
             bias=True)
 
-    def _make_conv_level(self,
-                         in_channels,
-                         out_channels,
-                         convs,
-                         stride=1,
-                         dilation=1):
-        modules = []
-        for i in range(convs):
-            modules.extend([
-                conv3x3_block(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=(stride if i == 0 else 1),
-                    padding=dilation,
-                    dilation=dilation)])
-            in_channels = out_channels
-        return nn.Sequential(*modules)
-
     def forward(self, x):
-        y = []
-        x = self.base_layer(x)
-        for i in range(6):
-            x = getattr(self, 'level{}'.format(i))(x)
-            y.append(x)
-        x = self.avgpool(x)
-        x = self.fc(x)
+        x = self.features(x)
+        x = self.output(x)
         x = x.view(x.size(0), -1)
         return x
 
 
 def oth_dla34(pretrained=None, **kwargs):  # DLA-34
     model = DLA(
-        [1, 1, 1, 2, 2, 1],
-        [16, 32, 64, 128, 256, 512],
-        block=BasicBlock,
+        levels=[1, 2, 2, 1],
+        channels=[64, 128, 256, 512],
+        init_block_channels=32,
+        block_class=SimpleBlock,
         **kwargs)
     return model
 
 
 def oth_dla46_c(pretrained=None, **kwargs):  # DLA-46-C
-    Bottleneck.expansion = 2
+
     model = DLA(
-        [1, 1, 1, 2, 2, 1],
-        [16, 32, 64, 64, 128, 256],
-        block=Bottleneck,
+        levels=[1, 2, 2, 1],
+        channels=[64, 64, 128, 256],
+        init_block_channels=32,
+        block_class=Bottleneck,
         **kwargs)
     return model
 
 
 def oth_dla46x_c(pretrained=None, **kwargs):  # DLA-X-46-C
-    BottleneckX.expansion = 2
     model = DLA(
-        [1, 1, 1, 2, 2, 1],
-        [16, 32, 64, 64, 128, 256],
-        block=BottleneckX,
+        levels=[1, 2, 2, 1],
+        channels=[64, 64, 128, 256],
+        init_block_channels=32,
+        block_class=BottleneckX,
         **kwargs)
     return model
 
 
 def oth_dla60x_c(pretrained=None, **kwargs):  # DLA-X-60-C
-    BottleneckX.expansion = 2
     model = DLA(
-        [1, 1, 1, 2, 3, 1],
-        [16, 32, 64, 64, 128, 256],
-        block=BottleneckX,
+        levels=[1, 2, 3, 1],
+        channels=[64, 64, 128, 256],
+        init_block_channels=32,
+        block_class=BottleneckX,
         **kwargs)
     return model
 
 
 def oth_dla60(pretrained=None, **kwargs):  # DLA-60
-    Bottleneck.expansion = 2
     model = DLA(
-        [1, 1, 1, 2, 3, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=Bottleneck,
+        levels=[1, 2, 3, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=Bottleneck,
         **kwargs)
     return model
 
 
 def oth_dla60x(pretrained=None, **kwargs):  # DLA-X-60
-    BottleneckX.expansion = 2
     model = DLA(
-        [1, 1, 1, 2, 3, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=BottleneckX,
+        levels=[1, 2, 3, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=BottleneckX,
         **kwargs)
     return model
 
 
 def oth_dla102(pretrained=None, **kwargs):  # DLA-102
-    Bottleneck.expansion = 2
     model = DLA(
-        [1, 1, 1, 3, 4, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=Bottleneck,
+        levels=[1, 3, 4, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=Bottleneck,
         residual_root=True,
         **kwargs)
     return model
 
 
 def oth_dla102x(pretrained=None, **kwargs):  # DLA-X-102
-    BottleneckX.expansion = 2
     model = DLA(
-        [1, 1, 1, 3, 4, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=BottleneckX,
+        levels=[1, 3, 4, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=BottleneckX,
         residual_root=True,
         **kwargs)
     return model
 
 
 def oth_dla102x2(pretrained=None, **kwargs):  # DLA-X-102 64
-    BottleneckX.cardinality = 64
+
+    class BottleneckX64(BottleneckX):
+        def __init__(self, in_channels, out_channels, stride=1, dilation=1):
+            super(BottleneckX64, self).__init__(in_channels, out_channels, stride, dilation, cardinality=64)
+
     model = DLA(
-        [1, 1, 1, 3, 4, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=BottleneckX,
+        levels=[1, 3, 4, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=BottleneckX64,
         residual_root=True,
         **kwargs)
     return model
 
 
 def oth_dla169(pretrained=None, **kwargs):  # DLA-169
-    Bottleneck.expansion = 2
     model = DLA(
-        [1, 1, 2, 3, 5, 1],
-        [16, 32, 128, 256, 512, 1024],
-        block=Bottleneck,
+        levels=[2, 3, 5, 1],
+        channels=[128, 256, 512, 1024],
+        init_block_channels=32,
+        block_class=Bottleneck,
         residual_root=True,
         **kwargs)
     return model

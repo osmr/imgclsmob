@@ -6,15 +6,23 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # see https://pytorch.org/tutorials/beginner/examples_autograd/two_layer_net_custom_function.html
 # see https://discuss.pytorch.org/t/why-input-is-tensor-in-the-forward-function-when-extending-torch-autograd/9039
+
+
 class ShakeShake(torch.autograd.Function):
+
     @staticmethod
-    def forward(ctx, input1, input2, alpha, beta=None):
+    def forward(ctx,
+                input1,
+                input2,
+                alpha,
+                beta=None):
         ctx.save_for_backward(input1, input2, alpha, beta)
         out = alpha * input1 + (1 - alpha) * input2
         return out
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx,
+                 grad_output):
         input1, input2, alpha, beta = ctx.saved_tensors
         grad_input1 = beta * grad_output
         grad_input2 = (1 - beta) * grad_output
@@ -22,7 +30,9 @@ class ShakeShake(torch.autograd.Function):
 
 
 class SkippingBranch(nn.Module):
-    def __init__(self, inplanes, stride=2):
+    def __init__(self,
+                 inplanes,
+                 stride=2):
         super(SkippingBranch, self).__init__()
         self.conv1 = nn.Conv2d(
             inplanes,
@@ -46,7 +56,7 @@ class SkippingBranch(nn.Module):
     def forward(self, x):
         out1 = self.conv1(self.avg_pool(x))
         shift_x = x[:, :, 1:, 1:]
-        shift_x= F.pad(shift_x, (0, 1, 0, 1))
+        shift_x = F.pad(shift_x, (0, 1, 0, 1))
         out2 = self.conv2(self.avg_pool(shift_x))
         out = torch.cat([out1, out2], dim=1)
         return out
@@ -55,11 +65,21 @@ class SkippingBranch(nn.Module):
 class ResidualBranch(nn.Module):
     def __init__(self, inplanes, planes, stride=1):
         super(ResidualBranch, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, 
-                               stride=stride, padding=1, bias=False) 
+        self.conv1 = nn.Conv2d(
+            inplanes,
+            planes,
+            kernel_size=3,
+            stride=stride,
+            padding=1,
+            bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, 
-                               stride=1, padding=1, bias=False) 
+        self.conv2 = nn.Conv2d(
+            planes,
+            planes,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
     def forward(self, x):
@@ -69,7 +89,10 @@ class ResidualBranch(nn.Module):
 
 
 class ShakeBlock(nn.Module):
-    def __init__(self, inplanes, planes, stride=1):
+    def __init__(self,
+                 inplanes,
+                 planes,
+                 stride=1):
         super(ShakeBlock, self).__init__()
         self.residual_branch1 = ResidualBranch(inplanes, planes, stride)
         self.residual_branch2 = ResidualBranch(inplanes, planes, stride)
@@ -102,17 +125,26 @@ class ShakeBlock(nn.Module):
 
 
 class ShakeResNet(nn.Module):
-    def __init__(self, block, num_classes=10):
+
+    def __init__(self,
+                 block,
+                 num_classes=10):
         super(ShakeResNet, self).__init__()
         self.inplanes = 16
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, 
-                               padding=1, bias=False)
+        self.conv1 = nn.Conv2d(
+            3,
+            16,
+            kernel_size=3,
+            stride=1,
+            padding=1,
+            bias=False)
         self.bn1 = nn.BatchNorm2d(16)
         self.relu = nn.ReLU(inplace=True)
 
         self.stage1 = self._make_stage(block, 32, 4, stride=1)
         self.stage2 = self._make_stage(block, 64, 4, stride=2) 
-        self.stage3 = self._make_stage(block, 128, 4, stride=2)  
+        self.stage3 = self._make_stage(block, 128, 4, stride=2)
+
         self.avg_pool = nn.AvgPool2d(8, stride=1)
         self.fc_out = nn.Linear(128, num_classes)
 

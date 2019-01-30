@@ -434,7 +434,9 @@ class Tree(nn.Module):
         self.project = None
         self.levels = levels
         if stride > 1:
-            self.downsample = nn.MaxPool2d(stride, stride=stride)
+            self.downsample = nn.MaxPool2d(
+                kernel_size=stride,
+                stride=stride)
         if in_channels != out_channels:
             self.project = conv1x1_block(
                 in_channels=in_channels,
@@ -514,7 +516,7 @@ class DLA(nn.Module):
             level_root=True,
             root_residual=residual_root)
 
-        self.avgpool = nn.AvgPool2d(7)
+        self.avgpool = nn.AvgPool2d(kernel_size=7)
         self.fc = conv1x1(
             in_channels=channels[-1],
             out_channels=num_classes,

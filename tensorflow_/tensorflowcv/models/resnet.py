@@ -52,6 +52,7 @@ def res_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
+        activation=None,
         activate=False,
         training=training,
         name=name + "/conv2")
@@ -62,8 +63,9 @@ def res_bottleneck_block(x,
                          in_channels,
                          out_channels,
                          strides,
-                         conv1_stride,
-                         training,
+                         conv1_stride=False,
+                         bottleneck_factor=4,
+                         training=False,
                          name="res_bottleneck_block"):
     """
     ResNet bottleneck block for residual path in ResNet unit.
@@ -78,10 +80,12 @@ def res_bottleneck_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
-    training : bool, or a TensorFlow boolean scalar tensor
+    training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
     name : str, default 'res_bottleneck_block'
         Block name.
 
@@ -90,7 +94,7 @@ def res_bottleneck_block(x,
     Tensor
         Resulted tensor.
     """
-    mid_channels = out_channels // 4
+    mid_channels = out_channels // bottleneck_factor
 
     x = conv1x1_block(
         x=x,
@@ -110,6 +114,7 @@ def res_bottleneck_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
+        activation=None,
         activate=False,
         training=training,
         name=name + "/conv3")
@@ -158,6 +163,7 @@ def res_unit(x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            activation=None,
             activate=False,
             training=training,
             name=name + "/identity_conv")

@@ -45,6 +45,7 @@ class ResBlock(HybridBlock):
                 in_channels=out_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
+                activation=None,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -65,20 +66,23 @@ class ResBottleneck(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
-                 conv1_stride,
+                 bn_use_global_stats=False,
+                 conv1_stride=False,
+                 bottleneck_factor=4,
                  **kwargs):
         super(ResBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // 4
+        mid_channels = out_channels // bottleneck_factor
 
         with self.name_scope():
             self.conv1 = conv1x1_block(
@@ -95,6 +99,7 @@ class ResBottleneck(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
+                activation=None,
                 activate=False)
 
     def hybrid_forward(self, F, x):
@@ -154,6 +159,7 @@ class ResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
+                    activation=None,
                     activate=False)
             self.activ = nn.Activation("relu")
 

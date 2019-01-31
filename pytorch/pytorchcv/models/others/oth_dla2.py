@@ -238,12 +238,12 @@ def conv7x7_block(in_channels,
         activate=activate)
 
 
-class DLABlock(nn.Module):
+class ResBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride):
-        super(DLABlock, self).__init__()
+        super(ResBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -266,9 +266,9 @@ class DLABottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
-                 expansion=2):
+                 bottleneck_factor=2):
         super(DLABottleneck, self).__init__()
-        mid_channels = out_channels // expansion
+        mid_channels = out_channels // bottleneck_factor
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
@@ -326,7 +326,7 @@ class DLAResBlock(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
-                 body_class=DLABlock,
+                 body_class=ResBlock,
                  return_down=False):
         super(DLAResBlock, self).__init__()
         self.return_down = return_down
@@ -557,7 +557,7 @@ def oth_dla34(pretrained=None, **kwargs):  # DLA-34
         levels=[1, 2, 2, 1],
         channels=[64, 128, 256, 512],
         init_block_channels=32,
-        res_body_class=DLABlock,
+        res_body_class=ResBlock,
         **kwargs)
     return model
 

@@ -50,6 +50,7 @@ def res_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
+        activation=None,
         activate=False,
         name=name + "/conv2")
     return x
@@ -59,7 +60,8 @@ def res_bottleneck_block(x,
                          in_channels,
                          out_channels,
                          strides,
-                         conv1_stride,
+                         conv1_stride=False,
+                         bottleneck_factor=4,
                          name="res_bottleneck_block"):
     """
     ResNet bottleneck block for residual path in ResNet unit.
@@ -74,8 +76,10 @@ def res_bottleneck_block(x,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
     name : str, default 'res_bottleneck_block'
         Block name.
 
@@ -84,7 +88,7 @@ def res_bottleneck_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    mid_channels = out_channels // 4
+    mid_channels = out_channels // bottleneck_factor
 
     x = conv1x1_block(
         x=x,
@@ -102,6 +106,7 @@ def res_bottleneck_block(x,
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
+        activation=None,
         activate=False,
         name=name + "/conv3")
     return x
@@ -146,6 +151,7 @@ def res_unit(x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            activation=None,
             activate=False,
             name=name + "/identity_conv")
     else:

@@ -42,6 +42,7 @@ class ResBlock(Chain):
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
+                activation=None,
                 activate=False)
 
     def __call__(self, x):
@@ -62,16 +63,19 @@ class ResBottleneck(Chain):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Stride of the convolution.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 conv1_stride):
+                 conv1_stride=False,
+                 bottleneck_factor=4):
         super(ResBottleneck, self).__init__()
-        mid_channels = out_channels // 4
+        mid_channels = out_channels // bottleneck_factor
 
         with self.init_scope():
             self.conv1 = conv1x1_block(
@@ -85,6 +89,7 @@ class ResBottleneck(Chain):
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                activation=None,
                 activate=False)
 
     def __call__(self, x):
@@ -137,6 +142,7 @@ class ResUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
+                    activation=None,
                     activate=False)
             self.activ = F.relu
 

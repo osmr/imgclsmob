@@ -142,8 +142,10 @@ def prepare_src_model(src_fwk,
         if dst_fwk != "pytorch":
             src_param_keys = [key for key in src_param_keys if not key.endswith("num_batches_tracked")]
         if src_model in ["oth_shufflenetv2_wd2"]:
-            src_param_keys = [key for key in src_param_keys if
-                              not key.startswith("network.0.")]
+            src_param_keys = [key for key in src_param_keys if not key.startswith("network.0.")]
+        if src_model.startswith("oth_dla"):
+            src1 = list(filter(re.compile("tree[0-1]\.project").search, src_param_keys))
+            src_param_keys = [key for key in src_param_keys if key not in src1]
 
     elif src_fwk == "mxnet":
         src_sym, src_arg_params, src_aux_params = mx.model.load_checkpoint(
@@ -690,7 +692,15 @@ def convert_pt2pt(dst_params_file_path,
                   src_model,
                   dst_model):
     import torch
-    if dst_model == "fishnet150":
+    if src_model.startswith("oth_dla"):
+        src1 = list(filter(re.compile("\.project").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1 + src1n
+        dst1 = list(filter(re.compile("\.project_conv").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst_param_keys = dst1 + dst1n
+
+    elif dst_model == "fishnet150":
         src1 = list(filter(re.compile("^(conv|fish\.fish\.[0-2])").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src2 = list(filter(re.compile("^fish\.fish\.6\.1").search, src1n))

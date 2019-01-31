@@ -238,47 +238,36 @@ def conv7x7_block(in_channels,
         activate=activate)
 
 
-class SimpleBlock(nn.Module):
+class DLABlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=1,
-                 dilation=1):
-        super(SimpleBlock, self).__init__()
+                 stride):
+        super(DLABlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            stride=stride,
-            padding=dilation,
-            dilation=dilation)
+            stride=stride)
         self.conv2 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
-            padding=dilation,
-            dilation=dilation,
             activation=None,
             activate=False)
-        self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, identity=None):
-        if identity is None:
-            identity = x
+    def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
-        x += identity
-        x = self.relu(x)
         return x
 
 
-class Bottleneck(nn.Module):
+class DLABottleneck(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=1,
-                 dilation=1,
+                 stride,
                  expansion=2):
-        super(Bottleneck, self).__init__()
+        super(DLABottleneck, self).__init__()
         mid_channels = out_channels // expansion
 
         self.conv1 = conv1x1_block(
@@ -287,36 +276,28 @@ class Bottleneck(nn.Module):
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=stride,
-            padding=dilation,
-            dilation=dilation)
+            stride=stride)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             activation=None,
             activate=False)
-        self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, identity=None):
-        if identity is None:
-            identity = x
+    def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x += identity
-        x = self.relu(x)
         return x
 
 
-class BottleneckX(nn.Module):
+class DLABottleneckX(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride=1,
-                 dilation=1,
+                 stride,
                  cardinality=32):
-        super(BottleneckX, self).__init__()
+        super(DLABottleneckX, self).__init__()
         mid_channels = out_channels * cardinality // 32
 
         self.conv1 = conv1x1_block(
@@ -326,137 +307,164 @@ class BottleneckX(nn.Module):
             in_channels=mid_channels,
             out_channels=mid_channels,
             stride=stride,
-            padding=dilation,
-            dilation=dilation,
             groups=cardinality)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             activation=None,
             activate=False)
-        self.relu = nn.ReLU(inplace=True)
 
-    def forward(self, x, identity=None):
-        if identity is None:
-            identity = x
+    def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x += identity
-        x = self.relu(x)
         return x
 
 
-class Root(nn.Module):
+class DLAResBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 residual):
-        super(Root, self).__init__()
-        self.residual = residual
+                 stride,
+                 body_class=DLABlock,
+                 return_down=False):
+        super(DLAResBlock, self).__init__()
+        self.return_down = return_down
+        self.downsample = (stride > 1)
+        self.project = (in_channels != out_channels)
 
-        self.conv = conv1x1_block(
+        self.body = body_class(
             in_channels=in_channels,
             out_channels=out_channels,
-            padding=(kernel_size - 1) // 2,
-            activation=None,
-            activate=False)
+            stride=stride)
         self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, *x):
-        children = x
-        x = torch.cat(x, dim=1)
-        x = self.conv(x)
-        if self.residual:
-            x += children[0]
-        x = self.relu(x)
-        return x
-
-
-class Tree(nn.Module):
-    def __init__(self,
-                 levels,
-                 block_class,
-                 in_channels,
-                 out_channels,
-                 stride=1,
-                 level_root=False,
-                 root_dim=0,
-                 root_kernel_size=1,
-                 dilation=1,
-                 root_residual=False):
-        super(Tree, self).__init__()
-        if root_dim == 0:
-            root_dim = 2 * out_channels
-        if level_root:
-            root_dim += in_channels
-        if levels == 1:
-            self.tree1 = block_class(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                dilation=dilation)
-            self.tree2 = block_class(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                stride=1,
-                dilation=dilation)
-        else:
-            self.tree1 = Tree(
-                levels=levels - 1,
-                block_class=block_class,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                root_dim=0,
-                root_kernel_size=root_kernel_size,
-                dilation=dilation,
-                root_residual=root_residual)
-            self.tree2 = Tree(
-                levels=levels - 1,
-                block_class=block_class,
-                in_channels=out_channels,
-                out_channels=out_channels,
-                root_dim=root_dim + out_channels,
-                root_kernel_size=root_kernel_size,
-                dilation=dilation,
-                root_residual=root_residual)
-        if levels == 1:
-            self.root = Root(
-                in_channels=root_dim,
-                out_channels=out_channels,
-                kernel_size=root_kernel_size,
-                residual=root_residual)
-        self.level_root = level_root
-        self.downsample_pool = None
-        self.project_conv = None
-        self.levels = levels
-        if stride > 1:
+        if self.downsample:
             self.downsample_pool = nn.MaxPool2d(
                 kernel_size=stride,
                 stride=stride)
-        if in_channels != out_channels:
+        if self.project:
             self.project_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 activation=None,
                 activate=False)
 
-    def forward(self, x, identity=None, children=None):
-        children = [] if children is None else children
-        bottom = self.downsample_pool(x) if self.downsample_pool else x
-        identity = self.project_conv(bottom) if self.project_conv else bottom
-        if self.level_root:
-            children.append(bottom)
-        x1 = self.tree1(x, identity)
-        if self.levels == 1:
-            x2 = self.tree2(x1)
-            x = self.root(x2, x1, *children)
+    def forward(self, x):
+        down = self.downsample_pool(x) if self.downsample else x
+        identity = self.project_conv(down) if self.project else down
+        if identity is None:
+            identity = x
+        x = self.body(x)
+        x += identity
+        x = self.relu(x)
+        if self.return_down:
+            return x, down
         else:
-            children.append(x1)
-            x = self.tree2(x1, children=children)
+            return x
+
+
+class DLARoot(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 residual):
+        super(DLARoot, self).__init__()
+        self.residual = residual
+
+        self.conv = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            activation=None,
+            activate=False)
+        self.relu = nn.ReLU(inplace=True)
+
+    def forward(self, x2, x1, extra):
+        last_branch = x2
+        x = torch.cat((x2, x1) + tuple(extra), dim=1)
+        x = self.conv(x)
+        if self.residual:
+            x += last_branch
+        x = self.relu(x)
         return x
+
+
+class DLATree(nn.Module):
+    def __init__(self,
+                 levels,
+                 in_channels,
+                 out_channels,
+                 res_body_class,
+                 stride,
+                 root_residual,
+                 root_dim=0,
+                 first_tree=False,
+                 input_level=True,
+                 return_down=False):
+        super(DLATree, self).__init__()
+        self.return_down = return_down
+        self.add_down = (input_level and not first_tree)
+        self.root_level = (levels == 1)
+
+        if root_dim == 0:
+            root_dim = 2 * out_channels
+        if self.add_down:
+            root_dim += in_channels
+
+        if self.root_level:
+            self.tree1 = DLAResBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                body_class=res_body_class,
+                return_down=True)
+            self.tree2 = DLAResBlock(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                stride=1,
+                body_class=res_body_class,
+                return_down=False)
+        else:
+            self.tree1 = DLATree(
+                levels=levels - 1,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                res_body_class=res_body_class,
+                stride=stride,
+                root_residual=root_residual,
+                root_dim=0,
+                input_level=False,
+                return_down=True)
+            self.tree2 = DLATree(
+                levels=levels - 1,
+                in_channels=out_channels,
+                out_channels=out_channels,
+                res_body_class=res_body_class,
+                stride=1,
+                root_residual=root_residual,
+                root_dim=root_dim + out_channels,
+                input_level=False,
+                return_down=False)
+        if self.root_level:
+            self.root = DLARoot(
+                in_channels=root_dim,
+                out_channels=out_channels,
+                residual=root_residual)
+
+    def forward(self, x, extra=None):
+        extra = [] if extra is None else extra
+        x1, down = self.tree1(x)
+        if self.add_down:
+            extra.append(down)
+        if self.root_level:
+            x2 = self.tree2(x1)
+            x = self.root(x2, x1, extra)
+        else:
+            extra.append(x1)
+            x = self.tree2(x1, extra)
+        if self.return_down:
+            return x, down
+        else:
+            return x
 
 
 class DLAInitBlock(nn.Module):
@@ -499,7 +507,7 @@ class DLA(nn.Module):
                  levels,
                  channels,
                  init_block_channels,
-                 block_class,
+                 res_body_class,
                  residual_root=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -515,17 +523,17 @@ class DLA(nn.Module):
         in_channels = init_block_channels
 
         for i in range(len(levels)):
-            level_i = levels[i]
+            levels_i = levels[i]
             out_channels = channels[i]
-            level_root = (i != 0)
-            self.features.add_module("stage{}".format(i + 1), Tree(
-                levels=level_i,
-                block_class=block_class,
+            first_tree = (i == 0)
+            self.features.add_module("stage{}".format(i + 1), DLATree(
+                levels=levels_i,
                 in_channels=in_channels,
                 out_channels=out_channels,
+                res_body_class=res_body_class,
                 stride=2,
-                level_root=level_root,
-                root_residual=residual_root))
+                root_residual=residual_root,
+                first_tree=first_tree))
             in_channels = out_channels
 
         self.features.add_module("final_pool", nn.AvgPool2d(
@@ -549,7 +557,7 @@ def oth_dla34(pretrained=None, **kwargs):  # DLA-34
         levels=[1, 2, 2, 1],
         channels=[64, 128, 256, 512],
         init_block_channels=32,
-        block_class=SimpleBlock,
+        res_body_class=DLABlock,
         **kwargs)
     return model
 
@@ -560,7 +568,7 @@ def oth_dla46_c(pretrained=None, **kwargs):  # DLA-46-C
         levels=[1, 2, 2, 1],
         channels=[64, 64, 128, 256],
         init_block_channels=32,
-        block_class=Bottleneck,
+        res_body_class=DLABottleneck,
         **kwargs)
     return model
 
@@ -570,7 +578,7 @@ def oth_dla46x_c(pretrained=None, **kwargs):  # DLA-X-46-C
         levels=[1, 2, 2, 1],
         channels=[64, 64, 128, 256],
         init_block_channels=32,
-        block_class=BottleneckX,
+        res_body_class=DLABottleneckX,
         **kwargs)
     return model
 
@@ -580,7 +588,7 @@ def oth_dla60x_c(pretrained=None, **kwargs):  # DLA-X-60-C
         levels=[1, 2, 3, 1],
         channels=[64, 64, 128, 256],
         init_block_channels=32,
-        block_class=BottleneckX,
+        res_body_class=DLABottleneckX,
         **kwargs)
     return model
 
@@ -590,7 +598,7 @@ def oth_dla60(pretrained=None, **kwargs):  # DLA-60
         levels=[1, 2, 3, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=Bottleneck,
+        res_body_class=DLABottleneck,
         **kwargs)
     return model
 
@@ -600,7 +608,7 @@ def oth_dla60x(pretrained=None, **kwargs):  # DLA-X-60
         levels=[1, 2, 3, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=BottleneckX,
+        res_body_class=DLABottleneckX,
         **kwargs)
     return model
 
@@ -610,7 +618,7 @@ def oth_dla102(pretrained=None, **kwargs):  # DLA-102
         levels=[1, 3, 4, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=Bottleneck,
+        res_body_class=DLABottleneck,
         residual_root=True,
         **kwargs)
     return model
@@ -621,7 +629,7 @@ def oth_dla102x(pretrained=None, **kwargs):  # DLA-X-102
         levels=[1, 3, 4, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=BottleneckX,
+        res_body_class=DLABottleneckX,
         residual_root=True,
         **kwargs)
     return model
@@ -629,15 +637,15 @@ def oth_dla102x(pretrained=None, **kwargs):  # DLA-X-102
 
 def oth_dla102x2(pretrained=None, **kwargs):  # DLA-X-102 64
 
-    class BottleneckX64(BottleneckX):
-        def __init__(self, in_channels, out_channels, stride=1, dilation=1):
-            super(BottleneckX64, self).__init__(in_channels, out_channels, stride, dilation, cardinality=64)
+    class DLABottleneckX64(DLABottleneckX):
+        def __init__(self, in_channels, out_channels, stride):
+            super(DLABottleneckX64, self).__init__(in_channels, out_channels, stride, cardinality=64)
 
     model = DLA(
         levels=[1, 3, 4, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=BottleneckX64,
+        res_body_class=DLABottleneckX64,
         residual_root=True,
         **kwargs)
     return model
@@ -648,7 +656,7 @@ def oth_dla169(pretrained=None, **kwargs):  # DLA-169
         levels=[2, 3, 5, 1],
         channels=[128, 256, 512, 1024],
         init_block_channels=32,
-        block_class=Bottleneck,
+        res_body_class=DLABottleneck,
         residual_root=True,
         **kwargs)
     return model
@@ -690,16 +698,16 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_dla34 or weight_count == 15783832)
-        assert (model != oth_dla46_c or weight_count == 1309848)
-        assert (model != oth_dla46x_c or weight_count == 1076888)
-        assert (model != oth_dla60x_c or weight_count == 1336728)
-        assert (model != oth_dla60 or weight_count == 22334104)
-        assert (model != oth_dla60x or weight_count == 17649816)
-        assert (model != oth_dla102 or weight_count == 33731736)
-        assert (model != oth_dla102x or weight_count == 26772120)
-        assert (model != oth_dla102x2 or weight_count == 41745048)
-        assert (model != oth_dla169 or weight_count == 53989016)
+        assert (model != oth_dla34 or weight_count == 15742104)  # 15783832
+        assert (model != oth_dla46_c or weight_count == 1301400)  # 1309848
+        assert (model != oth_dla46x_c or weight_count == 1068440)  # 1076888
+        assert (model != oth_dla60x_c or weight_count == 1319832)  # 1336728
+        assert (model != oth_dla60 or weight_count == 22036632)  # 22334104
+        assert (model != oth_dla60x or weight_count == 17352344)  # 17649816
+        assert (model != oth_dla102 or weight_count == 33268888)  # 33731736
+        assert (model != oth_dla102x or weight_count == 26309272)  # 26772120
+        assert (model != oth_dla102x2 or weight_count == 41282200)  # 41745048
+        assert (model != oth_dla169 or weight_count == 53389720)  # 53989016
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

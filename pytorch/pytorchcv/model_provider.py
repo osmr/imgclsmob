@@ -59,7 +59,6 @@ from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 from .models.msdnet_cifar10 import *
 
-
 from .models.dla import *
 from .models.others.oth_dla import *
 
@@ -403,7 +402,6 @@ _models = {
     'wrn40_8_cifar100': wrn40_8_cifar100,
 
     'msdnet22_cifar10': msdnet22_cifar10,
-
 
     'dla34': dla34,
     'dla46c': dla46c,

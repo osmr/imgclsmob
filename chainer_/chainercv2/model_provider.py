@@ -53,6 +53,8 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 
+from .models.dla import *
+
 __all__ = ['get_model']
 
 
@@ -372,6 +374,17 @@ _models = {
     'wrn28_10_cifar100': wrn28_10_cifar100,
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
+
+    'dla34': dla34,
+    'dla46c': dla46c,
+    'dla46xc': dla46xc,
+    'dla60xc': dla60xc,
+    'dla60': dla60,
+    'dla60x': dla60x,
+    'dla102': dla102,
+    'dla102x': dla102x,
+    'dla102x2': dla102x2,
+    'dla169': dla169,
 }
 
 

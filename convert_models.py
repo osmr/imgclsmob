@@ -144,8 +144,16 @@ def prepare_src_model(src_fwk,
         if src_model in ["oth_shufflenetv2_wd2"]:
             src_param_keys = [key for key in src_param_keys if not key.startswith("network.0.")]
         if src_model.startswith("oth_dla"):
-            src1 = list(filter(re.compile("tree[0-1]\.project").search, src_param_keys))
-            src_param_keys = [key for key in src_param_keys if key not in src1]
+            src1 = list(filter(re.compile("\.project").search, src_param_keys))
+            src1n = [key for key in src_param_keys if key not in src1]
+            src2 = []
+            for i in range(2, 6):
+                src1_i = list(filter(re.compile("level{}".format(i)).search, src1))
+                max_len = max([len(k) for k in src1_i])
+                pattern_i = [k for k in src1_i if len(k) == max_len][0][:-21]
+                src2_i = list(filter(re.compile(pattern_i).search, src1))
+                src2 += src2_i
+            src_param_keys = src2 + src1n
 
     elif src_fwk == "mxnet":
         src_sym, src_arg_params, src_aux_params = mx.model.load_checkpoint(

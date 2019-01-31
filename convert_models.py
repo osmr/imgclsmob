@@ -149,6 +149,8 @@ def prepare_src_model(src_fwk,
             src2 = []
             for i in range(2, 6):
                 src1_i = list(filter(re.compile("level{}".format(i)).search, src1))
+                if len(src1_i) == 0:
+                    continue
                 max_len = max([len(k) for k in src1_i])
                 pattern_i = [k for k in src1_i if len(k) == max_len][0][:-21]
                 src2_i = list(filter(re.compile(pattern_i).search, src1))

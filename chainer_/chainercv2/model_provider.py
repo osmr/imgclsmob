@@ -26,6 +26,7 @@ from .models.dpn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
+from .models.dla import *
 from .models.fishnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -52,8 +53,6 @@ from .models.resnext_cifar import *
 from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
-
-from .models.dla import *
 
 __all__ = ['get_model']
 
@@ -222,6 +221,17 @@ _models = {
 
     'channelnet': channelnet,
 
+    'dla34': dla34,
+    'dla46c': dla46c,
+    'dla46xc': dla46xc,
+    'dla60': dla60,
+    'dla60x': dla60x,
+    'dla60xc': dla60xc,
+    'dla102': dla102,
+    'dla102x': dla102x,
+    'dla102x2': dla102x2,
+    'dla169': dla169,
+
     'fishnet99': fishnet99,
     'fishnet150': fishnet150,
 
@@ -374,17 +384,6 @@ _models = {
     'wrn28_10_cifar100': wrn28_10_cifar100,
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
-
-    'dla34': dla34,
-    'dla46c': dla46c,
-    'dla46xc': dla46xc,
-    'dla60xc': dla60xc,
-    'dla60': dla60,
-    'dla60x': dla60x,
-    'dla102': dla102,
-    'dla102x': dla102x,
-    'dla102x2': dla102x2,
-    'dla169': dla169,
 }
 
 

@@ -3,7 +3,7 @@
     Original paper: 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 """
 
-__all__ = ['DLA', 'dla34', 'dla46c', 'dla46xc', 'dla60xc', 'dla60', 'dla60x', 'dla102', 'dla102x', 'dla102x2', 'dla169']
+__all__ = ['DLA', 'dla34', 'dla46c', 'dla46xc', 'dla60', 'dla60x', 'dla60xc', 'dla102', 'dla102x', 'dla102x2', 'dla169']
 
 import os
 import chainer.functions as F
@@ -489,21 +489,6 @@ def dla46xc(**kwargs):
                    model_name="dla46xc", **kwargs)
 
 
-def dla60xc(**kwargs):
-    """
-    DLA-X-60-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_dla(levels=[1, 2, 3, 1], channels=[64, 64, 128, 256], res_body_class=DLABottleneckX,
-                   model_name="dla60xc", **kwargs)
-
-
 def dla60(**kwargs):
     """
     DLA-60 model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
@@ -532,6 +517,21 @@ def dla60x(**kwargs):
     """
     return get_dla(levels=[1, 2, 3, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneckX,
                    model_name="dla60x", **kwargs)
+
+
+def dla60xc(**kwargs):
+    """
+    DLA-X-60-C model from 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_dla(levels=[1, 2, 3, 1], channels=[64, 64, 128, 256], res_body_class=DLABottleneckX,
+                   model_name="dla60xc", **kwargs)
 
 
 def dla102(**kwargs):
@@ -610,9 +610,9 @@ def _test():
         dla34,
         dla46c,
         dla46xc,
-        dla60xc,
         dla60,
         dla60x,
+        dla60xc,
         dla102,
         dla102x,
         dla102x2,
@@ -627,9 +627,9 @@ def _test():
         assert (model != dla34 or weight_count == 15742104)
         assert (model != dla46c or weight_count == 1301400)
         assert (model != dla46xc or weight_count == 1068440)
-        assert (model != dla60xc or weight_count == 1319832)
         assert (model != dla60 or weight_count == 22036632)
         assert (model != dla60x or weight_count == 17352344)
+        assert (model != dla60xc or weight_count == 1319832)
         assert (model != dla102 or weight_count == 33268888)
         assert (model != dla102x or weight_count == 26309272)
         assert (model != dla102x2 or weight_count == 41282200)

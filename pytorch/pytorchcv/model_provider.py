@@ -30,6 +30,7 @@ from .models.dpn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
+from .models.dla import *
 from .models.msdnet import *
 from .models.fishnet import *
 from .models.squeezenet import *
@@ -58,9 +59,6 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 from .models.msdnet_cifar10 import *
-
-from .models.dla import *
-from .models.others.oth_dla import *
 
 __all__ = ['get_model']
 
@@ -246,6 +244,17 @@ _models = {
 
     'channelnet': channelnet,
 
+    'dla34': dla34,
+    'dla46c': dla46c,
+    'dla46xc': dla46xc,
+    'dla60': dla60,
+    'dla60x': dla60x,
+    'dla60xc': dla60xc,
+    'dla102': dla102,
+    'dla102x': dla102x,
+    'dla102x2': dla102x2,
+    'dla169': dla169,
+
     'msdnet22': msdnet22,
 
     'fishnet99': fishnet99,
@@ -402,28 +411,6 @@ _models = {
     'wrn40_8_cifar100': wrn40_8_cifar100,
 
     'msdnet22_cifar10': msdnet22_cifar10,
-
-    'dla34': dla34,
-    'dla46c': dla46c,
-    'dla46xc': dla46xc,
-    'dla60xc': dla60xc,
-    'dla60': dla60,
-    'dla60x': dla60x,
-    'dla102': dla102,
-    'dla102x': dla102x,
-    'dla102x2': dla102x2,
-    'dla169': dla169,
-
-    'oth_dla34': oth_dla34,
-    'oth_dla46_c': oth_dla46_c,
-    'oth_dla46x_c': oth_dla46x_c,
-    'oth_dla60x_c': oth_dla60x_c,
-    'oth_dla60': oth_dla60,
-    'oth_dla60x': oth_dla60x,
-    'oth_dla102': oth_dla102,
-    'oth_dla102x': oth_dla102x,
-    'oth_dla102x2': oth_dla102x2,
-    'oth_dla169': oth_dla169,
 }
 
 

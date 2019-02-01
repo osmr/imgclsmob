@@ -84,6 +84,7 @@ Some remarks:
 | DarkNet-19 | A | A | A | A | A | [link](https://github.com/pjreddie/darknet) | [link](https://github.com/pjreddie/darknet) | - |
 | DarkNet-53 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1804.02767) | [link](https://github.com/pjreddie/darknet) | 2018 |
 | ChannelNet | A | A | A | - | A | [link](https://arxiv.org/abs/1809.01330) | [link](https://github.com/HongyangGao/ChannelNets) | 2018 |
+| DLA | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.06484) | [link](https://github.com/ucbdrive/dla) | 2017 |
 | MSDNet | A | AB | - | - | - | [link](https://arxiv.org/abs/1703.09844) | [link](https://github.com/gaohuang/MSDNet) | 2017 |
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |
 | SqueezeNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | [link](https://github.com/DeepScale/SqueezeNet) | 2016 |

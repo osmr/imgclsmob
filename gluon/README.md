@@ -92,7 +92,7 @@ Some remarks:
 bottleneck block. Respectively a network without b-suffix has the stride in the first convolution.
 - ResNet/PreResNet models do not use biases in convolutions at all.
 - CondenseNet models are only so-called converted versions.
-- ShuffleNetV2/ShuffleNetV2b/ShuffleNetV2c are different implementations of the same architecture.
+- ShuffleNetV2 and ShuffleNetV2b are different implementations of the same architecture.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -201,8 +201,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNetV2 x2.0 | 32.04 | 12.10 | 7,601,686 | 595.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.84/shufflenetv2_w2-1210-544b55d9.params.log)) |
 | ShuffleNetV2b x0.5 | 39.81 | 17.82 | 1,366,792 | 43.31M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.157/shufflenetv2b_wd2-1782-845a9c43.params.log)) |
 | ShuffleNetV2b x1.0 | 30.39 | 11.01 | 2,279,760 | 150.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.161/shufflenetv2b_w1-1101-f679702f.params.log)) |
-| ShuffleNetV2c x0.5 | 39.87 | 18.11 | 1,366,792 | 43.31M | From [tensorpack/tensorpack] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.91/shufflenetv2c_wd2-1811-979ce7d9.params.log)) |
-| ShuffleNetV2c x1.0 | 30.74 | 11.38 | 2,279,760 | 150.62M | From [tensorpack/tensorpack] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.95/shufflenetv2c_w1-1138-646f3b78.params.log)) |
+| ShuffleNetV2b x1.5 | 26.90 | 8.79 | 4,410,194 | 323.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.203/shufflenetv2b_w3d2-0879-4022da3a.params.log)) |
 | 108-MENet-8x1 (g=3) | 43.62 | 20.30 | 654,516 | 42.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2030-aa07f925.params.log)) |
 | 128-MENet-8x1 (g=4) | 42.10 | 19.13 | 750,796 | 45.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.103/menet128_8x1_g4-1913-0c890a76.params.log)) |
 | 128-MENet-8x1 (g=4) | 42.10 | 19.13 | 750,796 | 45.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.103/menet128_8x1_g4-1913-0c890a76.params.log)) |

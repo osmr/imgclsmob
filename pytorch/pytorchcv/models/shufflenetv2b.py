@@ -4,8 +4,7 @@
     https://arxiv.org/abs/1807.11164.
 """
 
-__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2',
-           'shufflenetv2c_wd2', 'shufflenetv2c_w1']
+__all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenetv2b_w3d2', 'shufflenetv2b_w2']
 
 import os
 import torch
@@ -352,44 +351,6 @@ def shufflenetv2b_w2(**kwargs):
         **kwargs)
 
 
-def shufflenetv2c_wd2(**kwargs):
-    """
-    ShuffleNetV2(c) 0.5x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
-    https://arxiv.org/abs/1807.11164.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_shufflenetv2b(
-        width_scale=(12.0 / 29.0),
-        shuffle_group_first=False,
-        model_name="shufflenetv2c_wd2",
-        **kwargs)
-
-
-def shufflenetv2c_w1(**kwargs):
-    """
-    ShuffleNetV2(c) 1x model from 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
-    https://arxiv.org/abs/1807.11164.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_shufflenetv2b(
-        width_scale=1.0,
-        shuffle_group_first=False,
-        model_name="shufflenetv2c_w1",
-        **kwargs)
-
-
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -410,8 +371,6 @@ def _test():
         shufflenetv2b_w1,
         shufflenetv2b_w3d2,
         shufflenetv2b_w2,
-        shufflenetv2c_wd2,
-        shufflenetv2c_w1,
     ]
 
     for model in models:
@@ -426,8 +385,6 @@ def _test():
         assert (model != shufflenetv2b_w1 or weight_count == 2279760)
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
-        assert (model != shufflenetv2c_wd2 or weight_count == 1366792)
-        assert (model != shufflenetv2c_w1 or weight_count == 2279760)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

@@ -335,7 +335,7 @@ def sqnxt23_w1(**kwargs):
 
 def sqnxt23_w3d2(**kwargs):
     """
-    0.75-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+    1.5-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
     Parameters:
     ----------
@@ -354,7 +354,7 @@ def sqnxt23_w3d2(**kwargs):
 
 def sqnxt23_w2(**kwargs):
     """
-    0.5-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+    2.0-SqNxt-23 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
     Parameters:
     ----------
@@ -392,7 +392,7 @@ def sqnxt23v5_w1(**kwargs):
 
 def sqnxt23v5_w3d2(**kwargs):
     """
-    0.75-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+    1.5-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
     Parameters:
     ----------
@@ -411,7 +411,7 @@ def sqnxt23v5_w3d2(**kwargs):
 
 def sqnxt23v5_w2(**kwargs):
     """
-    0.5-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
+    2.0-SqNxt-23v5 model from 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 
     Parameters:
     ----------

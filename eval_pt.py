@@ -162,7 +162,8 @@ def main():
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
-        resize_inv_factor=args.resize_inv_factor)
+        resize_inv_factor=args.resize_inv_factor,
+        use_cv_resize=args.use_cv_resize)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(

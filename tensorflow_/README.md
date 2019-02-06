@@ -64,7 +64,7 @@ with tf.Session() as sess:
 Some remarks:
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet-1K dataset.
 - FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs.
-- Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to Keras.
+- Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to TensorFlow.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |

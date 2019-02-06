@@ -84,7 +84,10 @@ y = net(x)
 Some remarks:
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet-1K dataset.
 - FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs.
-- Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to Keras.
+- Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to PyTorch.
+- You may notice that quality estimations are quite different from ones for the corresponding models in other frameworks. This
+is due to the fact that the quality is estimated on the standard TorchVision stack of image transformations. Using
+OpenCV `Resize` transformation instead of PIL one quality evaluation results will be similar to ones for the Gluon models.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |

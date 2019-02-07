@@ -412,8 +412,39 @@ def convert_mx2gl(dst_net,
         dst_param_keys = [key.replace('features.A.', 'features.0.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.B.', 'features.6.') for key in dst_param_keys]
 
+    elif src_model in ["preresnet269b"]:
+
+        dst1 = list(filter(re.compile("^features.1.0.body.conv1.bn.").search, dst_param_keys))
+        dst_param_keys = [key for key in dst_param_keys if key not in dst1]
+
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        src_param_keys = [re.sub('^classifier_', 'output.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('^res', 'features.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv1_weight$', '_conv1_aweight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv2_weight$', '_conv2_aweight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv3_weight$', '_conv3_aweight', key) for key in src_param_keys]
+
+        src_param_keys.sort()
+        src_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        dst_param_keys.sort()
+        dst_param_keys.sort(key=lambda var: ['{:10}'.format(int(x)) if
+                                             x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+
+        src_param_keys = [re.sub('^output\.', 'classifier_', key) for key in src_param_keys]
+        src_param_keys = [re.sub('^features\.', 'res', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv1_aweight$', '_conv1_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv2_aweight$', '_conv2_weight', key) for key in src_param_keys]
+        src_param_keys = [re.sub('_conv3_aweight$', '_conv3_weight', key) for key in src_param_keys]
+
     for src_i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-        assert (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1])
+        assert (dst_key.split('.')[-1].split('_')[-1] == src_key.split('_')[-1]), \
+            "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+                src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape)
         assert (dst_params[dst_key].shape == src_params[src_key].shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape)
@@ -935,7 +966,7 @@ def main():
         in_channels=args.dst_in_channels)
 
     if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]) or\
-            ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116"])):
+            ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

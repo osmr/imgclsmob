@@ -414,6 +414,7 @@ def convert_mx2gl(dst_net,
 
     elif src_model in ["preresnet269b"]:
 
+        dst_net.features[1][0].body.conv1.bn.initialize(ctx=ctx, verbose=True, force_reinit=True)
         dst1 = list(filter(re.compile("^features.1.0.body.conv1.bn.").search, dst_param_keys))
         dst_param_keys = [key for key in dst_param_keys if key not in dst1]
 

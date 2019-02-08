@@ -203,7 +203,14 @@ def preres_init_block(x,
         padding=3,
         use_bias=False,
         name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    if K.backend() == 'mxnet':
+        x = GluonBatchNormalization(name=name + "/bn")(x)
+    else:
+        x = nn.BatchNormalization(
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            momentum=0.9,
+            epsilon=1e-5,
+            name=name + "/bn")(x)
     x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
@@ -230,7 +237,14 @@ def preres_activation(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    if K.backend() == 'mxnet':
+        x = GluonBatchNormalization(name=name + "/bn")(x)
+    else:
+        x = nn.BatchNormalization(
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            momentum=0.9,
+            epsilon=1e-5,
+            name=name + "/bn")(x)
     x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
@@ -686,7 +700,10 @@ def _test():
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        if K.image_data_format() == 'channels_first':
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

@@ -8,11 +8,9 @@ __all__ = ['conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil
 
 import math
 from inspect import isfunction
-from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
-import mxnet as mx
 
 
 def conv2d(x,
@@ -352,7 +350,14 @@ def conv_block(x,
         groups=groups,
         use_bias=use_bias,
         name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    if K.backend() == 'mxnet':
+        x = GluonBatchNormalization(name=name + "/bn")(x)
+    else:
+        x = BatchNormalization(
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            momentum=0.9,
+            epsilon=1e-5,
+            name=name + "/bn")(x)
     if activate:
         assert (activation is not None)
         if isfunction(activation):
@@ -621,7 +626,14 @@ def pre_conv_block(x,
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    if K.backend() == 'mxnet':
+        x = GluonBatchNormalization(name=name + "/bn")(x)
+    else:
+        x = BatchNormalization(
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            momentum=0.9,
+            epsilon=1e-5,
+            name=name + "/bn")(x)
     x = nn.Activation("relu", name=name + "/activ")(x)
     if return_preact:
         x_pre_activ = x
@@ -833,69 +845,6 @@ def se_block(x,
     return x
 
 
-@keras_mxnet_symbol
-def gluon_batchnorm(x,
-                    gamma,
-                    beta,
-                    moving_mean,
-                    moving_var,
-                    momentum=0.9,
-                    axis=1,
-                    epsilon=1e-5,
-                    fix_gamma=False):
-    """
-    Apply native MXNet/Gluon batch normalization on x with given moving_mean, moving_var, beta and gamma.
-
-
-    Parameters
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    gamma : keras.backend tensor/variable/symbol
-        Tensor by which to scale the input.
-    beta : keras.backend tensor/variable/symbol
-        Tensor by which to center the input.
-    moving_mean : keras.backend tensor/variable/symbol
-        Moving mean.
-    moving_var : keras.backend tensor/variable/symbol
-        Moving variance.
-    momentum : float, default 0.9
-        Momentum for the moving average.
-    axis : int, default 1
-        Axis along which BatchNorm is applied. Axis usually represent axis of 'channels'. MXNet follows
-        'channels_first'.
-    epsilon : float, default 1e-5
-        Small float added to variance to avoid dividing by zero.
-    fix_gamma : bool, default False
-        Fix gamma while training.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    if isinstance(x, KerasSymbol):
-        x = x.symbol
-    if isinstance(moving_mean, KerasSymbol):
-        moving_mean = moving_mean.symbol
-    if isinstance(moving_var, KerasSymbol):
-        moving_var = moving_var.symbol
-    if isinstance(beta, KerasSymbol):
-        beta = beta.symbol
-    if isinstance(gamma, KerasSymbol):
-        gamma = gamma.symbol
-    return KerasSymbol(mx.sym.BatchNorm(
-        data=x,
-        gamma=gamma,
-        beta=beta,
-        moving_mean=moving_mean,
-        moving_var=moving_var,
-        momentum=momentum,
-        axis=axis,
-        eps=epsilon,
-        fix_gamma=fix_gamma))
-
-
 class GluonBatchNormalization(BatchNormalization):
     """
     Batch normalization layer wrapper for implementation of the Gluon type of BatchNorm default parameters.
@@ -967,6 +916,72 @@ class GluonBatchNormalization(BatchNormalization):
 
     def call(self, inputs, training=None):
         if K.backend() == 'mxnet':
+
+            from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
+            import mxnet as mx
+
+            @keras_mxnet_symbol
+            def gluon_batchnorm(x,
+                                gamma,
+                                beta,
+                                moving_mean,
+                                moving_var,
+                                momentum=0.9,
+                                axis=1,
+                                epsilon=1e-5,
+                                fix_gamma=False):
+                """
+                Apply native MXNet/Gluon batch normalization on x with given moving_mean, moving_var, beta and gamma.
+
+
+                Parameters
+                ----------
+                x : keras.backend tensor/variable/symbol
+                    Input tensor/variable/symbol.
+                gamma : keras.backend tensor/variable/symbol
+                    Tensor by which to scale the input.
+                beta : keras.backend tensor/variable/symbol
+                    Tensor by which to center the input.
+                moving_mean : keras.backend tensor/variable/symbol
+                    Moving mean.
+                moving_var : keras.backend tensor/variable/symbol
+                    Moving variance.
+                momentum : float, default 0.9
+                    Momentum for the moving average.
+                axis : int, default 1
+                    Axis along which BatchNorm is applied. Axis usually represent axis of 'channels'. MXNet follows
+                    'channels_first'.
+                epsilon : float, default 1e-5
+                    Small float added to variance to avoid dividing by zero.
+                fix_gamma : bool, default False
+                    Fix gamma while training.
+
+                Returns
+                -------
+                keras.backend tensor/variable/symbol
+                    Resulted tensor/variable/symbol.
+                """
+                if isinstance(x, KerasSymbol):
+                    x = x.symbol
+                if isinstance(moving_mean, KerasSymbol):
+                    moving_mean = moving_mean.symbol
+                if isinstance(moving_var, KerasSymbol):
+                    moving_var = moving_var.symbol
+                if isinstance(beta, KerasSymbol):
+                    beta = beta.symbol
+                if isinstance(gamma, KerasSymbol):
+                    gamma = gamma.symbol
+                return KerasSymbol(mx.sym.BatchNorm(
+                    data=x,
+                    gamma=gamma,
+                    beta=beta,
+                    moving_mean=moving_mean,
+                    moving_var=moving_var,
+                    momentum=momentum,
+                    axis=axis,
+                    eps=epsilon,
+                    fix_gamma=fix_gamma))
+
             return gluon_batchnorm(
                 x=inputs,
                 gamma=self.gamma,

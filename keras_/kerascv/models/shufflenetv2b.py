@@ -396,7 +396,10 @@ def _test():
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        if K.image_data_format() == 'channels_first':
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

@@ -458,7 +458,10 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mnasnet or weight_count == 4308816)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        if K.image_data_format() == 'channels_first':
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

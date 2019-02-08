@@ -473,7 +473,10 @@ def _test():
         assert (model != menet352_12x1_g8 or weight_count == 2272872)
         assert (model != menet456_24x1_g3 or weight_count == 5304784)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        if K.image_data_format() == 'channels_first':
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

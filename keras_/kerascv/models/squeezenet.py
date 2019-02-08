@@ -378,7 +378,10 @@ def _test():
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
         assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        if K.image_data_format() == 'channels_first':
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

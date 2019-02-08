@@ -65,8 +65,12 @@ def shuffle_unit(x,
             name=name + "/shortcut_conv")
         x2 = x
     else:
-        y1 = nn.Lambda(lambda z: z[:, 0:in_channels2, :, :])(x)
-        x2 = nn.Lambda(lambda z: z[:, in_channels2:, :, :])(x)
+        if K.image_data_format() == 'channels_first':
+            y1 = nn.Lambda(lambda z: z[:, 0:in_channels2, :, :])(x)
+            x2 = nn.Lambda(lambda z: z[:, in_channels2:, :, :])(x)
+        else:
+            y1 = nn.Lambda(lambda z: z[:, :, :, 0:in_channels2])(x)
+            x2 = nn.Lambda(lambda z: z[:, :, :, in_channels2:])(x)
 
     y2_in_channels = (in_channels if downsample else in_channels2)
     y2_out_channels = out_channels - y2_in_channels

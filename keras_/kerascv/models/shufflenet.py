@@ -12,7 +12,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, GluonBatchNormalization
+from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm
 
 
 def shuffle_unit(x,
@@ -60,7 +60,9 @@ def shuffle_unit(x,
         out_channels=mid_channels,
         groups=(1 if ignore_group else groups),
         name=name + "/compress_conv1")
-    x = GluonBatchNormalization(name=name + "/compress_bn1")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/compress_bn1")
     x = nn.Activation("relu", name=name + "/activ")(x)
 
     x = channel_shuffle_lambda(
@@ -73,7 +75,9 @@ def shuffle_unit(x,
         channels=mid_channels,
         strides=(2 if downsample else 1),
         name=name + "/dw_conv2")
-    x = GluonBatchNormalization(name=name + "/dw_bn2")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/dw_bn2")
 
     x = conv1x1(
         x=x,
@@ -81,9 +85,11 @@ def shuffle_unit(x,
         out_channels=out_channels,
         groups=groups,
         name=name + "/expand_conv3")
-    x = GluonBatchNormalization(name=name + "/expand_bn3")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/expand_bn3")
 
-    x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
+    x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
 
     if downsample:
         identity = nn.AvgPool2D(
@@ -130,7 +136,9 @@ def shuffle_init_block(x,
         out_channels=out_channels,
         strides=2,
         name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,

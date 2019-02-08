@@ -11,7 +11,7 @@ from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
 from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, max_pool2d_ceil, channel_shuffle_lambda,\
-    se_block, GluonBatchNormalization
+    se_block, batchnorm
 
 
 def shuffle_unit(x,
@@ -54,26 +54,36 @@ def shuffle_unit(x,
             channels=in_channels,
             strides=2,
             name=name + "/dw_conv4")
-        y1 = GluonBatchNormalization(name=name + "/dw_bn4")(y1)
+        y1 = batchnorm(
+            x=y1,
+            name=name + "/dw_bn4")
         y1 = conv1x1(
             x=y1,
             in_channels=in_channels,
             out_channels=mid_channels,
             name=name + "/expand_conv5")
-        y1 = GluonBatchNormalization(name=name + "/expand_bn5")(y1)
+        y1 = batchnorm(
+            x=y1,
+            name=name + "/expand_bn5")
         y1 = nn.Activation("relu", name=name + "/expand_activ5")(y1)
         x2 = x
     else:
         in_split2_channels = in_channels // 2
-        y1 = nn.Lambda(lambda z: z[:, 0:in_split2_channels, :, :])(x)
-        x2 = nn.Lambda(lambda z: z[:, in_split2_channels:, :, :])(x)
+        if K.image_data_format() == 'channels_first':
+            y1 = nn.Lambda(lambda z: z[:, 0:in_split2_channels, :, :])(x)
+            x2 = nn.Lambda(lambda z: z[:, in_split2_channels:, :, :])(x)
+        else:
+            y1 = nn.Lambda(lambda z: z[:, :, :, 0:in_split2_channels])(x)
+            x2 = nn.Lambda(lambda z: z[:, :, :, in_split2_channels:])(x)
 
     y2 = conv1x1(
         x=x2,
         in_channels=(in_channels if downsample else mid_channels),
         out_channels=mid_channels,
         name=name + "/compress_conv1")
-    y2 = GluonBatchNormalization(name=name + "/compress_bn1")(y2)
+    y2 = batchnorm(
+        x=y2,
+        name=name + "/compress_bn1")
     y2 = nn.Activation("relu", name=name + "/compress_activ1")(y2)
 
     y2 = depthwise_conv3x3(
@@ -81,14 +91,18 @@ def shuffle_unit(x,
         channels=mid_channels,
         strides=(2 if downsample else 1),
         name=name + "/dw_conv2")
-    y2 = GluonBatchNormalization(name=name + "/dw_bn2")(y2)
+    y2 = batchnorm(
+        x=y2,
+        name=name + "/dw_bn2")
 
     y2 = conv1x1(
         x=y2,
         in_channels=mid_channels,
         out_channels=mid_channels,
         name=name + "/expand_conv3")
-    y2 = GluonBatchNormalization(name=name + "/expand_bn3")(y2)
+    y2 = batchnorm(
+        x=y2,
+        name=name + "/expand_bn3")
     y2 = nn.Activation("relu", name=name + "/expand_activ3")(y2)
 
     if use_se:

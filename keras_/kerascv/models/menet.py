@@ -11,7 +11,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, GluonBatchNormalization
+from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm
 
 
 def me_unit(x,
@@ -63,7 +63,9 @@ def me_unit(x,
         out_channels=mid_channels,
         groups=(1 if ignore_group else groups),
         name=name + "/compress_conv1")
-    x = GluonBatchNormalization(name=name + "/compress_bn1")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/compress_bn1")
     x = nn.Activation("relu", name=name + "/compress_activ")(x)
 
     x = channel_shuffle_lambda(
@@ -77,7 +79,9 @@ def me_unit(x,
         in_channels=mid_channels,
         out_channels=side_channels,
         name=name + "/s_merge_conv")
-    y = GluonBatchNormalization(name=name + "/s_merge_bn")(y)
+    y = batchnorm(
+        x=y,
+        name=name + "/s_merge_bn")
     y = nn.Activation("relu", name=name + "/s_merge_activ")(y)
 
     # depthwise convolution (bottleneck)
@@ -86,7 +90,9 @@ def me_unit(x,
         channels=mid_channels,
         strides=(2 if downsample else 1),
         name=name + "/dw_conv2")
-    x = GluonBatchNormalization(name=name + "/dw_bn2")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/dw_bn2")
 
     # evolution
     y = conv3x3(
@@ -95,7 +101,9 @@ def me_unit(x,
         out_channels=side_channels,
         strides=(2 if downsample else 1),
         name=name + "/s_conv")
-    y = GluonBatchNormalization(name=name + "/s_conv_bn")(y)
+    y = batchnorm(
+        x=y,
+        name=name + "/s_conv_bn")
     y = nn.Activation("relu", name=name + "/s_conv_activ")(y)
 
     y = conv1x1(
@@ -103,7 +111,9 @@ def me_unit(x,
         in_channels=side_channels,
         out_channels=mid_channels,
         name=name + "/s_evolve_conv")
-    y = GluonBatchNormalization(name=name + "/s_evolve_bn")(y)
+    y = batchnorm(
+        x=y,
+        name=name + "/s_evolve_bn")
     y = nn.Activation('sigmoid', name=name + "/s_evolve_activ")(y)
 
     x = nn.multiply([x, y], name=name + "/mul")
@@ -115,9 +125,11 @@ def me_unit(x,
         out_channels=out_channels,
         groups=groups,
         name=name + "/expand_conv3")
-    x = GluonBatchNormalization(name=name + "/expand_bn3")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/expand_bn3")
 
-    x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
+    x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
 
     if downsample:
         identity = nn.AvgPool2D(
@@ -167,7 +179,9 @@ def me_init_block(x,
         padding=1,
         use_bias=False,
         name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,

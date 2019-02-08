@@ -12,7 +12,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, GluonBatchNormalization
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, batchnorm
 
 
 def preres_block(x,
@@ -203,14 +203,9 @@ def preres_init_block(x,
         padding=3,
         use_bias=False,
         name=name + "/conv")
-    if K.backend() == 'mxnet':
-        x = GluonBatchNormalization(name=name + "/bn")(x)
-    else:
-        x = nn.BatchNormalization(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
-            momentum=0.9,
-            epsilon=1e-5,
-            name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     x = nn.MaxPool2D(
         pool_size=3,
@@ -237,14 +232,9 @@ def preres_activation(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    if K.backend() == 'mxnet':
-        x = GluonBatchNormalization(name=name + "/bn")(x)
-    else:
-        x = nn.BatchNormalization(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
-            momentum=0.9,
-            epsilon=1e-5,
-            name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 

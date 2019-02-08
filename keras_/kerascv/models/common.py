@@ -2,15 +2,52 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block', 'GluonBatchNormalization']
+__all__ = ['batchnorm', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
 from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+
+
+def batchnorm(x,
+              momentum=0.9,
+              epsilon=1e-5,
+              name=None):
+    """
+    Batch normalization layer.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    momentum : float, default 0.9
+        Momentum for the moving average.
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    name : str, default None
+        Layer name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if K.backend() == 'mxnet':
+        x = GluonBatchNormalization(
+            momentum=momentum,
+            epsilon=epsilon,
+            name=name)(x)
+    else:
+        x = nn.BatchNormalization(
+            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            momentum=momentum,
+            epsilon=epsilon,
+            name=name)(x)
+    return x
 
 
 def conv2d(x,
@@ -102,12 +139,12 @@ def conv2d(x,
         in_group_channels = in_channels // groups
         out_group_channels = out_channels // groups
         group_list = []
-        channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+        is_channels_first = (K.image_data_format() == 'channels_first')
         for gi in range(groups):
             xi = nn.Lambda(
-                lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :]
-                if K.image_data_format() == 'channels_first' else
-                lambda z: z[:, :, :, gi * in_group_channels:(gi + 1) * in_group_channels])(x)
+                (lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :])
+                if is_channels_first else
+                (lambda z: z[:, :, :, gi * in_group_channels:(gi + 1) * in_group_channels]))(x)
             xi = nn.Conv2D(
                 filters=out_group_channels,
                 kernel_size=kernel_size,
@@ -117,6 +154,7 @@ def conv2d(x,
                 use_bias=use_bias,
                 name=name + "/convgroup{}".format(gi + 1))(xi)
             group_list.append(xi)
+        channel_axis = 1 if is_channels_first else -1
         x = nn.concatenate(group_list, axis=channel_axis, name=name + "/concat")
 
     return x
@@ -278,7 +316,7 @@ def max_pool2d_ceil(x,
 
     padding0 = 0 if padding == "valid" else strides[0] // 2
 
-    height = x.shape[2 if K.image_data_format() == 'channels_first' else 1]
+    height = x._keras_shape[2 if K.image_data_format() == 'channels_first' else 1]
     out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
     if math.ceil(out_height) > math.floor(out_height):
         assert (strides[0] <= 3)
@@ -350,14 +388,9 @@ def conv_block(x,
         groups=groups,
         use_bias=use_bias,
         name=name + "/conv")
-    if K.backend() == 'mxnet':
-        x = GluonBatchNormalization(name=name + "/bn")(x)
-    else:
-        x = BatchNormalization(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
-            momentum=0.9,
-            epsilon=1e-5,
-            name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     if activate:
         assert (activation is not None)
         if isfunction(activation):
@@ -626,14 +659,9 @@ def pre_conv_block(x,
     tuple of two keras.backend tensor/variable/symbol
         Resulted tensor and preactivated input tensor.
     """
-    if K.backend() == 'mxnet':
-        x = GluonBatchNormalization(name=name + "/bn")(x)
-    else:
-        x = BatchNormalization(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
-            momentum=0.9,
-            epsilon=1e-5,
-            name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     if return_preact:
         x_pre_activ = x
@@ -753,9 +781,9 @@ def channel_shuffle(x,
 
     is_channels_first = (K.image_data_format() == 'channels_first')
     if is_channels_first:
-        batch, channels, height, width = x.shape
+        batch, channels, height, width = x._keras_shape
     else:
-        batch, height, width, channels = x.shape
+        batch, height, width, channels = x._keras_shape
 
     # assert (channels % groups == 0)
     channels_per_group = channels // groups
@@ -765,12 +793,12 @@ def channel_shuffle(x,
         x = K.permute_dimensions(x, pattern=(0, 2, 1, 3, 4))
         x = K.reshape(x, shape=(-1, channels, height, width))
     else:
-        x = K.reshape(x, shape=(batch, height, width, groups, channels_per_group))
+        x = K.reshape(x, shape=(-1, height, width, groups, channels_per_group))
         x = K.permute_dimensions(x, pattern=(0, 1, 2, 4, 3))
-        x = K.reshape(x, shape=(batch, height, width, channels))
+        x = K.reshape(x, shape=(-1, height, width, channels))
 
     if not hasattr(x, '_keras_shape'):
-        x._keras_shape = tuple([d if d != 0 else None for d in x.shape])
+        x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
     return x
 
 
@@ -820,9 +848,9 @@ def se_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert(len(x.shape) == 4)
+    assert(len(x._keras_shape) == 4)
     mid_cannels = channels // reduction
-    pool_size = x.shape[2:4] if K.image_data_format() == 'channels_first' else x.shape[1:3]
+    pool_size = x._keras_shape[2:4] if K.image_data_format() == 'channels_first' else x._keras_shape[1:3]
 
     w = nn.AvgPool2D(
         pool_size=pool_size,

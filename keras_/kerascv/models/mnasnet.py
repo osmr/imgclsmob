@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, GluonBatchNormalization
+from .common import conv2d, batchnorm
 
 
 def conv_block(x,
@@ -60,7 +60,9 @@ def conv_block(x,
         groups=groups,
         use_bias=False,
         name=name + "/conv")
-    x = GluonBatchNormalization(name=name + "/bn")(x)
+    x = batchnorm(
+        x=x,
+        name=name + "/bn")
     if activate:
         x = nn.Activation("relu", name=name + "/activ")(x)
     return x

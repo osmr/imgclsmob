@@ -259,7 +259,7 @@ def batchnorm(x,
         Small float added to variance to avoid dividing by zero.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
-    name : str, default 'conv2d'
+    name : str, default None
         Layer name.
 
     Returns
@@ -298,7 +298,7 @@ def maxpool2d(x,
         Padding value for convolution layer.
     ceil_mode : bool, default False
         When `True`, will use ceil instead of floor to compute the output shape.
-    name : str, default 'conv2d'
+    name : str, default None
         Layer name.
 
     Returns
@@ -357,7 +357,7 @@ def avgpool2d(x,
         Padding value for convolution layer.
     ceil_mode : bool, default False
         When `True`, will use ceil instead of floor to compute the output shape.
-    name : str, default 'conv2d'
+    name : str, default None
         Layer name.
 
     Returns

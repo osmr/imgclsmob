@@ -230,7 +230,8 @@ def get_alexnet(model_name=None,
         from .model_store import download_model
         download_model(
             net=net,
-            model_name=model_name)
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 

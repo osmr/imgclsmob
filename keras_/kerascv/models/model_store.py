@@ -302,7 +302,7 @@ def _preprocess_weights_for_loading(layer,
     if layer.__class__.__name__ == "Conv2D":
         layer_weights0_shape = K.int_shape(layer.weights[0])
         if not is_channels_first:
-            weights[0] = np.transpose(weights[0], (3, 2, 1, 0))
+            weights[0] = np.transpose(weights[0], (2, 3, 1, 0))
         assert (layer_weights0_shape == weights[0].shape)
     return weights
 

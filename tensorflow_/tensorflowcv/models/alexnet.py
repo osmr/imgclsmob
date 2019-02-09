@@ -8,7 +8,7 @@ __all__ = ['AlexNet', 'alexnet']
 
 import os
 import tensorflow as tf
-from .common import conv2d, maxpool2d
+from .common import conv2d, maxpool2d, is_channels_first, flatten
 
 
 def alex_conv(x,
@@ -221,7 +221,9 @@ class AlexNet(object):
                 name="features/stage{}/pool".format(i + 1))
 
         in_channels = in_channels * 6 * 6
-        x = tf.reshape(x, [-1, in_channels])
+        x = flatten(
+            x=x,
+            out_channels=in_channels)
         x = alex_output_block(
             x=x,
             in_channels=in_channels,
@@ -304,7 +306,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first() else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -317,7 +319,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first() else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

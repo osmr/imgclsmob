@@ -2,12 +2,63 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block',
-           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
+__all__ = ['is_channels_first', 'get_channel_axis', 'flatten', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
+           'batchnorm', 'maxpool2d', 'avgpool2d', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'se_block', 'channel_shuffle',
+           'channel_shuffle2']
 
 import math
 import tensorflow as tf
+
+global_data_format = "channels_first"
+# global_data_format = "channels_last"
+
+
+def is_channels_first():
+    """
+    Whether global data format is channels first.
+
+    Returns
+    -------
+    bool
+        A flag.
+    """
+    return global_data_format == "channels_first"
+
+
+def get_channel_axis():
+    """
+    Get channel axis.
+
+    Returns
+    -------
+    int
+        Channel axis.
+    """
+    return 1 if is_channels_first() else 3
+
+
+def flatten(x,
+            out_channels):
+    """
+    Flattens the input to two dimensional.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    out_channels : int
+        Number of output channels.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    if not is_channels_first():
+        x = tf.transpose(x, perm=(0, 3, 1, 2))
+    x = tf.reshape(x, shape=(-1, out_channels))
+    return x
 
 
 def conv2d(x,
@@ -61,7 +112,11 @@ def conv2d(x,
         dilation = (dilation, dilation)
 
     if (padding[0] > 0) or (padding[1] > 0):
-        x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)])
+        if is_channels_first():
+            paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+        else:
+            paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+        x = tf.pad(x, paddings=paddings_tf)
 
     if groups == 1:
         x = tf.layers.conv2d(
@@ -69,8 +124,8 @@ def conv2d(x,
             filters=out_channels,
             kernel_size=kernel_size,
             strides=strides,
-            padding='valid',
-            data_format='channels_first',
+            padding="valid",
+            data_format=global_data_format,
             dilation_rate=dilation,
             use_bias=use_bias,
             kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
@@ -78,17 +133,17 @@ def conv2d(x,
     elif (groups == out_channels) and (out_channels == in_channels):
         assert (dilation[0] == 1) and (dilation[1] == 1)
         kernel = tf.get_variable(
-            name=name + '/dw_kernel',
+            name=name + "/dw_kernel",
             shape=kernel_size + (in_channels, 1),
             initializer=tf.variance_scaling_initializer(2.0))
         x = tf.nn.depthwise_conv2d(
             input=x,
             filter=kernel,
             strides=(1, 1) + strides,
-            padding='VALID',
+            padding="VALID",
             rate=(1, 1),
             name=name,
-            data_format='NCHW')
+            data_format="NCHW" if is_channels_first() else "NHWC")
         if use_bias:
             raise NotImplementedError
     else:
@@ -98,20 +153,23 @@ def conv2d(x,
         out_group_channels = out_channels // groups
         group_list = []
         for gi in range(groups):
-            xi = x[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :]
+            if is_channels_first():
+                xi = x[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :]
+            else:
+                xi = x[:, :, :, gi * in_group_channels:(gi + 1) * in_group_channels]
             xi = tf.layers.conv2d(
                 inputs=xi,
                 filters=out_group_channels,
                 kernel_size=kernel_size,
                 strides=strides,
-                padding='valid',
-                data_format='channels_first',
+                padding="valid",
+                data_format=global_data_format,
                 dilation_rate=dilation,
                 use_bias=use_bias,
                 kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
                 name=name + "/convgroup{}".format(gi + 1))
             group_list.append(xi)
-        x = tf.concat(group_list, axis=1, name=name + "/concat")
+        x = tf.concat(group_list, axis=get_channel_axis(), name=name + "/concat")
 
     return x
 
@@ -331,7 +389,7 @@ def maxpool2d(x,
         pool_size=pool_size,
         strides=strides,
         padding="valid",
-        data_format="channels_first",
+        data_format=global_data_format,
         name=name)
     return x
 
@@ -390,7 +448,7 @@ def avgpool2d(x,
         pool_size=pool_size,
         strides=1,
         padding="valid",
-        data_format="channels_first",
+        data_format=global_data_format,
         name=name)
 
     if (strides[0] > 1) or (strides[1] > 1):
@@ -399,7 +457,7 @@ def avgpool2d(x,
             pool_size=1,
             strides=strides,
             padding="valid",
-            data_format="channels_first",
+            data_format=global_data_format,
             name=name + "/stride")
     return x
 
@@ -883,16 +941,26 @@ def channel_shuffle(x,
         Resulted tensor.
     """
     x_shape = x.get_shape().as_list()
-    channels = x_shape[1]
-    height = x_shape[2]
-    width = x_shape[3]
+    if is_channels_first():
+        channels = x_shape[1]
+        height = x_shape[2]
+        width = x_shape[3]
+    else:
+        height = x_shape[1]
+        width = x_shape[2]
+        channels = x_shape[3]
 
     assert (channels % groups == 0)
     channels_per_group = channels // groups
 
-    x = tf.reshape(x, shape=(-1, groups, channels_per_group, height, width))
-    x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
-    x = tf.reshape(x, shape=(-1, channels, height, width))
+    if is_channels_first():
+        x = tf.reshape(x, shape=(-1, groups, channels_per_group, height, width))
+        x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
+        x = tf.reshape(x, shape=(-1, channels, height, width))
+    else:
+        x = tf.reshape(x, shape=(-1, height, width, groups, channels_per_group))
+        x = tf.transpose(x, perm=(0, 1, 2, 4, 3))
+        x = tf.reshape(x, shape=(-1, height, width, channels))
     return x
 
 
@@ -916,16 +984,26 @@ def channel_shuffle2(x,
         Resulted tensor.
     """
     x_shape = x.get_shape().as_list()
-    channels = x_shape[1]
-    height = x_shape[2]
-    width = x_shape[3]
+    if is_channels_first():
+        channels = x_shape[1]
+        height = x_shape[2]
+        width = x_shape[3]
+    else:
+        height = x_shape[1]
+        width = x_shape[2]
+        channels = x_shape[3]
 
     assert (channels % groups == 0)
     channels_per_group = channels // groups
 
-    x = tf.reshape(x, shape=(-1, channels_per_group, groups, height, width))
-    x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
-    x = tf.reshape(x, shape=(-1, channels, height, width))
+    if is_channels_first():
+        x = tf.reshape(x, shape=(-1, channels_per_group, groups, height, width))
+        x = tf.transpose(x, perm=(0, 2, 1, 3, 4))
+        x = tf.reshape(x, shape=(-1, channels, height, width))
+    else:
+        x = tf.reshape(x, shape=(-1, height, width, channels_per_group, groups))
+        x = tf.transpose(x, perm=(0, 1, 2, 4, 3))
+        x = tf.reshape(x, shape=(-1, height, width, channels))
     return x
 
 
@@ -954,13 +1032,13 @@ def se_block(x,
     """
     assert(len(x.shape) == 4)
     mid_cannels = channels // reduction
-    pool_size = x.shape[2:4]
+    pool_size = x.shape[2:4] if is_channels_first() else x.shape[1:3]
 
     w = tf.layers.average_pooling2d(
         inputs=x,
         pool_size=pool_size,
         strides=1,
-        data_format="channels_first",
+        data_format=global_data_format,
         name=name + "/pool")
     w = conv1x1(
         x=w,

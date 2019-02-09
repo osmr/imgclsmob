@@ -11,7 +11,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, GluonBatchNormalization
+from .common import conv2d, batchnorm
 
 
 def vgg_conv(x,
@@ -62,7 +62,9 @@ def vgg_conv(x,
         use_bias=use_bias,
         name=name + "/conv")
     if use_bn:
-        x = GluonBatchNormalization(name=name + "/bn")(x)
+        x = batchnorm(
+            x=x,
+            name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 

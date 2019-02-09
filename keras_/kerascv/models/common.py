@@ -2,15 +2,55 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['batchnorm', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block',
-           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
+__all__ = ['update_keras_shape', 'flatten', 'batchnorm', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
+           'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
+           'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
+import numpy as np
 from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+
+
+def update_keras_shape(x):
+    """
+    Update Keras shape property.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    """
+    if not hasattr(x, '_keras_shape'):
+        x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
+
+
+def flatten(x):
+    """
+    Flattens the input to two dimensional.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if K.image_data_format() != 'channels_first':
+        def channels_last_flatten(z):
+            z = K.permute_dimensions(z, pattern=(0, 3, 1, 2))
+            z = K.reshape(z, shape=(-1, np.prod(K.int_shape(z)[1:])))
+            update_keras_shape(z)
+            return z
+        return nn.Lambda(channels_last_flatten)(x)
+    else:
+        x = nn.Reshape((-1,))(x)
+        return x
 
 
 def batchnorm(x,

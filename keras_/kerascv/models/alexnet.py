@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d
+from .common import conv2d, flatten
 
 
 def alex_conv(x,
@@ -183,7 +183,7 @@ def alexnet_model(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    x = nn.Reshape((-1,))(x)
+    x = flatten(x)
     x = alex_output_block(
         x=x,
         in_channels=(in_channels * 6 * 6),
@@ -273,6 +273,7 @@ def _test():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)
+            
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

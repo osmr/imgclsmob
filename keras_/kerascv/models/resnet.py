@@ -214,11 +214,6 @@ def res_init_block(x,
         strides=2,
         padding=1,
         name=name + "/pool")
-    # x = nn.MaxPool2D(
-    #     pool_size=3,
-    #     strides=2,
-    #     padding="same",
-    #     name=name + "/pool")(x)
     return x
 
 

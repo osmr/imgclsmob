@@ -432,7 +432,9 @@ def load_model(net,
         Whether to skip loading of layers with wrong names.
     """
     with h5py.File(file_path, mode='r') as f:
-        if ('layer_names' not in f.attrs) or ('keras_version' not in f.attrs) or ('backend' not in f.attrs):
+        if ('layer_names' not in f.attrs) and ('model_weights' in f):
+            f = f['model_weights']
+        if ('keras_version' not in f.attrs) or ('backend' not in f.attrs):
             raise ImportError('Unsupported version of Keras checkpoint file.')
         # original_keras_version = f.attrs['keras_version'].decode('utf8')
         original_backend = f.attrs['backend'].decode('utf8')

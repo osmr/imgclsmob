@@ -2,9 +2,10 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['update_keras_shape', 'flatten', 'batchnorm', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
-           'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
+__all__ = ['get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'conv2d', 'conv1x1', 'conv3x3',
+           'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda',
+           'se_block']
 
 import math
 import numpy as np
@@ -12,6 +13,18 @@ from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+
+
+def get_channel_axis():
+    """
+    Get channel axis.
+
+    Returns
+    -------
+    int
+        Channel axis.
+    """
+    return 1 if K.image_data_format() == "channels_first" else -1
 
 
 def update_keras_shape(x):
@@ -182,6 +195,7 @@ def conv2d(x,
     else:
         assert (in_channels % groups == 0)
         assert (out_channels % groups == 0)
+        none_batch = (x._keras_shape[0] is None)
         in_group_channels = in_channels // groups
         out_group_channels = out_channels // groups
         group_list = []
@@ -202,6 +216,8 @@ def conv2d(x,
             group_list.append(xi)
         channel_axis = 1 if is_channels_first else -1
         x = nn.concatenate(group_list, axis=channel_axis, name=name + "/concat")
+        if none_batch and (x._keras_shape[0] is not None):
+            x._keras_shape = (None, ) + x._keras_shape[1:]
 
     return x
 

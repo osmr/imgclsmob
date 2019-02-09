@@ -12,7 +12,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, flatten
+from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, flatten, get_channel_axis
 
 
 def shuffle_unit(x,
@@ -89,8 +89,6 @@ def shuffle_unit(x,
         x=x,
         name=name + "/expand_bn3")
 
-    x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
-
     if downsample:
         identity = nn.AvgPool2D(
             pool_size=3,
@@ -98,8 +96,7 @@ def shuffle_unit(x,
             padding="same",
             name=name + "/avgpool")(identity)
 
-        channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-        x = nn.concatenate([x, identity], axis=channel_axis, name=name + "/concat")
+        x = nn.concatenate([x, identity], axis=get_channel_axis(), name=name + "/concat")
     else:
         x = nn.add([x, identity], name=name + "/add")
 
@@ -200,7 +197,6 @@ def shufflenet(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    # x = nn.Flatten()(x)
     x = flatten(x)
     x = nn.Dense(
         units=classes,

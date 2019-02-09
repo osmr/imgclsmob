@@ -255,7 +255,7 @@ def _test():
     import numpy as np
     import keras
 
-    pretrained = True
+    pretrained = False
 
     models = [
         alexnet,

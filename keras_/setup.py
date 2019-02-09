@@ -28,5 +28,5 @@ setup(
              'resnext senet densenet darknet squeezenet squeezenext shufflenet menet mobilenent igcv3 mnasnet',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
-    install_requires=['keras-mxnet'],
+    install_requires=['keras', 'h5py', 'keras-mxnet'],
 )

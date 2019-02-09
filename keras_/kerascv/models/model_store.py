@@ -2,12 +2,16 @@
     Model store which provides pretrained models.
 """
 
-__all__ = ['get_model_file']
+__all__ = ['get_model_file', 'download_model']
 
 import os
 import zipfile
 import logging
 import hashlib
+import numpy as np
+import h5py
+from keras import backend as K
+from keras.engine.saving import load_attributes_from_hdf5_group
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('alexnet', '2126', '56fb1c54f3fd3b95ac6b25b441372770e7f9e0c9', 'v0.0.121'),
@@ -275,3 +279,115 @@ def _check_sha1(filename, sha1_hash):
             sha1.update(data)
 
     return sha1.hexdigest() == sha1_hash
+
+
+def _preprocess_weights_for_loading(layer,
+                                    weights):
+    """
+    Converts layers weights.
+
+    Parameters
+    ----------
+    layer : Layer
+        Layer instance.
+    weights : list of np.array
+        List of weights values.
+
+    Returns
+    -------
+    list of np.array
+        A list of weights values.
+    """
+    is_channels_first = (K.image_data_format() == 'channels_first')
+    if layer.__class__.__name__ == "Conv2D":
+        layer_weights0_shape = K.int_shape(layer.weights[0])
+        if not is_channels_first:
+            weights[0] = np.transpose(weights[0], (3, 2, 1, 0))
+        assert (layer_weights0_shape == weights[0].shape)
+    return weights
+
+
+def load_model(net,
+               file_path):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Model
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    """
+    with h5py.File(file_path, mode='r') as f:
+        if ('layer_names' not in f.attrs) or ('keras_version' not in f.attrs) or ('backend' not in f.attrs):
+            raise ImportError('Unsupported version of Keras checkpoint file.')
+        # original_keras_version = f.attrs['keras_version'].decode('utf8')
+        original_backend = f.attrs['backend'].decode('utf8')
+        assert (original_backend == "mxnet")
+
+        filtered_layers = []
+        for layer in net.layers:
+            weights = layer.weights
+            if weights:
+                filtered_layers.append(layer)
+
+        layer_names = load_attributes_from_hdf5_group(f, 'layer_names')
+        filtered_layer_names = []
+        for name in layer_names:
+            g = f[name]
+            weight_names = load_attributes_from_hdf5_group(g, 'weight_names')
+            if weight_names:
+                filtered_layer_names.append(name)
+        layer_names = filtered_layer_names
+        if len(layer_names) != len(filtered_layers):
+            raise ValueError('You are trying to load a weight file '
+                             'containing ' + str(len(layer_names)) +
+                             ' layers into a model with ' +
+                             str(len(filtered_layers)) + ' layers.')
+
+        weight_value_tuples = []
+        for k, name in enumerate(layer_names):
+            g = f[name]
+            weight_names = load_attributes_from_hdf5_group(g, 'weight_names')
+            weight_values = [np.asarray(g[weight_name]) for weight_name in weight_names]
+            layer = filtered_layers[k]
+            symbolic_weights = layer.weights
+            weight_values = _preprocess_weights_for_loading(
+                layer=layer,
+                weights=weight_values)
+            if len(weight_values) != len(symbolic_weights):
+                raise ValueError('Layer #' + str(k) +
+                                 ' (named "' + layer.name +
+                                 '" in the current model) was found to '
+                                 'correspond to layer ' + name +
+                                 ' in the save file. '
+                                 'However the new layer ' + layer.name +
+                                 ' expects ' + str(len(symbolic_weights)) +
+                                 ' weights, but the saved weights have ' +
+                                 str(len(weight_values)) +
+                                 ' elements.')
+            weight_value_tuples += zip(symbolic_weights, weight_values)
+        K.batch_set_value(weight_value_tuples)
+
+
+def download_model(net,
+                   model_name,
+                   local_model_store_dir_path=os.path.join('~', '.keras', 'models')):
+    """
+    Load model state dictionary from a file with downloading it if necessary.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    model_name : str
+        Name of the model.
+    local_model_store_dir_path : str, default $TORCH_HOME/models
+        Location for keeping the model parameters.
+    """
+    load_model(
+        net=net,
+        file_path=get_model_file(
+            model_name=model_name,
+            local_model_store_dir_path=local_model_store_dir_path))

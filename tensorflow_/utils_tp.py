@@ -19,6 +19,7 @@ from tensorpack.dataflow import MultiThreadMapData
 from tensorpack.utils import logger
 
 from .tensorflowcv.model_provider import get_model
+from .tensorflowcv.models.common import is_channels_first
 
 
 class CachedChiefSessionCreator(tf.train.ChiefSessionCreator):
@@ -53,7 +54,7 @@ class ImageNetModel(ModelDesc):
         self.model_lambda = model_lambda
         self.image_size = image_size
         self.image_dtype = tf.float32
-        self.data_format = 'NCHW'
+        self.data_format = "NCHW" if is_channels_first() else "NHWC"
         self.label_smoothing = 0.0
         self.loss_scale = 1.0
         self.weight_decay = 1e-4

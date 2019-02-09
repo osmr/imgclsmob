@@ -10,8 +10,8 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'flatten', 'conv2d', 'conv1x
 import math
 import tensorflow as tf
 
-global_data_format = "channels_first"
-# global_data_format = "channels_last"
+# global_data_format = "channels_first"
+global_data_format = "channels_last"
 
 
 def is_channels_first():

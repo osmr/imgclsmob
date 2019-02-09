@@ -113,7 +113,7 @@ imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 
 def get_model_name_suffix_data(model_name):
     if model_name not in _model_sha1:
-        raise ValueError('Pretrained model for {name} is not available.'.format(name=model_name))
+        raise ValueError("Pretrained model for {name} is not available.".format(name=model_name))
     error, sha1_hash, repo_release_tag = _model_sha1[model_name]
     return error, sha1_hash, repo_release_tag
 
@@ -138,7 +138,7 @@ def get_model_file(model_name,
     """
     error, sha1_hash, repo_release_tag = get_model_name_suffix_data(model_name)
     short_sha1 = sha1_hash[:8]
-    file_name = '{name}-{error}-{short_sha1}.h5'.format(
+    file_name = "{name}-{error}-{short_sha1}.h5".format(
         name=model_name,
         error=error,
         short_sha1=short_sha1)
@@ -148,16 +148,16 @@ def get_model_file(model_name,
         if _check_sha1(file_path, sha1_hash):
             return file_path
         else:
-            logging.warning('Mismatch in the content of model file detected. Downloading again.')
+            logging.warning("Mismatch in the content of model file detected. Downloading again.")
     else:
-        logging.info('Model file not found. Downloading to {}.'.format(file_path))
+        logging.info("Model file not found. Downloading to {}.".format(file_path))
 
     if not os.path.exists(local_model_store_dir_path):
         os.makedirs(local_model_store_dir_path)
 
-    zip_file_path = file_path + '.zip'
+    zip_file_path = file_path + ".zip"
     _download(
-        url='{repo_url}/releases/download/{repo_release_tag}/{file_name}.zip'.format(
+        url="{repo_url}/releases/download/{repo_release_tag}/{file_name}.zip".format(
             repo_url=imgclsmob_repo_url,
             repo_release_tag=repo_release_tag,
             file_name=file_name),
@@ -170,7 +170,7 @@ def get_model_file(model_name,
     if _check_sha1(file_path, sha1_hash):
         return file_path
     else:
-        raise ValueError('Downloaded file has different hash. Please try again.')
+        raise ValueError("Downloaded file has different hash. Please try again.")
 
 
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
@@ -209,7 +209,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     if path is None:
         fname = url.split('/')[-1]
         # Empty filenames are invalid
-        assert fname, 'Can\'t construct file-name from this URL. Please set the `path` option manually.'
+        assert fname, "Can\'t construct file-name from this URL. Please set the `path` option manually."
     else:
         path = os.path.expanduser(path)
         if os.path.isdir(path):
@@ -219,9 +219,8 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
     assert retries >= 0, "Number of retries should be at least 0"
 
     if not verify_ssl:
-        warnings.warn(
-            'Unverified HTTPS request is being made (verify_ssl=False). '
-            'Adding certificate verification is strongly advised.')
+        warnings.warn("Unverified HTTPS request is being made (verify_ssl=False). Adding certificate verification"
+                      " is strongly advised.")
 
     if overwrite or not os.path.exists(fname) or (sha1_hash and not _check_sha1(fname, sha1_hash)):
         dirname = os.path.dirname(os.path.abspath(os.path.expanduser(fname)))
@@ -231,19 +230,19 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
             # Disable pyling too broad Exception
             # pylint: disable=W0703
             try:
-                print('Downloading {} from {}...'.format(fname, url))
+                print("Downloading {} from {}...".format(fname, url))
                 r = requests.get(url, stream=True, verify=verify_ssl)
                 if r.status_code != 200:
                     raise RuntimeError("Failed downloading url {}".format(url))
-                with open(fname, 'wb') as f:
+                with open(fname, "wb") as f:
                     for chunk in r.iter_content(chunk_size=1024):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
                 if sha1_hash and not _check_sha1(fname, sha1_hash):
-                    raise UserWarning('File {} is downloaded but the content hash does not match.'
-                                      ' The repo may be outdated or download may be incomplete. '
-                                      'If the "repo_url" is overridden, consider switching to '
-                                      'the default repo.'.format(fname))
+                    raise UserWarning("File {} is downloaded but the content hash does not match."
+                                      " The repo may be outdated or download may be incomplete. "
+                                      "If the `repo_url` is overridden, consider switching to "
+                                      "the default repo.".format(fname))
                 break
             except Exception as e:
                 retries -= 1
@@ -299,7 +298,7 @@ def _preprocess_weights_for_loading(layer,
     list of np.array
         A list of weights values.
     """
-    is_channels_first = (K.image_data_format() == 'channels_first')
+    is_channels_first = (K.image_data_format() == "channels_first")
     if ((K.backend() == "mxnet") and (not is_channels_first)) or (K.backend() == "tensorflow"):
         if layer.__class__.__name__ == "Conv2D":
             weights[0] = np.transpose(weights[0], (2, 3, 1, 0))
@@ -431,13 +430,16 @@ def load_model(net,
     skip_mismatch : bool, default False
         Whether to skip loading of layers with wrong names.
     """
+    # if (K.backend() == "mxnet") and (K.image_data_format() == "channels_first"):
+    #     net.load_weights(filepath=file_path, by_name=skip_mismatch)
+    #     return
     with h5py.File(file_path, mode='r') as f:
-        if ('layer_names' not in f.attrs) and ('model_weights' in f):
-            f = f['model_weights']
-        if ('keras_version' not in f.attrs) or ('backend' not in f.attrs):
-            raise ImportError('Unsupported version of Keras checkpoint file.')
-        # original_keras_version = f.attrs['keras_version'].decode('utf8')
-        original_backend = f.attrs['backend'].decode('utf8')
+        if ("layer_names" not in f.attrs) and ("model_weights" in f):
+            f = f["model_weights"]
+        if ("keras_version" not in f.attrs) or ("backend" not in f.attrs):
+            raise ImportError("Unsupported version of Keras checkpoint file.")
+        # original_keras_version = f.attrs["keras_version"].decode("utf8")
+        original_backend = f.attrs["backend"].decode("utf8")
         assert (original_backend == "mxnet")
         if skip_mismatch:
             _load_weights_from_hdf5_group_by_name(

@@ -49,7 +49,8 @@ def flatten(x):
             return z
         return nn.Lambda(channels_last_flatten)(x)
     else:
-        x = nn.Reshape((-1,))(x)
+        # x = nn.Reshape((-1,))(x)
+        x = nn.Flatten()(x)
         return x
 
 

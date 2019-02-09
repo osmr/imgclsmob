@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, se_block
+from .common import conv1x1_block, se_block, flatten
 from .resnet import res_init_block
 from .resnext import resnext_bottleneck
 
@@ -132,7 +132,8 @@ def seresnext(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

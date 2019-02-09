@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, flatten
 
 
 def dark_unit(x,
@@ -123,7 +123,8 @@ def darknet53_model(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

@@ -273,7 +273,6 @@ def _test():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)
-            
         y = net.predict(x)
         assert (y.shape == (1, 1000))
 

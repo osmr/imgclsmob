@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import pre_conv1x1_block, pre_conv3x3_block
+from .common import pre_conv1x1_block, pre_conv3x3_block, flatten
 from .preresnet import preres_init_block, preres_activation
 
 
@@ -161,7 +161,8 @@ def densenet(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

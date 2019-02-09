@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv2d
+from .common import max_pool2d_ceil, conv2d, flatten
 
 
 def fire_conv(x,
@@ -228,7 +228,8 @@ def squeezenet(channels,
         pool_size=13,
         strides=1,
         name="output/final_pool")(x)
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
 
     model = Model(inputs=input, outputs=x)
     model.in_size = in_size

@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, flatten
 
 
 def dark_convYxY(x,
@@ -117,7 +117,8 @@ def darknet(channels,
         pool_size=avg_pool_size,
         strides=1,
         name="output/final_pool")(x)
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
 
     model = Model(inputs=input, outputs=x)
     model.in_size = in_size

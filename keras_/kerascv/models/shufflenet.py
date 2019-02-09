@@ -12,7 +12,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm
+from .common import conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, flatten
 
 
 def shuffle_unit(x,
@@ -200,7 +200,8 @@ def shufflenet(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

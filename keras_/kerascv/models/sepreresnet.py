@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, se_block
+from .common import conv1x1, se_block, flatten
 from .preresnet import preres_block, preres_bottleneck_block, preres_init_block, preres_activation
 
 
@@ -138,7 +138,8 @@ def sepreresnet(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

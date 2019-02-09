@@ -10,7 +10,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle_lambda
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle_lambda, flatten
 
 
 def inv_res_unit(x,
@@ -143,7 +143,8 @@ def igcv3(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
     x = nn.Dense(
         units=classes,
         input_dim=in_channels,

@@ -9,7 +9,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, flatten
 
 
 def linear_bottleneck(x,
@@ -139,7 +139,8 @@ def mobilenetv2(channels,
         out_channels=classes,
         use_bias=False,
         name="output")
-    x = nn.Flatten()(x)
+    # x = nn.Flatten()(x)
+    x = flatten(x)
 
     model = Model(inputs=input, outputs=x)
     model.in_size = in_size

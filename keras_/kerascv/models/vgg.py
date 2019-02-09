@@ -11,7 +11,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, batchnorm
+from .common import conv2d, batchnorm, flatten
 
 
 def vgg_conv(x,
@@ -231,7 +231,7 @@ def vgg(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    x = nn.Reshape((-1,))(x)
+    x = flatten(x, reshape=True)
     x = vgg_output_block(
         x=x,
         in_channels=(in_channels * 7 * 7),

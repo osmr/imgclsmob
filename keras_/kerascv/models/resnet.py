@@ -11,7 +11,7 @@ import os
 from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, flatten
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, flatten
 
 
 def res_block(x,
@@ -175,7 +175,7 @@ def res_unit(x,
 
     x = nn.add([x, identity], name=name + "/add")
 
-    x = nn.Activation('relu', name=name + "/activ")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 
@@ -208,11 +208,17 @@ def res_init_block(x,
         out_channels=out_channels,
         strides=2,
         name=name + "/conv")
-    x = nn.MaxPool2D(
+    x = maxpool2d(
+        x=x,
         pool_size=3,
         strides=2,
-        padding='same',
-        name=name + "/pool")(x)
+        padding=1,
+        name=name + "/pool")
+    # x = nn.MaxPool2D(
+    #     pool_size=3,
+    #     strides=2,
+    #     padding="same",
+    #     name=name + "/pool")(x)
     return x
 
 
@@ -269,7 +275,6 @@ def resnet(channels,
         strides=1,
         name="features/final_pool")(x)
 
-    # x = nn.Flatten()(x)
     x = flatten(x)
     x = nn.Dense(
         units=classes,

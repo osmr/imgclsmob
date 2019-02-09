@@ -330,8 +330,8 @@ def maxpool2d(x,
         inputs=x,
         pool_size=pool_size,
         strides=strides,
-        padding='valid',
-        data_format='channels_first',
+        padding="valid",
+        data_format="channels_first",
         name=name)
     return x
 
@@ -389,8 +389,8 @@ def avgpool2d(x,
         inputs=x,
         pool_size=pool_size,
         strides=1,
-        padding='valid',
-        data_format='channels_first',
+        padding="valid",
+        data_format="channels_first",
         name=name)
 
     if (strides[0] > 1) or (strides[1] > 1):
@@ -398,8 +398,8 @@ def avgpool2d(x,
             inputs=x,
             pool_size=1,
             strides=strides,
-            padding='valid',
-            data_format='channels_first',
+            padding="valid",
+            data_format="channels_first",
             name=name + "/stride")
     return x
 
@@ -960,7 +960,7 @@ def se_block(x,
         inputs=x,
         pool_size=pool_size,
         strides=1,
-        data_format='channels_first',
+        data_format="channels_first",
         name=name + "/pool")
     w = conv1x1(
         x=w,

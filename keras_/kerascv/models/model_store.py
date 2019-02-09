@@ -299,11 +299,13 @@ def _preprocess_weights_for_loading(layer,
         A list of weights values.
     """
     is_channels_first = (K.image_data_format() == 'channels_first')
-    if layer.__class__.__name__ == "Conv2D":
-        layer_weights0_shape = K.int_shape(layer.weights[0])
-        if not is_channels_first:
+    if not is_channels_first:
+        if layer.__class__.__name__ == "Conv2D":
             weights[0] = np.transpose(weights[0], (2, 3, 1, 0))
-        assert (layer_weights0_shape == weights[0].shape)
+        elif layer.__class__.__name__ == "DepthwiseConv2D":
+            weights[0] = np.transpose(weights[0], (2, 3, 0, 1))
+    for i in range(len(weights)):
+        assert (K.int_shape(layer.weights[i]) == weights[i].shape)
     return weights
 
 

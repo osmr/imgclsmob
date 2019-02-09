@@ -229,11 +229,11 @@ def get_densenet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_weights(
-            filepath=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root))
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 

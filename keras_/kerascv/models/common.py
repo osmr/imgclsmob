@@ -27,7 +27,8 @@ def update_keras_shape(x):
         x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
 
 
-def flatten(x):
+def flatten(x,
+            reshape=False):
     """
     Flattens the input to two dimensional.
 
@@ -35,6 +36,8 @@ def flatten(x):
     ----------
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
+    reshape : bool, default False
+        Whether do reshape instead of flatten.
 
     Returns
     -------
@@ -49,8 +52,10 @@ def flatten(x):
             return z
         return nn.Lambda(channels_last_flatten)(x)
     else:
-        # x = nn.Reshape((-1,))(x)
-        x = nn.Flatten()(x)
+        if reshape:
+            x = nn.Reshape((-1,))(x)
+        else:
+            x = nn.Flatten()(x)
         return x
 
 

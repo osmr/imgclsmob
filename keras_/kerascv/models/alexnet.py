@@ -183,7 +183,7 @@ def alexnet_model(channels,
             padding='valid',
             name="features/stage{}/pool".format(i + 1))(x)
 
-    x = flatten(x)
+    x = flatten(x, reshape=True)
     x = alex_output_block(
         x=x,
         in_channels=(in_channels * 6 * 6),

@@ -23,7 +23,7 @@ def update_keras_shape(x):
     x : keras.backend tensor/variable/symbol
         Input tensor/variable/symbol.
     """
-    if not hasattr(x, '_keras_shape'):
+    if not hasattr(x, "_keras_shape"):
         x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
 
 
@@ -41,7 +41,7 @@ def flatten(x):
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    if K.image_data_format() != 'channels_first':
+    if K.image_data_format() != "channels_first":
         def channels_last_flatten(z):
             z = K.permute_dimensions(z, pattern=(0, 3, 1, 2))
             z = K.reshape(z, shape=(-1, np.prod(K.int_shape(z)[1:])))
@@ -76,14 +76,14 @@ def batchnorm(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    if K.backend() == 'mxnet':
+    if K.backend() == "mxnet":
         x = GluonBatchNormalization(
             momentum=momentum,
             epsilon=epsilon,
             name=name)(x)
     else:
         x = nn.BatchNormalization(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            axis=(1 if K.image_data_format() == "channels_first" else 3),
             momentum=momentum,
             epsilon=epsilon,
             name=name)(x)
@@ -179,7 +179,7 @@ def conv2d(x,
         in_group_channels = in_channels // groups
         out_group_channels = out_channels // groups
         group_list = []
-        is_channels_first = (K.image_data_format() == 'channels_first')
+        is_channels_first = (K.image_data_format() == "channels_first")
         for gi in range(groups):
             xi = nn.Lambda(
                 (lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :])
@@ -356,7 +356,7 @@ def max_pool2d_ceil(x,
 
     padding0 = 0 if padding == "valid" else strides[0] // 2
 
-    height = x._keras_shape[2 if K.image_data_format() == 'channels_first' else 1]
+    height = x._keras_shape[2 if K.image_data_format() == "channels_first" else 1]
     out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
     if math.ceil(out_height) > math.floor(out_height):
         assert (strides[0] <= 3)
@@ -819,7 +819,7 @@ def channel_shuffle(x,
         Resulted tensor/variable/symbol.
     """
 
-    is_channels_first = (K.image_data_format() == 'channels_first')
+    is_channels_first = (K.image_data_format() == "channels_first")
     if is_channels_first:
         batch, channels, height, width = x._keras_shape
     else:
@@ -837,7 +837,7 @@ def channel_shuffle(x,
         x = K.permute_dimensions(x, pattern=(0, 1, 2, 4, 3))
         x = K.reshape(x, shape=(-1, height, width, channels))
 
-    if not hasattr(x, '_keras_shape'):
+    if not hasattr(x, "_keras_shape"):
         x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
     return x
 
@@ -862,7 +862,7 @@ def channel_shuffle_lambda(channels,
     """
     assert (channels % groups == 0)
 
-    return nn.Lambda(channel_shuffle, arguments={'groups': groups}, **kwargs)
+    return nn.Lambda(channel_shuffle, arguments={"groups": groups}, **kwargs)
 
 
 def se_block(x,
@@ -890,7 +890,7 @@ def se_block(x,
     """
     assert(len(x._keras_shape) == 4)
     mid_cannels = channels // reduction
-    pool_size = x._keras_shape[2:4] if K.image_data_format() == 'channels_first' else x._keras_shape[1:3]
+    pool_size = x._keras_shape[2:4] if K.image_data_format() == "channels_first" else x._keras_shape[1:3]
 
     w = nn.AvgPool2D(
         pool_size=pool_size,
@@ -901,14 +901,14 @@ def se_block(x,
         out_channels=mid_cannels,
         use_bias=True,
         name=name + "/conv1")
-    w = nn.Activation('relu', name=name + "/relu")(w)
+    w = nn.Activation("relu", name=name + "/relu")(w)
     w = conv1x1(
         x=w,
         in_channels=mid_cannels,
         out_channels=channels,
         use_bias=True,
         name=name + "/conv2")
-    w = nn.Activation('sigmoid', name=name + "/sigmoid")(w)
+    w = nn.Activation("sigmoid", name=name + "/sigmoid")(w)
     x = nn.multiply([x, w], name=name + "/mul")
     return x
 
@@ -955,10 +955,10 @@ class GluonBatchNormalization(BatchNormalization):
                  epsilon=1e-5,
                  center=True,
                  scale=True,
-                 beta_initializer='zeros',
-                 gamma_initializer='ones',
-                 moving_mean_initializer='zeros',
-                 moving_variance_initializer='ones',
+                 beta_initializer="zeros",
+                 gamma_initializer="ones",
+                 moving_mean_initializer="zeros",
+                 moving_variance_initializer="ones",
                  beta_regularizer=None,
                  gamma_regularizer=None,
                  beta_constraint=None,
@@ -966,7 +966,7 @@ class GluonBatchNormalization(BatchNormalization):
                  fix_gamma=False,
                  **kwargs):
         super(GluonBatchNormalization, self).__init__(
-            axis=(1 if K.image_data_format() == 'channels_first' else 3),
+            axis=(1 if K.image_data_format() == "channels_first" else 3),
             momentum=momentum,
             epsilon=epsilon,
             center=center,
@@ -983,7 +983,7 @@ class GluonBatchNormalization(BatchNormalization):
         self.fix_gamma = fix_gamma
 
     def call(self, inputs, training=None):
-        if K.backend() == 'mxnet':
+        if K.backend() == "mxnet":
 
             from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
             import mxnet as mx

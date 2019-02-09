@@ -111,7 +111,7 @@ def fire_unit(x,
         padding=1,
         name=name + "/expand3x3")
 
-    channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
     out = nn.concatenate([y1, y2], axis=channel_axis, name=name + "/concat")
 
     if residual:
@@ -186,7 +186,7 @@ def squeezenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = squeeze_init_block(
@@ -379,7 +379,7 @@ def _test():
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
         assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == "channels_first":
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

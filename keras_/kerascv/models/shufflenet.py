@@ -98,7 +98,7 @@ def shuffle_unit(x,
             padding="same",
             name=name + "/avgpool")(identity)
 
-        channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
+        channel_axis = 1 if K.image_data_format() == "channels_first" else -1
         x = nn.concatenate([x, identity], axis=channel_axis, name=name + "/concat")
     else:
         x = nn.add([x, identity], name=name + "/add")
@@ -173,7 +173,7 @@ def shufflenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = shuffle_init_block(
@@ -479,7 +479,7 @@ def _test():
         assert (model != shufflenet_g1_wd4 or weight_count == 209746)
         assert (model != shufflenet_g3_wd4 or weight_count == 305902)
 
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == "channels_first":
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

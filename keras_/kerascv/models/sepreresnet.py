@@ -399,7 +399,7 @@ def _test():
         assert (model != sepreresnet200 or weight_count == 71828312)
         assert (model != sepreresnet200b or weight_count == 71828312)
 
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == "channels_first":
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

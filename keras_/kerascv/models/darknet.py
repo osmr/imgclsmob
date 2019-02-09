@@ -87,7 +87,7 @@ def darknet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = input
@@ -146,17 +146,17 @@ def get_darknet(version,
         Location for keeping the model parameters.
     """
 
-    if version == 'ref':
+    if version == "ref":
         channels = [[16], [32], [64], [128], [256], [512], [1024]]
         odd_pointwise = False
         avg_pool_size = 3
         cls_activ = True
-    elif version == 'tiny':
+    elif version == "tiny":
         channels = [[16], [32], [16, 128, 16, 128], [32, 256, 32, 256], [64, 512, 64, 512, 128]]
         odd_pointwise = True
         avg_pool_size = 14
         cls_activ = False
-    elif version == '19':
+    elif version == "19":
         channels = [[32], [64], [128, 64, 128], [256, 128, 256], [512, 256, 512, 256, 512],
                     [1024, 512, 1024, 512, 1024]]
         odd_pointwise = False
@@ -249,7 +249,7 @@ def _test():
         assert (model != darknet_tiny or weight_count == 1042104)
         assert (model != darknet19 or weight_count == 20842376)
 
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == "channels_first":
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

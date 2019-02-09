@@ -319,7 +319,7 @@ def _test():
         assert (model != densenet169 or weight_count == 14149480)
         assert (model != densenet201 or weight_count == 20013928)
 
-        if K.image_data_format() == 'channels_first':
+        if K.image_data_format() == "channels_first":
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

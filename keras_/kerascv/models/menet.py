@@ -10,8 +10,8 @@ __all__ = ['menet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, is_channels_first,\
-    flatten, get_channel_axis
+from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, maxpool2d,\
+    is_channels_first, get_channel_axis, flatten
 
 
 def me_unit(x,
@@ -180,10 +180,11 @@ def me_init_block(x,
         x=x,
         name=name + "/bn")
     x = nn.Activation("relu", name=name + "/activ")(x)
-    x = nn.MaxPool2D(
+    x = maxpool2d(
+        x=x,
         pool_size=3,
         strides=2,
-        padding="same",
+        padding=1,
         name=name + "/pool")(x)
     return x
 

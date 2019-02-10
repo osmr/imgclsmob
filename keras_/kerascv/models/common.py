@@ -3,8 +3,8 @@
 """
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'maxpool2d',
-           'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
+           'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
            'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
@@ -182,6 +182,88 @@ def maxpool2d(x,
         padding_ke = "valid"
 
     x = nn.MaxPool2D(
+        pool_size=pool_size,
+        strides=strides,
+        padding=padding_ke,
+        name=name + "/pool")(x)
+    return x
+
+
+def avgpool2d(x,
+              pool_size,
+              strides,
+              padding=0,
+              ceil_mode=False,
+              name=None):
+    """
+    Average pooling operation for two dimensional (spatial) data.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    pool_size : int or tuple/list of 2 int
+        Size of the max pooling windows.
+    strides : int or tuple/list of 2 int
+        Strides of the pooling.
+    padding : int or tuple/list of 2 int, default 0
+        Padding value for convolution layer.
+    ceil_mode : bool, default False
+        When `True`, will use ceil instead of floor to compute the output shape.
+    name : str, default None
+        Layer name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if isinstance(pool_size, int):
+        pool_size = (pool_size, pool_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
+    if isinstance(padding, int):
+        padding = (padding, padding)
+
+    assert (padding[0] == 0) or (padding[0] == (pool_size[0] - 1) // 2)
+    assert (padding[1] == 0) or (padding[1] == (pool_size[1] - 1) // 2)
+
+    padding_ke = "valid" if padding[0] == 0 else "same"
+
+    if K.backend() == "tensorflow":
+        if ceil_mode:
+            height = int(x.shape[2])
+            out_height = float(height + 2 * padding[0] - pool_size[0]) / strides[0] + 1.0
+            if math.ceil(out_height) > math.floor(out_height):
+                padding = (padding[0] + 1, padding[1])
+            width = int(x.shape[3])
+            out_width = float(width + 2 * padding[1] - pool_size[1]) / strides[1] + 1.0
+            if math.ceil(out_width) > math.floor(out_width):
+                padding = (padding[0], padding[1] + 1)
+
+        if (padding[0] > 0) or (padding[1] > 0):
+            import tensorflow as tf
+            x = nn.Lambda(
+                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT"))
+                if is_channels_first() else
+                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
+
+        x = nn.AvgPool2D(
+            pool_size=pool_size,
+            strides=1,
+            padding="valid",
+            name=name + "/pool")(x)
+
+        if (strides[0] > 1) or (strides[1] > 1):
+            x = nn.AvgPool2D(
+                inputs=x,
+                pool_size=1,
+                strides=strides,
+                padding="valid",
+                name=name + "/stride")
+        return x
+
+    x = nn.AvgPool2D(
         pool_size=pool_size,
         strides=strides,
         padding=padding_ke,

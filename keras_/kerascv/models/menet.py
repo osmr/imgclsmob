@@ -11,7 +11,7 @@ import os
 from keras import layers as nn
 from keras.models import Model
 from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, channel_shuffle_lambda, batchnorm, maxpool2d,\
-    is_channels_first, get_channel_axis, flatten
+    avgpool2d, is_channels_first, get_channel_axis, flatten
 
 
 def me_unit(x,
@@ -130,12 +130,12 @@ def me_unit(x,
         name=name + "/expand_bn3")
 
     if downsample:
-        identity = nn.AvgPool2D(
+        identity = avgpool2d(
+            x=identity,
             pool_size=3,
             strides=2,
-            padding="same",
-            name=name + "/avgpool")(identity)
-
+            padding=1,
+            name=name + "/avgpool")
         x = nn.concatenate([x, identity], axis=get_channel_axis(), name=name + "/concat")
     else:
         x = nn.add([x, identity], name=name + "/add")

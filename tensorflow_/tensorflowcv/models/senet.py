@@ -330,7 +330,6 @@ class SENet(object):
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,
-            out_channels=in_channels,
             data_format=self.data_format)
         x = tf.layers.dropout(
             inputs=x,

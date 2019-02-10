@@ -8,6 +8,7 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'flatten', 'batchnorm', 'max
            'channel_shuffle2']
 
 import math
+import numpy as np
 import tensorflow as tf
 
 
@@ -46,7 +47,6 @@ def get_channel_axis(data_format):
 
 
 def flatten(x,
-            out_channels,
             data_format):
     """
     Flattens the input to two dimensional.
@@ -55,8 +55,6 @@ def flatten(x,
     ----------
     x : Tensor
         Input tensor.
-    out_channels : int
-        Number of output channels.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
 
@@ -67,7 +65,7 @@ def flatten(x,
     """
     if not is_channels_first(data_format):
         x = tf.transpose(x, perm=(0, 3, 1, 2))
-    x = tf.reshape(x, shape=(-1, out_channels))
+    x = tf.reshape(x, shape=(-1, np.prod(x.get_shape().as_list()[1:])))
     return x
 
 
@@ -330,7 +328,7 @@ def conv2d(x,
         x = tf.nn.depthwise_conv2d(
             input=x,
             filter=kernel,
-            strides=(1, 1) + strides,
+            strides=(1, 1) + strides if is_channels_first(data_format) else (1,) + strides + (1,),
             padding="VALID",
             rate=(1, 1),
             name=name,

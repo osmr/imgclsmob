@@ -234,7 +234,6 @@ class AlexNet(object):
         in_channels = in_channels * 6 * 6
         x = flatten(
             x=x,
-            out_channels=in_channels,
             data_format=self.data_format)
         x = alex_output_block(
             x=x,

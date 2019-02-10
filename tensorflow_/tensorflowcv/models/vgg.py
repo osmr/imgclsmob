@@ -296,7 +296,6 @@ class VGG(object):
         # x = tf.reshape(x, [-1, in_channels])
         x = flatten(
             x=x,
-            out_channels=in_channels,
             data_format=self.data_format)
         x = vgg_output_block(
             x=x,

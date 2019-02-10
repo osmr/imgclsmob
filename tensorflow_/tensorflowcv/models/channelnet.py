@@ -632,7 +632,8 @@ class ChannelNet(object):
                  data_format="channels_last",
                  **kwargs):
         super(ChannelNet, self).__init__(**kwargs)
-        assert (data_format in ["channels_last", "channels_first"])
+        # assert (data_format in ["channels_last", "channels_first"])
+        assert (data_format in ["channels_first"])
         self.channels = channels
         self.block_names = block_names
         self.merge_types = merge_types
@@ -694,7 +695,6 @@ class ChannelNet(object):
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,
-            out_channels=in_channels,
             data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,

@@ -66,7 +66,7 @@ To enable/disable different hardware supports such as GPUs, check out PyTorch in
 
 ## Usage
 
-Example of using the pretrained ResNet-18 model:
+Example of using a pretrained ResNet-18 model:
 ```
 from pytorchcv.model_provider import get_model as ptcv_get_model
 import torch
@@ -217,7 +217,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | MobileNetV2 x0.25 | 48.34 | 24.51 | 1,516,392 | 34.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.137/mobilenetv2_wd4-2451-05e1e3a2.pth.log)) |
 | MobileNetV2 x0.5 | 35.98 | 14.93 | 1,964,736 | 100.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.170/mobilenetv2_wd2-1493-b82d79f6.pth.log)) |
 | MobileNetV2 x0.75 | 31.89 | 11.76 | 2,627,592 | 198.50M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w3d4-1176-1b966ff4.pth.log)) |
-| MobileNetV2 x1.0 | 29.31 | 10.39 | 3,504,960 | 329.36M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.9/mobilenetv2_w1-1039-7532eb72.pth.log)) |
+| MobileNetV2 x1.0 | 26.97 | 8.87 | 3,504,960 | 329.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.213/mobilenetv2_w1-0887-13a021bc.pth.log)) |
 | IGCV3 x0.25 | 53.70 | 28.71 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.142/igcv3_wd4-2871-c9f28301.pth.log)) |
 | IGCV3 x0.5 | 39.75 | 17.32 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.132/igcv3_wd2-1732-8c504f44.pth.log)) |
 | IGCV3 x0.75 | 31.05 | 11.40 | 2,638,084 | 210.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.207/igcv3_w3d4-1140-63f43cf8.pth.log)) |

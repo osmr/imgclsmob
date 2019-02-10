@@ -6,10 +6,9 @@
 __all__ = ['squeezenext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5_w1', 'sqnxt23v5_w3d2', 'sqnxt23v5_w2']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv_block, conv1x1_block, conv7x7_block, flatten
+from .common import max_pool2d_ceil, conv_block, conv1x1_block, conv7x7_block, is_channels_first, flatten
 
 
 def sqnxt_unit(x,
@@ -166,7 +165,7 @@ def squeezenext(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = sqnxt_init_block(
@@ -381,7 +380,7 @@ def _test():
         assert (model != sqnxt23v5_w3d2 or weight_count == 1953616)
         assert (model != sqnxt23v5_w2 or weight_count == 3366344)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

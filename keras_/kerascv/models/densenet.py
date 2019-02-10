@@ -6,10 +6,9 @@
 __all__ = ['densenet', 'densenet121', 'densenet161', 'densenet169', 'densenet201']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import pre_conv1x1_block, pre_conv3x3_block, flatten
+from .common import pre_conv1x1_block, pre_conv3x3_block, is_channels_first, get_channel_axis, flatten
 from .preresnet import preres_init_block, preres_activation
 
 
@@ -62,8 +61,7 @@ def dense_unit(x,
             rate=dropout_rate,
             name=name + "dropout")(x)
 
-    channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
-    x = nn.concatenate([identity, x], axis=channel_axis, name=name + "/concat")
+    x = nn.concatenate([identity, x], axis=get_channel_axis(), name=name + "/concat")
     return x
 
 
@@ -128,7 +126,7 @@ def densenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = preres_init_block(
@@ -319,7 +317,7 @@ def _test():
         assert (model != densenet169 or weight_count == 14149480)
         assert (model != densenet201 or weight_count == 20013928)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

@@ -8,10 +8,9 @@ __all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
            'resnet200', 'resnet200b', 'res_block', 'res_bottleneck_block', 'res_unit', 'res_init_block']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, flatten
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, is_channels_first, flatten
 
 
 def res_block(x,
@@ -244,7 +243,7 @@ def resnet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = res_init_block(
@@ -666,7 +665,7 @@ def _test():
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

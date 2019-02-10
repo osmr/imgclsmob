@@ -7,10 +7,9 @@ __all__ = ['resnext', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d',
 
 import os
 import math
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, flatten
+from .common import conv1x1_block, conv3x3_block, is_channels_first, flatten
 from .resnet import res_init_block
 
 
@@ -158,7 +157,7 @@ def resnext(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = res_init_block(
@@ -321,7 +320,7 @@ def _test():
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

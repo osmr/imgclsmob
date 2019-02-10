@@ -7,10 +7,9 @@
 __all__ = ['squeezenet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1_0', 'squeezeresnet_v1_1']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv2d, flatten
+from .common import max_pool2d_ceil, conv2d, is_channels_first, get_channel_axis, flatten
 
 
 def fire_conv(x,
@@ -111,8 +110,7 @@ def fire_unit(x,
         padding=1,
         name=name + "/expand3x3")
 
-    channel_axis = 1 if K.image_data_format() == "channels_first" else -1
-    out = nn.concatenate([y1, y2], axis=channel_axis, name=name + "/concat")
+    out = nn.concatenate([y1, y2], axis=get_channel_axis(), name=name + "/concat")
 
     if residual:
         out = nn.add([out, identity], name=name + "/add")
@@ -186,7 +184,7 @@ def squeezenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = squeeze_init_block(
@@ -379,7 +377,7 @@ def _test():
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
         assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

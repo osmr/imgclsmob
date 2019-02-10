@@ -7,11 +7,10 @@
 __all__ = ['shufflenetv2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_w3d2', 'shufflenetv2_w2']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
 from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, max_pool2d_ceil, channel_shuffle_lambda,\
-    se_block, batchnorm, flatten
+    se_block, batchnorm, is_channels_first, get_channel_axis, flatten
 
 
 def shuffle_unit(x,
@@ -69,7 +68,7 @@ def shuffle_unit(x,
         x2 = x
     else:
         in_split2_channels = in_channels // 2
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             y1 = nn.Lambda(lambda z: z[:, 0:in_split2_channels, :, :])(x)
             x2 = nn.Lambda(lambda z: z[:, in_split2_channels:, :, :])(x)
         else:
@@ -114,8 +113,7 @@ def shuffle_unit(x,
     if use_residual and not downsample:
         y2 = nn.add([y2, x2], name=name + "/add")
 
-    channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
-    x = nn.concatenate([y1, y2], axis=channel_axis, name=name + "/concat")
+    x = nn.concatenate([y1, y2], axis=get_channel_axis(), name=name + "/concat")
 
     x = channel_shuffle_lambda(
         channels=out_channels,
@@ -194,7 +192,7 @@ def shufflenetv2(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = shuffle_init_block(
@@ -373,7 +371,7 @@ def _test():
         assert (model != shufflenetv2_w3d2 or weight_count == 4406098)
         assert (model != shufflenetv2_w2 or weight_count == 7601686)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

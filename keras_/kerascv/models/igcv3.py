@@ -7,10 +7,9 @@
 __all__ = ['igcv3', 'igcv3_w1', 'igcv3_w3d4', 'igcv3_wd2', 'igcv3_wd4']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle_lambda, flatten
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle_lambda, is_channels_first, flatten
 
 
 def inv_res_unit(x,
@@ -108,7 +107,7 @@ def igcv3(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == 'channels_first' else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = conv3x3_block(
@@ -298,7 +297,7 @@ def _test():
         assert (model != igcv3_wd2 or weight_count == 1985528)
         assert (model != igcv3_wd4 or weight_count == 1534020)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

@@ -6,10 +6,9 @@
 __all__ = ['darknet53_model', 'darknet53']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, flatten
+from .common import conv1x1_block, conv3x3_block, is_channels_first, flatten
 
 
 def dark_unit(x,
@@ -86,7 +85,7 @@ def darknet53_model(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = conv3x3_block(
@@ -206,7 +205,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != darknet53 or weight_count == 41609928)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

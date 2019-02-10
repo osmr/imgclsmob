@@ -9,10 +9,9 @@ __all__ = ['preresnet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet1
            'preres_block', 'preres_bottleneck_block', 'preres_init_block', 'preres_activation']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, batchnorm, flatten
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv2d, conv1x1, batchnorm, is_channels_first, flatten
 
 
 def preres_block(x,
@@ -266,7 +265,7 @@ def preresnet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = preres_init_block(
@@ -691,7 +690,7 @@ def _test():
         assert (model != preresnet200 or weight_count == 64666280)
         assert (model != preresnet200b or weight_count == 64666280)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

@@ -7,10 +7,9 @@
 __all__ = ['alexnet_model', 'alexnet']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, flatten
+from .common import conv2d, is_channels_first, flatten
 
 
 def alex_conv(x,
@@ -162,7 +161,7 @@ def alexnet_model(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = input
@@ -269,7 +268,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != alexnet or weight_count == 61100840)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

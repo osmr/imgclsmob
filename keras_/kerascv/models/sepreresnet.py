@@ -7,10 +7,9 @@ __all__ = ['sepreresnet', 'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'se
            'sepreresnet101b', 'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, se_block, flatten
+from .common import conv1x1, se_block, is_channels_first, flatten
 from .preresnet import preres_block, preres_bottleneck_block, preres_init_block, preres_activation
 
 
@@ -109,7 +108,7 @@ def sepreresnet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = preres_init_block(
@@ -399,7 +398,7 @@ def _test():
         assert (model != sepreresnet200 or weight_count == 71828312)
         assert (model != sepreresnet200b or weight_count == 71828312)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

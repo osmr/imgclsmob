@@ -10,10 +10,9 @@ __all__ = ['mobilenet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
            'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, flatten
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, is_channels_first, flatten
 
 
 def dws_conv_block(x,
@@ -80,7 +79,7 @@ def mobilenet(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     init_block_channels = channels[0][0]
@@ -323,7 +322,7 @@ def _test():
         assert (model != fdmobilenet_wd2 or weight_count == 993928)
         assert (model != fdmobilenet_wd4 or weight_count == 383160)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

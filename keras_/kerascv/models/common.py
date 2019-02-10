@@ -2,10 +2,10 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'maxpool2d', 'conv2d', 'conv1x1',
-           'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block', 'conv3x3_block',
-           'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'channel_shuffle_lambda', 'se_block']
+__all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'maxpool2d',
+           'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
 import numpy as np
@@ -13,6 +13,18 @@ from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+
+
+def is_channels_first():
+    """
+    Is tested data format channels first.
+
+    Returns
+    -------
+    bool
+        A flag.
+    """
+    return K.image_data_format() == "channels_first"
 
 
 def get_channel_axis():
@@ -24,7 +36,7 @@ def get_channel_axis():
     int
         Channel axis.
     """
-    return 1 if K.image_data_format() == "channels_first" else -1
+    return 1 if is_channels_first() else -1
 
 
 def update_keras_shape(x):
@@ -57,7 +69,7 @@ def flatten(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    if K.image_data_format() != "channels_first":
+    if not is_channels_first():
         def channels_last_flatten(z):
             z = K.permute_dimensions(z, pattern=(0, 3, 1, 2))
             z = K.reshape(z, shape=(-1, np.prod(K.int_shape(z)[1:])))
@@ -102,7 +114,7 @@ def batchnorm(x,
             name=name)(x)
     else:
         x = nn.BatchNormalization(
-            axis=(1 if K.image_data_format() == "channels_first" else 3),
+            axis=get_channel_axis(),
             momentum=momentum,
             epsilon=epsilon,
             name=name)(x)
@@ -245,7 +257,6 @@ def conv2d(x,
         in_group_channels = in_channels // groups
         out_group_channels = out_channels // groups
         group_list = []
-        is_channels_first = (K.image_data_format() == "channels_first")
         for gi in range(groups):
             xi = nn.Lambda(
                 (lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :])
@@ -260,8 +271,7 @@ def conv2d(x,
                 use_bias=use_bias,
                 name=name + "/convgroup{}".format(gi + 1))(xi)
             group_list.append(xi)
-        channel_axis = 1 if is_channels_first else -1
-        x = nn.concatenate(group_list, axis=channel_axis, name=name + "/concat")
+        x = nn.concatenate(group_list, axis=get_channel_axis(), name=name + "/concat")
         if none_batch and (x._keras_shape[0] is not None):
             x._keras_shape = (None, ) + x._keras_shape[1:]
 
@@ -424,7 +434,7 @@ def max_pool2d_ceil(x,
 
     padding0 = 0 if padding == "valid" else strides[0] // 2
 
-    height = x._keras_shape[2 if K.image_data_format() == "channels_first" else 1]
+    height = x._keras_shape[2 if is_channels_first() else 1]
     out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
     if math.ceil(out_height) > math.floor(out_height):
         assert (strides[0] <= 3)
@@ -887,8 +897,7 @@ def channel_shuffle(x,
         Resulted tensor/variable/symbol.
     """
 
-    is_channels_first = (K.image_data_format() == "channels_first")
-    if is_channels_first:
+    if is_channels_first():
         batch, channels, height, width = x._keras_shape
     else:
         batch, height, width, channels = x._keras_shape
@@ -896,7 +905,7 @@ def channel_shuffle(x,
     # assert (channels % groups == 0)
     channels_per_group = channels // groups
 
-    if is_channels_first:
+    if is_channels_first():
         x = K.reshape(x, shape=(-1, groups, channels_per_group, height, width))
         x = K.permute_dimensions(x, pattern=(0, 2, 1, 3, 4))
         x = K.reshape(x, shape=(-1, channels, height, width))
@@ -905,8 +914,7 @@ def channel_shuffle(x,
         x = K.permute_dimensions(x, pattern=(0, 1, 2, 4, 3))
         x = K.reshape(x, shape=(-1, height, width, channels))
 
-    if not hasattr(x, "_keras_shape"):
-        x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
+    update_keras_shape(x)
     return x
 
 
@@ -958,7 +966,7 @@ def se_block(x,
     """
     assert(len(x._keras_shape) == 4)
     mid_cannels = channels // reduction
-    pool_size = x._keras_shape[2:4] if K.image_data_format() == "channels_first" else x._keras_shape[1:3]
+    pool_size = x._keras_shape[2:4] if is_channels_first() else x._keras_shape[1:3]
 
     w = nn.AvgPool2D(
         pool_size=pool_size,
@@ -1034,7 +1042,7 @@ class GluonBatchNormalization(BatchNormalization):
                  fix_gamma=False,
                  **kwargs):
         super(GluonBatchNormalization, self).__init__(
-            axis=(1 if K.image_data_format() == "channels_first" else 3),
+            axis=get_channel_axis(),
             momentum=momentum,
             epsilon=epsilon,
             center=center,

@@ -6,10 +6,9 @@
 __all__ = ['mnasnet_model', 'mnasnet']
 
 import os
-from keras import backend as K
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, batchnorm, flatten
+from .common import conv2d, batchnorm, is_channels_first, flatten
 
 
 def conv_block(x,
@@ -325,7 +324,7 @@ def mnasnet_model(channels,
     classes : int, default 1000
         Number of classification classes.
     """
-    input_shape = (in_channels, 224, 224) if K.image_data_format() == "channels_first" else (224, 224, in_channels)
+    input_shape = (in_channels, 224, 224) if is_channels_first() else (224, 224, in_channels)
     input = nn.Input(shape=input_shape)
 
     x = mnas_init_block(
@@ -461,7 +460,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mnasnet or weight_count == 4308816)
 
-        if K.image_data_format() == "channels_first":
+        if is_channels_first():
             x = np.zeros((1, 3, 224, 224), np.float32)
         else:
             x = np.zeros((1, 224, 224, 3), np.float32)

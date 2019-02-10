@@ -577,7 +577,6 @@ def menet456_24x1_g3(**kwargs):
 
 def _test():
     import numpy as np
-    from .model_store import init_variables_from_state_dict
 
     data_format = "channels_last"
     pretrained = False
@@ -595,11 +594,11 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
         x = tf.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
-            name='xx')
+            name="xx")
         y_net = net(x)
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
@@ -615,6 +614,7 @@ def _test():
 
         with tf.Session() as sess:
             if pretrained:
+                from .model_store import init_variables_from_state_dict
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())

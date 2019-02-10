@@ -570,6 +570,7 @@ def conv_block(x,
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/bn")
     if activate:
         assert (activation is not None)
@@ -878,6 +879,7 @@ def pre_conv_block(x,
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/bn")
     x = tf.nn.relu(x, name=name + "/activ")
     if return_preact:

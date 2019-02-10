@@ -8,7 +8,7 @@ __all__ = ['ChannelNet', 'channelnet']
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm
+from .common import conv2d, batchnorm, is_channels_first, get_channel_axis, flatten
 
 
 def dwconv3x3(x,
@@ -16,6 +16,7 @@ def dwconv3x3(x,
               out_channels,
               strides,
               use_bias=False,
+              data_format="channels_last",
               name="dwconv3x3"):
     """
     3x3 depthwise version of the standard convolution layer.
@@ -32,6 +33,8 @@ def dwconv3x3(x,
         Strides of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'dwconv3x3'
         Block name.
 
@@ -49,6 +52,7 @@ def dwconv3x3(x,
         padding=1,
         groups=out_channels,
         use_bias=use_bias,
+        data_format=data_format,
         name=name)
 
 
@@ -64,6 +68,7 @@ def channet_conv(x,
                  dropout_rate=0.0,
                  activate=True,
                  training=False,
+                 data_format="channels_last",
                  name="channet_conv"):
     """
     ChannelNet specific convolution block with Batch normalization and ReLU6 activation.
@@ -94,6 +99,8 @@ def channet_conv(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'channet_conv'
         Block name.
 
@@ -112,6 +119,7 @@ def channet_conv(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        data_format=data_format,
         name=name + "/conv")
     if dropout_rate > 0.0:
         x = tf.layers.dropout(
@@ -122,6 +130,7 @@ def channet_conv(x,
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/bn")
     if activate:
         x = tf.nn.relu6(x, name=name + "/activ")
@@ -137,6 +146,7 @@ def channet_conv1x1(x,
                     dropout_rate=0.0,
                     activate=True,
                     training=False,
+                    data_format="channels_last",
                     name="channet_conv1x1"):
     """
     1x1 version of ChannelNet specific convolution block.
@@ -161,6 +171,8 @@ def channet_conv1x1(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'channet_conv1x1'
         Block name.
 
@@ -181,6 +193,7 @@ def channet_conv1x1(x,
         dropout_rate=dropout_rate,
         activate=activate,
         training=training,
+        data_format=data_format,
         name=name)
 
 
@@ -195,6 +208,7 @@ def channet_conv3x3(x,
                     dropout_rate=0.0,
                     activate=True,
                     training=False,
+                    data_format="channels_last",
                     name="channet_conv3x3"):
     """
     3x3 version of ChannelNet specific convolution block.
@@ -223,6 +237,8 @@ def channet_conv3x3(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'channet_conv3x3'
         Block name.
 
@@ -244,6 +260,7 @@ def channet_conv3x3(x,
         dropout_rate=dropout_rate,
         activate=activate,
         training=training,
+        data_format=data_format,
         name=name)
 
 
@@ -254,6 +271,7 @@ def channet_dws_conv_block(x,
                            groups=1,
                            dropout_rate=0.0,
                            training=False,
+                           data_format="channels_last",
                            name="channet_dws_conv_block"):
     """
     ChannelNet specific depthwise separable convolution block with BatchNorms and activations at last convolution
@@ -275,6 +293,8 @@ def channet_dws_conv_block(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'channet_dws_conv_block'
         Block name.
 
@@ -288,6 +308,7 @@ def channet_dws_conv_block(x,
         in_channels=in_channels,
         out_channels=in_channels,
         strides=strides,
+        data_format=data_format,
         name=name + '/dw_conv')
     x = channet_conv1x1(
         x=x,
@@ -296,6 +317,7 @@ def channet_dws_conv_block(x,
         groups=groups,
         dropout_rate=dropout_rate,
         training=training,
+        data_format=data_format,
         name=name + '/pw_conv')
     return x
 
@@ -306,6 +328,7 @@ def simple_group_block(x,
                        groups,
                        dropout_rate,
                        training,
+                       data_format,
                        name="simple_group_block"):
     """
     ChannelNet specific block with a sequence of depthwise separable group convolution layers.
@@ -324,6 +347,8 @@ def simple_group_block(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'simple_group_block'
         Block name.
 
@@ -342,6 +367,7 @@ def simple_group_block(x,
             groups=groups,
             dropout_rate=dropout_rate,
             training=training,
+            data_format=data_format,
             name=name + '/block{}'.format(i + 1))
     return x
 
@@ -350,6 +376,7 @@ def channelwise_conv2d(x,
                        groups,
                        dropout_rate,
                        training=False,
+                       data_format="channels_last",
                        name="pure_conv2d"):
     """
     ChannelNet specific block with channel-wise convolution.
@@ -362,6 +389,8 @@ def channelwise_conv2d(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'channelwise_conv2d'
         Block name.
 
@@ -370,7 +399,7 @@ def channelwise_conv2d(x,
     Tensor
         Resulted tensor.
     """
-    x = tf.expand_dims(x, axis=1, name=name + '/expand_dims')
+    x = tf.expand_dims(x, axis=get_channel_axis(data_format), name=name + '/expand_dims')
     filters = groups
     kernel_size = [4 * groups, 1, 1]
     strides = [groups, 1, 1]
@@ -380,7 +409,7 @@ def channelwise_conv2d(x,
         kernel_size=kernel_size,
         strides=strides,
         padding="same",
-        data_format="channels_first",
+        data_format=data_format,
         use_bias=False,
         name=name + '/conv')
     if dropout_rate > 0.0:
@@ -390,9 +419,9 @@ def channelwise_conv2d(x,
             training=training,
             name=name + "/dropout")
     if filters == 1:
-        x = tf.squeeze(x, axis=[1], name=name + '/squeeze')
-    x = tf.unstack(x, axis=1, name=name + '/unstack')
-    x = tf.concat(x, axis=1, name=name + "/concat")
+        x = tf.squeeze(x, axis=[get_channel_axis(data_format)], name=name + '/squeeze')
+    x = tf.unstack(x, axis=get_channel_axis(data_format), name=name + '/unstack')
+    x = tf.concat(x, axis=get_channel_axis(data_format), name=name + "/concat")
     return x
 
 
@@ -402,6 +431,7 @@ def conv_group_block(x,
                      groups,
                      dropout_rate,
                      training,
+                     data_format,
                      name="conv_group_block"):
     """
     ChannelNet specific block with a combination of channel-wise convolution, depthwise separable group convolutions.
@@ -420,6 +450,8 @@ def conv_group_block(x,
         Dropout rate.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'conv_group_block'
         Block name.
 
@@ -435,6 +467,7 @@ def conv_group_block(x,
         groups=groups,
         dropout_rate=dropout_rate,
         training=training,
+        data_format=data_format,
         name=name + '/conv')
     x = simple_group_block(
         x=x,
@@ -443,6 +476,7 @@ def conv_group_block(x,
         groups=groups,
         dropout_rate=dropout_rate,
         training=training,
+        data_format=data_format,
         name=name)
     return x
 
@@ -457,6 +491,7 @@ def channet_unit(x,
                  block_names,
                  merge_type,
                  training,
+                 data_format,
                  name="channet_unit"):
     """
     ChannelNet unit.
@@ -483,6 +518,8 @@ def channet_unit(x,
         Type of sub-block output merging.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'channet_unit'
         Block name.
 
@@ -507,6 +544,7 @@ def channet_unit(x,
                 dropout_rate=dropout_rate,
                 activate=False,
                 training=training,
+                data_format=data_format,
                 name=name_i)
         elif block_name == "channet_dws_conv_block":
             x = channet_dws_conv_block(
@@ -516,6 +554,7 @@ def channet_unit(x,
                 strides=strides_i,
                 dropout_rate=dropout_rate,
                 training=training,
+                data_format=data_format,
                 name=name_i)
         elif block_name == "simple_group_block":
             x = simple_group_block(
@@ -525,6 +564,7 @@ def channet_unit(x,
                 groups=groups,
                 dropout_rate=dropout_rate,
                 training=training,
+                data_format=data_format,
                 name=name_i)
         elif block_name == "conv_group_block":
             x = conv_group_block(
@@ -534,6 +574,7 @@ def channet_unit(x,
                 groups=groups,
                 dropout_rate=dropout_rate,
                 training=training,
+                data_format=data_format,
                 name=name_i)
         else:
             raise NotImplementedError()
@@ -544,7 +585,7 @@ def channet_unit(x,
     elif merge_type == "add":
         x = tf.add(*x_outs, name=name + '/add')
     elif merge_type == "cat":
-        x = tf.concat(x_outs, axis=1, name=name + '/cat')
+        x = tf.concat(x_outs, axis=get_channel_axis(data_format), name=name + '/cat')
     else:
         raise NotImplementedError()
     return x
@@ -575,6 +616,8 @@ class ChannelNet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -586,8 +629,10 @@ class ChannelNet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(ChannelNet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.block_names = block_names
         self.merge_types = merge_types
@@ -597,6 +642,7 @@ class ChannelNet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -631,6 +677,7 @@ class ChannelNet(object):
                     block_names=self.block_names[i][j],
                     merge_type=self.merge_types[i][j],
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 if self.merge_types[i][j] == "cat":
                     in_channels = sum(out_channels)
@@ -641,10 +688,14 @@ class ChannelNet(object):
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -716,6 +767,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -727,7 +779,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -740,7 +792,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

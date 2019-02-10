@@ -9,7 +9,7 @@ __all__ = ['ShuffleNetV2b', 'shufflenetv2b_wd2', 'shufflenetv2b_w1', 'shufflenet
 import os
 import tensorflow as tf
 from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, channel_shuffle, channel_shuffle2, maxpool2d,\
-    se_block
+    se_block, is_channels_first, get_channel_axis, flatten
 
 
 def shuffle_unit(x,
@@ -20,6 +20,7 @@ def shuffle_unit(x,
                  use_residual,
                  shuffle_group_first,
                  training,
+                 data_format,
                  name="shuffle_unit"):
     """
     ShuffleNetV2(b) unit.
@@ -42,6 +43,8 @@ def shuffle_unit(x,
         Whether to use channel shuffle in group first mode.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'shuffle_unit'
         Unit name.
 
@@ -63,16 +66,18 @@ def shuffle_unit(x,
             activation=None,
             activate=False,
             training=training,
+            data_format=data_format,
             name=name + "/shortcut_dconv")
         y1 = conv1x1_block(
             x=y1,
             in_channels=in_channels,
             out_channels=in_channels,
             training=training,
+            data_format=data_format,
             name=name + "/shortcut_conv")
         x2 = x
     else:
-        y1, x2 = tf.split(x, num_or_size_splits=2, axis=1)
+        y1, x2 = tf.split(x, num_or_size_splits=2, axis=get_channel_axis(data_format))
 
     y2_in_channels = (in_channels if downsample else in_channels2)
     y2_out_channels = out_channels - y2_in_channels
@@ -82,6 +87,7 @@ def shuffle_unit(x,
         in_channels=y2_in_channels,
         out_channels=mid_channels,
         training=training,
+        data_format=data_format,
         name=name + "/conv1")
     y2 = dwconv3x3_block(
         x=y2,
@@ -91,35 +97,40 @@ def shuffle_unit(x,
         activation=None,
         activate=False,
         training=training,
+        data_format=data_format,
         name=name + "/dconv")
     y2 = conv1x1_block(
         x=y2,
         in_channels=mid_channels,
         out_channels=y2_out_channels,
         training=training,
+        data_format=data_format,
         name=name + "/conv2")
 
     if use_se:
         y2 = se_block(
             x=y2,
             channels=y2_out_channels,
+            data_format=data_format,
             name=name + "/se")
 
     if use_residual and not downsample:
         assert (y2_out_channels == in_channels2)
         y2 = y2 + x2
 
-    x = tf.concat([y1, y2], axis=1, name=name + "/concat")
+    x = tf.concat([y1, y2], axis=get_channel_axis(data_format), name=name + "/concat")
 
     assert (out_channels % 2 == 0)
     if shuffle_group_first:
         x = channel_shuffle(
             x=x,
-            groups=2)
+            groups=2,
+            data_format=data_format)
     else:
         x = channel_shuffle2(
             x=x,
-            groups=2)
+            groups=2,
+            data_format=data_format)
 
     return x
 
@@ -128,6 +139,7 @@ def shuffle_init_block(x,
                        in_channels,
                        out_channels,
                        training,
+                       data_format,
                        name="shuffle_init_block"):
     """
     ShuffleNetV2(b) specific initial block.
@@ -142,6 +154,8 @@ def shuffle_init_block(x,
         Number of output channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'shuffle_init_block'
         Block name.
 
@@ -156,6 +170,7 @@ def shuffle_init_block(x,
         out_channels=out_channels,
         strides=2,
         training=training,
+        data_format=data_format,
         name=name + "/conv")
     x = maxpool2d(
         x=x,
@@ -163,6 +178,7 @@ def shuffle_init_block(x,
         strides=2,
         padding=1,
         ceil_mode=False,
+        data_format=data_format,
         name=name + "/pool")
     return x
 
@@ -192,6 +208,8 @@ class ShuffleNetV2b(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -203,8 +221,10 @@ class ShuffleNetV2b(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(ShuffleNetV2b, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.final_block_channels = final_block_channels
@@ -214,6 +234,7 @@ class ShuffleNetV2b(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -239,6 +260,7 @@ class ShuffleNetV2b(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels
         for i, channels_per_stage in enumerate(self.channels):
@@ -253,6 +275,7 @@ class ShuffleNetV2b(object):
                     use_residual=self.use_residual,
                     shuffle_group_first=self.shuffle_group_first,
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = conv1x1_block(
@@ -260,15 +283,20 @@ class ShuffleNetV2b(object):
             in_channels=in_channels,
             out_channels=self.final_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/final_block")
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -438,6 +466,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -452,7 +481,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -468,7 +497,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

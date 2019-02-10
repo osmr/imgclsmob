@@ -8,7 +8,7 @@ __all__ = ['SqueezeNet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1
 
 import os
 import tensorflow as tf
-from .common import conv2d, maxpool2d
+from .common import conv2d, maxpool2d, is_channels_first, get_channel_axis, flatten
 
 
 def fire_conv(x,
@@ -16,6 +16,7 @@ def fire_conv(x,
               out_channels,
               kernel_size,
               padding,
+              data_format,
               name="fire_conv"):
     """
     SqueezeNet specific convolution block.
@@ -32,6 +33,8 @@ def fire_conv(x,
         Convolution window size.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'fire_conv'
         Block name.
 
@@ -47,6 +50,7 @@ def fire_conv(x,
         kernel_size=kernel_size,
         padding=padding,
         use_bias=True,
+        data_format=data_format,
         name=name + "/conv")
     x = tf.nn.relu(x, name=name + "/activ")
     return x
@@ -58,6 +62,7 @@ def fire_unit(x,
               expand1x1_channels,
               expand3x3_channels,
               residual,
+              data_format,
               name="fire_unit"):
     """
     SqueezeNet unit, so-called 'Fire' unit.
@@ -76,6 +81,8 @@ def fire_unit(x,
         Number of output channels for expand 3x3 convolution blocks.
     residual : bool
         Whether use residual connection.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'fire_unit'
         Block name.
 
@@ -93,6 +100,7 @@ def fire_unit(x,
         out_channels=squeeze_channels,
         kernel_size=1,
         padding=0,
+        data_format=data_format,
         name=name + "/squeeze")
     y1 = fire_conv(
         x=x,
@@ -100,6 +108,7 @@ def fire_unit(x,
         out_channels=expand1x1_channels,
         kernel_size=1,
         padding=0,
+        data_format=data_format,
         name=name + "/expand1x1")
     y2 = fire_conv(
         x=x,
@@ -107,9 +116,10 @@ def fire_unit(x,
         out_channels=expand3x3_channels,
         kernel_size=3,
         padding=1,
+        data_format=data_format,
         name=name + "/expand3x3")
 
-    out = tf.concat([y1, y2], axis=1, name=name + "/concat")
+    out = tf.concat([y1, y2], axis=get_channel_axis(data_format), name=name + "/concat")
 
     if residual:
         out = out + identity
@@ -121,6 +131,7 @@ def squeeze_init_block(x,
                        in_channels,
                        out_channels,
                        kernel_size,
+                       data_format,
                        name="squeeze_init_block"):
     """
     ResNet specific initial block.
@@ -135,6 +146,8 @@ def squeeze_init_block(x,
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'squeeze_init_block'
         Block name.
 
@@ -150,6 +163,7 @@ def squeeze_init_block(x,
         kernel_size=kernel_size,
         strides=2,
         use_bias=True,
+        data_format=data_format,
         name=name + "/conv")
     x = tf.nn.relu(x, name=name + "/activ")
     return x
@@ -176,6 +190,8 @@ class SqueezeNet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -185,8 +201,10 @@ class SqueezeNet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(SqueezeNet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.residuals = residuals
         self.init_block_kernel_size = init_block_kernel_size
@@ -194,6 +212,7 @@ class SqueezeNet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -219,6 +238,7 @@ class SqueezeNet(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             kernel_size=self.init_block_kernel_size,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels
         for i, channels_per_stage in enumerate(self.channels):
@@ -227,6 +247,7 @@ class SqueezeNet(object):
                 pool_size=3,
                 strides=2,
                 ceil_mode=True,
+                data_format=self.data_format,
                 name="features/pool{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 expand_channels = out_channels // 2
@@ -238,6 +259,7 @@ class SqueezeNet(object):
                     expand1x1_channels=expand_channels,
                     expand3x3_channels=expand_channels,
                     residual=((self.residuals is not None) and (self.residuals[i][j] == 1)),
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = tf.layers.dropout(
@@ -251,15 +273,20 @@ class SqueezeNet(object):
             in_channels=in_channels,
             out_channels=self.classes,
             kernel_size=1,
+            data_format=self.data_format,
             name="output/final_conv")
         x = tf.nn.relu(x, name="output/final_activ")
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=13,
             strides=1,
-            data_format='channels_first',
+            data_format=self.data_format,
             name="output/final_pool")
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
 
         return x
 
@@ -413,13 +440,14 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
-        # squeezenet_v1_0,
+        squeezenet_v1_0,
         squeezenet_v1_1,
-        # squeezeresnet_v1_0,
-        # squeezeresnet_v1_1,
+        squeezeresnet_v1_0,
+        squeezeresnet_v1_1,
     ]
 
     for model in models:
@@ -427,7 +455,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -443,7 +471,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

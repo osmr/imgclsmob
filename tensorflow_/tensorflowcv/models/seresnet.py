@@ -8,7 +8,7 @@ __all__ = ['SEResNet', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 
 
 import os
 import tensorflow as tf
-from .common import conv1x1_block, se_block
+from .common import conv1x1_block, se_block, is_channels_first, flatten
 from .resnet import res_block, res_bottleneck_block, res_init_block
 
 
@@ -19,6 +19,7 @@ def seres_unit(x,
                bottleneck,
                conv1_stride,
                training,
+               data_format,
                name="seres_unit"):
     """
     ResNet unit with residual connection.
@@ -39,6 +40,8 @@ def seres_unit(x,
         Whether to use stride in the first or the second convolution layer of the block.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'seres_unit'
         Unit name.
 
@@ -56,6 +59,7 @@ def seres_unit(x,
             strides=strides,
             activate=False,
             training=training,
+            data_format=data_format,
             name=name + "/identity_conv")
     else:
         identity = x
@@ -68,6 +72,7 @@ def seres_unit(x,
             strides=strides,
             conv1_stride=conv1_stride,
             training=training,
+            data_format=data_format,
             name=name + "/body")
     else:
         x = res_block(
@@ -76,11 +81,13 @@ def seres_unit(x,
             out_channels=out_channels,
             strides=strides,
             training=training,
+            data_format=data_format,
             name=name + "/body")
 
     x = se_block(
         x=x,
         channels=out_channels,
+        data_format=data_format,
         name=name + "/se")
 
     x = x + identity
@@ -109,6 +116,8 @@ class SEResNet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -118,8 +127,10 @@ class SEResNet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(SEResNet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.bottleneck = bottleneck
@@ -127,6 +138,7 @@ class SEResNet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -152,6 +164,7 @@ class SEResNet(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels
         for i, channels_per_stage in enumerate(self.channels):
@@ -165,16 +178,21 @@ class SEResNet(object):
                     bottleneck=self.bottleneck,
                     conv1_stride=self.conv1_stride,
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format="channels_first",
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -457,6 +475,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -477,7 +496,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -499,7 +518,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

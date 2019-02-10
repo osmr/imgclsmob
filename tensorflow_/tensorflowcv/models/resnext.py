@@ -8,7 +8,7 @@ __all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d',
 import os
 import math
 import tensorflow as tf
-from .common import conv1x1_block, conv3x3_block
+from .common import conv1x1_block, conv3x3_block, is_channels_first, flatten
 from .resnet import res_init_block
 
 
@@ -19,6 +19,7 @@ def resnext_bottleneck(x,
                        cardinality,
                        bottleneck_width,
                        training,
+                       data_format,
                        name="resnext_bottleneck"):
     """
     ResNeXt bottleneck block for residual path in ResNeXt unit.
@@ -39,6 +40,8 @@ def resnext_bottleneck(x,
         Width of bottleneck block.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'resnext_bottleneck'
         Block name.
 
@@ -56,6 +59,7 @@ def resnext_bottleneck(x,
         in_channels=in_channels,
         out_channels=group_width,
         training=training,
+        data_format=data_format,
         name=name + "/conv1")
     x = conv3x3_block(
         x=x,
@@ -64,6 +68,7 @@ def resnext_bottleneck(x,
         strides=strides,
         groups=cardinality,
         training=training,
+        data_format=data_format,
         name=name + "/conv2")
     x = conv1x1_block(
         x=x,
@@ -71,6 +76,7 @@ def resnext_bottleneck(x,
         out_channels=out_channels,
         activate=False,
         training=training,
+        data_format=data_format,
         name=name + "/conv3")
     return x
 
@@ -82,6 +88,7 @@ def resnext_unit(x,
                  cardinality,
                  bottleneck_width,
                  training,
+                 data_format,
                  name="resnext_unit"):
     """
     ResNeXt unit with residual connection.
@@ -102,6 +109,8 @@ def resnext_unit(x,
         Width of bottleneck block.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'resnext_unit'
         Unit name.
 
@@ -119,6 +128,7 @@ def resnext_unit(x,
             strides=strides,
             activate=False,
             training=training,
+            data_format=data_format,
             name=name + "/identity_conv")
     else:
         identity = x
@@ -131,6 +141,7 @@ def resnext_unit(x,
         cardinality=cardinality,
         bottleneck_width=bottleneck_width,
         training=training,
+        data_format=data_format,
         name=name + "/body")
 
     x = x + identity
@@ -159,6 +170,8 @@ class ResNeXt(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -168,8 +181,10 @@ class ResNeXt(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(ResNeXt, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.cardinality = cardinality
@@ -177,6 +192,7 @@ class ResNeXt(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -202,6 +218,7 @@ class ResNeXt(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels
         for i, channels_per_stage in enumerate(self.channels):
@@ -215,16 +232,21 @@ class ResNeXt(object):
                     cardinality=self.cardinality,
                     bottleneck_width=self.bottleneck_width,
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format="channels_first",
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -361,6 +383,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -374,7 +397,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -389,7 +412,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

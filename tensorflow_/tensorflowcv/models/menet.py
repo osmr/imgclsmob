@@ -9,7 +9,8 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 
 import os
 import tensorflow as tf
-from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d
+from .common import conv2d, conv1x1, conv3x3, depthwise_conv3x3, batchnorm, channel_shuffle, maxpool2d, avgpool2d,\
+    is_channels_first, get_channel_axis, flatten
 
 
 def me_unit(x,
@@ -20,6 +21,7 @@ def me_unit(x,
             downsample,
             ignore_group,
             training,
+            data_format,
             name="me_unit"):
     """
     MENet unit.
@@ -42,6 +44,8 @@ def me_unit(x,
         Whether ignore group value in the first convolution layer.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'me_unit'
         Unit name.
 
@@ -63,27 +67,32 @@ def me_unit(x,
         in_channels=in_channels,
         out_channels=mid_channels,
         groups=(1 if ignore_group else groups),
+        data_format=data_format,
         name=name + "/compress_conv1")
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/compress_bn1")
     x = tf.nn.relu(x, name=name + "/compress_activ")
 
     assert (mid_channels % groups == 0)
     x = channel_shuffle(
         x=x,
-        groups=groups)
+        groups=groups,
+        data_format=data_format)
 
     # merging
     y = conv1x1(
         x=x,
         in_channels=mid_channels,
         out_channels=side_channels,
+        data_format=data_format,
         name=name + "/s_merge_conv/conv")
     y = batchnorm(
         x=y,
         training=training,
+        data_format=data_format,
         name=name + "/s_merge_bn")
     y = tf.nn.relu(y, name=name + "/s_merge_activ")
 
@@ -92,10 +101,12 @@ def me_unit(x,
         x=x,
         channels=mid_channels,
         strides=(2 if downsample else 1),
+        data_format=data_format,
         name=name + "/dw_conv2")
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/dw_bn2")
 
     # evolution
@@ -104,10 +115,12 @@ def me_unit(x,
         in_channels=side_channels,
         out_channels=side_channels,
         strides=(2 if downsample else 1),
+        data_format=data_format,
         name=name + "/s_conv")
     y = batchnorm(
         x=y,
         training=training,
+        data_format=data_format,
         name=name + "/s_conv_bn")
     y = tf.nn.relu(y, name=name + "/s_conv_activ")
 
@@ -115,10 +128,12 @@ def me_unit(x,
         x=y,
         in_channels=side_channels,
         out_channels=mid_channels,
+        data_format=data_format,
         name=name + "/s_evolve_conv/conv")
     y = batchnorm(
         x=y,
         training=training,
+        data_format=data_format,
         name=name + "/s_evolve_bn")
     y = tf.nn.sigmoid(y, name=name + "/s_evolve_activ")
 
@@ -130,10 +145,12 @@ def me_unit(x,
         in_channels=mid_channels,
         out_channels=out_channels,
         groups=groups,
+        data_format=data_format,
         name=name + "/expand_conv3")
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/expand_bn3")
 
     if downsample:
@@ -142,8 +159,9 @@ def me_unit(x,
             pool_size=3,
             strides=2,
             padding=1,
+            data_format=data_format,
             name=name + "/avgpool")
-        x = tf.concat([x, identity], axis=1, name=name + "/concat")
+        x = tf.concat([x, identity], axis=get_channel_axis(data_format), name=name + "/concat")
     else:
         x = x + identity
 
@@ -155,6 +173,7 @@ def me_init_block(x,
                   in_channels,
                   out_channels,
                   training,
+                  data_format,
                   name="me_init_block"):
     """
     MENet specific initial block.
@@ -169,6 +188,8 @@ def me_init_block(x,
         Number of output channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'me_init_block'
         Block name.
 
@@ -185,10 +206,12 @@ def me_init_block(x,
         strides=2,
         padding=1,
         use_bias=False,
+        data_format=data_format,
         name=name + "/conv")
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/bn")
     x = tf.nn.relu(x, name=name + "/activ")
     x = maxpool2d(
@@ -196,6 +219,7 @@ def me_init_block(x,
         pool_size=3,
         strides=2,
         padding=1,
+        data_format=data_format,
         name=name + "/pool")
     return x
 
@@ -221,6 +245,8 @@ class MENet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -230,8 +256,10 @@ class MENet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(MENet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.side_channels = side_channels
@@ -239,6 +267,7 @@ class MENet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -264,6 +293,7 @@ class MENet(object):
             in_channels=in_channels,
             out_channels=self.init_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels
         for i, channels_per_stage in enumerate(self.channels):
@@ -279,16 +309,21 @@ class MENet(object):
                     downsample=downsample,
                     ignore_group=ignore_group,
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -544,6 +579,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -562,7 +598,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -582,7 +618,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

@@ -7,7 +7,7 @@ __all__ = ['MnasNet', 'mnasnet']
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm
+from .common import conv2d, batchnorm, is_channels_first, flatten
 
 
 def conv_block(x,
@@ -19,6 +19,7 @@ def conv_block(x,
                groups,
                activate,
                training,
+               data_format,
                name="conv_block"):
     """
     Standard convolution block with Batch normalization and ReLU activation.
@@ -43,6 +44,8 @@ def conv_block(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'conv_block'
         Block name.
 
@@ -60,10 +63,12 @@ def conv_block(x,
         padding=padding,
         groups=groups,
         use_bias=False,
+        data_format=data_format,
         name=name + "/conv")
     x = batchnorm(
         x=x,
         training=training,
+        data_format=data_format,
         name=name + "/bn")
     if activate:
         x = tf.nn.relu(x, name=name + "/activ")
@@ -75,6 +80,7 @@ def conv1x1_block(x,
                   out_channels,
                   activate=True,
                   training=False,
+                  data_format="channels_last",
                   name="conv1x1_block"):
     """
     1x1 version of the standard convolution block.
@@ -91,6 +97,8 @@ def conv1x1_block(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'conv1x1_block'
         Block name.
 
@@ -109,6 +117,7 @@ def conv1x1_block(x,
         groups=1,
         activate=activate,
         training=training,
+        data_format=data_format,
         name=name)
 
 
@@ -119,6 +128,7 @@ def dwconv_block(x,
                  strides,
                  activate=True,
                  training=False,
+                 data_format="channels_last",
                  name="dwconv_block"):
     """
     Depthwise version of the standard convolution block.
@@ -139,6 +149,8 @@ def dwconv_block(x,
         Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     name : str, default 'dwconv_block'
         Block name.
 
@@ -157,6 +169,7 @@ def dwconv_block(x,
         groups=out_channels,
         activate=activate,
         training=training,
+        data_format=data_format,
         name=name)
 
 
@@ -164,6 +177,7 @@ def dws_conv_block(x,
                    in_channels,
                    out_channels,
                    training,
+                   data_format,
                    name="dws_conv_block"):
     """
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
@@ -178,6 +192,8 @@ def dws_conv_block(x,
         Number of output channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'dws_conv_block'
         Block name.
 
@@ -193,12 +209,14 @@ def dws_conv_block(x,
         kernel_size=3,
         strides=1,
         training=training,
+        data_format=data_format,
         name=name + "/dw_conv")
     x = conv1x1_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         training=training,
+        data_format=data_format,
         name=name + "/pw_conv")
     return x
 
@@ -210,6 +228,7 @@ def mnas_unit(x,
               strides,
               expansion_factor,
               training,
+              data_format,
               name="mnas_unit"):
     """
     So-called 'Linear Bottleneck' layer. It is used as a MobileNetV2 unit.
@@ -230,6 +249,8 @@ def mnas_unit(x,
         Factor for expansion of channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'mnas_unit'
         Unit name.
 
@@ -250,6 +271,7 @@ def mnas_unit(x,
         out_channels=mid_channels,
         activate=True,
         training=training,
+        data_format=data_format,
         name=name + "/conv1")
     x = dwconv_block(
         x=x,
@@ -259,6 +281,7 @@ def mnas_unit(x,
         strides=strides,
         activate=True,
         training=training,
+        data_format=data_format,
         name=name + "/conv2")
     x = conv1x1_block(
         x=x,
@@ -266,6 +289,7 @@ def mnas_unit(x,
         out_channels=out_channels,
         activate=False,
         training=training,
+        data_format=data_format,
         name=name + "/conv3")
 
     if residual:
@@ -278,6 +302,7 @@ def mnas_init_block(x,
                     in_channels,
                     out_channels_list,
                     training,
+                    data_format,
                     name="mnas_init_block"):
     """
     Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
@@ -292,6 +317,8 @@ def mnas_init_block(x,
         Numbers of output channels.
     training : bool, or a TensorFlow boolean scalar tensor
       Whether to return the output in training mode or in inference mode.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'mnas_init_block'
         Block name.
 
@@ -310,12 +337,14 @@ def mnas_init_block(x,
         groups=1,
         activate=True,
         training=training,
+        data_format=data_format,
         name=name + "/conv1")
     x = dws_conv_block(
         x=x,
         in_channels=out_channels_list[0],
         out_channels=out_channels_list[1],
         training=training,
+        data_format=data_format,
         name=name + "/conv2")
     return x
 
@@ -343,6 +372,8 @@ class MnasNet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -353,8 +384,10 @@ class MnasNet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(MnasNet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.init_block_channels = init_block_channels
         self.final_block_channels = final_block_channels
@@ -363,6 +396,7 @@ class MnasNet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -388,6 +422,7 @@ class MnasNet(object):
             in_channels=in_channels,
             out_channels_list=self.init_block_channels,
             training=training,
+            data_format=self.data_format,
             name="features/init_block")
         in_channels = self.init_block_channels[-1]
         for i, channels_per_stage in enumerate(self.channels):
@@ -405,6 +440,7 @@ class MnasNet(object):
                     strides=strides,
                     expansion_factor=expansion_factor,
                     training=training,
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
         x = conv1x1_block(
@@ -413,16 +449,21 @@ class MnasNet(object):
             out_channels=self.final_block_channels,
             activate=True,
             training=training,
+            data_format=self.data_format,
             name="features/final_block")
         # in_channels = self.final_block_channels
         x = tf.layers.average_pooling2d(
             inputs=x,
             pool_size=7,
             strides=1,
-            data_format='channels_first',
+            data_format=self.data_format,
             name="features/final_pool")
 
-        x = tf.layers.flatten(x)
+        # x = tf.layers.flatten(x)
+        x = flatten(
+            x=x,
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = tf.layers.dense(
             inputs=x,
             units=self.classes,
@@ -516,6 +557,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -527,7 +569,7 @@ def _test():
         net = model(pretrained=pretrained)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -540,7 +582,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

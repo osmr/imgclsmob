@@ -8,7 +8,7 @@ __all__ = ['squeezenext', 'sqnxt23_w1', 'sqnxt23_w3d2', 'sqnxt23_w2', 'sqnxt23v5
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv_block, conv1x1_block, conv7x7_block, is_channels_first, flatten
+from .common import maxpool2d, conv_block, conv1x1_block, conv7x7_block, is_channels_first, flatten
 
 
 def sqnxt_unit(x,
@@ -132,11 +132,11 @@ def sqnxt_init_block(x,
         padding=1,
         use_bias=True,
         name=name + "/conv")
-    x = max_pool2d_ceil(
+    x = maxpool2d(
         x=x,
         pool_size=3,
         strides=2,
-        padding="valid",
+        ceil_mode=True,
         name=name + "/pool")
     return x
 

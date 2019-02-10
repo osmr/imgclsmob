@@ -3,7 +3,7 @@
 """
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'maxpool2d',
-           'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'max_pool2d_ceil', 'conv_block',
+           'max_pool2d_ceil', 'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block',
            'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'pre_conv_block', 'pre_conv1x1_block',
            'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
@@ -180,12 +180,67 @@ def maxpool2d(x,
                 if is_channels_first() else
                 (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
         padding_ke = "valid"
+    else:
+        if ceil_mode:
+            padding0 = 0 if padding_ke == "valid" else strides[0] // 2
+            height = x._keras_shape[2 if is_channels_first() else 1]
+            out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
+            if math.ceil(out_height) > math.floor(out_height):
+                assert (strides[0] <= 3)
+                padding_ke = "same"
 
     x = nn.MaxPool2D(
         pool_size=pool_size,
         strides=strides,
         padding=padding_ke,
         name=name + "/pool")(x)
+    return x
+
+
+def max_pool2d_ceil(x,
+                    pool_size,
+                    strides,
+                    padding,
+                    **kwargs):
+    """
+    Max pooling 2D layer wrapper with ceil mode supporting.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    pool_size : int or tuple/list of 2 int
+        Size of the max pooling windows.
+    strides : int or tuple/list of 2 int
+        Strides of the pooling.
+    padding : 'valid' or 'same'
+        Padding value for pooling layer.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if isinstance(pool_size, int):
+        pool_size = (pool_size, pool_size)
+    if isinstance(strides, int):
+        strides = (strides, strides)
+
+    assert (pool_size[0] == pool_size[1])
+    assert (strides[0] == strides[1])
+
+    padding0 = 0 if padding == "valid" else strides[0] // 2
+    height = x._keras_shape[2 if is_channels_first() else 1]
+    out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
+    if math.ceil(out_height) > math.floor(out_height):
+        assert (strides[0] <= 3)
+        padding = "same"
+
+    x = nn.MaxPool2D(
+        pool_size=pool_size,
+        strides=strides,
+        padding=padding,
+        **kwargs)(x)
     return x
 
 
@@ -513,54 +568,6 @@ def depthwise_conv3x3(x,
         groups=channels,
         use_bias=False,
         name=name)
-
-
-def max_pool2d_ceil(x,
-                    pool_size,
-                    strides,
-                    padding,
-                    **kwargs):
-    """
-    Max pooling 2D layer wrapper with ceil mode supporting.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    pool_size : int or tuple/list of 2 int
-        Size of the max pooling windows.
-    strides : int or tuple/list of 2 int
-        Strides of the pooling.
-    padding : 'valid' or 'same'
-        Padding value for pooling layer.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    if isinstance(pool_size, int):
-        pool_size = (pool_size, pool_size)
-    if isinstance(strides, int):
-        strides = (strides, strides)
-
-    assert (pool_size[0] == pool_size[1])
-    assert (strides[0] == strides[1])
-
-    padding0 = 0 if padding == "valid" else strides[0] // 2
-
-    height = x._keras_shape[2 if is_channels_first() else 1]
-    out_height = float(height + 2 * padding0 - pool_size[0]) / strides[0] + 1.0
-    if math.ceil(out_height) > math.floor(out_height):
-        assert (strides[0] <= 3)
-        padding = "same"
-
-    x = nn.MaxPool2D(
-        pool_size=pool_size,
-        strides=strides,
-        padding=padding,
-        **kwargs)(x)
-    return x
 
 
 def conv_block(x,

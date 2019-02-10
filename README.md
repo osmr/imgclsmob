@@ -18,7 +18,7 @@ For each supported framework, there is a PIP-package containing pure models with
 - [gluoncv2](https://pypi.org/project/gluoncv2) for Gluon,
 - [pytorchcv](https://pypi.org/project/pytorchcv) for PyTorch,
 - [chainercv2](https://pypi.org/project/chainercv2) for Chainer,
-- [kerascv](https://pypi.org/project/kerascv) for Keras-MXNet,
+- [kerascv](https://pypi.org/project/kerascv) for Keras,
 - [tensorflowcv](https://pypi.org/project/tensorflowcv) for TensorFlow.
 
 Currently, models are mostly implemented on Gluon and then ported to other frameworks. Some models are pretrained on

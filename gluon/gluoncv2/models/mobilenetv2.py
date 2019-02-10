@@ -303,6 +303,7 @@ def _test():
             if (param.shape is None) or (not param._differentiable):
                 continue
             weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenetv2_w1 or weight_count == 3504960)
         assert (model != mobilenetv2_w3d4 or weight_count == 2627592)
         assert (model != mobilenetv2_wd2 or weight_count == 1964736)

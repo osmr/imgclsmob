@@ -49,12 +49,15 @@ class ImageNetModel(ModelDesc):
     def __init__(self,
                  model_lambda,
                  image_size=224,
+                 data_format="channels_last",
                  **kwargs):
         super(ImageNetModel, self).__init__(**kwargs)
+        assert (data_format in ['channels_last', 'channels_first'])
+
         self.model_lambda = model_lambda
         self.image_size = image_size
         self.image_dtype = tf.float32
-        self.data_format = "NCHW" if is_channels_first() else "NHWC"
+        self.data_format = data_format
         self.label_smoothing = 0.0
         self.loss_scale = 1.0
         self.weight_decay = 1e-4
@@ -78,8 +81,7 @@ class ImageNetModel(ModelDesc):
                     label):
 
         image = self.image_preprocess(image)
-        assert self.data_format in ['NCHW', 'NHWC']
-        if self.data_format == 'NCHW':
+        if is_channels_first(self.data_format):
             image = tf.transpose(image, [0, 3, 1, 2], name="image_transpose")
 
         # tf.summary.image('input_image_', image)
@@ -123,11 +125,10 @@ class ImageNetModel(ModelDesc):
 
     def image_preprocess(self,
                          image):
-
         with tf.name_scope('image_preprocess'):
             if image.dtype.base_dtype != tf.float32:
                 image = tf.cast(image, tf.float32)
-            mean = np.array([0.485, 0.456, 0.406], np.float32) * 255.0    # rgb
+            mean = np.array([0.485, 0.456, 0.406], np.float32) * 255.0  # rgb
             std = np.array([0.229, 0.224, 0.225], np.float32) * 255.0
             if self.image_bgr:
                 mean = mean[::-1]
@@ -246,7 +247,8 @@ def prepare_tf_context(num_gpus,
 
 def prepare_model(model_name,
                   use_pretrained,
-                  pretrained_model_file_path):
+                  pretrained_model_file_path,
+                  data_format="channels_last"):
     kwargs = {'pretrained': use_pretrained}
 
     raw_net = get_model(model_name, **kwargs)
@@ -254,7 +256,8 @@ def prepare_model(model_name,
 
     net = ImageNetModel(
         model_lambda=raw_net,
-        image_size=input_image_size)
+        image_size=input_image_size,
+        data_format=data_format)
 
     if use_pretrained and not pretrained_model_file_path:
         pretrained_model_file_path = raw_net.file_path

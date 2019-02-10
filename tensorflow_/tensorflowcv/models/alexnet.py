@@ -17,6 +17,7 @@ def alex_conv(x,
               kernel_size,
               strides,
               padding,
+              data_format,
               name="alex_conv"):
     """
     AlexNet specific convolution block.
@@ -35,6 +36,8 @@ def alex_conv(x,
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
+    data_format : str
+        The ordering of the dimensions in tensors.
     name : str, default 'alex_conv'
         Block name.
 
@@ -51,6 +54,7 @@ def alex_conv(x,
         strides=strides,
         padding=padding,
         use_bias=True,
+        data_format=data_format,
         name=name + "/conv")
     x = tf.nn.relu(x, name=name + "/activ")
     return x
@@ -164,6 +168,8 @@ class AlexNet(object):
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -173,8 +179,10 @@ class AlexNet(object):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(AlexNet, self).__init__(**kwargs)
+        assert (data_format in ["channels_last", "channels_first"])
         self.channels = channels
         self.kernel_sizes = kernel_sizes
         self.strides = strides
@@ -182,6 +190,7 @@ class AlexNet(object):
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
     def __call__(self,
                  x,
@@ -211,6 +220,7 @@ class AlexNet(object):
                     kernel_size=self.kernel_sizes[i][j],
                     strides=self.strides[i][j],
                     padding=self.paddings[i][j],
+                    data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
             x = maxpool2d(
@@ -218,12 +228,14 @@ class AlexNet(object):
                 pool_size=3,
                 strides=2,
                 padding=0,
+                data_format=self.data_format,
                 name="features/stage{}/pool".format(i + 1))
 
         in_channels = in_channels * 6 * 6
         x = flatten(
             x=x,
-            out_channels=in_channels)
+            out_channels=in_channels,
+            data_format=self.data_format)
         x = alex_output_block(
             x=x,
             in_channels=in_channels,
@@ -295,6 +307,7 @@ def _test():
     import numpy as np
     from .model_store import init_variables_from_state_dict
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -303,10 +316,10 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
         x = tf.placeholder(
             dtype=tf.float32,
-            shape=(None, 3, 224, 224) if is_channels_first() else (None, 224, 224, 3),
+            shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name='xx')
         y_net = net(x)
 
@@ -319,7 +332,7 @@ def _test():
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
                 sess.run(tf.global_variables_initializer())
-            x_value = np.zeros((1, 3, 224, 224) if is_channels_first() else (1, 224, 224, 3), np.float32)
+            x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
         tf.reset_default_graph()

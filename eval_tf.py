@@ -22,14 +22,19 @@ def parse_args():
         help='training and validation pictures to use.')
 
     parser.add_argument(
+        '--data-format',
+        type=str,
+        default='channels_last',
+        help='ordering of the dimensions in tensors. options are channels_last and channels_first')
+    parser.add_argument(
         '--model',
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options.')
+        help='type of model to use. see model_provider for options')
     parser.add_argument(
         '--use-pretrained',
         action='store_true',
-        help='enable using pretrained model from gluon.')
+        help='enable using pretrained model')
     parser.add_argument(
         '--resume',
         type=str,
@@ -45,18 +50,18 @@ def parse_args():
         '--input-size',
         type=int,
         default=224,
-        help='size of the input for model. default is 224')
+        help='size of the input for model')
     parser.add_argument(
         '--resize-inv-factor',
         type=float,
         default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
+        help='inverted ratio for input image crop')
 
     parser.add_argument(
         '--num-gpus',
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help='number of gpus to use')
     parser.add_argument(
         '-j',
         '--num-data-workers',
@@ -69,7 +74,7 @@ def parse_args():
         '--batch-size',
         type=int,
         default=512,
-        help='training batch size per device (CPU/GPU).')
+        help='training batch size per device (CPU/GPU)')
 
     parser.add_argument(
         '--save-dir',
@@ -158,7 +163,8 @@ def main():
     net, inputs_desc = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
-        pretrained_model_file_path=args.resume.strip())
+        pretrained_model_file_path=args.resume.strip(),
+        data_format=args.data_format)
 
     val_dataflow = get_data(
         is_train=False,

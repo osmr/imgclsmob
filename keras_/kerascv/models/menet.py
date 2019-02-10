@@ -185,7 +185,7 @@ def me_init_block(x,
         pool_size=3,
         strides=2,
         padding=1,
-        name=name + "/pool")(x)
+        name=name + "/pool")
     return x
 
 

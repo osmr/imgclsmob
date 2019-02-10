@@ -162,24 +162,24 @@ def maxpool2d(x,
 
     padding_ke = "valid" if padding[0] == 0 else "same"
 
-    if K.backend() == "tensorflow":
-        if ceil_mode:
-            height = int(x.shape[2])
-            out_height = float(height + 2 * padding[0] - pool_size[0]) / strides[0] + 1.0
-            if math.ceil(out_height) > math.floor(out_height):
-                padding = (padding[0] + 1, padding[1])
-            width = int(x.shape[3])
-            out_width = float(width + 2 * padding[1] - pool_size[1]) / strides[1] + 1.0
-            if math.ceil(out_width) > math.floor(out_width):
-                padding = (padding[0], padding[1] + 1)
-
-        if (padding[0] > 0) or (padding[1] > 0):
-            import tensorflow as tf
-            x = nn.Lambda(
-                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT"))
-                if is_channels_first else
-                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
-        padding_ke = "valid"
+    # if K.backend() == "tensorflow":
+    #     if ceil_mode:
+    #         height = int(x.shape[2])
+    #         out_height = float(height + 2 * padding[0] - pool_size[0]) / strides[0] + 1.0
+    #         if math.ceil(out_height) > math.floor(out_height):
+    #             padding = (padding[0] + 1, padding[1])
+    #         width = int(x.shape[3])
+    #         out_width = float(width + 2 * padding[1] - pool_size[1]) / strides[1] + 1.0
+    #         if math.ceil(out_width) > math.floor(out_width):
+    #             padding = (padding[0], padding[1] + 1)
+    #
+    #     if (padding[0] > 0) or (padding[1] > 0):
+    #         import tensorflow as tf
+    #         x = nn.Lambda(
+    #             (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT"))
+    #             if is_channels_first() else
+    #             (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
+    #     padding_ke = "valid"
 
     x = nn.MaxPool2D(
         pool_size=pool_size,
@@ -282,7 +282,7 @@ def conv2d(x,
         for gi in range(groups):
             xi = nn.Lambda(
                 (lambda z: z[:, gi * in_group_channels:(gi + 1) * in_group_channels, :, :])
-                if is_channels_first else
+                if is_channels_first() else
                 (lambda z: z[:, :, :, gi * in_group_channels:(gi + 1) * in_group_channels]))(x)
             xi = nn.Conv2D(
                 filters=out_group_channels,

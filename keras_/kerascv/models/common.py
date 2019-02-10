@@ -240,16 +240,28 @@ def conv2d(x,
         dilation = (dilation, dilation)
 
     extra_pad = False
-    if (padding[0] == padding[1]) and (padding[0] == 0):
-        ke_padding = "valid"
-    elif (padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and (kernel_size[0] // 2 == padding[0]):
-        ke_padding = "same"
+    if K.backend() == "tensorflow":
+        if (padding[0] > 0) or (padding[1] > 0):
+            import tensorflow as tf
+            x = nn.Lambda(
+                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)]))
+                if is_channels_first() else
+                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]])))(x)
+            if not ((padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and
+                    (kernel_size[0] // 2 == padding[0])):
+                extra_pad = True
+        padding_ke = "valid"
     else:
-        x = nn.ZeroPadding2D(
-            padding=padding,
-            name=name + "/pad")(x)
-        ke_padding = "valid"
-        extra_pad = True
+        if (padding[0] == padding[1]) and (padding[0] == 0):
+            padding_ke = "valid"
+        elif (padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and (kernel_size[0] // 2 == padding[0]):
+            padding_ke = "same"
+        else:
+            x = nn.ZeroPadding2D(
+                padding=padding,
+                name=name + "/pad")(x)
+            padding_ke = "valid"
+            extra_pad = True
 
     if groups == 1:
         if extra_pad:
@@ -258,7 +270,7 @@ def conv2d(x,
             filters=out_channels,
             kernel_size=kernel_size,
             strides=strides,
-            padding=ke_padding,
+            padding=padding_ke,
             dilation_rate=dilation,
             use_bias=use_bias,
             name=name)(x)
@@ -269,7 +281,7 @@ def conv2d(x,
         x = nn.DepthwiseConv2D(
             kernel_size=kernel_size,
             strides=strides,
-            padding=ke_padding,
+            padding=padding_ke,
             use_bias=use_bias,
             name=name)(x)
     else:
@@ -288,7 +300,7 @@ def conv2d(x,
                 filters=out_group_channels,
                 kernel_size=kernel_size,
                 strides=strides,
-                padding=ke_padding,
+                padding=padding_ke,
                 dilation_rate=dilation,
                 use_bias=use_bias,
                 name=name + "/convgroup{}".format(gi + 1))(xi)

@@ -11,7 +11,7 @@ The following frameworks are used:
 - MXNet/Gluon ([info](https://mxnet.apache.org)),
 - PyTorch ([info](https://pytorch.org)),
 - Chainer ([info](https://chainer.org)),
-- Keras with MXNet backend ([info](https://github.com/awslabs/keras-apache-mxnet)),
+- Keras ([info](https://keras.io)),
 - TensorFlow ([info](https://www.tensorflow.org)).
 
 For each supported framework, there is a PIP-package containing pure models without auxiliary scripts. List of packages:

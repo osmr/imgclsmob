@@ -1,4 +1,4 @@
-# Large-scale image classification models on Keras with MXNet backend
+# Large-scale image classification models on Keras
 
 [![PyPI](https://img.shields.io/pypi/v/kerascv.svg)](https://pypi.python.org/pypi/kerascv)
 [![Downloads](https://pepy.tech/badge/kerascv)](https://pepy.tech/project/kerascv)
@@ -31,21 +31,22 @@ training/evaluating/converting models are in the [`imgclsmob`](https://github.co
 
 ## Installation
 
-To use the models in your project, simply install the `kerascv` package with `mxnet`:
+To use the models in your project, simply install the `kerascv` package with desired backend. For example for MXNet backend:
 ```
-pip install kerascv mxnet>=1.2.1
+pip install mxnet>=1.2.1 keras-mxnet kerascv
 ```
-To enable different hardware supports such as GPUs, check out [MXNet variants](https://pypi.org/project/mxnet).
-For example, you can install with CUDA-9.2 supported MXNet:
+Or if you prefer TensorFlow backend:
 ```
-pip install kerascv mxnet-cu92>=1.2.1
+pip install tensorflow kerascv
 ```
-After installation change the value of the `image_data_format` field to `channels_first` in the file
-`~/.keras/keras.json`. Also check that the `backend` field is set to `mxnet`. 
+To enable/disable different hardware supports, check out installation instruction for the corresponding backend.
+
+After installation check that the `backend` field is set to the correct value in the file `~/.keras/keras.json`. It is
+also preferable to set the value of the `image_data_format` field to `channels_first` in the case of using the MXNet backend.  
 
 ## Usage
 
-Example of using the pretrained ResNet-18 model:
+Example of using a pretrained ResNet-18 model (for `channels_first` data format):
 ```
 from kerascv.model_provider import get_model as kecv_get_model
 import numpy as np
@@ -58,6 +59,7 @@ y = net.predict(x)
 ## Pretrained models
 
 Some remarks:
+- All quality values are estimated with MXNet backend.
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet-1K dataset.
 - FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs.
 - Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to Keras.

@@ -32,25 +32,23 @@ training/evaluating/converting models are in the [`imgclsmob`](https://github.co
 
 ## Installation
 
-To use the models in your project, simply install the `tensorflowcv` package with `tensorflow-gpu`:
+To use the models in your project, simply install the `tensorflowcv` package with `tensorflow`:
 ```
-pip install tensorflowcv tensorflow-gpu>=1.11.0
+pip install tensorflowcv tensorflow>=1.11.0
 ```
 To enable/disable different hardware supports, check out TensorFlow installation [instructions](https://www.tensorflow.org).
 
-Note that the models use NCHW data format. The current version of TensorFlow cannot work with them on CPU.
-
 ## Usage
 
-Example of using the pretrained ResNet-18 model:
+Example of using a pretrained ResNet-18 model (with `channels_first` data format):
 ```
 from tensorflowcv.model_provider import get_model as tfcv_get_model
 from tensorflowcv.model_provider import init_variables_from_state_dict as tfcv_init_variables_from_state_dict
 import tensorflow as tf
 import numpy as np
 
-net = tfcv_get_model("resnet18", pretrained=True)
-x = tf.placeholder(dtype=tf.float32, shape=(None, 3, 224, 224), name='xx')
+net = tfcv_get_model("resnet18", pretrained=True, data_format="channels_first")
+x = tf.placeholder(dtype=tf.float32, shape=(None, 3, 224, 224), name="xx")
 y_net = net(x)
 
 with tf.Session() as sess:

@@ -113,27 +113,11 @@ def batchnorm(x,
             epsilon=epsilon,
             name=name)(x)
     else:
-        if K.backend() == "tensorflow":
-            import tensorflow as tf
-            x = nn.Lambda(lambda z: tf.layers.batch_normalization(
-                inputs=z,
-                axis=get_channel_axis(),
-                momentum=momentum,
-                epsilon=epsilon,
-                training=False,
-                name=name))(x)
-        else:
-            x = nn.BatchNormalization(
-                axis=get_channel_axis(),
-                momentum=momentum,
-                epsilon=epsilon,
-                name=name)(x)
-
-    # x = nn.BatchNormalization(
-        #     axis=get_channel_axis(),
-        #     momentum=momentum,
-        #     epsilon=epsilon,
-        #     name=name)(x)
+        x = nn.BatchNormalization(
+            axis=get_channel_axis(),
+            momentum=momentum,
+            epsilon=epsilon,
+            name=name)(x)
     return x
 
 

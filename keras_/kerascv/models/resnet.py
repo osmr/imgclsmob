@@ -618,6 +618,7 @@ def _test():
     import numpy as np
     import keras
 
+    keras.backend.set_learning_phase(0)
     pretrained = False
 
     models = [

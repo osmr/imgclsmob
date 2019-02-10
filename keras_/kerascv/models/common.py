@@ -116,7 +116,7 @@ def batchnorm(x,
         if K.backend() == "tensorflow":
             import tensorflow as tf
             x = nn.Lambda(lambda z: tf.layers.batch_normalization(
-                inputs=x,
+                inputs=z,
                 axis=get_channel_axis(),
                 momentum=momentum,
                 epsilon=epsilon,

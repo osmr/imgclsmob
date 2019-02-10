@@ -251,7 +251,10 @@ def prepare_model(model_name,
                   data_format="channels_last"):
     kwargs = {'pretrained': use_pretrained}
 
-    raw_net = get_model(model_name, **kwargs)
+    raw_net = get_model(
+        name=model_name,
+        data_format=data_format,
+        **kwargs)
     input_image_size = raw_net.in_size[0] if hasattr(raw_net, 'in_size') else 224
 
     net = ImageNetModel(

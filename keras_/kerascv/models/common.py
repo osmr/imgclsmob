@@ -256,11 +256,10 @@ def avgpool2d(x,
 
         if (strides[0] > 1) or (strides[1] > 1):
             x = nn.AvgPool2D(
-                inputs=x,
                 pool_size=1,
                 strides=strides,
                 padding="valid",
-                name=name + "/stride")
+                name=name + "/stride")(x)
         return x
 
     x = nn.AvgPool2D(

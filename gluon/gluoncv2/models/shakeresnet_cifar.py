@@ -19,16 +19,16 @@ class ShakeShake(mx.autograd.Function):
     """
 
     def forward(self, x1, x2):
-        if mx.autograd.is_training:
-            alpha = mx.nd.random.uniform(ctx=x1.context)
-            y = alpha * x1 + (1 - alpha) * x2
+        if mx.autograd.is_training():
+            alpha = mx.nd.random.uniform_like(x1.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]))
+            y = mx.nd.broadcast_mul(alpha, x1) + mx.nd.broadcast_mul(1 - alpha, x2)
         else:
             y = 0.5 * (x1 + x2)
         return y
 
     def backward(self, dy):
-        beta = mx.nd.random.uniform(ctx=dy.context)
-        return beta * dy, (1 - beta) * dy
+        beta = mx.nd.random.uniform_like(dy.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]))
+        return mx.nd.broadcast_mul(beta, dy), mx.nd.broadcast_mul(1 - beta, dy)
 
 
 class ShakeResUnit(HybridBlock):
@@ -78,7 +78,6 @@ class ShakeResUnit(HybridBlock):
                     bn_use_global_stats=bn_use_global_stats,
                     activation=None,
                     activate=False)
-            self.shake_shake = ShakeShake()
             self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
@@ -88,7 +87,7 @@ class ShakeResUnit(HybridBlock):
             identity = x
         x1 = self.branch1(x)
         x2 = self.branch2(x)
-        x = self.shake_shake(x1, x2) + identity
+        x = ShakeShake()(x1, x2) + identity
         x = self.activ(x)
         return x
 
@@ -294,12 +293,12 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != shakeresnet20_cifar10 or weight_count == 541082)
-        # assert (model != shakeresnet20_cifar100 or weight_count == 546932)
+        assert (model != shakeresnet20_cifar10 or weight_count == 541082)
+        assert (model != shakeresnet20_cifar100 or weight_count == 546932)
 
-        x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
+        x = mx.nd.zeros((14, 3, 32, 32), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, classes))
+        assert (y.shape == (14, classes))
 
 
 if __name__ == "__main__":

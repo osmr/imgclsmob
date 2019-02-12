@@ -9,7 +9,7 @@ __all__ = ['shufflenetv2', 'shufflenetv2_wd2', 'shufflenetv2_w1', 'shufflenetv2_
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, max_pool2d_ceil, channel_shuffle_lambda,\
+from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, maxpool2d, channel_shuffle_lambda,\
     se_block, batchnorm, is_channels_first, get_channel_axis, flatten
 
 
@@ -152,11 +152,12 @@ def shuffle_init_block(x,
         out_channels=out_channels,
         strides=2,
         name=name + "/conv")
-    x = max_pool2d_ceil(
+    x = maxpool2d(
         x=x,
         pool_size=3,
         strides=2,
-        padding="valid",
+        padding=0,
+        ceil_mode=True,
         name=name + "/pool")
     return x
 

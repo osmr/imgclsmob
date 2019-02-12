@@ -54,7 +54,7 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 
-from .models.shakeresnet_cifar import *
+from .models.shakeshakeresnet_cifar import *
 
 __all__ = ['get_model']
 

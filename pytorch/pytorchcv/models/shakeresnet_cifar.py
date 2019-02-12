@@ -1,9 +1,9 @@
 """
-    ShakeResNet for CIFAR, implemented in PyTorch.
+    ShakeShakeResNet for CIFAR, implemented in PyTorch.
     Original paper: 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 """
 
-__all__ = ['CIFARShakeResNet', 'shakeresnet20_cifar10', 'shakeresnet20_cifar100']
+__all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_cifar10', 'shakeshakeresnet20_cifar100']
 
 import os
 import torch
@@ -29,9 +29,9 @@ class ShakeShake(torch.autograd.Function):
         return beta * dy, (1 - beta) * dy, None
 
 
-class ShakeResUnit(nn.Module):
+class ShakeShakeResUnit(nn.Module):
     """
-    ShakeResNet unit with residual connection.
+    ShakeShakeResNet unit with residual connection.
 
     Parameters:
     ----------
@@ -49,7 +49,7 @@ class ShakeResUnit(nn.Module):
                  out_channels,
                  stride,
                  bottleneck):
-        super(ShakeResUnit, self).__init__()
+        super(ShakeShakeResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
         branch_class = ResBottleneck if bottleneck else ResBlock
 
@@ -88,9 +88,9 @@ class ShakeResUnit(nn.Module):
         return x
 
 
-class CIFARShakeResNet(nn.Module):
+class CIFARShakeShakeResNet(nn.Module):
     """
-    ResNet model for CIFAR from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ShakeShakeResNet model for CIFAR from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -114,7 +114,7 @@ class CIFARShakeResNet(nn.Module):
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
-        super(CIFARShakeResNet, self).__init__()
+        super(CIFARShakeShakeResNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
 
@@ -127,7 +127,7 @@ class CIFARShakeResNet(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), ShakeResUnit(
+                stage.add_module("unit{}".format(j + 1), ShakeShakeResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
@@ -158,15 +158,15 @@ class CIFARShakeResNet(nn.Module):
         return x
 
 
-def get_shakeresnet_cifar(classes,
-                          blocks,
-                          bottleneck,
-                          model_name=None,
-                          pretrained=False,
-                          root=os.path.join('~', '.torch', 'models'),
-                          **kwargs):
+def get_shakeshakeresnet_cifar(classes,
+                               blocks,
+                               bottleneck,
+                               model_name=None,
+                               pretrained=False,
+                               root=os.path.join('~', '.torch', 'models'),
+                               **kwargs):
     """
-    Create ShakeResNet model for CIFAR with specific parameters.
+    Create ShakeShakeResNet model for CIFAR with specific parameters.
 
     Parameters:
     ----------
@@ -200,7 +200,7 @@ def get_shakeresnet_cifar(classes,
     if bottleneck:
         channels = [[cij * 4 for cij in ci] for ci in channels]
 
-    net = CIFARShakeResNet(
+    net = CIFARShakeShakeResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -219,9 +219,9 @@ def get_shakeresnet_cifar(classes,
     return net
 
 
-def shakeresnet20_cifar10(classes=10, **kwargs):
+def shakeshakeresnet20_cifar10(classes=10, **kwargs):
     """
-    ShakeResNet-20 model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20 model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -232,13 +232,13 @@ def shakeresnet20_cifar10(classes=10, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_shakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="shakeresnet20_cifar10",
-                                 **kwargs)
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False,
+                                      model_name="shakeshakeresnet20_cifar10", **kwargs)
 
 
-def shakeresnet20_cifar100(classes=100, **kwargs):
+def shakeshakeresnet20_cifar100(classes=100, **kwargs):
     """
-    ShakeResNet-20 model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20 model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -249,8 +249,8 @@ def shakeresnet20_cifar100(classes=100, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_shakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="shakeresnet20_cifar100",
-                                 **kwargs)
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False,
+                                      model_name="shakeshakeresnet20_cifar100", **kwargs)
 
 
 def _calc_width(net):
@@ -269,8 +269,8 @@ def _test():
     pretrained = False
 
     models = [
-        (shakeresnet20_cifar10, 10),
-        (shakeresnet20_cifar100, 100),
+        (shakeshakeresnet20_cifar10, 10),
+        (shakeshakeresnet20_cifar100, 100),
     ]
 
     for model, num_classes in models:
@@ -281,8 +281,8 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != shakeresnet20_cifar10 or weight_count == 541082)
-        assert (model != shakeresnet20_cifar100 or weight_count == 546932)
+        assert (model != shakeshakeresnet20_cifar10 or weight_count == 541082)
+        assert (model != shakeshakeresnet20_cifar100 or weight_count == 546932)
 
         x = Variable(torch.randn(14, 3, 32, 32))
         y = net(x)

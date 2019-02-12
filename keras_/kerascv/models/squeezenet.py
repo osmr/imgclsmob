@@ -9,7 +9,7 @@ __all__ = ['squeezenet', 'squeezenet_v1_0', 'squeezenet_v1_1', 'squeezeresnet_v1
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import max_pool2d_ceil, conv2d, is_channels_first, get_channel_axis, flatten
+from .common import maxpool2d, conv2d, is_channels_first, get_channel_axis, flatten
 
 
 def fire_conv(x,
@@ -195,11 +195,11 @@ def squeezenet(channels,
         name="features/init_block")
     in_channels = init_block_channels
     for i, channels_per_stage in enumerate(channels):
-        x = max_pool2d_ceil(
+        x = maxpool2d(
             x=x,
             pool_size=3,
             strides=2,
-            padding="valid",
+            ceil_mode=True,
             name="features/pool{}".format(i + 1))
         for j, out_channels in enumerate(channels_per_stage):
             expand_channels = out_channels // 2

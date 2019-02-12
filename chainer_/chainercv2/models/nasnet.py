@@ -177,7 +177,7 @@ def process_with_padding(x,
         Input tensor.
     process : function, default (lambda x: x)
         a decorated layer
-    pad_width : tuple of int, default (0, 0, 0, 0, 1, 0, 1, 0)
+    pad_width : tuple of tuple of int, default ((0, 0), (0, 0), (1, 0), (1, 0))
         Whether the layer uses a bias vector.
 
     Returns

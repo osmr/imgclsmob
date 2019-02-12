@@ -3,7 +3,8 @@
     Original paper: 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 """
 
-__all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_cifar10', 'shakeshakeresnet20_cifar100']
+__all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_2x16d_cifar10', 'shakeshakeresnet20_2x16d_cifar100',
+           'shakeshakeresnet26_2x32d_cifar10', 'shakeshakeresnet26_2x32d_cifar100']
 
 import os
 import chainer
@@ -14,7 +15,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, SimpleSequential
+from .common import conv1x1, conv3x3_block, SimpleSequential
 from .resnet import ResBlock, ResBottleneck
 
 
@@ -41,6 +42,54 @@ class ShakeShake(chainer.function.Function):
         for i in range(len(beta)):
             beta[i] = xp.random.rand()
         return beta * dy, (xp.ones(dy.shape, dtype=dy.dtype) - beta) * dy
+
+
+class ShakeShakeShortcut(Chain):
+    """
+    ShakeShakeResNet shortcut.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride):
+        super(ShakeShakeShortcut, self).__init__()
+        assert (out_channels % 2 == 0)
+        mid_channels = out_channels // 2
+
+        with self.init_scope():
+            self.pool = partial(
+                F.average_pooling_2d,
+                ksize=1,
+                stride=stride)
+            self.conv1 = conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.conv2 = conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5)
+
+    def __call__(self, x):
+        x1 = self.pool(x)
+        x1 = self.conv1(x1)
+        x2 = x[:, :, :-1, :-1]
+        x2 = F.pad(x2, pad_width=((0, 0), (0, 0), (1, 0), (1, 0)), mode="constant", constant_values=0)
+        x2 = self.pool(x2)
+        x2 = self.conv2(x2)
+        x = F.concat((x1, x2), axis=1)
+        x = self.bn(x)
+        return x
 
 
 class ShakeShakeResUnit(Chain):
@@ -77,17 +126,15 @@ class ShakeShakeResUnit(Chain):
                 out_channels=out_channels,
                 stride=stride)
             if self.resize_identity:
-                self.identity_conv = conv1x1_block(
+                self.identity_branch = ShakeShakeShortcut(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    stride=stride,
-                    activation=None,
-                    activate=False)
+                    stride=stride)
             self.activ = F.relu
 
     def __call__(self, x):
         if self.resize_identity:
-            identity = self.identity_conv(x)
+            identity = self.identity_branch(x)
         else:
             identity = x
         x1 = self.branch1(x)
@@ -169,6 +216,7 @@ class CIFARShakeShakeResNet(Chain):
 def get_shakeshakeresnet_cifar(classes,
                                blocks,
                                bottleneck,
+                               first_stage_channels=16,
                                model_name=None,
                                pretrained=False,
                                root=os.path.join('~', '.chainer', 'models'),
@@ -184,6 +232,8 @@ def get_shakeshakeresnet_cifar(classes,
         Number of blocks.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
+    first_stage_channels : int, default 16
+        Number of output channels for the first stage.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -200,8 +250,10 @@ def get_shakeshakeresnet_cifar(classes,
         assert ((blocks - 2) % 6 == 0)
         layers = [(blocks - 2) // 6] * 3
 
-    channels_per_layers = [16, 32, 64]
     init_block_channels = 16
+
+    from functools import reduce
+    channels_per_layers = reduce(lambda x, y: x + [x[-1] * 2], range(2), [first_stage_channels])
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
@@ -228,9 +280,9 @@ def get_shakeshakeresnet_cifar(classes,
     return net
 
 
-def shakeshakeresnet20_cifar10(classes=10, **kwargs):
+def shakeshakeresnet20_2x16d_cifar10(classes=10, **kwargs):
     """
-    ShakeShakeResNet-20 model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20-2x16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -241,13 +293,13 @@ def shakeshakeresnet20_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False,
-                                      model_name="shakeshakeresnet20_cifar10", **kwargs)
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, first_stage_channels=16,
+                                      model_name="shakeshakeresnet20_2x16d_cifar10", **kwargs)
 
 
-def shakeshakeresnet20_cifar100(classes=100, **kwargs):
+def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
     """
-    ShakeShakeResNet-20 model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20-2x16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -258,8 +310,42 @@ def shakeshakeresnet20_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False,
-                                      model_name="shakeshakeresnet20_cifar100", **kwargs)
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, first_stage_channels=16,
+                                      model_name="shakeshakeresnet20_2x16d_cifar100", **kwargs)
+
+
+def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
+    """
+    ShakeShakeResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=26, bottleneck=False, first_stage_channels=32,
+                                      model_name="shakeshakeresnet26_2x32d_cifar10", **kwargs)
+
+
+def shakeshakeresnet26_2x32d_cifar100(classes=100, **kwargs):
+    """
+    ShakeShakeResNet-26-2x32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=26, bottleneck=False, first_stage_channels=32,
+                                      model_name="shakeshakeresnet26_2x32d_cifar100", **kwargs)
 
 
 def _test():
@@ -271,8 +357,10 @@ def _test():
     pretrained = False
 
     models = [
-        (shakeshakeresnet20_cifar10, 10),
-        (shakeshakeresnet20_cifar100, 100),
+        (shakeshakeresnet20_2x16d_cifar10, 10),
+        (shakeshakeresnet20_2x16d_cifar100, 100),
+        (shakeshakeresnet26_2x32d_cifar10, 10),
+        (shakeshakeresnet26_2x32d_cifar100, 100),
     ]
 
     for model, classes in models:
@@ -280,8 +368,10 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != shakeshakeresnet20_cifar10 or weight_count == 541082)
-        assert (model != shakeshakeresnet20_cifar100 or weight_count == 546932)
+        assert (model != shakeshakeresnet20_2x16d_cifar10 or weight_count == 541082)
+        assert (model != shakeshakeresnet20_2x16d_cifar100 or weight_count == 546932)
+        assert (model != shakeshakeresnet26_2x32d_cifar10 or weight_count == 2923162)
+        assert (model != shakeshakeresnet26_2x32d_cifar100 or weight_count == 2934772)
 
         x = np.zeros((14, 3, 32, 32), np.float32)
         y = net(x)

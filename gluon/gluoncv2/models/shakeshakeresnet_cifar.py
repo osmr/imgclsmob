@@ -3,8 +3,8 @@
     Original paper: 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 """
 
-__all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_16d_cifar10', 'shakeshakeresnet20_16d_cifar100',
-           'shakeshakeresnet26_32d_cifar10', 'shakeshakeresnet26_32d_cifar100']
+__all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_2x16d_cifar10', 'shakeshakeresnet20_2x16d_cifar100',
+           'shakeshakeresnet26_2x32d_cifar10', 'shakeshakeresnet26_2x32d_cifar100']
 
 import os
 import mxnet as mx
@@ -283,9 +283,9 @@ def get_shakeshakeresnet_cifar(classes,
     return net
 
 
-def shakeshakeresnet20_16d_cifar10(classes=10, **kwargs):
+def shakeshakeresnet20_2x16d_cifar10(classes=10, **kwargs):
     """
-    ShakeShakeResNet-20-16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20-2x16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -299,12 +299,12 @@ def shakeshakeresnet20_16d_cifar10(classes=10, **kwargs):
         Location for keeping the model parameters.
     """
     return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, first_stage_channels=16,
-                                      model_name="shakeshakeresnet20_16d_cifar10", **kwargs)
+                                      model_name="shakeshakeresnet20_2x16d_cifar10", **kwargs)
 
 
-def shakeshakeresnet20_16d_cifar100(classes=100, **kwargs):
+def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
     """
-    ShakeShakeResNet-20-16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-20-2x16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -318,12 +318,12 @@ def shakeshakeresnet20_16d_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, first_stage_channels=16,
-                                      model_name="shakeshakeresnet20_16d_cifar100", **kwargs)
+                                      model_name="shakeshakeresnet20_2x16d_cifar100", **kwargs)
 
 
-def shakeshakeresnet26_32d_cifar10(classes=10, **kwargs):
+def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
     """
-    ShakeShakeResNet-26-32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -337,12 +337,12 @@ def shakeshakeresnet26_32d_cifar10(classes=10, **kwargs):
         Location for keeping the model parameters.
     """
     return get_shakeshakeresnet_cifar(classes=classes, blocks=26, bottleneck=False, first_stage_channels=32,
-                                      model_name="shakeshakeresnet26_32d_cifar10", **kwargs)
+                                      model_name="shakeshakeresnet26_2x32d_cifar10", **kwargs)
 
 
-def shakeshakeresnet26_32d_cifar100(classes=100, **kwargs):
+def shakeshakeresnet26_2x32d_cifar100(classes=100, **kwargs):
     """
-    ShakeShakeResNet-26-32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    ShakeShakeResNet-26-2x32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -356,7 +356,7 @@ def shakeshakeresnet26_32d_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_shakeshakeresnet_cifar(classes=classes, blocks=26, bottleneck=False, first_stage_channels=32,
-                                      model_name="shakeshakeresnet26_32d_cifar100", **kwargs)
+                                      model_name="shakeshakeresnet26_2x32d_cifar100", **kwargs)
 
 
 def _test():
@@ -366,10 +366,10 @@ def _test():
     pretrained = False
 
     models = [
-        (shakeshakeresnet20_16d_cifar10, 10),
-        (shakeshakeresnet20_16d_cifar100, 100),
-        (shakeshakeresnet26_32d_cifar10, 10),
-        (shakeshakeresnet26_32d_cifar100, 100),
+        (shakeshakeresnet20_2x16d_cifar10, 10),
+        (shakeshakeresnet20_2x16d_cifar100, 100),
+        (shakeshakeresnet26_2x32d_cifar10, 10),
+        (shakeshakeresnet26_2x32d_cifar100, 100),
     ]
 
     for model, classes in models:
@@ -388,10 +388,10 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != shakeshakeresnet20_16d_cifar10 or weight_count == 541082)
-        assert (model != shakeshakeresnet20_16d_cifar100 or weight_count == 546932)
-        assert (model != shakeshakeresnet26_32d_cifar10 or weight_count == 2923162)
-        assert (model != shakeshakeresnet26_32d_cifar100 or weight_count == 2934772)
+        assert (model != shakeshakeresnet20_2x16d_cifar10 or weight_count == 541082)
+        assert (model != shakeshakeresnet20_2x16d_cifar100 or weight_count == 546932)
+        assert (model != shakeshakeresnet26_2x32d_cifar10 or weight_count == 2923162)
+        assert (model != shakeshakeresnet26_2x32d_cifar100 or weight_count == 2934772)
 
         x = mx.nd.zeros((14, 3, 32, 32), ctx=ctx)
         y = net(x)

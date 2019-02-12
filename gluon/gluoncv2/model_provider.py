@@ -418,10 +418,10 @@ _models = {
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
 
-    'shakeshakeresnet20_16d_cifar10': shakeshakeresnet20_16d_cifar10,
-    'shakeshakeresnet20_16d_cifar100': shakeshakeresnet20_16d_cifar100,
-    'shakeshakeresnet26_32d_cifar10': shakeshakeresnet26_32d_cifar10,
-    'shakeshakeresnet26_32d_cifar100': shakeshakeresnet26_32d_cifar100,
+    'shakeshakeresnet20_2x16d_cifar10': shakeshakeresnet20_2x16d_cifar10,
+    'shakeshakeresnet20_2x16d_cifar100': shakeshakeresnet20_2x16d_cifar100,
+    'shakeshakeresnet26_2x32d_cifar10': shakeshakeresnet26_2x32d_cifar10,
+    'shakeshakeresnet26_2x32d_cifar100': shakeshakeresnet26_2x32d_cifar100,
 }
 
 

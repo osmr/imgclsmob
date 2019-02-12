@@ -18,7 +18,7 @@ class ShakeShake(chainer.function.Function):
 
     def forward(self, inputs):
         x1, x2 = inputs
-        xp = cuda.get_array_module(x1)  # Get numpy(x=n) or cupy(x=c) array module
+        xp = cuda.get_array_module(x1)
         alpha = xp.ones(x1.shape, dtype=x1.dtype) * 0.5
 
         if configuration.config.train:
@@ -28,14 +28,14 @@ class ShakeShake(chainer.function.Function):
         return x1 * alpha + x2 * (xp.ones(x1.shape, dtype=x1.dtype) - alpha),
 
     def backward(self, inputs, grad_outputs):
-        gx, = grad_outputs
-        xp = cuda.get_array_module(gx)
-        beta = xp.empty(gx.shape, dtype=gx.dtype)
+        dy, = grad_outputs
+        xp = cuda.get_array_module(dy)
+        beta = xp.empty(dy.shape, dtype=dy.dtype)
 
         for i in range(len(beta)):
             beta[i] = xp.random.rand()
 
-        return gx * beta, gx * (xp.ones(gx.shape, dtype=gx.dtype) - beta)
+        return beta * dy, (xp.ones(dy.shape, dtype=dy.dtype) - beta) * dy
 
 
 def shake_shake(x1, x2):

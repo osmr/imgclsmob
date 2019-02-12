@@ -54,6 +54,8 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 
+from .models.shakeresnet_cifar import *
+
 __all__ = ['get_model']
 
 
@@ -382,6 +384,9 @@ _models = {
     'wrn28_10_cifar100': wrn28_10_cifar100,
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
+
+    'shakeresnet20_cifar10': shakeresnet20_cifar10,
+    'shakeresnet20_cifar100': shakeresnet20_cifar100,
 }
 
 

@@ -61,7 +61,9 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 
+from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
+from .models.shakedropresnet_cifar import *
 
 __all__ = ['get_model']
 
@@ -418,10 +420,16 @@ _models = {
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
 
+    'resdropresnet20_cifar10': resdropresnet20_cifar10,
+    'resdropresnet20_cifar100': resdropresnet20_cifar100,
+
     'shakeshakeresnet20_2x16d_cifar10': shakeshakeresnet20_2x16d_cifar10,
     'shakeshakeresnet20_2x16d_cifar100': shakeshakeresnet20_2x16d_cifar100,
     'shakeshakeresnet26_2x32d_cifar10': shakeshakeresnet26_2x32d_cifar10,
     'shakeshakeresnet26_2x32d_cifar100': shakeshakeresnet26_2x32d_cifar100,
+
+    'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
+    'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
 }
 
 

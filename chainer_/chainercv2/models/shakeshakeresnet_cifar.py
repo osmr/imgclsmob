@@ -1,5 +1,5 @@
 """
-    ShakeShakeResNet for CIFAR, implemented in Chainer.
+    Shake-Shake-ResNet for CIFAR, implemented in Chainer.
     Original paper: 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 """
 
@@ -8,8 +8,7 @@ __all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_2x16d_cifar10', 'shakesh
 
 import os
 import chainer
-from chainer import cuda
-from chainer import configuration
+from chainer import backend
 import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
@@ -26,8 +25,8 @@ class ShakeShake(chainer.function.Function):
 
     def forward(self, inputs):
         x1, x2 = inputs
-        if configuration.config.train:
-            xp = cuda.get_array_module(x1)
+        if chainer.config.train:
+            xp = backend.get_array_module(x1)
             alpha = xp.empty((x1.shape[0], 1, 1, 1), dtype=x1.dtype)
             for i in range(len(alpha)):
                 alpha[i] = xp.random.rand()
@@ -37,7 +36,7 @@ class ShakeShake(chainer.function.Function):
 
     def backward(self, inputs, grad_outputs):
         dy, = grad_outputs
-        xp = cuda.get_array_module(dy)
+        xp = backend.get_array_module(dy)
         beta = xp.empty((dy.shape[0], 1, 1, 1), dtype=dy.dtype)
         for i in range(len(beta)):
             beta[i] = xp.random.rand()
@@ -46,7 +45,7 @@ class ShakeShake(chainer.function.Function):
 
 class ShakeShakeShortcut(Chain):
     """
-    ShakeShakeResNet shortcut.
+    Shake-Shake-ResNet shortcut.
 
     Parameters:
     ----------
@@ -94,7 +93,7 @@ class ShakeShakeShortcut(Chain):
 
 class ShakeShakeResUnit(Chain):
     """
-    ShakeShakeResNet unit with residual connection.
+    Shake-Shake-ResNet unit with residual connection.
 
     Parameters:
     ----------
@@ -146,7 +145,7 @@ class ShakeShakeResUnit(Chain):
 
 class CIFARShakeShakeResNet(Chain):
     """
-    ShakeShakeResNet model for CIFAR from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    Shake-Shake-ResNet model for CIFAR from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -222,7 +221,7 @@ def get_shakeshakeresnet_cifar(classes,
                                root=os.path.join('~', '.chainer', 'models'),
                                **kwargs):
     """
-    Create ShakeShakeResNet model for CIFAR with specific parameters.
+    Create Shake-Shake-ResNet model for CIFAR with specific parameters.
 
     Parameters:
     ----------
@@ -282,7 +281,7 @@ def get_shakeshakeresnet_cifar(classes,
 
 def shakeshakeresnet20_2x16d_cifar10(classes=10, **kwargs):
     """
-    ShakeShakeResNet-20-2x16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    Shake-Shake-ResNet-20-2x16d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -299,7 +298,7 @@ def shakeshakeresnet20_2x16d_cifar10(classes=10, **kwargs):
 
 def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
     """
-    ShakeShakeResNet-20-2x16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    Shake-Shake-ResNet-20-2x16d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -316,7 +315,7 @@ def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
 
 def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
     """
-    ShakeShakeResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    Shake-Shake-ResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -333,7 +332,7 @@ def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
 
 def shakeshakeresnet26_2x32d_cifar100(classes=100, **kwargs):
     """
-    ShakeShakeResNet-26-2x32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+    Shake-Shake-ResNet-26-2x32d model for CIFAR-100 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 
     Parameters:
     ----------
@@ -352,7 +351,7 @@ def _test():
     import numpy as np
     import chainer
 
-    chainer.global_config.train = True
+    chainer.global_config.train = False
 
     pretrained = False
 

@@ -11,8 +11,8 @@ import os
 from inspect import isfunction
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import ReLU6, conv1x1_block, conv3x3_block
-from resnet import ResInitBlock
+from .common import ReLU6, conv1x1_block, conv3x3_block
+from .resnet import ResInitBlock
 
 
 class ShaConvBlock(HybridBlock):

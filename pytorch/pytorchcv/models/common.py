@@ -126,7 +126,6 @@ class ConvBlock(nn.Module):
     activate : bool, default True
         Whether activate the convolution block.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,

@@ -20,6 +20,7 @@ from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
+from .models.sharesnet import *
 from .models.densenet import *
 from .models.condensenet import *
 from .models.sparsenet import *
@@ -208,6 +209,15 @@ _models = {
 
     'diracnet18v2': diracnet18v2,
     'diracnet34v2': diracnet34v2,
+
+    'sharesnet18': sharesnet18,
+    'sharesnet34': sharesnet34,
+    'sharesnet50': sharesnet50,
+    'sharesnet50b': sharesnet50b,
+    'sharesnet101': sharesnet101,
+    'sharesnet101b': sharesnet101b,
+    'sharesnet152': sharesnet152,
+    'sharesnet152b': sharesnet152b,
 
     'densenet121': densenet121,
     'densenet161': densenet161,

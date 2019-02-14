@@ -24,6 +24,7 @@ Scripts for training/evaluating/converting models are in the [`imgclsmob`](https
 - ResAttNet (['Residual Attention Network for Image Classification'](https://arxiv.org/abs/1704.06904))
 - PyramidNet (['Deep Pyramidal Residual Networks'](https://arxiv.org/abs/1610.02915))
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
+- ShaResNet (['ShaResNet: reducing residual network parameter number by sharing weights'](https://arxiv.org/abs/1702.08782))
 - CRU-Net (['Sharing Residual Units Through Collective Tensor Factorization To Improve Deep Neural Networks'](https://www.ijcai.org/proceedings/2018/88))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
 - CondenseNet (['CondenseNet: An Efficient DenseNet using Learned Group Convolutions'](https://arxiv.org/abs/1711.09224))

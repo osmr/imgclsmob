@@ -1,21 +1,163 @@
 """
-    ResNet, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ShaResNet, implemented in Gluon.
+    Original paper: 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
-           'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b', 'ResBlock', 'ResBottleneck', 'ResUnit', 'ResInitBlock']
+__all__ = ['ShaResNet', 'sharesnet18', 'sharesnet34', 'sharesnet50', 'sharesnet50b', 'sharesnet101', 'sharesnet101b',
+           'sharesnet152', 'sharesnet152b']
 
 import os
+from inspect import isfunction
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1_block, conv3x3_block, conv7x7_block
+from common import ReLU6, conv1x1_block, conv3x3_block
+from resnet import ResInitBlock
 
 
-class ResBlock(HybridBlock):
+class ShaConvBlock(HybridBlock):
     """
-    Simple ResNet block for residual path in ResNet unit.
+    Shared convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activation : function or str or None, default nn.Activation('relu')
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    shared_conv : HybridBlock, default None
+        Shared convolution layer.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 bn_use_global_stats=False,
+                 activation=(lambda: nn.Activation("relu")),
+                 activate=True,
+                 shared_conv=None,
+                 **kwargs):
+        super(ShaConvBlock, self).__init__(**kwargs)
+        self.activate = activate
+
+        with self.name_scope():
+            if shared_conv is None:
+                self.conv = nn.Conv2D(
+                    channels=out_channels,
+                    kernel_size=kernel_size,
+                    strides=strides,
+                    padding=padding,
+                    dilation=dilation,
+                    groups=groups,
+                    use_bias=use_bias,
+                    in_channels=in_channels)
+            else:
+                self.conv = shared_conv
+            self.bn = nn.BatchNorm(
+                in_channels=out_channels,
+                use_global_stats=bn_use_global_stats)
+            if self.activate:
+                assert (activation is not None)
+                if isfunction(activation):
+                    self.activ = activation()
+                elif isinstance(activation, str):
+                    if activation == "relu6":
+                        self.activ = ReLU6()
+                    else:
+                        self.activ = nn.Activation(activation)
+                else:
+                    self.activ = activation
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def sha_conv3x3_block(in_channels,
+                      out_channels,
+                      strides=1,
+                      padding=1,
+                      dilation=1,
+                      groups=1,
+                      use_bias=False,
+                      bn_use_global_stats=False,
+                      activation=(lambda: nn.Activation("relu")),
+                      activate=True,
+                      shared_conv=None,
+                      **kwargs):
+    """
+    3x3 version of the shared convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activation : function or str or None, default nn.Activation('relu')
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    shared_conv : HybridBlock, default None
+        Shared convolution layer.
+    """
+    return ShaConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        use_bias=use_bias,
+        bn_use_global_stats=bn_use_global_stats,
+        activation=activation,
+        activate=activate,
+        shared_conv=shared_conv,
+        **kwargs)
+
+
+class ShaResBlock(HybridBlock):
+    """
+    Simple ShaResNet block for residual path in ShaResNet unit.
 
     Parameters:
     ----------
@@ -27,26 +169,30 @@ class ResBlock(HybridBlock):
         Strides of the convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    shared_conv : HybridBlock, default None
+        Shared convolution layer.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  bn_use_global_stats,
+                 shared_conv=None,
                  **kwargs):
-        super(ResBlock, self).__init__(**kwargs)
+        super(ShaResBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
+            self.conv2 = sha_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None,
-                activate=False)
+                activate=False,
+                shared_conv=shared_conv)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -54,9 +200,9 @@ class ResBlock(HybridBlock):
         return x
 
 
-class ResBottleneck(HybridBlock):
+class ShaResBottleneck(HybridBlock):
     """
-    ResNet bottleneck block for residual path in ResNet unit.
+    ShaResNet bottleneck block for residual path in ShaResNet unit.
 
     Parameters:
     ----------
@@ -68,10 +214,12 @@ class ResBottleneck(HybridBlock):
         Strides of the convolution.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    conv1_stride : bool, default False
-        Whether to use stride in the first or the second convolution layer of the block.
     bottleneck_factor : int, default 4
         Bottleneck factor.
+    conv1_stride : bool, default False
+        Whether to use stride in the first or the second convolution layer of the block.
+    shared_conv : HybridBlock, default None
+        Shared convolution layer.
     """
     def __init__(self,
                  in_channels,
@@ -80,8 +228,10 @@ class ResBottleneck(HybridBlock):
                  bn_use_global_stats=False,
                  conv1_stride=False,
                  bottleneck_factor=4,
+                 shared_conv=None,
                  **kwargs):
-        super(ResBottleneck, self).__init__(**kwargs)
+        super(ShaResBottleneck, self).__init__(**kwargs)
+        assert (conv1_stride or not ((strides > 1) and (shared_conv is not None)))
         mid_channels = out_channels // bottleneck_factor
 
         with self.name_scope():
@@ -90,11 +240,12 @@ class ResBottleneck(HybridBlock):
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
+            self.conv2 = sha_conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                shared_conv=shared_conv)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -109,9 +260,9 @@ class ResBottleneck(HybridBlock):
         return x
 
 
-class ResUnit(HybridBlock):
+class ShaResUnit(HybridBlock):
     """
-    ResNet unit with residual connection.
+    ShaResNet unit.
 
     Parameters:
     ----------
@@ -127,6 +278,8 @@ class ResUnit(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
+    shared_conv : HybridBlock, default None
+        Shared convolution layer.
     """
     def __init__(self,
                  in_channels,
@@ -135,31 +288,33 @@ class ResUnit(HybridBlock):
                  bn_use_global_stats,
                  bottleneck,
                  conv1_stride,
+                 shared_conv=None,
                  **kwargs):
-        super(ResUnit, self).__init__(**kwargs)
+        super(ShaResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
             if bottleneck:
-                self.body = ResBottleneck(
+                self.body = ShaResBottleneck(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    conv1_stride=conv1_stride)
+                    conv1_stride=conv1_stride,
+                    shared_conv=shared_conv)
             else:
-                self.body = ResBlock(
+                self.body = ShaResBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
-                    bn_use_global_stats=bn_use_global_stats)
+                    bn_use_global_stats=bn_use_global_stats,
+                    shared_conv=shared_conv)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    activation=None,
                     activate=False)
             self.activ = nn.Activation("relu")
 
@@ -174,45 +329,10 @@ class ResUnit(HybridBlock):
         return x
 
 
-class ResInitBlock(HybridBlock):
+class ShaResNet(HybridBlock):
     """
-    ResNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_use_global_stats=False,
-                 **kwargs):
-        super(ResInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = conv7x7_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=2,
-                bn_use_global_stats=bn_use_global_stats)
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
-class ResNet(HybridBlock):
-    """
-    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ShaResNet model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -244,7 +364,7 @@ class ResNet(HybridBlock):
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(ResNet, self).__init__(**kwargs)
+        super(ShaResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -257,16 +377,21 @@ class ResNet(HybridBlock):
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                shared_conv = None
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResUnit(
+                        unit = ShaResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
                             bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
+                            conv1_stride=conv1_stride,
+                            shared_conv=shared_conv)
+                        if (shared_conv is None) and not (bottleneck and not conv1_stride and strides > 1):
+                            shared_conv = unit.body.conv2.conv
+                        stage.add(unit)
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -285,16 +410,15 @@ class ResNet(HybridBlock):
         return x
 
 
-def get_resnet(blocks,
-               conv1_stride=True,
-               width_scale=1.0,
-               model_name=None,
-               pretrained=False,
-               ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
-               **kwargs):
+def get_sharesnet(blocks,
+                  conv1_stride=True,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
+                  **kwargs):
     """
-    Create ResNet model with specific parameters.
+    Create ShaResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -302,8 +426,6 @@ def get_resnet(blocks,
         Number of blocks.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
-    width_scale : float, default 1.0
-        Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -314,15 +436,7 @@ def get_resnet(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 10:
-        layers = [1, 1, 1, 1]
-    elif blocks == 12:
-        layers = [2, 1, 1, 1]
-    elif blocks == 14:
-        layers = [2, 2, 1, 1]
-    elif blocks == 16:
-        layers = [2, 2, 2, 1]
-    elif blocks == 18:
+    if blocks == 18:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -335,7 +449,7 @@ def get_resnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported ShaResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
 
@@ -348,11 +462,7 @@ def get_resnet(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    if width_scale != 1.0:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
-        init_block_channels = int(init_block_channels * width_scale)
-
-    net = ResNet(
+    net = ShaResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -372,10 +482,10 @@ def get_resnet(blocks,
     return net
 
 
-def resnet10(**kwargs):
+def sharesnet18(**kwargs):
     """
-    ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    ShaResNet-18 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -386,13 +496,13 @@ def resnet10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
+    return get_sharesnet(blocks=18, model_name="sharesnet18", **kwargs)
 
 
-def resnet12(**kwargs):
+def sharesnet34(**kwargs):
     """
-    ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    ShaResNet-34 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -403,13 +513,13 @@ def resnet12(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
+    return get_sharesnet(blocks=34, model_name="sharesnet34", **kwargs)
 
 
-def resnet14(**kwargs):
+def sharesnet50(**kwargs):
     """
-    ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    ShaResNet-50 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -420,13 +530,13 @@ def resnet14(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+    return get_sharesnet(blocks=50, model_name="sharesnet50", **kwargs)
 
 
-def resnet16(**kwargs):
+def sharesnet50b(**kwargs):
     """
-    ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    ShaResNet-50b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
+    network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -437,13 +547,13 @@ def resnet16(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
+    return get_sharesnet(blocks=50, conv1_stride=False, model_name="sharesnet50b", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def sharesnet101(**kwargs):
     """
-    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    ShaResNet-101 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -454,13 +564,13 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_sharesnet(blocks=101, model_name="sharesnet101", **kwargs)
 
 
-def resnet18_wd2(**kwargs):
+def sharesnet101b(**kwargs):
     """
-    ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    ShaResNet-101b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
+    network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -471,13 +581,13 @@ def resnet18_wd2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
+    return get_sharesnet(blocks=101, conv1_stride=False, model_name="sharesnet101b", **kwargs)
 
 
-def resnet18_w3d4(**kwargs):
+def sharesnet152(**kwargs):
     """
-    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    ShaResNet-152 model from 'ShaResNet: reducing residual network parameter number by sharing weights,'
+    https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -488,12 +598,13 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+    return get_sharesnet(blocks=152, model_name="sharesnet152", **kwargs)
 
 
-def resnet18(**kwargs):
+def sharesnet152b(**kwargs):
     """
-    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    ShaResNet-152b model with stride at the second convolution in bottleneck block from 'ShaResNet: reducing residual
+    network parameter number by sharing weights,' https://arxiv.org/abs/1702.08782.
 
     Parameters:
     ----------
@@ -504,156 +615,7 @@ def resnet18(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
-
-
-def resnet34(**kwargs):
-    """
-    ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
-
-
-def resnet50(**kwargs):
-    """
-    ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
-
-
-def resnet50b(**kwargs):
-    """
-    ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
-
-
-def resnet101(**kwargs):
-    """
-    ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
-
-
-def resnet101b(**kwargs):
-    """
-    ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
-
-
-def resnet152(**kwargs):
-    """
-    ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
-
-
-def resnet152b(**kwargs):
-    """
-    ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
-
-
-def resnet200(**kwargs):
-    """
-    ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
-
-
-def resnet200b(**kwargs):
-    """
-    ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
+    return get_sharesnet(blocks=152, conv1_stride=False, model_name="sharesnet152b", **kwargs)
 
 
 def _test():
@@ -663,24 +625,14 @@ def _test():
     pretrained = False
 
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnet16,
-        resnet18_wd4,
-        resnet18_wd2,
-        resnet18_w3d4,
-
-        resnet18,
-        resnet34,
-        resnet50,
-        resnet50b,
-        resnet101,
-        resnet101b,
-        resnet152,
-        resnet152b,
-        resnet200,
-        resnet200b,
+        sharesnet18,
+        sharesnet34,
+        sharesnet50,
+        sharesnet50b,
+        sharesnet101,
+        sharesnet101b,
+        sharesnet152,
+        sharesnet152b,
     ]
 
     for model in models:
@@ -699,23 +651,14 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet10 or weight_count == 5418792)
-        assert (model != resnet12 or weight_count == 5492776)
-        assert (model != resnet14 or weight_count == 5788200)
-        assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 831096)
-        assert (model != resnet18_wd2 or weight_count == 3055880)
-        assert (model != resnet18_w3d4 or weight_count == 6675352)
-        assert (model != resnet18 or weight_count == 11689512)
-        assert (model != resnet34 or weight_count == 21797672)
-        assert (model != resnet50 or weight_count == 25557032)
-        assert (model != resnet50b or weight_count == 25557032)
-        assert (model != resnet101 or weight_count == 44549160)
-        assert (model != resnet101b or weight_count == 44549160)
-        assert (model != resnet152 or weight_count == 60192808)
-        assert (model != resnet152b or weight_count == 60192808)
-        assert (model != resnet200 or weight_count == 64673832)
-        assert (model != resnet200b or weight_count == 64673832)
+        assert (model != sharesnet18 or weight_count == 8556072)
+        assert (model != sharesnet34 or weight_count == 13613864)
+        assert (model != sharesnet50 or weight_count == 17373224)
+        assert (model != sharesnet50b or weight_count == 20469800)
+        assert (model != sharesnet101 or weight_count == 26338344)
+        assert (model != sharesnet101b or weight_count == 29434920)
+        assert (model != sharesnet152 or weight_count == 33724456)
+        assert (model != sharesnet152b or weight_count == 36821032)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

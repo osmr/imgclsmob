@@ -73,10 +73,10 @@ class ShakeDropResUnit(HybridBlock):
         super(ShakeDropResUnit, self).__init__(**kwargs)
         self.life_prob = life_prob
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
-        branch_class = ResBottleneck if bottleneck else ResBlock
+        body_class = ResBottleneck if bottleneck else ResBlock
 
         with self.name_scope():
-            self.body = branch_class(
+            self.body = body_class(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,

@@ -269,9 +269,9 @@ def get_resnet(blocks,
     ----------
     blocks : int
         Number of blocks.
-    conv1_stride : bool
+    conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
-    width_scale : float
+    width_scale : float, default 1.0
         Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.

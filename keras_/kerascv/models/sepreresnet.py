@@ -163,7 +163,7 @@ def get_sepreresnet(blocks,
     ----------
     blocks : int
         Number of blocks.
-    conv1_stride : bool
+    conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     model_name : str or None, default None
         Model name for loading pretrained model.

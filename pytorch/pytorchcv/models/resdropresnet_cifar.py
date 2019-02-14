@@ -39,9 +39,9 @@ class ResDropResUnit(nn.Module):
         super(ResDropResUnit, self).__init__()
         self.life_prob = life_prob
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
-        branch_class = ResBottleneck if bottleneck else ResBlock
+        body_class = ResBottleneck if bottleneck else ResBlock
 
-        self.body = branch_class(
+        self.body = body_class(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride)

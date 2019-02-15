@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
-from oth_expandergraphlayer import ExpanderLinear, ExpanderConv2d
+from oth_expandergraphlayer import ExpanderConv2d
 
 
-__all__ = ['DenseNet', 'densenet121', 'densenet169', 'densenet201', 'densenet161']
+__all__ = ['oth_xdensenet121', 'oth_xdensenet169', 'oth_xdensenet201', 'oth_xdensenet161']
 
 
 model_urls = {
@@ -17,56 +17,56 @@ model_urls = {
 }
 
 
-def densenet121(expandSize, pretrained=False, **kwargs):
+def oth_xdensenet121(expandSize=2, pretrained=False, **kwargs):
     r"""Densenet-121 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = DenseNet(expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 24, 16),
+    model = DenseNet(expandSize=expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 24, 16),
                      **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['densenet121']))
     return model
 
 
-def densenet169(expandSize, pretrained=False, **kwargs):
+def oth_xdensenet169(expandSize=2, pretrained=False, **kwargs):
     r"""Densenet-169 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = DenseNet(expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 32, 32),
+    model = DenseNet(expandSize=expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 32, 32),
                      **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['densenet169']))
     return model
 
 
-def densenet201(expandSize, pretrained=False, **kwargs):
+def oth_xdensenet201(expandSize=2, pretrained=False, **kwargs):
     r"""Densenet-201 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = DenseNet(expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 48, 32),
+    model = DenseNet(expandSize=expandSize, num_init_features=64, growth_rate=32, block_config=(6, 12, 48, 32),
                      **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['densenet201']))
     return model
 
 
-def densenet161(expandSize, pretrained=False, **kwargs):
+def oth_xdensenet161(expandSize=2, pretrained=False, **kwargs):
     r"""Densenet-161 model from
     `"Densely Connected Convolutional Networks" <https://arxiv.org/pdf/1608.06993.pdf>`
 
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
     """
-    model = DenseNet(expandSize, num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24),
+    model = DenseNet(expandSize=expandSize, num_init_features=96, growth_rate=48, block_config=(6, 12, 36, 24),
                      **kwargs)
     if pretrained:
         model.load_state_dict(model_zoo.load_url(model_urls['densenet161']))
@@ -76,14 +76,14 @@ def densenet161(expandSize, pretrained=False, **kwargs):
 class _DenseLayer(nn.Sequential):
     def __init__(self,  num_input_features, growth_rate, bn_size, drop_rate,expandsize,):
         super(_DenseLayer, self).__init__()
-        self.add_module('norm.1', nn.BatchNorm2d(num_input_features)),
-        self.add_module('relu.1', nn.ReLU(inplace=True)),
+        self.add_module('norm_1', nn.BatchNorm2d(num_input_features)),
+        self.add_module('relu_1', nn.ReLU(inplace=True)),
         #print(num_input_features,bn_size ,growth_rate)
-        self.add_module('conv.1', ExpanderConv2d(num_input_features, bn_size *
+        self.add_module('conv_1', ExpanderConv2d(num_input_features, bn_size *
                         growth_rate, kernel_size=1, stride=1, expandSize=(num_input_features//expandsize))),
-        self.add_module('norm.2', nn.BatchNorm2d(bn_size * growth_rate)),
-        self.add_module('relu.2', nn.ReLU(inplace=True)),
-        self.add_module('conv.2', ExpanderConv2d(bn_size * growth_rate, growth_rate,
+        self.add_module('norm_2', nn.BatchNorm2d(bn_size * growth_rate)),
+        self.add_module('relu_2', nn.ReLU(inplace=True)),
+        self.add_module('conv_2', ExpanderConv2d(bn_size * growth_rate, growth_rate,
                         kernel_size=3, stride=1, padding=1, expandSize=((bn_size * growth_rate)//expandsize))),
         self.drop_rate = drop_rate
 
@@ -162,3 +162,47 @@ class DenseNet(nn.Module):
         out = F.avg_pool2d(out, kernel_size=7).view(features.size(0), -1)
         out = self.classifier(out)
         return out
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_xdensenet121,
+        oth_xdensenet161,
+        oth_xdensenet169,
+        oth_xdensenet201,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_xdensenet121 or weight_count == 7978856)
+        assert (model != oth_xdensenet161 or weight_count == 28681000)
+        assert (model != oth_xdensenet169 or weight_count == 14149480)
+        assert (model != oth_xdensenet201 or weight_count == 20013928)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

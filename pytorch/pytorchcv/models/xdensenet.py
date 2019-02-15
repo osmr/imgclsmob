@@ -4,108 +4,278 @@
     https://arxiv.org/abs/1711.08757.
 """
 
-__all__ = ['XDenseNet', 'xdensenet121', 'xdensenet161', 'xdensenet169', 'xdensenet201', 'XDenseUnit',
-           'XDensTransitionBlock']
+__all__ = ['XDenseNet', 'xdensenet121', 'xdensenet161', 'xdensenet169', 'xdensenet201']
 
 import os
+import math
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.nn.init as init
-from pytorch.pytorchcv.models.common import pre_conv1x1_block, pre_conv3x3_block
-from pytorch.pytorchcv.models.preresnet import PreResInitBlock, PreResActivation
+from .preresnet import PreResInitBlock, PreResActivation
+from .densenet import TransitionBlock
 
 
-class MulExpander(torch.autograd.Function):
-
-    def __init__(self, mask):
-        super(MulExpander, self).__init__()
-        self.mask = mask
-
-    def forward(self, weight):
-        extend_weights = weight.clone()
-        extend_weights.mul_(self.mask.data)
-        return extend_weights
-
-    def backward(self, grad_output):
-        grad_weight = grad_output.clone()
-        grad_weight.mul_(self.mask.data)
-        return grad_weight
+# class MulMask(torch.autograd.Function):
+#
+#     def __init__(self, mask):
+#         super(MulMask, self).__init__()
+#         self.mask = mask
+#
+#     def forward(self, weight):
+#         return weight.mul(self.mask)
+#
+#     def backward(self, grad_output):
+#         return grad_output.mul(self.mask)
 
 
-class execute2DConvolution(nn.Module):
+class XConv2d(nn.Module):
+    """
+    X-Convolution layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 0
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    expand_size : int, default 2
+        Size of expansion.
+    """
     def __init__(self,
-                 mask,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
                  stride=1,
                  padding=0,
                  dilation=1,
-                 groups=1):
-        super(execute2DConvolution, self).__init__()
+                 groups=1,
+                 bias=False,
+                 expand_size=2):
+        super(XConv2d, self).__init__()
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+        if isinstance(stride, int):
+            stride = (stride, stride)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+        if isinstance(dilation, int):
+            dilation = (dilation, dilation)
+
+        if in_channels % groups != 0:
+            raise ValueError('in_channels must be divisible by groups')
+        if out_channels % groups != 0:
+            raise ValueError('out_channels must be divisible by groups')
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
         self.dilation = dilation
         self.groups = groups
-        self.mask = mask
 
-    def forward(self, dataIn, weightIn):
-        fpWeights = MulExpander(self.mask)(weightIn)
-        return torch.nn.functional.conv2d(
-            dataIn,
-            fpWeights,
-            bias=None,
+        grouped_in_channels = in_channels // groups
+        self.weight = torch.nn.Parameter(torch.Tensor(out_channels, grouped_in_channels, *kernel_size))
+        if bias:
+            self.bias = torch.nn.Parameter(torch.Tensor(out_channels))
+        else:
+            self.register_parameter('bias', None)
+
+        mask = torch.zeros((out_channels, grouped_in_channels)) if out_channels <= grouped_in_channels else\
+            torch.zeros((grouped_in_channels, out_channels))
+        for i in range(mask.shape[0]):
+            x = torch.randperm(mask.shape[1])
+            for j in range(expand_size):
+                mask[i][x[j]] = 1
+        if out_channels > grouped_in_channels:
+            mask = mask.t()
+        mask = mask.unsqueeze(2).unsqueeze(3).repeat(1, 1, *kernel_size)
+
+        self.mask = nn.Parameter(mask, requires_grad=False)
+
+        # self.mul_mask = MulMask(self.mask.data)
+
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+        if self.bias is not None:
+            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
+            bound = 1 / math.sqrt(fan_in)
+            init.uniform_(self.bias, -bound, bound)
+
+    def forward(self, input):
+        # weight = self.mul_mask(self.weight.data)
+        weight = self.weight.data.mul(self.mask.data)
+        return F.conv2d(
+            input=input,
+            weight=weight,
+            bias=self.bias,
             stride=self.stride,
             padding=self.padding,
             dilation=self.dilation,
             groups=self.groups)
 
 
-class ExpanderConv2d(nn.Module):
+class PreXConvBlock(nn.Module):
+    """
+    X-Convolution block with Batch normalization and ReLU pre-activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
+    activate : bool, default True
+        Whether activate the convolution block.
+    expand_size : int, default 2
+        Size of expansion.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 expandSize,
-                 stride=1,
-                 padding=0,
-                 inDil=1,
-                 groups=1,
-                 mode='random'):
-        super(ExpanderConv2d, self).__init__()
+                 stride,
+                 padding,
+                 dilation=1,
+                 bias=False,
+                 return_preact=False,
+                 activate=True,
+                 expand_size=2):
+        super(PreXConvBlock, self).__init__()
+        self.return_preact = return_preact
+        self.activate = activate
 
-        # Initialize all parameters that the convolution function needs to know
-        self.kernel_size = kernel_size
-        self.conStride = stride
-        self.conPad = padding
-        self.outPad = 0
-        self.conDil = inDil
-        self.conTrans = False
-        self.conGroups = groups
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        if self.activate:
+            self.activ = nn.ReLU(inplace=True)
+        self.conv = XConv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            bias=bias,
+            expand_size=expand_size)
 
-        n = kernel_size * kernel_size * out_channels
-        # initialize the weights and the bias as well as the
-        self.fpWeight = torch.nn.Parameter(
-            data=torch.Tensor(out_channels, in_channels, kernel_size, kernel_size),
-            requires_grad=True)
-        nn.init.kaiming_normal(self.fpWeight.data, mode='fan_out')
-
-        self.mask = torch.zeros(out_channels, (in_channels), 1, 1)
-        #print(inWCout,inWCin,expandSize)
-        if in_channels > out_channels:
-            for i in range(out_channels):
-                x = torch.randperm(in_channels)
-                for j in range(expandSize):
-                    self.mask[i][x[j]][0][0] = 1
+    def forward(self, x):
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        if self.return_preact:
+            x_pre_activ = x
+        x = self.conv(x)
+        if self.return_preact:
+            return x, x_pre_activ
         else:
-            for i in range(in_channels):
-                x = torch.randperm(out_channels)
-                for j in range(expandSize):
-                    self.mask[x[j]][i][0][0] = 1
+            return x
 
-        self.mask = self.mask.repeat(1, 1, kernel_size, kernel_size)
-        self.mask =  nn.Parameter(self.mask.cuda())
-        self.mask.requires_grad = False
 
-    def forward(self, dataInput):
-        return execute2DConvolution(self.mask, self.conStride, self.conPad,self.conDil, self.conGroups)(dataInput, self.fpWeight)
+def pre_xconv1x1_block(in_channels,
+                       out_channels,
+                       stride=1,
+                       bias=False,
+                       return_preact=False,
+                       activate=True,
+                       expand_size=2):
+    """
+    1x1 version of the pre-activated x-convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
+    expand_size : int, default 2
+        Size of expansion.
+    """
+    return PreXConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=0,
+        bias=bias,
+        return_preact=return_preact,
+        activate=activate,
+        expand_size=expand_size)
+
+
+def pre_xconv3x3_block(in_channels,
+                       out_channels,
+                       stride=1,
+                       padding=1,
+                       dilation=1,
+                       return_preact=False,
+                       activate=True,
+                       expand_size=2):
+    """
+    3x3 version of the pre-activated x-convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
+    expand_size : int, default 2
+        Size of expansion.
+    """
+    return PreXConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        return_preact=return_preact,
+        activate=activate,
+        expand_size=expand_size)
 
 
 class XDenseUnit(nn.Module):
@@ -120,23 +290,28 @@ class XDenseUnit(nn.Module):
         Number of output channels.
     dropout_rate : bool
         Parameter of Dropout layer. Faction of the input units to drop.
+    expand_size : int
+        Size of expansion.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dropout_rate):
+                 dropout_rate,
+                 expand_size):
         super(XDenseUnit, self).__init__()
         self.use_dropout = (dropout_rate != 0.0)
         bn_size = 4
         inc_channels = out_channels - in_channels
         mid_channels = inc_channels * bn_size
 
-        self.conv1 = pre_conv1x1_block(
+        self.conv1 = pre_xconv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels)
-        self.conv2 = pre_conv3x3_block(
+            out_channels=mid_channels,
+            expand_size=expand_size)
+        self.conv2 = pre_xconv3x3_block(
             in_channels=mid_channels,
-            out_channels=inc_channels)
+            out_channels=inc_channels,
+            expand_size=expand_size)
         if self.use_dropout:
             self.dropout = nn.Dropout(p=dropout_rate)
 
@@ -147,36 +322,6 @@ class XDenseUnit(nn.Module):
         if self.use_dropout:
             x = self.dropout(x)
         x = torch.cat((identity, x), dim=1)
-        return x
-
-
-class XDensTransitionBlock(nn.Module):
-    """
-    X-DenseNet's auxiliary block, which can be treated as the initial part of the DenseNet unit, triggered only in the
-    first unit of each stage.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(XDensTransitionBlock, self).__init__()
-        self.conv = pre_conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
-        self.pool = nn.AvgPool2d(
-            kernel_size=2,
-            stride=2,
-            padding=0)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
         return x
 
 
@@ -193,6 +338,8 @@ class XDenseNet(nn.Module):
         Number of output channels for the initial unit.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
+    expand_size : int, default 2
+        Size of expansion.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -204,6 +351,7 @@ class XDenseNet(nn.Module):
                  channels,
                  init_block_channels,
                  dropout_rate=0.0,
+                 expand_size=2,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -219,7 +367,7 @@ class XDenseNet(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             if i != 0:
-                stage.add_module("trans{}".format(i + 1), XDensTransitionBlock(
+                stage.add_module("trans{}".format(i + 1), TransitionBlock(
                     in_channels=in_channels,
                     out_channels=(in_channels // 2)))
                 in_channels = in_channels // 2
@@ -227,7 +375,8 @@ class XDenseNet(nn.Module):
                 stage.add_module("unit{}".format(j + 1), XDenseUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    dropout_rate=dropout_rate))
+                    dropout_rate=dropout_rate,
+                    expand_size=expand_size))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))

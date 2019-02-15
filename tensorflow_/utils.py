@@ -37,7 +37,7 @@ def prepare_model(model_name,
         dtype=tf.float32,
         shape=(None, 3, input_image_size, input_image_size),
         name='xx')
-    y_net = net(x)
+    y_net = net(x, data_format="channels_first")
 
     if use_pretrained or pretrained_model_file_path:
         from .tensorflowcv.model_provider import init_variables_from_state_dict

@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.model_zoo as model_zoo
 from collections import OrderedDict
-from oth_expandergraphlayer import ExpanderConv2d
+from .oth_expandergraphlayer import ExpanderConv2d
 
 
 __all__ = ['oth_xdensenet121', 'oth_xdensenet169', 'oth_xdensenet201', 'oth_xdensenet161']

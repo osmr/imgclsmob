@@ -183,7 +183,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('wrn16_10_cifar10', '0293', '4ac60015e3b287580d11e605793b3426e8184137', 'v0.0.166'),
     ('wrn16_10_cifar100', '1895', 'd6e852788e29532c8a12bb39617a2e81aba2483f', 'v0.0.204'),
     ('wrn28_10_cifar10', '0239', 'f8a24941ca542f78eda2d192f461b1bac0600d27', 'v0.0.166'),
-    ('wrn40_8_cifar10', '0237', '3f56f24a07be7155fb143cc4360755d564e3761a', 'v0.0.166')]}
+    ('wrn40_8_cifar10', '0237', '3f56f24a07be7155fb143cc4360755d564e3761a', 'v0.0.166'),
+    ('shakeshakeresnet20_2x16d_cifar10', '0515', 'e2f524b5196951f48495973a087135ca974ec327', 'v0.0.215')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

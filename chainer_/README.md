@@ -179,6 +179,7 @@ Some remarks:
 | 1.0-SqNxt-23v5 | 40.96 | 17.86 | 921,816 | 285.82M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.172/sqnxt23v5_w1-1786-8b24c6e3.npz.log)) |
 | 1.5-SqNxt-23 | 34.71 | 13.44 | 1,511,824 | 552.39M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.210/sqnxt23_w3d2-1344-a5c3b21e.npz.log)) |
 | 1.5-SqNxt-23v5 | 33.79 | 12.92 | 1,953,616 | 550.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.212/sqnxt23v5_w3d2-1292-c997e279.npz.log)) |
+| 2.0-SqNxt-23v5 | 29.58 | 10.43 | 3,366,344 | 897.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.216/sqnxt23v5_w2-1043-e9e849cd.npz.log)) |
 | ShuffleNet x0.25 (g=1) | 62.04 | 36.81 | 209,746 | 12.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.134/shufflenet_g1_wd4-3681-15d3e787.npz.log)) |
 | ShuffleNet x0.25 (g=3) | 61.30 | 36.16 | 305,902 | 13.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.135/shufflenet_g3_wd4-3616-064f7f7f.npz.log)) |
 | ShuffleNet x0.5 (g=1) | 46.24 | 22.35 | 534,484 | 41.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.174/shufflenet_g1_wd2-2235-5d83cc28.npz.log)) |

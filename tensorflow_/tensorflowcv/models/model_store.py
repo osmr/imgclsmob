@@ -66,6 +66,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('sqnxt23v5_w1', '2077', 'ebc0c53dc0c39e72eb620b06c2eb07ba451fb28d', 'v0.0.172'),
     ('sqnxt23_w3d2', '1509', '8fbdcd6dde6a3fb2f8e8aab4d1eb828123becfb5', 'v0.0.210'),
     ('sqnxt23v5_w3d2', '1539', 'ae14d7b8685b23fcffeba96038e31255a7c718fa', 'v0.0.212'),
+    ('sqnxt23v5_w2', '1213', 'd12c9b338ec5a374a3e22fc9a48146197fa82ac6', 'v0.0.216'),
     ('shufflenet_g1_wd4', '3680', '3d9856357041fb69f4a6ddf0208e7821605487a9', 'v0.0.134'),
     ('shufflenet_g3_wd4', '3617', '8f00e642cfc2b7ab8b1a770513bb46190c3bcb7d', 'v0.0.135'),
     ('shufflenet_g1_wd2', '2231', 'd5356e3b04c4a30d568755807e996821098d8aae', 'v0.0.174'),

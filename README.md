@@ -69,7 +69,7 @@ Some remarks:
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | PyramidNet | A+B+C+ | A+B+C+ | A+B+C+ | - | - | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |
 | DiracNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
-| ShaResNet | A | A | - | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |
+| ShaResNet | A | A | A | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |
 | CRU-Net | A+ | - | - | - | - | [link](https://www.ijcai.org/proceedings/2018/88) | [link](https://github.com/cypw/CRU-Net) | 2018 |
 | DenseNet | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](https://arxiv.org/abs/1608.06993) | [link](https://github.com/liuzhuang13/DenseNet) | 2016 |
 | CondenseNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1711.09224) | [link](https://github.com/ShichenLiu/CondenseNet) | 2017 |
@@ -109,5 +109,5 @@ Some remarks:
 | PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
 | NIN | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
 | ResDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1603.09382) | [link](https://github.com/yueatsprograms/Stochastic_Depth) | 2016 |
-| Shake-Shake-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
+| Shake-Shake-ResNet | B+C | B+C | B+C | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |

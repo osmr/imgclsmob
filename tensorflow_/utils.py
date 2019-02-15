@@ -28,7 +28,7 @@ def load_model_params(net,
 def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained}
+    kwargs = {"pretrained": use_pretrained, "data_format": "channels_first"}
 
     net = get_model(model_name, **kwargs)
     input_image_size = net.in_size[0] if hasattr(net, 'in_size') else 224
@@ -37,7 +37,7 @@ def prepare_model(model_name,
         dtype=tf.float32,
         shape=(None, 3, input_image_size, input_image_size),
         name='xx')
-    y_net = net(x, data_format="channels_first")
+    y_net = net(x)
 
     if use_pretrained or pretrained_model_file_path:
         from .tensorflowcv.model_provider import init_variables_from_state_dict

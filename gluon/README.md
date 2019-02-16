@@ -276,6 +276,7 @@ Some remarks:
 | WRN-28-10 | 2.39 | 640 | 36,479,194 | 5,246.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn28_10_cifar10-0239-16f3c8a2.params.log)) |
 | WRN-40-8 | 2.37 | 512 | 35,748,314 | 5,176.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn40_8_cifar10-0237-3b81d261.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 5.15 | 64 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.215/shakeshakeresnet20_2x16d_cifar10-0515-a7b8a2f7.params.log)) |
+| Shake-Shake-ResNet-26-2x32d | 3.17 | 64 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.217/shakeshakeresnet26_2x32d_cifar10-0317-21e60e62.params.log)) |
 
 ### CIFAR-100
 

@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1711.08757.
 """
 
-__all__ = ['XDenseNet', 'xdensenet121', 'xdensenet161', 'xdensenet169', 'xdensenet201']
+__all__ = ['XDenseNet', 'xdensenet121_2', 'xdensenet161_2', 'xdensenet169_2', 'xdensenet201_2']
 
 import os
 import math
@@ -51,8 +51,8 @@ class XConv2d(nn.Module):
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    expand_size : int, default 2
-        Size of expansion.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     """
     def __init__(self,
                  in_channels,
@@ -63,8 +63,10 @@ class XConv2d(nn.Module):
                  dilation=1,
                  groups=1,
                  bias=False,
-                 expand_size=2):
+                 expand_ratio=2):
         super(XConv2d, self).__init__()
+        expand_size = in_channels // expand_ratio
+
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
         if isinstance(stride, int):
@@ -153,8 +155,8 @@ class PreXConvBlock(nn.Module):
         Whether return pre-activation. It's used by PreResNet.
     activate : bool, default True
         Whether activate the convolution block.
-    expand_size : int, default 2
-        Size of expansion.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     """
     def __init__(self,
                  in_channels,
@@ -166,7 +168,7 @@ class PreXConvBlock(nn.Module):
                  bias=False,
                  return_preact=False,
                  activate=True,
-                 expand_size=2):
+                 expand_ratio=2):
         super(PreXConvBlock, self).__init__()
         self.return_preact = return_preact
         self.activate = activate
@@ -182,7 +184,7 @@ class PreXConvBlock(nn.Module):
             padding=padding,
             dilation=dilation,
             bias=bias,
-            expand_size=expand_size)
+            expand_ratio=expand_ratio)
 
     def forward(self, x):
         x = self.bn(x)
@@ -203,7 +205,7 @@ def pre_xconv1x1_block(in_channels,
                        bias=False,
                        return_preact=False,
                        activate=True,
-                       expand_size=2):
+                       expand_ratio=2):
     """
     1x1 version of the pre-activated x-convolution block.
 
@@ -221,8 +223,8 @@ def pre_xconv1x1_block(in_channels,
         Whether return pre-activation.
     activate : bool, default True
         Whether activate the convolution block.
-    expand_size : int, default 2
-        Size of expansion.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     """
     return PreXConvBlock(
         in_channels=in_channels,
@@ -233,7 +235,7 @@ def pre_xconv1x1_block(in_channels,
         bias=bias,
         return_preact=return_preact,
         activate=activate,
-        expand_size=expand_size)
+        expand_ratio=expand_ratio)
 
 
 def pre_xconv3x3_block(in_channels,
@@ -243,7 +245,7 @@ def pre_xconv3x3_block(in_channels,
                        dilation=1,
                        return_preact=False,
                        activate=True,
-                       expand_size=2):
+                       expand_ratio=2):
     """
     3x3 version of the pre-activated x-convolution block.
 
@@ -263,8 +265,8 @@ def pre_xconv3x3_block(in_channels,
         Whether return pre-activation.
     activate : bool, default True
         Whether activate the convolution block.
-    expand_size : int, default 2
-        Size of expansion.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     """
     return PreXConvBlock(
         in_channels=in_channels,
@@ -275,7 +277,7 @@ def pre_xconv3x3_block(in_channels,
         dilation=dilation,
         return_preact=return_preact,
         activate=activate,
-        expand_size=expand_size)
+        expand_ratio=expand_ratio)
 
 
 class XDenseUnit(nn.Module):
@@ -290,14 +292,14 @@ class XDenseUnit(nn.Module):
         Number of output channels.
     dropout_rate : bool
         Parameter of Dropout layer. Faction of the input units to drop.
-    expand_size : int
-        Size of expansion.
+    expand_ratio : int
+        Ratio of expansion.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  dropout_rate,
-                 expand_size):
+                 expand_ratio):
         super(XDenseUnit, self).__init__()
         self.use_dropout = (dropout_rate != 0.0)
         bn_size = 4
@@ -307,11 +309,11 @@ class XDenseUnit(nn.Module):
         self.conv1 = pre_xconv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            expand_size=expand_size)
+            expand_ratio=expand_ratio)
         self.conv2 = pre_xconv3x3_block(
             in_channels=mid_channels,
             out_channels=inc_channels,
-            expand_size=expand_size)
+            expand_ratio=expand_ratio)
         if self.use_dropout:
             self.dropout = nn.Dropout(p=dropout_rate)
 
@@ -338,8 +340,8 @@ class XDenseNet(nn.Module):
         Number of output channels for the initial unit.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
-    expand_size : int, default 2
-        Size of expansion.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -351,7 +353,7 @@ class XDenseNet(nn.Module):
                  channels,
                  init_block_channels,
                  dropout_rate=0.0,
-                 expand_size=2,
+                 expand_ratio=2,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -376,7 +378,7 @@ class XDenseNet(nn.Module):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     dropout_rate=dropout_rate,
-                    expand_size=expand_size))
+                    expand_ratio=expand_ratio))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
@@ -405,6 +407,7 @@ class XDenseNet(nn.Module):
 
 
 def get_xdensenet(blocks,
+                  expand_ratio=2,
                   model_name=None,
                   pretrained=False,
                   root=os.path.join('~', '.torch', 'models'),
@@ -416,6 +419,8 @@ def get_xdensenet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    expand_ratio : int, default 2
+        Ratio of expansion.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -455,6 +460,7 @@ def get_xdensenet(blocks,
     net = XDenseNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        expand_ratio=expand_ratio,
         **kwargs)
 
     if pretrained:
@@ -469,9 +475,9 @@ def get_xdensenet(blocks,
     return net
 
 
-def xdensenet121(**kwargs):
+def xdensenet121_2(**kwargs):
     """
-    X-DenseNet-121 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
+    X-DenseNet-121-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -481,12 +487,12 @@ def xdensenet121(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_xdensenet(blocks=121, model_name="xdensenet121", **kwargs)
+    return get_xdensenet(blocks=121, model_name="xdensenet121_2", **kwargs)
 
 
-def xdensenet161(**kwargs):
+def xdensenet161_2(**kwargs):
     """
-    X-DenseNet-161 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
+    X-DenseNet-161-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -496,12 +502,12 @@ def xdensenet161(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_xdensenet(blocks=161, model_name="xdensenet161", **kwargs)
+    return get_xdensenet(blocks=161, model_name="xdensenet161_2", **kwargs)
 
 
-def xdensenet169(**kwargs):
+def xdensenet169_2(**kwargs):
     """
-    X-DenseNet-169 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
+    X-DenseNet-169-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -511,12 +517,12 @@ def xdensenet169(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_xdensenet(blocks=169, model_name="xdensenet169", **kwargs)
+    return get_xdensenet(blocks=169, model_name="xdensenet169_2", **kwargs)
 
 
-def xdensenet201(**kwargs):
+def xdensenet201_2(**kwargs):
     """
-    X-DenseNet-201 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
+    X-DenseNet-201-2 model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -526,7 +532,7 @@ def xdensenet201(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_xdensenet(blocks=201, model_name="xdensenet201", **kwargs)
+    return get_xdensenet(blocks=201, model_name="xdensenet201_2", **kwargs)
 
 
 def _calc_width(net):
@@ -545,10 +551,10 @@ def _test():
     pretrained = False
 
     models = [
-        xdensenet121,
-        xdensenet161,
-        xdensenet169,
-        xdensenet201,
+        xdensenet121_2,
+        xdensenet161_2,
+        xdensenet169_2,
+        xdensenet201_2,
     ]
 
     for model in models:
@@ -559,10 +565,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != xdensenet121 or weight_count == 7978856)
-        assert (model != xdensenet161 or weight_count == 28681000)
-        assert (model != xdensenet169 or weight_count == 14149480)
-        assert (model != xdensenet201 or weight_count == 20013928)
+        assert (model != xdensenet121_2 or weight_count == 7978856)
+        assert (model != xdensenet161_2 or weight_count == 28681000)
+        assert (model != xdensenet169_2 or weight_count == 14149480)
+        assert (model != xdensenet201_2 or weight_count == 20013928)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

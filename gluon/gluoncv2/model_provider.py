@@ -412,6 +412,8 @@ _models = {
 
     'densenet40_k12_cifar10': densenet40_k12_cifar10,
     'densenet40_k12_cifar100': densenet40_k12_cifar100,
+    'densenet40_k24_bc_cifar10': densenet40_k24_bc_cifar10,
+    'densenet40_k24_bc_cifar100': densenet40_k24_bc_cifar100,
     'densenet100_k12_cifar10': densenet100_k12_cifar10,
     'densenet100_k12_cifar100': densenet100_k12_cifar100,
     'densenet100_k24_cifar10': densenet100_k24_cifar10,

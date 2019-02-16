@@ -148,7 +148,7 @@ class ExpanderConv2d(torch.nn.Module):
                     self.mask[x[j]][i][0][0] = 1
 
         self.mask = self.mask.repeat(1, 1, kernel_size, kernel_size)
-        self.mask =  nn.Parameter(self.mask.cuda())
+        self.mask =  nn.Parameter(self.mask)
         self.mask.requires_grad = False
 
     def forward(self, dataInput):

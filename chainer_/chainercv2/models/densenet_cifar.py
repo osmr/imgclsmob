@@ -3,11 +3,11 @@
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['CIFARDenseNet', 'densenet40_k12_cifar10', 'densenet40_k12_cifar100', 'densenet100_k12_cifar10',
-           'densenet100_k12_cifar100', 'densenet100_k24_cifar10', 'densenet100_k24_cifar100',
-           'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar100',
-           'densenet190_k40_bc_cifar10', 'densenet190_k40_bc_cifar100', 'densenet250_k24_bc_cifar10',
-           'densenet250_k24_bc_cifar100']
+__all__ = ['CIFARDenseNet', 'densenet40_k12_cifar10', 'densenet40_k12_cifar100', 'densenet40_k24_bc_cifar10',
+           'densenet40_k24_bc_cifar100', 'densenet100_k12_cifar10', 'densenet100_k12_cifar100',
+           'densenet100_k24_cifar10', 'densenet100_k24_cifar100', 'densenet100_k12_bc_cifar10',
+           'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar100', 'densenet190_k40_bc_cifar10',
+           'densenet190_k40_bc_cifar100', 'densenet250_k24_bc_cifar10', 'densenet250_k24_bc_cifar100']
 
 import os
 import chainer.functions as F
@@ -239,6 +239,42 @@ def densenet40_k12_cifar100(classes=100, **kwargs):
                               model_name="densenet40_k12_cifar100", **kwargs)
 
 
+def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
+    """
+    DenseNet-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
+                              model_name="densenet40_k24_bc_cifar10", **kwargs)
+
+
+def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
+    """
+    DenseNet-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
+                              model_name="densenet40_k24_bc_cifar100", **kwargs)
+
+
 def densenet100_k12_cifar10(classes=10, **kwargs):
     """
     DenseNet-100 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
@@ -430,6 +466,8 @@ def _test():
     models = [
         (densenet40_k12_cifar10, 10),
         (densenet40_k12_cifar100, 100),
+        (densenet40_k24_bc_cifar10, 10),
+        (densenet40_k24_bc_cifar100, 100),
         (densenet100_k12_cifar10, 10),
         (densenet100_k12_cifar100, 100),
         (densenet100_k24_cifar10, 10),
@@ -449,6 +487,8 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != densenet40_k12_cifar10 or weight_count == 599050)
         assert (model != densenet40_k12_cifar100 or weight_count == 622360)
+        assert (model != densenet40_k24_bc_cifar10 or weight_count == 690346)
+        assert (model != densenet40_k24_bc_cifar100 or weight_count == 714196)
         assert (model != densenet100_k12_cifar10 or weight_count == 4068490)
         assert (model != densenet100_k12_cifar100 or weight_count == 4129600)
         assert (model != densenet100_k24_cifar10 or weight_count == 16114138)

@@ -239,39 +239,39 @@ def densenet40_k12_cifar100(classes=100, **kwargs):
                               model_name="densenet40_k12_cifar100", **kwargs)
 
 
-def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
+def densenet40_k24_bc_cifar10(classes=10, **kwargs):
     """
     DenseNet-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=24, bottleneck=True,
                               model_name="densenet40_k24_bc_cifar10", **kwargs)
 
 
-def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
+def densenet40_k24_bc_cifar100(classes=100, **kwargs):
     """
     DenseNet-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:
     ----------
-    num_classes : int, default 100
+    classes : int, default 100
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_densenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=24, bottleneck=True,
                               model_name="densenet40_k24_bc_cifar100", **kwargs)
 
 

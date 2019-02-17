@@ -238,7 +238,7 @@ def densenet40_k12_cifar100(num_classes=100, **kwargs):
 
 def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
     """
-    DenseNet-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
+    DenseNet-BC-40 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:
@@ -256,7 +256,7 @@ def densenet40_k24_bc_cifar10(num_classes=10, **kwargs):
 
 def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
     """
-    DenseNet-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
+    DenseNet-BC-40 (k=24) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:
@@ -274,7 +274,7 @@ def densenet40_k24_bc_cifar100(num_classes=100, **kwargs):
 
 def densenet40_k36_bc_cifar10(num_classes=10, **kwargs):
     """
-    DenseNet-40 (k=36) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
+    DenseNet-BC-40 (k=36) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:
@@ -292,7 +292,7 @@ def densenet40_k36_bc_cifar10(num_classes=10, **kwargs):
 
 def densenet40_k36_bc_cifar100(num_classes=100, **kwargs):
     """
-    DenseNet-40 (k=36) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
+    DenseNet-BC-40 (k=36) model for CIFAR-100 from 'Densely Connected Convolutional Networks,'
     https://arxiv.org/abs/1608.06993.
 
     Parameters:

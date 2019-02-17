@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1711.08757.
 """
 
-__all__ = ['XDenseNet', 'xdensenet121_2', 'xdensenet161_2', 'xdensenet169_2', 'xdensenet201_2']
+__all__ = ['XDenseNet', 'xdensenet121_2', 'xdensenet161_2', 'xdensenet169_2', 'xdensenet201_2', 'pre_xconv3x3_block',
+           'XDenseUnit']
 
 import os
 import mxnet as mx

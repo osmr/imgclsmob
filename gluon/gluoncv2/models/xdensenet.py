@@ -1,5 +1,5 @@
 """
-    X-DenseNet, implemented in PyTorch.
+    X-DenseNet, implemented in Gluon.
     Original paper: 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 """
@@ -7,29 +7,41 @@
 __all__ = ['XDenseNet', 'xdensenet121_2', 'xdensenet161_2', 'xdensenet169_2', 'xdensenet201_2']
 
 import os
-import math
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
+import mxnet as mx
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .preresnet import PreResInitBlock, PreResActivation
 from .densenet import TransitionBlock
 
 
-# class MulMask(torch.autograd.Function):
-#
-#     def __init__(self, mask):
-#         super(MulMask, self).__init__()
-#         self.mask = mask
-#
-#     def forward(self, weight):
-#         return weight.mul(self.mask)
-#
-#     def backward(self, grad_output):
-#         return grad_output.mul(self.mask)
+@mx.init.register
+class XMaskInit(mx.init.Initializer):
+    """
+    Returns an initializer performing "X-Net" initialization for masks.
+
+    Parameters:
+    ----------
+    expand_ratio : int
+        Ratio of expansion.
+    """
+    def __init__(self,
+                 expand_ratio,
+                 **kwargs):
+        super(XMaskInit, self).__init__(**kwargs)
+        assert (expand_ratio > 0)
+        self.expand_ratio = expand_ratio
+
+    def _init_weight(self, _, arr):
+        shape = arr.shape
+        expand_size = max(shape[1] // self.expand_ratio, 1)
+        shape1_arange = mx.nd.arange(shape[1], ctx=arr.context)
+        arr[:] = 0
+        for i in range(shape[0]):
+            jj = mx.nd.random.shuffle(shape1_arange)[:expand_size]
+            arr[i, jj, :, :] = 1
 
 
-class XConv2d(nn.Module):
+class XConv2D(nn.Conv2D):
     """
     X-Convolution layer.
 
@@ -41,16 +53,8 @@ class XConv2d(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
     expand_ratio : int, default 2
         Ratio of expansion.
     """
@@ -58,79 +62,31 @@ class XConv2d(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride=1,
-                 padding=0,
-                 dilation=1,
                  groups=1,
-                 bias=False,
-                 expand_ratio=2):
-        super(XConv2d, self).__init__()
+                 expand_ratio=2,
+                 **kwargs):
+        super(XConv2D, self).__init__(
+            in_channels=in_channels,
+            channels=out_channels,
+            kernel_size=kernel_size,
+            groups=groups,
+            **kwargs)
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
-        if isinstance(stride, int):
-            stride = (stride, stride)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        if isinstance(dilation, int):
-            dilation = (dilation, dilation)
-
-        if in_channels % groups != 0:
-            raise ValueError("in_channels must be divisible by groups")
-        if out_channels % groups != 0:
-            raise ValueError("out_channels must be divisible by groups")
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.groups = groups
-
         grouped_in_channels = in_channels // groups
-        expand_size = grouped_in_channels // expand_ratio
-        self.weight = torch.nn.Parameter(torch.Tensor(out_channels, grouped_in_channels, *kernel_size))
-        if bias:
-            self.bias = torch.nn.Parameter(torch.Tensor(out_channels))
-        else:
-            self.register_parameter("bias", None)
+        self.mask = self.params.get(
+            name="mask",
+            grad_req="null",
+            shape=(out_channels, grouped_in_channels, kernel_size[0], kernel_size[1]),
+            init=XMaskInit(expand_ratio=expand_ratio),
+            differentiable=False)
 
-        mask = torch.zeros((out_channels, grouped_in_channels)) if out_channels <= grouped_in_channels else\
-            torch.zeros((grouped_in_channels, out_channels))
-        for i in range(mask.shape[0]):
-            x = torch.randperm(mask.shape[1])
-            for j in range(expand_size):
-                mask[i][x[j]] = 1
-        if out_channels > grouped_in_channels:
-            mask = mask.t()
-        mask = mask.unsqueeze(2).unsqueeze(3).repeat(1, 1, *kernel_size)
-
-        self.mask = nn.Parameter(mask, requires_grad=False)
-
-        # self.mul_mask = MulMask(self.mask.data)
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-        if self.bias is not None:
-            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
-            bound = 1 / math.sqrt(fan_in)
-            init.uniform_(self.bias, -bound, bound)
-
-    def forward(self, input):
-        # weight = self.mul_mask(self.weight.data)
-        weight = self.weight.data.mul(self.mask.data)
-        return F.conv2d(
-            input=input,
-            weight=weight,
-            bias=self.bias,
-            stride=self.stride,
-            padding=self.padding,
-            dilation=self.dilation,
-            groups=self.groups)
+    def hybrid_forward(self, F, x, weight, bias=None, mask=None):
+        masked_weight = weight * mask
+        return super(XConv2D, self).hybrid_forward(F, x, weight=masked_weight, bias=bias)
 
 
-class PreXConvBlock(nn.Module):
+class PreXConvBlock(HybridBlock):
     """
     X-Convolution block with Batch normalization and ReLU pre-activation.
 
@@ -142,14 +98,18 @@ class PreXConvBlock(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
-    bias : bool, default False
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     activate : bool, default True
@@ -161,31 +121,38 @@ class PreXConvBlock(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
                  dilation=1,
-                 bias=False,
+                 groups=1,
+                 use_bias=False,
+                 bn_use_global_stats=False,
                  return_preact=False,
                  activate=True,
-                 expand_ratio=2):
-        super(PreXConvBlock, self).__init__()
+                 expand_ratio=2,
+                 **kwargs):
+        super(PreXConvBlock, self).__init__(**kwargs)
         self.return_preact = return_preact
         self.activate = activate
 
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-        self.conv = XConv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            bias=bias,
-            expand_ratio=expand_ratio)
+        with self.name_scope():
+            self.bn = nn.BatchNorm(
+                in_channels=in_channels,
+                use_global_stats=bn_use_global_stats)
+            if self.activate:
+                self.activ = nn.Activation("relu")
+            self.conv = XConv2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
+                use_bias=use_bias,
+                expand_ratio=expand_ratio)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.bn(x)
         if self.activate:
             x = self.activ(x)
@@ -200,8 +167,9 @@ class PreXConvBlock(nn.Module):
 
 def pre_xconv1x1_block(in_channels,
                        out_channels,
-                       stride=1,
-                       bias=False,
+                       strides=1,
+                       use_bias=False,
+                       bn_use_global_stats=False,
                        return_preact=False,
                        activate=True,
                        expand_ratio=2):
@@ -214,10 +182,12 @@ def pre_xconv1x1_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -229,9 +199,10 @@ def pre_xconv1x1_block(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        stride=stride,
+        strides=strides,
         padding=0,
-        bias=bias,
+        use_bias=use_bias,
+        bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
         activate=activate,
         expand_ratio=expand_ratio)
@@ -239,9 +210,11 @@ def pre_xconv1x1_block(in_channels,
 
 def pre_xconv3x3_block(in_channels,
                        out_channels,
-                       stride=1,
+                       strides=1,
                        padding=1,
                        dilation=1,
+                       groups=1,
+                       bn_use_global_stats=False,
                        return_preact=False,
                        activate=True,
                        expand_ratio=2):
@@ -254,12 +227,16 @@ def pre_xconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -271,15 +248,17 @@ def pre_xconv3x3_block(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        stride=stride,
+        strides=strides,
         padding=padding,
         dilation=dilation,
+        groups=groups,
+        bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
         activate=activate,
         expand_ratio=expand_ratio)
 
 
-class XDenseUnit(nn.Module):
+class XDenseUnit(HybridBlock):
     """
     X-DenseNet unit.
 
@@ -289,6 +268,8 @@ class XDenseUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     dropout_rate : bool
         Parameter of Dropout layer. Faction of the input units to drop.
     expand_ratio : int
@@ -297,36 +278,41 @@ class XDenseUnit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_use_global_stats,
                  dropout_rate,
-                 expand_ratio):
-        super(XDenseUnit, self).__init__()
+                 expand_ratio,
+                 **kwargs):
+        super(XDenseUnit, self).__init__(**kwargs)
         self.use_dropout = (dropout_rate != 0.0)
         bn_size = 4
         inc_channels = out_channels - in_channels
         mid_channels = inc_channels * bn_size
 
-        self.conv1 = pre_xconv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            expand_ratio=expand_ratio)
-        self.conv2 = pre_xconv3x3_block(
-            in_channels=mid_channels,
-            out_channels=inc_channels,
-            expand_ratio=expand_ratio)
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=dropout_rate)
+        with self.name_scope():
+            self.conv1 = pre_xconv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                expand_ratio=expand_ratio)
+            self.conv2 = pre_xconv3x3_block(
+                in_channels=mid_channels,
+                out_channels=inc_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                expand_ratio=expand_ratio)
+            if self.use_dropout:
+                self.dropout = nn.Dropout(rate=dropout_rate)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         identity = x
         x = self.conv1(x)
         x = self.conv2(x)
         if self.use_dropout:
             x = self.dropout(x)
-        x = torch.cat((identity, x), dim=1)
+        x = F.concat(identity, x, dim=1)
         return x
 
 
-class XDenseNet(nn.Module):
+class XDenseNet(HybridBlock):
     """
     X-DenseNet model from 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
@@ -337,6 +323,9 @@ class XDenseNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     expand_ratio : int, default 2
@@ -345,62 +334,63 @@ class XDenseNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
                  channels,
                  init_block_channels,
+                 bn_use_global_stats=False,
                  dropout_rate=0.0,
                  expand_ratio=2,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(XDenseNet, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(XDenseNet, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", PreResInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            if i != 0:
-                stage.add_module("trans{}".format(i + 1), TransitionBlock(
-                    in_channels=in_channels,
-                    out_channels=(in_channels // 2)))
-                in_channels = in_channels // 2
-            for j, out_channels in enumerate(channels_per_stage):
-                stage.add_module("unit{}".format(j + 1), XDenseUnit(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    dropout_rate=dropout_rate,
-                    expand_ratio=expand_ratio))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("post_activ", PreResActivation(in_channels=in_channels))
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(PreResInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                with stage.name_scope():
+                    if i != 0:
+                        stage.add(TransitionBlock(
+                            in_channels=in_channels,
+                            out_channels=(in_channels // 2),
+                            bn_use_global_stats=bn_use_global_stats))
+                        in_channels = in_channels // 2
+                    for j, out_channels in enumerate(channels_per_stage):
+                        stage.add(XDenseUnit(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            bn_use_global_stats=bn_use_global_stats,
+                            dropout_rate=dropout_rate,
+                            expand_ratio=expand_ratio))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(PreResActivation(
+                in_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -409,7 +399,8 @@ def get_xdensenet(blocks,
                   expand_ratio=2,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
                   **kwargs):
     """
     Create X-DenseNet model with specific parameters.
@@ -424,7 +415,9 @@ def get_xdensenet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
 
@@ -465,11 +458,12 @@ def get_xdensenet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -483,7 +477,9 @@ def xdensenet121_2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_xdensenet(blocks=121, model_name="xdensenet121_2", **kwargs)
@@ -498,7 +494,9 @@ def xdensenet161_2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_xdensenet(blocks=161, model_name="xdensenet161_2", **kwargs)
@@ -513,7 +511,9 @@ def xdensenet169_2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_xdensenet(blocks=169, model_name="xdensenet169_2", **kwargs)
@@ -528,24 +528,17 @@ def xdensenet201_2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_xdensenet(blocks=201, model_name="xdensenet201_2", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -560,18 +553,26 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != xdensenet121_2 or weight_count == 7978856)
         assert (model != xdensenet161_2 or weight_count == 28681000)
         assert (model != xdensenet169_2 or weight_count == 14149480)
         assert (model != xdensenet201_2 or weight_count == 20013928)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

@@ -7,7 +7,6 @@
 __all__ = ['XDenseNet', 'xdensenet121_2', 'xdensenet161_2', 'xdensenet169_2', 'xdensenet201_2']
 
 import os
-import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,20 +15,7 @@ from .preresnet import PreResInitBlock, PreResActivation
 from .densenet import TransitionBlock
 
 
-# class MulMask(torch.autograd.Function):
-#
-#     def __init__(self, mask):
-#         super(MulMask, self).__init__()
-#         self.mask = mask
-#
-#     def forward(self, weight):
-#         return weight.mul(self.mask)
-#
-#     def backward(self, grad_output):
-#         return grad_output.mul(self.mask)
-
-
-class XConv2d(nn.Module):
+class XConv2d(nn.Conv2d):
     """
     X-Convolution layer.
 
@@ -41,16 +27,8 @@ class XConv2d(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
     expand_ratio : int, default 2
         Ratio of expansion.
     """
@@ -58,71 +36,37 @@ class XConv2d(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride=1,
-                 padding=0,
-                 dilation=1,
                  groups=1,
-                 bias=False,
-                 expand_ratio=2):
-        super(XConv2d, self).__init__()
+                 expand_ratio=2,
+                 **kwargs):
+        super(XConv2d, self).__init__(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            groups=groups,
+            **kwargs)
+        self.expand_ratio = expand_ratio
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
-        if isinstance(stride, int):
-            stride = (stride, stride)
-        if isinstance(padding, int):
-            padding = (padding, padding)
-        if isinstance(dilation, int):
-            dilation = (dilation, dilation)
-
-        if in_channels % groups != 0:
-            raise ValueError("in_channels must be divisible by groups")
-        if out_channels % groups != 0:
-            raise ValueError("out_channels must be divisible by groups")
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.groups = groups
-
         grouped_in_channels = in_channels // groups
-        expand_size = grouped_in_channels // expand_ratio
-        self.weight = torch.nn.Parameter(torch.Tensor(out_channels, grouped_in_channels, *kernel_size))
-        if bias:
-            self.bias = torch.nn.Parameter(torch.Tensor(out_channels))
-        else:
-            self.register_parameter("bias", None)
+        self.mask = torch.nn.Parameter(
+            data=torch.Tensor(out_channels, grouped_in_channels, *kernel_size),
+            requires_grad=False)
+        self.init_parameters()
 
-        mask = torch.zeros((out_channels, grouped_in_channels)) if out_channels <= grouped_in_channels else\
-            torch.zeros((grouped_in_channels, out_channels))
-        for i in range(mask.shape[0]):
-            x = torch.randperm(mask.shape[1])
-            for j in range(expand_size):
-                mask[i][x[j]] = 1
-        if out_channels > grouped_in_channels:
-            mask = mask.t()
-        mask = mask.unsqueeze(2).unsqueeze(3).repeat(1, 1, *kernel_size)
-
-        self.mask = nn.Parameter(mask, requires_grad=False)
-
-        # self.mul_mask = MulMask(self.mask.data)
-
-        self.reset_parameters()
-
-    def reset_parameters(self):
-        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-        if self.bias is not None:
-            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
-            bound = 1 / math.sqrt(fan_in)
-            init.uniform_(self.bias, -bound, bound)
+    def init_parameters(self):
+        shape = self.mask.shape
+        expand_size = max(shape[1] // self.expand_ratio, 1)
+        self.mask[:] = 0
+        for i in range(shape[0]):
+            jj = torch.randperm(shape[1], device=self.mask.device)[:expand_size]
+            self.mask[i, jj, :, :] = 1
 
     def forward(self, input):
-        # weight = self.mul_mask(self.weight.data)
-        weight = self.weight.data.mul(self.mask.data)
+        masked_weight = self.weight.mul(self.mask)
         return F.conv2d(
             input=input,
-            weight=weight,
+            weight=masked_weight,
             bias=self.bias,
             stride=self.stride,
             padding=self.padding,

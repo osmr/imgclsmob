@@ -73,6 +73,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('shufflenet_g3_wd2', '2063', 'db302789f57d82520c13f4d0c39796801c3458b7', 'v0.0.167'),
     ('shufflenet_g1_w3d4', '1678', 'ca175843c5d78bf7d6c826142df810b1b721978b', 'v0.0.218'),
     ('shufflenet_g3_w3d4', '1613', 'f7a106be40b1cdcc68e1cf185451832aec3584fc', 'v0.0.219'),
+    ('shufflenet_g1_w1', '1351', '2f36fdbc45ef00b49dd558b3b2e5b238be2e28ca', 'v0.0.223'),
     ('shufflenetv2_wd2', '1844', '2bd8a314d4c21fb70496a9b263eea3bfe2cc39d4', 'v0.0.90'),
     ('shufflenetv2_w1', '1131', '6a728e21f405d52b0deade6878f4661089b47a51', 'v0.0.133'),
     ('shufflenetv2_w3d2', '1250', '5dd7b5b1d7de186adf32da4f81204c5a3a6e64c3', 'v0.0.85'),

@@ -476,6 +476,7 @@ def convert_gl2ch(dst_net,
 
     dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/features/body/', '/features/zbody/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/final_block/', 'features/stageN/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/final_conv/', 'features/stageN/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
@@ -493,6 +494,7 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('/weight', '/W') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/features/zbody/', '/features/body/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/stageN/final_conv/', 'features/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]

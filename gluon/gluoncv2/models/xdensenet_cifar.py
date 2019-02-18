@@ -224,7 +224,7 @@ def get_xdensenet_cifar(classes,
 
 def xdensenet40_2_k24_bc_cifar10(classes=10, **kwargs):
     """
-    DenseNet-BC-40-2 (k=24) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    X-DenseNet-BC-40-2 (k=24) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -244,7 +244,7 @@ def xdensenet40_2_k24_bc_cifar10(classes=10, **kwargs):
 
 def xdensenet40_2_k24_bc_cifar100(classes=100, **kwargs):
     """
-    DenseNet-BC-40-2 (k=24) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    X-DenseNet-BC-40-2 (k=24) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -264,7 +264,7 @@ def xdensenet40_2_k24_bc_cifar100(classes=100, **kwargs):
 
 def xdensenet40_2_k36_bc_cifar10(classes=10, **kwargs):
     """
-    DenseNet-BC-40-2 (k=36) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    X-DenseNet-BC-40-2 (k=36) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
     Parameters:
@@ -284,7 +284,7 @@ def xdensenet40_2_k36_bc_cifar10(classes=10, **kwargs):
 
 def xdensenet40_2_k36_bc_cifar100(classes=100, **kwargs):
     """
-    DenseNet-BC-40-2 (k=36) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    X-DenseNet-BC-40-2 (k=36) model for CIFAR-100 from 'Deep Expander Networks: Efficient Deep Networks from Graph
     Theory,' https://arxiv.org/abs/1711.08757.
 
     Parameters:

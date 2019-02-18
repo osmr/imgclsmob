@@ -69,9 +69,6 @@ from .models.xdensenet import *
 from .models.xdensenet_cifar import *
 from .models.ror_cifar import *
 
-# from .models.others.oth_densenetexpander_imagenet import *
-# from .models.others.oth_densenetexpander_cifar import *
-
 __all__ = ['get_model']
 
 
@@ -464,16 +461,6 @@ _models = {
     'ror3_110_cifar100': ror3_110_cifar100,
     'ror3_164_cifar10': ror3_164_cifar10,
     'ror3_164_cifar100': ror3_164_cifar100,
-
-    # 'oth_xdensenet121': oth_xdensenet121,
-    # 'oth_xdensenet161': oth_xdensenet161,
-    # 'oth_xdensenet169': oth_xdensenet169,
-    # 'oth_xdensenet201': oth_xdensenet201,
-    #
-    # 'oth_densenet40_k24_bc_cifar10': oth_densenet40_k24_bc_cifar10,
-    # 'oth_densenet40_k24_bc_cifar100': oth_densenet40_k24_bc_cifar100,
-    # 'oth_densenet40_k36_bc_cifar10': oth_densenet40_k36_bc_cifar10,
-    # 'oth_densenet40_k36_bc_cifar100': oth_densenet40_k36_bc_cifar100,
 }
 
 

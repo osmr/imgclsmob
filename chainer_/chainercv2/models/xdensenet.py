@@ -64,8 +64,6 @@ class XConvolution2D(L.Convolution2D):
     expand_ratio : int, default 2
         Ratio of expansion.
     """
-    mask = None
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -83,11 +81,11 @@ class XConvolution2D(L.Convolution2D):
             ksize = (ksize, ksize)
         grouped_in_channels = in_channels // groups
 
-        self.register_persistent('mask')
         self.mask = chainer.initializers.generate_array(
             initializer=XMaskInit(expand_ratio=expand_ratio),
             shape=(out_channels, grouped_in_channels, ksize[0], ksize[1]),
             xp=self.xp)
+        self.register_persistent('mask')
 
     def forward(self, x):
         if self.W.array is None:

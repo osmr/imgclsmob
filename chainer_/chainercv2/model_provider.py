@@ -60,6 +60,7 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 
 from .models.xdensenet import *
+from .models.xdensenet_cifar import *
 
 __all__ = ['get_model']
 
@@ -381,6 +382,8 @@ _models = {
 
     'densenet40_k12_cifar10': densenet40_k12_cifar10,
     'densenet40_k12_cifar100': densenet40_k12_cifar100,
+    'densenet40_k12_bc_cifar10': densenet40_k12_bc_cifar10,
+    'densenet40_k12_bc_cifar100': densenet40_k12_bc_cifar100,
     'densenet40_k24_bc_cifar10': densenet40_k24_bc_cifar10,
     'densenet40_k24_bc_cifar100': densenet40_k24_bc_cifar100,
     'densenet40_k36_bc_cifar10': densenet40_k36_bc_cifar10,
@@ -418,6 +421,11 @@ _models = {
     'xdensenet161_2': xdensenet161_2,
     'xdensenet169_2': xdensenet169_2,
     'xdensenet201_2': xdensenet201_2,
+
+    'xdensenet40_2_k24_bc_cifar10': xdensenet40_2_k24_bc_cifar10,
+    'xdensenet40_2_k24_bc_cifar100': xdensenet40_2_k24_bc_cifar100,
+    'xdensenet40_2_k36_bc_cifar10': xdensenet40_2_k36_bc_cifar10,
+    'xdensenet40_2_k36_bc_cifar100': xdensenet40_2_k36_bc_cifar100,
 }
 
 

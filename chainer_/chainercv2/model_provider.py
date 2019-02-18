@@ -61,6 +61,7 @@ from .models.shakedropresnet_cifar import *
 
 from .models.xdensenet import *
 from .models.xdensenet_cifar import *
+from .models.ror_cifar import *
 
 __all__ = ['get_model']
 
@@ -426,6 +427,13 @@ _models = {
     'xdensenet40_2_k24_bc_cifar100': xdensenet40_2_k24_bc_cifar100,
     'xdensenet40_2_k36_bc_cifar10': xdensenet40_2_k36_bc_cifar10,
     'xdensenet40_2_k36_bc_cifar100': xdensenet40_2_k36_bc_cifar100,
+
+    'ror3_56_cifar10': ror3_56_cifar10,
+    'ror3_56_cifar100': ror3_56_cifar100,
+    'ror3_110_cifar10': ror3_110_cifar10,
+    'ror3_110_cifar100': ror3_110_cifar100,
+    'ror3_164_cifar10': ror3_164_cifar10,
+    'ror3_164_cifar100': ror3_164_cifar100,
 }
 
 

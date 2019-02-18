@@ -112,4 +112,4 @@ Some remarks:
 | Shake-Shake-ResNet | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |
 | X-DenseNet | AB+C+ | AB+C+ | AB+C+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
-| RoR-3 | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |
+| RoR-3 | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |

@@ -313,6 +313,7 @@ Some remarks:
 | DenseNet-BC-100 (k=12) | 21.19 | 800,032 | 298.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.208/densenet100_k12_bc_cifar100-2119-fbd8a54c.params.log)) |
 | X-DenseNet-BC-40-2 (k=24) | 23.96 | 714,196 | 293.11M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.227/xdensenet40_2_k24_bc_cifar100-2396-73d5ba88.params.log)) |
 | WRN-16-10 | 18.95 | 17,174,324 | 2,414.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.204/wrn16_10_cifar100-1895-bcb5c89c.params.log)) |
+| RoR-3-56 | 25.49 | 768,596 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.229/ror3_56_cifar100-2549-43345593.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 18.80 | 2,934,772 | 428.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.222/shakeshakeresnet26_2x32d_cifar100-1880-bd46a741.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv

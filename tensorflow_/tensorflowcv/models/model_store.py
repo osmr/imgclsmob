@@ -99,7 +99,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('fdmobilenet_w1', '1318', 'da6a9808e4a40940fb2549b0a66fa1288e8a33c5', 'v0.0.162'),
     ('mobilenetv2_wd4', '2416', 'ae7e5137b9b9c01b35f16380afe7e1423541475e', 'v0.0.137'),
     ('mobilenetv2_wd2', '1446', '696501bd3e6df77a78e85756403a3da23839244b', 'v0.0.170'),
-    ('mobilenetv2_w3d4', '1124', '3531c997eb6a2052a715f2a37673151a1a0a075d', 'v0.0.82'),
+    ('mobilenetv2_w3d4', '1044', '0a8633acd058c0ea783796205a0767858939fe31', 'v0.0.230'),
     ('mobilenetv2_w1', '0862', '03daae54f799467152612138da07a8c221666d70', 'v0.0.213'),
     ('igcv3_wd4', '2835', 'b41fb3c75e090cc719962e1ca2debcbac241dc22', 'v0.0.142'),
     ('igcv3_wd2', '1705', 'de0b98d950a3892b6d15d1c3ea248d41a34adf00', 'v0.0.132'),

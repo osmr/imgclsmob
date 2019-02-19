@@ -69,6 +69,8 @@ from .models.xdensenet import *
 from .models.xdensenet_cifar import *
 from .models.ror_cifar import *
 
+from .models.others.oth_espnetv2 import *
+
 __all__ = ['get_model']
 
 
@@ -461,6 +463,12 @@ _models = {
     'ror3_110_cifar100': ror3_110_cifar100,
     'ror3_164_cifar10': ror3_164_cifar10,
     'ror3_164_cifar100': ror3_164_cifar100,
+
+    'oth_espnetv2_wd2': oth_espnetv2_wd2,
+    'oth_espnetv2_w1': oth_espnetv2_w1,
+    'oth_espnetv2_w5d8': oth_espnetv2_w5d8,
+    'oth_espnetv2_w3d2': oth_espnetv2_w3d2,
+    'oth_espnetv2_w2': oth_espnetv2_w2,
 }
 
 

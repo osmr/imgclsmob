@@ -2,10 +2,90 @@ import math
 from inspect import isfunction
 import torch
 import torch.nn as nn
-from torch.nn import init
+import torch.nn.init as init
 import torch.nn.functional as F
 
 __all__ = ['espnetv2_wd2', 'espnetv2_w1', 'espnetv2_w5d8', 'espnetv2_w3d2', 'espnetv2_w2']
+
+
+class DualPathSequential(nn.Sequential):
+    """
+    A sequential container for modules with dual inputs/outputs.
+    Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first modules with single input/output.
+    last_ordinals : int, default 0
+        Number of the final modules with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a module.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal module.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda module, x1, x2: module(x1, x2)),
+                 dual_path_scheme_ordinal=(lambda module, x1, x2: (module(x1), x2))):
+        super(DualPathSequential, self).__init__()
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def forward(self, x1, x2=None):
+        length = len(self._modules.values())
+        for i, module in enumerate(self._modules.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(module, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(module, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
+
+
+def conv3x3(in_channels,
+            out_channels,
+            stride=1,
+            padding=1,
+            dilation=1,
+            groups=1,
+            bias=False):
+    """
+    Convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias)
 
 
 class ConvBlock(nn.Module):
@@ -169,88 +249,6 @@ def conv3x3_block(in_channels,
         activate=activate)
 
 
-class CBR(nn.Module):
-    '''
-    This class defines the convolution layer with batch normalization and PReLU activation
-    '''
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 groups=1):
-        '''
-
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param kernel_size: kernel size
-        :param stride: stride rate for down-sampling. Default is 1
-        '''
-        super().__init__()
-        padding = int((kernel_size - 1) / 2)
-        self.conv = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False,
-            groups=groups)
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.act = nn.PReLU(out_channels)
-
-    def forward(self, input):
-        '''
-        :param input: input feature map
-        :return: transformed feature map
-        '''
-        output = self.conv(input)
-        output = self.bn(output)
-        output = self.act(output)
-        return output
-
-
-class CDilated(nn.Module):
-    '''
-    This class defines the dilated convolution.
-    '''
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride=1,
-                 dilation=1,
-                 groups=1):
-        '''
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param kernel_size: kernel size
-        :param stride: optional stride rate for down-sampling
-        :param dilation: optional dilation rate
-        '''
-        super().__init__()
-        padding = int((kernel_size - 1) / 2) * dilation
-        self.conv = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False,
-            dilation=dilation,
-            groups=groups)
-
-    def forward(self, input):
-        '''
-        :param input: input feature map
-        :return: transformed feature map
-        '''
-        output = self.conv(input)
-        return output
-
-
 class PreActivation(nn.Module):
     """
     PreResNet like pure pre-activation block without convolution layer.
@@ -273,7 +271,7 @@ class PreActivation(nn.Module):
         return x
 
 
-class EESP(nn.Module):
+class ESPBlock(nn.Module):
     '''
     This class defines the EESP block, which is based on the following principle
         REDUCE ---> SPLIT ---> TRANSFORM --> MERGE
@@ -283,65 +281,64 @@ class EESP(nn.Module):
                  in_channels,
                  out_channels,
                  stride=1,
-                 k=4,
-                 r_lim=7,
-                 down_method='esp'):
+                 branches=4,
+                 rfield=7,
+                 use_avg=False):
         '''
         :param in_channels: number of input channels
         :param out_channels: number of output channels
         :param stride: factor by which we should skip (useful for down-sampling). If 2, then down-samples the feature map by 2
-        :param k: # of parallel branches
-        :param r_lim: A maximum value of receptive field allowed for EESP block
+        :param branches: # of parallel branches
+        :param rfield: A maximum value of receptive field allowed for EESP block
         :param down_method: Downsample or not (equivalent to say stride is 2 or not)
         '''
-        super(EESP, self).__init__()
-        assert down_method in ['avg', 'esp']
-        assert (out_channels % k == 0)
+        super(ESPBlock, self).__init__()
+        assert (out_channels % branches == 0)
         self.stride = stride
-        n = out_channels // k
-        n1 = out_channels - (k - 1) * n
+        n = out_channels // branches
+        n1 = out_channels - (branches - 1) * n
         assert n == n1
 
         self.proj_1x1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=n,
-            groups=k,
+            groups=branches,
             activation=(lambda: nn.PReLU(n)))
 
         # (For convenience) Mapping between dilation rate and receptive field for a 3x3 kernel
         map_receptive_ksize = {3: 1, 5: 2, 7: 3, 9: 4, 11: 5, 13: 6, 15: 7, 17: 8}
         self.k_sizes = list()
-        for i in range(k):
+        for i in range(branches):
             ksize = int(3 + 2 * i)
             # After reaching the receptive field limit, fall back to the base kernel size of 3 with a dilation rate of 1
-            ksize = ksize if ksize <= r_lim else 3
+            ksize = ksize if ksize <= rfield else 3
             self.k_sizes.append(ksize)
         # sort (in ascending order) these kernel sizes based on their receptive field
         # This enables us to ignore the kernels (3x3 in our case) with the same effective receptive field in hierarchical
         # feature fusion because kernels with 3x3 receptive fields does not have gridding artifact.
         self.k_sizes.sort()
         self.spp_dw = nn.ModuleList()
-        for i in range(k):
+        for i in range(branches):
             d_rate = map_receptive_ksize[self.k_sizes[i]]
-            self.spp_dw.append(CDilated(
-                n,
-                n,
-                kernel_size=3,
+            self.spp_dw.append(conv3x3(
+                in_channels=n,
+                out_channels=n,
                 stride=stride,
-                groups=n,
-                dilation=d_rate))
+                padding=d_rate,
+                dilation=d_rate,
+                groups=n))
         # Performing a group convolution with K groups is the same as performing K point-wise convolutions
         self.conv_1x1_exp = conv1x1_block(
             in_channels=out_channels,
             out_channels=out_channels,
-            groups=k,
+            groups=branches,
             activation=None,
             activate=False)
         self.br_after_cat = PreActivation(in_channels=out_channels)
         self.module_act = nn.PReLU(out_channels)
-        self.downAvg = True if down_method == 'avg' else False
+        self.downAvg = use_avg
 
-    def forward(self, input):
+    def forward(self, input, input2):
         '''
         :param input: input feature map
         :return: transformed feature map
@@ -367,14 +364,14 @@ class EESP(nn.Module):
         # if down-sampling, then return the concatenated vector
         # because Downsampling function will combine it with avg. pooled feature map and then threshold it
         if self.stride == 2 and self.downAvg:
-            return expanded
+            return expanded, input2
 
         # if dimensions of input and concatenated vector are the same, add them (RESIDUAL LINK)
         if expanded.size() == input.size():
             expanded = expanded + input
 
         # Threshold the feature map using activation function (PReLU in this case)
-        return self.module_act(expanded)
+        return self.module_act(expanded), input2
 
 
 class DownSampler(nn.Module):
@@ -390,25 +387,26 @@ class DownSampler(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 k=4,
-                 r_lim=9,
+                 input_reinf=3,
+                 branches=4,
+                 rfield=9,
                  reinf=True):
         '''
             :param in_channels: number of input channels
             :param out_channels: number of output channels
-            :param k: # of parallel branches
-            :param r_lim: A maximum value of receptive field allowed for EESP block
+            :param branches: # of parallel branches
+            :param rfield: A maximum value of receptive field allowed for EESP block
             :param reinf: Use long range shortcut connection with the input or not.
         '''
         super(DownSampler, self).__init__()
         nout_new = out_channels - in_channels
-        self.eesp = EESP(
+        self.eesp = ESPBlock(
             in_channels=in_channels,
             out_channels=nout_new,
             stride=2,
-            k=k,
-            r_lim=r_lim,
-            down_method='avg')
+            branches=branches,
+            rfield=rfield,
+            use_avg=True)
         self.avg = nn.AvgPool2d(
             kernel_size=3,
             padding=1,
@@ -416,29 +414,31 @@ class DownSampler(nn.Module):
         if reinf:
             self.inp_reinf = nn.Sequential(
                 conv3x3_block(
-                    in_channels=config_inp_reinf,
-                    out_channels=config_inp_reinf,
-                    activation=(lambda: nn.PReLU(config_inp_reinf))
+                    in_channels=input_reinf,
+                    out_channels=input_reinf,
+                    activation=(lambda: nn.PReLU(input_reinf))
                 ),
                 conv1x1_block(
-                    in_channels=config_inp_reinf,
+                    in_channels=input_reinf,
                     out_channels=out_channels,
                     activation=None,
                     activate=False)
             )
         self.activ = nn.PReLU(out_channels)
 
-    def forward(self, input, input2=None):
+    def forward(self, input, input2_=None):
         '''
         :param input: input feature map
         :return: feature map down-sampled by a factor of 2
         '''
         avg_out = self.avg(input)
-        eesp_out = self.eesp(input)
+        eesp_out, _ = self.eesp(input, None)
         output = torch.cat([avg_out, eesp_out], 1)
 
-        if input2 is not None:
-            #assuming the input is a square image
+        if input2_ is not None:
+            input2 = input2_.clone()
+
+            # assuming the input is a square image
             # Shortcut connection with the input image
             w1 = avg_out.size(2)
             while True:
@@ -452,7 +452,42 @@ class DownSampler(nn.Module):
                     break
             output = output + self.inp_reinf(input2)
 
-        return self.activ(output)
+        return self.activ(output), input2_
+
+
+class ESPFinalBlock(nn.Module):
+    """
+    ESPNetv2 specific final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    final_groups : int
+        Number of groups in the last convolution layer.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 final_groups):
+        super(ESPFinalBlock, self).__init__()
+        self.conv1 = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            groups=in_channels,
+            activation=(lambda: nn.PReLU(in_channels)))
+        self.conv2 = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            groups=final_groups,
+            activation=(lambda: nn.PReLU(out_channels)))
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
 
 
 class EESPNet(nn.Module):
@@ -462,86 +497,76 @@ class EESPNet(nn.Module):
 
     def __init__(self,
                  channels,
-                 K,
-                 r_lim,
-                 reps,
+                 init_block_channels,
+                 final_block_channels,
+                 branches,
+                 rfields,
+                 dropout_rate=0.2,
                  in_channels=3,
-                 classes=1000):
+                 num_classes=1000):
         '''
-        :param classes: number of classes in the dataset. Default is 1000 for the ImageNet dataset
+        :param num_classes: number of classes in the dataset. Default is 1000 for the ImageNet dataset
         :param s: factor that scales the number of output feature maps
         '''
         super(EESPNet, self).__init__()
-        global config_inp_reinf
 
-        config_inp_reinf = 3
-        self.input_reinforcement = True # True for the shortcut connection with input
+        self.features = DualPathSequential(
+            return_two=False,
+            first_ordinals=1,
+            last_ordinals=3)
+        self.features.add_module("init_block", conv3x3_block(
+            in_channels=in_channels,
+            out_channels=init_block_channels,
+            stride=2,
+            activation=(lambda: nn.PReLU(init_block_channels))))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = DualPathSequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                if j == 0:
+                    unit = DownSampler(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        branches=branches,
+                        rfield=rfields[i][j])
+                else:
+                    unit = ESPBlock(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        stride=1,
+                        branches=branches,
+                        rfield=rfields[i][j])
+                stage.add_module("unit{}".format(j + 1), unit)
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module('final_block', ESPFinalBlock(
+            in_channels=in_channels,
+            out_channels=final_block_channels,
+            final_groups=branches))
+        in_channels = final_block_channels
+        self.features.add_module("final_pool", nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
+        self.features.add_module("final_dropout", nn.Dropout(p=dropout_rate))
 
-        # assert len(K) == len(r_lim), 'Length of branching factor array and receptive field array should be the same.'
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
-        self.level1 = CBR(in_channels, channels[0], 3, 2)  # 112 L1
+        self._init_params()
 
-        self.level2_0 = DownSampler(channels[0], channels[1], k=K[0], r_lim=r_lim[0], reinf=self.input_reinforcement)  # out = 56
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
-        self.level3_0 = DownSampler(channels[1], channels[2], k=K[1], r_lim=r_lim[1], reinf=self.input_reinforcement) # out = 28
-        self.level3 = nn.ModuleList()
-        for i in range(reps[1]):
-            self.level3.append(EESP(channels[2], channels[2], stride=1, k=K[2], r_lim=r_lim[2]))
-
-        self.level4_0 = DownSampler(channels[2], channels[3], k=K[2], r_lim=r_lim[2], reinf=self.input_reinforcement) #out = 14
-        self.level4 = nn.ModuleList()
-        for i in range(reps[2]):
-            self.level4.append(EESP(channels[3], channels[3], stride=1, k=K[3], r_lim=r_lim[3]))
-
-        self.level5_0 = DownSampler(channels[3], channels[4], k=K[3], r_lim=r_lim[3]) #7
-        self.level5 = nn.ModuleList()
-        for i in range(reps[3]):
-            self.level5.append(EESP(channels[4], channels[4], stride=1, k=K[4], r_lim=r_lim[4]))
-
-        # expand the feature maps using depth-wise convolution followed by group point-wise convolution
-        self.level5.append(CBR(channels[4], channels[4], 3, 1, groups=channels[4]))
-        self.level5.append(CBR(channels[4], channels[5], 1, 1, groups=K[4]))
-
-        self.classifier = nn.Linear(channels[5], classes)
-
-    def forward(self, input, p=0.2):
-        '''
-        :param input: Receives the input RGB image
-        :return: a C-dimensional vector, C=# of classes
-        '''
-        out_l1 = self.level1(input)  # 112
-        if not self.input_reinforcement:
-            del input
-            input = None
-
-        out_l2 = self.level2_0(out_l1, input)  # 56
-
-        out_l3_0 = self.level3_0(out_l2, input)  # down-sample
-        for i, layer in enumerate(self.level3):
-            if i == 0:
-                out_l3 = layer(out_l3_0)
-            else:
-                out_l3 = layer(out_l3)
-
-        out_l4_0 = self.level4_0(out_l3, input)  # down-sample
-        for i, layer in enumerate(self.level4):
-            if i == 0:
-                out_l4 = layer(out_l4_0)
-            else:
-                out_l4 = layer(out_l4)
-
-        out_l5_0 = self.level5_0(out_l4)  # down-sample
-        for i, layer in enumerate(self.level5):
-            if i == 0:
-                out_l5 = layer(out_l5_0)
-            else:
-                out_l5 = layer(out_l5)
-
-        output_g = F.adaptive_avg_pool2d(out_l5, output_size=1)
-        output_g = F.dropout(output_g, p=p, training=self.training)
-        output_1x1 = output_g.view(output_g.size(0), -1)
-
-        return self.classifier(output_1x1)
+    def forward(self, x):
+        x = self.features(x, x)
+        x = x.view(x.size(0), -1)
+        x = self.output(x)
+        return x
 
 
 def get_espnetv2(width_scale=1.0,
@@ -554,36 +579,29 @@ def get_espnetv2(width_scale=1.0,
     width_scale : float, default 1.0
         Scale factor for width of layers.
     """
-    reps = [0, 3, 7, 3]  # how many times EESP blocks should be repeated at each spatial level.
+    assert (width_scale <= 2.0)
 
-    r_lim = [13, 11, 9, 7, 5]  # receptive field at each spatial level
-    K = [4] * len(r_lim)  # No. of parallel branches at different levels
+    branches = 4
+    layers = [1, 4, 8, 4]
 
-    base = 32  # base configuration
-    config_len = 5
-    channels = [base] * config_len
-    base_s = 0
-    for i in range(config_len):
-        if i == 0:
-            base_s = int(base * width_scale)
-            base_s = math.ceil(base_s / K[0]) * K[0]
-            channels[i] = base if base_s > base else base_s
-        else:
-            channels[i] = base_s * pow(2, i)
-    if width_scale <= 1.5:
-        channels.append(1024)
-    elif width_scale <= 2.0:
-        channels.append(1280)
-    else:
-        ValueError('Configuration not supported')
+    rfields_list = [13, 11, 9, 7, 5]
+    rfields = [[rfields_list[i]] + [rfields_list[i + 1]] * (li - 1) for (i, li) in enumerate(layers)]
 
-    assert len(K) == len(r_lim), 'Length of branching factor array and receptive field array should be the same.'
+    base_channels = 32
+    weighed_base_channels = math.ceil(float(math.floor(base_channels * width_scale)) / branches) * branches
+    channels_per_layers = [weighed_base_channels * pow(2, i + 1) for i in range(len(layers))]
+
+    init_block_channels = base_channels if weighed_base_channels > base_channels else weighed_base_channels
+    final_block_channels = 1024 if width_scale <= 1.5 else 1280
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     net = EESPNet(
         channels=channels,
-        K=K,
-        r_lim=r_lim,
-        reps=reps,
+        init_block_channels=init_block_channels,
+        final_block_channels=final_block_channels,
+        branches=branches,
+        rfields=rfields,
         **kwargs)
 
     return net

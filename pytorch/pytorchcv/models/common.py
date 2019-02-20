@@ -47,6 +47,7 @@ def conv3x3(in_channels,
             out_channels,
             stride=1,
             padding=1,
+            dilation=1,
             groups=1,
             bias=False):
     """
@@ -73,6 +74,7 @@ def conv3x3(in_channels,
         kernel_size=3,
         stride=stride,
         padding=padding,
+        dilation=dilation,
         groups=groups,
         bias=bias)
 

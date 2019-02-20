@@ -11,7 +11,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv3x3, conv1x1_block, conv3x3_block, DualPathSequential
+from .common import conv3x3, conv1x1_block, conv3x3_block, DualPathSequential
 
 
 class PreActivation(nn.Module):

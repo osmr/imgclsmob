@@ -75,6 +75,9 @@ def measure_model(model,
         elif isinstance(module, nn.ReLU6):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
+        elif isinstance(module, nn.PReLU):
+            extra_num_flops = 3 * x[0].numel()
+            extra_num_macs = 0
         elif isinstance(module, nn.Conv2d):
             x_h = x[0].shape[2]
             x_w = x[0].shape[3]

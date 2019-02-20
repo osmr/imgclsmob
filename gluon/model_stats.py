@@ -3,7 +3,7 @@ import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
 from mxnet.gluon.contrib.nn import Identity
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2
 from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 
 __all__ = ['measure_model']
@@ -81,6 +81,9 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(block, ReLU6):
             extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, PReLU2):
+            extra_num_flops = 3 * x[0].size
             extra_num_macs = 0
         elif isinstance(block, nn.Conv2D):
             x_h = x[0].shape[2]

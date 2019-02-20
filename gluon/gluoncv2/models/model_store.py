@@ -129,7 +129,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('menet256_12x1_g4', '1216', '7caf63d15190648e266a4e7520c3ad677716f388', 'v0.0.152'),
     ('menet348_12x1_g3', '0936', '62c72b0b56460f062d4da7155bd64a524f42fb88', 'v0.0.173'),
     ('menet352_12x1_g8', '1167', '5892fea4e44eb27814a9b092a1a06eb81cea7844', 'v0.0.198'),
-    ('menet456_24x1_g3', '1043', '6e777068761f9c45cd0527f3824ad3b5cf36b0b5', 'v0.0.6'),
+    ('menet456_24x1_g3', '0780', '7a89b32c89f878ac63fc96ddc71cb1a5e91c84d6', 'v0.0.237'),
     ('mobilenet_wd4', '2218', '3185cdd29b3b964ad51fdd7820bd65f091cf281f', 'v0.0.62'),
     ('mobilenet_wd2', '1330', '94f13ae1375b48892d8ecbb4a253bb583fe27277', 'v0.0.156'),
     ('mobilenet_w3d4', '1051', '6361d4b4192b5fc68f3409100d825e8edb28876b', 'v0.0.130'),

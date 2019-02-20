@@ -151,9 +151,9 @@ class ESPBlock(nn.Module):
             out_k = out_k + output[k - 1]
             output.append(out_k)
         # Merge
-        expanded = self.conv_1x1_exp( # learn linear combinations using group point-wise convolutions
-            self.br_after_cat( # apply batch normalization followed by activation function (PRelu in this case)
-                torch.cat(output, 1) # concatenate the output of different branches
+        expanded = self.conv_1x1_exp(  # learn linear combinations using group point-wise convolutions
+            self.br_after_cat(  # apply batch normalization followed by activation function (PRelu in this case)
+                torch.cat(output, 1)  # concatenate the output of different branches
             )
         )
         del output

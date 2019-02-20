@@ -23,7 +23,6 @@ class PreActivation(nn.Module):
     in_channels : int
         Number of input channels.
     """
-
     def __init__(self,
                  in_channels):
         super(PreActivation, self).__init__()
@@ -67,6 +66,32 @@ class ShortcutBlock(nn.Module):
         return x
 
 
+class HierarchicalConcurrent(nn.Sequential):
+    """
+    A container for hierarchical concatenation of modules on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    """
+    def __init__(self, axis=1):
+        super(HierarchicalConcurrent, self).__init__()
+        self.axis = axis
+
+    def forward(self, x):
+        out = []
+        y_prev = None
+        for module in self._modules.values():
+            y = module(x)
+            if y_prev is not None:
+                y += y_prev
+            out.append(y)
+            y_prev = y
+        out = torch.cat(tuple(out), dim=self.axis)
+        return out
+
+
 class ESPBlock(nn.Module):
     """
     ESPNetv2 block (so-called EESP block).
@@ -78,11 +103,9 @@ class ESPBlock(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Strides of the branch convolution layers.
     dilations : list of int
         Dilation values for branches.
-    use_avg : bool, default False
-        Whether use average pooling.
     """
     def __init__(self,
                  in_channels,
@@ -101,15 +124,14 @@ class ESPBlock(nn.Module):
             groups=num_branches,
             activation=(lambda: nn.PReLU(mid_channels)))
 
-        self.spp_dw = nn.ModuleList()
+        self.branches = HierarchicalConcurrent()
         for i in range(num_branches):
-            dilation = dilations[i]
-            self.spp_dw.append(conv3x3(
+            self.branches.add_module("branch{}".format(i + 1), conv3x3(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=stride,
-                padding=dilation,
-                dilation=dilation,
+                padding=dilations[i],
+                dilation=dilations[i],
                 groups=mid_channels))
 
         self.merge_conv = conv1x1_block(
@@ -122,32 +144,17 @@ class ESPBlock(nn.Module):
         self.activ = nn.PReLU(out_channels)
 
     def forward(self, x, x0):
-
-        identity = x
-
-        # Reduce --> project high-dimensional feature maps to low-dimensional space
-        output1 = self.reduce_conv(x)
-        outs = [self.spp_dw[0](output1)]
-        # compute the output for each branch and hierarchically fuse them
-        # i.e. Split --> Transform --> HFF
-        for k in range(1, len(self.spp_dw)):
-            out_k = self.spp_dw[k](output1)
-            # HFF
-            out_k = out_k + outs[k - 1]
-            outs.append(out_k)
-
-        y = torch.cat(tuple(outs), dim=1)
+        y = self.reduce_conv(x)
+        y = self.branches(y)
         y = self.preactiv(y)
         y = self.merge_conv(y)
-
         if not self.downsample:
-            y = y + identity
+            y = y + x
             y = self.activ(y)
-
         return y, x0
 
 
-class DownSampler(nn.Module):
+class DownsampleBlock(nn.Module):
     """
     ESPNetv2 downsample block.
 
@@ -157,17 +164,17 @@ class DownSampler(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dilations : list of int
-        Dilation values for branches in EESP block.
     x0_in_channels : int
         Number of input channels for shortcut.
+    dilations : list of int
+        Dilation values for branches in EESP block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 dilations,
-                 x0_in_channels):
-        super(DownSampler, self).__init__()
+                 x0_channels,
+                 dilations):
+        super(DownsampleBlock, self).__init__()
         inc_channels = out_channels - in_channels
 
         self.pool = nn.AvgPool2d(
@@ -180,7 +187,7 @@ class DownSampler(nn.Module):
             stride=2,
             dilations=dilations)
         self.shortcut_block = ShortcutBlock(
-            in_channels=x0_in_channels,
+            in_channels=x0_channels,
             out_channels=out_channels)
         self.activ = nn.PReLU(out_channels)
 
@@ -300,7 +307,7 @@ class ESPNetv2(nn.Module):
         super(ESPNetv2, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
-        x0_in_channels = in_channels
+        x0_channels = in_channels
 
         self.features = DualPathSequential(
             return_two=False,
@@ -314,11 +321,11 @@ class ESPNetv2(nn.Module):
             stage = DualPathSequential()
             for j, out_channels in enumerate(channels_per_stage):
                 if j == 0:
-                    unit = DownSampler(
+                    unit = DownsampleBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        dilations=dilations[i][j],
-                        x0_in_channels=x0_in_channels)
+                        x0_channels=x0_channels,
+                        dilations=dilations[i][j])
                 else:
                     unit = ESPBlock(
                         in_channels=in_channels,

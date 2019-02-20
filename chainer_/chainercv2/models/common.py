@@ -58,6 +58,7 @@ def conv3x3(in_channels,
             out_channels,
             stride=1,
             pad=1,
+            dilate=1,
             groups=1,
             use_bias=False):
     """
@@ -73,6 +74,8 @@ def conv3x3(in_channels,
         Stride of the convolution.
     pad : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     use_bias : bool, default False
@@ -84,8 +87,9 @@ def conv3x3(in_channels,
         ksize=3,
         stride=stride,
         pad=pad,
-        groups=groups,
-        nobias=(not use_bias))
+        nobias=(not use_bias),
+        dilate=dilate,
+        groups=groups)
 
 
 def depthwise_conv3x3(channels,

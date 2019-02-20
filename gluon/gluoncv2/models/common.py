@@ -2,13 +2,14 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+__all__ = ['ReLU6', 'PReLU2', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential',
            'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
 
 import math
 from inspect import isfunction
+import mxnet as mx
 from mxnet.gluon import nn, HybridBlock
 
 
@@ -21,6 +22,29 @@ class ReLU6(nn.HybridBlock):
 
     def hybrid_forward(self, F, x):
         return F.clip(x, 0, 6, name="relu6")
+
+
+class PReLU2(HybridBlock):
+    """
+    Parametric leaky version of a Rectified Linear Unit (with wide alpha).
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    alpha_initializer : Initializer
+        Initializer for the `embeddings` matrix.
+    """
+    def __init__(self,
+                 in_channels=1,
+                 alpha_initializer=mx.init.Constant(0.25),
+                 **kwargs):
+        super(PReLU2, self).__init__(**kwargs)
+        with self.name_scope():
+            self.alpha = self.params.get("alpha", shape=(in_channels,), init=alpha_initializer)
+
+    def hybrid_forward(self, F, x, alpha):
+        return F.LeakyReLU(x, gamma=alpha, act_type="prelu", name="fwd")
 
 
 def conv1x1(in_channels,
@@ -57,6 +81,7 @@ def conv3x3(in_channels,
             out_channels,
             strides=1,
             padding=1,
+            dilation=1,
             groups=1,
             use_bias=False):
     """
@@ -72,6 +97,8 @@ def conv3x3(in_channels,
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
     use_bias : bool, default False
@@ -82,6 +109,7 @@ def conv3x3(in_channels,
         kernel_size=3,
         strides=strides,
         padding=padding,
+        dilation=dilation,
         groups=groups,
         use_bias=use_bias,
         in_channels=in_channels)

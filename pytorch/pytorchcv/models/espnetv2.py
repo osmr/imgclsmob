@@ -11,7 +11,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3, conv1x1_block, conv3x3_block, DualPathSequential
+from common import conv3x3, conv1x1_block, conv3x3_block, DualPathSequential
 
 
 class PreActivation(nn.Module):
@@ -79,10 +79,8 @@ class ESPBlock(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
-    branches : int
-        Number of parallel branches.
-    rfield : int
-        Maximum value of receptive field.
+    dilations : list of int
+        Dilation values for branches.
     use_avg : bool, default False
         Whether use average pooling.
     """
@@ -90,84 +88,63 @@ class ESPBlock(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
-                 branches,
-                 rfield,
-                 use_avg=False):
+                 dilations):
         super(ESPBlock, self).__init__()
-        assert (out_channels % branches == 0)
-        self.stride = stride
-        n = out_channels // branches
-        n1 = out_channels - (branches - 1) * n
-        assert n == n1
+        num_branches = len(dilations)
+        assert (out_channels % num_branches == 0)
+        self.downsample = (stride != 1)
+        mid_channels = out_channels // num_branches
 
-        self.proj_1x1 = conv1x1_block(
+        self.reduce_conv = conv1x1_block(
             in_channels=in_channels,
-            out_channels=n,
-            groups=branches,
-            activation=(lambda: nn.PReLU(n)))
+            out_channels=mid_channels,
+            groups=num_branches,
+            activation=(lambda: nn.PReLU(mid_channels)))
 
-        # (For convenience) Mapping between dilation rate and receptive field for a 3x3 kernel
-        map_receptive_ksize = {3: 1, 5: 2, 7: 3, 9: 4, 11: 5, 13: 6, 15: 7, 17: 8}
-        self.k_sizes = list()
-        for i in range(branches):
-            ksize = int(3 + 2 * i)
-            # After reaching the receptive field limit, fall back to the base kernel size of 3 with a dilation rate of 1
-            ksize = ksize if ksize <= rfield else 3
-            self.k_sizes.append(ksize)
-        # sort (in ascending order) these kernel sizes based on their receptive field
-        # This enables us to ignore the kernels (3x3 in our case) with the same effective receptive field in hierarchical
-        # feature fusion because kernels with 3x3 receptive fields does not have gridding artifact.
-        self.k_sizes.sort()
         self.spp_dw = nn.ModuleList()
-        for i in range(branches):
-            d_rate = map_receptive_ksize[self.k_sizes[i]]
+        for i in range(num_branches):
+            dilation = dilations[i]
             self.spp_dw.append(conv3x3(
-                in_channels=n,
-                out_channels=n,
+                in_channels=mid_channels,
+                out_channels=mid_channels,
                 stride=stride,
-                padding=d_rate,
-                dilation=d_rate,
-                groups=n))
-        # Performing a group convolution with K groups is the same as performing K point-wise convolutions
-        self.conv_1x1_exp = conv1x1_block(
+                padding=dilation,
+                dilation=dilation,
+                groups=mid_channels))
+
+        self.merge_conv = conv1x1_block(
             in_channels=out_channels,
             out_channels=out_channels,
-            groups=branches,
+            groups=num_branches,
             activation=None,
             activate=False)
-        self.br_after_cat = PreActivation(in_channels=out_channels)
-        self.module_act = nn.PReLU(out_channels)
-        self.downAvg = use_avg
+        self.preactiv = PreActivation(in_channels=out_channels)
+        self.activ = nn.PReLU(out_channels)
 
-    def forward(self, input, input2):
+    def forward(self, x, x0):
+
+        identity = x
+
         # Reduce --> project high-dimensional feature maps to low-dimensional space
-        output1 = self.proj_1x1(input)
-        output = [self.spp_dw[0](output1)]
+        output1 = self.reduce_conv(x)
+        outs = [self.spp_dw[0](output1)]
         # compute the output for each branch and hierarchically fuse them
         # i.e. Split --> Transform --> HFF
         for k in range(1, len(self.spp_dw)):
             out_k = self.spp_dw[k](output1)
             # HFF
-            out_k = out_k + output[k - 1]
-            output.append(out_k)
-        # Merge
-        expanded = self.conv_1x1_exp(  # learn linear combinations using group point-wise convolutions
-            self.br_after_cat(  # apply batch normalization followed by activation function (PRelu in this case)
-                torch.cat(output, 1)  # concatenate the output of different branches
-            )
-        )
-        del output
-        # if down-sampling, then return the concatenated vector
-        # because Downsampling function will combine it with avg. pooled feature map and then threshold it
-        if self.stride == 2 and self.downAvg:
-            return expanded, input2
+            out_k = out_k + outs[k - 1]
+            outs.append(out_k)
 
-        # if dimensions of input and concatenated vector are the same, add them (RESIDUAL LINK)
-        if expanded.size() == input.size():
-            expanded = expanded + input
+        y = torch.cat(tuple(outs), dim=1)
+        y = self.preactiv(y)
+        y = self.merge_conv(y)
 
-        # Threshold the feature map using activation function (PReLU in this case)
-        return self.module_act(expanded), input2
+        if not self.downsample:
+            y = y + identity
+            y = self.activ(y)
+
+        return y, x0
 
 
 class DownSampler(nn.Module):
@@ -180,23 +157,20 @@ class DownSampler(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    branches : int
-        Number of parallel branches.
-    rfield : int
-        Maximum value of receptive field allowed for EESP block.
+    dilations : list of int
+        Dilation values for branches in EESP block.
     x0_in_channels : int
         Number of input channels for shortcut.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 branches,
-                 rfield,
+                 dilations,
                  x0_in_channels):
         super(DownSampler, self).__init__()
         inc_channels = out_channels - in_channels
 
-        self.avg_pool = nn.AvgPool2d(
+        self.pool = nn.AvgPool2d(
             kernel_size=3,
             stride=2,
             padding=1)
@@ -204,21 +178,19 @@ class DownSampler(nn.Module):
             in_channels=in_channels,
             out_channels=inc_channels,
             stride=2,
-            branches=branches,
-            rfield=rfield,
-            use_avg=True)
+            dilations=dilations)
         self.shortcut_block = ShortcutBlock(
             in_channels=x0_in_channels,
             out_channels=out_channels)
         self.activ = nn.PReLU(out_channels)
 
     def forward(self, x, x0):
-        x1 = self.avg_pool(x)
-        x2, _ = self.eesp(x, None)
-        x = torch.cat((x1, x2), dim=1)
-        x0 = self.avg_pool(x0)
-        x3 = self.shortcut_block(x0)
-        x = x + x3
+        y1 = self.pool(x)
+        y2, _ = self.eesp(x, None)
+        x = torch.cat((y1, y2), dim=1)
+        x0 = self.pool(x0)
+        y3 = self.shortcut_block(x0)
+        x = x + y3
         x = self.activ(x)
         return x, x0
 
@@ -302,10 +274,10 @@ class ESPNetv2(nn.Module):
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final unit.
-    branches : int
-        Number of parallel branches.
-    rfields : list of list of int
-        Number of receptive field limits for each unit.
+    final_block_groups : int
+        Number of groups for the final unit.
+    dilations : list of list of list of int
+        Dilation values for branches in each unit.
     dropout_rate : float, default 0.2
         Parameter of Dropout layer. Faction of the input units to drop.
     in_channels : int, default 3
@@ -319,8 +291,8 @@ class ESPNetv2(nn.Module):
                  channels,
                  init_block_channels,
                  final_block_channels,
-                 branches,
-                 rfields,
+                 final_block_groups,
+                 dilations,
                  dropout_rate=0.2,
                  in_channels=3,
                  in_size=(224, 224),
@@ -345,23 +317,21 @@ class ESPNetv2(nn.Module):
                     unit = DownSampler(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        branches=branches,
-                        rfield=rfields[i][j],
+                        dilations=dilations[i][j],
                         x0_in_channels=x0_in_channels)
                 else:
                     unit = ESPBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         stride=1,
-                        branches=branches,
-                        rfield=rfields[i][j])
+                        dilations=dilations[i][j])
                 stage.add_module("unit{}".format(j + 1), unit)
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('final_block', ESPFinalBlock(
             in_channels=in_channels,
             out_channels=final_block_channels,
-            final_groups=branches))
+            final_groups=final_block_groups))
         in_channels = final_block_channels
         self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
@@ -412,8 +382,9 @@ def get_espnetv2(width_scale,
     branches = 4
     layers = [1, 4, 8, 4]
 
-    rfields_list = [13, 11, 9, 7, 5]
-    rfields = [[rfields_list[i]] + [rfields_list[i + 1]] * (li - 1) for (i, li) in enumerate(layers)]
+    max_dilation_list = [6, 5, 4, 3, 2]
+    max_dilations = [[max_dilation_list[i]] + [max_dilation_list[i + 1]] * (li - 1) for (i, li) in enumerate(layers)]
+    dilations = [[sorted([k + 1 if k < dij else 1 for k in range(branches)]) for dij in di] for di in max_dilations]
 
     base_channels = 32
     weighed_base_channels = math.ceil(float(math.floor(base_channels * width_scale)) / branches) * branches
@@ -428,8 +399,8 @@ def get_espnetv2(width_scale,
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
-        branches=branches,
-        rfields=rfields,
+        final_block_groups=branches,
+        dilations=dilations,
         **kwargs)
 
     if pretrained:

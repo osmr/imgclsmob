@@ -36,6 +36,8 @@ from .models.channelnet import *
 from .models.dla import *
 from .models.msdnet import *
 from .models.fishnet import *
+from .models.espnetv2 import *
+from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -54,23 +56,19 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
+
 from .models.nin_cifar import *
 from .models.resnet_cifar import *
 from .models.preresnet_cifar import *
 from .models.resnext_cifar import *
 from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
+from .models.xdensenet_cifar import *
 from .models.wrn_cifar import *
-
+from .models.ror_cifar import *
 from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
-
-from .models.xdensenet import *
-from .models.xdensenet_cifar import *
-from .models.ror_cifar import *
-
-from .models.espnetv2 import *
 
 __all__ = ['get_model']
 
@@ -288,6 +286,17 @@ _models = {
     'fishnet99': fishnet99,
     'fishnet150': fishnet150,
 
+    'espnetv2_wd2': espnetv2_wd2,
+    'espnetv2_w1': espnetv2_w1,
+    'espnetv2_w5d4': espnetv2_w5d4,
+    'espnetv2_w3d2': espnetv2_w3d2,
+    'espnetv2_w2': espnetv2_w2,
+
+    'xdensenet121_2': xdensenet121_2,
+    'xdensenet161_2': xdensenet161_2,
+    'xdensenet169_2': xdensenet169_2,
+    'xdensenet201_2': xdensenet201_2,
+
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,
 
@@ -435,12 +444,24 @@ _models = {
     'densenet250_k24_bc_cifar10': densenet250_k24_bc_cifar10,
     'densenet250_k24_bc_cifar100': densenet250_k24_bc_cifar100,
 
+    'xdensenet40_2_k24_bc_cifar10': xdensenet40_2_k24_bc_cifar10,
+    'xdensenet40_2_k24_bc_cifar100': xdensenet40_2_k24_bc_cifar100,
+    'xdensenet40_2_k36_bc_cifar10': xdensenet40_2_k36_bc_cifar10,
+    'xdensenet40_2_k36_bc_cifar100': xdensenet40_2_k36_bc_cifar100,
+
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn16_10_cifar100': wrn16_10_cifar100,
     'wrn28_10_cifar10': wrn28_10_cifar10,
     'wrn28_10_cifar100': wrn28_10_cifar100,
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
+
+    'ror3_56_cifar10': ror3_56_cifar10,
+    'ror3_56_cifar100': ror3_56_cifar100,
+    'ror3_110_cifar10': ror3_110_cifar10,
+    'ror3_110_cifar100': ror3_110_cifar100,
+    'ror3_164_cifar10': ror3_164_cifar10,
+    'ror3_164_cifar100': ror3_164_cifar100,
 
     'resdropresnet20_cifar10': resdropresnet20_cifar10,
     'resdropresnet20_cifar100': resdropresnet20_cifar100,
@@ -452,29 +473,6 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
-
-    'xdensenet121_2': xdensenet121_2,
-    'xdensenet161_2': xdensenet161_2,
-    'xdensenet169_2': xdensenet169_2,
-    'xdensenet201_2': xdensenet201_2,
-
-    'xdensenet40_2_k24_bc_cifar10': xdensenet40_2_k24_bc_cifar10,
-    'xdensenet40_2_k24_bc_cifar100': xdensenet40_2_k24_bc_cifar100,
-    'xdensenet40_2_k36_bc_cifar10': xdensenet40_2_k36_bc_cifar10,
-    'xdensenet40_2_k36_bc_cifar100': xdensenet40_2_k36_bc_cifar100,
-
-    'ror3_56_cifar10': ror3_56_cifar10,
-    'ror3_56_cifar100': ror3_56_cifar100,
-    'ror3_110_cifar10': ror3_110_cifar10,
-    'ror3_110_cifar100': ror3_110_cifar100,
-    'ror3_164_cifar10': ror3_164_cifar10,
-    'ror3_164_cifar100': ror3_164_cifar100,
-
-    'espnetv2_wd2': espnetv2_wd2,
-    'espnetv2_w1': espnetv2_w1,
-    'espnetv2_w5d8': espnetv2_w5d8,
-    'espnetv2_w3d2': espnetv2_w3d2,
-    'espnetv2_w2': espnetv2_w2,
 }
 
 

@@ -87,6 +87,8 @@ Some remarks:
 | DLA | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.06484) | [link](https://github.com/ucbdrive/dla) | 2017 |
 | MSDNet | A | AB | - | - | - | [link](https://arxiv.org/abs/1703.09844) | [link](https://github.com/gaohuang/MSDNet) | 2017 |
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |
+| ESPNetv2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1811.11431) | [link](https://github.com/sacmehta/ESPNetv2) | 2018 |
+| X-DenseNet | AB+C+ | AB+C+ | AB+C+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
 | SqueezeNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | [link](https://github.com/DeepScale/SqueezeNet) | 2016 |
 | SqueezeResNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | - | 2016 |
 | SqueezeNext | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1803.10615) | [link](https://github.com/amirgholami/SqueezeNext) | 2018 |
@@ -108,8 +110,7 @@ Some remarks:
 | NASNet-Mobile | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
 | PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
 | NIN | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
+| RoR-3 | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |
 | ResDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1603.09382) | [link](https://github.com/yueatsprograms/Stochastic_Depth) | 2016 |
 | Shake-Shake-ResNet | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |
-| X-DenseNet | AB+C+ | AB+C+ | AB+C+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
-| RoR-3 | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |

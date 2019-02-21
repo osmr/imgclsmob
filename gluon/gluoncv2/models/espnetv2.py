@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1811.11431.
 """
 
-__all__ = ['ESPNetv2', 'espnetv2_wd2', 'espnetv2_w1', 'espnetv2_w5d8', 'espnetv2_w3d2', 'espnetv2_w2']
+__all__ = ['ESPNetv2', 'espnetv2_wd2', 'espnetv2_w1', 'espnetv2_w5d4', 'espnetv2_w3d2', 'espnetv2_w2']
 
 import os
 import math
@@ -504,7 +504,7 @@ def espnetv2_w1(**kwargs):
     return get_espnetv2(width_scale=1.0, model_name="espnetv2_w1", **kwargs)
 
 
-def espnetv2_w5d8(**kwargs):
+def espnetv2_w5d4(**kwargs):
     """
     ESPNetv2 x1.25 model from 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural
     Network,' https://arxiv.org/abs/1811.11431.
@@ -518,7 +518,7 @@ def espnetv2_w5d8(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_espnetv2(width_scale=1.25, model_name="espnetv2_w5d8", **kwargs)
+    return get_espnetv2(width_scale=1.25, model_name="espnetv2_w5d4", **kwargs)
 
 
 def espnetv2_w3d2(**kwargs):
@@ -564,7 +564,7 @@ def _test():
     models = [
         espnetv2_wd2,
         espnetv2_w1,
-        espnetv2_w5d8,
+        espnetv2_w5d4,
         espnetv2_w3d2,
         espnetv2_w2,
     ]
@@ -587,7 +587,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != espnetv2_wd2 or weight_count == 1241332)
         assert (model != espnetv2_w1 or weight_count == 1670072)
-        assert (model != espnetv2_w5d8 or weight_count == 1965440)
+        assert (model != espnetv2_w5d4 or weight_count == 1965440)
         assert (model != espnetv2_w3d2 or weight_count == 2314856)
         assert (model != espnetv2_w2 or weight_count == 3498136)
 

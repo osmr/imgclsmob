@@ -132,6 +132,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | PreResNet-152 | 20.94 | 5.55 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.14/preresnet152-0555-c842a030.pth.log)) |
 | PreResNet-152b | 21.34 | 5.91 | 60,185,256 | 11,551.87M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet152b-0591-2c91ab2c.pth.log)) |
 | PreResNet-200b | 21.33 | 5.88 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.45/preresnet200b-0588-f7104ff3.pth.log)) |
+| PreResNet-269b | 20.92 | 5.81 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0581-1a7878bb.pth.log)) |
 | ResNeXt-101 (32x4d) | 21.81 | 6.11 | 44,177,704 | 8,003.45M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.10/resnext101_32x4d-0611-cf962440.pth.log)) |
 | ResNeXt-101 (64x4d) | 21.04 | 5.75 | 83,455,272 | 15,500.27M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.10/resnext101_64x4d-0575-651abd02.pth.log)) |
 | SE-ResNet-50 | 22.47 | 6.40 | 28,088,024 | 3,880.49M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.11/seresnet50-0640-8820f2af.pth.log)) |
@@ -330,6 +331,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [quark0/darts]: https://github.com/quark0/darts
 [homles11/IGCV3]: https://github.com/homles11/IGCV3
 [soeaver/AirNet-PyTorch]: https://github.com/soeaver/AirNet-PyTorch
+[soeaver/mxnet-model]: https://github.com/soeaver/mxnet-model
 [Jongchan/attention-module]: https://github.com/Jongchan/attention-module
 [XingangPan/IBN-Net]: https://github.com/XingangPan/IBN-Net
 [cypw/CRU-Net]: https://github.com/cypw/CRU-Net

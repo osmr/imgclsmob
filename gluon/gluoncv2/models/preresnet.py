@@ -728,7 +728,6 @@ def _test():
         preresnet152b,
         preresnet200,
         preresnet200b,
-
         preresnet269b,
     ]
 

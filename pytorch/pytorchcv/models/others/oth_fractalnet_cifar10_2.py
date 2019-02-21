@@ -217,7 +217,7 @@ class FractalNet(nn.Module):
         C_out = init_block_channels
         total_layers = 0
         for b, p_dropout in enumerate(dropout_probs):
-            print("[block {}] Channel in = {}, Channel out = {}".format(b, in_channels, C_out))
+            # print("[block {}] Channel in = {}, Channel out = {}".format(b, in_channels, C_out))
             fb = FractalBlock(
                 n_columns,
                 in_channels,
@@ -239,8 +239,8 @@ class FractalNet(nn.Module):
             if b < self.B-2:
                 C_out *= 2 # doubling except for last block
 
-        print("Last featuremap size = {}".format(size))
-        print("Total layers = {}".format(total_layers))
+        # print("Last featuremap size = {}".format(size))
+        # print("Total layers = {}".format(total_layers))
 
         if gap == 2:
             layers.append(nn.Conv2d(C_out, num_classes, 1, padding=0)) # 1x1 conv

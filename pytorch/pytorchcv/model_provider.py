@@ -64,6 +64,7 @@ from .models.densenet_cifar import *
 from .models.xdensenet_cifar import *
 from .models.wrn_cifar import *
 from .models.ror_cifar import *
+from .models.rir_cifar import *
 from .models.msdnet_cifar10 import *
 from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
@@ -455,6 +456,9 @@ _models = {
     'ror3_110_cifar100': ror3_110_cifar100,
     'ror3_164_cifar10': ror3_164_cifar10,
     'ror3_164_cifar100': ror3_164_cifar100,
+
+    'rir_cifar10': rir_cifar10,
+    'rir_cifar100': rir_cifar100,
 
     'msdnet22_cifar10': msdnet22_cifar10,
 

@@ -82,12 +82,12 @@ class FractalBlock(nn.Module):
                     first_block = (i+1 == dist) # first block in this column
                     if first_block and not doubling:
                         # if doubling, always input channel size is C_out.
-                        cur_C_in = in_channels
+                        cur_in_channels = in_channels
                     else:
-                        cur_C_in = out_channels
+                        cur_in_channels = out_channels
 
                     module = ConvBlock(
-                        in_channels=cur_C_in,
+                        in_channels=cur_in_channels,
                         out_channels=out_channels,
                         dropout_rate=dropout_rate)
                     self.count[i] += 1

@@ -199,7 +199,7 @@ class RoRResBody(nn.Module):
 
 class CIFARRoR(nn.Module):
     """
-    RoR-3 model for CIFAR-10 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
+    RoR-3 model for CIFAR from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 
     Parameters:

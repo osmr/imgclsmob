@@ -15,7 +15,7 @@ from .preresnet import PreResUnit, PreResActivation
 
 class CIFARWRN(HybridBlock):
     """
-    CIFAR WRN model from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+    WRN model for CIFAR from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -84,14 +84,14 @@ class CIFARWRN(HybridBlock):
         return x
 
 
-def get_wrn(classes,
-            blocks,
-            width_factor,
-            model_name=None,
-            pretrained=False,
-            ctx=cpu(),
-            root=os.path.join('~', '.mxnet', 'models'),
-            **kwargs):
+def get_wrn_cifar(classes,
+                  blocks,
+                  width_factor,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join('~', '.mxnet', 'models'),
+                  **kwargs):
     """
     Create WRN model for CIFAR with specific parameters.
 
@@ -154,7 +154,7 @@ def wrn16_10_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar10", **kwargs)
 
 
 def wrn16_10_cifar100(classes=100, **kwargs):
@@ -172,7 +172,7 @@ def wrn16_10_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar100", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar100", **kwargs)
 
 
 def wrn28_10_cifar10(classes=10, **kwargs):
@@ -190,7 +190,7 @@ def wrn28_10_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar10", **kwargs)
 
 
 def wrn28_10_cifar100(classes=100, **kwargs):
@@ -208,7 +208,7 @@ def wrn28_10_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar100", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar100", **kwargs)
 
 
 def wrn40_8_cifar10(classes=10, **kwargs):
@@ -226,7 +226,7 @@ def wrn40_8_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar10", **kwargs)
 
 
 def wrn40_8_cifar100(classes=100, **kwargs):
@@ -244,7 +244,7 @@ def wrn40_8_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar100", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar100", **kwargs)
 
 
 def _test():

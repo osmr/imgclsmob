@@ -42,17 +42,17 @@ class ConvBlock(nn.Module):
 
 class FractalBlock(nn.Module):
     def __init__(self,
-                 n_columns,
                  in_channels,
                  out_channels,
+                 n_columns,
                  p_ldrop,
                  dropout_rate,
                  doubling=False):
         """ Fractal block
         Args:
-            - n_columns: # of columns
             - C_in: channel_in
             - C_out: channel_out
+            - n_columns: # of columns
             - p_ldrop: local droppath prob
             - p_dropout: dropout prob
             - doubling: if True, doubling by 1x1 conv in front of the block.
@@ -148,7 +148,7 @@ class FractalBlock(nn.Module):
             n_alive[n_alive == 0.] = 1. # all-dead cases
             out = masked_out.sum(dim=0) / n_alive # [B, C, H, W] / [B, 1, 1, 1]
         else:
-            out = out.mean(dim=0) # no drop
+            out = out.mean(dim=0)  # no drop
 
         return out
 
@@ -185,7 +185,6 @@ class FractalNet(nn.Module):
                  p_ldrop,
                  dropout_probs,
                  gdrop_ratio,
-                 gap=0,
                  doubling=False,
                  consist_gdrop=True,
                  in_channels=3,
@@ -198,14 +197,11 @@ class FractalNet(nn.Module):
             - p_ldrop: local drop prob
             - dropout_probs: dropout probs (list)
             - gdrop_ratio: global droppath ratio
-            - gap: pooling type for last block
-            - init: initializer type
             - doubling: if True, doubling by 1x1 conv in front of the block.
-            - consist_gdrop
         """
         super(FractalNet, self).__init__()
 
-        self.B = len(dropout_probs) # the number of blocks
+        self.B = len(dropout_probs)  # the number of blocks
         self.consist_gdrop = consist_gdrop
         self.gdrop_ratio = gdrop_ratio
         self.n_columns = n_columns
@@ -214,41 +210,26 @@ class FractalNet(nn.Module):
         size = in_size[0]
 
         layers = nn.ModuleList()
-        C_out = init_block_channels
-        total_layers = 0
+        out_channels = init_block_channels
         for b, p_dropout in enumerate(dropout_probs):
             # print("[block {}] Channel in = {}, Channel out = {}".format(b, in_channels, C_out))
             fb = FractalBlock(
-                n_columns,
-                in_channels,
-                C_out,
-                p_ldrop,
-                p_dropout,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                n_columns=n_columns,
+                p_ldrop=p_ldrop,
+                dropout_rate=p_dropout,
                 doubling=doubling)
             layers.append(fb)
-            if gap == 0 or b < self.B-1:
-                # Originally, every pool is max-pool in the paper (No GAP).
-                layers.append(nn.MaxPool2d(2))
-            elif gap == 1:
-                # last layer and gap == 1
-                layers.append(nn.AdaptiveAvgPool2d(1)) # average pooling
+            layers.append(nn.MaxPool2d(2))
 
             size //= 2
-            total_layers += fb.max_depth
-            in_channels = C_out
+            in_channels = out_channels
             if b < self.B-2:
-                C_out *= 2 # doubling except for last block
+                out_channels *= 2  # doubling except for last block
 
-        # print("Last featuremap size = {}".format(size))
-        # print("Total layers = {}".format(total_layers))
-
-        if gap == 2:
-            layers.append(nn.Conv2d(C_out, num_classes, 1, padding=0)) # 1x1 conv
-            layers.append(nn.AdaptiveAvgPool2d(1)) # gap
-            layers.append(Flatten())
-        else:
-            layers.append(Flatten())
-            layers.append(nn.Linear(C_out * size * size, num_classes)) # fc layer
+        layers.append(Flatten())
+        layers.append(nn.Linear(out_channels * size * size, num_classes))  # fc layer
 
         self.layers = layers
 
@@ -277,7 +258,6 @@ def oth_fractalnet_cifar10(pretrained=False, **kwargs):
         p_ldrop=0.15,
         dropout_probs=(0.0, 0.1, 0.2, 0.3, 0.4),
         gdrop_ratio=0.5,
-        gap=0,
         doubling=False,
         consist_gdrop=True,
         num_classes=10)

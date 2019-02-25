@@ -46,42 +46,28 @@ class FractalBlock(nn.Module):
                  out_channels,
                  n_columns,
                  p_ldrop,
-                 dropout_rate,
-                 doubling=False):
+                 dropout_rate):
         """ Fractal block
         Args:
-            - C_in: channel_in
-            - C_out: channel_out
             - n_columns: # of columns
             - p_ldrop: local droppath prob
             - p_dropout: dropout prob
-            - doubling: if True, doubling by 1x1 conv in front of the block.
         """
         super(FractalBlock, self).__init__()
 
         self.n_columns = n_columns
         self.p_ldrop = p_ldrop
 
-        if doubling:
-            self.doubler = ConvBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-                padding=0)
-        else:
-            self.doubler = None
-
         self.columns = nn.ModuleList([nn.ModuleList() for _ in range(n_columns)])
-        self.max_depth = 2 ** (n_columns-1)
+        self.max_depth = 2 ** (n_columns - 1)
 
         dist = self.max_depth
         self.count = np.zeros([self.max_depth], dtype=np.int)
         for col in self.columns:
             for i in range(self.max_depth):
-                if (i+1) % dist == 0:
-                    first_block = (i+1 == dist) # first block in this column
-                    if first_block and not doubling:
-                        # if doubling, always input channel size is C_out.
+                if (i + 1) % dist == 0:
+                    first_block = (i + 1 == dist)  # first block in this column
+                    if first_block:
                         cur_in_channels = in_channels
                     else:
                         cur_in_channels = out_channels
@@ -97,6 +83,8 @@ class FractalBlock(nn.Module):
                 col.append(module)
 
             dist //= 2
+
+        pass
 
     def drop_mask(self, B, global_cols, n_cols):
         """ Generate drop mask; [n_cols, B].
@@ -152,21 +140,19 @@ class FractalBlock(nn.Module):
 
         return out
 
-    def forward(self, x, global_cols, deepest=False):
+    def forward(self, x, global_cols):
         """
         global_cols works only in training mode.
         """
-        out = self.doubler(x) if self.doubler else x
+        out = x
         outs = [out] * self.n_columns
         for i in range(self.max_depth):
             st = self.n_columns - self.count[i]
-            cur_outs = [] # outs of current depth
-            if deepest:
-                st = self.n_columns - 1 # last column only
+            cur_outs = []  # outs of current depth
 
             for c in range(st, self.n_columns):
-                cur_in = outs[c] # current input
-                cur_module = self.columns[c][i] # current module
+                cur_in = outs[c]  # current input
+                cur_module = self.columns[c][i]  # current module
                 cur_outs.append(cur_module(cur_in))
 
             # join
@@ -175,18 +161,16 @@ class FractalBlock(nn.Module):
             for c in range(st, self.n_columns):
                 outs[c] = joined
 
-        return outs[-1] # for deepest case
+        return outs[-1]  # for deepest case
 
 
 class FractalNet(nn.Module):
     def __init__(self,
-                 n_columns,
-                 init_block_channels,
-                 p_ldrop,
+                 channels,
                  dropout_probs,
+                 n_columns,
+                 p_ldrop,
                  gdrop_ratio,
-                 doubling=False,
-                 consist_gdrop=True,
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
@@ -200,51 +184,34 @@ class FractalNet(nn.Module):
             - doubling: if True, doubling by 1x1 conv in front of the block.
         """
         super(FractalNet, self).__init__()
-
-        self.B = len(dropout_probs)  # the number of blocks
-        self.consist_gdrop = consist_gdrop
         self.gdrop_ratio = gdrop_ratio
         self.n_columns = n_columns
 
-        assert (in_size[0] == in_size[1])
-        size = in_size[0]
-
         layers = nn.ModuleList()
-        out_channels = init_block_channels
-        for b, p_dropout in enumerate(dropout_probs):
-            # print("[block {}] Channel in = {}, Channel out = {}".format(b, in_channels, C_out))
-            fb = FractalBlock(
+        for i, out_channels in enumerate(channels):
+            p_dropout = dropout_probs[i]
+            layers.append(FractalBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 n_columns=n_columns,
                 p_ldrop=p_ldrop,
-                dropout_rate=p_dropout,
-                doubling=doubling)
-            layers.append(fb)
+                dropout_rate=p_dropout))
             layers.append(nn.MaxPool2d(2))
-
-            size //= 2
             in_channels = out_channels
-            if b < self.B-2:
-                out_channels *= 2  # doubling except for last block
 
         layers.append(Flatten())
-        layers.append(nn.Linear(out_channels * size * size, num_classes))  # fc layer
+        layers.append(nn.Linear(out_channels, num_classes))  # fc layer
 
         self.layers = layers
 
-    def forward(self, x, deepest=False):
-        if deepest:
-            assert self.training is False
+    def forward(self, x):
         GB = int(x.size(0) * self.gdrop_ratio)
+        global_cols = np.random.randint(0, self.n_columns, size=[GB])
+
         out = x
-        global_cols = None
         for layer in self.layers:
             if isinstance(layer, FractalBlock):
-                if not self.consist_gdrop or global_cols is None:
-                    global_cols = np.random.randint(0, self.n_columns, size=[GB])
-
-                out = layer(out, global_cols, deepest=deepest)
+                out = layer(out, global_cols)
             else:
                 out = layer(out)
 
@@ -252,14 +219,16 @@ class FractalNet(nn.Module):
 
 
 def oth_fractalnet_cifar10(pretrained=False, **kwargs):
+
+    dropout_probs = (0.0, 0.1, 0.2, 0.3, 0.4)
+    channels = [64 * (2 ** (i if i != len(dropout_probs) - 1 else i - 1)) for i in range(len(dropout_probs))]
+
     model = FractalNet(
+        channels=channels,
+        dropout_probs=dropout_probs,
         n_columns=3,
-        init_block_channels=64,
         p_ldrop=0.15,
-        dropout_probs=(0.0, 0.1, 0.2, 0.3, 0.4),
         gdrop_ratio=0.5,
-        doubling=False,
-        consist_gdrop=True,
         num_classes=10)
     return model
 
@@ -293,9 +262,9 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_fractalnet_cifar10 or weight_count == 33724618)
 
-        x = Variable(torch.randn(1, 3, 32, 32))
+        x = Variable(torch.randn(14, 3, 32, 32))
         y = net(x)
-        assert (tuple(y.size()) == (1, 10))
+        assert (tuple(y.size()) == (14, 10))
 
 
 if __name__ == "__main__":

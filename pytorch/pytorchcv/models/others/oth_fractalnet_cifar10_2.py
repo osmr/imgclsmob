@@ -5,6 +5,20 @@ import torch.nn.functional as F
 import numpy as np
 
 
+class ParametricSequential(nn.Sequential):
+    """
+    A sequential container for modules with parameters.
+    Modules will be executed in the order they are added.
+    """
+    def __init__(self, *args):
+        super(ParametricSequential, self).__init__(*args)
+
+    def forward(self, x, **kwargs):
+        for module in self._modules.values():
+            x = module(x, **kwargs)
+        return x
+
+
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
@@ -164,6 +178,38 @@ class FractalBlock(nn.Module):
         return outs[-1]  # for deepest case
 
 
+class FractalUnit(nn.Module):
+    """
+    FractalNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 n_columns,
+                 p_ldrop,
+                 p_dropout):
+        super(FractalUnit, self).__init__()
+        self.block = FractalBlock(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            n_columns=n_columns,
+            p_ldrop=p_ldrop,
+            dropout_rate=p_dropout)
+        self.pool = nn.MaxPool2d(2)
+
+    def forward(self, x, global_cols):
+        x = self.block(x, global_cols)
+        x = self.pool(x)
+        return x
+
+
 class FractalNet(nn.Module):
     def __init__(self,
                  channels,
@@ -187,35 +233,29 @@ class FractalNet(nn.Module):
         self.gdrop_ratio = gdrop_ratio
         self.n_columns = n_columns
 
-        layers = nn.ModuleList()
+        self.features = ParametricSequential()
         for i, out_channels in enumerate(channels):
             p_dropout = dropout_probs[i]
-            layers.append(FractalBlock(
+            self.features.add_module("unit{}".format(i + 1), FractalUnit(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 n_columns=n_columns,
                 p_ldrop=p_ldrop,
-                dropout_rate=p_dropout))
-            layers.append(nn.MaxPool2d(2))
+                p_dropout=p_dropout))
             in_channels = out_channels
 
-        layers.append(Flatten())
-        layers.append(nn.Linear(out_channels, num_classes))  # fc layer
-
-        self.layers = layers
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
     def forward(self, x):
         GB = int(x.size(0) * self.gdrop_ratio)
         global_cols = np.random.randint(0, self.n_columns, size=[GB])
 
-        out = x
-        for layer in self.layers:
-            if isinstance(layer, FractalBlock):
-                out = layer(out, global_cols)
-            else:
-                out = layer(out)
-
-        return out
+        x = self.features(x, global_cols=global_cols)
+        x = x.view(x.size(0), -1)
+        x = self.output(x)
+        return x
 
 
 def oth_fractalnet_cifar10(pretrained=False, **kwargs):
@@ -256,8 +296,8 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
+        net.train()
+        # net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_fractalnet_cifar10 or weight_count == 33724618)

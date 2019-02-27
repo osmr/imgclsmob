@@ -70,6 +70,7 @@ from .models.rir_cifar import *
 from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
+from .models.fractalnet_cifar import *
 
 __all__ = ['get_model']
 
@@ -477,6 +478,9 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
+
+    'fractalnet_cifar10': fractalnet_cifar10,
+    'fractalnet_cifar100': fractalnet_cifar100,
 }
 
 

@@ -341,6 +341,7 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != oth_fractalnet_cifar10 or weight_count == 33724618)
+        # assert (model != oth_fractalnet_cifar100 or weight_count == 33770788)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

@@ -572,14 +572,14 @@ def channel_shuffle(x,
 
     Parameters:
     ----------
-    x : NDArray
+    x : Symbol or NDArray
         Input tensor.
     groups : int
         Number of groups.
 
     Returns
     -------
-    NDArray
+    Symbol or NDArray
         Resulted tensor.
     """
     return x.reshape((0, -4, groups, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
@@ -616,14 +616,14 @@ def channel_shuffle2(x,
 
     Parameters:
     ----------
-    x : NDArray
+    x : Symbol or NDArray
         Input tensor.
     channels_per_group : int
         Number of channels per group.
 
     Returns
     -------
-    NDArray
+    Symbol or NDArray
         Resulted tensor.
     """
     return x.reshape((0, -4, channels_per_group, -1, -2)).swapaxes(1, 2).reshape((0, -3, -2))
@@ -701,7 +701,7 @@ def split(x,
 
     Parameters:
     ----------
-    x : NDArray/symbol
+    x : Symbol or NDArray
         Input tensor.
     sizes : tuple/list of int
         Sizes of chunks.
@@ -710,7 +710,7 @@ def split(x,
 
     Returns
     -------
-    Tuple of NDArray/symbol
+    Tuple of Symbol or NDArray
         Resulted tensor.
     """
     x_outs = []

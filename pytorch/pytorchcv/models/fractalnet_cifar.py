@@ -1,25 +1,39 @@
-""" Fractal Model - per sample drop path """
+"""
+    FractalNet for CIFAR, implemented in PyTorch.
+    Original paper: 'FractalNet: Ultra-Deep Neural Networks without Residuals,' https://arxiv.org/abs/1605.07648.
+"""
+
+__all__ = ['CIFARFractalNet', 'fractalnet_cifar10', 'fractalnet_cifar100']
+
+import os
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-
-
-class ParametricSequential(nn.Sequential):
-    """
-    A sequential container for modules with parameters.
-    Modules will be executed in the order they are added.
-    """
-    def __init__(self, *args):
-        super(ParametricSequential, self).__init__(*args)
-
-    def forward(self, x, **kwargs):
-        for module in self._modules.values():
-            x = module(x, **kwargs)
-        return x
+import torch.nn.init as init
+from .common import ParametricSequential
 
 
 class DropConvBlock(nn.Module):
+    """
+    Convolution block with Batch normalization, ReLU activation, and Dropout layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    dropout_rate : bool, default 0.0
+        Parameter of Dropout layer. Faction of the input units to drop.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -30,6 +44,7 @@ class DropConvBlock(nn.Module):
                  dropout_prob=0.0):
         super(DropConvBlock, self).__init__()
         self.use_dropout = (dropout_prob != 0.0)
+
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -37,17 +52,18 @@ class DropConvBlock(nn.Module):
             stride=stride,
             padding=padding,
             bias=bias)
-        self.bn = nn.BatchNorm2d(out_channels)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        self.activ = nn.ReLU(inplace=True)
         if self.use_dropout:
             self.dropout = nn.Dropout2d(p=dropout_prob)
 
     def forward(self, x):
-        out = self.conv(x)
-        out = self.bn(out)
-        out = F.relu_(out)
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.activ(x)
         if self.use_dropout:
-            out = self.dropout(out)
-        return out
+            x = self.dropout(x)
+        return x
 
 
 def drop_conv3x3_block(in_channels,
@@ -56,6 +72,24 @@ def drop_conv3x3_block(in_channels,
                        padding=1,
                        bias=False,
                        dropout_prob=0.0):
+    """
+    3x3 version of the convolution block with dropout.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    dropout_rate : bool, default 0.0
+        Parameter of Dropout layer. Faction of the input units to drop.
+    """
     return DropConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -67,6 +101,22 @@ def drop_conv3x3_block(in_channels,
 
 
 class FractalBlock(nn.Module):
+    """
+    FractalNet block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    num_columns : int
+        Number of columns in each block.
+    loc_drop_prob : float
+        Local drop path probability.
+    dropout_prob : float
+        Probability of dropout.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -92,15 +142,33 @@ class FractalBlock(nn.Module):
                         dropout_prob=dropout_prob))
             self.blocks.add_module("block{}".format(i + 1), level_block_i)
 
-        pass
-
     @staticmethod
     def calc_drop_mask(batch_size,
                        glob_num_columns,
                        curr_num_columns,
                        max_num_columns,
                        loc_drop_prob):
+        """
+        Calculate drop path mask.
 
+        Parameters:
+        ----------
+        batch_size : int
+            Size of batch.
+        glob_num_columns : int
+            Number of columns in global drop path mask.
+        curr_num_columns : int
+            Number of active columns in the current level of block.
+        max_num_columns : int
+            Number of columns for all network.
+        loc_drop_prob : float
+            Local drop path probability.
+
+        Returns
+        -------
+        Tensor
+            Resulted mask.
+        """
         glob_batch_size = glob_num_columns.shape[0]
         glob_drop_mask = np.zeros((curr_num_columns, glob_batch_size), dtype=np.float32)
         glob_drop_num_columns = glob_num_columns - (max_num_columns - curr_num_columns)
@@ -125,6 +193,27 @@ class FractalBlock(nn.Module):
                   num_columns,
                   loc_drop_prob,
                   training):
+        """
+        Join outputs for current level of block.
+
+        Parameters:
+        ----------
+        raw_outs : list of Tensor
+            Current outputs from active columns.
+        glob_num_columns : int
+            Number of columns in global drop path mask.
+        num_columns : int
+            Number of columns for all network.
+        loc_drop_prob : float
+            Local drop path probability.
+        training : bool
+            Whether training mode for network.
+
+        Returns
+        -------
+        Tensor
+            Joined output.
+        """
         curr_num_columns = len(raw_outs)
         out = torch.stack(raw_outs, dim=0)
         assert (out.size(0) == curr_num_columns)
@@ -184,6 +273,12 @@ class FractalUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    num_columns : int
+        Number of columns in each block.
+    loc_drop_prob : float
+        Local drop path probability.
+    dropout_prob : float
+        Probability of dropout.
     """
     def __init__(self,
                  in_channels,
@@ -208,7 +303,30 @@ class FractalUnit(nn.Module):
         return x
 
 
-class FractalNet(nn.Module):
+class CIFARFractalNet(nn.Module):
+    """
+    FractalNet model for CIFAR from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
+    https://arxiv.org/abs/1605.07648.
+
+    Parameters:
+    ----------
+    channels : list of int
+        Number of output channels for each unit.
+    num_columns : int
+        Number of columns in each block.
+    dropout_probs : list of float
+        Probability of dropout in each block.
+    loc_drop_prob : float
+        Local drop path probability.
+    glob_drop_ratio : float
+        Global drop part fraction.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (32, 32)
+        Spatial size of the expected input image.
+    num_classes : int, default 10
+        Number of classification classes.
+    """
     def __init__(self,
                  channels,
                  num_columns,
@@ -218,7 +336,7 @@ class FractalNet(nn.Module):
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):
-        super(FractalNet, self).__init__()
+        super(CIFARFractalNet, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
         self.glob_drop_ratio = glob_drop_ratio
@@ -239,9 +357,18 @@ class FractalNet(nn.Module):
             in_features=in_channels,
             out_features=num_classes)
 
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
     def forward(self, x):
         glob_batch_size = int(x.size(0) * self.glob_drop_ratio)
-        glob_num_columns = np.random.randint(0, self.num_columns, size=[glob_batch_size])
+        glob_num_columns = np.random.randint(0, self.num_columns, size=(glob_batch_size,))
 
         x = self.features(x, glob_num_columns=glob_num_columns)
         x = x.view(x.size(0), -1)
@@ -249,7 +376,25 @@ class FractalNet(nn.Module):
         return x
 
 
-def oth_fractalnet_cifar10(pretrained=False, **kwargs):
+def get_fractalnet_cifar(num_classes,
+                         model_name=None,
+                         pretrained=False,
+                         root=os.path.join('~', '.torch', 'models'),
+                         **kwargs):
+    """
+    Create WRN model for CIFAR with specific parameters.
+
+    Parameters:
+    ----------
+    num_classes : int
+        Number of classification classes.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
 
     dropout_probs = (0.0, 0.1, 0.2, 0.3, 0.4)
     channels = [64 * (2 ** (i if i != len(dropout_probs) - 1 else i - 1)) for i in range(len(dropout_probs))]
@@ -257,32 +402,59 @@ def oth_fractalnet_cifar10(pretrained=False, **kwargs):
     loc_drop_prob = 0.15
     glob_drop_ratio = 0.5
 
-    model = FractalNet(
+    net = CIFARFractalNet(
         channels=channels,
         num_columns=num_columns,
         dropout_probs=dropout_probs,
         loc_drop_prob=loc_drop_prob,
         glob_drop_ratio=glob_drop_ratio,
-        num_classes=10)
-    return model
+        num_classes=num_classes,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
 
 
-def oth_fractalnet_cifar100(pretrained=False, **kwargs):
+def fractalnet_cifar10(num_classes=10, **kwargs):
+    """
+    FractalNet model for CIFAR-10 from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
+    https://arxiv.org/abs/1605.07648.
 
-    dropout_probs = (0.0, 0.1, 0.2, 0.3, 0.4)
-    channels = [64 * (2 ** (i if i != len(dropout_probs) - 1 else i - 1)) for i in range(len(dropout_probs))]
-    num_columns = 3
-    loc_drop_prob = 0.15
-    glob_drop_ratio = 0.5
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_fractalnet_cifar(num_classes=num_classes, model_name="fractalnet_cifar10", **kwargs)
 
-    model = FractalNet(
-        channels=channels,
-        num_columns=num_columns,
-        dropout_probs=dropout_probs,
-        loc_drop_prob=loc_drop_prob,
-        glob_drop_ratio=glob_drop_ratio,
-        num_classes=100)
-    return model
+
+def fractalnet_cifar100(num_classes=100, **kwargs):
+    """
+    FractalNet model for CIFAR-100 from 'FractalNet: Ultra-Deep Neural Networks without Residuals,'
+    https://arxiv.org/abs/1605.07648.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_fractalnet_cifar(num_classes=num_classes, model_name="fractalnet_cifar100", **kwargs)
 
 
 def _calc_width(net):
@@ -301,24 +473,24 @@ def _test():
     pretrained = False
 
     models = [
-        oth_fractalnet_cifar10,
-        # oth_fractalnet_cifar100,
+        (fractalnet_cifar10, 10),
+        (fractalnet_cifar100, 100),
     ]
 
-    for model in models:
+    for model, num_classes in models:
 
         net = model(pretrained=pretrained)
 
-        net.train()
-        # net.eval()
+        # net.train()
+        net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_fractalnet_cifar10 or weight_count == 33724618)
-        # assert (model != oth_fractalnet_cifar100 or weight_count == 33770788)
+        assert (model != fractalnet_cifar10 or weight_count == 33724618)
+        assert (model != fractalnet_cifar100 or weight_count == 33770788)
 
-        x = Variable(torch.randn(14, 3, 32, 32))
+        x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)
-        assert (tuple(y.size()) == (14, 10))
+        assert (tuple(y.size()) == (1, num_classes))
 
 
 if __name__ == "__main__":

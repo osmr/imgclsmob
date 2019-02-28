@@ -826,15 +826,15 @@ class SesquialteralHourglass(Chain):
 
     Parameters:
     ----------
-    down1_seq : nn.Sequential
+    down1_seq : SimpleSequential
         The first down modules as sequential.
-    skip1_seq : nn.Sequential
+    skip1_seq : SimpleSequential
         The first skip connection modules as sequential.
-    up_seq : nn.Sequential
+    up_seq : SimpleSequential
         Up modules as sequential.
-    skip2_seq : nn.Sequential
+    skip2_seq : SimpleSequential
         The second skip connection modules as sequential.
-    down2_seq : nn.Sequential
+    down2_seq : SimpleSequential
         The second down modules as sequential.
     merge_type : str, default 'con'
         Type of concatenation of up and skip outputs.

@@ -71,6 +71,8 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
+from .models.others.oth_isqrtcovresnet import *
+
 __all__ = ['get_model']
 
 
@@ -476,6 +478,9 @@ _models = {
 
     'fractalnet_cifar10': fractalnet_cifar10,
     'fractalnet_cifar100': fractalnet_cifar100,
+
+    'oth_isqrtcovresnet50': oth_isqrtcovresnet50,
+    'oth_isqrtcovresnet101': oth_isqrtcovresnet101,
 }
 
 

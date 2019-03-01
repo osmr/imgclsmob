@@ -3,7 +3,7 @@ import torch.utils.model_zoo as model_zoo
 import torch
 from torch.autograd import Function
 
-__all__ = ['oth_mpncovresnet50', 'oth_mpncovresnet101']
+__all__ = ['oth_isqrtcovresnet50', 'oth_isqrtcovresnet101']
 
 
 model_urls = {
@@ -269,7 +269,7 @@ class MPNCOVResNet(nn.Module):
         return x
 
 
-def oth_mpncovresnet50(pretrained=False, **kwargs):
+def oth_isqrtcovresnet50(pretrained=False, **kwargs):
     """Constructs a ResNet-50 model.
 
     Args:
@@ -281,7 +281,7 @@ def oth_mpncovresnet50(pretrained=False, **kwargs):
     return model
 
 
-def oth_mpncovresnet101(pretrained=False, **kwargs):
+def oth_isqrtcovresnet101(pretrained=False, **kwargs):
     """Constructs a ResNet-101 model.
 
     Args:
@@ -309,8 +309,8 @@ def _test():
     pretrained = False
 
     models = [
-        oth_mpncovresnet50,
-        oth_mpncovresnet101,
+        oth_isqrtcovresnet50,
+        oth_isqrtcovresnet101,
     ]
 
     for model in models:
@@ -321,8 +321,8 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_mpncovresnet50 or weight_count == 56929832)
-        assert (model != oth_mpncovresnet101 or weight_count == 75921960)
+        assert (model != oth_isqrtcovresnet50 or weight_count == 56929832)
+        assert (model != oth_isqrtcovresnet101 or weight_count == 75921960)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

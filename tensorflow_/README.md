@@ -140,6 +140,7 @@ Some remarks:
 | ShuffleNetV2b x0.5 | 39.80 | 17.84 | 1,366,792 | 43.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.158/shufflenetv2b_wd2-1784-fd5df5a3.tf.npz.log)) |
 | ShuffleNetV2b x1.0 | 30.40 | 11.04 | 2,279,760 | 150.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.161/shufflenetv2b_w1-1104-6df32bad.tf.npz.log)) |
 | ShuffleNetV2b x1.5 | 26.92 | 8.80 | 4,410,194 | 323.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.203/shufflenetv2b_w3d2-0880-9ce6d2b7.tf.npz.log)) |
+| ShuffleNetV2b x2.0 | 25.20 | 8.10 | 7,611,290 | 603.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.242/shufflenetv2b_w2-0810-164690ed.tf.npz.log)) |
 | 108-MENet-8x1 (g=3) | 43.67 | 20.32 | 654,516 | 42.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.89/menet108_8x1_g3-2032-4e9e89e1.tf.npz.log)) |
 | 128-MENet-8x1 (g=4) | 42.04 | 19.15 | 750,796 | 45.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.103/menet128_8x1_g4-1915-148105f4.tf.npz.log)) |
 | 160-MENet-8x1 (g=8) | 43.53 | 20.28 | 850,120 | 45.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.154/menet160_8x1_g8-2028-7ff635d1.tf.npz.log)) |
@@ -163,7 +164,7 @@ Some remarks:
 | IGCV3 x0.25 | 53.39 | 28.35 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.142/igcv3_wd4-2835-b41fb3c7.tf.npz.log)) |
 | IGCV3 x0.5 | 39.38 | 17.05 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.132/igcv3_wd2-1705-de0b98d9.tf.npz.log)) |
 | IGCV3 x0.75 | 30.80 | 10.96 | 2,638,084 | 210.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.207/igcv3_w3d4-1096-b8650159.tf.npz.log)) |
-| IGCV3 x1.0 | 28.17 | 9.55 | 3,491,688 | 340.79M | From [homles11/IGCV3] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.126/igcv3_w1-0955-cb263e3a.tf.npz.log)) |
+| IGCV3 x1.0 | 27.67 | 9.03 | 3,491,688 | 340.79M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.243/igcv3_w1-0903-a69c216f.tf.npz.log)) |
 | MnasNet | 31.29 | 11.44 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-f2b84fc4.tf.npz.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv

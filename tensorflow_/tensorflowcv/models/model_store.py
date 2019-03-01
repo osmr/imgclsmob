@@ -84,6 +84,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('shufflenetv2b_wd2', '1784', 'fd5df5a33ba7a8940b2732f2f464522283438165', 'v0.0.158'),
     ('shufflenetv2b_w1', '1104', '6df32bad4c38e603dd75c89ba39c25d45162ab43', 'v0.0.161'),
     ('shufflenetv2b_w3d2', '0880', '9ce6d2b779f0f2483ffc8c8396a9c22af0ea712b', 'v0.0.203'),
+    ('shufflenetv2b_w2', '0810', '164690eda8bf24de2f2835250646b8164b9de1dc', 'v0.0.242'),
     ('menet108_8x1_g3', '2032', '4e9e89e10f7bc055c83bbbb0e9f283f983546288', 'v0.0.89'),
     ('menet128_8x1_g4', '1915', '148105f444f44137b3df2d50ef63d811a9d1da82', 'v0.0.103'),
     ('menet160_8x1_g8', '2028', '7ff635d185d0228f147dc32c225da85c99763e9b', 'v0.0.154'),
@@ -107,7 +108,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_wd4', '2835', 'b41fb3c75e090cc719962e1ca2debcbac241dc22', 'v0.0.142'),
     ('igcv3_wd2', '1705', 'de0b98d950a3892b6d15d1c3ea248d41a34adf00', 'v0.0.132'),
     ('igcv3_w3d4', '1096', 'b8650159ab15b118c0655002d9ce613b3a36dea1', 'v0.0.207'),
-    ('igcv3_w1', '0955', 'cb263e3aa49677b1b34bfa7af3b7d33be854dc4b', 'v0.0.126'),
+    ('igcv3_w1', '0903', 'a69c216fa5838dba316b01d347846812835650fe', 'v0.0.243'),
     ('mnasnet', '1144', 'f2b84fc44eabe0722c84bdcb7748fa390c3c1162', 'v0.0.117')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

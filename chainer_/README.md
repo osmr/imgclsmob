@@ -321,7 +321,6 @@ Some remarks:
 [szagoruyko/functional-zoo]: https://github.com/szagoruyko/functional-zoo
 [fyu/drn]: https://github.com/fyu/drn
 [quark0/darts]: https://github.com/quark0/darts
-[homles11/IGCV3]: https://github.com/homles11/IGCV3
 [soeaver/AirNet-PyTorch]: https://github.com/soeaver/AirNet-PyTorch
 [soeaver/mxnet-model]: https://github.com/soeaver/mxnet-model
 [Jongchan/attention-module]: https://github.com/Jongchan/attention-module

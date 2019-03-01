@@ -172,6 +172,5 @@ Some remarks:
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch
 [tensorpack/tensorpack]: https://github.com/tensorpack/tensorpack
 [clavichord93/MENet]: https://github.com/clavichord93/MENet
-[homles11/IGCV3]: https://github.com/homles11/IGCV3
 [zeusees/Mnasnet...Model]: https://github.com/zeusees/Mnasnet-Pretrained-Model
 [soeaver/mxnet-model]: https://github.com/soeaver/mxnet-model

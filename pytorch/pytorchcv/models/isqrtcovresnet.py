@@ -4,77 +4,169 @@
     Normalization,' https://arxiv.org/abs/1712.01034.
 """
 
-__all__ = ['iSQRTCOVResNet', 'isqrtcovresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b',
-           'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+__all__ = ['iSQRTCOVResNet', 'isqrtcovresnet18', 'isqrtcovresnet34', 'isqrtcovresnet50', 'isqrtcovresnet50b',
+           'isqrtcovresnet101', 'isqrtcovresnet101b']
 
 import os
+import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, SEBlock
-from .resnet import ResBlock, ResBottleneck, ResInitBlock
+from .common import conv1x1_block
+from .resnet import ResUnit, ResInitBlock
 
 
-class SEResUnit(nn.Module):
-    """
-    SE-ResNet unit.
+class Covpool(torch.autograd.Function):
 
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    bottleneck : bool
-        Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
-        Whether to use stride in the first or the second convolution layer of the block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bottleneck,
-                 conv1_stride):
-        super(SEResUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+    @staticmethod
+    def forward(ctx, input):
+        x = input
+        batch_size = x.data.shape[0]
+        channels = x.data.shape[1]
+        h = x.data.shape[2]
+        w = x.data.shape[3]
+        M = h * w
+        x = x.reshape(batch_size, channels, M)
+        I_hat = (-1. / M / M) * torch.ones(M, M, device=x.device) + (1. / M) * torch.eye(M, M, device=x.device)
+        I_hat = I_hat.view(1, M, M).repeat(batch_size, 1, 1).type(x.dtype)
+        y = x.bmm(I_hat).bmm(x.transpose(1, 2))
+        ctx.save_for_backward(input, I_hat)
+        return y
 
-        if bottleneck:
-            self.body = ResBottleneck(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                conv1_stride=conv1_stride)
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, I_hat = ctx.saved_tensors
+        x = input
+        batch_size = x.data.shape[0]
+        channels = x.data.shape[1]
+        h = x.data.shape[2]
+        w = x.data.shape[3]
+        M = h * w
+        x = x.reshape(batch_size, channels, M)
+        grad_input = grad_output + grad_output.transpose(1, 2)
+        grad_input = grad_input.bmm(x).bmm(I_hat)
+        grad_input = grad_input.reshape(batch_size, channels, h, w)
+        return grad_input
+
+
+class Sqrtm(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, input, iterN):
+        x = input
+        batch_size = x.data.shape[0]
+        dim = x.data.shape[1]
+        dtype = x.dtype
+        I3 = 3.0 * torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, 1, 1).type(dtype)
+        normA = (1.0 / 3.0) * x.mul(I3).sum(dim=1).sum(dim=1)
+        A = x.div(normA.view(batch_size, 1, 1).expand_as(x))
+        Y = torch.zeros(batch_size, iterN, dim, dim, requires_grad=False, device=x.device).type(dtype)
+        Z = torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, iterN, 1, 1).type(dtype)
+        if iterN < 2:
+            ZY = 0.5 * (I3 - A)
+            YZY = A.bmm(ZY)
         else:
-            self.body = ResBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride)
-        self.se = SEBlock(channels=out_channels)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                activate=False)
-        self.activ = nn.ReLU(inplace=True)
+            ZY = 0.5 * (I3 - A)
+            Y[:, 0, :, :] = A.bmm(ZY)
+            Z[:, 0, :, :] = ZY
+            for i in range(1, iterN - 1):
+                ZY = 0.5 * (I3 - Z[:, i - 1, :, :].bmm(Y[:, i - 1, :, :]))
+                Y[:, i, :, :] = Y[:, i - 1, :, :].bmm(ZY)
+                Z[:, i, :, :] = ZY.bmm(Z[:, i - 1, :, :])
+            YZY = 0.5 * Y[:, iterN - 2, :, :].bmm(I3 - Z[:, iterN - 2, :, :].bmm(Y[:, iterN - 2, :, :]))
+        y = YZY * torch.sqrt(normA).view(batch_size, 1, 1).expand_as(x)
+        ctx.save_for_backward(input, A, YZY, normA, Y, Z)
+        ctx.iterN = iterN
+        return y
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, A, ZY, normA, Y, Z = ctx.saved_tensors
+        iterN = ctx.iterN
+        x = input
+        batch_size = x.data.shape[0]
+        dim = x.data.shape[1]
+        dtype = x.dtype
+        der_postCom = grad_output * torch.sqrt(normA).view(batch_size, 1, 1).expand_as(x)
+        der_postComAux = (grad_output * ZY).sum(dim=1).sum(dim=1).div(2 * torch.sqrt(normA))
+        I3 = 3.0 * torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, 1, 1).type(dtype)
+        if iterN < 2:
+            der_NSiter = 0.5 * (der_postCom.bmm(I3 - A) - A.bmm(der_postCom))
+        else:
+            dldY = 0.5 * (der_postCom.bmm(I3 - Y[:, iterN - 2, :, :].bmm(Z[:, iterN - 2, :, :])) -
+                          Z[:, iterN - 2, :, :].bmm(Y[:, iterN - 2, :, :]).bmm(der_postCom))
+            dldZ = -0.5 * Y[:, iterN - 2, :, :].bmm(der_postCom).bmm(Y[:, iterN - 2, :, :])
+            for i in range(iterN - 3, -1, -1):
+                YZ = I3 - Y[:, i, :, :].bmm(Z[:, i, :, :])
+                ZY = Z[:, i, :, :].bmm(Y[:, i, :, :])
+                dldY_ = 0.5 * (dldY.bmm(YZ) -
+                               Z[:, i, :, :].bmm(dldZ).bmm(Z[:, i, :, :]) -
+                               ZY.bmm(dldY))
+                dldZ_ = 0.5 * (YZ.bmm(dldZ) -
+                               Y[:, i, :, :].bmm(dldY).bmm(Y[:, i, :, :]) -
+                               dldZ.bmm(ZY))
+                dldY = dldY_
+                dldZ = dldZ_
+            der_NSiter = 0.5 * (dldY.bmm(I3 - A) - dldZ - A.bmm(dldY))
+        der_NSiter = der_NSiter.transpose(1, 2)
+        grad_input = der_NSiter.div(normA.view(batch_size, 1, 1).expand_as(x))
+        grad_aux = der_NSiter.mul(x).sum(dim=1).sum(dim=1)
+        for i in range(batch_size):
+            grad_input[i, :, :] += (der_postComAux[i] \
+                                    - grad_aux[i] / (normA[i] * normA[i])) \
+                                   * torch.ones(dim, device=x.device).diag().type(dtype)
+        return grad_input, None
+
+
+class Triuvec(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, input):
+        x = input
+        batch_size = x.data.shape[0]
+        dim = x.data.shape[1]
+        dtype = x.dtype
+        x = x.reshape(batch_size, dim * dim)
+        I = torch.ones(dim, dim).triu().reshape(dim * dim)
+        index = I.nonzero()
+        y = torch.zeros(batch_size, int(dim * (dim + 1) / 2), device=x.device).type(dtype)
+        y = x[:, index]
+        ctx.save_for_backward(input, index)
+        return y
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        input, index = ctx.saved_tensors
+        x = input
+        batch_size = x.data.shape[0]
+        dim = x.data.shape[1]
+        dtype = x.dtype
+        grad_input = torch.zeros(batch_size, dim * dim, device=x.device, requires_grad=False).type(dtype)
+        grad_input[:, index] = grad_output
+        grad_input = grad_input.reshape(batch_size, dim, dim)
+        return grad_input
+
+
+class iSQRTCOVPool(nn.Module):
+    """
+    iSQRT-COV pooling layer.
+    """
+    def __init__(self):
+        super(iSQRTCOVPool, self).__init__()
+        self.conv_shake = Covpool.apply
+        self.sqrt_m = Sqrtm.apply
+        self.triuvec = Triuvec.apply
 
     def forward(self, x):
-        if self.resize_identity:
-            identity = self.identity_conv(x)
-        else:
-            identity = x
-        x = self.body(x)
-        x = self.se(x)
-        x = x + identity
-        x = self.activ(x)
+        x = self.conv_shake(x)
+        x = self.sqrt_m(x, 5)
+        x = self.triuvec(x)
         return x
 
 
 class iSQRTCOVResNet(nn.Module):
     """
-    SE-ResNet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
+    Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -82,6 +174,8 @@ class iSQRTCOVResNet(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    final_block_channels : int
+        Number of output channels for the final unit.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
@@ -96,6 +190,7 @@ class iSQRTCOVResNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 final_block_channels,
                  bottleneck,
                  conv1_stride,
                  in_channels=3,
@@ -113,8 +208,8 @@ class iSQRTCOVResNet(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), SEResUnit(
+                stride = 2 if (j == 0) and (i not in [0, len(channels_per_stage) - 1]) else 1
+                stage.add_module("unit{}".format(j + 1), ResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
@@ -122,12 +217,15 @@ class iSQRTCOVResNet(nn.Module):
                     conv1_stride=conv1_stride))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        self.features.add_module("final_block", conv1x1_block(
+            in_channels=in_channels,
+            out_channels=final_block_channels))
+        in_channels = final_block_channels
+        self.features.add_module("final_pool", iSQRTCOVPool())
 
+        in_features = in_channels * (in_channels + 1) // 2
         self.output = nn.Linear(
-            in_features=in_channels,
+            in_features=in_features,
             out_features=num_classes)
 
         self._init_params()
@@ -146,14 +244,14 @@ class iSQRTCOVResNet(nn.Module):
         return x
 
 
-def get_seresnet(blocks,
-                 conv1_stride=True,
-                 model_name=None,
-                 pretrained=False,
-                 root=os.path.join('~', '.torch', 'models'),
-                 **kwargs):
+def get_isqrtcovresnet(blocks,
+                       conv1_stride=True,
+                       model_name=None,
+                       pretrained=False,
+                       root=os.path.join('~', '.torch', 'models'),
+                       **kwargs):
     """
-    Create SE-ResNet model with specific parameters.
+    Create iSQRT-COV-ResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -182,9 +280,10 @@ def get_seresnet(blocks,
     elif blocks == 200:
         layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported SE-ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported iSQRT-COV-ResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
+    final_block_channels = 256
 
     if blocks < 50:
         channels_per_layers = [64, 128, 256, 512]
@@ -198,6 +297,7 @@ def get_seresnet(blocks,
     net = iSQRTCOVResNet(
         channels=channels,
         init_block_channels=init_block_channels,
+        final_block_channels=final_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
         **kwargs)
@@ -216,7 +316,8 @@ def get_seresnet(blocks,
 
 def isqrtcovresnet18(**kwargs):
     """
-    SE-ResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-18 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
+    Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -225,12 +326,13 @@ def isqrtcovresnet18(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=18, model_name="seresnet18", **kwargs)
+    return get_isqrtcovresnet(blocks=18, model_name="isqrtcovresnet18", **kwargs)
 
 
-def seresnet34(**kwargs):
+def isqrtcovresnet34(**kwargs):
     """
-    SE-ResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-34 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
+    Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -239,12 +341,13 @@ def seresnet34(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=34, model_name="seresnet34", **kwargs)
+    return get_isqrtcovresnet(blocks=34, model_name="isqrtcovresnet34", **kwargs)
 
 
-def seresnet50(**kwargs):
+def isqrtcovresnet50(**kwargs):
     """
-    SE-ResNet-50 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-50 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
+    Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -253,13 +356,14 @@ def seresnet50(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=50, model_name="seresnet50", **kwargs)
+    return get_isqrtcovresnet(blocks=50, model_name="isqrtcovresnet50", **kwargs)
 
 
-def seresnet50b(**kwargs):
+def isqrtcovresnet50b(**kwargs):
     """
-    SE-ResNet-50 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-50 model with stride at the second convolution in bottleneck block from 'Towards Faster Training
+    of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization,'
+    https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -268,12 +372,13 @@ def seresnet50b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=50, conv1_stride=False, model_name="seresnet50b", **kwargs)
+    return get_isqrtcovresnet(blocks=50, conv1_stride=False, model_name="isqrtcovresnet50b", **kwargs)
 
 
-def seresnet101(**kwargs):
+def isqrtcovresnet101(**kwargs):
     """
-    SE-ResNet-101 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-101 model from 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix
+    Square Root Normalization,' https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -282,13 +387,14 @@ def seresnet101(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=101, model_name="seresnet101", **kwargs)
+    return get_isqrtcovresnet(blocks=101, model_name="isqrtcovresnet101", **kwargs)
 
 
-def seresnet101b(**kwargs):
+def isqrtcovresnet101b(**kwargs):
     """
-    SE-ResNet-101 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
+    iSQRT-COV-ResNet-101 model with stride at the second convolution in bottleneck block from 'Towards Faster Training
+    of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization,'
+    https://arxiv.org/abs/1712.01034.
 
     Parameters:
     ----------
@@ -297,66 +403,7 @@ def seresnet101b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_seresnet(blocks=101, conv1_stride=False, model_name="seresnet101b", **kwargs)
-
-
-def seresnet152(**kwargs):
-    """
-    SE-ResNet-152 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_seresnet(blocks=152, model_name="seresnet152", **kwargs)
-
-
-def seresnet152b(**kwargs):
-    """
-    SE-ResNet-152 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_seresnet(blocks=152, conv1_stride=False, model_name="seresnet152b", **kwargs)
-
-
-def seresnet200(**kwargs):
-    """
-    SE-ResNet-200 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
-    It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_seresnet(blocks=200, model_name="seresnet200", **kwargs)
-
-
-def seresnet200b(**kwargs):
-    """
-    SE-ResNet-200 model with stride at the second convolution in bottleneck block from 'Squeeze-and-Excitation
-    Networks,' https://arxiv.org/abs/1709.01507. It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_seresnet(blocks=200, conv1_stride=False, model_name="seresnet200b", **kwargs)
+    return get_isqrtcovresnet(blocks=101, conv1_stride=False, model_name="isqrtcovresnet101b", **kwargs)
 
 
 def _calc_width(net):
@@ -376,15 +423,11 @@ def _test():
 
     models = [
         isqrtcovresnet18,
-        seresnet34,
-        seresnet50,
-        seresnet50b,
-        seresnet101,
-        seresnet101b,
-        seresnet152,
-        seresnet152b,
-        seresnet200,
-        seresnet200b,
+        isqrtcovresnet34,
+        isqrtcovresnet50,
+        isqrtcovresnet50b,
+        isqrtcovresnet101,
+        isqrtcovresnet101b,
     ]
 
     for model in models:
@@ -395,16 +438,12 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != isqrtcovresnet18 or weight_count == 11778592)
-        assert (model != seresnet34 or weight_count == 21958868)
-        assert (model != seresnet50 or weight_count == 28088024)
-        assert (model != seresnet50b or weight_count == 28088024)
-        assert (model != seresnet101 or weight_count == 49326872)
-        assert (model != seresnet101b or weight_count == 49326872)
-        assert (model != seresnet152 or weight_count == 66821848)
-        assert (model != seresnet152b or weight_count == 66821848)
-        assert (model != seresnet200 or weight_count == 71835864)
-        assert (model != seresnet200b or weight_count == 71835864)
+        assert (model != isqrtcovresnet18 or weight_count == 44205096)
+        assert (model != isqrtcovresnet34 or weight_count == 54313256)
+        assert (model != isqrtcovresnet50 or weight_count == 56929832)
+        assert (model != isqrtcovresnet50b or weight_count == 56929832)
+        assert (model != isqrtcovresnet101 or weight_count == 75921960)
+        assert (model != isqrtcovresnet101b or weight_count == 75921960)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

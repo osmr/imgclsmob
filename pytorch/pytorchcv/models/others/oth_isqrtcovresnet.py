@@ -255,6 +255,7 @@ class MPNCOVResNet(nn.Module):
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
+
         # 1x1 Conv. for dimension reduction
         x = self.layer_reduce(x)
         x = self.layer_reduce_bn(x)
@@ -263,6 +264,7 @@ class MPNCOVResNet(nn.Module):
         x = CovpoolLayer(x)
         x = SqrtmLayer(x, 5)
         x = TriuvecLayer(x)
+
         x = x.view(x.size(0), -1)
         x = self.fc(x)
 

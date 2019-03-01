@@ -111,9 +111,8 @@ class Sqrtm(torch.autograd.Function):
         grad_input = der_NSiter.div(normA.view(batch_size, 1, 1).expand_as(x))
         grad_aux = der_NSiter.mul(x).sum(dim=1).sum(dim=1)
         for i in range(batch_size):
-            grad_input[i, :, :] += (der_postComAux[i] \
-                                    - grad_aux[i] / (normA[i] * normA[i])) \
-                                   * torch.ones(dim, device=x.device).diag().type(dtype)
+            grad_input[i, :, :] += (der_postComAux[i] - grad_aux[i] / (normA[i] * normA[i])) *\
+                                   torch.ones(dim, device=x.device).diag().type(dtype)
         return grad_input, None
 
 
@@ -123,12 +122,11 @@ class Triuvec(torch.autograd.Function):
     def forward(ctx, input):
         x = input
         batch_size = x.data.shape[0]
-        dim = x.data.shape[1]
-        dtype = x.dtype
-        x = x.reshape(batch_size, dim * dim)
-        I = torch.ones(dim, dim).triu().reshape(dim * dim)
-        index = I.nonzero()
-        y = torch.zeros(batch_size, int(dim * (dim + 1) / 2), device=x.device).type(dtype)
+        channels = x.data.shape[1]
+        x = x.reshape(batch_size, channels * channels)
+        identity = torch.ones(channels, channels).triu().reshape(channels * channels)
+        index = identity.nonzero()
+        y = torch.zeros(batch_size, channels * (channels + 1) // 2, device=x.device).type(x.dtype)
         y = x[:, index]
         ctx.save_for_backward(input, index)
         return y
@@ -138,11 +136,10 @@ class Triuvec(torch.autograd.Function):
         input, index = ctx.saved_tensors
         x = input
         batch_size = x.data.shape[0]
-        dim = x.data.shape[1]
-        dtype = x.dtype
-        grad_input = torch.zeros(batch_size, dim * dim, device=x.device, requires_grad=False).type(dtype)
+        channels = x.data.shape[1]
+        grad_input = torch.zeros(batch_size, channels * channels, device=x.device, requires_grad=False).type(x.dtype)
         grad_input[:, index] = grad_output
-        grad_input = grad_input.reshape(batch_size, dim, dim)
+        grad_input = grad_input.reshape(batch_size, channels, channels)
         return grad_input
 
 
@@ -154,12 +151,12 @@ class iSQRTCOVPool(nn.Module):
         super(iSQRTCOVPool, self).__init__()
         self.conv_shake = Covpool.apply
         self.sqrt_m = Sqrtm.apply
-        self.triuvec = Triuvec.apply
+        self.triu_vec = Triuvec.apply
 
     def forward(self, x):
         x = self.conv_shake(x)
         x = self.sqrt_m(x, 5)
-        x = self.triuvec(x)
+        x = self.triu_vec(x)
         return x
 
 

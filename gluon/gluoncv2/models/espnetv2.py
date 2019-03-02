@@ -100,7 +100,7 @@ class HierarchicalConcurrent(nn.HybridSequential):
         for block in self._children.values():
             y = block(x)
             if y_prev is not None:
-                y += y_prev
+                y = y + y_prev
             out.append(y)
             y_prev = y
         out = F.concat(*out, dim=self.axis)

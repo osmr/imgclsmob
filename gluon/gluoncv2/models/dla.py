@@ -140,7 +140,7 @@ class DLAResBlock(HybridBlock):
         if identity is None:
             identity = x
         x = self.body(x)
-        x += identity
+        x = x + identity
         x = self.activ(x)
         if self.return_down:
             return x, down

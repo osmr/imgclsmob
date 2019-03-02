@@ -15,87 +15,80 @@ from .common import conv1x1_block
 from .resnet import ResUnit, ResInitBlock
 
 
-class Covpool(torch.autograd.Function):
-
+class CovPool(torch.autograd.Function):
+    """
+    Covariance pooling function.
+    """
     @staticmethod
-    def forward(ctx, input):
-        x = input
-        batch_size = x.data.shape[0]
-        channels = x.data.shape[1]
-        h = x.data.shape[2]
-        w = x.data.shape[3]
-        M = h * w
-        x = x.reshape(batch_size, channels, M)
-        I_hat = (-1. / M / M) * torch.ones(M, M, device=x.device) + (1. / M) * torch.eye(M, M, device=x.device)
-        I_hat = I_hat.view(1, M, M).repeat(batch_size, 1, 1).type(x.dtype)
-        y = x.bmm(I_hat).bmm(x.transpose(1, 2))
-        ctx.save_for_backward(input, I_hat)
-        return y
+    def forward(ctx, x):
+        batch, channels, height, width = x.size()
+        n = height * width
+        xn = x.reshape(batch, channels, n)
+        identity_bar = ((1.0 / n) * torch.eye(n, dtype=xn.dtype, device=xn.device)).unsqueeze(dim=0).repeat(batch, 1, 1)
+        ones_bar = torch.full((batch, n, n), fill_value=(-1.0 / n / n), dtype=xn.dtype, device=xn.device)
+        i_bar = identity_bar + ones_bar
+        sigma = xn.bmm(i_bar).bmm(xn.transpose(1, 2))
+        ctx.save_for_backward(x, i_bar)
+        return sigma
 
     @staticmethod
     def backward(ctx, grad_output):
-        input, I_hat = ctx.saved_tensors
-        x = input
-        batch_size = x.data.shape[0]
-        channels = x.data.shape[1]
-        h = x.data.shape[2]
-        w = x.data.shape[3]
-        M = h * w
-        x = x.reshape(batch_size, channels, M)
+        x, i_bar = ctx.saved_tensors
+        batch, channels, height, width = x.size()
+        n = height * width
+        xn = x.reshape(batch, channels, n)
         grad_input = grad_output + grad_output.transpose(1, 2)
-        grad_input = grad_input.bmm(x).bmm(I_hat)
-        grad_input = grad_input.reshape(batch_size, channels, h, w)
+        grad_input = grad_input.bmm(xn).bmm(i_bar)
+        grad_input = grad_input.reshape(batch, channels, height, width)
         return grad_input
 
 
-class Sqrtm(torch.autograd.Function):
-
+class NewtonSchulzSqrt(torch.autograd.Function):
+    """
+    Newton-Schulz iterative matrix square root function.
+    """
     @staticmethod
-    def forward(ctx, input, iterN):
-        x = input
-        batch_size = x.data.shape[0]
-        dim = x.data.shape[1]
-        dtype = x.dtype
-        I3 = 3.0 * torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, 1, 1).type(dtype)
-        normA = (1.0 / 3.0) * x.mul(I3).sum(dim=1).sum(dim=1)
-        A = x.div(normA.view(batch_size, 1, 1).expand_as(x))
-        Y = torch.zeros(batch_size, iterN, dim, dim, requires_grad=False, device=x.device).type(dtype)
-        Z = torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, iterN, 1, 1).type(dtype)
-        if iterN < 2:
-            ZY = 0.5 * (I3 - A)
-            YZY = A.bmm(ZY)
-        else:
-            ZY = 0.5 * (I3 - A)
-            Y[:, 0, :, :] = A.bmm(ZY)
-            Z[:, 0, :, :] = ZY
-            for i in range(1, iterN - 1):
-                ZY = 0.5 * (I3 - Z[:, i - 1, :, :].bmm(Y[:, i - 1, :, :]))
-                Y[:, i, :, :] = Y[:, i - 1, :, :].bmm(ZY)
-                Z[:, i, :, :] = ZY.bmm(Z[:, i - 1, :, :])
-            YZY = 0.5 * Y[:, iterN - 2, :, :].bmm(I3 - Z[:, iterN - 2, :, :].bmm(Y[:, iterN - 2, :, :]))
-        y = YZY * torch.sqrt(normA).view(batch_size, 1, 1).expand_as(x)
-        ctx.save_for_backward(input, A, YZY, normA, Y, Z)
-        ctx.iterN = iterN
-        return y
+    def forward(ctx, x, num_iter):
+        assert (num_iter > 1)
+        batch, cols, rows = x.size()
+        assert (cols == rows)
+        n = cols
+        identity = torch.eye(n, dtype=x.dtype, device=x.device).unsqueeze(dim=0).repeat(batch, 1, 1)
+        x_trace = (x * identity).sum(dim=(1, 2), keepdim=True)
+        a = x / x_trace
+        i3 = 3.0 * identity
+        y = torch.zeros(batch, num_iter, n, n, dtype=x.dtype, device=x.device)
+        z = torch.zeros(batch, num_iter, n, n, dtype=x.dtype, device=x.device)
+        b = 0.5 * (i3 - a)
+        y[:, 0, :, :] = a.bmm(b)
+        z[:, 0, :, :] = b
+        for i in range(1, num_iter - 1):
+            b = 0.5 * (i3 - z[:, i - 1, :, :].bmm(y[:, i - 1, :, :]))
+            y[:, i, :, :] = y[:, i - 1, :, :].bmm(b)
+            z[:, i, :, :] = b.bmm(z[:, i - 1, :, :])
+        yzy = 0.5 * y[:, num_iter - 2, :, :].bmm(i3 - z[:, num_iter - 2, :, :].bmm(y[:, num_iter - 2, :, :]))
+        c = yzy * torch.sqrt(x_trace).view(batch, 1, 1).expand_as(x)
+        ctx.save_for_backward(x, a, yzy, x_trace, y, z)
+        ctx.num_iter = num_iter
+        return c
 
     @staticmethod
     def backward(ctx, grad_output):
-        input, A, ZY, normA, Y, Z = ctx.saved_tensors
-        iterN = ctx.iterN
-        x = input
+        x, A, ZY, normA, Y, Z = ctx.saved_tensors
+        num_iter = ctx.num_iter
         batch_size = x.data.shape[0]
         dim = x.data.shape[1]
         dtype = x.dtype
-        der_postCom = grad_output * torch.sqrt(normA).view(batch_size, 1, 1).expand_as(x)
-        der_postComAux = (grad_output * ZY).sum(dim=1).sum(dim=1).div(2 * torch.sqrt(normA))
+        der_postCom = grad_output * torch.sqrt(normA)
+        der_postComAux = (grad_output * ZY).sum(dim=1).sum(dim=1).div(2 * torch.sqrt(normA.squeeze()))
         I3 = 3.0 * torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, 1, 1).type(dtype)
-        if iterN < 2:
+        if num_iter < 2:
             der_NSiter = 0.5 * (der_postCom.bmm(I3 - A) - A.bmm(der_postCom))
         else:
-            dldY = 0.5 * (der_postCom.bmm(I3 - Y[:, iterN - 2, :, :].bmm(Z[:, iterN - 2, :, :])) -
-                          Z[:, iterN - 2, :, :].bmm(Y[:, iterN - 2, :, :]).bmm(der_postCom))
-            dldZ = -0.5 * Y[:, iterN - 2, :, :].bmm(der_postCom).bmm(Y[:, iterN - 2, :, :])
-            for i in range(iterN - 3, -1, -1):
+            dldY = 0.5 * (der_postCom.bmm(I3 - Y[:, num_iter - 2, :, :].bmm(Z[:, num_iter - 2, :, :])) -
+                          Z[:, num_iter - 2, :, :].bmm(Y[:, num_iter - 2, :, :]).bmm(der_postCom))
+            dldZ = -0.5 * Y[:, num_iter - 2, :, :].bmm(der_postCom).bmm(Y[:, num_iter - 2, :, :])
+            for i in range(num_iter - 3, -1, -1):
                 YZ = I3 - Y[:, i, :, :].bmm(Z[:, i, :, :])
                 ZY = Z[:, i, :, :].bmm(Y[:, i, :, :])
                 dldY_ = 0.5 * (dldY.bmm(YZ) -
@@ -108,10 +101,10 @@ class Sqrtm(torch.autograd.Function):
                 dldZ = dldZ_
             der_NSiter = 0.5 * (dldY.bmm(I3 - A) - dldZ - A.bmm(dldY))
         der_NSiter = der_NSiter.transpose(1, 2)
-        grad_input = der_NSiter.div(normA.view(batch_size, 1, 1).expand_as(x))
+        grad_input = der_NSiter.div(normA)
         grad_aux = der_NSiter.mul(x).sum(dim=1).sum(dim=1)
         for i in range(batch_size):
-            grad_input[i, :, :] += (der_postComAux[i] - grad_aux[i] / (normA[i] * normA[i])) *\
+            grad_input[i, :, :] += (der_postComAux[i] - grad_aux[i] / (normA.squeeze()[i] * normA.squeeze()[i])) *\
                                    torch.ones(dim, device=x.device).diag().type(dtype)
         return grad_input, None
 
@@ -149,13 +142,13 @@ class iSQRTCOVPool(nn.Module):
     """
     def __init__(self):
         super(iSQRTCOVPool, self).__init__()
-        self.conv_shake = Covpool.apply
-        self.sqrt_m = Sqrtm.apply
+        self.cov_pool = CovPool.apply
+        self.sqrt = NewtonSchulzSqrt.apply
         self.triu_vec = Triuvec.apply
 
     def forward(self, x):
-        x = self.conv_shake(x)
-        x = self.sqrt_m(x, 5)
+        x = self.cov_pool(x)
+        x = self.sqrt(x, 5)
         x = self.triu_vec(x)
         return x
 
@@ -442,9 +435,10 @@ def _test():
         assert (model != isqrtcovresnet101 or weight_count == 75921960)
         assert (model != isqrtcovresnet101b or weight_count == 75921960)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = Variable(torch.randn(14, 3, 224, 224))
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        y.sum().backward()
+        assert (tuple(y.size()) == (14, 1000))
 
 
 if __name__ == "__main__":

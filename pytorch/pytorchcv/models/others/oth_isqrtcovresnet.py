@@ -326,9 +326,9 @@ def _test():
         assert (model != oth_isqrtcovresnet50 or weight_count == 56929832)
         assert (model != oth_isqrtcovresnet101 or weight_count == 75921960)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = Variable(torch.randn(14, 3, 224, 224))
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (tuple(y.size()) == (14, 1000))
 
 
 if __name__ == "__main__":

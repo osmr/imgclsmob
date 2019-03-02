@@ -163,7 +163,8 @@ class ESPBlock(HybridBlock):
                 activation=None,
                 activate=False)
             self.preactiv = PreActivation(in_channels=out_channels)
-            self.activ = PReLU2(out_channels)
+            if not self.downsample:
+                self.activ = PReLU2(out_channels)
 
     def hybrid_forward(self, F, x, x0):
         y = self.reduce_conv(x)
@@ -465,6 +466,7 @@ def get_espnetv2(width_scale,
             filename=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
+            ignore_extra=True,
             ctx=ctx)
 
     return net

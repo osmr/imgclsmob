@@ -86,7 +86,8 @@ class NewtonSchulzSqrt(torch.autograd.Function):
         x, x_trace, a, yi, zi, yn, x_trace_sqrt = ctx.saved_tensors
         n = ctx.n
         batch, m, _ = x.size()
-        identity = torch.eye(m, dtype=x.dtype, device=x.device).unsqueeze(dim=0).repeat(batch, 1, 1)
+        identity0 = torch.eye(m, dtype=x.dtype, device=x.device)
+        identity = identity0.unsqueeze(dim=0).repeat(batch, 1, 1)
         i3 = 3.0 * identity
 
         grad_yn = grad_c * x_trace_sqrt
@@ -103,14 +104,12 @@ class NewtonSchulzSqrt(torch.autograd.Function):
 
         grad_a = 0.5 * (grad_yi.bmm(i3 - a) - grad_zi - a.bmm(grad_yi))
 
-        grad_yn_aux = 0.5 * (grad_c * yn).sum(dim=(1, 2)) / x_trace_sqrt.squeeze()
-        grad_a_t = grad_a.transpose(1, 2)
-        grad_a_aux = (grad_a_t * x).sum(dim=(1, 2))
+        x_trace_sqr = x_trace * x_trace
+        grad_atx_trace = (grad_a.transpose(1, 2).bmm(x) * identity).sum(dim=(1, 2), keepdim=True)
+        grad_cty_trace = (grad_c.transpose(1, 2).bmm(yn) * identity).sum(dim=(1, 2), keepdim=True)
+        grad_x_extra = (0.5 * grad_cty_trace / x_trace_sqrt - grad_atx_trace / x_trace_sqr).repeat(1, m, m) * identity
 
-        grad_x = grad_a_t / x_trace
-        for i in range(batch):
-            grad_x[i, :, :] += (grad_yn_aux[i] - grad_a_aux[i] / (x_trace.squeeze()[i] * x_trace.squeeze()[i])) *\
-                                   torch.ones(m, device=x.device).diag().type(x.dtype)
+        grad_x = grad_a / x_trace + grad_x_extra
         return grad_x, None
 
 

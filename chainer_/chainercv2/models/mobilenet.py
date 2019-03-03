@@ -300,7 +300,7 @@ def _test():
 
     chainer.global_config.train = False
 
-    pretrained = True
+    pretrained = False
 
     models = [
         mobilenet_w1,
@@ -308,7 +308,7 @@ def _test():
         mobilenet_wd2,
         mobilenet_wd4,
         fdmobilenet_w1,
-        # fdmobilenet_w3d4,
+        fdmobilenet_w3d4,
         fdmobilenet_wd2,
         fdmobilenet_wd4,
     ]

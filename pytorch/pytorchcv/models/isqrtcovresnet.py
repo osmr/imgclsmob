@@ -32,124 +32,135 @@ class CovPool(torch.autograd.Function):
         return sigma
 
     @staticmethod
-    def backward(ctx, grad_output):
+    def backward(ctx, grad_sigma):
         x, i_bar = ctx.saved_tensors
         batch, channels, height, width = x.size()
         n = height * width
         xn = x.reshape(batch, channels, n)
-        grad_input = grad_output + grad_output.transpose(1, 2)
-        grad_input = grad_input.bmm(xn).bmm(i_bar)
-        grad_input = grad_input.reshape(batch, channels, height, width)
-        return grad_input
+        grad_x = grad_sigma + grad_sigma.transpose(1, 2)
+        grad_x = grad_x.bmm(xn).bmm(i_bar)
+        grad_x = grad_x.reshape(batch, channels, height, width)
+        return grad_x
 
 
 class NewtonSchulzSqrt(torch.autograd.Function):
     """
     Newton-Schulz iterative matrix square root function.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor (batch * cols * rows).
+    n : int
+        Number of iterations (n > 1).
     """
     @staticmethod
-    def forward(ctx, x, num_iter):
-        assert (num_iter > 1)
+    def forward(ctx, x, n):
+        assert (n > 1)
         batch, cols, rows = x.size()
         assert (cols == rows)
-        n = cols
-        identity = torch.eye(n, dtype=x.dtype, device=x.device).unsqueeze(dim=0).repeat(batch, 1, 1)
+        m = cols
+        identity = torch.eye(m, dtype=x.dtype, device=x.device).unsqueeze(dim=0).repeat(batch, 1, 1)
         x_trace = (x * identity).sum(dim=(1, 2), keepdim=True)
         a = x / x_trace
         i3 = 3.0 * identity
-        y = torch.zeros(batch, num_iter, n, n, dtype=x.dtype, device=x.device)
-        z = torch.zeros(batch, num_iter, n, n, dtype=x.dtype, device=x.device)
-        b = 0.5 * (i3 - a)
-        y[:, 0, :, :] = a.bmm(b)
-        z[:, 0, :, :] = b
-        for i in range(1, num_iter - 1):
-            b = 0.5 * (i3 - z[:, i - 1, :, :].bmm(y[:, i - 1, :, :]))
-            y[:, i, :, :] = y[:, i - 1, :, :].bmm(b)
-            z[:, i, :, :] = b.bmm(z[:, i - 1, :, :])
-        yzy = 0.5 * y[:, num_iter - 2, :, :].bmm(i3 - z[:, num_iter - 2, :, :].bmm(y[:, num_iter - 2, :, :]))
-        c = yzy * torch.sqrt(x_trace).view(batch, 1, 1).expand_as(x)
-        ctx.save_for_backward(x, a, yzy, x_trace, y, z)
-        ctx.num_iter = num_iter
+        yi = torch.zeros(batch, n - 1, m, m, dtype=x.dtype, device=x.device)
+        zi = torch.zeros(batch, n - 1, m, m, dtype=x.dtype, device=x.device)
+        b2 = 0.5 * (i3 - a)
+        yi[:, 0, :, :] = a.bmm(b2)
+        zi[:, 0, :, :] = b2
+        for i in range(1, n - 1):
+            b2 = 0.5 * (i3 - zi[:, i - 1, :, :].bmm(yi[:, i - 1, :, :]))
+            yi[:, i, :, :] = yi[:, i - 1, :, :].bmm(b2)
+            zi[:, i, :, :] = b2.bmm(zi[:, i - 1, :, :])
+        b2 = 0.5 * (i3 - zi[:, n - 2, :, :].bmm(yi[:, n - 2, :, :]))
+        yn = yi[:, n - 2, :, :].bmm(b2)
+        x_trace_sqrt = torch.sqrt(x_trace)
+        c = yn * x_trace_sqrt
+        ctx.save_for_backward(x, x_trace, a, yi, zi, yn, x_trace_sqrt)
+        ctx.n = n
         return c
 
     @staticmethod
-    def backward(ctx, grad_output):
-        x, A, ZY, normA, Y, Z = ctx.saved_tensors
-        num_iter = ctx.num_iter
-        batch_size = x.data.shape[0]
-        dim = x.data.shape[1]
-        dtype = x.dtype
-        der_postCom = grad_output * torch.sqrt(normA)
-        der_postComAux = (grad_output * ZY).sum(dim=1).sum(dim=1).div(2 * torch.sqrt(normA.squeeze()))
-        I3 = 3.0 * torch.eye(dim, dim, device=x.device).view(1, dim, dim).repeat(batch_size, 1, 1).type(dtype)
-        if num_iter < 2:
-            der_NSiter = 0.5 * (der_postCom.bmm(I3 - A) - A.bmm(der_postCom))
-        else:
-            dldY = 0.5 * (der_postCom.bmm(I3 - Y[:, num_iter - 2, :, :].bmm(Z[:, num_iter - 2, :, :])) -
-                          Z[:, num_iter - 2, :, :].bmm(Y[:, num_iter - 2, :, :]).bmm(der_postCom))
-            dldZ = -0.5 * Y[:, num_iter - 2, :, :].bmm(der_postCom).bmm(Y[:, num_iter - 2, :, :])
-            for i in range(num_iter - 3, -1, -1):
-                YZ = I3 - Y[:, i, :, :].bmm(Z[:, i, :, :])
-                ZY = Z[:, i, :, :].bmm(Y[:, i, :, :])
-                dldY_ = 0.5 * (dldY.bmm(YZ) -
-                               Z[:, i, :, :].bmm(dldZ).bmm(Z[:, i, :, :]) -
-                               ZY.bmm(dldY))
-                dldZ_ = 0.5 * (YZ.bmm(dldZ) -
-                               Y[:, i, :, :].bmm(dldY).bmm(Y[:, i, :, :]) -
-                               dldZ.bmm(ZY))
-                dldY = dldY_
-                dldZ = dldZ_
-            der_NSiter = 0.5 * (dldY.bmm(I3 - A) - dldZ - A.bmm(dldY))
-        der_NSiter = der_NSiter.transpose(1, 2)
-        grad_input = der_NSiter.div(normA)
-        grad_aux = der_NSiter.mul(x).sum(dim=1).sum(dim=1)
-        for i in range(batch_size):
-            grad_input[i, :, :] += (der_postComAux[i] - grad_aux[i] / (normA.squeeze()[i] * normA.squeeze()[i])) *\
-                                   torch.ones(dim, device=x.device).diag().type(dtype)
-        return grad_input, None
+    def backward(ctx, grad_c):
+        x, x_trace, a, yi, zi, yn, x_trace_sqrt = ctx.saved_tensors
+        n = ctx.n
+        batch, m, _ = x.size()
+        identity = torch.eye(m, dtype=x.dtype, device=x.device).unsqueeze(dim=0).repeat(batch, 1, 1)
+        i3 = 3.0 * identity
+
+        grad_yn = grad_c * x_trace_sqrt
+        b = i3 - yi[:, n - 2, :, :].bmm(zi[:, n - 2, :, :])
+        grad_yi = 0.5 * (grad_yn.bmm(b) - zi[:, n - 2, :, :].bmm(yi[:, n - 2, :, :]).bmm(grad_yn))
+        grad_zi = -0.5 * yi[:, n - 2, :, :].bmm(grad_yn).bmm(yi[:, n - 2, :, :])
+        for i in range(n - 3, -1, -1):
+            b = i3 - yi[:, i, :, :].bmm(zi[:, i, :, :])
+            ziyi = zi[:, i, :, :].bmm(yi[:, i, :, :])
+            grad_yi_m1 = 0.5 * (grad_yi.bmm(b) - zi[:, i, :, :].bmm(grad_zi).bmm(zi[:, i, :, :]) - ziyi.bmm(grad_yi))
+            grad_zi_m1 = 0.5 * (b.bmm(grad_zi) - yi[:, i, :, :].bmm(grad_yi).bmm(yi[:, i, :, :]) - grad_zi.bmm(ziyi))
+            grad_yi = grad_yi_m1
+            grad_zi = grad_zi_m1
+
+        grad_a = 0.5 * (grad_yi.bmm(i3 - a) - grad_zi - a.bmm(grad_yi))
+
+        grad_yn_aux = 0.5 * (grad_c * yn).sum(dim=(1, 2)) / x_trace_sqrt.squeeze()
+        grad_a_t = grad_a.transpose(1, 2)
+        grad_a_aux = (grad_a_t * x).sum(dim=(1, 2))
+
+        grad_x = grad_a_t / x_trace
+        for i in range(batch):
+            grad_x[i, :, :] += (grad_yn_aux[i] - grad_a_aux[i] / (x_trace.squeeze()[i] * x_trace.squeeze()[i])) *\
+                                   torch.ones(m, device=x.device).diag().type(x.dtype)
+        return grad_x, None
 
 
 class Triuvec(torch.autograd.Function):
-
+    """
+    Extract upper triangular part of matrix into vector form.
+    """
     @staticmethod
-    def forward(ctx, input):
-        x = input
-        batch_size = x.data.shape[0]
-        channels = x.data.shape[1]
-        x = x.reshape(batch_size, channels * channels)
-        identity = torch.ones(channels, channels).triu().reshape(channels * channels)
-        index = identity.nonzero()
-        y = torch.zeros(batch_size, channels * (channels + 1) // 2, device=x.device).type(x.dtype)
-        y = x[:, index]
-        ctx.save_for_backward(input, index)
+    def forward(ctx, x):
+        batch, cols, rows = x.size()
+        assert (cols == rows)
+        n = cols
+        triuvec_inds = torch.ones(n, n).triu().view(n * n).nonzero()
+        # assert (len(triuvec_inds) == n * (n + 1) // 2)
+        x_vec = x.reshape(batch, -1)
+        y = x_vec[:, triuvec_inds]
+        ctx.save_for_backward(x, triuvec_inds)
         return y
 
     @staticmethod
-    def backward(ctx, grad_output):
-        input, index = ctx.saved_tensors
-        x = input
-        batch_size = x.data.shape[0]
-        channels = x.data.shape[1]
-        grad_input = torch.zeros(batch_size, channels * channels, device=x.device, requires_grad=False).type(x.dtype)
-        grad_input[:, index] = grad_output
-        grad_input = grad_input.reshape(batch_size, channels, channels)
-        return grad_input
+    def backward(ctx, grad_y):
+        x, triuvec_inds = ctx.saved_tensors
+        batch, n, _ = x.size()
+        grad_x = torch.zeros_like(x).view(batch, -1)
+        grad_x[:, triuvec_inds] = grad_y
+        grad_x = grad_x.view(batch, n, n)
+        return grad_x
 
 
 class iSQRTCOVPool(nn.Module):
     """
     iSQRT-COV pooling layer.
+
+    Parameters:
+    ----------
+    num_iter : int, default 5
+        Number of iterations (num_iter > 1).
     """
-    def __init__(self):
+    def __init__(self,
+                 num_iter=5):
         super(iSQRTCOVPool, self).__init__()
+        self.num_iter = num_iter
         self.cov_pool = CovPool.apply
         self.sqrt = NewtonSchulzSqrt.apply
-        self.triu_vec = Triuvec.apply
+        self.triuvec = Triuvec.apply
 
     def forward(self, x):
         x = self.cov_pool(x)
-        x = self.sqrt(x, 5)
-        x = self.triu_vec(x)
+        x = self.sqrt(x, self.num_iter)
+        x = self.triuvec(x)
         return x
 
 

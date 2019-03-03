@@ -116,3 +116,4 @@ Some remarks:
 | Shake-Shake-ResNet | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |
 | FractalNet | BC | BC | - | - | - | [link](https://arxiv.org/abs/1605.07648) | [link](https://github.com/gustavla/fractalnet) | 2016 |
+| iSQRT-COV-ResNet | A | A | - | - | - | [link](https://arxiv.org/abs/1712.01034) | [link](https://github.com/jiangtaoxie/fast-MPN-COV) | 2017 |

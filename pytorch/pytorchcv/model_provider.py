@@ -72,6 +72,7 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.isqrtcovresnet import *
+from .models.others.oth_irevnet import *
 
 __all__ = ['get_model']
 
@@ -485,6 +486,8 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
+
+    'oth_irevnet': oth_irevnet,
 }
 
 

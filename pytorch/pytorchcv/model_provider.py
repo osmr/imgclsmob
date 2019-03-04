@@ -487,7 +487,7 @@ _models = {
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
 
-    'oth_irevnet': oth_irevnet,
+    'oth_irevnet301': oth_irevnet301,
 }
 
 

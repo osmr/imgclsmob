@@ -1,17 +1,14 @@
 """
-Code for "i-RevNet: Deep Invertible Networks"
-https://openreview.net/pdf?id=HJsjkMb0Z
-ICLR, 2018
-
-(c) Joern-Henrik Jacobsen, 2018
+    i-RevNet, implemented in PyTorch.
+    Original paper: 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 """
 
 __all__ = ['oth_irevnet301']
 
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from torch.autograd import Variable
 
 
 def split(x):
@@ -143,36 +140,43 @@ class iRevNet(nn.Module):
     def __init__(self,
                  nBlocks,
                  nStrides,
-                 nClasses,
-                 nChannels=None,
+                 nChannels,
                  init_ds=2,
                  dropout_rate=0.,
                  affineBN=True,
-                 in_shape=None,
-                 mult=4):
+                 mult=4,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 num_classes=1000):
         super(iRevNet, self).__init__()
-        self.ds = in_shape[2]//2**(nStrides.count(2)+init_ds//2)
+
+        self.ds = in_size[1] // 2**(nStrides.count(2)+init_ds//2)
         self.init_ds = init_ds
-        self.in_ch = in_shape[0] * 2**self.init_ds
-        self.nBlocks = nBlocks
+        self.in_ch = in_channels * 2**self.init_ds
         self.first = True
 
-        print('')
-        print(' == Building iRevNet %d == ' % (sum(nBlocks) * 3 + 1))
-        if not nChannels:
-            nChannels = [self.in_ch//2, self.in_ch//2 * 4,
-                         self.in_ch//2 * 4**2, self.in_ch//2 * 4**3]
-
         self.init_psi = psi(self.init_ds)
-        self.stack = self.irevnet_stack(irevnet_block, nChannels, nBlocks,
-                                        nStrides, dropout_rate=dropout_rate,
-                                        affineBN=affineBN, in_ch=self.in_ch,
-                                        mult=mult)
+        self.stack = self.irevnet_stack(
+            irevnet_block,
+            nChannels,
+            nBlocks,
+            nStrides,
+            dropout_rate=dropout_rate,
+            affineBN=affineBN,
+            in_ch=self.in_ch,
+            mult=mult)
         self.bn1 = nn.BatchNorm2d(nChannels[-1]*2, momentum=0.9)
-        self.linear = nn.Linear(nChannels[-1]*2, nClasses)
+        self.linear = nn.Linear(nChannels[-1] * 2, num_classes)
 
-    def irevnet_stack(self, _block, nChannels, nBlocks, nStrides, dropout_rate,
-                      affineBN, in_ch, mult):
+    def irevnet_stack(self,
+                      _block,
+                      nChannels,
+                      nBlocks,
+                      nStrides,
+                      dropout_rate,
+                      affineBN,
+                      in_ch,
+                      mult):
         """ Create stack of irevnet blocks """
         block_list = nn.ModuleList()
         strides = []
@@ -181,17 +185,21 @@ class iRevNet(nn.Module):
             strides = strides + ([stride] + [1]*(depth-1))
             channels = channels + ([channel]*depth)
         for channel, stride in zip(channels, strides):
-            block_list.append(_block(in_ch, channel, stride,
-                                     first=self.first,
-                                     dropout_rate=dropout_rate,
-                                     affineBN=affineBN, mult=mult))
+            block_list.append(_block(
+                in_ch,
+                channel,
+                stride,
+                first=self.first,
+                dropout_rate=dropout_rate,
+                affineBN=affineBN,
+                mult=mult))
             in_ch = 2 * channel
             self.first = False
         return block_list
 
     def forward(self, x):
         """ irevnet forward """
-        n = self.in_ch//2
+        n = self.in_ch // 2
         if self.init_ds != 0:
             x = self.init_psi.forward(x)
         out = (x[:, :n, :, :], x[:, n:, :, :])
@@ -210,7 +218,7 @@ class iRevNet(nn.Module):
         out = split(out_bij)
         for i in range(len(self.stack)):
             out = self.stack[-1-i].inverse(out)
-        out = merge(out[0],out[1])
+        out = merge(out[0], out[1])
         if self.init_ds != 0:
             x = self.init_psi.inverse(out)
         else:
@@ -218,18 +226,50 @@ class iRevNet(nn.Module):
         return x
 
 
-def oth_irevnet301(pretrained=False, **kwargs):
-    model = iRevNet(
-        nBlocks=[6, 16, 72, 6],
-        nStrides=[2, 2, 2, 2],
-        nChannels=[24, 96, 384, 1536],
-        nClasses=1000,
-        init_ds=2,
+def get_irevnet(blocks,
+                model_name=None,
+                pretrained=False,
+                root=os.path.join('~', '.torch', 'models'),
+                **kwargs):
+    """
+    Create i-RevNet model with specific parameters.
+
+    Parameters:
+    ----------
+    blocks : int
+        Number of blocks.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    if blocks == 301:
+        nBlocks = [6, 16, 72, 6]
+    else:
+        raise ValueError("Unsupported i-RevNet with number of blocks: {}".format(blocks))
+
+    assert (sum(nBlocks) * 3 + 1 == blocks)
+
+    nStrides = [2, 2, 2, 2]
+    nChannels = [24, 96, 384, 1536]
+    init_ds = 2
+
+    net = iRevNet(
+        nBlocks=nBlocks,
+        nStrides=nStrides,
+        nChannels=nChannels,
+        init_ds=init_ds,
         dropout_rate=0.,
         affineBN=True,
-        in_shape=[3, 224, 224],
         mult=4)
-    return model
+
+    return net
+
+
+def oth_irevnet301(pretrained=False, **kwargs):
+    return get_irevnet(blocks=301)
 
 
 def _calc_width(net):

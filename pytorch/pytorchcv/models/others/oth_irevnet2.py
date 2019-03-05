@@ -11,20 +11,65 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def split(x):
-    n = int(x.size()[1]/2)
-    x1 = x[:, :n, :, :].contiguous()
-    x2 = x[:, n:, :, :].contiguous()
-    return x1, x2
+class DualPathSequential(nn.Sequential):
+    """
+    A sequential container for modules with dual inputs/outputs.
+    Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first modules with single input/output.
+    last_ordinals : int, default 0
+        Number of the final modules with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a module.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal module.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda module, x1, x2: module(x1, x2)),
+                 dual_path_scheme_ordinal=(lambda module, x1, x2: (module(x1), x2))):
+        super(DualPathSequential, self).__init__()
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def forward(self, x1, x2=None):
+        length = len(self._modules.values())
+        for i, module in enumerate(self._modules.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(module, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(module, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
+
+    def inverse(self, x1, x2=None):
+        length = len(self._modules.values())
+        for i, module in enumerate(self._modules.values()):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(module, x1, x2)
+            else:
+                x1, x2 = self.dual_path_scheme(module, x1, x2)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
 
 
-def merge(x1, x2):
-    return torch.cat((x1, x2), dim=1)
-
-
-class injective_pad(nn.Module):
+class RevInjectivePad(nn.Module):
     def __init__(self, pad_size):
-        super(injective_pad, self).__init__()
+        super(RevInjectivePad, self).__init__()
         self.pad_size = pad_size
         self.pad = nn.ZeroPad2d((0, 0, 0, pad_size))
 
@@ -37,117 +82,112 @@ class injective_pad(nn.Module):
         return x[:, :x.size(1) - self.pad_size, :, :]
 
 
-class psi(nn.Module):
+class RevDownscale(nn.Module):
+    def __init__(self, scale):
+        super(RevDownscale, self).__init__()
+        self.scale = scale
+
+    def forward(self, x):
+        batch, x_channels, x_height, x_width = x.size()
+        y_channels = x_channels * self.scale * self.scale
+        assert (x_height % self.scale == 0)
+        y_height = x_height // self.scale
+
+        y = x.permute(0, 2, 3, 1)
+        d2_split_seq = y.split(split_size=self.scale, dim=2)
+        d2_split_seq = [t.contiguous().view(batch, y_height, y_channels) for t in d2_split_seq]
+        y = torch.stack(d2_split_seq, dim=1)
+        y = y.permute(0, 3, 2, 1)
+        return y.contiguous()
+
+    def inverse(self, y):
+        scale_sqr = self.scale * self.scale
+        batch, y_channels, y_height, y_width = y.size()
+        assert (y_channels % scale_sqr == 0)
+        x_channels = y_channels // scale_sqr
+        x_height = y_height * self.scale
+        x_width = y_width * self.scale
+
+        x = y.permute(0, 2, 3, 1)
+        x = x.contiguous().view(batch, y_height, y_width, scale_sqr, x_channels)
+        d3_split_seq = x.split(split_size=self.scale, dim=3)
+        d3_split_seq = [t.contiguous().view(batch, y_height, x_width, x_channels) for t in d3_split_seq]
+        x = torch.stack(d3_split_seq, dim=0)
+        x = x.transpose(0, 1).permute(0, 2, 1, 3, 4).contiguous().view(batch, x_height, x_width, x_channels)
+        x = x.permute(0, 3, 1, 2)
+        return x.contiguous()
+
+
+class RevBottleneck(nn.Module):
     def __init__(self,
-                 block_size):
-        super(psi, self).__init__()
-        self.block_size = block_size
-        self.block_size_sq = block_size*block_size
-
-    def inverse(self, input):
-        output = input.permute(0, 2, 3, 1)
-        (batch_size, d_height, d_width, d_depth) = output.size()
-        s_depth = int(d_depth / self.block_size_sq)
-        s_width = int(d_width * self.block_size)
-        s_height = int(d_height * self.block_size)
-        t_1 = output.contiguous().view(batch_size, d_height, d_width, self.block_size_sq, s_depth)
-        spl = t_1.split(self.block_size, 3)
-        stack = [t_t.contiguous().view(batch_size, d_height, s_width, s_depth) for t_t in spl]
-        output = torch.stack(stack, 0).transpose(0, 1).permute(0, 2, 1, 3, 4).contiguous().view(batch_size, s_height, s_width, s_depth)
-        output = output.permute(0, 3, 1, 2)
-        return output.contiguous()
-
-    def forward(self, input):
-        output = input.permute(0, 2, 3, 1)
-        (batch_size, s_height, s_width, s_depth) = output.size()
-        d_depth = s_depth * self.block_size_sq
-        d_height = int(s_height / self.block_size)
-        t_1 = output.split(self.block_size, 2)
-        stack = [t_t.contiguous().view(batch_size, d_height, d_depth) for t_t in t_1]
-        output = torch.stack(stack, 1)
-        output = output.permute(0, 2, 1, 3)
-        output = output.permute(0, 3, 1, 2)
-        return output.contiguous()
-
-
-class irevnet_block(nn.Module):
-    def __init__(self,
-                 in_ch,
-                 out_ch,
+                 in_channels,
+                 out_channels,
                  stride=1,
-                 first=False,
-                 dropout_rate=0.,
-                 mult=4):
-        """ buid invertible bottleneck block """
-        super(irevnet_block, self).__init__()
-        self.pad = 2 * out_ch - in_ch
+                 first=False):
+        super(RevBottleneck, self).__init__()
+        mid_channels = out_channels // 4
+        self.pad = 2 * out_channels - in_channels
         self.stride = stride
-        self.inj_pad = injective_pad(self.pad)
-        self.psi = psi(stride)
+        self.inj_pad = RevInjectivePad(self.pad)
+        self.psi = RevDownscale(stride)
         if self.pad != 0 and stride == 1:
-            in_ch = out_ch * 2
-            print('')
-            print('| Injective iRevNet |')
-            print('')
+            in_channels = out_channels * 2
+        in_channels2 = in_channels // 2
+
         layers = []
         if not first:
-            layers.append(nn.BatchNorm2d(in_ch//2))
+            layers.append(nn.BatchNorm2d(in_channels2))
             layers.append(nn.ReLU(inplace=True))
         layers.append(nn.Conv2d(
-            in_ch//2,
-            int(out_ch//mult),
+            in_channels2,
+            mid_channels,
             kernel_size=3,
             stride=stride,
             padding=1,
             bias=False))
-        layers.append(nn.BatchNorm2d(int(out_ch//mult)))
+        layers.append(nn.BatchNorm2d(mid_channels))
         layers.append(nn.ReLU(inplace=True))
         layers.append(nn.Conv2d(
-            int(out_ch//mult),
-            int(out_ch//mult),
+            mid_channels,
+            mid_channels,
             kernel_size=3,
             padding=1,
             bias=False))
-        layers.append(nn.Dropout(p=dropout_rate))
-        layers.append(nn.BatchNorm2d(int(out_ch//mult)))
+        layers.append(nn.BatchNorm2d(mid_channels))
         layers.append(nn.ReLU(inplace=True))
         layers.append(nn.Conv2d(
-            int(out_ch//mult),
-            out_ch,
+            mid_channels,
+            out_channels,
             kernel_size=3,
             padding=1,
             bias=False))
         self.bottleneck_block = nn.Sequential(*layers)
 
-    def forward(self, x):
-        """ bijective or injective block forward """
+    def forward(self, x1, x2):
         if self.pad != 0 and self.stride == 1:
-            x = merge(x[0], x[1])
+            x = torch.cat((x1, x2), dim=1)
             x = self.inj_pad.forward(x)
-            x1, x2 = split(x)
-            x = (x1, x2)
-        x1 = x[0]
-        x2 = x[1]
-        Fx2 = self.bottleneck_block(x2)
+            x1, x2 = torch.chunk(x, chunks=2, dim=1)
+
+        fx2 = self.bottleneck_block(x2)
         if self.stride == 2:
-            x1 = self.psi.forward(x1)
-            x2 = self.psi.forward(x2)
-        y1 = Fx2 + x1
-        return (x2, y1)
+            x1 = self.psi(x1)
+            x2 = self.psi(x2)
+        y1 = fx2 + x1
+        return x2, y1
 
     def inverse(self, x):
-        """ bijective or injecitve block inverse """
         x2, y1 = x[0], x[1]
         if self.stride == 2:
             x2 = self.psi.inverse(x2)
-        Fx2 = - self.bottleneck_block(x2)
-        x1 = Fx2 + y1
+        fx2 = - self.bottleneck_block(x2)
+        x1 = fx2 + y1
         if self.stride == 2:
             x1 = self.psi.inverse(x1)
         if self.pad != 0 and self.stride == 1:
-            x = merge(x1, x2)
+            x = torch.cat((x1, x2), dim=1)
             x = self.inj_pad.inverse(x)
-            x1, x2 = split(x)
+            x1, x2 = torch.chunk(x, chunks=2, dim=1)
             x = (x1, x2)
         else:
             x = (x1, x2)
@@ -158,8 +198,6 @@ class iRevNet(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 mult=4,
-                 dropout_rate=0.0,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -168,7 +206,7 @@ class iRevNet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
 
-        self.init_psi = psi(block_size=2)
+        self.init_psi = RevDownscale(scale=2)
         in_channels = init_block_channels
 
         block_list = nn.ModuleList()
@@ -176,13 +214,11 @@ class iRevNet(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) else 1
-                block_list.append(irevnet_block(
+                block_list.append(RevBottleneck(
                     in_channels,
                     out_channels,
                     stride,
-                    first=first,
-                    dropout_rate=dropout_rate,
-                    mult=mult))
+                    first=first))
                 in_channels = 2 * out_channels
                 first = False
         self.stack = block_list
@@ -197,22 +233,27 @@ class iRevNet(nn.Module):
             in_features=in_channels,
             out_features=num_classes)
 
-    def forward(self, x):
+    def forward(self, x, return_out_bij=False):
         """ irevnet forward """
-        x = self.init_psi.forward(x)
+        x = self.init_psi(x)
 
-        out = torch.chunk(x, chunks=2, dim=1)
+        x1, x2 = torch.chunk(x, chunks=2, dim=1)
         for block in self.stack:
-            out = block.forward(out)
-        out_bij = torch.cat((out[0], out[1]), dim=1)
+            x1, x2 = block(x1, x2)
+        x = torch.cat((x1, x2), dim=1)
+        if return_out_bij:
+            out_bij = x.clone()
 
-        out = F.relu(self.bn1(out_bij))
+        x = F.relu(self.bn1(x))
 
-        out = self.features(out)
-        out = out.view(out.size(0), -1)
-        out = self.output(out)
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        x = self.output(x)
 
-        return out
+        if return_out_bij:
+            return x, out_bij
+        else:
+            return x
 
     def inverse(self, out_bij):
         """ irevnet inverse """
@@ -258,7 +299,7 @@ def get_irevnet(blocks,
     net = iRevNet(
         channels=channels,
         init_block_channels=init_block_channels,
-        mult=4)
+        **kwargs)
 
     return net
 

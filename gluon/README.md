@@ -222,6 +222,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ShuffleNet x1.0 (g=2) | 33.98 | 13.32 | 1,733,848 | 147.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.241/shufflenet_g2_w1-1332-f5a1479f.params.log)) |
 | ShuffleNet x1.0 (g=3) | 33.96 | 13.29 | 1,865,728 | 145.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.244/shufflenet_g3_w1-1329-ac58d62c.params.log)) |
 | ShuffleNet x1.0 (g=4) | 33.84 | 13.10 | 1,968,344 | 143.33M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.245/shufflenet_g4_w1-1310-73c039eb.params.log)) |
+| ShuffleNet x1.0 (g=8) | 33.65 | 13.19 | 2,434,768 | 150.76M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.250/shufflenet_g8_w1-1319-9a50ddd9.params.log)) |
 | ShuffleNetV2 x0.5 | 40.61 | 18.30 | 1,366,792 | 43.31M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1830-156953de.params.log)) |
 | ShuffleNetV2 x1.0 | 30.94 | 11.23 | 2,278,604 | 149.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.133/shufflenetv2_w1-1123-27435039.params.log)) |
 | ShuffleNetV2 x1.5 | 32.38 | 12.37 | 4,406,098 | 320.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1237-08c01388.params.log)) |

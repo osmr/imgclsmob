@@ -136,6 +136,7 @@ Some remarks:
 | ShuffleNet x1.0 (g=2) | 33.97 | 13.32 | 1,733,848 | 147.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.241/shufflenet_g2_w1-1332-8784a32b.h5.log)) |
 | ShuffleNet x1.0 (g=3) | 33.96 | 13.29 | 1,865,728 | 145.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.244/shufflenet_g3_w1-1329-0e213e76.h5.log)) |
 | ShuffleNet x1.0 (g=4) | 33.83 | 13.10 | 1,968,344 | 143.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.245/shufflenet_g4_w1-1310-ef2ff63e.h5.log)) |
+| ShuffleNet x1.0 (g=8) | 33.64 | 13.20 | 2,434,768 | 150.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.250/shufflenet_g8_w1-1320-796314f1.h5.log)) |
 | ShuffleNetV2 x0.5 | 40.76 | 18.40 | 1,366,792 | 43.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1840-9b4b0964.h5.log)) |
 | ShuffleNetV2 x1.0 | 31.02 | 11.33 | 2,278,604 | 149.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.133/shufflenetv2_w1-1133-bcba973e.h5.log)) |
 | ShuffleNetV2 x1.5 | 32.46 | 12.47 | 4,406,098 | 320.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1247-f7f813b4.h5.log)) |

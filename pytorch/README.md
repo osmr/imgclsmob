@@ -216,6 +216,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ShuffleNet x1.0 (g=2) | 34.25 | 13.63 | 1,733,848 | 147.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.241/shufflenet_g2_w1-1363-07256203.pth.log)) |
 | ShuffleNet x1.0 (g=3) | 34.39 | 13.48 | 1,865,728 | 145.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.244/shufflenet_g3_w1-1348-ce54f64e.pth.log)) |
 | ShuffleNet x1.0 (g=4) | 34.19 | 13.35 | 1,968,344 | 143.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.245/shufflenet_g4_w1-1335-e2415f82.pth.log)) |
+| ShuffleNet x1.0 (g=8) | 34.06 | 13.42 | 2,434,768 | 150.76M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.250/shufflenet_g8_w1-1342-9a979b36.pth.log)) |
 | ShuffleNetV2 x0.5 | 40.99 | 18.65 | 1,366,792 | 43.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.90/shufflenetv2_wd2-1865-9c22238b.pth.log)) |
 | ShuffleNetV2 x1.0 | 31.44 | 11.63 | 2,278,604 | 149.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.133/shufflenetv2_w1-1163-c71dfb7a.pth.log)) |
 | ShuffleNetV2 x1.5 | 32.82 | 12.69 | 4,406,098 | 320.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.65/shufflenetv2_w3d2-1269-536ad5b1.pth.log)) |

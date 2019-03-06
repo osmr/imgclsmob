@@ -73,6 +73,7 @@ from .models.fractalnet_cifar import *
 
 from .models.isqrtcovresnet import *
 from .models.others.oth_irevnet import *
+from .models.irevnet import *
 
 __all__ = ['get_model']
 
@@ -488,6 +489,7 @@ _models = {
     'isqrtcovresnet101b': isqrtcovresnet101b,
 
     'oth_irevnet301': oth_irevnet301,
+    'irevnet301': irevnet301,
 }
 
 

@@ -75,7 +75,7 @@ Some remarks:
 | BN-VGG-13b | 29.47 | 10.15 | 133,053,736 | 11,342.14M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg13b-1015-999e47a6.tf.npz.log)) |
 | BN-VGG-16b | 26.83 | 8.66 | 138,365,992 | 15,507.20M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg16b-0866-1f8251aa.tf.npz.log)) |
 | BN-VGG-19b | 25.62 | 8.17 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg19b-0817-784e4c39.tf.npz.log)) |
-| ResNet-10 | 37.11 | 15.52 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet10-1552-e2c11848.tf.npz.log)) |
+| ResNet-10 | 34.62 | 13.90 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.248/resnet10-1390-7fff13ae.tf.npz.log)) |
 | ResNet-12 | 35.82 | 14.50 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet12-1450-8865f58b.tf.npz.log)) |
 | ResNet-14 | 32.83 | 12.45 | 5,788,200 | 1,357.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet14-1245-8596c8f1.tf.npz.log)) |
 | ResNet-16 | 30.66 | 11.05 | 6,968,872 | 1,589.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet16-1105-8ee84db2.tf.npz.log)) |
@@ -90,6 +90,7 @@ Some remarks:
 | ResNet-101b | 20.81 | 5.40 | 44,549,160 | 7,830.48M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.145/resnet101b-0540-4e2ec57c.tf.npz.log)) |
 | ResNet-152 | 20.73 | 5.35 | 60,192,808 | 11,321.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.144/resnet152-0535-b21844fc.tf.npz.log)) |
 | ResNet-152b | 20.27 | 5.23 | 60,192,808 | 11,554.38M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.143/resnet152b-0523-da1f46f3.tf.npz.log)) |
+| PreResNet-10 | 34.71 | 14.01 | 5,417,128 | 894.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.249/preresnet10-1401-3a2eed3b.tf.npz.log)) |
 | PreResNet-18 | 28.21 | 9.49 | 11,687,848 | 1,820.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.140/preresnet18-0949-692e6c11.tf.npz.log)) |
 | PreResNet-34 | 25.82 | 8.08 | 21,796,008 | 3,672.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet34-0808-ceab73cc.tf.npz.log)) |
 | PreResNet-50 | 23.42 | 6.68 | 25,549,480 | 3,875.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet50-0668-822837cf.tf.npz.log)) |

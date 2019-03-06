@@ -221,6 +221,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('ror3_110_cifar10', '0435', 'fb2a2b0499e4a4d92bdc1d6792bd5572256d5165', 'v0.0.235'),
     ('ror3_110_cifar100', '2364', 'd599e3a93cd960c8bfc5d05c721cd48fece5fa6f', 'v0.0.236'),
     ('shakeshakeresnet20_2x16d_cifar10', '0515', 'ef71ec0d5ef928ef8654294114a013895abe3f9a', 'v0.0.215'),
+    ('shakeshakeresnet20_2x16d_cifar100', '2922', '4d07f14234b1c796b3c1dfb24d4a3220a1b6b293', 'v0.0.247'),
     ('shakeshakeresnet26_2x32d_cifar10', '0317', 'ecd1f8337cc90b5378b4217fb2591f2ed0f02bdf', 'v0.0.217'),
     ('shakeshakeresnet26_2x32d_cifar100', '1880', 'b47e371f60c9fed9eaac960568783fb6f83a362f', 'v0.0.222')]}
 

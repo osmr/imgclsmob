@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity
 from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
-from .pytorchcv.models.irevnet import IRevDownscale
+from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 
 __all__ = ['measure_model']
 
@@ -53,7 +53,8 @@ def measure_model(model,
     # names = {}
 
     def call_hook(module, x, y):
-        assert (len(x) == 1)
+        if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock)):
+            assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):
@@ -156,6 +157,12 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(module, IRevDownscale):
             extra_num_flops = 5 * x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, IRevSplitBlock):
+            extra_num_flops = x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, IRevMergeBlock):
+            extra_num_flops = x[0].numel()
             extra_num_macs = 0
         else:
             raise TypeError('Unknown layer type: {}'.format(type(module)))

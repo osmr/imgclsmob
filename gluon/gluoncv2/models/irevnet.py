@@ -8,7 +8,7 @@ __all__ = ['IRevNet', 'irevnet301']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv3x3, pre_conv3x3_block, DualPathSequential
+from common import conv3x3, pre_conv3x3_block, DualPathSequential
 
 
 class IRevDualPathSequential(DualPathSequential):
@@ -275,6 +275,8 @@ class IRevUnit(HybridBlock):
         return x2, y1
 
     def inverse(self, x2, y1):
+        import mxnet.ndarray as F
+
         if self.do_downscale:
             x2 = self.psi.inverse(x2)
         fx2 = - self.bottleneck_block(x2)

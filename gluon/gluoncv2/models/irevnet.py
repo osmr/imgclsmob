@@ -522,7 +522,6 @@ def _test():
         x_ = net.inverse(out_bij)
         assert (x_.shape == (2, 3, 224, 224))
 
-        import numpy as np
         assert (np.max(np.abs(x.asnumpy() - x_.asnumpy())) < 1e-4)
 
 

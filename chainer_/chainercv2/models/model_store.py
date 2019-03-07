@@ -83,6 +83,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('darknet_tiny', '1746', 'b04fa46318a78e977aa5a117786968d98d325871', 'v0.0.69'),
     ('darknet_ref', '1671', 'b2d5721f3a5f6f05cc785d57ff7a63fe82f6325e', 'v0.0.64'),
     ('darknet53', '0556', '42c57951fc2668c1a81ede52e6f4de4aac7e0278', 'v0.0.150'),
+    ('irevnet301', '0887', 'ed6e6df033e659893b9021a6381f101feff002b8', 'v0.0.251'),
     ('dla34', '0823', '45504b0927fab7165e863c6801f9c0f10a906731', 'v0.0.202'),
     ('dla46c', '1471', '487ae254f1898e9e577aebb81c4466b3b7f0b238', 'v0.0.202'),
     ('dla46xc', '1396', 'a40cc67575756590ebace9c7ed9132a64afc646e', 'v0.0.202'),

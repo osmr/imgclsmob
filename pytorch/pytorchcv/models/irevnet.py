@@ -9,7 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv3x3, pre_conv3x3_block, DualPathSequential
+from common import conv3x3, pre_conv3x3_block, DualPathSequential
 
 
 class IRevDualPathSequential(DualPathSequential):
@@ -475,13 +475,13 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != irevnet301 or weight_count == 125120356)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = Variable(torch.randn(2, 3, 224, 224))
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (tuple(y.size()) == (2, 1000))
 
         y, out_bij = net(x, return_out_bij=True)
         x_ = net.inverse(out_bij)
-        assert (tuple(x_.size()) == (1, 3, 224, 224))
+        assert (tuple(x_.size()) == (2, 3, 224, 224))
 
         import numpy as np
         assert (np.max(np.abs(x.detach().numpy() - x_.detach().numpy())) < 1e-4)

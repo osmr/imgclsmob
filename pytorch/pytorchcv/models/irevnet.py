@@ -238,7 +238,7 @@ class IRevUnit(nn.Module):
 
         if self.do_padding:
             self.pad = IRevInjectivePad(padding)
-        self.bottleneck_block = IRevBottleneck(
+        self.bottleneck = IRevBottleneck(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride,
@@ -249,9 +249,9 @@ class IRevUnit(nn.Module):
     def forward(self, x1, x2):
         if self.do_padding:
             x = torch.cat((x1, x2), dim=1)
-            x = self.pad.forward(x)
+            x = self.pad(x)
             x1, x2 = torch.chunk(x, chunks=2, dim=1)
-        fx2 = self.bottleneck_block(x2)
+        fx2 = self.bottleneck(x2)
         if self.do_downscale:
             x1 = self.psi(x1)
             x2 = self.psi(x2)
@@ -261,7 +261,7 @@ class IRevUnit(nn.Module):
     def inverse(self, x2, y1):
         if self.do_downscale:
             x2 = self.psi.inverse(x2)
-        fx2 = - self.bottleneck_block(x2)
+        fx2 = - self.bottleneck(x2)
         x1 = fx2 + y1
         if self.do_downscale:
             x1 = self.psi.inverse(x1)

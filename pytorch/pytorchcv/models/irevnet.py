@@ -9,7 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.init as init
-from common import conv3x3, pre_conv3x3_block, DualPathSequential
+from .common import conv3x3, pre_conv3x3_block, DualPathSequential
 
 
 class IRevDualPathSequential(DualPathSequential):

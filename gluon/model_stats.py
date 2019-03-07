@@ -5,6 +5,7 @@ from mxnet.gluon import nn
 from mxnet.gluon.contrib.nn import Identity
 from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2
 from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
+from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 
 __all__ = ['measure_model']
 
@@ -56,7 +57,8 @@ def measure_model(model,
     names = {}
 
     def call_hook(block, x, y):
-        assert (len(x) == 1)
+        if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock)):
+            assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
         assert (len(block._children) == 0)
         if isinstance(block, nn.Dense):
@@ -143,6 +145,15 @@ def measure_model(model,
             extra_num_flops = x[0].size
             extra_num_macs = 0
         elif isinstance(block, ChannelSqueeze):
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, IRevDownscale):
+            extra_num_flops = 5 * x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, IRevSplitBlock):
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, IRevMergeBlock):
             extra_num_flops = x[0].size
             extra_num_macs = 0
         else:

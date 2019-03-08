@@ -74,6 +74,7 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.others.oth_bagnet import *
+from .models.bagnet import *
 
 __all__ = ['get_model']
 
@@ -493,6 +494,10 @@ _models = {
     'oth_bagnet9': oth_bagnet9,
     'oth_bagnet17': oth_bagnet17,
     'oth_bagnet33': oth_bagnet33,
+
+    'bagnet9': bagnet9,
+    'bagnet17': bagnet17,
+    'bagnet33': bagnet33,
 }
 
 

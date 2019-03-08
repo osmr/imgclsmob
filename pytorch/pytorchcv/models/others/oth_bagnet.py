@@ -43,9 +43,11 @@ class Bottleneck(nn.Module):
 
         if self.downsample is not None:
             residual = self.downsample(x)
+            print("->downsample")
         
         if residual.size(-1) != out.size(-1):
             diff = residual.size(-1) - out.size(-1)
+            print("residual.shape={}, out.shape={}, diff={}".format(residual.shape, out.shape, diff))
             residual = residual[:,:,:-diff,:-diff]
         
         out += residual
@@ -96,6 +98,7 @@ class BagNet(nn.Module):
         layers.append(block(self.inplanes, planes, stride, downsample, kernel_size=kernel))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
+            # print("->i={}".format(i))
             kernel = 1 if kernel3 <= i else 3
             layers.append(block(self.inplanes, planes, kernel_size=kernel))
 

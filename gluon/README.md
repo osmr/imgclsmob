@@ -299,6 +299,7 @@ Some remarks:
 | DenseNet-BC-40 (k=24) | 4.52 | 264 | 690,346 | 293.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.220/densenet40_k24_bc_cifar10-0452-13fa807e.params.log)) |
 | DenseNet-BC-40 (k=36) | 4.04 | 396 | 1,542,682 | 654.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.224/densenet40_k36_bc_cifar10-0404-4c154567.params.log)) |
 | DenseNet-100 (k=12) | 3.66 | 678 | 4,068,490 | 1,353.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.205/densenet100_k12_cifar10-0366-4e371ccb.params.log)) |
+| DenseNet-100 (k=24) | 3.13 | 1356 | 16,114,138 | 5,354.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.252/densenet100_k24_cifar10-0313-9f795bac.params.log)) |
 | DenseNet-BC-100 (k=12) | 4.16 | 342 | 769,162 | 298.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.189/densenet100_k12_bc_cifar10-0416-6685d1f4.params.log)) |
 | X-DenseNet-BC-40-2 (k=24) | 5.31 | 264 | 690,346 | 293.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.226/xdensenet40_2_k24_bc_cifar10-0531-66c9d384.params.log)) |
 | X-DenseNet-BC-40-2 (k=36) | 4.37 | 396 | 1,542,682 | 654.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.233/xdensenet40_2_k36_bc_cifar10-0437-e9bf4192.params.log)) |

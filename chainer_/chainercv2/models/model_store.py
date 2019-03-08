@@ -203,6 +203,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('densenet40_k36_bc_cifar100', '2050', '49b6695fe06d98cfac5d4fdbdb716edb268712c2', 'v0.0.225'),
     ('densenet100_k12_cifar10', '0366', '85031735e1c80d3a6254fe8649c5e9bae2d54315', 'v0.0.205'),
     ('densenet100_k12_cifar100', '1964', 'f04f59203ad863f466c25fa9bbfc18686d72a46a', 'v0.0.206'),
+    ('densenet100_k24_cifar10', '0313', '939ef3090b6219e5afabc97f03cc34365c729ada', 'v0.0.252'),
     ('densenet100_k12_bc_cifar10', '0416', '160a064165eddf492970a99b5a8ca9689bf94fea', 'v0.0.189'),
     ('densenet100_k12_bc_cifar100', '2119', 'a37ebc2a083fbe8e7642988945d1092fb421f182', 'v0.0.208'),
     ('xdensenet40_2_k24_bc_cifar10', '0531', 'd3c448ab2c110f873579093ff9a69e735d80b4e7', 'v0.0.226'),

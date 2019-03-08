@@ -20,7 +20,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('bn_vgg16b', '0866', '1f8251aa987151e89a82f0f209c2a8bbde0f0c47', 'v0.0.123'),
     ('bn_vgg19b', '0817', '784e4c396e6de685727bc8fd30f5ed35c66a84a0', 'v0.0.123'),
     ('resnet10', '1390', '7fff13aee28ba7601c155907be64aff344530736', 'v0.0.248'),
-    ('resnet12', '1450', '8865f58bd3daecc3a30e1f002790719f2f3f0c58', 'v0.0.72'),
+    ('resnet12', '1300', '9539494f8fae66c454efed4e5abf26c273d3b285', 'v0.0.253'),
     ('resnet14', '1245', '8596c8f1c48b91998456419e68e58de20d75f0d1', 'v0.0.72'),
     ('resnet16', '1105', '8ee84db280879e366e26c626cf33a47b0298a9f6', 'v0.0.72'),
     ('resnet18_wd4', '2450', 'b536eea54c6e7b93aee7c6c39bfe75cf6b985fa1', 'v0.0.72'),

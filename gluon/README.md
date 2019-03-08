@@ -118,7 +118,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | BN-VGG-19b | 25.66 | 8.15 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.110/bn_vgg19b-0815-3a0e43e6.params.log)) |
 | BN-Inception | 25.09 | 7.76 | 11,295,240 | 2,048.06M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.139/bninception-0776-8314001b.params.log)) |
 | ResNet-10 | 34.61 | 13.85 | 5,418,792 | 894.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.248/resnet10-1385-a9964274.params.log)) |
-| ResNet-12 | 35.86 | 14.46 | 5,492,776 | 1,126.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.30/resnet12-1446-9ce715b0.params.log)) |
+| ResNet-12 | 33.42 | 13.03 | 5,492,776 | 1,126.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.253/resnet12-1303-8f492c28.params.log)) |
 | ResNet-14 | 32.85 | 12.41 | 5,788,200 | 1,357.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.40/resnet14-1241-a8955ff3.params.log)) |
 | ResNet-16 | 30.68 | 11.10 | 6,968,872 | 1,589.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.41/resnet16-1110-1be996d1.params.log)) |
 | ResNet-18 x0.25 | 49.16 | 24.45 | 831,096 | 137.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.47/resnet18_wd4-2445-28d15cf4.params.log)) |

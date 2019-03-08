@@ -76,7 +76,7 @@ Some remarks:
 | BN-VGG-16b | 26.83 | 8.66 | 138,365,992 | 15,507.20M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg16b-0866-1f8251aa.tf.npz.log)) |
 | BN-VGG-19b | 25.62 | 8.17 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.123/bn_vgg19b-0817-784e4c39.tf.npz.log)) |
 | ResNet-10 | 34.62 | 13.90 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.248/resnet10-1390-7fff13ae.tf.npz.log)) |
-| ResNet-12 | 35.82 | 14.50 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet12-1450-8865f58b.tf.npz.log)) |
+| ResNet-12 | 33.36 | 13.00 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.253/resnet12-1300-9539494f.tf.npz.log)) |
 | ResNet-14 | 32.83 | 12.45 | 5,788,200 | 1,357.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet14-1245-8596c8f1.tf.npz.log)) |
 | ResNet-16 | 30.66 | 11.05 | 6,968,872 | 1,589.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet16-1105-8ee84db2.tf.npz.log)) |
 | ResNet-18 x0.25 | 49.12 | 24.50 | 831,096 | 137.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet18_wd4-2450-b536eea5.tf.npz.log)) |

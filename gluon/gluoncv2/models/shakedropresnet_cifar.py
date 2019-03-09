@@ -30,7 +30,7 @@ class ShakeDrop(mx.autograd.Function):
     def forward(self, x):
         if mx.autograd.is_training():
             b = np.random.binomial(n=1, p=self.p)
-            alpha = mx.nd.random.uniform_like(x.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]), low=-1.0, high=1.0)
+            alpha = mx.nd.random.uniform_like(x.slice(begin=(None, 0, 0, 0), end=(None, 1, 1, 1)), low=-1.0, high=1.0)
             y = mx.nd.broadcast_mul(b + alpha - b * alpha, x)
             self.save_for_backward(b)
         else:
@@ -39,7 +39,7 @@ class ShakeDrop(mx.autograd.Function):
 
     def backward(self, dy):
         b, = self.saved_tensors
-        beta = mx.nd.random.uniform_like(dy.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]), low=0.0, high=1.0)
+        beta = mx.nd.random.uniform_like(dy.slice(begin=(None, 0, 0, 0), end=(None, 1, 1, 1)), low=0.0, high=1.0)
         return mx.nd.broadcast_mul(b + beta - b * beta, dy)
 
 

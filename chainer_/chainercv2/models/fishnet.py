@@ -551,7 +551,7 @@ def get_fishnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 

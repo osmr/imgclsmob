@@ -545,7 +545,7 @@ def get_resattnet(blocks,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join('~', '.mxnet', 'models'),
                   **kwargs):
     """
     Create ResAttNet model with specific parameters.
@@ -560,7 +560,7 @@ def get_resattnet(blocks,
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     if blocks == 56:
@@ -623,7 +623,7 @@ def resattnet56(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=56, model_name="resattnet56", **kwargs)
@@ -639,7 +639,7 @@ def resattnet92(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=92, model_name="resattnet92", **kwargs)
@@ -655,7 +655,7 @@ def resattnet128(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=128, model_name="resattnet128", **kwargs)
@@ -671,7 +671,7 @@ def resattnet164(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=164, model_name="resattnet164", **kwargs)
@@ -687,7 +687,7 @@ def resattnet200(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=200, model_name="resattnet200", **kwargs)
@@ -703,7 +703,7 @@ def resattnet236(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=236, model_name="resattnet236", **kwargs)
@@ -719,7 +719,7 @@ def resattnet452(**kwargs):
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
         The context in which to load the pretrained weights.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_resattnet(blocks=452, model_name="resattnet452", **kwargs)

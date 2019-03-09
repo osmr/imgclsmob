@@ -127,7 +127,10 @@ class IRevInjectivePad(HybridBlock):
         self.padding = padding
 
     def hybrid_forward(self, F, x):
-        return F.pad(x, mode="constant", pad_width=(0, 0, 0, self.padding, 0, 0, 0, 0), constant_value=0)
+        x = x.transpose(axes=(0, 2, 1, 3))
+        x = F.pad(x, mode="constant", pad_width=(0, 0, 0, 0, 0, self.padding, 0, 0), constant_value=0)
+        x = x.transpose(axes=(0, 2, 1, 3))
+        return x
 
     def inverse(self, x):
         return x[:, :x.shape[1] - self.padding, :, :]

@@ -21,14 +21,14 @@ class ShakeShake(mx.autograd.Function):
 
     def forward(self, x1, x2):
         if mx.autograd.is_training():
-            alpha = mx.nd.random.uniform_like(x1.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]))
+            alpha = mx.nd.random.uniform_like(x1.slice(begin=(None, 0, 0, 0), end=(None, 1, 1, 1)))
             y = mx.nd.broadcast_mul(alpha, x1) + mx.nd.broadcast_mul(1 - alpha, x2)
         else:
             y = 0.5 * (x1 + x2)
         return y
 
     def backward(self, dy):
-        beta = mx.nd.random.uniform_like(dy.slice(begin=[None, 0, 0, 0], end=[None, 1, 1, 1]))
+        beta = mx.nd.random.uniform_like(dy.slice(begin=(None, 0, 0, 0), end=(None, 1, 1, 1)))
         return mx.nd.broadcast_mul(beta, dy), mx.nd.broadcast_mul(1 - beta, dy)
 
 

@@ -74,6 +74,8 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
+from .models.bagnet import *
+
 __all__ = ['get_model']
 
 
@@ -492,6 +494,10 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
+
+    'bagnet9': bagnet9,
+    'bagnet17': bagnet17,
+    'bagnet33': bagnet33,
 }
 
 

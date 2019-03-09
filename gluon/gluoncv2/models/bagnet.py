@@ -1,5 +1,5 @@
 """
-    BagNet, implemented in PyTorch.
+    BagNet, implemented in Gluon.
     Original paper: 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 """
@@ -7,12 +7,12 @@
 __all__ = ['BagNet', 'bagnet9', 'bagnet17', 'bagnet33']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1, conv1x1_block, conv3x3_block, ConvBlock
 
 
-class BagNetBottleneck(nn.Module):
+class BagNetBottleneck(HybridBlock):
     """
     BagNet bottleneck block for residual path in BagNet unit.
 
@@ -24,8 +24,10 @@ class BagNetBottleneck(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size of the second convolution.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the second convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bottleneck_factor : int, default 4
         Bottleneck factor.
     """
@@ -33,34 +35,40 @@ class BagNetBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
-                 bottleneck_factor=4):
-        super(BagNetBottleneck, self).__init__()
+                 strides,
+                 bn_use_global_stats,
+                 bottleneck_factor=4,
+                 **kwargs):
+        super(BagNetBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // bottleneck_factor
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.conv2 = ConvBlock(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=0)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            activation=None,
-            activate=False)
+        with self.name_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = ConvBlock(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=0,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv3 = conv1x1_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                activation=None,
+                activate=False)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         return x
 
 
-class BagNetUnit(nn.Module):
+class BagNetUnit(HybridBlock):
     """
     BagNet unit.
 
@@ -72,45 +80,51 @@ class BagNetUnit(nn.Module):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size of the second body convolution.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the second body convolution.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride):
-        super(BagNetUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+                 strides,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(BagNetUnit, self).__init__(**kwargs)
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
-        self.body = BagNetBottleneck(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
+        with self.name_scope():
+            self.body = BagNetBottleneck(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
-                activate=False)
-        self.activ = nn.ReLU(inplace=True)
+                kernel_size=kernel_size,
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
+            if self.resize_identity:
+                self.identity_conv = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
+                    activate=False)
+            self.activ = nn.Activation("relu")
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
             identity = x
         x = self.body(x)
-        if x.size(-1) != identity.size(-1):
-            diff = identity.size(-1) - x.size(-1)
-            identity = identity[:, :, :-diff, :-diff]
+        if self.resize_identity:
+            identity = F.slice_like(identity, x, axes=(2, 3))
         x = x + identity
         x = self.activ(x)
         return x
 
 
-class BagNetInitBlock(nn.Module):
+class BagNetInitBlock(HybridBlock):
     """
     BagNet specific initial block.
 
@@ -120,26 +134,32 @@ class BagNetInitBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(BagNetInitBlock, self).__init__()
-        self.conv1 = conv1x1(
-            in_channels=in_channels,
-            out_channels=out_channels)
-        self.conv2 = conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            padding=0)
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(BagNetInitBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv1 = conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels)
+            self.conv2 = conv3x3_block(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                padding=0,
+                bn_use_global_stats=bn_use_global_stats)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class BagNet(nn.Module):
+class BagNet(HybridBlock):
     """
     BagNet model from 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
@@ -154,11 +174,14 @@ class BagNet(nn.Module):
         Size of the pooling windows for final pool.
     normal_kernel_sizes : list of int
         Count of the first units with 3x3 convolution window size for each stage.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -166,50 +189,48 @@ class BagNet(nn.Module):
                  init_block_channels,
                  final_pool_size,
                  normal_kernel_sizes,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(BagNet, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(BagNet, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", BagNetInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != len(channels) - 1) else 1
-                kernel_size = 3 if j < normal_kernel_sizes[i] else 1
-                stage.add_module("unit{}".format(j + 1), BagNetUnit(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    stride=stride))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=final_pool_size,
-            stride=1))
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(BagNetInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if (j == 0) and (i != len(channels) - 1) else 1
+                        kernel_size = 3 if j < normal_kernel_sizes[i] else 1
+                        stage.add(BagNetUnit(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            kernel_size=kernel_size,
+                            strides=strides,
+                            bn_use_global_stats=bn_use_global_stats))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=final_pool_size,
+                strides=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -217,7 +238,8 @@ class BagNet(nn.Module):
 def get_bagnet(field,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
+               ctx=cpu(),
+               root=os.path.join('~', '.mxnet', 'models'),
                **kwargs):
     """
     Create BagNet model with specific parameters.
@@ -230,7 +252,9 @@ def get_bagnet(field,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
 
@@ -263,11 +287,12 @@ def get_bagnet(field,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -281,7 +306,9 @@ def bagnet9(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_bagnet(field=9, model_name="bagnet9", **kwargs)
@@ -296,7 +323,9 @@ def bagnet17(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_bagnet(field=17, model_name="bagnet17", **kwargs)
@@ -311,24 +340,17 @@ def bagnet33(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_bagnet(field=33, model_name="bagnet33", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -342,17 +364,25 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != bagnet9 or weight_count == 15688744)
         assert (model != bagnet17 or weight_count == 16213032)
         assert (model != bagnet33 or weight_count == 18310184)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

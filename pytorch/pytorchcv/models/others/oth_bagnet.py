@@ -43,11 +43,11 @@ class Bottleneck(nn.Module):
 
         if self.downsample is not None:
             residual = self.downsample(x)
-            print("->downsample")
+            # print("->downsample")
         
         if residual.size(-1) != out.size(-1):
             diff = residual.size(-1) - out.size(-1)
-            print("residual.shape={}, out.shape={}, diff={}".format(residual.shape, out.shape, diff))
+            # print("residual.shape={}, out.shape={}, diff={}".format(residual.shape, out.shape, diff))
             residual = residual[:,:,:-diff,:-diff]
         
         out += residual

@@ -85,7 +85,7 @@ class DwsConvBlock(nn.Module):
         self.activate = activate
 
         if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+            self.activ = nn.ReLU(inplace=False)
         self.conv = DwsConv(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -189,7 +189,7 @@ class XceptionUnit(nn.Module):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
-            identity = x.clone()
+            identity = x
         x = self.body(x)
         x = x + identity
         return x
@@ -397,7 +397,7 @@ def _test():
 
         x = Variable(torch.randn(1, 3, 299, 299))
         y = net(x)
-        # y.sum().backward()
+        y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))
 
 

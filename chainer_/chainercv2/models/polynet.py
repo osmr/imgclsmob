@@ -12,115 +12,8 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential, Concurrent, ParametricSequential, ParametricConcurrent
-
-
-class ConvBlock(Chain):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 activate=True):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=True)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=1e-5)
-            if self.activate:
-                self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  activate=True):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Stride of the convolution.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=1,
-        stride=stride,
-        pad=0,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride,
-                  pad=1,
-                  activate=True):
-    """
-    3x3 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=stride,
-        pad=pad,
-        activate=activate)
+from .common import ConvBlock, conv1x1_block, conv3x3_block, Concurrent, ParametricSequential, ParametricConcurrent,\
+    SimpleSequential
 
 
 class PolyConv(Chain):
@@ -899,24 +792,18 @@ class PolyInitBlock(Chain):
                  in_channels):
         super(PolyInitBlock, self).__init__()
         with self.init_scope():
-            self.conv1 = ConvBlock(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=32,
-                ksize=3,
                 stride=2,
                 pad=0)
-            self.conv2 = ConvBlock(
+            self.conv2 = conv3x3_block(
                 in_channels=32,
                 out_channels=32,
-                ksize=3,
-                stride=1,
                 pad=0)
-            self.conv3 = ConvBlock(
+            self.conv3 = conv3x3_block(
                 in_channels=32,
-                out_channels=64,
-                ksize=3,
-                stride=1,
-                pad=1)
+                out_channels=64)
             self.block1 = PolyBlock3a()
             self.block2 = PolyBlock4a()
             self.block3 = PolyBlock5a()

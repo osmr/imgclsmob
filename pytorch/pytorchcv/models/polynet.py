@@ -9,112 +9,7 @@ __all__ = ['PolyNet', 'polynet']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import Concurrent, ParametricSequential, ParametricConcurrent
-
-
-class ConvBlock(nn.Module):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 activate=True):
-        super(ConvBlock, self).__init__()
-        self.activate = activate
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  stride=1,
-                  activate=True):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=stride,
-        padding=0,
-        activate=activate)
-
-
-def conv3x3_block(in_channels,
-                  out_channels,
-                  stride,
-                  padding=1,
-                  activate=True):
-    """
-    3x3 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=stride,
-        padding=padding,
-        activate=activate)
+from .common import ConvBlock, conv1x1_block, conv3x3_block, Concurrent, ParametricSequential, ParametricConcurrent
 
 
 class PolyConv(nn.Module):
@@ -557,7 +452,7 @@ class MultiResidual(nn.Module):
         self.scale = scale
 
         self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=True)
+        self.activ = nn.ReLU(inplace=False)
 
     def forward(self, x):
         out = x
@@ -593,7 +488,7 @@ class PolyResidual(nn.Module):
 
         self.pre_block = pre_block(num_blocks=num_blocks)
         self.res_blocks = nn.ModuleList([res_block() for _ in range(num_blocks)])
-        self.activ = nn.ReLU(inplace=True)
+        self.activ = nn.ReLU(inplace=False)
 
     def forward(self, x):
         out = x
@@ -852,24 +747,18 @@ class PolyInitBlock(nn.Module):
     def __init__(self,
                  in_channels):
         super(PolyInitBlock, self).__init__()
-        self.conv1 = ConvBlock(
+        self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=32,
-            kernel_size=3,
             stride=2,
             padding=0)
-        self.conv2 = ConvBlock(
+        self.conv2 = conv3x3_block(
             in_channels=32,
             out_channels=32,
-            kernel_size=3,
-            stride=1,
             padding=0)
-        self.conv3 = ConvBlock(
+        self.conv3 = conv3x3_block(
             in_channels=32,
-            out_channels=64,
-            kernel_size=3,
-            stride=1,
-            padding=1)
+            out_channels=64)
         self.block1 = PolyBlock3a()
         self.block2 = PolyBlock4a()
         self.block3 = PolyBlock5a()

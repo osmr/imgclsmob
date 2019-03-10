@@ -599,6 +599,7 @@ def _test():
 
         x = Variable(torch.randn(1, 3, 331, 331))
         y = net(x)
+        y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))
 
 

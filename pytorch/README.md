@@ -183,9 +183,9 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DarkNet Ref | 38.58 | 17.18 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1718-034595b4.pth.log)) |
 | DarkNet-53 | 21.75 | 5.64 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0564-b36bef6b.pth.log)) |
 | i-RevNet-301 | 25.98 | 8.41 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0841-95dc8d94.pth.log)) |
-| BagNet-9 | 53.61 | 29.61 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-2961-cab11792.pth.log)) |
-| BagNet-17 | 41.20 | 18.84 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-1884-6b2a100f.pth.log)) |
-| BagNet-33 | 33.34 | 13.01 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1301-4f17b6e8.pth.log)) |
+| BagNet-9 | 53.61 | 29.61 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-2961-cab11792.pth.log)) |
+| BagNet-17 | 41.20 | 18.84 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-1884-6b2a100f.pth.log)) |
+| BagNet-33 | 33.34 | 13.01 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1301-4f17b6e8.pth.log)) |
 | DLA-34 | 25.36 | 7.94 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0794-04698d78.pth.log)) |
 | DLA-46-C | 35.12 | 13.71 | 1,301,400 | 585.45M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46c-1371-cc919179.pth.log)) |
 | DLA-X-46-C | 34.02 | 13.02 | 1,068,440 | 546.72M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46xc-1302-1161f37b.pth.log)) |
@@ -358,4 +358,4 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
-[wielandbrendel/bag-of-local-features-models]: https://github.com/wielandbrendel/bag-of-local-features-models
+[wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models

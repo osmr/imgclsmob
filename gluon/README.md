@@ -189,9 +189,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DarkNet Ref | 38.00 | 16.68 | 7,319,416 | 367.59M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1668-3011b4e1.params.log)) |
 | DarkNet-53 | 21.44 | 5.56 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0556-e9486353.params.log)) |
 | i-RevNet-301 | 26.97 | 8.97 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0897-cef9b5bf.params.log)) |
-| BagNet-9 | 59.57 | 35.44 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-3544-ea1ae645.params.log)) |
-| BagNet-17 | 44.76 | 21.52 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-2152-4b3a6212.params.log)) |
-| BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
+| BagNet-9 | 59.57 | 35.44 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-3544-ea1ae645.params.log)) |
+| BagNet-17 | 44.76 | 21.52 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-2152-4b3a6212.params.log)) |
+| BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
 | DLA-34 | 26.14 | 8.21 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0821-1127fa0a.params.log)) |
 | DLA-46-C | 36.79 | 14.70 | 1,301,400 | 585.45M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46c-1470-bae8b513.params.log)) |
 | DLA-X-46-C | 35.58 | 13.98 | 1,068,440 | 546.72M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46xc-1398-28deb1fc.params.log)) |
@@ -371,4 +371,4 @@ Some remarks:
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
-[wielandbrendel/bag-of-local-features-models]: https://github.com/wielandbrendel/bag-of-local-features-models
+[wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models

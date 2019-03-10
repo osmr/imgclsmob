@@ -86,6 +86,7 @@ Some remarks:
 | ChannelNet | A | A | A | - | A | [link](https://arxiv.org/abs/1809.01330) | [link](https://github.com/HongyangGao/ChannelNets) | 2018 |
 | iSQRT-COV-ResNet | A | A | - | - | - | [link](https://arxiv.org/abs/1712.01034) | [link](https://github.com/jiangtaoxie/fast-MPN-COV) | 2017 |
 | i-RevNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1802.07088) | [link](https://github.com/jhjacobsen/pytorch-i-revnet) | 2018 |
+| BagNet | A+ | A+ | A+ | - | - | [link](https://openreview.net/pdf?id=SkfMWhAqYQ) | [link](https://github.com/wielandbrendel/bag-of-local-features-models) | 2019 |
 | DLA | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.06484) | [link](https://github.com/ucbdrive/dla) | 2017 |
 | MSDNet | A | AB | - | - | - | [link](https://arxiv.org/abs/1703.09844) | [link](https://github.com/gaohuang/MSDNet) | 2017 |
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |

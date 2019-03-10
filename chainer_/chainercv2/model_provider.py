@@ -28,6 +28,7 @@ from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
 from .models.irevnet import *
+from .models.bagnet import *
 from .models.dla import *
 from .models.fishnet import *
 from .models.espnetv2 import *
@@ -64,8 +65,6 @@ from .models.rir_cifar import *
 from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
-
-from .models.bagnet import *
 
 __all__ = ['get_model']
 
@@ -245,6 +244,10 @@ _models = {
     'channelnet': channelnet,
 
     'irevnet301': irevnet301,
+
+    'bagnet9': bagnet9,
+    'bagnet17': bagnet17,
+    'bagnet33': bagnet33,
 
     'dla34': dla34,
     'dla46c': dla46c,
@@ -450,10 +453,6 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
-
-    'bagnet9': bagnet9,
-    'bagnet17': bagnet17,
-    'bagnet33': bagnet33,
 }
 
 

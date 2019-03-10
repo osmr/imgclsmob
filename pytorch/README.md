@@ -37,6 +37,7 @@ Scripts for training/evaluating/converting models are in the [`imgclsmob`](https
 - ChannelNet (['ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise Convolutions'](https://arxiv.org/abs/1809.01330))
 - iSQRT-COV-ResNet (['Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization'](https://arxiv.org/abs/1712.01034))
 - i-RevNet (['i-RevNet: Deep Invertible Networks'](https://arxiv.org/abs/1802.07088))
+- BagNet (['Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet'](https://openreview.net/pdf?id=SkfMWhAqYQ))
 - DLA (['Deep Layer Aggregation'](https://arxiv.org/abs/1707.06484))
 - MSDNet (['Multi-Scale Dense Networks for Resource Efficient Image Classification'](https://arxiv.org/abs/1703.09844))
 - FishNet (['FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction'](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf))
@@ -182,6 +183,9 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | DarkNet Ref | 38.58 | 17.18 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.64/darknet_ref-1718-034595b4.pth.log)) |
 | DarkNet-53 | 21.75 | 5.64 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.150/darknet53-0564-b36bef6b.pth.log)) |
 | i-RevNet-301 | 25.98 | 8.41 | 125,120,356 | 14,453.87M | From [jhjacobsen/pytorch-i-revnet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.251/irevnet301-0841-95dc8d94.pth.log)) |
+| BagNet-9 | 53.61 | 29.61 | 15,688,744 | 16,049.19M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet9-2961-cab11792.pth.log)) |
+| BagNet-17 | 41.20 | 18.84 | 16,213,032 | 15,768.77M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet17-1884-6b2a100f.pth.log)) |
+| BagNet-33 | 33.34 | 13.01 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag-of-local-features-models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1301-4f17b6e8.pth.log)) |
 | DLA-34 | 25.36 | 7.94 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0794-04698d78.pth.log)) |
 | DLA-46-C | 35.12 | 13.71 | 1,301,400 | 585.45M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46c-1371-cc919179.pth.log)) |
 | DLA-X-46-C | 34.02 | 13.02 | 1,068,440 | 546.72M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla46xc-1302-1161f37b.pth.log)) |
@@ -354,3 +358,4 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [ucbdrive/dla]: https://github.com/ucbdrive/dla
 [sacmehta/ESPNetv2]: https://github.com/sacmehta/ESPNetv2
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
+[wielandbrendel/bag-of-local-features-models]: https://github.com/wielandbrendel/bag-of-local-features-models

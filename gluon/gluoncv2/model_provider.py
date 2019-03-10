@@ -35,6 +35,7 @@ from .models.darknet53 import *
 from .models.channelnet import *
 from .models.isqrtcovresnet import *
 from .models.irevnet import *
+from .models.bagnet import *
 from .models.dla import *
 from .models.msdnet import *
 from .models.fishnet import *
@@ -73,8 +74,6 @@ from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
-
-from .models.bagnet import *
 
 __all__ = ['get_model']
 
@@ -277,6 +276,10 @@ _models = {
     'channelnet': channelnet,
 
     'irevnet301': irevnet301,
+
+    'bagnet9': bagnet9,
+    'bagnet17': bagnet17,
+    'bagnet33': bagnet33,
 
     'dla34': dla34,
     'dla46c': dla46c,
@@ -494,10 +497,6 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
-
-    'bagnet9': bagnet9,
-    'bagnet17': bagnet17,
-    'bagnet33': bagnet33,
 }
 
 

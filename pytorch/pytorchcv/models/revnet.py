@@ -103,9 +103,9 @@ class ReversibleBlock(nn.Module):
     Parameters:
     ----------
     fm : nn.Module
-        Fm-fucntion.
+        Fm-function.
     gm : nn.Module
-        Gm-fucntion.
+        Gm-function.
     """
     def __init__(self,
                  fm,

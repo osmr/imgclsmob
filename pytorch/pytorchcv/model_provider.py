@@ -32,6 +32,7 @@ from .models.darknet import *
 from .models.darknet53 import *
 from .models.channelnet import *
 from .models.isqrtcovresnet import *
+from .models.revnet import *
 from .models.irevnet import *
 from .models.bagnet import *
 from .models.dla import *
@@ -267,6 +268,10 @@ _models = {
     'darknet53': darknet53,
 
     'channelnet': channelnet,
+
+    'revnet38': revnet38,
+    'revnet110': revnet110,
+    'revnet164': revnet164,
 
     'irevnet301': irevnet301,
 

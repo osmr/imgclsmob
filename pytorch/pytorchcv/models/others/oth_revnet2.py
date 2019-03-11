@@ -5,8 +5,374 @@ import copy
 import warnings
 from torch.autograd import Variable
 from contextlib import contextmanager
+from inspect import isfunction
+import torch.nn.init as init
 
 __all__ = ['oth_revnet38', 'oth_revnet110', 'oth_revnet164']
+
+
+def conv1x1(in_channels,
+            out_channels,
+            stride=1,
+            groups=1,
+            bias=False):
+    """
+    Convolution 1x1 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        groups=groups,
+        bias=bias)
+
+
+def conv3x3(in_channels,
+            out_channels,
+            stride=1,
+            padding=1,
+            dilation=1,
+            groups=1,
+            bias=False):
+    """
+    Convolution 3x3 layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    """
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias)
+
+
+class ConvBlock(nn.Module):
+    """
+    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 activation=(lambda: nn.ReLU(inplace=True)),
+                 activate=True):
+        super(ConvBlock, self).__init__()
+        self.activate = activate
+
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        if self.activate:
+            assert (activation is not None)
+            if isfunction(activation):
+                self.activ = activation()
+            elif isinstance(activation, str):
+                if activation == "relu":
+                    self.activ = nn.ReLU(inplace=True)
+                elif activation == "relu6":
+                    self.activ = nn.ReLU6(inplace=True)
+                else:
+                    raise NotImplementedError()
+            else:
+                self.activ = activation
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def conv1x1_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=0,
+                  groups=1,
+                  bias=False,
+                  activation=(lambda: nn.ReLU(inplace=True)),
+                  activate=True):
+    """
+    1x1 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 0
+        Padding value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=padding,
+        groups=groups,
+        bias=bias,
+        activation=activation,
+        activate=activate)
+
+
+def conv3x3_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=1,
+                  dilation=1,
+                  groups=1,
+                  bias=False,
+                  activation=(lambda: nn.ReLU(inplace=True)),
+                  activate=True):
+    """
+    3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+        activation=activation,
+        activate=activate)
+
+
+class PreConvBlock(nn.Module):
+    """
+    Convolution block with Batch normalization and ReLU pre-activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    return_preact : bool, default False
+        Whether return pre-activation. It's used by PreResNet.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 bias=False,
+                 return_preact=False,
+                 activate=True):
+        super(PreConvBlock, self).__init__()
+        self.return_preact = return_preact
+        self.activate = activate
+
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        if self.activate:
+            self.activ = nn.ReLU(inplace=True)
+        self.conv = nn.Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            bias=bias)
+
+    def forward(self, x):
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        if self.return_preact:
+            x_pre_activ = x
+        x = self.conv(x)
+        if self.return_preact:
+            return x, x_pre_activ
+        else:
+            return x
+
+
+def pre_conv1x1_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      bias=False,
+                      return_preact=False,
+                      activate=True):
+    """
+    1x1 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return PreConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=0,
+        bias=bias,
+        return_preact=return_preact,
+        activate=activate)
+
+
+def pre_conv3x3_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      padding=1,
+                      dilation=1,
+                      return_preact=False,
+                      activate=True):
+    """
+    3x3 version of the pre-activated convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    return_preact : bool, default False
+        Whether return pre-activation.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return PreConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        return_preact=return_preact,
+        activate=activate)
 
 
 use_context_mans = int(torch.__version__[0]) * 100 + int(torch.__version__[2]) - \
@@ -64,14 +430,16 @@ class ReversibleBlockFunction(torch.autograd.Function):
 
             # compute outputs
             with warnings.catch_warnings():
-                x2var = Variable(x2, requires_grad=False, volatile=True)
+                # x2var = Variable(x2, requires_grad=False, volatile=True)
+                x2var = Variable(x2, requires_grad=False)
             fmr = Fm.forward(x2var).data
 
             y1 = x1 + fmr
             x1.set_()
             del x1
             with warnings.catch_warnings():
-                y1var = Variable(y1, requires_grad=False, volatile=True)
+                # y1var = Variable(y1, requires_grad=False, volatile=True)
+                y1var = Variable(y1, requires_grad=False)
             gmr = Gm.forward(y1var).data
             y2 = x2 + gmr
             x2.set_()
@@ -136,130 +504,12 @@ class ReversibleBlockFunction(torch.autograd.Function):
         return (grad_input, None, None) + FWgrads + GWgrads
 
 
-class ReversibleBlockFunction2(torch.autograd.Function):
-    @staticmethod
-    def forward(ctx, x, Fm, Gm, *weights):
-        """Forward pass for the reversible block computes:
-        {x1, x2} = x
-        y1 = x1 + Fm(x2)
-        y2 = x2 + Gm(y1)
-        output = {y1, y2}
-
-        Parameters
-        ----------
-        ctx : torch.autograd.function.RevNetFunctionBackward
-            The backward pass context object
-        x : TorchTensor
-            Input tensor. Must have channels (2nd dimension) that can be partitioned in two equal partitions
-        Fm : nn.Module
-            Module to use for computation, must retain dimensions such that Fm(X)=Y, X.shape == Y.shape
-        Gm : nn.Module
-            Module to use for computation, must retain dimensions such that Gm(X)=Y, X.shape == Y.shape
-        *weights : TorchTensor
-            weights for Fm and Gm in that order {Fm_w1, ... Fm_wn, Gm_w1, ... Gm_wn}
-
-        Note
-        ----
-        All tensor/autograd variable input arguments and the output are
-        TorchTensors for the scope of this fuction
-
-        """
-        # check if possible to partition into two equally sized partitions
-        assert(x.shape[1] % 2 == 0) # assert if possible
-
-        # store partition size, Fm and Gm functions in context
-        ctx.Fm = Fm
-        ctx.Gm = Gm
-
-        with set_grad_enabled(False):
-            # partition in two equally sized set of channels
-            x1, x2 = torch.chunk(x, 2, dim=1)
-            x1, x2 = x1.contiguous(), x2.contiguous()
-
-            # compute outputs
-            with warnings.catch_warnings():
-                x2var = Variable(x2, requires_grad=False, volatile=True)
-            fmr = Fm.forward(x2var).data
-
-            y1 = x1 + fmr
-            x1.set_()
-            del x1
-            with warnings.catch_warnings():
-                y1var = Variable(y1, requires_grad=False, volatile=True)
-            gmr = Gm.forward(y1var).data
-            y2 = x2 + gmr
-            x2.set_()
-            del x2
-            output = torch.cat([y1, y2], dim=1)
-            y1.set_()
-            del y1
-            y2.set_()
-            del y2
-
-        # save the input and output variables
-        ctx.save_for_backward(x, output)
-
-        return output
-
-    @staticmethod
-    def backward(ctx, grad_output):
-
-        Fm, Gm = ctx.Fm, ctx.Gm
-        # are all variable objects now
-        x, output = ctx.saved_variables
-
-        with set_grad_enabled(False):
-            y1, y2 = torch.chunk(output, 2, dim=1)
-            y1, y2 = y1.contiguous(), y2.contiguous()
-
-            # partition output gradient also on channels
-            assert(grad_output.data.shape[1] % 2 == 0)
-            y1_grad, y2_grad = torch.chunk(grad_output, 2, dim=1)
-            y1_grad, y2_grad = y1_grad.contiguous(), y2_grad.contiguous()
-
-        # Recreate computation graphs for functions Gm and Fm with gradient collecting leaf nodes:
-        # z1_stop, x2_stop, GW, FW
-        # Also recompute inputs (x1, x2) from outputs (y1, y2)
-        with set_grad_enabled(True):
-            z1_stop = Variable(y1.data, requires_grad=True)
-
-            G_z1 = Gm.forward(z1_stop)
-            x2 = y2 - G_z1
-            x2_stop = Variable(x2.data, requires_grad=True)
-
-            F_x2 = Fm.forward(x2_stop)
-            x1 = y1 - F_x2
-            x1_stop = Variable(x1.data, requires_grad=True)
-
-            # restore input
-            x.data.set_(torch.cat([x1.data, x2.data], dim=1).contiguous())
-
-            # compute outputs building a sub-graph
-            z1 = x1_stop + F_x2
-            y2_ = x2_stop + G_z1
-            y1_ = z1
-
-            # calculate the final gradients for the weights and inputs
-            dd = torch.autograd.grad(y2_, (z1_stop,) + tuple(Gm.parameters()), y2_grad) #, retain_graph=False)
-            z1_grad = dd[0] + y1_grad
-            GWgrads = dd[1:]
-
-            dd = torch.autograd.grad(y1_, (x1_stop, x2_stop) + tuple(Fm.parameters()), z1_grad, retain_graph=False)
-
-            FWgrads = dd[2:]
-            x2_grad = dd[1] + y2_grad
-            x1_grad = dd[0]
-            grad_input = torch.cat([x1_grad, x2_grad], dim=1)
-
-            y1_.detach_()
-            y2_.detach_()
-            del y1_, y2_
-
-        return (grad_input, None, None) + FWgrads + GWgrads
-
-
 class ReversibleBlock(nn.Module):
-    def __init__(self, Fm, Gm=None, implementation=1, keep_input=False):
+    def __init__(self,
+                 Fm,
+                 Gm=None,
+                 implementation=1,
+                 keep_input=False):
         """The ReversibleBlock
 
         Parameters
@@ -285,18 +535,11 @@ class ReversibleBlock(nn.Module):
             Gm = copy.deepcopy(Fm)
         self.Gm = Gm
         self.Fm = Fm
-        self.implementation = implementation
         self.keep_input = keep_input
 
     def forward(self, x):
         args = [x, self.Fm, self.Gm] + [w for w in self.Fm.parameters()] + [w for w in self.Gm.parameters()]
-        if self.implementation == 0:
-            out = ReversibleBlockFunction.apply(*args)
-        elif self.implementation == 1:
-            out = ReversibleBlockFunction2.apply(*args)
-        else:
-            raise NotImplementedError("Selected implementation ({}) not implemented..."
-                                      .format(self.implementation))
+        out = ReversibleBlockFunction.apply(*args)
 
         # clears the input data as it can be reversed on the backward pass
         if not self.keep_input:
@@ -323,274 +566,296 @@ class ReversibleBlock(nn.Module):
         return x
 
 
-def conv3x3(in_planes, out_planes, stride=1):
-    """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=1, bias=False)
+class RevBlock(nn.Module):
+    """
+    Simple RevNet block for residual path in RevNet unit.
 
-
-def batch_norm(input):
-    """match Tensorflow batch norm settings"""
-    return nn.BatchNorm2d(input, momentum=0.99, eps=0.001)
-
-
-class BasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, noactivation=False, *args, **kwargs):
-        super(BasicBlock, self).__init__()
-        self.basicblock_sub = BasicBlockSub(inplanes, planes, stride, noactivation)
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        residual = x
-        out = self.basicblock_sub(x)
-        if self.downsample is not None:
-            residual = self.downsample(x)
-        out += residual
-        return out
-
-
-class Bottleneck(nn.Module):
-    expansion = 4
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, noactivation=False, *args, **kwargs):
-        super(Bottleneck, self).__init__()
-        self.bottleneck_sub = BottleneckSub(inplanes, planes, stride, noactivation)
-        self.downsample = downsample
-        self.stride = stride
-
-    def forward(self, x):
-        residual = x
-        out = self.bottleneck_sub(x)
-        if self.downsample is not None:
-            residual = self.downsample(x)
-        out += residual
-        return out
-
-
-class RevBasicBlock(nn.Module):
-    expansion = 1
-
-    def __init__(self, inplanes, planes, stride=1, downsample=None, noactivation=False):
-        super(RevBasicBlock, self).__init__()
-        if downsample is None and stride == 1:
-            Gm = BasicBlockSub(inplanes // 2, planes // 2, stride, noactivation)
-            Fm = BasicBlockSub(inplanes // 2, planes // 2, stride, noactivation)
-            self.revblock = ReversibleBlock(Gm, Fm)
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    preactivate : bool
+        Whether use pre-activation for the first convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 preactivate):
+        super(RevBlock, self).__init__()
+        if preactivate:
+            self.conv1 = pre_conv3x3_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride)
         else:
-            self.basicblock_sub = BasicBlockSub(inplanes, planes, stride, noactivation)
-        self.downsample = downsample
-        self.stride = stride
+            self.conv1 = conv3x3(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride)
+        self.conv2 = pre_conv3x3_block(
+            in_channels=out_channels,
+            out_channels=out_channels)
 
     def forward(self, x):
-        residual = x
-        if self.downsample is not None:
-            out = self.basicblock_sub(x)
-            residual = self.downsample(x)
-            out += residual
-        else:
-            out = self.revblock(x)
-        return out
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
 
 
 class RevBottleneck(nn.Module):
-    expansion = 4
+    """
+    RevNet bottleneck block for residual path in RevNet unit.
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, noactivation=False):
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    preactivate : bool
+        Whether use pre-activation for the first convolution block.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 preactivate,
+                 bottleneck_factor=4):
         super(RevBottleneck, self).__init__()
-        if downsample is None and stride == 1:
-            Gm = BottleneckSub(inplanes // 2, planes // 2, stride, noactivation)
-            Fm = BottleneckSub(inplanes // 2, planes // 2, stride, noactivation)
-            self.revblock = ReversibleBlock(Gm, Fm)
+        mid_channels = out_channels // bottleneck_factor
+
+        if preactivate:
+            self.conv1 = pre_conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels)
         else:
-            self.bottleneck_sub = BottleneckSub(inplanes, planes, stride, noactivation)
-        self.downsample = downsample
-        self.stride = stride
+            self.conv1 = conv1x1(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+        self.conv2 = pre_conv3x3_block(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            stride=stride)
+        self.conv3 = pre_conv1x1_block(
+            in_channels=mid_channels,
+            out_channels=out_channels)
 
     def forward(self, x):
-        residual = x
-        if self.downsample is not None:
-            out = self.bottleneck_sub(x)
-            residual = self.downsample(x)
-            out += residual
-        else:
-            out = self.revblock(x)
-        return out
-
-
-class BottleneckSub(nn.Module):
-    def __init__(self, inplanes, planes, stride=1, noactivation=False):
-        super(BottleneckSub, self).__init__()
-        self.noactivation = noactivation
-        if not self.noactivation:
-            self.bn1 = batch_norm(inplanes)
-        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
-        self.bn2 = batch_norm(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-                               padding=1, bias=False)
-        self.bn3 = batch_norm(planes)
-        self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
-        self.relu = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        if not self.noactivation:
-            x = self.bn1(x)
-            x = self.relu(x)
         x = self.conv1(x)
-        x = self.bn2(x)
-        x = self.relu(x)
         x = self.conv2(x)
-        x = self.bn3(x)
-        x = self.relu(x)
         x = self.conv3(x)
         return x
 
 
-class BasicBlockSub(nn.Module):
-    def __init__(self, inplanes, planes, stride=1, noactivation=False):
-        super(BasicBlockSub, self).__init__()
-        self.noactivation = noactivation
-        if not self.noactivation:
-            self.bn1 = batch_norm(inplanes)
-        self.conv1 = conv3x3(inplanes, planes, stride)
-        self.bn2 = batch_norm(planes)
-        self.conv2 = conv3x3(planes, planes)
-        self.relu = nn.ReLU(inplace=True)
+class RevUnit(nn.Module):
+    """
+    RevNet unit with residual connection.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    preactivate : bool
+        Whether use pre-activation for the first convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 bottleneck,
+                 preactivate):
+        super(RevUnit, self).__init__()
+        self.resize_identity = (in_channels != out_channels) or (stride != 1)
+        body_class = RevBottleneck if bottleneck else RevBlock
+
+        if (not self.resize_identity) and (stride == 1):
+            in_channels2 = in_channels // 2
+            out_channels2 = out_channels // 2
+            gm = body_class(
+                in_channels=in_channels2,
+                out_channels=out_channels2,
+                stride=1,
+                preactivate=preactivate)
+            fm = body_class(
+                in_channels=in_channels2,
+                out_channels=out_channels2,
+                stride=1,
+                preactivate=preactivate)
+            self.body = ReversibleBlock(gm, fm)
+        else:
+            self.body = body_class(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                preactivate=preactivate)
+        if self.resize_identity:
+            self.identity_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                activation=None,
+                activate=False)
 
     def forward(self, x):
-        if not self.noactivation:
-            x = self.bn1(x)
-            x = self.relu(x)
-        x = self.conv1(x)
-        x = self.bn2(x)
-        x = self.relu(x)
-        x = self.conv2(x)
+        if self.resize_identity:
+            identity = self.identity_conv(x)
+            x = self.body(x)
+            x = x + identity
+        else:
+            x = self.body(x)
+        return x
+
+
+class RevPostActivation(nn.Module):
+    """
+    RevNet specific post-activation block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    """
+    def __init__(self,
+                 in_channels):
+        super(RevPostActivation, self).__init__()
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        self.activ = nn.ReLU(inplace=True)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.activ(x)
         return x
 
 
 class RevNet(nn.Module):
+    """
+    RevNet model from 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
+    https://arxiv.org/abs/1707.04585.
+
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    init_block_channels : int
+        Number of output channels for the initial unit.
+    bottleneck : bool
+        Whether to use a bottleneck or simple block in units.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    num_classes : int, default 1000
+        Number of classification classes.
+    """
     def __init__(self,
-                 block,
-                 layers,
-                 num_classes=1000,
-                 channels_per_layer=None,
-                 strides=None,
-                 implementation=0):
+                 channels,
+                 init_block_channels,
+                 bottleneck,
+                 in_channels=3,
+                 in_size=(224, 224),
+                 num_classes=1000):
         super(RevNet, self).__init__()
-        assert(len(channels_per_layer) == len(layers) + 1)
-        self.channels_per_layer = channels_per_layer
-        self.strides = strides
-        self.implementation = implementation
-        self.inplanes = channels_per_layer[0]  # 64 by default
+        self.in_size = in_size
+        self.num_classes = num_classes
 
-        init_kernel_size = 3
-        self.conv1 = nn.Conv2d(
-            3,
-            self.inplanes,
-            kernel_size=init_kernel_size,
-            stride=strides[0],
-            padding=(init_kernel_size - 1) // 2,
-            bias=False)
-        self.bn1 = batch_norm(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
+        self.features = nn.Sequential()
+        self.features.add_module("init_block", conv3x3_block(
+            in_channels=in_channels,
+            out_channels=init_block_channels))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                stride = 2 if (j == 0) and (i != 0) else 1
+                preactivate = (j != 0) or (i != 0)
+                stage.add_module("unit{}".format(j + 1), RevUnit(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    bottleneck=bottleneck,
+                    preactivate=preactivate))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module("final_postactiv", RevPostActivation(in_channels=in_channels))
+        self.features.add_module("final_pool", nn.AvgPool2d(
+            kernel_size=56,
+            stride=1))
 
-        self.layer1 = self._make_layer(block, channels_per_layer[1], layers[0], stride=strides[1], noactivation=True)
-        self.layer2 = self._make_layer(block, channels_per_layer[2], layers[1], stride=strides[2])
-        self.layer3 = self._make_layer(block, channels_per_layer[3], layers[2], stride=strides[3])
-        self.has_4_layers = len(layers) >= 4
-        if self.has_4_layers:
-            self.layer4 = self._make_layer(block, channels_per_layer[4], layers[3], stride=strides[4])
-        self.bn_final = batch_norm(self.inplanes)  # channels_per_layer[-1])
-        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(channels_per_layer[-1] * block.expansion, num_classes)
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
-        self.configure()
-        self.init_weights()
+        self._init_params()
 
-    def init_weights(self):
-        """Initialization using He initialization"""
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-            elif isinstance(m, nn.BatchNorm2d):
-                m.reset_parameters()
-
-    def configure(self):
-        """Initialization specific configuration settings"""
-        for m in self.modules():
-            if isinstance(m, ReversibleBlock):
-                m.implementation = self.implementation
-            elif isinstance(m, nn.BatchNorm2d):
-                m.momentum = 0.1
-                m.eps = 1e-05
-
-    def _make_layer(self, block, planes, blocks, stride=1, noactivation=False):
-        downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
-            downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=stride, bias=False),
-                batch_norm(planes * block.expansion),
-            )
-        layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample, noactivation))
-        self.inplanes = planes * block.expansion
-        for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
-        return nn.Sequential(*layers)
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
 
     def forward(self, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x = self.layer3(x)
-        if self.has_4_layers:
-            x = self.layer4(x)
-        x = self.bn_final(x)
-        x = self.relu(x)
-        x = self.avgpool(x)
+        x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.fc(x)
+        x = self.output(x)
         return x
 
 
-def oth_revnet38(pretrained=False, **kwargs):
+def get_revnet(blocks,
+               **kwargs):
+
+    if blocks == 38:
+        layers = [3, 3, 3]
+        channels_per_layers = [32, 64, 112]
+        bottleneck = False
+    elif blocks == 110:
+        layers = [9, 9, 9]
+        channels_per_layers = [32, 64, 128]
+        bottleneck = False
+    elif blocks == 164:
+        layers = [9, 9, 9]
+        channels_per_layers = [128, 256, 512]
+        bottleneck = True
+    else:
+        raise ValueError("Unsupported RevNet with number of blocks: {}".format(blocks))
+
+    init_block_channels = 32
+
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+
     net = RevNet(
-        block=RevBasicBlock,
-        layers=[3, 3, 3],
-        num_classes=1000,
-        channels_per_layer=[32, 32, 64, 112],
-        strides=[1, 1, 2, 2],
-        implementation=0)
+        channels=channels,
+        init_block_channels=init_block_channels,
+        bottleneck=bottleneck)
+
     return net
+
+
+def oth_revnet38(pretrained=False, **kwargs):
+    return get_revnet(blocks=38)
 
 
 def oth_revnet110(pretrained=False, **kwargs):
-    net = RevNet(
-        block=RevBasicBlock,
-        layers=[9, 9, 9],
-        num_classes=1000,
-        channels_per_layer=[32, 32, 64, 128],
-        strides=[1, 1, 2, 2],
-        implementation=0)
-    return net
+    return get_revnet(blocks=110)
 
 
 def oth_revnet164(pretrained=False, **kwargs):
-    net = RevNet(
-        block=RevBottleneck,
-        layers=[9, 9, 9],
-        num_classes=1000,
-        channels_per_layer=[32, 32, 64, 128],
-        strides=[1, 1, 2, 2],
-        implementation=0)
-    return net
+    return get_revnet(blocks=164)
 
 
 def _calc_width(net):

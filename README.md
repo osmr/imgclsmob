@@ -85,6 +85,7 @@ Some remarks:
 | DarkNet-53 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1804.02767) | [link](https://github.com/pjreddie/darknet) | 2018 |
 | ChannelNet | A | A | A | - | A | [link](https://arxiv.org/abs/1809.01330) | [link](https://github.com/HongyangGao/ChannelNets) | 2018 |
 | iSQRT-COV-ResNet | A | A | - | - | - | [link](https://arxiv.org/abs/1712.01034) | [link](https://github.com/jiangtaoxie/fast-MPN-COV) | 2017 |
+| RevNet | - | A | - | - | - | [link](https://arxiv.org/abs/1707.04585) | [link](https://github.com/renmengye/revnet-public) | 2017 |
 | i-RevNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1802.07088) | [link](https://github.com/jhjacobsen/pytorch-i-revnet) | 2018 |
 | BagNet | A+ | A+ | A+ | - | - | [link](https://openreview.net/pdf?id=SkfMWhAqYQ) | [link](https://github.com/wielandbrendel/bag-of-local-features-models) | 2019 |
 | DLA | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.06484) | [link](https://github.com/ucbdrive/dla) | 2017 |

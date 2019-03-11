@@ -36,6 +36,7 @@ Scripts for training/evaluating/converting models are in the [`imgclsmob`](https
 - DarkNet-53 (['YOLOv3: An Incremental Improvement'](https://arxiv.org/abs/1804.02767))
 - ChannelNet (['ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise Convolutions'](https://arxiv.org/abs/1809.01330))
 - iSQRT-COV-ResNet (['Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root Normalization'](https://arxiv.org/abs/1712.01034))
+- RevNet (['The Reversible Residual Network: Backpropagation Without Storing Activations'](https://arxiv.org/abs/1707.04585))
 - i-RevNet (['i-RevNet: Deep Invertible Networks'](https://arxiv.org/abs/1802.07088))
 - BagNet (['Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet'](https://openreview.net/pdf?id=SkfMWhAqYQ))
 - DLA (['Deep Layer Aggregation'](https://arxiv.org/abs/1707.06484))

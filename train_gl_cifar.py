@@ -18,7 +18,7 @@ from gluon.cifar import add_dataset_parser_arguments
 from gluon.cifar import batch_fn
 from gluon.cifar import get_train_data_source
 from gluon.cifar import get_val_data_source
-from gluon.cifar import num_training_samples
+from gluon.cifar import get_num_training_samples
 
 
 def parse_args():
@@ -596,7 +596,7 @@ def main():
         warmup_mode=args.warmup_mode,
         batch_size=batch_size,
         num_epochs=args.num_epochs,
-        num_training_samples=num_training_samples,
+        num_training_samples=get_num_training_samples(args.dataset),
         dtype=args.dtype,
         gamma_wd_mult=args.gamma_wd_mult,
         beta_wd_mult=args.beta_wd_mult,

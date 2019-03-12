@@ -1,5 +1,5 @@
 """
-    CIFAR dataset routines.
+    CIFAR/SVHN dataset routines.
 """
 
 import numpy as np
@@ -7,7 +7,7 @@ import chainer
 from chainer import iterators
 from chainer import Chain
 from chainer.dataset import DatasetMixin
-from chainer.datasets import cifar
+from chainer.datasets import cifar, svhn
 
 __all__ = ['add_dataset_parser_arguments', 'get_val_data_iterator', 'get_data_iterators', 'CIFARPredictor']
 
@@ -25,6 +25,12 @@ def add_dataset_parser_arguments(parser,
             '--num-classes',
             type=int,
             default=100,
+            help='number of classes')
+    elif dataset_name == "SVHN":
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=10,
             help='number of classes')
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
@@ -71,6 +77,8 @@ def get_val_data_iterator(dataset_name,
         _, test_ds = cifar.get_cifar10()
     elif dataset_name == "CIFAR100":
         _, test_ds = cifar.get_cifar100()
+    elif dataset_name == "SVHN":
+        _, test_ds = svhn.get_svhn()
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

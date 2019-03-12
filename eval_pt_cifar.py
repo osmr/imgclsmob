@@ -10,14 +10,14 @@ from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_cou
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (PyTorch/CIFAR)',
+        description='Evaluate a model for image classification (PyTorch/CIFAR/SVHN)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         '--dataset',
         type=str,
         default="CIFAR10",
-        help='dataset name. options are CIFAR10 and CIFAR100')
+        help='dataset name. options are CIFAR10, CIFAR100, and SVHN')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)

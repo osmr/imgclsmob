@@ -6,13 +6,12 @@ __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 
            'get_num_training_samples']
 
 import os
-import tarfile
 import numpy as np
 import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon import Block
 from mxnet.gluon.data.vision import transforms
-from mxnet.gluon.utils import download, check_sha1, _get_repo_file_url
+from mxnet.gluon.utils import download, check_sha1
 
 
 def add_dataset_parser_arguments(parser,
@@ -70,14 +69,16 @@ class CIFAR100Fine(gluon.data.vision.CIFAR100):
             train=train)
 
 
-class SVHN(gluon.dataset._DownloadedDataset):
+class SVHN(gluon.data.dataset._DownloadedDataset):
     """
-    CIFAR10 image classification dataset from https://www.cs.toronto.edu/~kriz/cifar.html
+    SVHN image classification dataset from http://ufldl.stanford.edu/housenumbers/.
     Each sample is an image (in 3D NDArray) with shape (32, 32, 3).
+    Note: The SVHN dataset assigns the label `10` to the digit `0`. However, in this Dataset,
+    we assign the label `0` to the digit `0`.
 
     Parameters
     ----------
-    root : str, default $MXNET_HOME/datasets/cifar10
+    root : str, default $MXNET_HOME/datasets/svhn
         Path to temp folder for storing data.
     train : bool, default True
         Whether to load the training or testing set.
@@ -85,49 +86,37 @@ class SVHN(gluon.dataset._DownloadedDataset):
         A user defined callback that transforms each sample.
     """
     def __init__(self,
-                 root=os.path.join('~', '.mxnet', 'datasets', 'cifar10'),
+                 root=os.path.join('~', '.mxnet', 'datasets', 'svhn'),
                  train=True,
                  transform=None):
         self._train = train
-        self._archive_file = ('cifar-10-binary.tar.gz', 'fab780a1e191a7eda0f345501ccd62d20f7ed891')
-        self._train_data = [('data_batch_1.bin', 'aadd24acce27caa71bf4b10992e9e7b2d74c2540'),
-                            ('data_batch_2.bin', 'c0ba65cce70568cd57b4e03e9ac8d2a5367c1795'),
-                            ('data_batch_3.bin', '1dd00a74ab1d17a6e7d73e185b69dbf31242f295'),
-                            ('data_batch_4.bin', 'aab85764eb3584312d3c7f65fd2fd016e36a258e'),
-                            ('data_batch_5.bin', '26e2849e66a845b7f1e4614ae70f4889ae604628')]
-        self._test_data = [('test_batch.bin', '67eb016db431130d61cd03c7ad570b013799c88c')]
-        self._namespace = 'cifar10'
+        self._train_data = [("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", "train_32x32.mat",
+                             "e6588cae42a1a5ab5efe608cc5cd3fb9aaffd674")]
+        self._test_data = [("http://ufldl.stanford.edu/housenumbers/test_32x32.mat", "test_32x32.mat",
+                            "29b312382ca6b9fba48d41a7b5c19ad9a5462b20")]
         super(SVHN, self).__init__(root, transform)
 
-    def _read_batch(self, filename):
-        with open(filename, 'rb') as fin:
-            data = np.frombuffer(fin.read(), dtype=np.uint8).reshape(-1, 3072 + 1)
-
-        return data[:, 1:].reshape(-1, 3, 32, 32).transpose(0, 2, 3, 1), data[:, 0].astype(np.int32)
-
     def _get_data(self):
-        if any(not os.path.exists(path) or not check_sha1(path, sha1)
-               for path, sha1 in ((os.path.join(self._root, name), sha1)
-                                  for name, sha1 in self._train_data + self._test_data)):
-            namespace = 'gluon/dataset/' + self._namespace
-            filename = download(_get_repo_file_url(namespace, self._archive_file[0]),
-                                path=self._root,
-                                sha1_hash=self._archive_file[1])
-
-            with tarfile.open(filename) as tar:
-                tar.extractall(self._root)
+        if any(not os.path.exists(path) or not check_sha1(path, sha1) for path, sha1 in
+               ((os.path.join(self._root, name), sha1) for _, name, sha1 in self._train_data + self._test_data)):
+            for url, _, sha1 in self._train_data + self._test_data:
+                download(url=url, path=self._root, sha1_hash=sha1)
 
         if self._train:
-            data_files = self._train_data
+            data_files = self._train_data[0]
         else:
-            data_files = self._test_data
-        data, label = zip(*(self._read_batch(os.path.join(self._root, name))
-                            for name, _ in data_files))
-        data = np.concatenate(data)
-        label = np.concatenate(label)
+            data_files = self._test_data[0]
 
+        import scipy.io as sio
+
+        loaded_mat = sio.loadmat(os.path.join(self._root, data_files[1]))
+
+        data = loaded_mat['X']
+        data = np.transpose(data, (3, 0, 1, 2))
         self._data = mx.nd.array(data, dtype=data.dtype)
-        self._label = label
+
+        self._label = loaded_mat['y'].astype(np.int32).squeeze()
+        np.place(self._label, self._label == 10, 0)
 
 
 class RandomCrop(Block):
@@ -216,21 +205,17 @@ def get_train_data_source(dataset_name,
     ])
 
     if dataset_name == "CIFAR10":
-        # dataset_class = gluon.data.vision.CIFAR10
-        dataset = gluon.data.vision.CIFAR10(
-            root=dataset_dir,
-            train=True)
+        dataset_class = gluon.data.vision.CIFAR10
     elif dataset_name == "CIFAR100":
-        # dataset_class = CIFAR100Fine
-        dataset = CIFAR100Fine(
-            root=dataset_dir,
-            train=True)
+        dataset_class = CIFAR100Fine
     elif dataset_name == "SVHN":
-        dataset = SVHN(
-            root=dataset_dir,
-            train=True)
+        dataset_class = SVHN
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+    dataset = dataset_class(
+        root=dataset_dir,
+        train=True)
 
     return gluon.data.DataLoader(
         dataset=dataset.transform_first(fn=transform_train),
@@ -255,21 +240,17 @@ def get_val_data_source(dataset_name,
     ])
 
     if dataset_name == "CIFAR10":
-        # dataset_class = gluon.data.vision.CIFAR10
-        dataset = gluon.data.vision.CIFAR10(
-            root=dataset_dir,
-            train=False)
+        dataset_class = gluon.data.vision.CIFAR10
     elif dataset_name == "CIFAR100":
-        # dataset_class = CIFAR100Fine
-        dataset = CIFAR100Fine(
-            root=dataset_dir,
-            train=False)
+        dataset_class = CIFAR100Fine
     elif dataset_name == "SVHN":
-        dataset = SVHN(
-            root=dataset_dir,
-            train=False)
+        dataset_class = SVHN
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+    dataset = dataset_class(
+        root=dataset_dir,
+        train=False)
 
     return gluon.data.DataLoader(
         dataset=dataset.transform_first(fn=transform_val),

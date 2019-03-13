@@ -1,5 +1,5 @@
 """
-    ResNet, implemented in PyTorch.
+    ResNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 

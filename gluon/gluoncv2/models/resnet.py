@@ -1,5 +1,5 @@
 """
-    ResNet, implemented in Gluon.
+    ResNet for Imagenet-1K, implemented in Gluon.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 

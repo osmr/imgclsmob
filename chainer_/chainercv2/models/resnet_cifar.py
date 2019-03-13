@@ -1,11 +1,12 @@
 """
-    ResNet for CIFAR, implemented in Chainer.
+    ResNet for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet56_cifar10', 'resnet56_cifar100',
-           'resnet110_cifar10', 'resnet110_cifar100', 'resnet164bn_cifar10', 'resnet164bn_cifar100',
-           'resnet1001_cifar10', 'resnet1001_cifar100', 'resnet1202_cifar10', 'resnet1202_cifar100']
+__all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn', 'resnet56_cifar10',
+           'resnet56_cifar100', 'resnet56_svhn', 'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
+           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn', 'resnet1001_cifar10',
+           'resnet1001_cifar100', 'resnet1001_svhn', 'resnet1202_cifar10', 'resnet1202_cifar100', 'resnet1202_svhn']
 
 import os
 import chainer.functions as F
@@ -182,6 +183,22 @@ def resnet20_cifar100(classes=100, **kwargs):
     return get_resnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resnet20_cifar100", **kwargs)
 
 
+def resnet20_svhn(classes=10, **kwargs):
+    """
+    ResNet-20 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resnet20_svhn", **kwargs)
+
+
 def resnet56_cifar10(classes=10, **kwargs):
     """
     ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
@@ -212,6 +229,22 @@ def resnet56_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_resnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="resnet56_cifar100", **kwargs)
+
+
+def resnet56_svhn(classes=10, **kwargs):
+    """
+    ResNet-56 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="resnet56_svhn", **kwargs)
 
 
 def resnet110_cifar10(classes=10, **kwargs):
@@ -245,6 +278,22 @@ def resnet110_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_resnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="resnet110_cifar100", **kwargs)
+
+
+def resnet110_svhn(classes=10, **kwargs):
+    """
+    ResNet-110 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="resnet110_svhn", **kwargs)
 
 
 def resnet164bn_cifar10(classes=10, **kwargs):
@@ -281,6 +330,23 @@ def resnet164bn_cifar100(classes=100, **kwargs):
     return get_resnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="resnet164bn_cifar100", **kwargs)
 
 
+def resnet164bn_svhn(classes=10, **kwargs):
+    """
+    ResNet-164(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="resnet164bn_svhn", **kwargs)
+
+
 def resnet1001_cifar10(classes=10, **kwargs):
     """
     ResNet-1001 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
@@ -313,6 +379,23 @@ def resnet1001_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar100", **kwargs)
+
+
+def resnet1001_svhn(classes=10, **kwargs):
+    """
+    ResNet-1001 model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_svhn", **kwargs)
 
 
 def resnet1202_cifar10(classes=10, **kwargs):
@@ -349,6 +432,23 @@ def resnet1202_cifar100(classes=100, **kwargs):
     return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar100", **kwargs)
 
 
+def resnet1202_svhn(classes=10, **kwargs):
+    """
+    ResNet-1202 model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -360,16 +460,22 @@ def _test():
     models = [
         (resnet20_cifar10, 10),
         (resnet20_cifar100, 100),
+        (resnet20_svhn, 10),
         (resnet56_cifar10, 10),
         (resnet56_cifar100, 100),
+        (resnet56_svhn, 10),
         (resnet110_cifar10, 10),
         (resnet110_cifar100, 100),
+        (resnet110_svhn, 10),
         (resnet164bn_cifar10, 10),
         (resnet164bn_cifar100, 100),
+        (resnet164bn_svhn, 10),
         (resnet1001_cifar10, 10),
         (resnet1001_cifar100, 100),
+        (resnet1001_svhn, 10),
         (resnet1202_cifar10, 10),
         (resnet1202_cifar100, 100),
+        (resnet1202_svhn, 10),
     ]
 
     for model, classes in models:
@@ -379,16 +485,22 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resnet20_cifar10 or weight_count == 272474)
         assert (model != resnet20_cifar100 or weight_count == 278324)
+        assert (model != resnet20_svhn or weight_count == 272474)
         assert (model != resnet56_cifar10 or weight_count == 855770)
         assert (model != resnet56_cifar100 or weight_count == 861620)
+        assert (model != resnet56_svhn or weight_count == 855770)
         assert (model != resnet110_cifar10 or weight_count == 1730714)
         assert (model != resnet110_cifar100 or weight_count == 1736564)
+        assert (model != resnet110_svhn or weight_count == 1730714)
         assert (model != resnet164bn_cifar10 or weight_count == 1704154)
         assert (model != resnet164bn_cifar100 or weight_count == 1727284)
+        assert (model != resnet164bn_svhn or weight_count == 1704154)
         assert (model != resnet1001_cifar10 or weight_count == 10328602)
         assert (model != resnet1001_cifar100 or weight_count == 10351732)
+        assert (model != resnet1001_svhn or weight_count == 10328602)
         assert (model != resnet1202_cifar10 or weight_count == 19424026)
         assert (model != resnet1202_cifar100 or weight_count == 19429876)
+        assert (model != resnet1202_svhn or weight_count == 19424026)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

@@ -404,8 +404,10 @@ _models = {
     'resnet164bn_svhn': resnet164bn_svhn,
     'resnet1001_cifar10': resnet1001_cifar10,
     'resnet1001_cifar100': resnet1001_cifar100,
+    'resnet1001_svhn': resnet1001_svhn,
     'resnet1202_cifar10': resnet1202_cifar10,
     'resnet1202_cifar100': resnet1202_cifar100,
+    'resnet1202_svhn': resnet1202_svhn,
 
     'preresnet20_cifar10': preresnet20_cifar10,
     'preresnet20_cifar100': preresnet20_cifar100,

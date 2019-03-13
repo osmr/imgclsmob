@@ -6,7 +6,7 @@
 __all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn', 'resnet56_cifar10',
            'resnet56_cifar100', 'resnet56_svhn', 'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
            'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn', 'resnet1001_cifar10',
-           'resnet1001_cifar100', 'resnet1202_cifar10', 'resnet1202_cifar100']
+           'resnet1001_cifar100', 'resnet1001_svhn', 'resnet1202_cifar10', 'resnet1202_cifar100', 'resnet1202_svhn']
 
 import os
 from mxnet import cpu
@@ -410,6 +410,25 @@ def resnet1001_cifar100(classes=100, **kwargs):
     return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar100", **kwargs)
 
 
+def resnet1001_svhn(classes=10, **kwargs):
+    """
+    ResNet-1001 model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_svhn", **kwargs)
+
+
 def resnet1202_cifar10(classes=10, **kwargs):
     """
     ResNet-1202 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
@@ -448,6 +467,25 @@ def resnet1202_cifar100(classes=100, **kwargs):
     return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar100", **kwargs)
 
 
+def resnet1202_svhn(classes=10, **kwargs):
+    """
+    ResNet-1202 model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -469,8 +507,10 @@ def _test():
         (resnet164bn_svhn, 10),
         (resnet1001_cifar10, 10),
         (resnet1001_cifar100, 100),
+        (resnet1001_svhn, 10),
         (resnet1202_cifar10, 10),
         (resnet1202_cifar100, 100),
+        (resnet1202_svhn, 10),
     ]
 
     for model, classes in models:
@@ -503,8 +543,10 @@ def _test():
         assert (model != resnet164bn_svhn or weight_count == 1704154)
         assert (model != resnet1001_cifar10 or weight_count == 10328602)
         assert (model != resnet1001_cifar100 or weight_count == 10351732)
+        assert (model != resnet1001_svhn or weight_count == 10328602)
         assert (model != resnet1202_cifar10 or weight_count == 19424026)
         assert (model != resnet1202_cifar100 or weight_count == 19429876)
+        assert (model != resnet1202_svhn or weight_count == 19424026)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

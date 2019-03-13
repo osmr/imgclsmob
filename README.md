@@ -22,8 +22,10 @@ For each supported framework, there is a PIP-package containing pure models with
 - [tensorflowcv](https://pypi.org/project/tensorflowcv) for TensorFlow.
 
 Currently, models are mostly implemented on Gluon and then ported to other frameworks. Some models are pretrained on
-ImageNet-1K and CIFAR-10/100 datasets. All pretrained weights are loaded automatically during use. See examples of such
-automatic loading of weights in the corresponding sections of the documentation dedicated to a particular package:
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
+[SVHN](http://ufldl.stanford.edu/housenumbers) datasets. All pretrained weights are loaded automatically during use.
+See examples of such automatic loading of weights in the corresponding sections of the documentation dedicated to a
+particular package:
 - [Gluon models](gluon/README.md),
 - [PyTorch models](pytorch/README.md),
 - [Chainer models](chainer_/README.md),
@@ -42,8 +44,8 @@ pip install -r requirements.txt
 
 Some remarks:
 - `Repo` is an author repository, if it exists.
-- `A`, `B`, and `C` means the implementation of a model for ImageNet-1K, CIFAR-10, and CIFAR-100, respectively.
-- `A+`, `B+`, and `C+` means having a pre-trained model for ImageNet-1K, CIFAR-10, and CIFAR-100, respectively.
+- `A`, `B`, `C`, and `D` means the implementation of a model for ImageNet-1K, CIFAR-10, CIFAR-100, and SVHN, respectively.
+- `A+`, `B+`, `C+`, and `D+` means having a pre-trained model for ImageNet-1K, CIFAR-10, CIFAR-100, and SVHN, respectively.
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TensorFlow](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -52,7 +54,7 @@ Some remarks:
 | VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |
 | BN-Inception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |
-| ResNet | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
+| ResNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
 | PreResNet | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
 | ResNeXt | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |

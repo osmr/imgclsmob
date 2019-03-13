@@ -3,9 +3,11 @@
 [![PyPI](https://img.shields.io/pypi/v/gluoncv2.svg)](https://pypi.python.org/pypi/gluoncv2)
 [![Downloads](https://pepy.tech/badge/gluoncv2)](https://pepy.tech/project/gluoncv2)
 
-This is a collection of image classification models. Many of them are pretrained on ImageNet-1K and CIFAR-10/100
-datasets and loaded automatically during use. All pretrained models require the same ordinary normalization.
-Scripts for training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+This is a collection of image classification models. Many of them are pretrained on
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
+[SVHN](http://ufldl.stanford.edu/housenumbers) datasets and loaded automatically during use. All pretrained models
+require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
+[`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 

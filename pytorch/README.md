@@ -3,9 +3,11 @@
 [![PyPI](https://img.shields.io/pypi/v/pytorchcv.svg)](https://pypi.python.org/pypi/pytorchcv)
 [![Downloads](https://pepy.tech/badge/pytorchcv)](https://pepy.tech/project/pytorchcv)
 
-This is a collection of image classification models. Many of them are pretrained on ImageNet-1K and CIFAR-10/100
-datasets and loaded automatically during use. All pretrained models require the same ordinary normalization.
-Scripts for training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+This is a collection of image classification models. Many of them are pretrained on
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
+[SVHN](http://ufldl.stanford.edu/housenumbers) datasets and loaded automatically during use. All pretrained models
+require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
+[`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 

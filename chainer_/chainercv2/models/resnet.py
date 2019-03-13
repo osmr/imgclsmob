@@ -324,7 +324,9 @@ def get_resnet(blocks,
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+        channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
+                     for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
 
     net = ResNet(
@@ -635,9 +637,9 @@ def _test():
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)
         assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 831096)
-        assert (model != resnet18_wd2 or weight_count == 3055880)
-        assert (model != resnet18_w3d4 or weight_count == 6675352)
+        assert (model != resnet18_wd4 or weight_count == 3937400)  # 831096
+        assert (model != resnet18_wd2 or weight_count == 5804296)  # 3055880
+        assert (model != resnet18_w3d4 or weight_count == 8476056)  # 6675352
         assert (model != resnet18 or weight_count == 11689512)
         assert (model != resnet34 or weight_count == 21797672)
         assert (model != resnet50 or weight_count == 25557032)

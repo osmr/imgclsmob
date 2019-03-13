@@ -56,7 +56,7 @@ x = np.zeros((1, 3, 224, 224), np.float32)
 y = net.predict(x)
 ```
 
-## Pretrained models
+## Pretrained models (ImageNet-1K)
 
 Some remarks:
 - All quality values are estimated with MXNet backend.

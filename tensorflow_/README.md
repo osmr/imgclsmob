@@ -57,7 +57,7 @@ with tf.Session() as sess:
     y = sess.run(y_net, feed_dict={x: x_value})
 ```
 
-## Pretrained models
+## Pretrained models (ImageNet-1K)
 
 Some remarks:
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet-1K dataset.

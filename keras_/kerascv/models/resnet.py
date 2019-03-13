@@ -1,5 +1,5 @@
 """
-    ResNet, implemented in Keras.
+    ResNet for ImageNet-1K, implemented in Keras.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 

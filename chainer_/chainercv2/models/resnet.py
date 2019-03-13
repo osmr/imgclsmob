@@ -1,5 +1,5 @@
 """
-    ResNet for Imagenet-1K, implemented in Chainer.
+    ResNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 

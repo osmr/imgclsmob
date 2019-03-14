@@ -10,7 +10,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from common import conv1x1_block, conv3x3_block, conv7x7_block
 
 
 class ResBlock(HybridBlock):

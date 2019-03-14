@@ -1,6 +1,7 @@
 
 import torch.nn as nn
-from . import resnet
+import oth_resnet
+from oth_resnet import resnet50, resnet101, resnet152
 
 up_kwargs = {'mode': 'bilinear', 'align_corners': True}
 
@@ -24,10 +25,20 @@ nclass = {
     'citys': 19,
 }
 
+
 class BaseNet(nn.Module):
-    def __init__(self, nclass, backbone, aux, se_loss, dilated=True, norm_layer=None,
-                 base_size=520, crop_size=480, mean=[.485, .456, .406],
-                 std=[.229, .224, .225], root='~/.gluoncvth/models'):
+    def __init__(self,
+                 nclass,
+                 backbone,
+                 aux,
+                 se_loss,
+                 dilated=True,
+                 norm_layer=None,
+                 base_size=520,
+                 crop_size=480,
+                 mean=[.485, .456, .406],
+                 std=[.229, .224, .225],
+                 root='~/.gluoncvth/models'):
         super(BaseNet, self).__init__()
         self.nclass = nclass
         self.aux = aux
@@ -38,14 +49,26 @@ class BaseNet(nn.Module):
         self.crop_size = crop_size
         # copying modules from pretrained models
         if backbone == 'resnet50':
-            self.pretrained = resnet.resnet50(pretrained=False, dilated=dilated, deep_base=True,
-                                              norm_layer=norm_layer, root=root)
+            self.pretrained = resnet50(
+                pretrained=False,
+                dilated=dilated,
+                deep_base=True,
+                norm_layer=norm_layer,
+                root=root)
         elif backbone == 'resnet101':
-            self.pretrained = resnet.resnet101(pretrained=False, dilated=dilated, deep_base=True,
-                                               norm_layer=norm_layer, root=root)
+            self.pretrained = resnet101(
+                pretrained=False,
+                dilated=dilated,
+                deep_base=True,
+                norm_layer=norm_layer,
+                root=root)
         elif backbone == 'resnet152':
-            self.pretrained = resnet.resnet152(pretrained=False, dilated=dilated, deep_base=True,
-                                               norm_layer=norm_layer, root=root)
+            self.pretrained = resnet152(
+                pretrained=False,
+                dilated=dilated,
+                deep_base=True,
+                norm_layer=norm_layer,
+                root=root)
         else:
             raise RuntimeError('unknown backbone: {}'.format(backbone))
         # bilinear upsample options

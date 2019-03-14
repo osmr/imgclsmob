@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch.nn.functional import interpolate
 
-from .base import BaseNet
+from oth_base import BaseNet
 
 __all__ = ['FCN', 'get_fcn', 'get_fcn_resnet101_voc', 'get_fcn_resnet101_ade']
 

@@ -9,8 +9,8 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent, Identity
-from common import conv1x1, conv1x1_block, conv3x3_block
-from resnet import resnet50, resnet101
+from .common import conv1x1, conv1x1_block, conv3x3_block
+from .resnet import resnet50, resnet101
 
 
 class PyramidPoolingBranch(HybridBlock):

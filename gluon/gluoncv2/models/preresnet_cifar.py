@@ -1,12 +1,13 @@
 """
-    PreResNet for CIFAR, implemented in Gluon.
+    PreResNet for CIFAR/SVHN, implemented in Gluon.
     Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
-__all__ = ['CIFARPreResNet', 'preresnet20_cifar10', 'preresnet20_cifar100', 'preresnet56_cifar10',
-           'preresnet56_cifar100', 'preresnet110_cifar10', 'preresnet110_cifar100', 'preresnet164bn_cifar10',
-           'preresnet164bn_cifar100', 'preresnet1001_cifar10', 'preresnet1001_cifar100', 'preresnet1202_cifar10',
-           'preresnet1202_cifar100']
+__all__ = ['CIFARPreResNet', 'preresnet20_cifar10', 'preresnet20_cifar100', 'preresnet20_svhn', 'preresnet56_cifar10',
+           'preresnet56_cifar100', 'preresnet56_svhn', 'preresnet110_cifar10', 'preresnet110_cifar100',
+           'preresnet110_svhn', 'preresnet164bn_cifar10', 'preresnet164bn_cifar100', 'preresnet164bn_svhn',
+           'preresnet1001_cifar10', 'preresnet1001_cifar100', 'preresnet1001_svhn', 'preresnet1202_cifar10',
+           'preresnet1202_cifar100', 'preresnet1202_svhn']
 
 import os
 from mxnet import cpu
@@ -193,6 +194,25 @@ def preresnet20_cifar100(classes=100, **kwargs):
                                **kwargs)
 
 
+def preresnet20_svhn(classes=10, **kwargs):
+    """
+    PreResNet-20 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="preresnet20_svhn", **kwargs)
+
+
 def preresnet56_cifar10(classes=10, **kwargs):
     """
     PreResNet-56 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
@@ -232,6 +252,25 @@ def preresnet56_cifar100(classes=100, **kwargs):
                                **kwargs)
 
 
+def preresnet56_svhn(classes=10, **kwargs):
+    """
+    PreResNet-56 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="preresnet56_svhn", **kwargs)
+
+
 def preresnet110_cifar10(classes=10, **kwargs):
     """
     PreResNet-110 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
@@ -269,6 +308,26 @@ def preresnet110_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_preresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="preresnet110_cifar100",
+                               **kwargs)
+
+
+def preresnet110_svhn(classes=10, **kwargs):
+    """
+    PreResNet-110 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="preresnet110_svhn",
                                **kwargs)
 
 
@@ -312,6 +371,26 @@ def preresnet164bn_cifar100(classes=100, **kwargs):
                                **kwargs)
 
 
+def preresnet164bn_svhn(classes=10, **kwargs):
+    """
+    PreResNet-164(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="preresnet164bn_svhn",
+                               **kwargs)
+
+
 def preresnet1001_cifar10(classes=10, **kwargs):
     """
     PreResNet-1001 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
@@ -349,6 +428,26 @@ def preresnet1001_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_preresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="preresnet1001_cifar100",
+                               **kwargs)
+
+
+def preresnet1001_svhn(classes=10, **kwargs):
+    """
+    PreResNet-1001 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="preresnet1001_svhn",
                                **kwargs)
 
 
@@ -392,6 +491,26 @@ def preresnet1202_cifar100(classes=100, **kwargs):
                                **kwargs)
 
 
+def preresnet1202_svhn(classes=10, **kwargs):
+    """
+    PreResNet-1202 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="preresnet1202_svhn",
+                               **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -401,16 +520,22 @@ def _test():
     models = [
         (preresnet20_cifar10, 10),
         (preresnet20_cifar100, 100),
+        (preresnet20_svhn, 10),
         (preresnet56_cifar10, 10),
         (preresnet56_cifar100, 100),
+        (preresnet56_svhn, 10),
         (preresnet110_cifar10, 10),
         (preresnet110_cifar100, 100),
+        (preresnet110_svhn, 10),
         (preresnet164bn_cifar10, 10),
         (preresnet164bn_cifar100, 100),
+        (preresnet164bn_svhn, 10),
         (preresnet1001_cifar10, 10),
         (preresnet1001_cifar100, 100),
+        (preresnet1001_svhn, 10),
         (preresnet1202_cifar10, 10),
         (preresnet1202_cifar100, 100),
+        (preresnet1202_svhn, 10),
     ]
 
     for model, classes in models:
@@ -431,16 +556,22 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != preresnet20_cifar10 or weight_count == 272282)
         assert (model != preresnet20_cifar100 or weight_count == 278132)
+        assert (model != preresnet20_svhn or weight_count == 272282)
         assert (model != preresnet56_cifar10 or weight_count == 855578)
         assert (model != preresnet56_cifar100 or weight_count == 861428)
+        assert (model != preresnet56_svhn or weight_count == 855578)
         assert (model != preresnet110_cifar10 or weight_count == 1730522)
         assert (model != preresnet110_cifar100 or weight_count == 1736372)
+        assert (model != preresnet110_svhn or weight_count == 1730522)
         assert (model != preresnet164bn_cifar10 or weight_count == 1703258)
         assert (model != preresnet164bn_cifar100 or weight_count == 1726388)
+        assert (model != preresnet164bn_svhn or weight_count == 1703258)
         assert (model != preresnet1001_cifar10 or weight_count == 10327706)
         assert (model != preresnet1001_cifar100 or weight_count == 10350836)
+        assert (model != preresnet1001_svhn or weight_count == 10327706)
         assert (model != preresnet1202_cifar10 or weight_count == 19423834)
         assert (model != preresnet1202_cifar100 or weight_count == 19429684)
+        assert (model != preresnet1202_svhn or weight_count == 19423834)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='kerascv',
-    version='0.0.25',
+    version='0.0.26',
     description='Image classification models for Keras',
     license='MIT',
     long_description=long_description,
@@ -24,7 +24,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
-    keywords='machine-learning deep-learning neuralnetwork image-classification imagenet keras keras-mxnet vgg resnet '
+    keywords='machine-learning deep-learning neuralnetwork image-classification keras keras-mxnet imagenet vgg resnet '
              'resnext senet densenet darknet squeezenet squeezenext shufflenet menet mobilenent igcv3 mnasnet',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,

@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='tensorflowcv',
-    version='0.0.26',
+    version='0.0.27',
     description='Image classification models for TensorFlow',
     license='MIT',
     long_description=long_description,
@@ -24,7 +24,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Scientific/Engineering :: Image Recognition',
     ],
-    keywords='machine-learning deep-learning neuralnetwork image-classification imagenet tensorflow vgg resnet resnext '
+    keywords='machine-learning deep-learning neuralnetwork image-classification tensorflow imagenet vgg resnet resnext '
              'senet densenet darknet squeezenet squeezenext shufflenet menet mobilenent igcv3 mnasnet',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,

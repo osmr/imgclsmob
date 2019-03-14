@@ -189,6 +189,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('resnet110_svhn', '0245', '0570b5942680cf88c66ae9a76c0e7ff0a41e71a6', 'v0.0.265'),
     ('resnet164bn_cifar10', '0368', 'e7941eeeddef9336664522eaa3af92d77128cac0', 'v0.0.179'),
     ('resnet164bn_cifar100', '2044', 'c7db7b5e6fbe6dc0f9501d25784f1a107c6e0315', 'v0.0.182'),
+    ('resnet164bn_svhn', '0242', '8cdce67452d2780c7c69f4d0b979e80189d4bff8', 'v0.0.267'),
     ('resnet1001_cifar10', '0328', 'bb979d53089138b5060b418cad6c8ad9a940bf81', 'v0.0.201'),
     ('resnet1001_cifar100', '1979', '692d9516620bc8b7a4da30a98ebcb7432243f5e9', 'v0.0.254'),
     ('resnet1202_cifar10', '0353', '377510a63595e544333f6f57523222cd845744a8', 'v0.0.214'),

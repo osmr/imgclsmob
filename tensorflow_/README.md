@@ -3,9 +3,10 @@
 [![PyPI](https://img.shields.io/pypi/v/tensorflowcv.svg)](https://pypi.python.org/pypi/tensorflowcv)
 [![Downloads](https://pepy.tech/badge/tensorflowcv)](https://pepy.tech/project/tensorflowcv)
 
-This is a collection of large-scale image classification models. Many of them are pretrained on ImageNet-1K dataset
-and loaded automatically during use. All pretrained models require the same ordinary normalization. Scripts for
-training/evaluating/converting models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+This is a collection of large-scale image classification models. Many of them are pretrained on
+[ImageNet-1K](http://www.image-net.org) dataset and loaded automatically during use. All pretrained models require the
+same ordinary normalization. Scripts for training/evaluating/converting models are in the
+[`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 
@@ -81,7 +82,7 @@ Some remarks:
 | ResNet-16 | 30.25 | 10.86 | 6,968,872 | 1,589.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.259/resnet16-1086-5ac8e7da.tf.npz.log)) |
 | ResNet-18 x0.25 | 39.32 | 17.41 | 3,937,400 | 270.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.262/resnet18_wd4-1741-4aafd009.tf.npz.log)) |
 | ResNet-18 x0.5 | 33.36 | 12.87 | 5,804,296 | 608.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.263/resnet18_wd2-1287-dac8e632.tf.npz.log)) |
-| ResNet-18 x0.75 | 33.28 | 12.50 | 6,675,352 | 1,047.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet18_w3d4-1250-2040e339.tf.npz.log)) |
+| ResNet-18 x0.75 | 30.00 | 10.69 | 8,476,056 | 1,129.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.266/resnet18_w3d4-1066-afa3a239.h5.log)) |
 | ResNet-18 | 28.16 | 9.56 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0956-b4fc7198.tf.npz.log)) |
 | ResNet-34 | 25.32 | 7.93 | 21,797,672 | 3,672.68M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.72/resnet34-0793-aaf4f066.tf.npz.log)) |
 | ResNet-50 | 22.61 | 6.42 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0642-39e88383.tf.npz.log)) |

@@ -1,9 +1,9 @@
 """
-    NIN for CIFAR, implemented in PyTorch.
+    NIN for CIFAR/SVHN, implemented in PyTorch.
     Original paper: 'Network In Network,' https://arxiv.org/abs/1312.4400.
 """
 
-__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100']
+__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100', 'nin_svhn']
 
 import os
 import torch.nn as nn
@@ -201,6 +201,22 @@ def nin_cifar100(num_classes=100, **kwargs):
     return get_nin_cifar(num_classes=num_classes, model_name="nin_cifar100", **kwargs)
 
 
+def nin_svhn(num_classes=10, **kwargs):
+    """
+    NIN model for SVHN from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_nin_cifar(num_classes=num_classes, model_name="nin_svhn", **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -219,6 +235,7 @@ def _test():
     models = [
         (nin_cifar10, 10),
         (nin_cifar100, 100),
+        (nin_svhn, 10),
     ]
 
     for model, num_classes in models:
@@ -231,6 +248,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != nin_cifar10 or weight_count == 966986)
         assert (model != nin_cifar100 or weight_count == 984356)
+        assert (model != nin_svhn or weight_count == 966986)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

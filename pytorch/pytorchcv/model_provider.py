@@ -387,6 +387,7 @@ _models = {
 
     'nin_cifar10': nin_cifar10,
     'nin_cifar100': nin_cifar100,
+    'nin_svhn': nin_svhn,
 
     'resnet20_cifar10': resnet20_cifar10,
     'resnet20_cifar100': resnet20_cifar100,

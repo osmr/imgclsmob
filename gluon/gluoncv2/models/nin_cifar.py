@@ -1,9 +1,9 @@
 """
-    NIN for CIFAR, implemented in Gluon.
+    NIN for CIFAR/SVHN, implemented in Gluon.
     Original paper: 'Network In Network,' https://arxiv.org/abs/1312.4400.
 """
 
-__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100']
+__all__ = ['CIFARNIN', 'nin_cifar10', 'nin_cifar100', 'nin_svhn']
 
 import os
 from mxnet import cpu
@@ -205,6 +205,24 @@ def nin_cifar100(classes=100, **kwargs):
     return get_nin_cifar(classes=classes, model_name="nin_cifar100", **kwargs)
 
 
+def nin_svhn(classes=10, **kwargs):
+    """
+    NIN model for SVHN from 'Network In Network,' https://arxiv.org/abs/1312.4400.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_nin_cifar(classes=classes, model_name="nin_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -214,6 +232,7 @@ def _test():
     models = [
         (nin_cifar10, 10),
         (nin_cifar100, 100),
+        (nin_svhn, 10),
     ]
 
     for model, classes in models:
@@ -234,6 +253,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != nin_cifar10 or weight_count == 966986)
         assert (model != nin_cifar100 or weight_count == 984356)
+        assert (model != nin_svhn or weight_count == 966986)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

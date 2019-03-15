@@ -77,7 +77,7 @@ Some remarks:
 | CondenseNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1711.09224) | [link](https://github.com/ShichenLiu/CondenseNet) | 2017 |
 | SparseNet | A | A | A | - | - | [link](https://arxiv.org/abs/1801.05895) | [link](https://github.com/Lyken17/SparseNet) | 2018 |
 | PeleeNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1804.06882) | [link](https://github.com/Robert-JunWang/Pelee) | 2018 |
-| WRN | A+B+C+D | A+B+C+D | A+B+C+D | - | - | [link](https://arxiv.org/abs/1605.07146) | [link](https://github.com/szagoruyko/wide-residual-networks) | 2016 |
+| WRN | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | - | [link](https://arxiv.org/abs/1605.07146) | [link](https://github.com/szagoruyko/wide-residual-networks) | 2016 |
 | DRN-C | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
 | DRN-D | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
 | DPN | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.01629) | [link](https://github.com/cypw/DPNs) | 2017 |
@@ -115,7 +115,7 @@ Some remarks:
 | NASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
 | NASNet-Mobile | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
 | PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
-| NIN | B+C+D | B+C+D | B+C+D | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
+| NIN | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
 | RoR-3 | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |
 | RiR | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1603.08029) | - | 2016 |
 | ResDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1603.09382) | [link](https://github.com/yueatsprograms/Stochastic_Depth) | 2016 |

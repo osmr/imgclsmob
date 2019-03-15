@@ -177,6 +177,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('pnasnet5large', '0428', '65de46ebd049e494c13958d5671aba5abf803ff3', 'v0.0.114'),
     ('nin_cifar10', '0743', '795b082470b58c1aa94e2f861514b7914f6e2f58', 'v0.0.175'),
     ('nin_cifar100', '2839', '627a11c064eb44c6451fe53e0becfc21a6d57d7f', 'v0.0.183'),
+    ('nin_svhn', '0376', '1205dc06a4847bece8159754033f325f75565c02', 'v0.0.270'),
     ('resnet20_cifar10', '0597', '9b0024ac4c2f374cde2c5052e0d0344a75871cdb', 'v0.0.163'),
     ('resnet20_cifar100', '2964', 'a5322afed92fa96cb7b3453106f73cf38e316151', 'v0.0.180'),
     ('resnet20_svhn', '0343', '8232e6e4c2c9fac1200386b68311c3bd56f483f5', 'v0.0.265'),

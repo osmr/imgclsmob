@@ -1,10 +1,10 @@
 """
-    WRN for CIFAR, implemented in Chainer.
+    WRN for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 """
 
-__all__ = ['CIFARWRN', 'wrn16_10_cifar10', 'wrn16_10_cifar100', 'wrn28_10_cifar10', 'wrn28_10_cifar100',
-           'wrn40_8_cifar10', 'wrn40_8_cifar100']
+__all__ = ['CIFARWRN', 'wrn16_10_cifar10', 'wrn16_10_cifar100', 'wrn16_10_svhn', 'wrn28_10_cifar10',
+           'wrn28_10_cifar100', 'wrn28_10_svhn', 'wrn40_8_cifar10', 'wrn40_8_cifar100', 'wrn40_8_svhn']
 
 import os
 import chainer.functions as F
@@ -169,6 +169,22 @@ def wrn16_10_cifar100(classes=100, **kwargs):
     return get_wrn_cifar(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_cifar100", **kwargs)
 
 
+def wrn16_10_svhn(classes=10, **kwargs):
+    """
+    WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn_cifar(classes=classes, blocks=16, width_factor=10, model_name="wrn16_10_svhn", **kwargs)
+
+
 def wrn28_10_cifar10(classes=10, **kwargs):
     """
     WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
@@ -199,6 +215,22 @@ def wrn28_10_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_cifar100", **kwargs)
+
+
+def wrn28_10_svhn(classes=10, **kwargs):
+    """
+    WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn16_10_svhn", **kwargs)
 
 
 def wrn40_8_cifar10(classes=10, **kwargs):
@@ -233,6 +265,22 @@ def wrn40_8_cifar100(classes=100, **kwargs):
     return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_cifar100", **kwargs)
 
 
+def wrn40_8_svhn(classes=10, **kwargs):
+    """
+    WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn16_10_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -244,10 +292,13 @@ def _test():
     models = [
         (wrn16_10_cifar10, 10),
         (wrn16_10_cifar100, 100),
+        (wrn16_10_svhn, 10),
         (wrn28_10_cifar10, 10),
         (wrn28_10_cifar100, 100),
+        (wrn28_10_svhn, 10),
         (wrn40_8_cifar10, 10),
         (wrn40_8_cifar100, 100),
+        (wrn40_8_svhn, 10),
     ]
 
     for model, classes in models:
@@ -257,10 +308,13 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != wrn16_10_cifar10 or weight_count == 17116634)
         assert (model != wrn16_10_cifar100 or weight_count == 17174324)
+        assert (model != wrn16_10_svhn or weight_count == 17116634)
         assert (model != wrn28_10_cifar10 or weight_count == 36479194)
         assert (model != wrn28_10_cifar100 or weight_count == 36536884)
+        assert (model != wrn28_10_svhn or weight_count == 36479194)
         assert (model != wrn40_8_cifar10 or weight_count == 35748314)
         assert (model != wrn40_8_cifar100 or weight_count == 35794484)
+        assert (model != wrn40_8_svhn or weight_count == 35748314)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

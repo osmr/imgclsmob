@@ -369,6 +369,7 @@ Some remarks:
 | PreResNet-56 | 2.80 | 855,578 | 127.03M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet56_svhn-0280-b974c2c9.params.log)) |
 | PreResNet-110 | 2.79 | 1,730,522 | 255.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet110_svhn-0279-6804450b.params.log)) |
 | PreResNet-164(BN) | 2.58 | 1,703,258 | 255.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet164bn_svhn-0258-4aeee06a.params.log)) |
+| WRN-16-10 | 2.78 | 17,116,634 | 2,414.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.271/wrn16_10_svhn-0278-76f4e136.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

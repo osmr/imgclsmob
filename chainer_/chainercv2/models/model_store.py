@@ -230,6 +230,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('xdensenet40_2_k36_bc_cifar100', '2165', '9ac51e902167ba05f1c21ed1a9690c1fd4cad3eb', 'v0.0.234'),
     ('wrn16_10_cifar10', '0293', '4ac60015e3b287580d11e605793b3426e8184137', 'v0.0.166'),
     ('wrn16_10_cifar100', '1895', 'd6e852788e29532c8a12bb39617a2e81aba2483f', 'v0.0.204'),
+    ('wrn16_10_svhn', '0278', 'b87185c815b64a1290ecbb7a217447906c77da75', 'v0.0.271'),
     ('wrn28_10_cifar10', '0239', 'f8a24941ca542f78eda2d192f461b1bac0600d27', 'v0.0.166'),
     ('wrn40_8_cifar10', '0237', '3f56f24a07be7155fb143cc4360755d564e3761a', 'v0.0.166'),
     ('ror3_56_cifar10', '0543', '7ca1b24c4a573d53484ca92b19bad5c08e38fa8b', 'v0.0.228'),

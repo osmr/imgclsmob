@@ -1,94 +1,20 @@
 """
-    PSPNet, implemented in Gluon.
-    Original paper: 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    FCN, implemented in Gluon.
+    Original paper: 'Fully Convolutional Networks for Semantic Segmentation,' https://arxiv.org/abs/1411.4038.
 """
 
-__all__ = ['PSPNet', 'pspnet_resnet50_voc', 'pspnet_resnet101_voc', 'pspnet_resnet50_ade20k']
+__all__ = ['FCN', 'fcn_resnet50_voc', 'fcn_resnet101_voc', 'fcn_resnet50_ade20k']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from mxnet.gluon.contrib.nn import HybridConcurrent, Identity
-from .common import conv1x1, conv1x1_block, conv3x3_block
+from .common import conv1x1, conv3x3_block
 from .resnet import resnet50, resnet101
 
 
-class PyramidPoolingBranch(HybridBlock):
+class FCN(HybridBlock):
     """
-    Pyramid Pooling branch.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    output_size : int
-        Target output size of the image.
-    in_size : tuple of 2 int
-        Spatial size of the input tensor for the bilinear upsampling operation.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 output_size,
-                 in_size,
-                 **kwargs):
-        super(PyramidPoolingBranch, self).__init__(**kwargs)
-        self.output_size = output_size
-        self.in_size = in_size
-
-        with self.name_scope():
-            self.conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels)
-
-    def hybrid_forward(self, F, x):
-        x = F.contrib.AdaptiveAvgPooling2D(x, output_size=self.output_size)
-        x = self.conv(x)
-        x = F.contrib.BilinearResize2D(x, height=self.in_size[0], width=self.in_size[1])
-        return x
-
-
-class PyramidPooling(HybridBlock):
-    """
-    Pyramid Pooling module.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    in_size : tuple of 2 int
-        Spatial size of the input tensor for the bilinear upsampling operation.
-    """
-    def __init__(self,
-                 in_channels,
-                 in_size,
-                 **kwargs):
-        super(PyramidPooling, self).__init__(**kwargs)
-        output_sizes = [1, 2, 3, 6]
-        assert (len(output_sizes) == 4)
-        assert (in_channels % 4 == 0)
-        mid_channels = in_channels // 4
-
-        with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
-            self.branches.add(Identity())
-            for output_size in output_sizes:
-                self.branches.add(PyramidPoolingBranch(
-                    in_channels=in_channels,
-                    out_channels=mid_channels,
-                    output_size=output_size,
-                    in_size=in_size))
-
-    def hybrid_forward(self, F, x):
-        x = self.branches(x)
-        return x
-
-
-class PSPNet(HybridBlock):
-    """
-    PSPNet model from 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    FCN model from 'Fully Convolutional Networks for Semantic Segmentation,' https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
@@ -110,21 +36,16 @@ class PSPNet(HybridBlock):
                  in_size=(224, 224),
                  classes=21,
                  **kwargs):
-        super(PSPNet, self).__init__(**kwargs)
+        super(FCN, self).__init__(**kwargs)
         assert (in_channels > 0)
-        assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
         self.classes = classes
-        pool_out_channels = 2 * backbone_out_channels
         mid_channels = backbone_out_channels // 4
 
         with self.name_scope():
             self.backbone = backbone
-            self.pool = PyramidPooling(
-                in_channels=backbone_out_channels,
-                in_size=(self.in_size[0] // 8, self.in_size[1] // 8))
             self.conv1 = conv3x3_block(
-                in_channels=pool_out_channels,
+                in_channels=backbone_out_channels,
                 out_channels=mid_channels)
             self.dropout = nn.Dropout(rate=0.1)
             self.conv2 = conv1x1(
@@ -133,7 +54,6 @@ class PSPNet(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.backbone(x)
-        x = self.pool(x)
         x = self.conv1(x)
         x = self.dropout(x)
         x = self.conv2(x)
@@ -141,21 +61,21 @@ class PSPNet(HybridBlock):
         return x
 
 
-def get_pspnet(backbone,
-               classes,
-               model_name=None,
-               pretrained=False,
-               ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
-               **kwargs):
+def get_fcn(backbone,
+            num_classes,
+            model_name=None,
+            pretrained=False,
+            ctx=cpu(),
+            root=os.path.join('~', '.mxnet', 'models'),
+            **kwargs):
     """
-    Create PSPNet model with specific parameters.
+    Create FCN model with specific parameters.
 
     Parameters:
     ----------
     backbone : nn.Sequential
         Feature extractor.
-    classes : int
+    num_classes : int
         Number of segmentation classes.
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -167,9 +87,9 @@ def get_pspnet(backbone,
         Location for keeping the model parameters.
     """
 
-    net = PSPNet(
+    net = FCN(
         backbone=backbone,
-        classes=classes,
+        classes=num_classes,
         **kwargs)
 
     if pretrained:
@@ -185,16 +105,16 @@ def get_pspnet(backbone,
     return net
 
 
-def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
+def fcn_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-50 for Pascal VOC from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    classes : int, default 21
+    num_classes : int, default 21
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -204,19 +124,19 @@ def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_voc", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet50_voc", **kwargs)
 
 
-def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
+def fcn_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-101 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-101 for Pascal VOC from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    classes : int, default 21
+    num_classes : int, default 21
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -226,19 +146,19 @@ def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet101(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet101_voc", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet101_voc", **kwargs)
 
 
-def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
+def fcn_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for ADE20K from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-50 for ADE20K from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    classes : int, default 150
+    num_classes : int, default 150
         Number of segmentation classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -248,7 +168,7 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet50_ade20k", **kwargs)
 
 
 def _test():
@@ -258,9 +178,9 @@ def _test():
     pretrained = False
 
     models = [
-        (pspnet_resnet50_voc, 21),
-        (pspnet_resnet101_voc, 21),
-        (pspnet_resnet50_ade20k, 150),
+        (fcn_resnet50_voc, 21),
+        (fcn_resnet101_voc, 21),
+        (fcn_resnet50_ade20k, 150),
     ]
 
     for model, classes in models:
@@ -279,9 +199,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != pspnet_resnet50_voc or weight_count == 46592576)
-        assert (model != pspnet_resnet101_voc or weight_count == 65584704)
-        assert (model != pspnet_resnet50_ade20k or weight_count == 46658624)
+        assert (model != fcn_resnet50_voc or weight_count == 32956992)
+        assert (model != fcn_resnet101_voc or weight_count == 51949120)
+        assert (model != fcn_resnet50_ade20k or weight_count == 33023040)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

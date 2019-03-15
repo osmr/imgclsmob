@@ -3,7 +3,7 @@ from __future__ import division
 from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
-from .segbase import SegBaseModel
+from oth_segbase import SegBaseModel
 # pylint: disable=unused-argument,abstract-method,missing-docstring
 
 __all__ = ['FCN', 'get_fcn', 'get_fcn_resnet50_voc', 'get_fcn_resnet101_voc',

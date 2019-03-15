@@ -1,19 +1,37 @@
 from __future__ import division
-import os
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.nn.functional import interpolate
 
-from .base import BaseNet
-from .fcn import FCNHead
+from oth_base import BaseNet
+from oth_fcn import FCNHead
+
 
 class DeepLabV3(BaseNet):
-    def __init__(self, nclass, backbone, aux=True, se_loss=False, norm_layer=nn.BatchNorm2d, **kwargs):
-        super(DeepLabV3, self).__init__(nclass, backbone, aux, se_loss, norm_layer=norm_layer, **kwargs)
-        self.head = DeepLabV3Head(2048, nclass, norm_layer, self._up_kwargs)
+    def __init__(self,
+                 nclass,
+                 backbone,
+                 aux=True,
+                 se_loss=False,
+                 norm_layer=nn.BatchNorm2d,
+                 **kwargs):
+        super(DeepLabV3, self).__init__(
+            nclass,
+            backbone,
+            aux,
+            se_loss,
+            norm_layer=norm_layer,
+            **kwargs)
+        self.head = DeepLabV3Head(
+            2048,
+            nclass,
+            norm_layer,
+            self._up_kwargs)
         if aux:
-            self.auxlayer = FCNHead(1024, nclass, norm_layer)
+            self.auxlayer = FCNHead(
+                1024,
+                nclass,
+                norm_layer)
 
     def forward(self, x):
         _, _, h, w = x.size()
@@ -31,10 +49,21 @@ class DeepLabV3(BaseNet):
 
 
 class DeepLabV3Head(nn.Module):
-    def __init__(self, in_channels, out_channels, norm_layer, up_kwargs, atrous_rates=[12, 24, 36], **kwargs):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 norm_layer,
+                 up_kwargs,
+                 atrous_rates=[12, 24, 36],
+                 **kwargs):
         super(DeepLabV3Head, self).__init__()
         inter_channels = in_channels // 8
-        self.aspp = ASPP_Module(in_channels, atrous_rates, norm_layer, up_kwargs, **kwargs)
+        self.aspp = ASPP_Module(
+            in_channels,
+            atrous_rates,
+            norm_layer,
+            up_kwargs,
+            **kwargs)
         self.block = nn.Sequential(
             nn.Conv2d(inter_channels, inter_channels, 3, padding=1, bias=False),
             norm_layer(inter_channels),
@@ -56,6 +85,7 @@ def ASPPConv(in_channels, out_channels, atrous_rate, norm_layer):
         nn.ReLU(True))
     return block
 
+
 class AsppPooling(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, up_kwargs):
         super(AsppPooling, self).__init__()
@@ -70,8 +100,13 @@ class AsppPooling(nn.Module):
         pool = self.gap(x)
         return interpolate(pool, (h,w), **self._up_kwargs)
 
+
 class ASPP_Module(nn.Module):
-    def __init__(self, in_channels, atrous_rates, norm_layer, up_kwargs):
+    def __init__(self,
+                 in_channels,
+                 atrous_rates,
+                 norm_layer,
+                 up_kwargs):
         super(ASPP_Module, self).__init__()
         out_channels = in_channels // 8
         rate1, rate2, rate3 = tuple(atrous_rates)
@@ -99,16 +134,18 @@ class ASPP_Module(nn.Module):
         y = torch.cat((feat0, feat1, feat2, feat3, feat4), 1)
         return self.project(y)
 
+
 def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
             root='~/.gluoncvth/models', **kwargs):
     # infer number of classes
-    from .base import nclass, acronyms
+    from oth_base import nclass, acronyms
     model = DeepLabV3(nclass[dataset.lower()], backbone=backbone, root=root, **kwargs)
     if pretrained:
         from .model_store import get_model_file
         model.load_state_dict(torch.load(
             get_model_file('deeplab_%s_%s'%(backbone, acronyms[dataset]), root=root)))
     return model
+
 
 def get_deeplab_resnet101_voc(pretrained=False, root='~/.gluoncvth/models', **kwargs):
     r"""DeepLabV3 model from the paper `"Context Encoding for Semantic Segmentation"
@@ -120,12 +157,6 @@ def get_deeplab_resnet101_voc(pretrained=False, root='~/.gluoncvth/models', **kw
         Whether to load the pretrained weights for model.
     root : str, default '~/.gluoncvth/models'
         Location for keeping the model parameters.
-
-
-    Examples
-    --------
-    >>> model = get_deeplab_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
     return get_deeplab('pascal_voc', 'resnet101', pretrained, root=root, **kwargs)
 
@@ -140,12 +171,44 @@ def get_deeplab_resnet101_ade(pretrained=False, root='~/.gluoncvth/models', **kw
         Whether to load the pretrained weights for model.
     root : str, default '~/.gluoncvth/models'
         Location for keeping the model parameters.
-
-
-    Examples
-    --------
-    >>> model = get_deeplab_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
     return get_deeplab('ade20k', 'resnet101', pretrained, root=root, **kwargs)
 
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        get_deeplab_resnet101_voc,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != get_deeplab_resnet101_voc or weight_count == 63168978)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        y.sum().backward()
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

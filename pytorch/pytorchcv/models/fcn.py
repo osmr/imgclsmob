@@ -1,82 +1,21 @@
 """
-    PSPNet, implemented in PyTorch.
-    Original paper: 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    FCN, implemented in PyTorch.
+    Original paper: 'Fully Convolutional Networks for Semantic Segmentation,' https://arxiv.org/abs/1411.4038.
 """
 
-__all__ = ['PSPNet', 'pspnet_resnet50_voc', 'pspnet_resnet101_voc', 'pspnet_resnet50_ade20k']
+__all__ = ['FCN', 'fcn_resnet50_voc', 'fcn_resnet101_voc', 'fcn_resnet50_ade20k']
 
 import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity
+from .common import conv1x1, conv3x3_block
 from .resnet import resnet50, resnet101
 
 
-class PyramidPoolingBranch(nn.Module):
+class FCN(nn.Module):
     """
-    Pyramid Pooling branch.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    output_size : int
-        Target output size of the image.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 output_size):
-        super(PyramidPoolingBranch, self).__init__()
-        self.pool = nn.AdaptiveAvgPool2d(output_size)
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
-
-    def forward(self, x):
-        _, _, h, w = x.size()
-        x = self.pool(x)
-        x = self.conv(x)
-        x = F.interpolate(x, size=(h, w), mode="bilinear", align_corners=True)
-        return x
-
-
-class PyramidPooling(nn.Module):
-    """
-    Pyramid Pooling module.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    """
-    def __init__(self,
-                 in_channels):
-        super(PyramidPooling, self).__init__()
-        output_sizes = [1, 2, 3, 6]
-        assert (len(output_sizes) == 4)
-        assert (in_channels % 4 == 0)
-        mid_channels = in_channels // 4
-
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", Identity())
-        for i, output_size in enumerate(output_sizes):
-            self.branches.add_module("branch{}".format(i + 2), PyramidPoolingBranch(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                output_size=output_size))
-
-    def forward(self, x):
-        x = self.branches(x)
-        return x
-
-
-class PSPNet(nn.Module):
-    """
-    PSPNet model from 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    FCN model from 'Fully Convolutional Networks for Semantic Segmentation,' https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
@@ -97,17 +36,15 @@ class PSPNet(nn.Module):
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=21):
-        super(PSPNet, self).__init__()
+        super(FCN, self).__init__()
         assert (in_channels > 0)
         self.in_size = in_size
         self.num_classes = num_classes
-        pool_out_channels = 2 * backbone_out_channels
         mid_channels = backbone_out_channels // 4
 
         self.backbone = backbone
-        self.pool = PyramidPooling(in_channels=backbone_out_channels)
         self.conv1 = conv3x3_block(
-            in_channels=pool_out_channels,
+            in_channels=backbone_out_channels,
             out_channels=mid_channels)
         self.dropout = nn.Dropout2d(p=0.1, inplace=False)
         self.conv2 = conv1x1(
@@ -126,7 +63,6 @@ class PSPNet(nn.Module):
     def forward(self, x):
         _, _, h, w = x.size()
         x = self.backbone(x)
-        x = self.pool(x)
         x = self.conv1(x)
         x = self.dropout(x)
         x = self.conv2(x)
@@ -134,14 +70,14 @@ class PSPNet(nn.Module):
         return x
 
 
-def get_pspnet(backbone,
-               num_classes,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
-               **kwargs):
+def get_fcn(backbone,
+            num_classes,
+            model_name=None,
+            pretrained=False,
+            root=os.path.join('~', '.torch', 'models'),
+            **kwargs):
     """
-    Create PSPNet model with specific parameters.
+    Create FCN model with specific parameters.
 
     Parameters:
     ----------
@@ -157,7 +93,7 @@ def get_pspnet(backbone,
         Location for keeping the model parameters.
     """
 
-    net = PSPNet(
+    net = FCN(
         backbone=backbone,
         num_classes=num_classes,
         **kwargs)
@@ -174,10 +110,10 @@ def get_pspnet(backbone,
     return net
 
 
-def pspnet_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
+def fcn_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-50 for Pascal VOC from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
@@ -191,13 +127,13 @@ def pspnet_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet50_voc", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet50_voc", **kwargs)
 
 
-def pspnet_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
+def fcn_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-101 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-101 for Pascal VOC from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
@@ -211,13 +147,13 @@ def pspnet_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet101(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet101_voc", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet101_voc", **kwargs)
 
 
-def pspnet_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs):
+def fcn_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for ADE20K from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    FCN model on the base of ResNet-50 for ADE20K from 'Fully Convolutional Networks for Semantic Segmentation,'
+    https://arxiv.org/abs/1411.4038.
 
     Parameters:
     ----------
@@ -231,7 +167,7 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs)
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_fcn(backbone=backbone, num_classes=num_classes, model_name="fcn_resnet50_ade20k", **kwargs)
 
 
 def _calc_width(net):
@@ -250,9 +186,9 @@ def _test():
     pretrained = False
 
     models = [
-        (pspnet_resnet50_voc, 21),
-        (pspnet_resnet101_voc, 21),
-        (pspnet_resnet50_ade20k, 150),
+        (fcn_resnet50_voc, 21),
+        (fcn_resnet101_voc, 21),
+        (fcn_resnet50_ade20k, 150),
     ]
 
     for model, num_classes in models:
@@ -263,9 +199,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != pspnet_resnet50_voc or weight_count == 46592576)
-        assert (model != pspnet_resnet101_voc or weight_count == 65584704)
-        assert (model != pspnet_resnet50_ade20k or weight_count == 46658624)
+        assert (model != fcn_resnet50_voc or weight_count == 32956992)
+        assert (model != fcn_resnet101_voc or weight_count == 51949120)
+        assert (model != fcn_resnet50_ade20k or weight_count == 33023040)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

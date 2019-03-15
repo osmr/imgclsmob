@@ -66,6 +66,10 @@ class ResBottleneck(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for the second convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for the second convolution layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     conv1_stride : bool, default False
@@ -77,6 +81,8 @@ class ResBottleneck(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 padding=1,
+                 dilation=1,
                  bn_use_global_stats=False,
                  conv1_stride=False,
                  bottleneck_factor=4,
@@ -94,6 +100,8 @@ class ResBottleneck(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
+                padding=padding,
+                dilation=dilation,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
@@ -121,20 +129,26 @@ class ResUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for the second convolution layer in bottleneck.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for the second convolution layer in bottleneck.
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bottleneck : bool
+    bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
-                 bottleneck,
-                 conv1_stride,
+                 padding=1,
+                 dilation=1,
+                 bn_use_global_stats=False,
+                 bottleneck=True,
+                 conv1_stride=False,
                  **kwargs):
         super(ResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
@@ -145,6 +159,8 @@ class ResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    padding=padding,
+                    dilation=dilation,
                     bn_use_global_stats=bn_use_global_stats,
                     conv1_stride=conv1_stride)
             else:
@@ -227,6 +243,9 @@ class ResNet(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    dilated : bool, default False
+        Applying dilation strategy to pretrained ResNet yielding a stride-8 model, typically used for semantic
+        segmentation.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -240,6 +259,7 @@ class ResNet(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
+                 dilated=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -259,19 +279,25 @@ class ResNet(HybridBlock):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
+                        strides = 2 if ((j == 0) and (i != 0) and ((not dilated) or (i < 2))) else 1
+                        dilation = (2 ** max(0, i - 1 - int(j == 0))) if dilated else 1
                         stage.add(ResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
+                            padding=dilation,
+                            dilation=dilation,
                             bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=7,
-                strides=1))
+            if not dilated:
+                self.features.add(nn.AvgPool2D(
+                    pool_size=7,
+                    strides=1))
+            else:
+                self.features.add(nn.GlobalAvgPool2D())
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.Flatten())

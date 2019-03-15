@@ -1,21 +1,21 @@
 """
-    PSPNet, implemented in PyTorch.
-    Original paper: 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    DeepLabv3, implemented in PyTorch.
+    Original paper: 'Rethinking Atrous Convolution for Semantic Image Segmentation,' https://arxiv.org/abs/1706.05587.
 """
 
-__all__ = ['PSPNet', 'pspnet_resnet50_voc', 'pspnet_resnet101_voc', 'pspnet_resnet50_ade20k']
+__all__ = ['DeepLabv3', 'deeplabv3_resnet50_voc', 'deeplabv3_resnet101_voc', 'deeplabv3_resnet50_ade20k']
 
 import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent
 from .resnet import resnet50, resnet101
 
 
-class PyramidPoolingBranch(nn.Module):
+class ASPPAvgBranch(nn.Module):
     """
-    Pyramid Pooling branch.
+    ASPP branch with average pooling.
 
     Parameters:
     ----------
@@ -23,15 +23,12 @@ class PyramidPoolingBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    output_size : int
-        Target output size of the image.
     """
     def __init__(self,
                  in_channels,
-                 out_channels,
-                 output_size):
-        super(PyramidPoolingBranch, self).__init__()
-        self.pool = nn.AdaptiveAvgPool2d(output_size)
+                 out_channels):
+        super(ASPPAvgBranch, self).__init__()
+        self.pool = nn.AdaptiveAvgPool2d(1)
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels)
@@ -44,9 +41,9 @@ class PyramidPoolingBranch(nn.Module):
         return x
 
 
-class PyramidPooling(nn.Module):
+class AtrousSpatialPyramidPooling(nn.Module):
     """
-    Pyramid Pooling module.
+    Atrous Spatial Pyramid Pooling (ASPP) module.
 
     Parameters:
     ----------
@@ -55,28 +52,41 @@ class PyramidPooling(nn.Module):
     """
     def __init__(self,
                  in_channels):
-        super(PyramidPooling, self).__init__()
-        output_sizes = [1, 2, 3, 6]
-        assert (len(output_sizes) == 4)
-        assert (in_channels % 4 == 0)
-        mid_channels = in_channels // 4
+        super(AtrousSpatialPyramidPooling, self).__init__()
+        atrous_rates = [12, 24, 36]
+        assert (in_channels % 8 == 0)
+        mid_channels = in_channels // 8
+        project_in_channels = 5 * mid_channels
 
         self.branches = Concurrent()
-        self.branches.add_module("branch1", Identity())
-        for i, output_size in enumerate(output_sizes):
-            self.branches.add_module("branch{}".format(i + 2), PyramidPoolingBranch(
+        self.branches.add_module("branch1", conv1x1_block(
+            in_channels=in_channels,
+            out_channels=mid_channels))
+        for i, atrous_rate in enumerate(atrous_rates):
+            self.branches.add_module("branch{}".format(i + 2), conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                output_size=output_size))
+                padding=atrous_rate,
+                dilation=atrous_rate))
+        self.branches.add_module("branch5", ASPPAvgBranch(
+            in_channels=in_channels,
+            out_channels=mid_channels))
+        self.conv = conv1x1(
+            in_channels=project_in_channels,
+            out_channels=mid_channels)
+        self.dropout = nn.Dropout2d(p=0.5, inplace=False)
 
     def forward(self, x):
         x = self.branches(x)
+        x = self.conv(x)
+        x = self.dropout(x)
         return x
 
 
-class PSPNet(nn.Module):
+class DeepLabv3(nn.Module):
     """
-    PSPNet model from 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
+    DeepLabv3 model from 'Rethinking Atrous Convolution for Semantic Image Segmentation,'
+    https://arxiv.org/abs/1706.05587.
 
     Parameters:
     ----------
@@ -97,21 +107,20 @@ class PSPNet(nn.Module):
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=21):
-        super(PSPNet, self).__init__()
+        super(DeepLabv3, self).__init__()
         assert (in_channels > 0)
         self.in_size = in_size
         self.num_classes = num_classes
-        pool_out_channels = 2 * backbone_out_channels
-        mid_channels = backbone_out_channels // 4
+        pool_out_channels = backbone_out_channels // 8
 
         self.backbone = backbone
-        self.pool = PyramidPooling(in_channels=backbone_out_channels)
+        self.pool = AtrousSpatialPyramidPooling(in_channels=backbone_out_channels)
         self.conv1 = conv3x3_block(
             in_channels=pool_out_channels,
-            out_channels=mid_channels)
+            out_channels=pool_out_channels)
         self.dropout = nn.Dropout2d(p=0.1, inplace=False)
         self.conv2 = conv1x1(
-            in_channels=mid_channels,
+            in_channels=pool_out_channels,
             out_channels=num_classes)
 
         self._init_params()
@@ -134,14 +143,14 @@ class PSPNet(nn.Module):
         return x
 
 
-def get_pspnet(backbone,
-               num_classes,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
-               **kwargs):
+def get_deeplabv3(backbone,
+                  num_classes,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join('~', '.torch', 'models'),
+                  **kwargs):
     """
-    Create PSPNet model with specific parameters.
+    Create DeepLabv3 model with specific parameters.
 
     Parameters:
     ----------
@@ -157,7 +166,7 @@ def get_pspnet(backbone,
         Location for keeping the model parameters.
     """
 
-    net = PSPNet(
+    net = DeepLabv3(
         backbone=backbone,
         num_classes=num_classes,
         **kwargs)
@@ -174,10 +183,10 @@ def get_pspnet(backbone,
     return net
 
 
-def pspnet_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
+def deeplabv3_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    DeepLabv3 model on the base of ResNet-50 for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
 
     Parameters:
     ----------
@@ -191,13 +200,13 @@ def pspnet_resnet50_voc(pretrained_backbone=False, num_classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet50_voc", **kwargs)
+    return get_deeplabv3(backbone=backbone, num_classes=num_classes, model_name="deeplabv3_resnet50_voc", **kwargs)
 
 
-def pspnet_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
+def deeplabv3_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
     """
-    PSPNet model on the base of ResNet-101 for Pascal VOC from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    DeepLabv3 model on the base of ResNet-101 for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
 
     Parameters:
     ----------
@@ -211,13 +220,13 @@ def pspnet_resnet101_voc(pretrained_backbone=False, num_classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet101(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet101_voc", **kwargs)
+    return get_deeplabv3(backbone=backbone, num_classes=num_classes, model_name="deeplabv3_resnet101_voc", **kwargs)
 
 
-def pspnet_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs):
+def deeplabv3_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs):
     """
-    PSPNet model on the base of ResNet-50 for ADE20K from 'Pyramid Scene Parsing Network,'
-    https://arxiv.org/abs/1612.01105.
+    DeepLabv3 model on the base of ResNet-50 for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
 
     Parameters:
     ----------
@@ -231,7 +240,7 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, num_classes=150, **kwargs)
         Location for keeping the model parameters.
     """
     backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
-    return get_pspnet(backbone=backbone, num_classes=num_classes, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_deeplabv3(backbone=backbone, num_classes=num_classes, model_name="deeplabv3_resnet50_ade20k", **kwargs)
 
 
 def _calc_width(net):
@@ -250,9 +259,9 @@ def _test():
     pretrained = False
 
     models = [
-        (pspnet_resnet50_voc, 21),
-        (pspnet_resnet101_voc, 21),
-        (pspnet_resnet50_ade20k, 150),
+        (deeplabv3_resnet50_voc, 21),
+        (deeplabv3_resnet101_voc, 21),
+        (deeplabv3_resnet50_ade20k, 150),
     ]
 
     for model, num_classes in models:
@@ -263,9 +272,9 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != pspnet_resnet50_voc or weight_count == 46592576)
-        assert (model != pspnet_resnet101_voc or weight_count == 65584704)
-        assert (model != pspnet_resnet50_ade20k or weight_count == 46658624)
+        assert (model != deeplabv3_resnet50_voc or weight_count == 39638336)
+        assert (model != deeplabv3_resnet101_voc or weight_count == 58630464)
+        assert (model != deeplabv3_resnet50_ade20k or weight_count == 39671360)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

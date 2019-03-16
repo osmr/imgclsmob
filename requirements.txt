@@ -12,3 +12,5 @@ opencv-python
 pandas
 Pillow
 imgaug
+scipy
+tqdm

@@ -26,6 +26,7 @@ def parse_args():
                         help='backbone name (default: resnet50)')
     parser.add_argument('--dataset', type=str, default='pascalaug',
                         help='dataset name (default: pascal)')
+    parser.add_argument('--dataset-dir', type=str, default='../imgclsmob_data/voc', help='dataset path')
     parser.add_argument('--workers', type=int, default=16,
                         metavar='N', help='dataloader threads')
     parser.add_argument('--base-size', type=int, default=520,
@@ -110,7 +111,8 @@ class Trainer(object):
         data_kwargs = {
             'transform': input_transform,
             'base_size': args.base_size,
-            'crop_size': args.crop_size}
+            'crop_size': args.crop_size,
+            'root': args.dataset_dir}
         trainset = get_segmentation_dataset(
             args.dataset,
             split=args.train_split,

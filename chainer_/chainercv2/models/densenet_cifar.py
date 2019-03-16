@@ -1,15 +1,17 @@
 """
-    DenseNet for CIFAR, implemented in Chainer.
+    DenseNet for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 
-__all__ = ['CIFARDenseNet', 'densenet40_k12_cifar10', 'densenet40_k12_cifar100', 'densenet40_k12_bc_cifar10',
-           'densenet40_k12_bc_cifar100', 'densenet40_k24_bc_cifar10', 'densenet40_k24_bc_cifar100',
-           'densenet40_k36_bc_cifar10', 'densenet40_k36_bc_cifar100', 'densenet100_k12_cifar10',
-           'densenet100_k12_cifar100', 'densenet100_k24_cifar10', 'densenet100_k24_cifar100',
-           'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar100',
-           'densenet190_k40_bc_cifar10', 'densenet190_k40_bc_cifar100', 'densenet250_k24_bc_cifar10',
-           'densenet250_k24_bc_cifar100']
+__all__ = ['CIFARDenseNet', 'densenet40_k12_cifar10', 'densenet40_k12_cifar100', 'densenet40_k12_svhn',
+           'densenet40_k12_bc_cifar10', 'densenet40_k12_bc_cifar100', 'densenet40_k12_bc_svhn',
+           'densenet40_k24_bc_cifar10', 'densenet40_k24_bc_cifar100', 'densenet40_k24_bc_svhn',
+           'densenet40_k36_bc_cifar10', 'densenet40_k36_bc_cifar100', 'densenet40_k36_bc_svhn',
+           'densenet100_k12_cifar10', 'densenet100_k12_cifar100', 'densenet100_k12_svhn',
+           'densenet100_k24_cifar10', 'densenet100_k24_cifar100', 'densenet100_k24_svhn',
+           'densenet100_k12_bc_cifar10', 'densenet100_k12_bc_cifar100', 'densenet100_k12_bc_svhn',
+           'densenet190_k40_bc_cifar10', 'densenet190_k40_bc_cifar100', 'densenet190_k40_bc_svhn',
+           'densenet250_k24_bc_cifar10', 'densenet250_k24_bc_cifar100', 'densenet250_k24_bc_svhn']
 
 import os
 import chainer.functions as F
@@ -241,6 +243,24 @@ def densenet40_k12_cifar100(classes=100, **kwargs):
                               model_name="densenet40_k12_cifar100", **kwargs)
 
 
+def densenet40_k12_svhn(classes=10, **kwargs):
+    """
+    DenseNet-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=12, bottleneck=False,
+                              model_name="densenet40_k12_svhn", **kwargs)
+
+
 def densenet40_k12_bc_cifar10(classes=10, **kwargs):
     """
     DenseNet-BC-40 (k=12) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
@@ -275,6 +295,24 @@ def densenet40_k12_bc_cifar100(classes=100, **kwargs):
     """
     return get_densenet_cifar(classes=classes, blocks=40, growth_rate=12, bottleneck=True,
                               model_name="densenet40_k12_bc_cifar100", **kwargs)
+
+
+def densenet40_k12_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-40 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=12, bottleneck=True,
+                              model_name="densenet40_k12_bc_svhn", **kwargs)
 
 
 def densenet40_k24_bc_cifar10(classes=10, **kwargs):
@@ -313,6 +351,24 @@ def densenet40_k24_bc_cifar100(classes=100, **kwargs):
                               model_name="densenet40_k24_bc_cifar100", **kwargs)
 
 
+def densenet40_k24_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-40 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=24, bottleneck=True,
+                              model_name="densenet40_k24_bc_svhn", **kwargs)
+
+
 def densenet40_k36_bc_cifar10(classes=10, **kwargs):
     """
     DenseNet-BC-40 (k=36) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
@@ -347,6 +403,24 @@ def densenet40_k36_bc_cifar100(classes=100, **kwargs):
     """
     return get_densenet_cifar(classes=classes, blocks=40, growth_rate=36, bottleneck=True,
                               model_name="densenet40_k36_bc_cifar100", **kwargs)
+
+
+def densenet40_k36_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-40 (k=36) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=40, growth_rate=36, bottleneck=True,
+                              model_name="densenet40_k36_bc_svhn", **kwargs)
 
 
 def densenet100_k12_cifar10(classes=10, **kwargs):
@@ -385,6 +459,24 @@ def densenet100_k12_cifar100(classes=100, **kwargs):
                               model_name="densenet100_k12_cifar100", **kwargs)
 
 
+def densenet100_k12_svhn(classes=10, **kwargs):
+    """
+    DenseNet-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=100, growth_rate=12, bottleneck=False,
+                              model_name="densenet100_k12_svhn", **kwargs)
+
+
 def densenet100_k24_cifar10(classes=10, **kwargs):
     """
     DenseNet-100 (k=24) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
@@ -419,6 +511,24 @@ def densenet100_k24_cifar100(classes=100, **kwargs):
     """
     return get_densenet_cifar(classes=classes, blocks=100, growth_rate=24, bottleneck=False,
                               model_name="densenet100_k24_cifar100", **kwargs)
+
+
+def densenet100_k24_svhn(classes=10, **kwargs):
+    """
+    DenseNet-100 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=100, growth_rate=24, bottleneck=False,
+                              model_name="densenet100_k24_svhn", **kwargs)
 
 
 def densenet100_k12_bc_cifar10(classes=10, **kwargs):
@@ -457,6 +567,24 @@ def densenet100_k12_bc_cifar100(classes=100, **kwargs):
                               model_name="densenet100_k12_bc_cifar100", **kwargs)
 
 
+def densenet100_k12_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-100 (k=12) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=100, growth_rate=12, bottleneck=True,
+                              model_name="densenet100_k12_bc_svhn", **kwargs)
+
+
 def densenet190_k40_bc_cifar10(classes=10, **kwargs):
     """
     DenseNet-BC-190 (k=40) model for CIFAR-10 from 'Densely Connected Convolutional Networks,'
@@ -491,6 +619,24 @@ def densenet190_k40_bc_cifar100(classes=100, **kwargs):
     """
     return get_densenet_cifar(classes=classes, blocks=190, growth_rate=40, bottleneck=True,
                               model_name="densenet190_k40_bc_cifar100", **kwargs)
+
+
+def densenet190_k40_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-190 (k=40) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=190, growth_rate=40, bottleneck=True,
+                              model_name="densenet190_k40_bc_svhn", **kwargs)
 
 
 def densenet250_k24_bc_cifar10(classes=10, **kwargs):
@@ -529,6 +675,24 @@ def densenet250_k24_bc_cifar100(classes=100, **kwargs):
                               model_name="densenet250_k24_bc_cifar100", **kwargs)
 
 
+def densenet250_k24_bc_svhn(classes=10, **kwargs):
+    """
+    DenseNet-BC-250 (k=24) model for SVHN from 'Densely Connected Convolutional Networks,'
+    https://arxiv.org/abs/1608.06993.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_densenet_cifar(classes=classes, blocks=250, growth_rate=24, bottleneck=True,
+                              model_name="densenet250_k24_bc_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -540,22 +704,31 @@ def _test():
     models = [
         (densenet40_k12_cifar10, 10),
         (densenet40_k12_cifar100, 100),
+        (densenet40_k12_svhn, 10),
         (densenet40_k12_bc_cifar10, 10),
         (densenet40_k12_bc_cifar100, 100),
+        (densenet40_k12_bc_svhn, 10),
         (densenet40_k24_bc_cifar10, 10),
         (densenet40_k24_bc_cifar100, 100),
+        (densenet40_k24_bc_svhn, 10),
         (densenet40_k36_bc_cifar10, 10),
         (densenet40_k36_bc_cifar100, 100),
+        (densenet40_k36_bc_svhn, 10),
         (densenet100_k12_cifar10, 10),
         (densenet100_k12_cifar100, 100),
+        (densenet100_k12_svhn, 10),
         (densenet100_k24_cifar10, 10),
         (densenet100_k24_cifar100, 100),
+        (densenet100_k24_svhn, 10),
         (densenet100_k12_bc_cifar10, 10),
         (densenet100_k12_bc_cifar100, 100),
+        (densenet100_k12_bc_svhn, 10),
         (densenet190_k40_bc_cifar10, 10),
         (densenet190_k40_bc_cifar100, 100),
+        (densenet190_k40_bc_svhn, 10),
         (densenet250_k24_bc_cifar10, 10),
         (densenet250_k24_bc_cifar100, 100),
+        (densenet250_k24_bc_svhn, 10),
     ]
 
     for model, classes in models:
@@ -565,22 +738,31 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != densenet40_k12_cifar10 or weight_count == 599050)
         assert (model != densenet40_k12_cifar100 or weight_count == 622360)
+        assert (model != densenet40_k12_svhn or weight_count == 599050)
         assert (model != densenet40_k12_bc_cifar10 or weight_count == 176122)
         assert (model != densenet40_k12_bc_cifar100 or weight_count == 188092)
+        assert (model != densenet40_k12_bc_svhn or weight_count == 176122)
         assert (model != densenet40_k24_bc_cifar10 or weight_count == 690346)
         assert (model != densenet40_k24_bc_cifar100 or weight_count == 714196)
+        assert (model != densenet40_k24_bc_svhn or weight_count == 690346)
         assert (model != densenet40_k36_bc_cifar10 or weight_count == 1542682)
         assert (model != densenet40_k36_bc_cifar100 or weight_count == 1578412)
+        assert (model != densenet40_k36_bc_svhn or weight_count == 1542682)
         assert (model != densenet100_k12_cifar10 or weight_count == 4068490)
         assert (model != densenet100_k12_cifar100 or weight_count == 4129600)
+        assert (model != densenet100_k12_svhn or weight_count == 4068490)
         assert (model != densenet100_k24_cifar10 or weight_count == 16114138)
         assert (model != densenet100_k24_cifar100 or weight_count == 16236268)
+        assert (model != densenet100_k24_svhn or weight_count == 16114138)
         assert (model != densenet100_k12_bc_cifar10 or weight_count == 769162)
         assert (model != densenet100_k12_bc_cifar100 or weight_count == 800032)
+        assert (model != densenet100_k12_bc_svhn or weight_count == 769162)
         assert (model != densenet190_k40_bc_cifar10 or weight_count == 25624430)
         assert (model != densenet190_k40_bc_cifar100 or weight_count == 25821620)
+        assert (model != densenet190_k40_bc_svhn or weight_count == 25624430)
         assert (model != densenet250_k24_bc_cifar10 or weight_count == 15324406)
         assert (model != densenet250_k24_bc_cifar100 or weight_count == 15480556)
+        assert (model != densenet250_k24_bc_svhn or weight_count == 15324406)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

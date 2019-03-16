@@ -56,7 +56,7 @@ Some remarks:
 | BN-Inception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |
 | ResNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
 | PreResNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
-| ResNeXt | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
+| ResNeXt | A+B+C+D | A+B+C+D | A+B+C+D | A+ | A+ | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-PreResNet | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
@@ -73,7 +73,7 @@ Some remarks:
 | DiracNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
 | ShaResNet | A | A | A | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |
 | CRU-Net | A+ | - | - | - | - | [link](https://www.ijcai.org/proceedings/2018/88) | [link](https://github.com/cypw/CRU-Net) | 2018 |
-| DenseNet | A+B+C+ | A+B+C+ | A+B+C+ | A+ | A+ | [link](https://arxiv.org/abs/1608.06993) | [link](https://github.com/liuzhuang13/DenseNet) | 2016 |
+| DenseNet | A+B+C+D | A+B+C+D | A+B+C+D | A+ | A+ | [link](https://arxiv.org/abs/1608.06993) | [link](https://github.com/liuzhuang13/DenseNet) | 2016 |
 | CondenseNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1711.09224) | [link](https://github.com/ShichenLiu/CondenseNet) | 2017 |
 | SparseNet | A | A | A | - | - | [link](https://arxiv.org/abs/1801.05895) | [link](https://github.com/Lyken17/SparseNet) | 2018 |
 | PeleeNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1804.06882) | [link](https://github.com/Robert-JunWang/Pelee) | 2018 |

@@ -8,11 +8,11 @@ from mxnet import gluon, autograd
 from mxnet.gluon.data.vision import transforms
 
 import gluoncv
-from gluoncv.loss import *
+from gluoncv.loss import MixSoftmaxCrossEntropyLoss
 from gluoncv.utils import LRScheduler
-from gluoncv.model_zoo.segbase import *
+from gluoncv.model_zoo.segbase import get_segmentation_model, SegEvalModel
 from gluoncv.model_zoo import get_model
-from gluoncv.utils.parallel import *
+from gluoncv.utils.parallel import DataParallelModel, DataParallelCriterion
 from gluoncv.data import get_segmentation_dataset
 
 

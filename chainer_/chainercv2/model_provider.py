@@ -397,8 +397,10 @@ _models = {
 
     'resnext29_32x4d_cifar10': resnext29_32x4d_cifar10,
     'resnext29_32x4d_cifar100': resnext29_32x4d_cifar100,
+    'resnext29_32x4d_svhn': resnext29_32x4d_svhn,
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
     'resnext29_16x64d_cifar100': resnext29_16x64d_cifar100,
+    'resnext29_16x64d_svhn': resnext29_16x64d_svhn,
 
     'pyramidnet110_a48_cifar10': pyramidnet110_a48_cifar10,
     'pyramidnet110_a48_cifar100': pyramidnet110_a48_cifar100,

@@ -467,7 +467,9 @@ def get_preresnet(blocks,
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
+        channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
+                     for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
 
     net = PreResNet(
@@ -888,9 +890,9 @@ def _test():
         assert (model != preresnet12 or weight_count == 5491112)
         assert (model != preresnet14 or weight_count == 5786536)
         assert (model != preresnet16 or weight_count == 6967208)
-        assert (model != preresnet18_wd4 or weight_count == 830680)
-        assert (model != preresnet18_wd2 or weight_count == 3055048)
-        assert (model != preresnet18_w3d4 or weight_count == 6674104)
+        assert (model != preresnet18_wd4 or weight_count == 3935960)
+        assert (model != preresnet18_wd2 or weight_count == 5802440)
+        assert (model != preresnet18_w3d4 or weight_count == 8473784)
         assert (model != preresnet18 or weight_count == 11687848)
         assert (model != preresnet34 or weight_count == 21796008)
         assert (model != preresnet50 or weight_count == 25549480)

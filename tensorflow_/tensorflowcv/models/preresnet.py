@@ -1,5 +1,5 @@
 """
-    PreResNet, implemented in TensorFlow.
+    PreResNet for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 

@@ -1,5 +1,5 @@
 """
-    PreResNet, implemented in Keras.
+    PreResNet for ImageNet-1K, implemented in Keras.
     Original paper: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 

@@ -1,5 +1,5 @@
 """
-    DenseNet, implemented in PyTorch.
+    DenseNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Densely Connected Convolutional Networks,' https://arxiv.org/abs/1608.06993.
 """
 

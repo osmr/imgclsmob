@@ -1,5 +1,5 @@
 """
-    PreResNet, implemented in Gluon.
+    PreResNet for ImageNet-1K, implemented in Gluon.
     Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 

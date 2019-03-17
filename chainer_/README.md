@@ -126,6 +126,9 @@ Some remarks:
 | PreResNet-12 | 33.62 | 13.18 | 5,491,112 | 1,126.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.257/preresnet12-1318-fea1c8c5.npz.log)) |
 | PreResNet-14 | 32.28 | 12.24 | 5,786,536 | 1,358.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.260/preresnet14-1224-f9973f4f.npz.log)) |
 | PreResNet-16 | 30.22 | 10.80 | 6,967,208 | 1,589.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.261/preresnet16-1080-ac7a346a.npz.log)) |
+| PreResNet-18 x0.25 | 39.58 | 17.78 | 3,935,960 | 270.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.272/preresnet18_wd4-1778-1cf8aa48.npz.log)) |
+| PreResNet-18 x0.5 | 33.64 | 13.12 | 5,802,440 | 608.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.273/preresnet18_wd2-1312-fa4ce56a.npz.log)) |
+| PreResNet-18 x0.75 | 29.95 | 10.69 | 8,473,784 | 1,129.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.274/preresnet18_w3d4-1069-25ddcd56.npz.log)) |
 | PreResNet-18 | 28.17 | 9.54 | 11,687,848 | 1,820.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.140/preresnet18-0954-21e4811a.npz.log)) |
 | PreResNet-34 | 25.89 | 8.12 | 21,796,008 | 3,672.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.23/preresnet34-0812-829f5a23.npz.log)) |
 | PreResNet-50 | 23.36 | 6.69 | 25,549,480 | 3,875.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.23/preresnet50-0669-40bd5e93.npz.log)) |

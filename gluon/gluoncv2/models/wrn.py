@@ -1,5 +1,5 @@
 """
-    WRN, implemented in Gluon.
+    WRN for ImageNet-1K, implemented in Gluon.
     Original paper: 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 """
 

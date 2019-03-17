@@ -230,7 +230,7 @@ def wrn28_10_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn16_10_svhn", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=28, width_factor=10, model_name="wrn28_10_svhn", **kwargs)
 
 
 def wrn40_8_cifar10(classes=10, **kwargs):
@@ -278,7 +278,7 @@ def wrn40_8_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn16_10_svhn", **kwargs)
+    return get_wrn_cifar(classes=classes, blocks=40, width_factor=8, model_name="wrn40_8_svhn", **kwargs)
 
 
 def _test():

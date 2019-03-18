@@ -100,7 +100,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('bagnet17', '1884', '6b2a100f8d14d4616709586483f625743ed04769', 'v0.0.255'),
     ('bagnet33', '1301', '4f17b6e837dacd978b15708ffbb2c1e6be3c371a', 'v0.0.255'),
     ('dla34', '0794', '04698d78b16f2d08e4396b5b0c9f46cb42542242', 'v0.0.202'),
-    ('dla46c', '1371', 'cc9191790bf5839a8ca7a5b2fa39278b651c2c77', 'v0.0.202'),
+    ('dla46c', '1323', 'efcd363642a4b479892f47edae7440f0eea05edb', 'v0.0.282'),
     ('dla46xc', '1302', '1161f37bfdd7852ffe1fbd00bf9dd39290d6e839', 'v0.0.202'),
     ('dla60', '0669', 'b2cd6e51a322512a6cb45414982a2ec71285daad', 'v0.0.202'),
     ('dla60x', '0598', '88547d3f81c4df711b15457cfcf37e2b703ed895', 'v0.0.202'),

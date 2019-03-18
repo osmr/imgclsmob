@@ -8,8 +8,8 @@ __all__ = ['ResNetD', 'resnetd50b', 'resnetd101b']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import MultiOutputSequential
-from resnet import ResUnit, ResInitBlock
+from .common import MultiOutputSequential
+from .resnet import ResUnit, ResInitBlock
 
 
 class ResNetD(HybridBlock):

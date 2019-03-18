@@ -4,10 +4,10 @@ from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
 from oth_segbase import SegBaseModel
-# pylint: disable=unused-argument,abstract-method,missing-docstring
 
 __all__ = ['FCN', 'get_fcn', 'get_fcn_resnet50_voc', 'get_fcn_resnet101_voc',
            'get_fcn_resnet101_coco', 'get_fcn_resnet50_ade', 'get_fcn_resnet101_ade']
+
 
 class FCN(SegBaseModel):
     r"""Fully Convolutional Networks for Semantic Segmentation

@@ -20,68 +20,46 @@ def parse_args():
     """Training Options for Segmentation Experiments"""
     parser = argparse.ArgumentParser(description='MXNet Gluon Segmentation')
 
-    parser.add_argument('--model', type=str, default='fcn',
-                        help='model name (default: fcn)')
-    parser.add_argument('--backbone', type=str, default='resnet50',
-                        help='backbone name (default: resnet50)')
-    parser.add_argument('--dataset', type=str, default='pascalaug',
-                        help='dataset name (default: pascal)')
+    parser.add_argument('--model', type=str, default='fcn', help='model name (default: fcn)')
+    parser.add_argument('--backbone', type=str, default='resnet50', help='backbone name (default: resnet50)')
+    parser.add_argument('--dataset', type=str, default='pascalaug', help='dataset name (default: pascal)')
     parser.add_argument('--dataset-dir', type=str, default='../imgclsmob_data/voc', help='dataset path')
-    parser.add_argument('--workers', type=int, default=16,
-                        metavar='N', help='dataloader threads')
-    parser.add_argument('--base-size', type=int, default=520,
-                        help='base image size')
-    parser.add_argument('--crop-size', type=int, default=480,
-                        help='crop image size')
-    parser.add_argument('--train-split', type=str, default='train',
-                        help='dataset train split (default: train)')
+    parser.add_argument('--workers', type=int, default=16, metavar='N', help='dataloader threads')
+    parser.add_argument('--base-size', type=int, default=520, help='base image size')
+    parser.add_argument('--crop-size', type=int, default=480, help='crop image size')
+    parser.add_argument('--train-split', type=str, default='train', help='dataset train split (default: train)')
 
-    parser.add_argument('--aux', action='store_true', default=False,
-                        help='Auxiliary loss')
-    parser.add_argument('--aux-weight', type=float, default=0.5,
-                        help='auxiliary loss weight')
-    parser.add_argument('--epochs', type=int, default=50, metavar='N',
-                        help='number of epochs to train (default: 50)')
-    parser.add_argument('--start_epoch', type=int, default=0,
-                        metavar='N', help='start epochs (default:0)')
-    parser.add_argument('--batch-size', type=int, default=16,
-                        metavar='N', help='input batch size for \
-                        training (default: 16)')
-    parser.add_argument('--test-batch-size', type=int, default=16,
-                        metavar='N', help='input batch size for \
-                        testing (default: 32)')
-    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
-                        help='learning rate (default: 1e-3)')
-    parser.add_argument('--momentum', type=float, default=0.9,
-                        metavar='M', help='momentum (default: 0.9)')
-    parser.add_argument('--weight-decay', type=float, default=1e-4,
-                        metavar='M', help='w-decay (default: 1e-4)')
+    parser.add_argument('--aux', action='store_true', default=False, help='Auxiliary loss')
+    parser.add_argument('--aux-weight', type=float, default=0.5, help='auxiliary loss weight')
+    parser.add_argument('--epochs', type=int, default=50, metavar='N', help='number of epochs to train (default: 50)')
+    parser.add_argument('--start_epoch', type=int, default=0, metavar='N', help='start epochs (default:0)')
+    parser.add_argument('--batch-size', type=int, default=16, metavar='N',
+                        help='input batch size for training (default: 16)')
+    parser.add_argument('--test-batch-size', type=int, default=16, metavar='N',
+                        help='input batch size for testing (default: 32)')
+    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR', help='learning rate (default: 1e-3)')
+    parser.add_argument('--momentum', type=float, default=0.9, metavar='M', help='momentum (default: 0.9)')
+    parser.add_argument('--weight-decay', type=float, default=1e-4, metavar='M', help='w-decay (default: 1e-4)')
     parser.add_argument('--no-wd', action='store_true',
                         help='whether to remove weight decay on bias, and beta/gamma for batchnorm layers.')
 
     parser.add_argument('--no-cuda', action='store_true', default=False, help='disables CUDA training')
-    parser.add_argument('--ngpus', type=int,
-                        default=len(mx.test_utils.list_gpus()),
-                        help='number of GPUs (default: 4)')
-    parser.add_argument('--kvstore', type=str, default='device',
-                        help='kvstore to use for trainer/module.')
-    parser.add_argument('--dtype', type=str, default='float32',
-                        help='data type for training. default is float32')
+    parser.add_argument('--ngpus', type=int, default=len(mx.test_utils.list_gpus()), help='number of GPUs (default: 4)')
+    parser.add_argument('--kvstore', type=str, default='device', help='kvstore to use for trainer/module.')
+    parser.add_argument('--dtype', type=str, default='float32', help='data type for training. default is float32')
+
     # checking point
-    parser.add_argument('--resume', type=str, default=None,
-                        help='put the path to resuming file if needed')
-    parser.add_argument('--checkname', type=str, default='default',
-                        help='set the checkpoint name')
-    parser.add_argument('--model-zoo', type=str, default=None,
-                        help='evaluating on model zoo model')
+    parser.add_argument('--resume', type=str, default=None, help='put the path to resuming file if needed')
+    parser.add_argument('--checkname', type=str, default='default', help='set the checkpoint name')
+    parser.add_argument('--model-zoo', type=str, default=None, help='evaluating on model zoo model')
+
     # evaluation only
-    parser.add_argument('--eval', action='store_true', default=False,
-                        help='evaluation only')
-    parser.add_argument('--no-val', action='store_true', default=False,
-                            help='skip validation during training')
+    parser.add_argument('--eval', action='store_true', default=False, help='evaluation only')
+    parser.add_argument('--no-val', action='store_true', default=False, help='skip validation during training')
+
     # synchronized Batch Normalization
-    parser.add_argument('--syncbn', action='store_true', default=False,
-                        help='using Synchronized Cross-GPU BatchNorm')
+    parser.add_argument('--syncbn', action='store_true', default=False, help='using Synchronized Cross-GPU BatchNorm')
+
     # the parser
     args = parser.parse_args()
     # handle contexts
@@ -219,7 +197,7 @@ class Trainer(object):
 
 def save_checkpoint(net, args, is_best=False):
     """Save Checkpoint"""
-    directory = "runs/{}/{}/{}/".format(args.dataset, args.model, args.checkname)
+    directory = "../imgclsmob_data/{}/{}/{}/".format(args.dataset, args.model, args.checkname)
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = 'checkpoint.params'

@@ -9,8 +9,51 @@ import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent, Identity
-from .common import conv1x1, conv1x1_block, conv3x3_block
-from .resnet import resnet50, resnet101
+from common import conv1x1, conv1x1_block, conv3x3_block
+from resnetd import resnetd50b, resnetd101b
+
+
+class PSPFinalBlock(HybridBlock):
+    """
+    PSPNet final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    out_size : tuple of 2 int
+        Spatial size of the output image for the bilinear upsampling operation.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 out_size,
+                 bottleneck_factor=4,
+                 **kwargs):
+        super(PSPFinalBlock, self).__init__(**kwargs)
+        self.out_size = out_size
+        assert (in_channels % bottleneck_factor == 0)
+        mid_channels = in_channels // bottleneck_factor
+
+        with self.name_scope():
+            self.conv1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.dropout = nn.Dropout(rate=0.1)
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.dropout(x)
+        x = self.conv2(x)
+        x = F.contrib.BilinearResize2D(x, height=self.out_size[0], width=self.out_size[1])
+        return x
 
 
 class PyramidPoolingBranch(HybridBlock):
@@ -25,18 +68,18 @@ class PyramidPoolingBranch(HybridBlock):
         Number of output channels.
     output_size : int
         Target output size of the image.
-    in_size : tuple of 2 int
-        Spatial size of the input tensor for the bilinear upsampling operation.
+    out_size : tuple of 2 int
+        Spatial size of output image for the bilinear upsampling operation.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  output_size,
-                 in_size,
+                 out_size,
                  **kwargs):
         super(PyramidPoolingBranch, self).__init__(**kwargs)
         self.output_size = output_size
-        self.in_size = in_size
+        self.out_size = out_size
 
         with self.name_scope():
             self.conv = conv1x1_block(
@@ -46,7 +89,7 @@ class PyramidPoolingBranch(HybridBlock):
     def hybrid_forward(self, F, x):
         x = F.contrib.AdaptiveAvgPooling2D(x, output_size=self.output_size)
         x = self.conv(x)
-        x = F.contrib.BilinearResize2D(x, height=self.in_size[0], width=self.in_size[1])
+        x = F.contrib.BilinearResize2D(x, height=self.out_size[0], width=self.out_size[1])
         return x
 
 
@@ -79,7 +122,7 @@ class PyramidPooling(HybridBlock):
                     in_channels=in_channels,
                     out_channels=mid_channels,
                     output_size=output_size,
-                    in_size=in_size))
+                    out_size=in_size))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -96,6 +139,8 @@ class PSPNet(HybridBlock):
         Feature extractor.
     backbone_out_channels : int, default 2048
         Number of output channels form feature extractor.
+    aux : bool, default False
+        Whether to output an auxiliary result.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -106,6 +151,7 @@ class PSPNet(HybridBlock):
     def __init__(self,
                  backbone,
                  backbone_out_channels=2048,
+                 aux=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=21,
@@ -115,30 +161,38 @@ class PSPNet(HybridBlock):
         assert ((in_size[0] % 8 == 0) and (in_size[1] % 8 == 0))
         self.in_size = in_size
         self.classes = classes
-        pool_out_channels = 2 * backbone_out_channels
-        mid_channels = backbone_out_channels // 4
+        self.aux = aux
 
         with self.name_scope():
             self.backbone = backbone
             self.pool = PyramidPooling(
                 in_channels=backbone_out_channels,
                 in_size=(self.in_size[0] // 8, self.in_size[1] // 8))
-            self.conv1 = conv3x3_block(
+            pool_out_channels = 2 * backbone_out_channels
+            self.final_block = PSPFinalBlock(
                 in_channels=pool_out_channels,
-                out_channels=mid_channels)
-            self.dropout = nn.Dropout(rate=0.1)
-            self.conv2 = conv1x1(
-                in_channels=mid_channels,
-                out_channels=classes)
+                out_channels=classes,
+                out_size=in_size,
+                bottleneck_factor=8)
+            if self.aux:
+                aux_out_channels = backbone_out_channels // 2
+                self.aux_block = PSPFinalBlock(
+                    in_channels=aux_out_channels,
+                    out_channels=classes,
+                    out_size=in_size,
+                    bottleneck_factor=4)
 
     def hybrid_forward(self, F, x):
-        x = self.backbone(x)
+        outs = self.backbone(x)
+        x = outs[0]
         x = self.pool(x)
-        x = self.conv1(x)
-        x = self.dropout(x)
-        x = self.conv2(x)
-        x = F.contrib.BilinearResize2D(x, height=self.in_size[0], width=self.in_size[1])
-        return x
+        x = self.final_block(x)
+        if self.aux:
+            y = outs[1]
+            y = self.aux_block(y)
+            return x, y
+        else:
+            return x
 
 
 def get_pspnet(backbone,
@@ -203,7 +257,7 @@ def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, multi_output=True).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_voc", **kwargs)
 
 
@@ -225,7 +279,7 @@ def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet101(pretrained=pretrained_backbone, dilated=True).features[:-1]
+    backbone = resnetd101b(pretrained=pretrained_backbone, multi_output=True).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet101_voc", **kwargs)
 
 
@@ -247,7 +301,7 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet50(pretrained=pretrained_backbone, dilated=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, multi_output=True).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_ade20k", **kwargs)
 
 
@@ -255,6 +309,8 @@ def _test():
     import numpy as np
     import mxnet as mx
 
+    in_size = (480, 480)
+    aux = False
     pretrained = False
 
     models = [
@@ -265,7 +321,7 @@ def _test():
 
     for model, classes in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, in_size=in_size, aux=aux)
 
         ctx = mx.cpu()
         if not pretrained:
@@ -279,12 +335,18 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != pspnet_resnet50_voc or weight_count == 46592576)
-        assert (model != pspnet_resnet101_voc or weight_count == 65584704)
-        assert (model != pspnet_resnet50_ade20k or weight_count == 46658624)
+        if aux:
+            assert (model != pspnet_resnet50_voc or weight_count == 48957760)
+            assert (model != pspnet_resnet101_voc or weight_count == 67949888)
+            assert (model != pspnet_resnet50_ade20k or weight_count == 49056832)
+        else:
+            assert (model != pspnet_resnet50_voc or weight_count == 46592576)
+            assert (model != pspnet_resnet101_voc or weight_count == 65584704)
+            assert (model != pspnet_resnet50_ade20k or weight_count == 46658624)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-        y = net(x)
+        x = mx.nd.zeros((1, 3, in_size[0], in_size[1]), ctx=ctx)
+        ys = net(x)
+        y = ys[0] if aux else ys
         assert ((y.shape[0] == x.shape[0]) and (y.shape[1] == classes) and (y.shape[2] == x.shape[2]) and
                 (y.shape[3] == x.shape[3]))
 

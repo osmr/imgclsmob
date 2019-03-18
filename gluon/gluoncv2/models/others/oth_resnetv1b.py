@@ -813,15 +813,15 @@ def resnet50_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs)
     """
     model = ResNetV1b(BottleneckV1b, [3, 4, 6, 3], deep_stem=True, stem_width=64,
                       name_prefix='resnetv1s_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnet%d_v%ds'%(50, 1),
-                                             tag=pretrained, root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file('resnet%d_v%ds'%(50, 1),
+    #                                          tag=pretrained, root=root), ctx=ctx)
+    #     from ..data import ImageNet1kAttr
+    #     attrib = ImageNet1kAttr()
+    #     model.synset = attrib.synset
+    #     model.classes = attrib.classes
+    #     model.classes_long = attrib.classes_long
     return model
 
 
@@ -845,15 +845,15 @@ def resnet101_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
     """
     model = ResNetV1b(BottleneckV1b, [3, 4, 23, 3], deep_stem=True, stem_width=64,
                       name_prefix='resnetv1s_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnet%d_v%ds'%(101, 1),
-                                             tag=pretrained, root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file('resnet%d_v%ds'%(101, 1),
+    #                                          tag=pretrained, root=root), ctx=ctx)
+    #     from ..data import ImageNet1kAttr
+    #     attrib = ImageNet1kAttr()
+    #     model.synset = attrib.synset
+    #     model.classes = attrib.classes
+    #     model.classes_long = attrib.classes_long
     return model
 
 

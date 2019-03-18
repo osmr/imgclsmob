@@ -10,7 +10,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_w
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from common import conv1x1_block, conv3x3_block, conv7x7_block
 
 
 class ResBlock(HybridBlock):
@@ -243,9 +243,6 @@ class ResNet(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
-    dilated : bool, default False
-        Applying dilation strategy to pretrained ResNet yielding a stride-8 model, typically used for semantic
-        segmentation.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -259,7 +256,6 @@ class ResNet(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
-                 dilated=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -279,25 +275,19 @@ class ResNet(HybridBlock):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if ((j == 0) and (i != 0) and ((not dilated) or (i < 2))) else 1
-                        dilation = (2 ** max(0, i - 1 - int(j == 0))) if dilated else 1
+                        strides = 2 if (j == 0) and (i != 0) else 1
                         stage.add(ResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            padding=dilation,
-                            dilation=dilation,
                             bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
-            if not dilated:
-                self.features.add(nn.AvgPool2D(
-                    pool_size=7,
-                    strides=1))
-            else:
-                self.features.add(nn.GlobalAvgPool2D())
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
             self.output = nn.HybridSequential(prefix='')
             self.output.add(nn.Flatten())
@@ -375,7 +365,6 @@ def get_resnet(blocks,
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
@@ -731,9 +720,9 @@ def _test():
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)
         assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 3937400)  # 831096
-        assert (model != resnet18_wd2 or weight_count == 5804296)  # 3055880
-        assert (model != resnet18_w3d4 or weight_count == 8476056)  # 6675352
+        assert (model != resnet18_wd4 or weight_count == 3937400)
+        assert (model != resnet18_wd2 or weight_count == 5804296)
+        assert (model != resnet18_w3d4 or weight_count == 8476056)
         assert (model != resnet18 or weight_count == 11689512)
         assert (model != resnet34 or weight_count == 21797672)
         assert (model != resnet50 or weight_count == 25557032)

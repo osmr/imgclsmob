@@ -1,14 +1,13 @@
-# pylint: disable=unused-argument
 """Pyramid Scene Parsing Network"""
 from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
-from .segbase import SegBaseModel
-from .fcn import _FCNHead
-# pylint: disable-all
+from oth_segbase import SegBaseModel
+from oth_fcn import _FCNHead
 
 __all__ = ['PSPNet', 'get_psp', 'get_psp_resnet101_coco', 'get_psp_resnet101_voc',
-    'get_psp_resnet50_ade', 'get_psp_resnet101_ade', 'get_psp_resnet101_citys']
+           'get_psp_resnet50_ade', 'get_psp_resnet101_ade', 'get_psp_resnet101_citys']
+
 
 class PSPNet(SegBaseModel):
     r"""Pyramid Scene Parsing Network
@@ -143,7 +142,7 @@ class _PSPHead(HybridBlock):
         
 
 def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
-            root='~/.mxnet/models', ctx=cpu(0), pretrained_base=True, **kwargs):
+            root='~/.mxnet/models', ctx=cpu(0), pretrained_base=True, num_class=150, **kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -171,14 +170,14 @@ def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'coco': 'coco',
         'citys': 'citys',
     }
-    from ..data import datasets
+    # from ..data import datasets
     # infer number of classes
-    model = PSPNet(datasets[dataset].NUM_CLASS, backbone=backbone,
+    model = PSPNet(num_class, backbone=backbone,
                    pretrained_base=pretrained_base, ctx=ctx, **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('psp_%s_%s'%(backbone, acronyms[dataset]),
-                                             tag=pretrained, root=root), ctx=ctx)
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file('psp_%s_%s'%(backbone, acronyms[dataset]),
+    #                                          tag=pretrained, root=root), ctx=ctx)
     return model
 
 def get_psp_resnet101_coco(**kwargs):
@@ -236,7 +235,7 @@ def get_psp_resnet50_ade(**kwargs):
     >>> model = get_psp_resnet50_ade(pretrained=True)
     >>> print(model)
     """
-    return get_psp('ade20k', 'resnet50', **kwargs)
+    return get_psp('ade20k', 'resnet50', num_class=150, **kwargs)
 
 def get_psp_resnet101_ade(**kwargs):
     r"""Pyramid Scene Parsing Network
@@ -255,7 +254,7 @@ def get_psp_resnet101_ade(**kwargs):
     >>> model = get_psp_resnet101_ade(pretrained=True)
     >>> print(model)
     """
-    return get_psp('ade20k', 'resnet101', **kwargs)
+    return get_psp('ade20k', 'resnet101', num_class=150, **kwargs)
 
 
 def get_psp_resnet101_citys(**kwargs):
@@ -276,3 +275,44 @@ def get_psp_resnet101_citys(**kwargs):
     >>> print(model)
     """
     return get_psp('citys', 'resnet101', **kwargs)
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        (get_psp_resnet50_ade, 150),
+        (get_psp_resnet101_ade, 150),
+    ]
+
+    for model, classes in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        x = mx.nd.zeros((1, 3, 480, 480), ctx=ctx)
+        y = net(x)[0]
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != get_psp_resnet50_ade or weight_count == 49180908)
+        assert (model != get_psp_resnet101_ade or weight_count == 68173036)
+
+        assert ((y.shape[0] == x.shape[0]) and (y.shape[1] == classes) and (y.shape[2] == x.shape[2]) and
+                (y.shape[3] == x.shape[3]))
+
+
+if __name__ == "__main__":
+    _test()

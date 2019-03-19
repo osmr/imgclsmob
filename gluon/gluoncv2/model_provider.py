@@ -75,6 +75,8 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
+from .models.resnetd import *
+from .models.others.oth_resnetv1b import *
 from .models.pspnet import *
 from .models.others.oth_pspnet import *
 
@@ -534,6 +536,12 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
+
+    'resnetd50b': resnetd50b,
+    'resnetd101b': resnetd101b,
+
+    'oth_resnet50_v1s': oth_resnet50_v1s,
+    'oth_resnet101_v1s': oth_resnet101_v1s,
 
     'pspnet_resnet50_voc': pspnet_resnet50_voc,
     'pspnet_resnet101_voc': pspnet_resnet101_voc,

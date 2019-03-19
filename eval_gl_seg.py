@@ -1,108 +1,201 @@
-import os
 import argparse
+import time
+import logging
 
-import mxnet as mx
-from mxnet import gluon
-from mxnet.gluon.data.vision import transforms
+from gluoncv.utils.metrics import SegmentationMetric
 
-import gluoncv
-from gluoncv.model_zoo.segbase import *
-from gluoncv.model_zoo import get_model
-from gluoncv.data import get_segmentation_dataset, ms_batchify_fn
+from common.logger_utils import initialize_logging
+from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
+from gluon.model_stats import measure_model
+from gluon.seg_datasets import add_dataset_parser_arguments
+from gluon.seg_datasets import batch_fn
+from gluon.seg_datasets import get_val_data_source
+from gluon.seg_datasets import validate1
 
 
 def parse_args():
-    """Training Options for Segmentation Experiments"""
-    parser = argparse.ArgumentParser(description='MXNet Gluon Segmentation')
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image segmentation (Gluon/ADE20K)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="ADE20K",
+        help='dataset name. options are ADE20K...')
 
-    parser.add_argument('--model', type=str, default='fcn', help='model name (default: fcn)')
-    parser.add_argument('--backbone', type=str, default='resnet50', help='backbone name (default: resnet50)')
-    parser.add_argument('--dataset', type=str, default='pascalaug', help='dataset name (default: pascal)')
-    parser.add_argument('--dataset-dir', type=str, default='../imgclsmob_data/voc', help='dataset path')
-    parser.add_argument('--workers', type=int, default=16, metavar='N', help='dataloader threads')
-    parser.add_argument('--base-size', type=int, default=520, help='base image size')
-    parser.add_argument('--crop-size', type=int, default=480, help='crop image size')
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
-    parser.add_argument('--batch-size', type=int, default=1, metavar='N', help='input batch size for testing')
+    parser.add_argument(
+        '--model',
+        type=str,
+        required=True,
+        help='type of model to use. see model_provider for options.')
+    parser.add_argument(
+        '--use-pretrained',
+        action='store_true',
+        help='enable using pretrained model from gluon.')
+    parser.add_argument(
+        '--dtype',
+        type=str,
+        default='float32',
+        help='data type for training. default is float32')
+    parser.add_argument(
+        '--resume',
+        type=str,
+        default='',
+        help='resume from previously saved parameters if not None')
+    parser.add_argument(
+        '--calc-flops',
+        dest='calc_flops',
+        action='store_true',
+        help='calculate FLOPs')
+    parser.add_argument(
+        '--calc-flops-only',
+        dest='calc_flops_only',
+        action='store_true',
+        help='calculate FLOPs without quality estimation')
 
-    parser.add_argument('--ngpus', type=int, default=len(mx.test_utils.list_gpus()), help='number of GPUs (default: 4)')
+    parser.add_argument(
+        '--num-gpus',
+        type=int,
+        default=0,
+        help='number of gpus to use.')
+    parser.add_argument(
+        '-j',
+        '--num-data-workers',
+        dest='num_workers',
+        default=4,
+        type=int,
+        help='number of preprocessing workers')
 
-    # checking point
-    parser.add_argument('--resume', type=str, default=None, help='put the path to resuming file if needed')
-    parser.add_argument('--checkname', type=str, default='default', help='set the checkpoint name')
-    parser.add_argument('--model-zoo', type=str, default=None, help='evaluating on model zoo model')
+    parser.add_argument(
+        '--batch-size',
+        type=int,
+        default=16,
+        help='training batch size per device (CPU/GPU).')
 
-    # the parser
+    parser.add_argument(
+        '--save-dir',
+        type=str,
+        default='',
+        help='directory of saved models and log-files')
+    parser.add_argument(
+        '--logging-file-name',
+        type=str,
+        default='train.log',
+        help='filename of training log')
+
+    parser.add_argument(
+        '--log-packages',
+        type=str,
+        default='mxnet',
+        help='list of python packages for logging')
+    parser.add_argument(
+        '--log-pip-packages',
+        type=str,
+        default='mxnet-cu92, gluoncv',
+        help='list of pip packages for logging')
     args = parser.parse_args()
-    # handle contexts
-    if args.ngpus == 0:
-        args.ctx = [mx.cpu(0)]
-    else:
-        args.ctx = [mx.gpu(i) for i in range(args.ngpus)]
-    print(args)
     return args
 
 
-def test(args):
-
-    # image transform
-    input_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize([.485, .456, .406], [.229, .224, .225]),
-    ])
-    # dataset and dataloader
-    testset = get_segmentation_dataset(
-        args.dataset,
-        split='val',
-        mode='testval',
-        transform=input_transform,
-        root=args.dataset_dir)
-    test_data = gluon.data.DataLoader(
-        dataset=testset,
-        batch_size=args.batch_size,
-        shuffle=False,
-        last_batch='keep',
-        batchify_fn=ms_batchify_fn,
-        num_workers=args.workers)
-
-    # create network
-    if args.model_zoo is not None:
-        model = get_model(args.model_zoo, pretrained=True)
-    else:
-        model = get_segmentation_model(
-            model=args.model,
-            dataset=args.dataset,
-            ctx=args.ctx,
-            backbone=args.backbone,
-            norm_layer=mx.gluon.nn.BatchNorm,
-            norm_kwargs={},
-            aux=False,
-            base_size=args.base_size,
-            crop_size=args.crop_size)
-        # load pretrained weight
-        assert args.resume is not None, '=> Please provide the checkpoint using --resume'
-        if os.path.isfile(args.resume):
-            model.load_parameters(
-                filename=args.resume,
-                ctx=args.ctx)
+def test(net,
+         val_data,
+         data_source_needs_reset,
+         dtype,
+         ctx,
+         input_image_size,
+         in_channels,
+         calc_weight_count=False,
+         calc_flops=False,
+         calc_flops_only=True,
+         extended_log=False):
+    if not calc_flops_only:
+        accuracy_metric = SegmentationMetric(net.classes)
+        tic = time.time()
+        pix_acc, miou = validate1(
+            accuracy_metric=accuracy_metric,
+            net=net,
+            val_data=val_data,
+            batch_fn=batch_fn,
+            data_source_needs_reset=data_source_needs_reset,
+            dtype=dtype,
+            ctx=ctx)
+        if extended_log:
+            logging.info('Test: pixAcc={pixAcc:.4f} ({pixAcc}), mIoU={mIoU:.4f} ({mIoU})'.format(
+                pixAcc=pix_acc, mIoU=miou))
         else:
-            raise RuntimeError("=> no checkpoint found at '{}'".format(args.resume))
+            logging.info('Test: pixAcc={pixAcc:.4f}, mIoU={mIoU:.4f}'.format(
+                pixAcc=pix_acc, mIoU=miou))
+        logging.info('Time cost: {:.4f} sec'.format(
+            time.time() - tic))
 
-    evaluator = MultiEvalModel(
-        module=model,
-        nclass=testset.num_class,
-        ctx_list=args.ctx)
-    metric = gluoncv.utils.metrics.SegmentationMetric(testset.num_class)
+    if calc_weight_count:
+        weight_count = calc_net_weight_count(net)
+        if not calc_flops:
+            logging.info("Model: {} trainable parameters".format(weight_count))
+    if calc_flops:
+        num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size, ctx[0])
+        assert (not calc_weight_count) or (weight_count == num_params)
+        stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
+                   " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"
+        logging.info(stat_msg.format(
+            params=num_params, params_m=num_params / 1e6,
+            flops=num_flops, flops_m=num_flops / 1e6,
+            flops2=num_flops / 2, flops2_m=num_flops / 2 / 1e6,
+            macs=num_macs, macs_m=num_macs / 1e6))
 
-    for i, (data, dsts) in enumerate(test_data):
-        predicts = [pred for pred in evaluator.parallel_forward(data)]
-        targets = [target.as_in_context(predicts[0].context).expand_dims(0) for target in dsts]
-        metric.update(targets, predicts)
-        pixAcc, mIoU = metric.get()
-        print('batch={}, pixAcc: {}, mIoU: {}'.format(i, pixAcc, mIoU))
 
-
-if __name__ == "__main__":
+def main():
     args = parse_args()
-    print('Testing model: ', args.resume)
-    test(args)
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=args.log_packages,
+        log_pip_packages=args.log_pip_packages)
+
+    ctx, batch_size = prepare_mx_context(
+        num_gpus=args.num_gpus,
+        batch_size=args.batch_size)
+
+    net = prepare_model(
+        model_name=args.model,
+        use_pretrained=args.use_pretrained,
+        pretrained_model_file_path=args.resume.strip(),
+        dtype=args.dtype,
+        classes=args.num_classes,
+        in_channels=args.in_channels,
+        do_hybridize=(not args.calc_flops),
+        ctx=ctx)
+    net.aux = False
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (480, 480)
+
+    val_data = get_val_data_source(
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
+        batch_size=batch_size,
+        num_workers=args.num_workers,
+        image_base_size=args.image_base_size,
+        image_crop_size=args.image_crop_size)
+
+    assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
+    test(
+        net=net,
+        val_data=val_data,
+        data_source_needs_reset=False,
+        dtype=args.dtype,
+        ctx=ctx,
+        input_image_size=input_image_size,
+        in_channels=args.in_channels,
+        # calc_weight_count=(not log_file_exist),
+        calc_weight_count=True,
+        calc_flops=args.calc_flops,
+        calc_flops_only=args.calc_flops_only,
+        extended_log=True)
+
+
+if __name__ == '__main__':
+    main()

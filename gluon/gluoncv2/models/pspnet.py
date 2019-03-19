@@ -48,7 +48,8 @@ class PSPFinalBlock(HybridBlock):
             self.dropout = nn.Dropout(rate=0.1)
             self.conv2 = conv1x1(
                 in_channels=mid_channels,
-                out_channels=out_channels)
+                out_channels=out_channels,
+                use_bias=True)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -258,7 +259,7 @@ def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_voc", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_voc", **kwargs)
 
 
 def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
@@ -280,7 +281,7 @@ def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet101_voc", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_voc", **kwargs)
 
 
 def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, **kwargs):
@@ -302,7 +303,7 @@ def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_mscoco", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_mscoco", **kwargs)
 
 
 def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, **kwargs):
@@ -324,7 +325,7 @@ def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet101_mscoco", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_mscoco", **kwargs)
 
 
 def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
@@ -346,7 +347,7 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_ade20k", **kwargs)
 
 
 def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, **kwargs):
@@ -368,7 +369,7 @@ def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_ade20k", **kwargs)
 
 
 def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
@@ -390,7 +391,7 @@ def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet50_sityscapes", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_sityscapes", **kwargs)
 
 
 def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
@@ -412,7 +413,7 @@ def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, **kwargs)
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, model_name="pspnet_resnet101_sityscapes", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_sityscapes", **kwargs)
 
 
 def _test():

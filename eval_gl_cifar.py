@@ -165,7 +165,6 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
-        tune_layers="",
         classes=args.num_classes,
         in_channels=args.in_channels,
         do_hybridize=(not args.calc_flops),

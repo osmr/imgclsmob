@@ -17,7 +17,7 @@ def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
                   dtype,
-                  tune_layers,
+                  tune_layers=None,
                   classes=None,
                   in_channels=None,
                   do_hybridize=True,
@@ -53,7 +53,7 @@ def prepare_model(model_name,
     else:
         net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
 
-    if tune_layers:
+    if (tune_layers is not None) and tune_layers:
         tune_layers_pattern = re.compile(tune_layers)
         for k, v in net._collect_params_with_prefix().items():
             if tune_layers_pattern.match(k):

@@ -107,12 +107,13 @@ def test(net,
          ctx,
          input_image_size,
          in_channels,
+         classes,
          calc_weight_count=False,
          calc_flops=False,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        accuracy_metric = SegmentationMetric(net.classes)
+        accuracy_metric = SegmentationMetric(classes)
         tic = time.time()
         pix_acc, miou = validate1(
             accuracy_metric=accuracy_metric,
@@ -190,6 +191,7 @@ def main():
         ctx=ctx,
         input_image_size=input_image_size,
         in_channels=args.in_channels,
+        classes=args.num_classes,
         # calc_weight_count=(not log_file_exist),
         calc_weight_count=True,
         calc_flops=args.calc_flops,

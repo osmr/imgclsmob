@@ -4,9 +4,9 @@ import numpy as np
 import mxnet as mx
 from mxnet.ndarray import NDArray
 from mxnet.gluon.nn import HybridBlock
-from oth_parallel import parallel_apply
-from oth_parallel import tuple_map
-from oth_resnetv1b import resnet50_v1s, resnet101_v1s, resnet152_v1s
+from .oth_parallel import parallel_apply
+from .oth_parallel import tuple_map
+from .oth_resnetv1b import resnet50_v1s, resnet101_v1s, resnet152_v1s
 # pylint: disable=wildcard-import,abstract-method,arguments-differ,dangerous-default-value,missing-docstring
 
 __all__ = ['get_segmentation_model', 'SegBaseModel', 'SegEvalModel', 'MultiEvalModel']

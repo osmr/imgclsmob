@@ -1,8 +1,8 @@
 from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
-from oth_segbase import SegBaseModel
-from oth_fcn import _FCNHead
+from .oth_segbase import SegBaseModel
+from .oth_fcn import _FCNHead
 
 __all__ = ['PSPNet', 'get_psp', 'oth_psp_resnet101_coco', 'oth_psp_resnet101_voc',
            'oth_psp_resnet50_ade', 'oth_psp_resnet101_ade', 'oth_psp_resnet101_citys']

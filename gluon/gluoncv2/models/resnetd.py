@@ -30,7 +30,7 @@ class ResNetD(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
-    ordinary_init : bool, default True
+    ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
     multi_output : bool, default False
         Whether to return intermediate outputs.
@@ -47,7 +47,7 @@ class ResNetD(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
-                 ordinary_init=True,
+                 ordinary_init=False,
                  multi_output=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -236,7 +236,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    ordinary_init = True
+    ordinary_init = False
     multi_output = False
     pretrained = False
 

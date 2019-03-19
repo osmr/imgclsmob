@@ -75,6 +75,9 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
+from .models.pspnet import *
+from .models.others.oth_pspnet import *
+
 __all__ = ['get_model']
 
 
@@ -531,6 +534,21 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
+
+    'pspnet_resnet50_voc': pspnet_resnet50_voc,
+    'pspnet_resnet101_voc': pspnet_resnet101_voc,
+    'pspnet_resnet50_coco': pspnet_resnet50_coco,
+    'pspnet_resnet101_coco': pspnet_resnet101_coco,
+    'pspnet_resnet50_ade20k': pspnet_resnet50_ade20k,
+    'pspnet_resnet101_ade20k': pspnet_resnet101_ade20k,
+    'pspnet_resnet50_sityscapes': pspnet_resnet50_sityscapes,
+    'pspnet_resnet101_sityscapes': pspnet_resnet101_sityscapes,
+
+    'oth_psp_resnet101_coco': oth_psp_resnet101_coco,
+    'oth_psp_resnet101_voc': oth_psp_resnet101_voc,
+    'oth_psp_resnet50_ade': oth_psp_resnet50_ade,
+    'oth_psp_resnet101_ade': oth_psp_resnet101_ade,
+    'oth_psp_resnet101_citys': oth_psp_resnet101_citys,
 }
 
 

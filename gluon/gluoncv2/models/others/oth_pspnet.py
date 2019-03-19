@@ -1,12 +1,11 @@
-"""Pyramid Scene Parsing Network"""
 from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
 from oth_segbase import SegBaseModel
 from oth_fcn import _FCNHead
 
-__all__ = ['PSPNet', 'get_psp', 'get_psp_resnet101_coco', 'get_psp_resnet101_voc',
-           'get_psp_resnet50_ade', 'get_psp_resnet101_ade', 'get_psp_resnet101_citys']
+__all__ = ['PSPNet', 'get_psp', 'oth_psp_resnet101_coco', 'oth_psp_resnet101_voc',
+           'oth_psp_resnet50_ade', 'oth_psp_resnet101_ade', 'oth_psp_resnet101_citys']
 
 
 class PSPNet(SegBaseModel):
@@ -157,11 +156,6 @@ def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         Location for keeping the model parameters.
     pretrained_base : bool or str, default True
         This will load pretrained backbone network, that was trained on ImageNet.
-
-    Examples
-    --------
-    >>> model = get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False)
-    >>> print(model)
     """
     acronyms = {
         'pascal_voc': 'voc',
@@ -180,7 +174,8 @@ def get_psp(dataset='pascal_voc', backbone='resnet50', pretrained=False,
     #                                          tag=pretrained, root=root), ctx=ctx)
     return model
 
-def get_psp_resnet101_coco(**kwargs):
+
+def oth_psp_resnet101_coco(**kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -191,15 +186,11 @@ def get_psp_resnet101_coco(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_psp_resnet101_coco(pretrained=True)
-    >>> print(model)
     """
-    return get_psp('coco', 'resnet101', **kwargs)
+    return get_psp('coco', 'resnet101', num_class=21, **kwargs)
 
-def get_psp_resnet101_voc(**kwargs):
+
+def oth_psp_resnet101_voc(**kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -210,15 +201,11 @@ def get_psp_resnet101_voc(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_psp_resnet101_voc(pretrained=True)
-    >>> print(model)
     """
-    return get_psp('pascal_voc', 'resnet101', **kwargs)
+    return get_psp('pascal_voc', 'resnet101', num_class=21, **kwargs)
 
-def get_psp_resnet50_ade(**kwargs):
+
+def oth_psp_resnet50_ade(**kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -229,15 +216,11 @@ def get_psp_resnet50_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_psp_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
     return get_psp('ade20k', 'resnet50', num_class=150, **kwargs)
 
-def get_psp_resnet101_ade(**kwargs):
+
+def oth_psp_resnet101_ade(**kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -248,16 +231,11 @@ def get_psp_resnet101_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_psp_resnet101_ade(pretrained=True)
-    >>> print(model)
     """
     return get_psp('ade20k', 'resnet101', num_class=150, **kwargs)
 
 
-def get_psp_resnet101_citys(**kwargs):
+def oth_psp_resnet101_citys(**kwargs):
     r"""Pyramid Scene Parsing Network
     Parameters
     ----------
@@ -268,13 +246,8 @@ def get_psp_resnet101_citys(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_psp_resnet101_ade(pretrained=True)
-    >>> print(model)
     """
-    return get_psp('citys', 'resnet101', **kwargs)
+    return get_psp('citys', 'resnet101', num_class=19, **kwargs)
 
 
 def _test():
@@ -284,8 +257,11 @@ def _test():
     pretrained = False
 
     models = [
-        (get_psp_resnet50_ade, 150),
-        (get_psp_resnet101_ade, 150),
+        (oth_psp_resnet50_ade, 150),
+        (oth_psp_resnet101_ade, 150),
+        (oth_psp_resnet101_coco, 21),
+        (oth_psp_resnet101_voc, 21),
+        (oth_psp_resnet101_citys, 19),
     ]
 
     for model, classes in models:
@@ -307,8 +283,11 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != get_psp_resnet50_ade or weight_count == 49180908)
-        assert (model != get_psp_resnet101_ade or weight_count == 68173036)
+        assert (model != oth_psp_resnet50_ade or weight_count == 49180908)
+        assert (model != oth_psp_resnet101_ade or weight_count == 68173036)
+        assert (model != oth_psp_resnet101_coco or weight_count == 68073706)
+        assert (model != oth_psp_resnet101_voc or weight_count == 68073706)
+        assert (model != oth_psp_resnet101_citys or weight_count == 68072166)
 
         assert ((y.shape[0] == x.shape[0]) and (y.shape[1] == classes) and (y.shape[2] == x.shape[2]) and
                 (y.shape[3] == x.shape[3]))

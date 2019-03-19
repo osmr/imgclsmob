@@ -10,6 +10,7 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import MultiOutputSequential
 from .resnet import ResUnit, ResInitBlock
+from .senet import SEInitBlock
 
 
 class ResNetD(HybridBlock):
@@ -29,8 +30,10 @@ class ResNetD(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    ordinary_init : bool, default True
+        Whether to use original initial block or SENet one.
     multi_output : bool, default False
-        Whether return intermediate outputs.
+        Whether to return intermediate outputs.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -44,6 +47,7 @@ class ResNetD(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
+                 ordinary_init=True,
                  multi_output=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -56,10 +60,17 @@ class ResNetD(HybridBlock):
 
         with self.name_scope():
             self.features = MultiOutputSequential(prefix='')
-            self.features.add(ResInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats))
+            if ordinary_init:
+                self.features.add(ResInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
+                    bn_use_global_stats=bn_use_global_stats))
+            else:
+                init_block_channels = 2 * init_block_channels
+                self.features.add(SEInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
+                    bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
@@ -225,6 +236,7 @@ def _test():
     import numpy as np
     import mxnet as mx
 
+    ordinary_init = True
     multi_output = False
     pretrained = False
 
@@ -235,7 +247,10 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, multi_output=multi_output)
+        net = model(
+            pretrained=pretrained,
+            ordinary_init=ordinary_init,
+            multi_output=multi_output)
 
         ctx = mx.cpu()
         if not pretrained:
@@ -249,8 +264,12 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnetd50b or weight_count == 25557032)
-        assert (model != resnetd101b or weight_count == 44549160)
+        if ordinary_init:
+            assert (model != resnetd50b or weight_count == 25557032)
+            assert (model != resnetd101b or weight_count == 44549160)
+        else:
+            assert (model != resnetd50b or weight_count == 25680808)
+            assert (model != resnetd101b or weight_count == 44672936)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

@@ -41,7 +41,12 @@ class PSPNet(SegBaseModel):
             self.head.initialize(ctx=ctx)
             self.head.collect_params().setattr('lr_mult', 10)
             if self.aux:
-                self.auxlayer = _FCNHead(1024, nclass, **kwargs)
+                aux_kwargs = kwargs
+                if "classes" in aux_kwargs:
+                    del aux_kwargs["classes"]
+                if "in_channels" in aux_kwargs:
+                    del aux_kwargs["in_channels"]
+                self.auxlayer = _FCNHead(1024, nclass, **aux_kwargs)
                 self.auxlayer.initialize(ctx=ctx)
                 self.auxlayer.collect_params().setattr('lr_mult', 10)
         print('self.crop_size', self.crop_size)

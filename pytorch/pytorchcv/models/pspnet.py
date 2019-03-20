@@ -1,5 +1,5 @@
 """
-    PSPNet, implemented in PyTorch.
+    PSPNet for image segmentation, implemented in PyTorch.
     Original paper: 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
 """
 
@@ -11,6 +11,48 @@ import torch.nn.functional as F
 import torch.nn.init as init
 from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity
 from .resnet import resnet50, resnet101
+
+
+class PSPFinalBlock(nn.Module):
+    """
+    PSPNet final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    out_size : tuple of 2 int
+        Spatial size of the output image for the bilinear upsampling operation.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 out_size,
+                 bottleneck_factor=4):
+        super(PSPFinalBlock, self).__init__()
+        self.out_size = out_size
+        assert (in_channels % bottleneck_factor == 0)
+        mid_channels = in_channels // bottleneck_factor
+
+        self.conv1 = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.dropout = nn.Dropout2d(p=0.1, inplace=False)
+        self.conv2 = conv1x1(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            bias=True)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.dropout(x)
+        x = self.conv2(x)
+        x = F.interpolate(x, size=self.out_size, mode="bilinear", align_corners=True)
+        return x
 
 
 class PyramidPoolingBranch(nn.Module):

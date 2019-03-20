@@ -1,5 +1,5 @@
 """
-    PSPNet, implemented in Gluon.
+    PSPNet for image segmentation, implemented in Gluon.
     Original paper: 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
 """
 

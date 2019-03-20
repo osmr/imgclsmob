@@ -1,5 +1,5 @@
 """
-    Segmentation datasets (ADE20K) routines.
+    Segmentation datasets (ADE20K/PascalVOC/COCO/Cityscapes) routines.
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
@@ -8,6 +8,9 @@ __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
 from gluoncv.data.ade20k.segmentation import ADE20KSegmentation
+from gluoncv.data.pascal_voc.segmentation import VOCSegmentation
+from gluoncv.data.mscoco.segmentation import COCOSegmentation
+from gluoncv.data.cityscapes import CitySegmentation
 
 
 def add_dataset_parser_arguments(parser,
@@ -22,6 +25,39 @@ def add_dataset_parser_arguments(parser,
             '--num-classes',
             type=int,
             default=150,
+            help='number of classes')
+    elif dataset_name == "VOC":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/voc',
+            help='path to directory with Pascal VOC dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=21,
+            help='number of classes')
+    elif dataset_name == "COCO":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/coco',
+            help='path to directory with COCO dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=21,
+            help='number of classes')
+    elif dataset_name == "Cityscapes":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/cityscapes',
+            help='path to directory with Cityscapes dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=19,
             help='number of classes')
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
@@ -49,12 +85,8 @@ def batch_fn(batch, ctx):
 
 
 def get_num_training_samples(dataset_name):
-    if dataset_name == "CIFAR10":
-        return 50000
-    elif dataset_name == "CIFAR100":
-        return 50000
-    elif dataset_name == "SVHN":
-        return 73257
+    if dataset_name == "ADE20K":
+        return None
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -116,6 +148,12 @@ def get_val_data_source(dataset_name,
 
     if dataset_name == "ADE20K":
         dataset_class = ADE20KSegmentation
+    elif dataset_name == "VOC":
+        dataset_class = VOCSegmentation
+    elif dataset_name == "COCO":
+        dataset_class = COCOSegmentation
+    elif dataset_name == "Cityscapes":
+        dataset_class = CitySegmentation
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

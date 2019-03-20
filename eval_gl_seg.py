@@ -15,13 +15,13 @@ from gluon.seg_datasets import validate1
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (Gluon/ADE20K)',
+        description='Evaluate a model for image segmentation (Gluon/ADE20K/PascalVOC/COCO/Cityscapes)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--dataset',
         type=str,
         default="ADE20K",
-        help='dataset name. options are ADE20K...')
+        help='dataset name. options are ADE20K, VOC, COCO, Cityscapes')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)

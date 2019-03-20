@@ -5,7 +5,7 @@
 __all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -907,3 +907,20 @@ class SesquialteralHourglass(nn.Module):
             y = skip2_outs[self.depth - 1 - i]
             x = self._merge(x, y)
         return x
+
+
+class MultiOutputSequential(nn.Sequential):
+    """
+    A sequential container with multiple outputs.
+    Modules will be executed in the order they are added.
+    """
+    def __init__(self):
+        super(MultiOutputSequential, self).__init__()
+
+    def forward(self, x):
+        outs = []
+        for module in self._modules.values():
+            x = module(x)
+            if hasattr(module, "do_output") and module.do_output:
+                outs.append(x)
+        return [x] + outs

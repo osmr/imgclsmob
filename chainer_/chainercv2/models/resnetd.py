@@ -1,19 +1,22 @@
 """
-    ResNet(D) with dilation for ImageNet-1K, implemented in Gluon.
+    ResNet(D) with dilation for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
 __all__ = ['ResNetD', 'resnetd50b', 'resnetd101b']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import MultiOutputSequential
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import MultiOutputSequential, SimpleSequential
 from .resnet import ResUnit, ResInitBlock
 from .senet import SEInitBlock
 
 
-class ResNetD(HybridBlock):
+class ResNetD(Chain):
     """
     ResNet(D) with dilation model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -27,9 +30,6 @@ class ResNetD(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
     multi_output : bool, default False
@@ -46,60 +46,59 @@ class ResNetD(HybridBlock):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 bn_use_global_stats=False,
                  ordinary_init=False,
                  multi_output=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(ResNetD, self).__init__(**kwargs)
+                 classes=1000):
+        super(ResNetD, self).__init__()
         self.in_size = in_size
         self.classes = classes
         self.multi_output = multi_output
 
-        with self.name_scope():
-            self.features = MultiOutputSequential(prefix='')
-            if ordinary_init:
-                self.features.add(ResInitBlock(
-                    in_channels=in_channels,
-                    out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
-            else:
-                init_block_channels = 2 * init_block_channels
-                self.features.add(SEInitBlock(
-                    in_channels=in_channels,
-                    out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
-                        dilation = (2 ** max(0, i - 1 - int(j == 0)))
-                        stage.add(ResUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            padding=dilation,
-                            dilation=dilation,
-                            bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
-                        in_channels = out_channels
-                if i == 2:
-                    stage.do_output = True
-                self.features.add(stage)
-            self.features.add(nn.GlobalAvgPool2D())
+        with self.init_scope():
+            self.features = MultiOutputSequential()
+            with self.features.init_scope():
+                if ordinary_init:
+                    setattr(self.features, "init_block", ResInitBlock(
+                        in_channels=in_channels,
+                        out_channels=init_block_channels))
+                else:
+                    init_block_channels = 2 * init_block_channels
+                    setattr(self.features, "init_block", SEInitBlock(
+                        in_channels=in_channels,
+                        out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            stride = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
+                            dilate = (2 ** max(0, i - 1 - int(j == 0)))
+                            setattr(stage, "unit{}".format(j + 1), ResUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                pad=dilate,
+                                dilate=dilate,
+                                bottleneck=bottleneck,
+                                conv1_stride=conv1_stride))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, "final_pool", partial(
+                    F.average_pooling_2d,
+                    ksize=(in_size[0] // 8, in_size[1] // 8)))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, "flatten", partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, "fc", L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         outs = self.features(x)
         x = outs[0]
         x = self.output(x)
@@ -114,8 +113,7 @@ def get_resnetd(blocks,
                 width_scale=1.0,
                 model_name=None,
                 pretrained=False,
-                ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join('~', '.chainer', 'models'),
                 **kwargs):
     """
     Create ResNet(D) with dilation model with specific parameters.
@@ -132,9 +130,7 @@ def get_resnetd(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
@@ -173,6 +169,7 @@ def get_resnetd(blocks,
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
+        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
@@ -188,11 +185,11 @@ def get_resnetd(blocks,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        load_npz(
+            file=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            obj=net)
 
     return net
 
@@ -206,9 +203,7 @@ def resnetd50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_resnetd(blocks=50, conv1_stride=False, model_name="resnetd50b", **kwargs)
@@ -223,9 +218,7 @@ def resnetd101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_resnetd(blocks=101, conv1_stride=False, model_name="resnetd101b", **kwargs)
@@ -233,7 +226,9 @@ def resnetd101b(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import chainer
+
+    chainer.global_config.train = False
 
     ordinary_init = False
     multi_output = False
@@ -250,18 +245,7 @@ def _test():
             pretrained=pretrained,
             ordinary_init=ordinary_init,
             multi_output=multi_output)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        # net.hybridize()
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         if ordinary_init:
             assert (model != resnetd50b or weight_count == 25557032)
@@ -270,7 +254,7 @@ def _test():
             assert (model != resnetd50b or weight_count == 25680808)
             assert (model != resnetd101b or weight_count == 44672936)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
         if multi_output:
             y = y[0]

@@ -211,9 +211,6 @@ class ResNet(nn.Module):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    dilated : bool, default False
-        Applying dilation strategy to pretrained ResNet yielding a stride-8 model, typically used for semantic
-        segmentation.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -226,7 +223,6 @@ class ResNet(nn.Module):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 dilated=False,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -242,24 +238,18 @@ class ResNet(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if ((j == 0) and (i != 0) and ((not dilated) or (i < 2))) else 1
-                dilation = (2 ** max(0, i - 1 - int(j == 0))) if dilated else 1
+                stride = 2 if (j == 0) and (i != 0) else 1
                 stage.add_module("unit{}".format(j + 1), ResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
-                    padding=dilation,
-                    dilation=dilation,
                     bottleneck=bottleneck,
                     conv1_stride=conv1_stride))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        if not dilated:
-            self.features.add_module("final_pool", nn.AvgPool2d(
-                kernel_size=7,
-                stride=1))
-        else:
-            self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
+        self.features.add_module("final_pool", nn.AvgPool2d(
+            kernel_size=7,
+            stride=1))
 
         self.output = nn.Linear(
             in_features=in_channels,

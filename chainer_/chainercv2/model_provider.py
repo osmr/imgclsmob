@@ -66,6 +66,8 @@ from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 
+from .models.resnetd import *
+
 __all__ = ['get_model']
 
 
@@ -487,6 +489,9 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
+
+    'resnetd50b': resnetd50b,
+    'resnetd101b': resnetd101b,
 }
 
 

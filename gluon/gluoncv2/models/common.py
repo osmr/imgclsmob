@@ -1004,10 +1004,10 @@ class MultiOutputSequential(nn.HybridSequential):
                  **kwargs):
         super(MultiOutputSequential, self).__init__(**kwargs)
 
-    def hybrid_forward(self, F, x, *args, **kwargs):
+    def hybrid_forward(self, F, x):
         outs = []
         for block in self._children.values():
-            x = block(x, *args, **kwargs)
+            x = block(x)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
         return [x] + outs

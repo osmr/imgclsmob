@@ -63,6 +63,10 @@ class ResBottleneck(Chain):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for the second convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for the second convolution layer.
     conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     bottleneck_factor : int, default 4
@@ -72,6 +76,8 @@ class ResBottleneck(Chain):
                  in_channels,
                  out_channels,
                  stride,
+                 pad=1,
+                 dilate=1,
                  conv1_stride=False,
                  bottleneck_factor=4):
         super(ResBottleneck, self).__init__()
@@ -85,7 +91,9 @@ class ResBottleneck(Chain):
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                stride=(1 if conv1_stride else stride))
+                stride=(1 if conv1_stride else stride),
+                pad=pad,
+                dilate=dilate)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -111,17 +119,23 @@ class ResUnit(Chain):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Stride of the convolution.
-    bottleneck : bool
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for the second convolution layer in bottleneck.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for the second convolution layer in bottleneck.
+    bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 bottleneck,
-                 conv1_stride):
+                 pad=1,
+                 dilate=1,
+                 bottleneck=True,
+                 conv1_stride=False):
         super(ResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -131,6 +145,8 @@ class ResUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
+                    pad=pad,
+                    dilate=dilate,
                     conv1_stride=conv1_stride)
             else:
                 self.body = ResBlock(

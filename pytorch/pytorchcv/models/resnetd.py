@@ -1,19 +1,19 @@
 """
-    ResNet(D) with dilation for ImageNet-1K, implemented in Gluon.
+    ResNet(D) with dilation for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
 __all__ = ['ResNetD', 'resnetd50b', 'resnetd101b']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import torch.nn as nn
+import torch.nn.init as init
 from .common import MultiOutputSequential
 from .resnet import ResUnit, ResInitBlock
 from .senet import SEInitBlock
 
 
-class ResNetD(HybridBlock):
+class ResNetD(nn.Module):
     """
     ResNet(D) with dilation model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 
@@ -27,9 +27,6 @@ class ResNetD(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool
         Whether to use stride in the first or the second convolution layer in units.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
     multi_output : bool, default False
@@ -38,7 +35,7 @@ class ResNetD(HybridBlock):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -46,62 +43,63 @@ class ResNetD(HybridBlock):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 bn_use_global_stats=False,
                  ordinary_init=False,
                  multi_output=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(ResNetD, self).__init__(**kwargs)
+                 num_classes=1000):
+        super(ResNetD, self).__init__()
         self.in_size = in_size
-        self.classes = classes
+        self.num_classes = num_classes
         self.multi_output = multi_output
 
-        with self.name_scope():
-            self.features = MultiOutputSequential(prefix='')
-            if ordinary_init:
-                self.features.add(ResInitBlock(
+        self.features = MultiOutputSequential()
+        if ordinary_init:
+            self.features.add_module("init_block", ResInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels))
+        else:
+            init_block_channels = 2 * init_block_channels
+            self.features.add_module("init_block", SEInitBlock(
+                in_channels=in_channels,
+                out_channels=init_block_channels))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            for j, out_channels in enumerate(channels_per_stage):
+                stride = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
+                dilation = (2 ** max(0, i - 1 - int(j == 0)))
+                stage.add_module("unit{}".format(j + 1), ResUnit(
                     in_channels=in_channels,
-                    out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
-            else:
-                init_block_channels = 2 * init_block_channels
-                self.features.add(SEInitBlock(
-                    in_channels=in_channels,
-                    out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
-                        dilation = (2 ** max(0, i - 1 - int(j == 0)))
-                        stage.add(ResUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            padding=dilation,
-                            dilation=dilation,
-                            bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
-                        in_channels = out_channels
-                if i == 2:
-                    stage.do_output = True
-                self.features.add(stage)
-            self.features.add(nn.GlobalAvgPool2D())
+                    out_channels=out_channels,
+                    stride=stride,
+                    padding=dilation,
+                    dilation=dilation,
+                    bottleneck=bottleneck,
+                    conv1_stride=conv1_stride))
+                in_channels = out_channels
+            if i == 2:
+                stage.do_output = True
+            self.features.add_module("stage{}".format(i + 1), stage)
+        self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
 
-            self.output = nn.HybridSequential(prefix='')
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+        self.output = nn.Linear(
+            in_features=in_channels,
+            out_features=num_classes)
 
-    def hybrid_forward(self, F, x):
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
+    def forward(self, x):
         outs = self.features(x)
         x = outs[0]
+        x = x.view(x.size(0), -1)
         x = self.output(x)
         if self.multi_output:
             return [x] + outs[1:]
@@ -114,8 +112,7 @@ def get_resnetd(blocks,
                 width_scale=1.0,
                 model_name=None,
                 pretrained=False,
-                ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join('~', '.torch', 'models'),
                 **kwargs):
     """
     Create ResNet(D) with dilation model with specific parameters.
@@ -132,9 +129,7 @@ def get_resnetd(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
 
@@ -187,12 +182,11 @@ def get_resnetd(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -206,9 +200,7 @@ def resnetd50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_resnetd(blocks=50, conv1_stride=False, model_name="resnetd50b", **kwargs)
@@ -223,17 +215,24 @@ def resnetd101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     return get_resnetd(blocks=101, conv1_stride=False, model_name="resnetd101b", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
-    import mxnet as mx
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
 
     ordinary_init = False
     multi_output = False
@@ -251,17 +250,9 @@ def _test():
             ordinary_init=ordinary_init,
             multi_output=multi_output)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        # net.hybridize()
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         if ordinary_init:
             assert (model != resnetd50b or weight_count == 25557032)
@@ -270,11 +261,12 @@ def _test():
             assert (model != resnetd50b or weight_count == 25680808)
             assert (model != resnetd101b or weight_count == 44672936)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
         if multi_output:
             y = y[0]
-        assert (y.shape == (1, 1000))
+        y.sum().backward()
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

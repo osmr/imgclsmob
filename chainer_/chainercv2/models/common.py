@@ -5,7 +5,8 @@
 __all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass']
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential']
 
 from inspect import isfunction
 from chainer import Chain
@@ -892,3 +893,21 @@ class SesquialteralHourglass(Chain):
             y = skip2_outs[self.depth - 1 - i]
             x = self._merge(x, y)
         return x
+
+
+class MultiOutputSequential(SimpleSequential):
+    """
+    A sequential container with multiple outputs.
+    Blocks will be executed in the order they are added.
+    """
+    def __init__(self):
+        super(MultiOutputSequential, self).__init__()
+
+    def __call__(self, x):
+        outs = []
+        for name in self.layer_names:
+            block = self[name]
+            x = block(x)
+            if hasattr(block, "do_output") and block.do_output:
+                outs.append(x)
+        return [x] + outs

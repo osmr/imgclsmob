@@ -69,20 +69,20 @@ class PyramidPoolingBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    output_size : int
+    pool_out_size : int
         Target output size of the image.
-    out_size : tuple of 2 int
+    upscale_out_size : tuple of 2 int
         Spatial size of output image for the bilinear upsampling operation.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 output_size,
-                 out_size,
+                 pool_out_size,
+                 upscale_out_size,
                  **kwargs):
         super(PyramidPoolingBranch, self).__init__(**kwargs)
-        self.output_size = output_size
-        self.out_size = out_size
+        self.pool_out_size = pool_out_size
+        self.upscale_out_size = upscale_out_size
 
         with self.name_scope():
             self.conv = conv1x1_block(
@@ -90,9 +90,9 @@ class PyramidPoolingBranch(HybridBlock):
                 out_channels=out_channels)
 
     def hybrid_forward(self, F, x):
-        x = F.contrib.AdaptiveAvgPooling2D(x, output_size=self.output_size)
+        x = F.contrib.AdaptiveAvgPooling2D(x, output_size=self.pool_out_size)
         x = self.conv(x)
-        x = F.contrib.BilinearResize2D(x, height=self.out_size[0], width=self.out_size[1])
+        x = F.contrib.BilinearResize2D(x, height=self.upscale_out_size[0], width=self.upscale_out_size[1])
         return x
 
 
@@ -104,28 +104,28 @@ class PyramidPooling(HybridBlock):
     ----------
     in_channels : int
         Number of input channels.
-    in_size : tuple of 2 int
+    upscale_out_size : tuple of 2 int
         Spatial size of the input tensor for the bilinear upsampling operation.
     """
     def __init__(self,
                  in_channels,
-                 in_size,
+                 upscale_out_size,
                  **kwargs):
         super(PyramidPooling, self).__init__(**kwargs)
-        output_sizes = [1, 2, 3, 6]
-        assert (len(output_sizes) == 4)
+        pool_out_sizes = [1, 2, 3, 6]
+        assert (len(pool_out_sizes) == 4)
         assert (in_channels % 4 == 0)
         mid_channels = in_channels // 4
 
         with self.name_scope():
             self.branches = HybridConcurrent(axis=1, prefix='')
             self.branches.add(Identity())
-            for output_size in output_sizes:
+            for pool_out_size in pool_out_sizes:
                 self.branches.add(PyramidPoolingBranch(
                     in_channels=in_channels,
                     out_channels=mid_channels,
-                    output_size=output_size,
-                    out_size=in_size))
+                    pool_out_size=pool_out_size,
+                    upscale_out_size=upscale_out_size))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -170,7 +170,7 @@ class PSPNet(HybridBlock):
             self.backbone = backbone
             self.pool = PyramidPooling(
                 in_channels=backbone_out_channels,
-                in_size=(self.in_size[0] // 8, self.in_size[1] // 8))
+                upscale_out_size=(self.in_size[0] // 8, self.in_size[1] // 8))
             pool_out_channels = 2 * backbone_out_channels
             self.final_block = PSPFinalBlock(
                 in_channels=pool_out_channels,
@@ -198,6 +198,7 @@ class PSPNet(HybridBlock):
 
 def get_pspnet(backbone,
                classes,
+               aux=False,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
@@ -212,6 +213,8 @@ def get_pspnet(backbone,
         Feature extractor.
     classes : int
         Number of segmentation classes.
+    aux : bool, default False
+        Whether to output an auxiliary result.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -225,6 +228,7 @@ def get_pspnet(backbone,
     net = PSPNet(
         backbone=backbone,
         classes=classes,
+        aux=aux,
         **kwargs)
 
     if pretrained:
@@ -240,7 +244,7 @@ def get_pspnet(backbone,
     return net
 
 
-def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
+def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-50 for Pascal VOC from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -251,6 +255,8 @@ def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 21
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -259,10 +265,10 @@ def pspnet_resnet50_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_voc", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet50_voc", **kwargs)
 
 
-def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
+def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-101 for Pascal VOC from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -273,6 +279,8 @@ def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 21
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -281,10 +289,10 @@ def pspnet_resnet101_voc(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_voc", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet101_voc", **kwargs)
 
 
-def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, **kwargs):
+def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-50 for COCO from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -295,6 +303,8 @@ def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 21
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -303,10 +313,10 @@ def pspnet_resnet50_coco(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_mscoco", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet50_mscoco", **kwargs)
 
 
-def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, **kwargs):
+def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-101 for COCO from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -317,6 +327,8 @@ def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 21
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -325,10 +337,10 @@ def pspnet_resnet101_coco(pretrained_backbone=False, classes=21, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_mscoco", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet101_mscoco", **kwargs)
 
 
-def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
+def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-50 for ADE20K from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -339,6 +351,8 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 150
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -347,10 +361,10 @@ def pspnet_resnet50_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet50_ade20k", **kwargs)
 
 
-def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, **kwargs):
+def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-101 for ADE20K from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -361,6 +375,8 @@ def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 150
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -369,10 +385,10 @@ def pspnet_resnet101_ade20k(pretrained_backbone=False, classes=150, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_ade20k", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet50_ade20k", **kwargs)
 
 
-def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
+def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-50 for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -383,6 +399,8 @@ def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 19
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -391,10 +409,10 @@ def pspnet_resnet50_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet50_sityscapes", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet50_sityscapes", **kwargs)
 
 
-def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, **kwargs):
+def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet-101 for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -405,6 +423,8 @@ def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, **kwargs)
         Whether to load the pretrained weights for feature extractor.
     classes : int, default 19
         Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -413,7 +433,7 @@ def pspnet_resnet101_sityscapes(pretrained_backbone=False, classes=19, **kwargs)
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_pspnet(backbone=backbone, classes=classes, aux=True, model_name="pspnet_resnet101_sityscapes", **kwargs)
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnet101_sityscapes", **kwargs)
 
 
 def _test():
@@ -452,23 +472,23 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
-            assert (model != pspnet_resnet50_voc or weight_count == 49081536)
-            assert (model != pspnet_resnet101_voc or weight_count == 68073664)
-            assert (model != pspnet_resnet50_coco or weight_count == 49081536)
-            assert (model != pspnet_resnet101_coco or weight_count == 68073664)
-            assert (model != pspnet_resnet50_ade20k or weight_count == 49180608)
-            assert (model != pspnet_resnet101_ade20k or weight_count == 68172736)
-            assert (model != pspnet_resnet50_sityscapes or weight_count == 49080000)
-            assert (model != pspnet_resnet101_sityscapes or weight_count == 68072128)
+            assert (model != pspnet_resnet50_voc or weight_count == 49081578)
+            assert (model != pspnet_resnet101_voc or weight_count == 68073706)
+            assert (model != pspnet_resnet50_coco or weight_count == 49081578)
+            assert (model != pspnet_resnet101_coco or weight_count == 68073706)
+            assert (model != pspnet_resnet50_ade20k or weight_count == 49180908)
+            assert (model != pspnet_resnet101_ade20k or weight_count == 68173036)
+            assert (model != pspnet_resnet50_sityscapes or weight_count == 49080038)
+            assert (model != pspnet_resnet101_sityscapes or weight_count == 68072166)
         else:
-            assert (model != pspnet_resnet50_voc or weight_count == 46716352)
-            assert (model != pspnet_resnet101_voc or weight_count == 65708480)
-            assert (model != pspnet_resnet50_coco or weight_count == 46716352)
-            assert (model != pspnet_resnet101_coco or weight_count == 65708480)
-            assert (model != pspnet_resnet50_ade20k or weight_count == 46782400)
-            assert (model != pspnet_resnet101_ade20k or weight_count == 65774528)
-            assert (model != pspnet_resnet50_sityscapes or weight_count == 46715328)
-            assert (model != pspnet_resnet101_sityscapes or weight_count == 65707456)
+            assert (model != pspnet_resnet50_voc or weight_count == 46716373)
+            assert (model != pspnet_resnet101_voc or weight_count == 65708501)
+            assert (model != pspnet_resnet50_coco or weight_count == 46716373)
+            assert (model != pspnet_resnet101_coco or weight_count == 65708501)
+            assert (model != pspnet_resnet50_ade20k or weight_count == 46782550)
+            assert (model != pspnet_resnet101_ade20k or weight_count == 65774678)
+            assert (model != pspnet_resnet50_sityscapes or weight_count == 46715347)
+            assert (model != pspnet_resnet101_sityscapes or weight_count == 65707475)
 
         x = mx.nd.zeros((1, 3, in_size[0], in_size[1]), ctx=ctx)
         ys = net(x)

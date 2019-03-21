@@ -67,6 +67,7 @@ from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 
 from .models.resnetd import *
+from .models.pspnet import *
 
 __all__ = ['get_model']
 
@@ -492,6 +493,15 @@ _models = {
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,
+
+    'pspnet_resnet50_voc': pspnet_resnet50_voc,
+    'pspnet_resnet101_voc': pspnet_resnet101_voc,
+    'pspnet_resnet50_coco': pspnet_resnet50_coco,
+    'pspnet_resnet101_coco': pspnet_resnet101_coco,
+    'pspnet_resnet50_ade20k': pspnet_resnet50_ade20k,
+    'pspnet_resnet101_ade20k': pspnet_resnet101_ade20k,
+    'pspnet_resnet50_sityscapes': pspnet_resnet50_sityscapes,
+    'pspnet_resnet101_sityscapes': pspnet_resnet101_sityscapes,
 }
 
 

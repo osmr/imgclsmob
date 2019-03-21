@@ -217,6 +217,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('pyramidnet110_a270_cifar10', '0251', 'b3456ddd5919ef861ec607f8287bd071de0ba077', 'v0.0.194'),
     ('pyramidnet164_a270_bn_cifar10', '0242', '783e21b5856a46ee0087535776703eb7ca0c24ae', 'v0.0.264'),
     ('pyramidnet200_a240_bn_cifar10', '0244', '89ae1856e23a67aac329df11775346e6bf8e00b7', 'v0.0.268'),
+    ('pyramidnet236_a220_bn_cifar10', '0247', '6b9a29664f54d8ea82afc863670a79099e6f570a', 'v0.0.285'),
     ('pyramidnet272_a200_bn_cifar10', '0239', '533f8d89abe57656e1baef549dabedbc4dcefbe8', 'v0.0.284'),
     ('densenet40_k12_cifar10', '0561', 'a37df881a11487fdde772254a82c20c3e45b461b', 'v0.0.193'),
     ('densenet40_k12_cifar100', '2490', 'd06839db7eec0331354ca31b421c6fbcd4665fd3', 'v0.0.195'),

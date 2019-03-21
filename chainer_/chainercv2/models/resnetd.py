@@ -84,6 +84,8 @@ class ResNetD(Chain):
                                 bottleneck=bottleneck,
                                 conv1_stride=conv1_stride))
                             in_channels = out_channels
+                    if i == 2:
+                        stage.do_output = True
                     setattr(self.features, "stage{}".format(i + 1), stage)
                 setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,

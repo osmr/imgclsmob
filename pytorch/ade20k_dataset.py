@@ -1,116 +1,150 @@
 import os
-import collections
-import torch
+import random
 import numpy as np
-import scipy.misc as m
-
-from torch.utils import data
-
-
-def recursive_glob(rootdir=".", suffix=""):
-    """Performs recursive glob with given suffix and rootdir
-        :param rootdir is the root directory
-        :param suffix is the suffix to be searched
-    """
-    return [
-        os.path.join(looproot, filename)
-        for looproot, _, filenames in os.walk(rootdir)
-        for filename in filenames
-        if filename.endswith(suffix)
-    ]
+from PIL import Image, ImageOps, ImageFilter
+import torch.utils.data as data
 
 
 class ADE20KSegmentation(data.Dataset):
+    """
+    ADE20K semantic segmentation dataset.
+
+    Parameters
+    ----------
+    root : string
+        Path to ADE20K folder.
+    mode: string
+        'train', 'val' or 'test'
+    transform : callable, optional
+        A function that transforms the image
+    target_transform : callable, optional
+        A function/transform that takes in the target and transforms it.
+    """
+
     def __init__(self,
                  root,
-                 split="training",
-                 is_transform=False,
-                 img_size=512,
-                 augmentations=None,
-                 img_norm=True,
-                 test_mode=False):
-        self.root = root
-        self.split = split
-        self.is_transform = is_transform
-        self.augmentations = augmentations
-        self.img_norm = img_norm
-        self.test_mode = test_mode
-        self.n_classes = 150
-        self.img_size = img_size if isinstance(img_size, tuple) else (img_size, img_size)
-        self.mean = np.array([104.00699, 116.66877, 122.67892])
-        self.files = collections.defaultdict(list)
+                 mode="train",
+                 transform=None,
+                 target_transform=None,
+                 base_size=520,
+                 crop_size=480):
+        self.root = os.path.expanduser(root)
+        self.mode = mode
+        self.transform = transform
+        self.target_transform = target_transform
+        self.base_size = base_size
+        self.crop_size = crop_size
 
-        if not self.test_mode:
-            for split in ["training", "validation"]:
-                file_list = recursive_glob(
-                    rootdir=self.root + "images/" + self.split + "/", suffix=".jpg"
-                )
-                self.files[split] = file_list
+        ade20k_root = os.path.join(self.root, "ADEChallengeData2016")
+        image_dir_path = os.path.join(ade20k_root, 'images')
+        mask_dir_path = os.path.join(ade20k_root, 'annotations')
 
-    def __len__(self):
-        return len(self.files[self.split])
+        mode_dir_name = "training" if (mode == "train") else "validation"
+        image_dir_path = os.path.join(image_dir_path, mode_dir_name)
+        mask_dir_path = os.path.join(mask_dir_path, mode_dir_name)
+
+        images = []
+        masks = []
+        for filename in os.listdir(image_dir_path):
+            basename, _ = os.path.splitext(filename)
+            if filename.endswith(".jpg"):
+                imgpath = os.path.join(image_dir_path, filename)
+                maskname = basename + '.png'
+                maskpath = os.path.join(mask_dir_path, maskname)
+                if os.path.isfile(maskpath):
+                    images.append(imgpath)
+                    masks.append(maskpath)
+                else:
+                    print('cannot find the mask:', maskpath)
+
+        self.images = images
+        self.masks = masks
+        assert (len(self.images) == len(self.masks))
 
     def __getitem__(self, index):
-        img_path = self.files[self.split][index].rstrip()
-        lbl_path = img_path[:-4] + "_seg.png"
+        img = Image.open(self.images[index]).convert('RGB')
+        mask = Image.open(self.masks[index])
 
-        img = m.imread(img_path)
-        img = np.array(img, dtype=np.uint8)
+        if self.mode == 'train':
+            img, mask = self._sync_transform(img, mask)
+        elif self.mode == 'val':
+            img, mask = self._val_sync_transform(img, mask)
+        else:
+            assert self.mode == 'testval'
+            img, mask = self._img_transform(img), self._mask_transform(mask)
 
-        lbl = m.imread(lbl_path)
-        lbl = np.array(lbl, dtype=np.int32)
+        if self.transform is not None:
+            img = self.transform(img)
 
-        if self.augmentations is not None:
-            img, lbl = self.augmentations(img, lbl)
+        if self.target_transform is not None:
+            mask = self.target_transform(mask)
 
-        if self.is_transform:
-            img, lbl = self.transform(img, lbl)
+        return img, mask
 
-        return img, lbl
+    def __len__(self):
+        return len(self.images)
 
-    def transform(self, img, lbl):
-        img = m.imresize(img, (self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
-        img = img[:, :, ::-1]  # RGB -> BGR
-        img = img.astype(np.float64)
-        img -= self.mean
-        if self.img_norm:
-            # Resize scales images from 0 to 255, thus we need
-            # to divide by 255.0
-            img = img.astype(float) / 255.0
-        # NHWC -> NCHW
-        img = img.transpose(2, 0, 1)
+    def _val_sync_transform(self, img, mask):
+        outsize = self.crop_size
+        short_size = outsize
+        w, h = img.size
+        if w > h:
+            oh = short_size
+            ow = int(1.0 * w * oh / h)
+        else:
+            ow = short_size
+            oh = int(1.0 * h * ow / w)
+        img = img.resize((ow, oh), Image.BILINEAR)
+        mask = mask.resize((ow, oh), Image.NEAREST)
+        # center crop
+        w, h = img.size
+        x1 = int(round((w - outsize) / 2.))
+        y1 = int(round((h - outsize) / 2.))
+        img = img.crop((x1, y1, x1 + outsize, y1 + outsize))
+        mask = mask.crop((x1, y1, x1 + outsize, y1 + outsize))
+        # final transform
+        img, mask = self._img_transform(img), self._mask_transform(mask)
+        return img, mask
 
-        lbl = self.encode_segmap(lbl)
-        classes = np.unique(lbl)
-        lbl = lbl.astype(float)
-        lbl = m.imresize(lbl, (self.img_size[0], self.img_size[1]), "nearest", mode="F")
-        lbl = lbl.astype(int)
-        assert np.all(classes == np.unique(lbl))
+    def _sync_transform(self, img, mask):
+        # random mirror
+        if random.random() < 0.5:
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            mask = mask.transpose(Image.FLIP_LEFT_RIGHT)
+        crop_size = self.crop_size
+        # random scale (short edge)
+        short_size = random.randint(int(self.base_size * 0.5), int(self.base_size * 2.0))
+        w, h = img.size
+        if h > w:
+            ow = short_size
+            oh = int(1.0 * h * ow / w)
+        else:
+            oh = short_size
+            ow = int(1.0 * w * oh / h)
+        img = img.resize((ow, oh), Image.BILINEAR)
+        mask = mask.resize((ow, oh), Image.NEAREST)
+        # pad crop
+        if short_size < crop_size:
+            padh = crop_size - oh if oh < crop_size else 0
+            padw = crop_size - ow if ow < crop_size else 0
+            img = ImageOps.expand(img, border=(0, 0, padw, padh), fill=0)
+            mask = ImageOps.expand(mask, border=(0, 0, padw, padh), fill=0)
+        # random crop crop_size
+        w, h = img.size
+        x1 = random.randint(0, w - crop_size)
+        y1 = random.randint(0, h - crop_size)
+        img = img.crop((x1, y1, x1 + crop_size, y1 + crop_size))
+        mask = mask.crop((x1, y1, x1 + crop_size, y1 + crop_size))
+        # gaussian blur as in PSP
+        if random.random() < 0.5:
+            img = img.filter(ImageFilter.GaussianBlur(
+                radius=random.random()))
+        # final transform
+        img, mask = self._img_transform(img), self._mask_transform(mask)
+        return img, mask
 
-        img = torch.from_numpy(img).float()
-        lbl = torch.from_numpy(lbl).long()
-        return img, lbl
+    def _img_transform(self, img):
+        return np.array(img)
 
-    def encode_segmap(self, mask):
-        # Refer : http://groups.csail.mit.edu/vision/datasets/ADE20K/code/loadAde20K.m
-        mask = mask.astype(int)
-        label_mask = np.zeros((mask.shape[0], mask.shape[1]))
-        label_mask = (mask[:, :, 0] / 10.0) * 256 + mask[:, :, 1]
-        return np.array(label_mask, dtype=np.uint8)
-
-    def decode_segmap(self, temp, plot=False):
-        # TODO:(@meetshah1995)
-        # Verify that the color mapping is 1-to-1
-        r = temp.copy()
-        g = temp.copy()
-        b = temp.copy()
-        for l in range(0, self.n_classes):
-            r[temp == l] = 10 * (l % 10)
-            g[temp == l] = l
-            b[temp == l] = 0
-
-        rgb = np.zeros((temp.shape[0], temp.shape[1], 3))
-        rgb[:, :, 0] = r / 255.0
-        rgb[:, :, 1] = g / 255.0
-        rgb[:, :, 2] = b / 255.0
-        return rgb
+    def _mask_transform(self, mask):
+        return np.array(mask).astype(np.int32)

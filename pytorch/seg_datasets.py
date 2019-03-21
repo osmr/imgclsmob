@@ -4,10 +4,10 @@
 
 __all__ = ['add_dataset_parser_arguments', 'get_val_data_loader', 'validate1']
 
-from tqdm import tqdm
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+from .ade20k_dataset import ADE20KSegmentation
 
 
 def add_dataset_parser_arguments(parser,
@@ -78,7 +78,9 @@ def add_dataset_parser_arguments(parser,
 def get_val_data_loader(dataset_name,
                         dataset_dir,
                         batch_size,
-                        num_workers):
+                        num_workers,
+                        image_base_size,
+                        image_crop_size):
     mean_rgb = (0.485, 0.456, 0.406)
     std_rgb = (0.229, 0.224, 0.225)
 
@@ -90,7 +92,12 @@ def get_val_data_loader(dataset_name,
     ])
 
     if dataset_name == "ADE20K":
-        dataset = None
+        dataset = ADE20KSegmentation(
+            root=dataset_dir,
+            mode="val",
+            base_size=image_base_size,
+            crop_size=image_crop_size,
+            transform=transform_val)
     elif dataset_name == "VOC":
         dataset = datasets.VOCSegmentation(
             root=dataset_dir,
@@ -114,19 +121,22 @@ def get_val_data_loader(dataset_name,
     return val_loader
 
 
+def accuracy(_, __):
+    return None
+
+
 def validate1(accuracy_metric,
               net,
               val_data,
-              batch_fn,
-              data_source_needs_reset,
-              dtype,
-              ctx):
-    if data_source_needs_reset:
-        val_data.reset()
+              use_cuda):
+    net.eval()
     accuracy_metric.reset()
-    for batch in tqdm(val_data):
-        data_list, labels_list = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        accuracy_metric.update(labels_list, outputs_list)
-    pix_acc, miou = accuracy_metric.get()
+    with torch.no_grad():
+        for data, target in val_data:
+            if use_cuda:
+                target = target.cuda(non_blocking=True)
+            output = net(data)
+            accuracy_value = accuracy(output, target)
+            accuracy_metric.update(accuracy_value[0], data.size(0))
+    pix_acc, miou = accuracy_metric.avg.item()
     return pix_acc, miou

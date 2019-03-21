@@ -6,7 +6,7 @@ from mxnet.ndarray import NDArray
 from mxnet.gluon.nn import HybridBlock
 from .oth_parallel import parallel_apply
 from .oth_parallel import tuple_map
-from .oth_resnetv1b import oth_resnet50_v1s, oth_resnet101_v1s, resnet152_v1s
+from .oth_resnetv1b import oth_resnet50_v1s, oth_resnet101_v1s, oth_resnet152_v1s
 # pylint: disable=wildcard-import,abstract-method,arguments-differ,dangerous-default-value,missing-docstring
 
 __all__ = ['get_segmentation_model', 'SegBaseModel', 'SegEvalModel', 'MultiEvalModel']
@@ -46,7 +46,7 @@ class SegBaseModel(HybridBlock):
             elif backbone == 'resnet101':
                 pretrained = oth_resnet101_v1s(pretrained=pretrained_base, dilated=True, **kwargs)
             elif backbone == 'resnet152':
-                pretrained = resnet152_v1s(pretrained=pretrained_base, dilated=True, **kwargs)
+                pretrained = oth_resnet152_v1s(pretrained=pretrained_base, dilated=True, **kwargs)
             else:
                 raise RuntimeError('unknown backbone: {}'.format(backbone))
             self.conv1 = pretrained.conv1

@@ -14,7 +14,7 @@ __all__ = ['ResNetV1b', 'resnet18_v1b', 'resnet34_v1b',
            'resnet50_v1c', 'resnet101_v1c', 'resnet152_v1c',
            'resnet50_v1d', 'resnet101_v1d', 'resnet152_v1d',
            'resnet50_v1e', 'resnet101_v1e', 'resnet152_v1e',
-           'oth_resnet50_v1s', 'oth_resnet101_v1s', 'resnet152_v1s']
+           'oth_resnet50_v1s', 'oth_resnet101_v1s', 'oth_resnet152_v1s']
 
 class BasicBlockV1b(HybridBlock):
     """ResNetV1b BasicBlockV1b
@@ -857,7 +857,7 @@ def oth_resnet101_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kw
     return model
 
 
-def resnet152_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def oth_resnet152_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     """Constructs a ResNetV1s-152 model.
 
     Parameters
@@ -877,13 +877,13 @@ def resnet152_v1s(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs
     """
     model = ResNetV1b(BottleneckV1b, [3, 8, 36, 3], deep_stem=True, stem_width=64,
                       name_prefix='resnetv1s_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnet%d_v%ds'%(152, 1),
-                                             tag=pretrained, root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file('resnet%d_v%ds'%(152, 1),
+    #                                          tag=pretrained, root=root), ctx=ctx)
+    #     from ..data import ImageNet1kAttr
+    #     attrib = ImageNet1kAttr()
+    #     model.synset = attrib.synset
+    #     model.classes = attrib.classes
+    #     model.classes_long = attrib.classes_long
     return model

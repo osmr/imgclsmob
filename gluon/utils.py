@@ -17,6 +17,8 @@ def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
                   dtype,
+                  net_extra_kwargs=None,
+                  load_ignore_extra=False,
                   tune_layers=None,
                   classes=None,
                   in_channels=None,
@@ -28,6 +30,8 @@ def prepare_model(model_name,
         kwargs["classes"] = classes
     if in_channels is not None:
         kwargs["in_channels"] = in_channels
+    if net_extra_kwargs is not None:
+        kwargs.update(net_extra_kwargs)
 
     net = get_model(model_name, **kwargs)
 
@@ -36,7 +40,8 @@ def prepare_model(model_name,
         logging.info('Loading model: {}'.format(pretrained_model_file_path))
         net.load_parameters(
             filename=pretrained_model_file_path,
-            ctx=ctx)
+            ctx=ctx,
+            ignore_extra=load_ignore_extra)
 
     net.cast(dtype)
 

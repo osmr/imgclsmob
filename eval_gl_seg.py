@@ -167,11 +167,12 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
+        net_extra_kwargs={"aux": False},
+        load_ignore_extra=True,
         classes=args.num_classes,
         in_channels=args.in_channels,
         do_hybridize=(not args.calc_flops),
         ctx=ctx)
-    net.aux = False
     input_image_size = net.in_size if hasattr(net, 'in_size') else (480, 480)
 
     val_data = get_val_data_source(

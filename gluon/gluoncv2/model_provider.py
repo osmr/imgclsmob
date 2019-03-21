@@ -539,6 +539,7 @@ _models = {
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,
+    'resnetd152b': resnetd152b,
 
     'oth_resnet50_v1s': oth_resnet50_v1s,
     'oth_resnet101_v1s': oth_resnet101_v1s,

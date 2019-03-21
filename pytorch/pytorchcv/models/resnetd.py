@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNetD', 'resnetd50b', 'resnetd101b']
+__all__ = ['ResNetD', 'resnetd50b', 'resnetd101b', 'resnetd152b']
 
 import os
 import torch.nn as nn
@@ -221,6 +221,21 @@ def resnetd101b(**kwargs):
     return get_resnetd(blocks=101, conv1_stride=False, model_name="resnetd101b", **kwargs)
 
 
+def resnetd152b(**kwargs):
+    """
+    ResNet(D)-152 with dilation model with stride at the second convolution in bottleneck block from 'Deep Residual
+    Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnetd(blocks=152, conv1_stride=False, model_name="resnetd152b", **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -241,6 +256,7 @@ def _test():
     models = [
         resnetd50b,
         resnetd101b,
+        resnetd152b,
     ]
 
     for model in models:
@@ -257,9 +273,11 @@ def _test():
         if ordinary_init:
             assert (model != resnetd50b or weight_count == 25557032)
             assert (model != resnetd101b or weight_count == 44549160)
+            assert (model != resnetd152b or weight_count == 60192808)
         else:
             assert (model != resnetd50b or weight_count == 25680808)
             assert (model != resnetd101b or weight_count == 44672936)
+            assert (model != resnetd152b or weight_count == 60316584)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)

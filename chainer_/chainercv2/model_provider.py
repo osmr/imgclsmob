@@ -493,6 +493,7 @@ _models = {
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,
+    'resnetd152b': resnetd152b,
 
     'pspnet_resnet50_voc': pspnet_resnet50_voc,
     'pspnet_resnet101_voc': pspnet_resnet101_voc,

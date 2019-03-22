@@ -3,13 +3,13 @@
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
-           'get_num_training_samples', 'validate1']
+           'get_test_data_source', 'get_num_training_samples', 'validate1']
 
 from tqdm import tqdm
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
-from gluoncv.data.ade20k.segmentation import ADE20KSegmentation
-from gluoncv.data.pascal_voc.segmentation import VOCSegmentation
+from .ade20k_seg_dataset import ADE20KSegDataset
+from .voc_seg_dataset import VOCSegDataset
 from gluoncv.data.mscoco.segmentation import COCOSegmentation
 from gluoncv.data.cityscapes import CitySegmentation
 
@@ -115,7 +115,7 @@ def get_train_data_source(dataset_name,
     ])
 
     if dataset_name == "ADE20K":
-        dataset_class = ADE20KSegmentation
+        dataset_class = ADE20KSegDataset
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -148,9 +148,9 @@ def get_val_data_source(dataset_name,
     ])
 
     if dataset_name == "ADE20K":
-        dataset_class = ADE20KSegmentation
+        dataset_class = ADE20KSegDataset
     elif dataset_name == "VOC":
-        dataset_class = VOCSegmentation
+        dataset_class = VOCSegDataset
     elif dataset_name == "COCO":
         dataset_class = COCOSegmentation
     elif dataset_name == "Cityscapes":
@@ -164,6 +164,44 @@ def get_val_data_source(dataset_name,
         mode="val",
         base_size=image_base_size,
         crop_size=image_crop_size,
+        transform=transform_val)
+
+    return gluon.data.DataLoader(
+        dataset=dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers)
+
+
+def get_test_data_source(dataset_name,
+                         dataset_dir,
+                         batch_size,
+                         num_workers):
+    mean_rgb = (0.485, 0.456, 0.406)
+    std_rgb = (0.229, 0.224, 0.225)
+
+    transform_val = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=mean_rgb,
+            std=std_rgb)
+    ])
+
+    if dataset_name == "ADE20K":
+        dataset_class = ADE20KSegDataset
+    elif dataset_name == "VOC":
+        dataset_class = VOCSegDataset
+    elif dataset_name == "COCO":
+        dataset_class = COCOSegmentation
+    elif dataset_name == "Cityscapes":
+        dataset_class = CitySegmentation
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+    dataset = dataset_class(
+        root=dataset_dir,
+        split="val",
+        mode="testval",
         transform=transform_val)
 
     return gluon.data.DataLoader(

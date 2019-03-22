@@ -25,19 +25,15 @@ class PSPFinalBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    out_size : tuple of 2 int
-        Spatial size of the output image for the bilinear upsampling operation.
     bottleneck_factor : int, default 4
         Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 out_size,
                  bottleneck_factor=4,
                  **kwargs):
         super(PSPFinalBlock, self).__init__(**kwargs)
-        self.out_size = out_size
         assert (in_channels % bottleneck_factor == 0)
         mid_channels = in_channels // bottleneck_factor
 
@@ -51,11 +47,11 @@ class PSPFinalBlock(HybridBlock):
                 out_channels=out_channels,
                 use_bias=True)
 
-    def hybrid_forward(self, F, x):
+    def hybrid_forward(self, F, x, out_size):
         x = self.conv1(x)
         x = self.dropout(x)
         x = self.conv2(x)
-        x = F.contrib.BilinearResize2D(x, height=self.out_size[0], width=self.out_size[1])
+        x = F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
         return x
 
 
@@ -71,7 +67,7 @@ class PyramidPoolingBranch(HybridBlock):
         Number of output channels.
     pool_out_size : int
         Target output size of the image.
-    upscale_out_size : tuple of 2 int
+    upscale_out_size : tuple of 2 int or None
         Spatial size of output image for the bilinear upsampling operation.
     """
     def __init__(self,
@@ -90,9 +86,10 @@ class PyramidPoolingBranch(HybridBlock):
                 out_channels=out_channels)
 
     def hybrid_forward(self, F, x):
+        in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
         x = F.contrib.AdaptiveAvgPooling2D(x, output_size=self.pool_out_size)
         x = self.conv(x)
-        x = F.contrib.BilinearResize2D(x, height=self.upscale_out_size[0], width=self.upscale_out_size[1])
+        x = F.contrib.BilinearResize2D(x, height=in_size[0], width=in_size[1])
         return x
 
 
@@ -165,32 +162,32 @@ class PSPNet(HybridBlock):
         self.in_size = in_size
         self.classes = classes
         self.aux = aux
+        pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if aux else None
 
         with self.name_scope():
             self.backbone = backbone
             self.pool = PyramidPooling(
                 in_channels=backbone_out_channels,
-                upscale_out_size=(self.in_size[0] // 8, self.in_size[1] // 8))
+                upscale_out_size=pool_out_size)
             pool_out_channels = 2 * backbone_out_channels
             self.final_block = PSPFinalBlock(
                 in_channels=pool_out_channels,
                 out_channels=classes,
-                out_size=in_size,
                 bottleneck_factor=8)
             if self.aux:
                 aux_out_channels = backbone_out_channels // 2
                 self.aux_block = PSPFinalBlock(
                     in_channels=aux_out_channels,
                     out_channels=classes,
-                    out_size=in_size,
                     bottleneck_factor=4)
 
     def hybrid_forward(self, F, x):
+        in_size = self.in_size if self.aux else x.shape[2:]
         x, y = self.backbone(x)
         x = self.pool(x)
-        x = self.final_block(x)
+        x = self.final_block(x, in_size)
         if self.aux:
-            y = self.aux_block(y)
+            y = self.aux_block(y, in_size)
             return x, y
         else:
             return x

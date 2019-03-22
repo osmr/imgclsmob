@@ -9,7 +9,7 @@ from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
 from gluon.seg_datasets import add_dataset_parser_arguments
 from gluon.seg_datasets import batch_fn
-from gluon.seg_datasets import get_val_data_source
+from gluon.seg_datasets import get_test_data_source
 from gluon.seg_datasets import validate1
 
 
@@ -69,11 +69,11 @@ def parse_args():
         type=int,
         help='number of preprocessing workers')
 
-    parser.add_argument(
-        '--batch-size',
-        type=int,
-        default=16,
-        help='training batch size per device (CPU/GPU).')
+    # parser.add_argument(
+    #     '--batch-size',
+    #     type=int,
+    #     default=16,
+    #     help='training batch size per device (CPU/GPU).')
 
     parser.add_argument(
         '--save-dir',
@@ -101,7 +101,7 @@ def parse_args():
 
 
 def test(net,
-         val_data,
+         test_data,
          data_source_needs_reset,
          dtype,
          ctx,
@@ -118,7 +118,7 @@ def test(net,
         pix_acc, miou = validate1(
             accuracy_metric=accuracy_metric,
             net=net,
-            val_data=val_data,
+            val_data=test_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
@@ -160,7 +160,7 @@ def main():
 
     ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,
-        batch_size=args.batch_size)
+        batch_size=1)
 
     net = prepare_model(
         model_name=args.model,
@@ -171,22 +171,20 @@ def main():
         load_ignore_extra=True,
         classes=args.num_classes,
         in_channels=args.in_channels,
-        do_hybridize=(not args.calc_flops),
+        do_hybridize=False,
         ctx=ctx)
     input_image_size = net.in_size if hasattr(net, 'in_size') else (480, 480)
 
-    val_data = get_val_data_source(
+    test_data = get_test_data_source(
         dataset_name=args.dataset,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
-        num_workers=args.num_workers,
-        image_base_size=args.image_base_size,
-        image_crop_size=args.image_crop_size)
+        num_workers=args.num_workers)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
-        val_data=val_data,
+        test_data=test_data,
         data_source_needs_reset=False,
         dtype=args.dtype,
         ctx=ctx,

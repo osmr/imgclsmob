@@ -1,3 +1,4 @@
+import os
 import argparse
 import time
 import logging
@@ -149,6 +150,7 @@ def test(net,
 
 
 def main():
+    os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
     args = parse_args()
 
     _, log_file_exist = initialize_logging(

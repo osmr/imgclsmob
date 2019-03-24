@@ -13,22 +13,18 @@ class ADE20KSegDataset(SegDataset):
     ----------
     root : string
         Path to ADE20K folder.
-    split: string, default 'train'
-        'train', 'val' or 'test'.
-    mode: string, default None
-        'train', 'val' or 'test'.
+    mode: string, default 'train'
+        'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.
     """
     def __init__(self,
                  root,
-                 split="train",
-                 mode=None,
+                 mode="train",
                  transform=None,
                  **kwargs):
         super(ADE20KSegDataset, self).__init__(
             root=root,
-            split=split,
             mode=mode,
             transform=transform,
             **kwargs)
@@ -65,7 +61,7 @@ class ADE20KSegDataset(SegDataset):
     def __getitem__(self, index):
         image = Image.open(self.images[index]).convert("RGB")
         # image = mx.image.imread(self.images[index])
-        if self.mode == "test":
+        if self.mode == "demo":
             image = self._img_transform(image)
             if self.transform is not None:
                 image = self.transform(image)
@@ -78,8 +74,9 @@ class ADE20KSegDataset(SegDataset):
         elif self.mode == "val":
             image, mask = self._val_sync_transform(image, mask)
         else:
-            assert self.mode == "testval"
-            image, mask = self._img_transform(image), self._mask_transform(mask)
+            assert (self.mode == "test")
+            image = self._img_transform(image)
+            mask = self._mask_transform(mask)
 
         if self.transform is not None:
             image = self.transform(image)

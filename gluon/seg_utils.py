@@ -9,9 +9,9 @@ from tqdm import tqdm
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
 from .ade20k_seg_dataset import ADE20KSegDataset
-from .voc_seg_dataset import VOCSegDataset
-from gluoncv.data.mscoco.segmentation import COCOSegmentation
-from gluoncv.data.cityscapes import CitySegmentation
+# from .voc_seg_dataset import VOCSegDataset
+# from gluoncv.data.mscoco.segmentation import COCOSegmentation
+# from gluoncv.data.cityscapes import CitySegmentation
 # from gluoncv.data.ade20k.segmentation import ADE20KSegmentation
 
 
@@ -150,12 +150,12 @@ def get_val_data_source(dataset_name,
 
     if dataset_name == "ADE20K":
         dataset_class = ADE20KSegDataset
-    elif dataset_name == "VOC":
-        dataset_class = VOCSegDataset
-    elif dataset_name == "COCO":
-        dataset_class = COCOSegmentation
-    elif dataset_name == "Cityscapes":
-        dataset_class = CitySegmentation
+    # elif dataset_name == "VOC":
+    #     dataset_class = VOCSegDataset
+    # elif dataset_name == "COCO":
+    #     dataset_class = COCOSegmentation
+    # elif dataset_name == "Cityscapes":
+    #     dataset_class = CitySegmentation
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -190,20 +190,25 @@ def get_test_data_source(dataset_name,
 
     if dataset_name == "ADE20K":
         dataset_class = ADE20KSegDataset
-    elif dataset_name == "VOC":
-        dataset_class = VOCSegDataset
-    elif dataset_name == "COCO":
-        dataset_class = COCOSegmentation
-    elif dataset_name == "Cityscapes":
-        dataset_class = CitySegmentation
+    # elif dataset_name == "VOC":
+    #     dataset_class = VOCSegDataset
+    # elif dataset_name == "COCO":
+    #     dataset_class = COCOSegmentation
+    # elif dataset_name == "Cityscapes":
+    #     dataset_class = CitySegmentation
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
     dataset = dataset_class(
         root=dataset_dir,
-        split="val",
-        mode="testval",
+        mode="test",
         transform=transform_val)
+
+    # dataset = dataset_class(
+    #     root=dataset_dir,
+    #     split="val",
+    #     mode="testval",
+    #     transform=transform_val)
 
     return gluon.data.DataLoader(
         dataset=dataset,

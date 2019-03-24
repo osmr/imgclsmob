@@ -13,23 +13,20 @@ class SegDataset(dataset.Dataset):
     ----------
     root : string
         Path to data folder.
-    split: string
-        'train', 'val' or 'test'
     mode: string
-        'train', 'val' or 'test'
+        'train', 'val', 'test', or 'demo'.
     transform : callable
         A function that transforms the image
     """
     def __init__(self,
                  root,
-                 split,
                  mode,
                  transform,
                  base_size=520,
                  crop_size=480):
+        assert (mode in ("train", "val", "test", "demo"))
         self.root = root
-        self.split = split
-        self.mode = mode if mode is not None else split
+        self.mode = mode
         self.transform = transform
         self.base_size = base_size
         self.crop_size = crop_size

@@ -3,15 +3,14 @@ import argparse
 import time
 import logging
 
-from gluoncv.utils.metrics import SegmentationMetric
-
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
-from gluon.seg_datasets import add_dataset_parser_arguments
-from gluon.seg_datasets import batch_fn
-from gluon.seg_datasets import get_test_data_source
-from gluon.seg_datasets import validate1
+from gluon.seg_utils import add_dataset_parser_arguments
+from gluon.seg_utils import batch_fn
+from gluon.seg_utils import get_test_data_source
+from gluon.seg_utils import validate1
+from gluon.seg_metrics import PixIoUSegMetric
 
 
 def parse_args():
@@ -70,12 +69,6 @@ def parse_args():
         type=int,
         help='number of preprocessing workers')
 
-    # parser.add_argument(
-    #     '--batch-size',
-    #     type=int,
-    #     default=16,
-    #     help='training batch size per device (CPU/GPU).')
-
     parser.add_argument(
         '--save-dir',
         type=str,
@@ -114,7 +107,7 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        accuracy_metric = SegmentationMetric(classes)
+        accuracy_metric = PixIoUSegMetric(classes)
         tic = time.time()
         pix_acc, miou = validate1(
             accuracy_metric=accuracy_metric,
@@ -169,7 +162,7 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
-        net_extra_kwargs={"aux": False},
+        net_extra_kwargs={"aux": False, "fixed_size": False},
         load_ignore_extra=True,
         classes=args.num_classes,
         in_channels=args.in_channels,

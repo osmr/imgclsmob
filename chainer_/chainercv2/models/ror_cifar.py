@@ -1,11 +1,11 @@
 """
-    RoR-3 for CIFAR, implemented in Chainer.
+    RoR-3 for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
     https://arxiv.org/abs/1608.02908.
 """
 
-__all__ = ['CIFARRoR', 'ror3_56_cifar10', 'ror3_56_cifar100', 'ror3_110_cifar10', 'ror3_110_cifar100',
-           'ror3_164_cifar10', 'ror3_164_cifar100']
+__all__ = ['CIFARRoR', 'ror3_56_cifar10', 'ror3_56_cifar100', 'ror3_56_svhn', 'ror3_110_cifar10', 'ror3_110_cifar100',
+           'ror3_110_svhn', 'ror3_164_cifar10', 'ror3_164_cifar100', 'ror3_164_svhn']
 
 import os
 import chainer.functions as F
@@ -357,6 +357,23 @@ def ror3_56_cifar100(classes=100, **kwargs):
     return get_ror_cifar(classes=classes, blocks=56, model_name="ror3_56_cifar100", **kwargs)
 
 
+def ror3_56_svhn(classes=10, **kwargs):
+    """
+    RoR-3-56 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
+    https://arxiv.org/abs/1608.02908.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_ror_cifar(classes=classes, blocks=56, model_name="ror3_56_svhn", **kwargs)
+
+
 def ror3_110_cifar10(classes=10, **kwargs):
     """
     RoR-3-110 model for CIFAR-10 from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
@@ -389,6 +406,23 @@ def ror3_110_cifar100(classes=100, **kwargs):
         Location for keeping the model parameters.
     """
     return get_ror_cifar(classes=classes, blocks=110, model_name="ror3_110_cifar100", **kwargs)
+
+
+def ror3_110_svhn(classes=10, **kwargs):
+    """
+    RoR-3-110 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
+    https://arxiv.org/abs/1608.02908.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_ror_cifar(classes=classes, blocks=110, model_name="ror3_110_svhn", **kwargs)
 
 
 def ror3_164_cifar10(classes=10, **kwargs):
@@ -425,6 +459,23 @@ def ror3_164_cifar100(classes=100, **kwargs):
     return get_ror_cifar(classes=classes, blocks=164, model_name="ror3_164_cifar100", **kwargs)
 
 
+def ror3_164_svhn(classes=10, **kwargs):
+    """
+    RoR-3-164 model for SVHN from 'Residual Networks of Residual Networks: Multilevel Residual Networks,'
+    https://arxiv.org/abs/1608.02908.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_ror_cifar(classes=classes, blocks=164, model_name="ror3_164_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -436,10 +487,13 @@ def _test():
     models = [
         (ror3_56_cifar10, 10),
         (ror3_56_cifar100, 100),
+        (ror3_56_svhn, 10),
         (ror3_110_cifar10, 10),
         (ror3_110_cifar100, 100),
+        (ror3_110_svhn, 10),
         (ror3_164_cifar10, 10),
         (ror3_164_cifar100, 100),
+        (ror3_164_svhn, 10),
     ]
 
     for model, classes in models:
@@ -449,10 +503,13 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ror3_56_cifar10 or weight_count == 762746)
         assert (model != ror3_56_cifar100 or weight_count == 768596)
+        assert (model != ror3_56_svhn or weight_count == 762746)
         assert (model != ror3_110_cifar10 or weight_count == 1637690)
         assert (model != ror3_110_cifar100 or weight_count == 1643540)
+        assert (model != ror3_110_svhn or weight_count == 1637690)
         assert (model != ror3_164_cifar10 or weight_count == 2512634)
         assert (model != ror3_164_cifar100 or weight_count == 2518484)
+        assert (model != ror3_164_svhn or weight_count == 2512634)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

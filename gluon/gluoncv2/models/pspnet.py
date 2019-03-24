@@ -141,6 +141,8 @@ class PSPNet(HybridBlock):
         Number of output channels form feature extractor.
     aux : bool, default False
         Whether to output an auxiliary result.
+    fixed_size : bool, default True
+        Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (480, 480)
@@ -152,6 +154,7 @@ class PSPNet(HybridBlock):
                  backbone,
                  backbone_out_channels=2048,
                  aux=False,
+                 fixed_size=True,
                  in_channels=3,
                  in_size=(480, 480),
                  classes=21,
@@ -162,10 +165,11 @@ class PSPNet(HybridBlock):
         self.in_size = in_size
         self.classes = classes
         self.aux = aux
-        pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if aux else None
+        self.fixed_size = fixed_size
 
         with self.name_scope():
             self.backbone = backbone
+            pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if fixed_size else None
             self.pool = PyramidPooling(
                 in_channels=backbone_out_channels,
                 upscale_out_size=pool_out_size)
@@ -182,7 +186,7 @@ class PSPNet(HybridBlock):
                     bottleneck_factor=4)
 
     def hybrid_forward(self, F, x):
-        in_size = self.in_size if self.aux else x.shape[2:]
+        in_size = self.in_size if self.fixed_size else x.shape[2:]
         x, y = self.backbone(x)
         x = self.pool(x)
         x = self.final_block(x, in_size)

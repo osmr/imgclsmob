@@ -504,10 +504,13 @@ _models = {
 
     'ror3_56_cifar10': ror3_56_cifar10,
     'ror3_56_cifar100': ror3_56_cifar100,
+    'ror3_56_svhn': ror3_56_svhn,
     'ror3_110_cifar10': ror3_110_cifar10,
     'ror3_110_cifar100': ror3_110_cifar100,
+    'ror3_110_svhn': ror3_110_svhn,
     'ror3_164_cifar10': ror3_164_cifar10,
     'ror3_164_cifar100': ror3_164_cifar100,
+    'ror3_164_svhn': ror3_164_svhn,
 
     'rir_cifar10': rir_cifar10,
     'rir_cifar100': rir_cifar100,

@@ -955,7 +955,7 @@ def main():
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
         packages += ["chainer"]
-        pip_packages += ["cupy-cuda92", "chainer"]
+        pip_packages += ["cupy-cuda92", "cupy-cuda100", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
         pip_packages += ["keras", "keras-mxnet", "keras-applications", "keras-preprocessing"]

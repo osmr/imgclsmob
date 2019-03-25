@@ -78,7 +78,7 @@ def parse_args():
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='cupy-cuda92, chainer, chainercv',
+        default='cupy-cuda92, cupy-cuda100, chainer, chainercv',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args

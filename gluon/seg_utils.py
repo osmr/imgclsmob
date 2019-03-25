@@ -3,13 +3,13 @@
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
-           'get_test_data_source', 'get_num_training_samples', 'validate1']
+           'get_test_data_source', 'get_num_training_samples', 'validate1', 'get_mask_idx']
 
 from tqdm import tqdm
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
 from .ade20k_seg_dataset import ADE20KSegDataset
-# from .voc_seg_dataset import VOCSegDataset
+from .voc_seg_dataset import VOCSegDataset
 # from gluoncv.data.mscoco.segmentation import COCOSegmentation
 # from gluoncv.data.cityscapes import CitySegmentation
 # from gluoncv.data.ade20k.segmentation import ADE20KSegmentation
@@ -89,6 +89,15 @@ def batch_fn(batch, ctx):
 def get_num_training_samples(dataset_name):
     if dataset_name == "ADE20K":
         return None
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+
+def get_mask_idx(dataset_name):
+    if dataset_name == "ADE20K":
+        return None
+    elif dataset_name == "VOC":
+        return VOCSegDataset.mask_idx
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -190,8 +199,8 @@ def get_test_data_source(dataset_name,
 
     if dataset_name == "ADE20K":
         dataset_class = ADE20KSegDataset
-    # elif dataset_name == "VOC":
-    #     dataset_class = VOCSegDataset
+    elif dataset_name == "VOC":
+        dataset_class = VOCSegDataset
     # elif dataset_name == "COCO":
     #     dataset_class = COCOSegmentation
     # elif dataset_name == "Cityscapes":
@@ -203,12 +212,6 @@ def get_test_data_source(dataset_name,
         root=dataset_dir,
         mode="test",
         transform=transform_val)
-
-    # dataset = dataset_class(
-    #     root=dataset_dir,
-    #     split="val",
-    #     mode="testval",
-    #     transform=transform_val)
 
     return gluon.data.DataLoader(
         dataset=dataset,

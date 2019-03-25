@@ -7,41 +7,41 @@ from .seg_dataset import SegDataset
 
 class VOCSegDataset(SegDataset):
     """
-    Pascal VOC semantic segmentation dataset.
+    Pascal VOC2012 semantic segmentation dataset.
 
     Parameters
     ----------
     root : string
         Path to VOCdevkit folder.
-    split: string, default 'train'
-        'train', 'val' or 'test'.
-    mode: string, default None
-        'train', 'val' or 'test'.
+    mode: string, default 'train'
+        'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image
     """
     def __init__(self,
                  root,
-                 split="train",
-                 mode=None,
+                 mode="train",
                  transform=None,
                  **kwargs):
-        super(VOCSegDataset, self).__init__(root, split, mode, transform, **kwargs)
+        super(VOCSegDataset, self).__init__(
+            root=root,
+            mode=mode,
+            transform=transform,
+            **kwargs)
         self.classes = 21
+        self.background_idx = 0
 
-        base_dir_path = os.path.join(root, 'VOC2012')
-        image_dir_path = os.path.join(base_dir_path, 'JPEGImages')
-        mask_dir_path = os.path.join(base_dir_path, 'SegmentationClass')
+        base_dir_path = os.path.join(root, "VOC2012")
+        image_dir_path = os.path.join(base_dir_path, "JPEGImages")
+        mask_dir_path = os.path.join(base_dir_path, "SegmentationClass")
 
-        splits_dir_path = os.path.join(base_dir_path, 'ImageSets', 'Segmentation')
-        if split == 'train':
-            split_file_path = os.path.join(splits_dir_path, 'trainval.txt')
-        elif split == 'val':
-            split_file_path = os.path.join(splits_dir_path, 'val.txt')
-        elif split == 'test':
-            split_file_path = os.path.join(splits_dir_path, 'test.txt')
+        splits_dir_path = os.path.join(base_dir_path, "ImageSets", "Segmentation")
+        if mode == "train":
+            split_file_path = os.path.join(splits_dir_path, "train.txt")
+        elif mode in ("val", "test", "demo"):
+            split_file_path = os.path.join(splits_dir_path, "val.txt")
         else:
-            raise RuntimeError('Unknown dataset split')
+            raise RuntimeError("Unknown dataset splitting mode")
 
         self.images = []
         self.masks = []
@@ -50,17 +50,15 @@ class VOCSegDataset(SegDataset):
                 image_file_path = os.path.join(image_dir_path, line.rstrip('\n') + ".jpg")
                 assert os.path.isfile(image_file_path)
                 self.images.append(image_file_path)
-                if split != "test":
-                    mask_file_path = os.path.join(mask_dir_path, line.rstrip('\n') + ".png")
-                    assert os.path.isfile(mask_file_path)
-                    self.masks.append(mask_file_path)
+                mask_file_path = os.path.join(mask_dir_path, line.rstrip('\n') + ".png")
+                assert os.path.isfile(mask_file_path)
+                self.masks.append(mask_file_path)
 
-        if split != "test":
-            assert (len(self.images) == len(self.masks))
+        assert (len(self.images) == len(self.masks))
 
     def __getitem__(self, index):
         image = Image.open(self.images[index]).convert("RGB")
-        if self.mode == "test":
+        if self.mode == "demo":
             image = self._img_transform(image)
             if self.transform is not None:
                 image = self.transform(image)
@@ -72,7 +70,7 @@ class VOCSegDataset(SegDataset):
         elif self.mode == "val":
             image, mask = self._val_sync_transform(image, mask)
         else:
-            assert self.mode == "testval"
+            assert self.mode == "test"
             image, mask = self._img_transform(image), self._mask_transform(mask)
 
         if self.transform is not None:
@@ -80,10 +78,12 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
+    mask_idx = 22
+
     @staticmethod
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
-        np_mask[np_mask == 255] = -1
+        np_mask[np_mask == 255] = VOCSegDataset.mask_idx
         return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):

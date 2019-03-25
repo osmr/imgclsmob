@@ -6,11 +6,12 @@ import logging
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
-from gluon.seg_utils import add_dataset_parser_arguments
+from gluon.seg_utils import add_dataset_parser_arguments, get_mask_idx
 from gluon.seg_utils import batch_fn
 from gluon.seg_utils import get_test_data_source
 from gluon.seg_utils import validate1
-from gluon.seg_metrics import PixIoUSegMetric
+# from gluon.seg_metrics import PixIoUSegMetric
+from gluon.seg_metrics import PixelAccuracyMetric
 
 
 def parse_args():
@@ -105,9 +106,14 @@ def test(net,
          calc_weight_count=False,
          calc_flops=False,
          calc_flops_only=True,
-         extended_log=False):
+         extended_log=False,
+         mask_idx=-1):
     if not calc_flops_only:
-        accuracy_metric = PixIoUSegMetric(classes)
+        # accuracy_metric = PixIoUSegMetric(classes)
+        accuracy_metric = PixelAccuracyMetric(
+            num_classes=classes,
+            mask_idx=mask_idx,
+            use_mask=(mask_idx >= 0))
         tic = time.time()
         pix_acc, miou = validate1(
             accuracy_metric=accuracy_metric,
@@ -190,7 +196,8 @@ def main():
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        mask_idx=get_mask_idx(args.dataset))
 
 
 if __name__ == '__main__':

@@ -499,14 +499,14 @@ _models = {
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
 
-    'pspnet_resnet50_voc': pspnet_resnet50_voc,
-    'pspnet_resnet101_voc': pspnet_resnet101_voc,
-    'pspnet_resnet50_coco': pspnet_resnet50_coco,
-    'pspnet_resnet101_coco': pspnet_resnet101_coco,
-    'pspnet_resnet50_ade20k': pspnet_resnet50_ade20k,
-    'pspnet_resnet101_ade20k': pspnet_resnet101_ade20k,
-    'pspnet_resnet50_sityscapes': pspnet_resnet50_sityscapes,
-    'pspnet_resnet101_sityscapes': pspnet_resnet101_sityscapes,
+    'pspnet_resnetd50b_voc': pspnet_resnetd50b_voc,
+    'pspnet_resnetd101b_voc': pspnet_resnetd101b_voc,
+    'pspnet_resnetd50b_coco': pspnet_resnetd50b_coco,
+    'pspnet_resnetd101b_coco': pspnet_resnetd101b_coco,
+    'pspnet_resnetd50b_ade20k': pspnet_resnetd50b_ade20k,
+    'pspnet_resnetd101b_ade20k': pspnet_resnetd101b_ade20k,
+    'pspnet_resnetd50b_sityscapes': pspnet_resnetd50b_sityscapes,
+    'pspnet_resnetd101b_sityscapes': pspnet_resnetd101b_sityscapes,
 }
 
 

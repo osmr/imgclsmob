@@ -11,7 +11,8 @@ __all__ = ['seg_pixel_accuracy_np', 'segm_mean_accuracy_hmasks', 'segm_mean_accu
 def seg_pixel_accuracy_np(label_imask,
                           pred_imask,
                           vague_idx=-1,
-                          use_vague=False):
+                          use_vague=False,
+                          empty_result=0.0):
     """
     The segmentation pixel accuracy.
 
@@ -25,6 +26,8 @@ def seg_pixel_accuracy_np(label_imask,
         Index of masked pixels.
     use_vague : bool, default False
         Whether to use pixel masking.
+    empty_result : float, default 0.0
+        Result value for an image without any classes.
 
     Returns
     -------
@@ -35,7 +38,7 @@ def seg_pixel_accuracy_np(label_imask,
     if use_vague:
         sum_u_ij = np.sum(label_imask.flat != vague_idx)
         if sum_u_ij == 0:
-            return 0.0
+            return empty_result
         sum_u_ii = np.sum(np.logical_and(pred_imask.flat == label_imask.flat, label_imask.flat != vague_idx))
     else:
         sum_u_ii = np.sum(pred_imask.flat == label_imask.flat)
@@ -260,7 +263,11 @@ def segm_mean_iou2(label_hmask,
 def seg_mean_iou_imasks_np(label_imask,
                            pred_imask,
                            num_classes,
-                           ignore_bg=False):
+                           vague_idx=-1,
+                           use_vague=False,
+                           bg_idx=-1,
+                           ignore_bg=False,
+                           empty_result=0.0):
     """
     The segmentation mean intersection over union.
 
@@ -272,8 +279,16 @@ def seg_mean_iou_imasks_np(label_imask,
         Predicted index mask (batch of).
     num_classes : int
         Number of classes.
-    ignore_bg : bool
-        Ignoring class 0, if true.
+    vague_idx : int, default -1
+        Index of masked pixels.
+    use_vague : bool, default False
+        Whether to use pixel masking.
+    bg_idx : int, default -1
+        Index of background class.
+    ignore_bg : bool, default False
+        Whether to ignore background class.
+    empty_result : float, default 0.0
+        Result value for an image without any classes.
 
     Returns
     -------
@@ -284,29 +299,43 @@ def seg_mean_iou_imasks_np(label_imask,
     assert (len(pred_imask.shape) == 2)
     assert (pred_imask.shape == label_imask.shape)
 
-    eps = np.finfo(np.float32).eps
+    min_i = 1
+    max_i = num_classes
+    n_bins = num_classes
 
-    mini = 1
-    maxi = num_classes
-    nbins = num_classes
     if ignore_bg:
-        maxi -= 1
-        nbins -= 1
-        pred_imask = pred_imask * (label_imask > 0).astype(pred_imask.dtype)
-    else:
+        n_bins -= 1
+        if bg_idx != 0:
+            assert (bg_idx == num_classes - 1)
+            max_i -= 1
+
+    if not (ignore_bg and (bg_idx == 0)):
         label_imask += 1
         pred_imask += 1
-        if (label_imask < 0).any():
-            pred_imask = pred_imask * (label_imask >= 0).astype(pred_imask.dtype)
+        vague_idx += 1
+
+    if use_vague:
+        label_imask = label_imask * (label_imask != vague_idx)
+        pred_imask = pred_imask * (pred_imask != vague_idx)
 
     intersection = pred_imask * (pred_imask == label_imask)
 
-    area_inter, _ = np.histogram(intersection, bins=nbins, range=(mini, maxi))
-    area_pred, _ = np.histogram(pred_imask, bins=nbins, range=(mini, maxi))
-    area_label, _ = np.histogram(label_imask, bins=nbins, range=(mini, maxi))
-    area_union = area_pred + area_label - area_inter + eps
+    area_inter, _ = np.histogram(intersection, bins=n_bins, range=(min_i, max_i))
+    area_pred, _ = np.histogram(pred_imask, bins=n_bins, range=(min_i, max_i))
+    area_label, _ = np.histogram(label_imask, bins=n_bins, range=(min_i, max_i))
+    area_union = area_pred + area_label - area_inter
 
-    mean_iou = (area_inter / area_union).mean()
+    class_count = (area_union > 0).sum()
+    if class_count == 0:
+        return empty_result
+
+    eps = np.finfo(np.float32).eps
+    area_union = area_union + eps
+
+    mean_iou = (area_inter / area_union).sum() / class_count
+
+    assert ((not ignore_bg) or (len(area_inter) == num_classes - 1))
+    assert (ignore_bg or (len(area_inter) == num_classes))
 
     return mean_iou
 

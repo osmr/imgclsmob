@@ -7,23 +7,22 @@ import mxnet as mx
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
-from gluon.seg_utils import add_dataset_parser_arguments, get_vague_idx
+from gluon.seg_utils import add_dataset_parser_arguments, get_vague_idx, get_background_idx
 from gluon.seg_utils import batch_fn
 from gluon.seg_utils import get_test_data_source
 from gluon.seg_utils import validate1
-# from gluon.seg_metrics import PixIoUSegMetric
 from gluon.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (Gluon/ADE20K/PascalVOC/COCO/Cityscapes)',
+        description='Evaluate a model for image segmentation (Gluon/VOC2012/ADE20K/COCO/Cityscapes)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '--dataset',
         type=str,
-        default="ADE20K",
-        help='dataset name. options are ADE20K, VOC, COCO, Cityscapes')
+        default="VOC",
+        help='dataset name. options are VOC, ADE20K, COCO, Cityscapes')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)
@@ -90,7 +89,7 @@ def parse_args():
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='mxnet-cu92, gluoncv',
+        default='mxnet-cu92, mxnet-cu100mkl, gluoncv',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args
@@ -108,7 +107,8 @@ def test(net,
          calc_flops=False,
          calc_flops_only=True,
          extended_log=False,
-         vague_idx=-1):
+         vague_idx=-1,
+         bg_idx=-1):
     if not calc_flops_only:
         metric = mx.metric.CompositeEvalMetric()
         metric.add(PixelAccuracyMetric(
@@ -118,15 +118,11 @@ def test(net,
         metric.add(MeanIoUMetric(
             num_classes=classes,
             vague_idx=vague_idx,
-            use_vague=(vague_idx >= 0)))
-
-        # accuracy_metric = PixIoUSegMetric(classes)
-        # accuracy_metric = PixelAccuracyMetric(
-        #     num_classes=classes,
-        #     vague_idx=vague_idx,
-        #     use_vague=(vague_idx >= 0))
+            use_vague=(vague_idx >= 0),
+            bg_idx=bg_idx,
+            ignore_bg=True))
         tic = time.time()
-        pix_acc, miou = validate1(
+        accuracy_info = validate1(
             accuracy_metric=metric,
             net=net,
             val_data=test_data,
@@ -134,12 +130,14 @@ def test(net,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
+        pix_acc = accuracy_info[1][0]
+        mean_iou = accuracy_info[1][1]
         if extended_log:
-            logging.info('Test: pixAcc={pixAcc:.4f} ({pixAcc}), mIoU={mIoU:.4f} ({mIoU})'.format(
-                pixAcc=pix_acc, mIoU=miou))
+            logging.info('Test: pix_acc={pix_acc:.4f} ({pix_acc}), mean_iou={mean_iou:.4f} ({mean_iou})'.format(
+                pix_acc=pix_acc, mean_iou=mean_iou))
         else:
-            logging.info('Test: pixAcc={pixAcc:.4f}, mIoU={mIoU:.4f}'.format(
-                pixAcc=pix_acc, mIoU=miou))
+            logging.info('Test: pix_acc={pix_acc:.4f}, mean_iou={mean_iou:.4f}'.format(
+                pix_acc=pix_acc, mean_iou=mean_iou))
         logging.info('Time cost: {:.4f} sec'.format(
             time.time() - tic))
 
@@ -208,7 +206,8 @@ def main():
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
         extended_log=True,
-        vague_idx=get_vague_idx(args.dataset))
+        vague_idx=get_vague_idx(args.dataset),
+        bg_idx=get_background_idx(args.dataset))
 
 
 if __name__ == '__main__':

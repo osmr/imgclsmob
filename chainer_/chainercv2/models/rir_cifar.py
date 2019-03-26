@@ -1,9 +1,9 @@
 """
-    RiR for CIFAR, implemented in Chainer.
+    RiR for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Resnet in Resnet: Generalizing Residual Architectures,' https://arxiv.org/abs/1603.08029.
 """
 
-__all__ = ['CIFARRiR', 'rir_cifar10', 'rir_cifar100']
+__all__ = ['CIFARRiR', 'rir_cifar10', 'rir_cifar100', 'rir_svhn']
 
 import os
 import chainer.functions as F
@@ -297,6 +297,23 @@ def rir_cifar100(num_classes=100, **kwargs):
     return get_rir_cifar(num_classes=num_classes, model_name="rir_cifar100", **kwargs)
 
 
+def rir_svhn(num_classes=10, **kwargs):
+    """
+    RiR model for SVHN from 'Resnet in Resnet: Generalizing Residual Architectures,'
+    https://arxiv.org/abs/1603.08029.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_rir_cifar(num_classes=num_classes, model_name="rir_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -308,6 +325,7 @@ def _test():
     models = [
         (rir_cifar10, 10),
         (rir_cifar100, 100),
+        (rir_svhn, 10),
     ]
 
     for model, classes in models:
@@ -317,6 +335,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != rir_cifar10 or weight_count == 9492980)
         assert (model != rir_cifar100 or weight_count == 9527720)
+        assert (model != rir_svhn or weight_count == 9492980)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

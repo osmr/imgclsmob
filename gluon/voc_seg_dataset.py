@@ -29,7 +29,6 @@ class VOCSegDataset(SegDataset):
             transform=transform,
             **kwargs)
         self.classes = 21
-        self.background_idx = 0
 
         base_dir_path = os.path.join(root, "VOC2012")
         image_dir_path = os.path.join(base_dir_path, "JPEGImages")
@@ -78,12 +77,13 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
-    vague_idx = 22
+    background_idx = 0
+    vague_idx = 255
 
     @staticmethod
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
-        np_mask[np_mask == 255] = VOCSegDataset.vague_idx
+        # np_mask[np_mask == 255] = VOCSegDataset.vague_idx
         return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):

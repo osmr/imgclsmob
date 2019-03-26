@@ -514,6 +514,7 @@ _models = {
 
     'rir_cifar10': rir_cifar10,
     'rir_cifar100': rir_cifar100,
+    'rir_svhn': rir_svhn,
 
     'msdnet22_cifar10': msdnet22_cifar10,
 

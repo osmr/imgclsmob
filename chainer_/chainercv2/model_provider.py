@@ -482,6 +482,7 @@ _models = {
 
     'rir_cifar10': rir_cifar10,
     'rir_cifar100': rir_cifar100,
+    'rir_svhn': rir_svhn,
 
     'resdropresnet20_cifar10': resdropresnet20_cifar10,
     'resdropresnet20_cifar100': resdropresnet20_cifar100,

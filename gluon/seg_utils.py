@@ -3,7 +3,7 @@
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
-           'get_test_data_source', 'get_num_training_samples', 'validate1', 'get_vague_idx']
+           'get_test_data_source', 'get_num_training_samples', 'validate1', 'get_vague_idx', 'get_background_idx']
 
 from tqdm import tqdm
 from mxnet import gluon
@@ -17,18 +17,7 @@ from .voc_seg_dataset import VOCSegDataset
 
 def add_dataset_parser_arguments(parser,
                                  dataset_name):
-    if dataset_name == "ADE20K":
-        parser.add_argument(
-            '--data-dir',
-            type=str,
-            default='../imgclsmob_data/ade20k',
-            help='path to directory with ADE20K dataset')
-        parser.add_argument(
-            '--num-classes',
-            type=int,
-            default=150,
-            help='number of classes')
-    elif dataset_name == "VOC":
+    if dataset_name == "VOC":
         parser.add_argument(
             '--data-dir',
             type=str,
@@ -38,6 +27,17 @@ def add_dataset_parser_arguments(parser,
             '--num-classes',
             type=int,
             default=21,
+            help='number of classes')
+    elif dataset_name == "ADE20K":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/ade20k',
+            help='path to directory with ADE20K dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=150,
             help='number of classes')
     elif dataset_name == "COCO":
         parser.add_argument(
@@ -94,10 +94,19 @@ def get_num_training_samples(dataset_name):
 
 
 def get_vague_idx(dataset_name):
-    if dataset_name == "ADE20K":
-        return None
-    elif dataset_name == "VOC":
+    if dataset_name == "VOC":
         return VOCSegDataset.vague_idx
+    elif dataset_name == "ADE20K":
+        return None
+    else:
+        raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+
+def get_background_idx(dataset_name):
+    if dataset_name == "VOC":
+        return VOCSegDataset.background_idx
+    elif dataset_name == "ADE20K":
+        return None
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -197,10 +206,10 @@ def get_test_data_source(dataset_name,
             std=std_rgb)
     ])
 
-    if dataset_name == "ADE20K":
-        dataset_class = ADE20KSegDataset
-    elif dataset_name == "VOC":
+    if dataset_name == "VOC":
         dataset_class = VOCSegDataset
+    elif dataset_name == "ADE20K":
+        dataset_class = ADE20KSegDataset
     # elif dataset_name == "COCO":
     #     dataset_class = COCOSegmentation
     # elif dataset_name == "Cityscapes":
@@ -234,5 +243,5 @@ def validate1(accuracy_metric,
         data_list, labels_list = batch_fn(batch, ctx)
         outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
         accuracy_metric.update(labels_list, outputs_list)
-    pix_acc, miou = accuracy_metric.get()
-    return pix_acc, miou
+    accuracy_info = accuracy_metric.get()
+    return accuracy_info

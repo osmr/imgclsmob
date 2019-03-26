@@ -12,7 +12,8 @@ __all__ = ['seg_pixel_accuracy_nd', 'segm_mean_accuracy', 'segm_mean_iou', 'seg_
 def seg_pixel_accuracy_nd(label_imask,
                           pred_imask,
                           vague_idx=-1,
-                          use_vague=False):
+                          use_vague=False,
+                          empty_result=0.0):
     """
     The segmentation pixel accuracy (for MXNet nd-arrays).
 
@@ -26,6 +27,8 @@ def seg_pixel_accuracy_nd(label_imask,
         Index of masked pixels.
     use_vague : bool, default False
         Whether to use pixel masking.
+    empty_result : float, default 0.0
+        Result value for an image without any classes.
 
     Returns
     -------
@@ -37,7 +40,7 @@ def seg_pixel_accuracy_nd(label_imask,
         mask = (label_imask != vague_idx)
         sum_u_ij = mask.sum().asscalar()
         if sum_u_ij == 0:
-            return 0.0
+            return empty_result
         sum_u_ii = ((label_imask == pred_imask) * mask).sum().asscalar()
     else:
         sum_u_ii = (label_imask == pred_imask).sum().asscalar()

@@ -219,7 +219,7 @@ class CIFARRiR(Chain):
         return x
 
 
-def get_rir_cifar(num_classes,
+def get_rir_cifar(classes,
                   model_name=None,
                   pretrained=False,
                   root=os.path.join('~', '.chainer', 'models'),
@@ -229,7 +229,7 @@ def get_rir_cifar(num_classes,
 
     Parameters:
     ----------
-    num_classes : int
+    classes : int
         Number of classification classes.
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -247,7 +247,7 @@ def get_rir_cifar(num_classes,
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
-        classes=num_classes,
+        classes=classes,
         **kwargs)
 
     if pretrained:
@@ -263,55 +263,55 @@ def get_rir_cifar(num_classes,
     return net
 
 
-def rir_cifar10(num_classes=10, **kwargs):
+def rir_cifar10(classes=10, **kwargs):
     """
     RiR model for CIFAR-10 from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
     Parameters:
     ----------
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_rir_cifar(num_classes=num_classes, model_name="rir_cifar10", **kwargs)
+    return get_rir_cifar(classes=classes, model_name="rir_cifar10", **kwargs)
 
 
-def rir_cifar100(num_classes=100, **kwargs):
+def rir_cifar100(classes=100, **kwargs):
     """
     RiR model for CIFAR-100 from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
     Parameters:
     ----------
-    num_classes : int, default 100
+    classes : int, default 100
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_rir_cifar(num_classes=num_classes, model_name="rir_cifar100", **kwargs)
+    return get_rir_cifar(classes=classes, model_name="rir_cifar100", **kwargs)
 
 
-def rir_svhn(num_classes=10, **kwargs):
+def rir_svhn(classes=10, **kwargs):
     """
     RiR model for SVHN from 'Resnet in Resnet: Generalizing Residual Architectures,'
     https://arxiv.org/abs/1603.08029.
 
     Parameters:
     ----------
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_rir_cifar(num_classes=num_classes, model_name="rir_svhn", **kwargs)
+    return get_rir_cifar(classes=classes, model_name="rir_svhn", **kwargs)
 
 
 def _test():

@@ -6,79 +6,10 @@ import threading
 import numpy as np
 import mxnet as mx
 from mxnet.metric import EvalMetric
+from .seg_metrics_np import seg_pixel_accuracy_np, seg_mean_iou_imasks_np, seg_mean_iou_np
+from .seg_metrics_nd import seg_pixel_accuracy_nd, seg_mean_iou2_nd
 
 __all__ = ['PixIoUSegMetric', 'PixelAccuracyMetric', 'MeanIoUMetric']
-
-
-def segm_pixel_accuracy(label_imask,
-                        pred_imask,
-                        mask_idx=-1,
-                        use_mask=False):
-    """
-    The segmentation pixel accuracy.
-
-    Parameters
-    ----------
-    label_imask : np.array
-        Ground truth index mask (maybe batch of).
-    pred_imask : np.array
-        Predicted index mask (maybe batch of).
-    mask_idx : int, default -1
-        Index of masked pixels.
-    use_mask : bool, default False
-        Whether to use pixel masking.
-
-    Returns
-    -------
-    float
-        PA metric value.
-    """
-    assert (label_imask.shape == pred_imask.shape)
-    if use_mask:
-        sum_u_ij = np.sum(label_imask.flat != mask_idx)
-        if sum_u_ij == 0:
-            return 0.0
-        sum_u_ii = np.sum(np.logical_and(pred_imask.flat == label_imask.flat, label_imask.flat != mask_idx))
-    else:
-        sum_u_ii = np.sum(pred_imask.flat == label_imask.flat)
-        sum_u_ij = pred_imask.size
-    return float(sum_u_ii) / sum_u_ij
-
-
-def segm_pixel_accuracy_nd(label_imask,
-                           pred_imask,
-                           mask_idx=-1,
-                           use_mask=False):
-    """
-    The segmentation pixel accuracy (for MXNet nd-arrays).
-
-    Parameters
-    ----------
-    label_imask : mx.nd.array
-        Ground truth index mask (maybe batch of).
-    pred_imask : mx.nd.array
-        Predicted index mask (maybe batch of).
-    mask_idx : int, default -1
-        Index of masked pixels.
-    use_mask : bool, default False
-        Whether to use pixel masking.
-
-    Returns
-    -------
-    float
-        PA metric value.
-    """
-    assert (label_imask.shape == pred_imask.shape)
-    if use_mask:
-        mask = (label_imask != mask_idx)
-        sum_u_ij = mask.sum().asscalar()
-        if sum_u_ij == 0:
-            return 0.0
-        sum_u_ii = ((label_imask != pred_imask) * mask).sum().asscalar()
-    else:
-        sum_u_ii = mx.nd.equal(label_imask, pred_imask).sum().asscalar()
-        sum_u_ij = pred_imask.size
-    return float(sum_u_ii) / sum_u_ij
 
 
 class PixelAccuracyMetric(mx.metric.EvalMetric):
@@ -89,12 +20,12 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
     ----------
     axis : int, default 1
         The axis that represents classes.
-    name : str
+    name : str, default 'pix_acc'
         Name of this metric instance for display.
-    output_names : list of str, or None
+    output_names : list of str, or None, default None
         Name of predictions that should be used when updating with update_dict.
         By default include all predictions.
-    label_names : list of str, or None
+    label_names : list of str, or None, default None
         Name of labels that should be used when updating with update_dict.
         By default include all labels.
     on_cpu : bool, default True
@@ -103,9 +34,9 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         Whether label is an integer array instead of probability distribution.
     num_classes : int, default None
         Number of classes.
-    mask_idx : int, default -1
+    vague_idx : int, default -1
         Index of masked pixels.
-    use_mask : bool, default False
+    use_vague : bool, default False
         Whether to use pixel masking.
     """
     def __init__(self,
@@ -116,8 +47,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                  on_cpu=True,
                  sparse_label=True,
                  num_classes=None,
-                 mask_idx=-1,
-                 use_mask=False):
+                 vague_idx=-1,
+                 use_vague=False):
         super(PixelAccuracyMetric, self).__init__(
             name,
             axis=axis,
@@ -127,8 +58,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         self.on_cpu = on_cpu
         self.sparse_label = sparse_label
         self.num_classes = num_classes
-        self.mask_idx = mask_idx
-        self.use_mask = use_mask
+        self.vague_idx = vague_idx
+        self.use_vague = use_vague
 
     def update(self, labels, preds):
         """
@@ -149,11 +80,11 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                 else:
                     label_imask = mx.nd.argmax(label, axis=self.axis).asnumpy().astype(np.int32)
                 pred_imask = mx.nd.argmax(pred, axis=self.axis).asnumpy().astype(np.int32)
-                acc = segm_pixel_accuracy(
+                acc = seg_pixel_accuracy_np(
                     label_imask=label_imask,
                     pred_imask=pred_imask,
-                    mask_idx=self.mask_idx,
-                    use_mask=self.use_mask)
+                    vague_idx=self.vague_idx,
+                    use_vague=self.use_vague)
                 self.sum_metric += acc
                 self.num_inst += 1
         else:
@@ -163,149 +94,13 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                 else:
                     label_imask = mx.nd.cast(mx.nd.argmax(label, axis=self.axis), dtype=np.int32)
                 pred_imask = mx.nd.cast(mx.nd.argmax(pred, axis=self.axis), dtype=np.int32)
-                acc = segm_pixel_accuracy_nd(
+                acc = seg_pixel_accuracy_nd(
                     label_imask=label_imask,
                     pred_imask=pred_imask,
-                    mask_idx=self.mask_idx,
-                    use_mask=self.use_mask)
+                    vague_idx=self.vague_idx,
+                    use_vague=self.use_vague)
                 self.sum_metric += acc
                 self.num_inst += 1
-
-
-def segm_mean_iou_imasks(label_imask,
-                         pred_imask,
-                         num_classes,
-                         ignore_bg=False):
-    """
-    The segmentation mean intersection over union.
-
-    Parameters
-    ----------
-    label_imask : nd.array
-        Ground truth index mask (batch of)
-    pred_imask : nd.array
-        Predicted index mask (batch of)
-    num_classes : int
-        Number of classes
-    ignore_bg : bool
-        Ignoring class 0, if true
-
-    Returns
-    -------
-    acc : float
-        MIoU metric value
-    """
-    assert (len(label_imask.shape) == 2)
-    assert (len(pred_imask.shape) == 2)
-    assert (pred_imask.shape == label_imask.shape)
-
-    eps = np.finfo(np.float32).eps
-
-    mini = 1
-    maxi = num_classes
-    nbins = num_classes
-    if ignore_bg:
-        maxi -= 1
-        nbins -= 1
-        pred_imask = pred_imask * (label_imask > 0).astype(pred_imask.dtype)
-    else:
-        label_imask += 1
-        pred_imask += 1
-        if (label_imask < 0).any():
-            pred_imask = pred_imask * (label_imask >= 0).astype(pred_imask.dtype)
-
-    intersection = pred_imask * (pred_imask == label_imask)
-
-    area_inter, _ = np.histogram(intersection, bins=nbins, range=(mini, maxi))
-    area_pred, _ = np.histogram(pred_imask, bins=nbins, range=(mini, maxi))
-    area_label, _ = np.histogram(label_imask, bins=nbins, range=(mini, maxi))
-    area_union = area_pred + area_label - area_inter + eps
-
-    mean_iou = (area_inter / area_union).mean()
-
-    return mean_iou
-
-
-def segm_mean_iou(label_hmask,
-                  pred_imask):
-    """
-    The segmentation mean intersection over union.
-
-    Parameters
-    ----------
-    label_hmask : np.array
-        Ground truth one-hot mask
-    pred_imask : np.array
-        Predicted index mask
-
-    Returns
-    -------
-    acc : float
-        MIoU metric value
-    """
-    assert (len(label_hmask.shape) == 3)
-    assert (len(pred_imask.shape) == 2)
-    assert (pred_imask.shape == label_hmask.shape[1:])
-    n = label_hmask.shape[0]
-    i_sum = 0
-    acc_iou = 0.0
-    for i in range(n):
-        class_i_pred_mask = (pred_imask == i)
-        class_i_label_mask = label_hmask[i, :, :]
-
-        u_i = np.sum(class_i_label_mask)
-        u_ji_sj = np.sum(class_i_pred_mask)
-        if (u_i + u_ji_sj) == 0:
-            continue
-
-        u_ii = np.sum(np.logical_and(class_i_pred_mask, class_i_label_mask))
-
-        acc_iou += float(u_ii) / (u_i + u_ji_sj - u_ii)
-        i_sum += 1
-
-    if i_sum > 0:
-        mean_iou = acc_iou / i_sum
-    else:
-        mean_iou = 1.0
-
-    return mean_iou
-
-
-def segm_mean_iou2(label_hmask,
-                   pred_hmask):
-    """
-    The segmentation mean intersection over union.
-
-    Parameters
-    ----------
-    label_hmask : nd.array
-        Ground truth one-hot mask (batch of)
-    pred_hmask : nd.array
-        Predicted one-hot mask (batch of)
-
-    Returns
-    -------
-    acc : float
-        MIoU metric value
-    """
-    assert (len(label_hmask.shape) == 4)
-    assert (len(pred_hmask.shape) == 4)
-    assert (pred_hmask.shape == label_hmask.shape)
-
-    eps = np.finfo(np.float32).eps
-    batch_axis = 0  # The axis that represents mini-batch
-    class_axis = 1  # The axis that represents classes
-
-    inter_hmask = label_hmask * pred_hmask
-    u_i = label_hmask.sum(axis=[batch_axis, class_axis], exclude=True)
-    u_ji_sj = pred_hmask.sum(axis=[batch_axis, class_axis], exclude=True)
-    u_ii = inter_hmask.sum(axis=[batch_axis, class_axis], exclude=True)
-    class_count = (u_i + u_ji_sj > 0.0).sum(axis=class_axis) + eps
-    class_acc = u_ii / (u_i + u_ji_sj - u_ii + eps)
-    acc_iou = class_acc.sum(axis=class_axis) + eps
-    mean_iou = (acc_iou / class_count).mean().asscalar()
-
-    return mean_iou
 
 
 class MeanIoUMetric(mx.metric.EvalMetric):
@@ -314,33 +109,42 @@ class MeanIoUMetric(mx.metric.EvalMetric):
 
     Parameters
     ----------
-    axis : int, default=1
+    axis : int, default 1
         The axis that represents classes
-    name : str
+    name : str, default 'mean_iou'
         Name of this metric instance for display.
-    output_names : list of str, or None
+    output_names : list of str, or None, default None
         Name of predictions that should be used when updating with update_dict.
         By default include all predictions.
-    label_names : list of str, or None
+    label_names : list of str, or None, default None
         Name of labels that should be used when updating with update_dict.
         By default include all labels.
-    on_cpu : bool
+    on_cpu : bool, default True
         Calculate on CPU.
-    sparse_label : bool, default False
+    sparse_label : bool, default True
         Whether label is an integer array instead of probability distribution.
     num_classes : int
         Number of classes
-    ignore_bg : bool
-        Ignoring class 0, if true
+    vague_idx : int, default -1
+        Index of masked pixels.
+    use_vague : bool, default False
+        Whether to use pixel masking.
+    background_idx : int, default -1
+        Index of background class.
+    ignore_bg : bool, default False
+        Whether to ignore background class.
     """
     def __init__(self,
                  axis=1,
-                 name='mean_iou',
+                 name="mean_iou",
                  output_names=None,
                  label_names=None,
                  on_cpu=True,
-                 sparse_label=False,
+                 sparse_label=True,
                  num_classes=None,
+                 vague_idx=-1,
+                 use_vague=False,
+                 bg_idx=-1,
                  ignore_bg=False):
         super(MeanIoUMetric, self).__init__(
             name,
@@ -351,6 +155,9 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         self.on_cpu = on_cpu
         self.sparse_label = sparse_label
         self.num_classes = num_classes
+        self.vague_idx = vague_idx
+        self.use_vague = use_vague
+        self.bg_idx = bg_idx
         self.ignore_bg = ignore_bg
 
     def update(self, labels, preds):
@@ -364,7 +171,6 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         preds : list of `NDArray`
             Predicted values.
         """
-        # time_begin = time.time()
         assert (len(labels) == len(preds))
         if self.on_cpu:
             for label, pred in zip(labels, preds):
@@ -376,13 +182,13 @@ class MeanIoUMetric(mx.metric.EvalMetric):
                 batch_size = label.shape[0]
                 for k in range(batch_size):
                     if self.sparse_label:
-                        acc = segm_mean_iou_imasks(
+                        acc = seg_mean_iou_imasks_np(
                             label_imask=label_imask[k, :, :],
                             pred_imask=pred_imask[k, :, :],
                             num_classes=self.num_classes,
                             ignore_bg=self.ignore_bg)
                     else:
-                        acc = segm_mean_iou(
+                        acc = seg_mean_iou_np(
                             label_hmask=label_hmask[k, :, :, :],
                             pred_imask=pred_imask[k, :, :])
                     self.sum_metric += acc
@@ -398,7 +204,7 @@ class MeanIoUMetric(mx.metric.EvalMetric):
                     n = label_hmask.shape[1]
                 pred_imask = mx.nd.argmax(pred, axis=self.axis)
                 pred_hmask = mx.nd.one_hot(pred_imask, depth=n).transpose((0, 3, 1, 2))
-                acc = segm_mean_iou2(
+                acc = seg_mean_iou2_nd(
                     label_hmask=label_hmask,
                     pred_hmask=pred_hmask)
                 self.sum_metric += acc

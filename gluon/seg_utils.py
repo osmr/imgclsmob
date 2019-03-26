@@ -3,7 +3,7 @@
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
-           'get_test_data_source', 'get_num_training_samples', 'validate1', 'get_mask_idx']
+           'get_test_data_source', 'get_num_training_samples', 'validate1', 'get_vague_idx']
 
 from tqdm import tqdm
 from mxnet import gluon
@@ -93,11 +93,11 @@ def get_num_training_samples(dataset_name):
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
 
-def get_mask_idx(dataset_name):
+def get_vague_idx(dataset_name):
     if dataset_name == "ADE20K":
         return None
     elif dataset_name == "VOC":
-        return VOCSegDataset.mask_idx
+        return VOCSegDataset.vague_idx
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

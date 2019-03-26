@@ -78,12 +78,12 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
-    mask_idx = 22
+    vague_idx = 22
 
     @staticmethod
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
-        np_mask[np_mask == 255] = VOCSegDataset.mask_idx
+        np_mask[np_mask == 255] = VOCSegDataset.vague_idx
         return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):

@@ -77,8 +77,10 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
-    background_idx = 0
     vague_idx = 255
+    use_vague = True
+    background_idx = 0
+    ignore_bg = True
 
     @staticmethod
     def _mask_transform(mask):

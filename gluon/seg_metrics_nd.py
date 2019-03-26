@@ -13,6 +13,7 @@ def seg_pixel_accuracy_nd(label_imask,
                           pred_imask,
                           vague_idx=-1,
                           use_vague=False,
+                          macro_average=True,
                           empty_result=0.0):
     """
     The segmentation pixel accuracy (for MXNet nd-arrays).
@@ -27,12 +28,14 @@ def seg_pixel_accuracy_nd(label_imask,
         Index of masked pixels.
     use_vague : bool, default False
         Whether to use pixel masking.
+    macro_average : bool, default True
+        Whether to use micro or macro averaging.
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
     Returns
     -------
-    float
+    float or tuple of two floats
         PA metric value.
     """
     assert (label_imask.shape == pred_imask.shape)
@@ -40,12 +43,18 @@ def seg_pixel_accuracy_nd(label_imask,
         mask = (label_imask != vague_idx)
         sum_u_ij = mask.sum().asscalar()
         if sum_u_ij == 0:
-            return empty_result
+            if macro_average:
+                return empty_result
+            else:
+                return 0, 0
         sum_u_ii = ((label_imask == pred_imask) * mask).sum().asscalar()
     else:
         sum_u_ii = (label_imask == pred_imask).sum().asscalar()
         sum_u_ij = pred_imask.size
-    return float(sum_u_ii) / sum_u_ij
+    if macro_average:
+        return float(sum_u_ii) / sum_u_ij
+    else:
+        return sum_u_ii, sum_u_ij
 
 
 def segm_mean_accuracy(label_hmask,

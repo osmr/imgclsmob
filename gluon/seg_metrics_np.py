@@ -12,6 +12,7 @@ def seg_pixel_accuracy_np(label_imask,
                           pred_imask,
                           vague_idx=-1,
                           use_vague=False,
+                          macro_average=True,
                           empty_result=0.0):
     """
     The segmentation pixel accuracy.
@@ -26,24 +27,32 @@ def seg_pixel_accuracy_np(label_imask,
         Index of masked pixels.
     use_vague : bool, default False
         Whether to use pixel masking.
+    macro_average : bool, default True
+        Whether to use micro or macro averaging.
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
     Returns
     -------
-    float
+    float or tuple of two ints
         PA metric value.
     """
     assert (label_imask.shape == pred_imask.shape)
     if use_vague:
         sum_u_ij = np.sum(label_imask.flat != vague_idx)
         if sum_u_ij == 0:
-            return empty_result
+            if macro_average:
+                return empty_result
+            else:
+                return 0, 0
         sum_u_ii = np.sum(np.logical_and(pred_imask.flat == label_imask.flat, label_imask.flat != vague_idx))
     else:
         sum_u_ii = np.sum(pred_imask.flat == label_imask.flat)
         sum_u_ij = pred_imask.size
-    return float(sum_u_ii) / sum_u_ij
+    if macro_average:
+        return float(sum_u_ii) / sum_u_ij
+    else:
+        return sum_u_ii, sum_u_ij
 
 
 def segm_mean_accuracy_hmasks(label_hmask,
@@ -267,6 +276,7 @@ def seg_mean_iou_imasks_np(label_imask,
                            use_vague=False,
                            bg_idx=-1,
                            ignore_bg=False,
+                           macro_average=True,
                            empty_result=0.0):
     """
     The segmentation mean intersection over union.
@@ -287,12 +297,14 @@ def seg_mean_iou_imasks_np(label_imask,
         Index of background class.
     ignore_bg : bool, default False
         Whether to ignore background class.
+    macro_average : bool, default True
+        Whether to use micro or macro averaging.
     empty_result : float, default 0.0
         Result value for an image without any classes.
 
     Returns
     -------
-    float
+    float or tuple of two np.arrays of int
         MIoU metric value.
     """
     assert (len(label_imask.shape) == 2)
@@ -325,19 +337,19 @@ def seg_mean_iou_imasks_np(label_imask,
     area_label, _ = np.histogram(label_imask, bins=n_bins, range=(min_i, max_i))
     area_union = area_pred + area_label - area_inter
 
-    class_count = (area_union > 0).sum()
-    if class_count == 0:
-        return empty_result
-
-    eps = np.finfo(np.float32).eps
-    area_union = area_union + eps
-
-    mean_iou = (area_inter / area_union).sum() / class_count
-
     assert ((not ignore_bg) or (len(area_inter) == num_classes - 1))
     assert (ignore_bg or (len(area_inter) == num_classes))
 
-    return mean_iou
+    if macro_average:
+        class_count = (area_union > 0).sum()
+        if class_count == 0:
+            return empty_result
+        eps = np.finfo(np.float32).eps
+        area_union = area_union + eps
+        mean_iou = (area_inter / area_union).sum() / class_count
+        return mean_iou
+    else:
+        return area_inter.astype(np.uint64), area_union.astype(np.uint64)
 
 
 def segm_fw_iou_hmasks(label_hmask,

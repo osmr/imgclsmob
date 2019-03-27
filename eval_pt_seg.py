@@ -4,8 +4,9 @@ import logging
 
 from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
-from pytorch.seg_utils import add_dataset_parser_arguments, get_test_data_loader, get_metainfo
-from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate1, AverageMeter
+from pytorch.seg_utils import add_dataset_parser_arguments, get_test_data_loader, get_metainfo, validate1
+from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count
+from pytorch.seg_metrics import PixelAccuracyMetric
 
 
 def parse_args():
@@ -101,10 +102,14 @@ def test(net,
          dataset_metainfo=None):
     assert (dataset_metainfo is not None)
     if not calc_flops_only:
-        accuracy_metric = AverageMeter()
+        pix_acc_macro_average = False
+        metric = PixelAccuracyMetric(
+            vague_idx=dataset_metainfo["vague_idx"],
+            use_vague=dataset_metainfo["use_vague"],
+            macro_average=pix_acc_macro_average)
         tic = time.time()
         err_val = validate1(
-            accuracy_metric=accuracy_metric,
+            accuracy_metric=metric,
             net=net,
             val_data=test_data,
             use_cuda=use_cuda)

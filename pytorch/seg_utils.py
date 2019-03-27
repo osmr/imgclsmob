@@ -133,10 +133,6 @@ def get_test_data_loader(dataset_name,
     return val_loader
 
 
-def accuracy(_, __):
-    return None
-
-
 def validate1(accuracy_metric,
               net,
               val_data,
@@ -148,7 +144,6 @@ def validate1(accuracy_metric,
             if use_cuda:
                 target = target.cuda(non_blocking=True)
             output = net(data)
-            accuracy_value = accuracy(output, target)
-            accuracy_metric.update(accuracy_value[0], data.size(0))
-    pix_acc, miou = accuracy_metric.avg.item()
-    return pix_acc, miou
+            accuracy_metric.update(target, output)
+    accuracy_info = accuracy_metric.get()
+    return accuracy_info

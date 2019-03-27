@@ -113,7 +113,6 @@ def test(net,
         metric = mx.metric.CompositeEvalMetric()
         pix_acc_macro_average = False
         metric.add(PixelAccuracyMetric(
-            num_classes=classes,
             vague_idx=dataset_metainfo["vague_idx"],
             use_vague=dataset_metainfo["use_vague"],
             macro_average=pix_acc_macro_average))

@@ -2,14 +2,13 @@
     Segmentation datasets (VOC2012/ADE20K/COCO/Cityscapes) routines.
 """
 
-__all__ = ['add_dataset_parser_arguments', 'get_test_data_loader', 'validate1', 'get_metainfo']
+__all__ = ['add_dataset_parser_arguments', 'get_test_data_iterator', 'get_metainfo', 'SegPredictor']
 
-from tqdm import tqdm
-import torch.utils.data
-import torchvision.transforms as transforms
+import numpy as np
+import chainer
+from chainer import iterators
+from chainer import Chain
 from .voc_seg_dataset import VOCSegDataset
-# import torchvision.datasets as datasets
-# from .ade20k_dataset import ADE20KSegmentation
 
 
 def add_dataset_parser_arguments(parser,
@@ -77,6 +76,39 @@ def add_dataset_parser_arguments(parser,
         help='crop image size')
 
 
+class SegPredictor(Chain):
+
+    def __init__(self,
+                 base_model,
+                 mean=(0.485, 0.456, 0.406),
+                 std=(0.229, 0.224, 0.225)):
+        super(SegPredictor, self).__init__()
+        self.mean = np.array(mean, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std, np.float32)[:, np.newaxis, np.newaxis]
+        with self.init_scope():
+            self.model = base_model
+
+    def _preprocess(self, img):
+        dtype = chainer.get_dtype(None)
+        img = img.transpose(2, 0, 1)
+        img = img.astype(dtype)
+        img *= 1.0 / 255.0
+
+        img -= self.mean
+        img /= self.std
+        return img
+
+    def predict(self, imgs):
+        imgs = self.xp.asarray([self._preprocess(img) for img in imgs])
+
+        with chainer.using_config('train', False), chainer.function.no_backprop_mode():
+            imgs = chainer.Variable(imgs)
+            predictions = self.model(imgs)
+
+        output = chainer.backends.cuda.to_cpu(predictions.array)
+        return output
+
+
 def get_metainfo(dataset_name):
     if dataset_name == "VOC":
         return {
@@ -90,63 +122,28 @@ def get_metainfo(dataset_name):
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
 
-def get_test_data_loader(dataset_name,
-                         dataset_dir,
-                         batch_size,
-                         num_workers):
-    mean_rgb = (0.485, 0.456, 0.406)
-    std_rgb = (0.229, 0.224, 0.225)
-
-    transform_val = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=mean_rgb,
-            std=std_rgb),
-    ])
+def get_test_data_iterator(dataset_name,
+                           dataset_dir,
+                           batch_size,
+                           num_workers):
 
     if dataset_name == "VOC":
-        dataset = VOCSegDataset(
+        test_ds = VOCSegDataset(
             root=dataset_dir,
             mode="test",
-            transform=transform_val)
-    elif dataset_name == "ADE20K":
-        dataset = None
-        # dataset = ADE20KSegmentation(
-        #     root=dataset_dir,
-        #     mode="val",
-        #     base_size=image_base_size,
-        #     crop_size=image_crop_size,
-        #     transform=transform_val)
-    elif dataset_name == "COCO":
-        dataset = None
-    elif dataset_name == "Cityscapes":
-        dataset = None
+            transform=None)
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
-    val_loader = torch.utils.data.DataLoader(
-        dataset=dataset,
+    test_dataset = test_ds
+    test_dataset_len = len(test_dataset)
+
+    test_iterator = iterators.MultiprocessIterator(
+        dataset=test_dataset,
         batch_size=batch_size,
+        repeat=False,
         shuffle=False,
-        num_workers=num_workers,
-        pin_memory=True)
+        n_processes=num_workers,
+        shared_mem=300000000)
 
-    return val_loader
-
-
-def validate1(accuracy_metrics,
-              net,
-              val_data,
-              use_cuda):
-    net.eval()
-    for metric in accuracy_metrics:
-        metric.reset()
-    with torch.no_grad():
-        for data, target in tqdm(val_data):
-            if use_cuda:
-                target = target.cuda(non_blocking=True)
-            output = net(data)
-            for metric in accuracy_metrics:
-                metric.update(target, output)
-    accuracy_info = [metric.get() for metric in accuracy_metrics]
-    return accuracy_info
+    return test_iterator, test_dataset_len, test_dataset

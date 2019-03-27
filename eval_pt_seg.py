@@ -6,7 +6,7 @@ from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
 from pytorch.seg_utils import add_dataset_parser_arguments, get_test_data_loader, get_metainfo, validate1
 from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count
-from pytorch.seg_metrics import PixelAccuracyMetric
+from pytorch.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def parse_args():
@@ -95,6 +95,7 @@ def test(net,
          use_cuda,
          input_image_size,
          in_channels,
+         num_classes,
          calc_weight_count=False,
          calc_flops=False,
          calc_flops_only=True,
@@ -102,23 +103,38 @@ def test(net,
          dataset_metainfo=None):
     assert (dataset_metainfo is not None)
     if not calc_flops_only:
+        metric = []
         pix_acc_macro_average = False
-        metric = PixelAccuracyMetric(
+        metric.append(PixelAccuracyMetric(
             vague_idx=dataset_metainfo["vague_idx"],
             use_vague=dataset_metainfo["use_vague"],
-            macro_average=pix_acc_macro_average)
+            macro_average=pix_acc_macro_average))
+        mean_iou_macro_average = False
+        metric.append(MeanIoUMetric(
+            num_classes=num_classes,
+            vague_idx=dataset_metainfo["vague_idx"],
+            use_vague=dataset_metainfo["use_vague"],
+            bg_idx=dataset_metainfo["background_idx"],
+            ignore_bg=dataset_metainfo["ignore_bg"],
+            macro_average=mean_iou_macro_average))
         tic = time.time()
-        err_val = validate1(
-            accuracy_metric=metric,
+        accuracy_info = validate1(
+            accuracy_metrics=metric,
             net=net,
             val_data=test_data,
             use_cuda=use_cuda)
+        pix_acc = accuracy_info[0][1]
+        mean_iou = accuracy_info[1][1]
+        pix_macro = "macro" if pix_acc_macro_average else "micro"
+        iou_macro = "macro" if mean_iou_macro_average else "micro"
         if extended_log:
-            logging.info('Test: err={err:.4f} ({err})'.format(
-                err=err_val))
+            logging.info(
+                "Test: {pix_macro}-pix_acc={pix_acc:.4f} ({pix_acc}), "
+                "{iou_macro}-mean_iou={mean_iou:.4f} ({mean_iou})".format(
+                    pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
         else:
-            logging.info('Test: err={err:.4f}'.format(
-                err=err_val))
+            logging.info("Test: {pix_macro}-pix_acc={pix_acc:.4f}, {iou_macro}-mean_iou={mean_iou:.4f}".format(
+                pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
         logging.info('Time cost: {:.4f} sec'.format(
             time.time() - tic))
 
@@ -179,6 +195,7 @@ def main():
         # calc_weight_count=(not log_file_exist),
         input_image_size=(input_image_size, input_image_size),
         in_channels=args.in_channels,
+        num_classes=args.num_classes,
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,

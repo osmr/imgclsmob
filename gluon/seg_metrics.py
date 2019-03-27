@@ -1,5 +1,5 @@
 """
-Evaluation Metrics for Semantic Segmentation
+Evaluation Metrics for Semantic Segmentation.
 """
 
 import numpy as np
@@ -30,8 +30,6 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         Calculate on CPU.
     sparse_label : bool, default True
         Whether label is an integer array instead of probability distribution.
-    num_classes : int, default None
-        Number of classes.
     vague_idx : int, default -1
         Index of masked pixels.
     use_vague : bool, default False
@@ -46,7 +44,6 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                  label_names=None,
                  on_cpu=True,
                  sparse_label=True,
-                 num_classes=None,
                  vague_idx=-1,
                  use_vague=False,
                  macro_average=True):
@@ -59,7 +56,6 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         self.axis = axis
         self.on_cpu = on_cpu
         self.sparse_label = sparse_label
-        self.num_classes = num_classes
         self.vague_idx = vague_idx
         self.use_vague = use_vague
 
@@ -119,14 +115,11 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         Resets the internal evaluation result to initial state.
         """
         if self.macro_average:
-            # super(PixelAccuracyMetric, self).reset()
             self.num_inst = 0
             self.sum_metric = 0.0
         else:
             self.num_inst = 0
             self.sum_metric = 0
-            self.global_num_inst = 0
-            self.global_sum_metric = 0
 
     def get(self):
         """
@@ -140,7 +133,6 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
            Value of the evaluations.
         """
         if self.macro_average:
-            # return super(PixelAccuracyMetric, self).reset()
             if self.num_inst == 0:
                 return (self.name, float('nan'))
             else:
@@ -279,7 +271,6 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         Resets the internal evaluation result to initial state.
         """
         if self.macro_average:
-            # super(MeanIoUMetric, self).reset()
             self.num_inst = 0
             self.sum_metric = 0.0
         else:
@@ -299,7 +290,6 @@ class MeanIoUMetric(mx.metric.EvalMetric):
            Value of the evaluations.
         """
         if self.macro_average:
-            # return super(MeanIoUMetric, self).reset()
             if self.num_inst == 0:
                 return (self.name, float('nan'))
             else:

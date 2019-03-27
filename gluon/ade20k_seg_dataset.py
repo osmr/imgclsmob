@@ -28,7 +28,7 @@ class ADE20KSegDataset(SegDataset):
             mode=mode,
             transform=transform,
             **kwargs)
-        self.classes = 150
+        self.classes = 151
 
         base_dir_path = os.path.join(root, "ADEChallengeData2016")
         assert os.path.exists(base_dir_path), "Please prepare dataset"
@@ -82,9 +82,17 @@ class ADE20KSegDataset(SegDataset):
             image = self.transform(image)
         return image, mask
 
+    vague_idx = -1
+    use_vague = False
+    background_idx = 0
+    ignore_bg = True
+
     @staticmethod
     def _mask_transform(mask):
-        return mx.nd.array(np.array(mask), mx.cpu()).astype(np.int32) - 1
+        np_mask = np.array(mask).astype(np.int32)
+        # np_mask[np_mask == 0] = ADE20KSegDataset.vague_idx
+        # np_mask -= 1
+        return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):
         return len(self.images)

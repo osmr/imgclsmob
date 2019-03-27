@@ -7,8 +7,11 @@ from .chainercv2.model_provider import get_model
 def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
+                  net_extra_kwargs=None,
                   num_gpus=0):
     kwargs = {'pretrained': use_pretrained}
+    if net_extra_kwargs is not None:
+        kwargs.update(net_extra_kwargs)
 
     net = get_model(model_name, **kwargs)
 

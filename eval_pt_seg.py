@@ -4,7 +4,7 @@ import logging
 
 from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
-from pytorch.seg_datasets import add_dataset_parser_arguments, get_val_data_loader
+from pytorch.seg_utils import add_dataset_parser_arguments, get_test_data_loader, get_metainfo
 from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate1, AverageMeter
 
 
@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument(
         '--dataset',
         type=str,
-        default="ADE20K",
+        default="VOC",
         help='dataset name. options are VOC, ADE20K, COCO, Cityscapes')
 
     args, _ = parser.parse_known_args()
@@ -97,7 +97,9 @@ def test(net,
          calc_weight_count=False,
          calc_flops=False,
          calc_flops_only=True,
-         extended_log=False):
+         extended_log=False,
+         dataset_metainfo=None):
+    assert (dataset_metainfo is not None)
     if not calc_flops_only:
         accuracy_metric = AverageMeter()
         tic = time.time()
@@ -151,19 +153,18 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
         net_extra_kwargs={"aux": False, "fixed_size": False},
+        ignore_extra=True,
         remove_module=args.remove_module)
     if hasattr(net, 'module'):
         input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
     else:
         input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
-    test_data = get_val_data_loader(
+    test_data = get_test_data_loader(
         dataset_name=args.dataset,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
-        num_workers=args.num_workers,
-        image_base_size=args.image_base_size,
-        image_crop_size=args.image_crop_size)
+        num_workers=args.num_workers)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
@@ -176,7 +177,8 @@ def main():
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        dataset_metainfo=get_metainfo(args.dataset))
 
 
 if __name__ == '__main__':

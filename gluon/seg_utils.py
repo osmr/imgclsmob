@@ -1,5 +1,5 @@
 """
-    Segmentation datasets (ADE20K/PascalVOC/COCO/Cityscapes) routines.
+    Segmentation datasets (VOC2012/ADE20K/COCO/Cityscapes) routines.
 """
 
 __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
@@ -8,8 +8,8 @@ __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 
 from tqdm import tqdm
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
-from .ade20k_seg_dataset import ADE20KSegDataset
 from .voc_seg_dataset import VOCSegDataset
+from .ade20k_seg_dataset import ADE20KSegDataset
 # from gluoncv.data.mscoco.segmentation import COCOSegmentation
 # from gluoncv.data.cityscapes import CitySegmentation
 # from gluoncv.data.ade20k.segmentation import ADE20KSegmentation

@@ -1,11 +1,10 @@
 import random
 import numpy as np
-import mxnet as mx
 from PIL import Image, ImageOps, ImageFilter
-from mxnet.gluon.data import dataset
+import torch.utils.data as data
 
 
-class SegDataset(dataset.Dataset):
+class SegDataset(data.Dataset):
     """
     Segmentation base dataset.
 
@@ -92,8 +91,8 @@ class SegDataset(dataset.Dataset):
 
     @staticmethod
     def _img_transform(image):
-        return mx.nd.array(np.array(image), mx.cpu())
+        return np.array(image)
 
     @staticmethod
     def _mask_transform(mask):
-        return mx.nd.array(np.array(mask), mx.cpu()).astype(np.int32)
+        return np.array(mask).astype(np.int32)

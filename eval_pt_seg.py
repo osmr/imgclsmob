@@ -10,14 +10,14 @@ from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_cou
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (PyTorch/ADE20K/PascalVOC/COCO/Cityscapes)',
+        description='Evaluate a model for image segmentation (PyTorch/VOC2012/ADE20K/COCO/Cityscapes)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         '--dataset',
         type=str,
         default="ADE20K",
-        help='dataset name. options are ADE20K, VOC, COCO, Cityscapes')
+        help='dataset name. options are VOC, ADE20K, COCO, Cityscapes')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)
@@ -65,12 +65,6 @@ def parse_args():
         help='number of preprocessing workers')
 
     parser.add_argument(
-        '--batch-size',
-        type=int,
-        default=16,
-        help='training batch size per device (CPU/GPU).')
-
-    parser.add_argument(
         '--save-dir',
         type=str,
         default='',
@@ -96,7 +90,7 @@ def parse_args():
 
 
 def test(net,
-         val_data,
+         test_data,
          use_cuda,
          input_image_size,
          in_channels,
@@ -110,7 +104,7 @@ def test(net,
         err_val = validate1(
             accuracy_metric=accuracy_metric,
             net=net,
-            val_data=val_data,
+            val_data=test_data,
             use_cuda=use_cuda)
         if extended_log:
             logging.info('Test: err={err:.4f} ({err})'.format(
@@ -149,20 +143,21 @@ def main():
 
     use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,
-        batch_size=args.batch_size)
+        batch_size=1)
 
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
+        net_extra_kwargs={"aux": False, "fixed_size": False},
         remove_module=args.remove_module)
     if hasattr(net, 'module'):
         input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
     else:
         input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
-    val_data = get_val_data_loader(
+    test_data = get_val_data_loader(
         dataset_name=args.dataset,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
@@ -173,7 +168,7 @@ def main():
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
-        val_data=val_data,
+        test_data=test_data,
         use_cuda=use_cuda,
         # calc_weight_count=(not log_file_exist),
         input_image_size=(input_image_size, input_image_size),

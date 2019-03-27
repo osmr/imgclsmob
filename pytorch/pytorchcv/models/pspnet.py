@@ -25,18 +25,14 @@ class PSPFinalBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    out_size : tuple of 2 int
-        Spatial size of the output image for the bilinear upsampling operation.
     bottleneck_factor : int, default 4
         Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 out_size,
                  bottleneck_factor=4):
         super(PSPFinalBlock, self).__init__()
-        self.out_size = out_size
         assert (in_channels % bottleneck_factor == 0)
         mid_channels = in_channels // bottleneck_factor
 
@@ -49,11 +45,11 @@ class PSPFinalBlock(nn.Module):
             out_channels=out_channels,
             bias=True)
 
-    def forward(self, x):
+    def forward(self, x, out_size):
         x = self.conv1(x)
         x = self.dropout(x)
         x = self.conv2(x)
-        x = F.interpolate(x, size=self.out_size, mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=out_size, mode="bilinear", align_corners=True)
         return x
 
 
@@ -86,9 +82,10 @@ class PyramidPoolingBranch(nn.Module):
             out_channels=out_channels)
 
     def forward(self, x):
+        in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
         x = self.pool(x)
         x = self.conv(x)
-        x = F.interpolate(x, size=self.upscale_out_size, mode="bilinear", align_corners=True)
+        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=True)
         return x
 
 
@@ -138,6 +135,8 @@ class PSPNet(nn.Module):
         Number of output channels form feature extractor.
     aux : bool, default False
         Whether to output an auxiliary result.
+    fixed_size : bool, default True
+        Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (480, 480)
@@ -149,6 +148,7 @@ class PSPNet(nn.Module):
                  backbone,
                  backbone_out_channels=2048,
                  aux=False,
+                 fixed_size=True,
                  in_channels=3,
                  in_size=(480, 480),
                  num_classes=21):
@@ -158,23 +158,23 @@ class PSPNet(nn.Module):
         self.in_size = in_size
         self.num_classes = num_classes
         self.aux = aux
+        self.fixed_size = fixed_size
 
         self.backbone = backbone
+        pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if fixed_size else None
         self.pool = PyramidPooling(
             in_channels=backbone_out_channels,
-            upscale_out_size=(self.in_size[0] // 8, self.in_size[1] // 8))
+            upscale_out_size=pool_out_size)
         pool_out_channels = 2 * backbone_out_channels
         self.final_block = PSPFinalBlock(
             in_channels=pool_out_channels,
             out_channels=num_classes,
-            out_size=in_size,
             bottleneck_factor=8)
         if self.aux:
             aux_out_channels = backbone_out_channels // 2
             self.aux_block = PSPFinalBlock(
                 in_channels=aux_out_channels,
                 out_channels=num_classes,
-                out_size=in_size,
                 bottleneck_factor=4)
 
         self._init_params()
@@ -187,11 +187,12 @@ class PSPNet(nn.Module):
                     init.constant_(module.bias, 0)
 
     def forward(self, x):
+        in_size = self.in_size if self.fixed_size else x.shape[2:]
         x, y = self.backbone(x)
         x = self.pool(x)
-        x = self.final_block(x)
+        x = self.final_block(x, in_size)
         if self.aux:
-            y = self.aux_block(y)
+            y = self.aux_block(y, in_size)
             return x, y
         else:
             return x

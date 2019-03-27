@@ -19,10 +19,13 @@ def prepare_model(model_name,
                   pretrained_model_file_path,
                   use_cuda,
                   use_data_parallel=True,
+                  net_extra_kwargs=None,
                   ignore_extra=False,
                   remap_to_cpu=False,
                   remove_module=False):
     kwargs = {'pretrained': use_pretrained}
+    if net_extra_kwargs is not None:
+        kwargs.update(net_extra_kwargs)
 
     net = get_model(model_name, **kwargs)
 

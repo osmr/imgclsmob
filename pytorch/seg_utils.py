@@ -8,8 +8,8 @@ from tqdm import tqdm
 import torch.utils.data
 import torchvision.transforms as transforms
 from .voc_seg_dataset import VOCSegDataset
+from .ade20k_seg_dataset import ADE20KSegDataset
 # import torchvision.datasets as datasets
-# from .ade20k_dataset import ADE20KSegmentation
 
 
 def add_dataset_parser_arguments(parser,
@@ -85,7 +85,11 @@ def get_metainfo(dataset_name):
             "background_idx": VOCSegDataset.background_idx,
             "ignore_bg": VOCSegDataset.ignore_bg}
     elif dataset_name == "ADE20K":
-        return None
+        return {
+            "vague_idx": ADE20KSegDataset.vague_idx,
+            "use_vague": ADE20KSegDataset.use_vague,
+            "background_idx": ADE20KSegDataset.background_idx,
+            "ignore_bg": ADE20KSegDataset.ignore_bg}
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -105,24 +109,20 @@ def get_test_data_loader(dataset_name,
     ])
 
     if dataset_name == "VOC":
-        dataset = VOCSegDataset(
-            root=dataset_dir,
-            mode="test",
-            transform=transform_val)
+        dataset_class = VOCSegDataset
     elif dataset_name == "ADE20K":
-        dataset = None
-        # dataset = ADE20KSegmentation(
-        #     root=dataset_dir,
-        #     mode="val",
-        #     base_size=image_base_size,
-        #     crop_size=image_crop_size,
-        #     transform=transform_val)
-    elif dataset_name == "COCO":
-        dataset = None
-    elif dataset_name == "Cityscapes":
-        dataset = None
+        dataset_class = ADE20KSegDataset
+    # elif dataset_name == "COCO":
+    #     dataset = None
+    # elif dataset_name == "Cityscapes":
+    #     dataset = None
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
+
+    dataset = dataset_class(
+        root=dataset_dir,
+        mode="test",
+        transform=transform_val)
 
     val_loader = torch.utils.data.DataLoader(
         dataset=dataset,

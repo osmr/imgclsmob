@@ -27,7 +27,6 @@ class VOCSegDataset(SegDataset):
             mode=mode,
             transform=transform,
             **kwargs)
-        self.classes = 21
 
         base_dir_path = os.path.join(root, "VOC2012")
         image_dir_path = os.path.join(base_dir_path, "JPEGImages")
@@ -76,6 +75,7 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
+    classes = 21
     vague_idx = 255
     use_vague = True
     background_idx = 0

@@ -12,7 +12,7 @@ class ADE20KSegDataset(SegDataset):
     Parameters
     ----------
     root : string
-        Path to ADE20K folder.
+        Path to a folder with `ADEChallengeData2016` subfolder.
     mode: string, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional

@@ -1,18 +1,17 @@
 import os
 import numpy as np
-import mxnet as mx
 from PIL import Image
 from .seg_dataset import SegDataset
 
 
-class VOCSegDataset(SegDataset):
+class ADE20KSegDataset(SegDataset):
     """
-    Pascal VOC2012 semantic segmentation dataset.
+    ADE20K semantic segmentation dataset.
 
     Parameters
     ----------
     root : string
-        Path to VOCdevkit folder.
+        Path to a folder with `ADEChallengeData2016` subfolder.
     mode: string, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
@@ -23,36 +22,39 @@ class VOCSegDataset(SegDataset):
                  mode="train",
                  transform=None,
                  **kwargs):
-        super(VOCSegDataset, self).__init__(
+        super(ADE20KSegDataset, self).__init__(
             root=root,
             mode=mode,
             transform=transform,
             **kwargs)
 
-        base_dir_path = os.path.join(root, "VOC2012")
-        image_dir_path = os.path.join(base_dir_path, "JPEGImages")
-        mask_dir_path = os.path.join(base_dir_path, "SegmentationClass")
+        base_dir_path = os.path.join(root, "ADEChallengeData2016")
+        assert os.path.exists(base_dir_path), "Please prepare dataset"
 
-        splits_dir_path = os.path.join(base_dir_path, "ImageSets", "Segmentation")
-        if mode == "train":
-            split_file_path = os.path.join(splits_dir_path, "train.txt")
-        elif mode in ("val", "test", "demo"):
-            split_file_path = os.path.join(splits_dir_path, "val.txt")
-        else:
-            raise RuntimeError("Unknown dataset splitting mode")
+        image_dir_path = os.path.join(base_dir_path, "images")
+        mask_dir_path = os.path.join(base_dir_path, "annotations")
+
+        mode_dir_name = "training" if mode == "train" else "validation"
+        image_dir_path = os.path.join(image_dir_path, mode_dir_name)
+        mask_dir_path = os.path.join(mask_dir_path, mode_dir_name)
 
         self.images = []
         self.masks = []
-        with open(os.path.join(split_file_path), "r") as lines:
-            for line in lines:
-                image_file_path = os.path.join(image_dir_path, line.rstrip('\n') + ".jpg")
-                assert os.path.isfile(image_file_path)
-                self.images.append(image_file_path)
-                mask_file_path = os.path.join(mask_dir_path, line.rstrip('\n') + ".png")
-                assert os.path.isfile(mask_file_path)
-                self.masks.append(mask_file_path)
+        for image_file_name in os.listdir(image_dir_path):
+            image_file_stem, _ = os.path.splitext(image_file_name)
+            if image_file_name.endswith(".jpg"):
+                image_file_path = os.path.join(image_dir_path, image_file_name)
+                mask_file_name = image_file_stem + ".png"
+                mask_file_path = os.path.join(mask_dir_path, mask_file_name)
+                if os.path.isfile(mask_file_path):
+                    self.images.append(image_file_path)
+                    self.masks.append(mask_file_path)
+                else:
+                    print("Cannot find the mask: {}".format(mask_file_path))
 
         assert (len(self.images) == len(self.masks))
+        if len(self.images) == 0:
+            raise RuntimeError("Found 0 images in subfolders of: {}\n".format(base_dir_path))
 
     def __getitem__(self, index):
         image = Image.open(self.images[index]).convert("RGB")
@@ -76,17 +78,18 @@ class VOCSegDataset(SegDataset):
 
         return image, mask
 
-    classes = 21
-    vague_idx = 255
+    classes = 150
+    vague_idx = 150
     use_vague = True
-    background_idx = 0
-    ignore_bg = True
+    background_idx = -1
+    ignore_bg = False
 
     @staticmethod
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
-        # np_mask[np_mask == 255] = VOCSegDataset.vague_idx
-        return mx.nd.array(np_mask, mx.cpu())
+        np_mask[np_mask == 0] = ADE20KSegDataset.vague_idx + 1
+        np_mask -= 1
+        return np_mask
 
     def __len__(self):
         return len(self.images)

@@ -39,7 +39,7 @@ class PSPFinalBlock(nn.Module):
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels)
-        self.dropout = nn.Dropout2d(p=0.1, inplace=False)
+        self.dropout = nn.Dropout(p=0.1, inplace=False)
         self.conv2 = conv1x1(
             in_channels=mid_channels,
             out_channels=out_channels,

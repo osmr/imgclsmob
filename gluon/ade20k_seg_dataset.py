@@ -82,7 +82,7 @@ class ADE20KSegDataset(SegDataset):
         return image, mask
 
     classes = 150
-    vague_idx = 254
+    vague_idx = 150
     use_vague = True
     background_idx = -1
     ignore_bg = False

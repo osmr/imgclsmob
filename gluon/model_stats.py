@@ -6,6 +6,7 @@ from mxnet.gluon.contrib.nn import Identity
 from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2
 from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
+from .gluoncv2.models.rir_cifar import RiRFinalBlock
 
 __all__ = ['measure_model']
 
@@ -57,7 +58,8 @@ def measure_model(model,
     names = {}
 
     def call_hook(block, x, y):
-        if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock)):
+        if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock) or
+                isinstance(block, RiRFinalBlock)):
             assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
         assert (len(block._children) == 0)
@@ -77,7 +79,7 @@ def measure_model(model,
                 extra_num_flops = 4 * x[0].size
                 extra_num_macs = 0
             else:
-                raise TypeError('Unknown activation type: {}'.format(block._act_type))
+                raise TypeError("Unknown activation type: {}".format(block._act_type))
         elif isinstance(block, nn.LeakyReLU):
             extra_num_flops = 2 * x[0].size
             extra_num_macs = 0
@@ -156,8 +158,11 @@ def measure_model(model,
         elif isinstance(block, IRevMergeBlock):
             extra_num_flops = x[0].size
             extra_num_macs = 0
+        elif isinstance(block, RiRFinalBlock):
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
         else:
-            raise TypeError('Unknown layer type: {}'.format(type(block)))
+            raise TypeError("Unknown layer type: {}".format(type(block)))
 
         global num_flops
         global num_macs
@@ -189,7 +194,7 @@ def measure_model(model,
     num_params1 = calc_block_num_params2(model)
     if num_params != num_params1:
         logging.warning(
-            'Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}'.format(
+            "Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}".format(
                 num_params1, num_params))
 
     [h.detach() for h in hook_handles]

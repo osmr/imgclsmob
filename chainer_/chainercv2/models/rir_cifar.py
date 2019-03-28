@@ -3,7 +3,7 @@
     Original paper: 'Resnet in Resnet: Generalizing Residual Architectures,' https://arxiv.org/abs/1603.08029.
 """
 
-__all__ = ['CIFARRiR', 'rir_cifar10', 'rir_cifar100', 'rir_svhn']
+__all__ = ['CIFARRiR', 'rir_cifar10', 'rir_cifar100', 'rir_svhn', 'RiRFinalBlock']
 
 import os
 import chainer.functions as F

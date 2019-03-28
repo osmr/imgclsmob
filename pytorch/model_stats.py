@@ -6,6 +6,7 @@ from torch.autograd import Variable
 from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity
 from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
+from .pytorchcv.models.rir_cifar import RiRFinalBlock
 
 __all__ = ['measure_model']
 
@@ -53,7 +54,8 @@ def measure_model(model,
     # names = {}
 
     def call_hook(module, x, y):
-        if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock)):
+        if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock) or
+                isinstance(module, RiRFinalBlock)):
             assert (len(x) == 1)
         assert (x[0].shape[0] == 1)
         assert (len(module._modules) == 0)
@@ -164,8 +166,11 @@ def measure_model(model,
         elif isinstance(module, IRevMergeBlock):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
+        elif isinstance(module, RiRFinalBlock):
+            extra_num_flops = x[0].numel()
+            extra_num_macs = 0
         else:
-            raise TypeError('Unknown layer type: {}'.format(type(module)))
+            raise TypeError("Unknown layer type: {}".format(type(module)))
 
         global num_flops
         global num_macs
@@ -199,7 +204,7 @@ def measure_model(model,
     num_params1 = calc_block_num_params2(model)
     if num_params != num_params1:
         logging.warning(
-            'Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}'.format(
+            "Calculated numbers of parameters are different: standard method: {},\tper-leaf method: {}".format(
                 num_params1, num_params))
 
     [h.remove() for h in hook_handles]

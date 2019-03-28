@@ -3,7 +3,7 @@
     Original paper: 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 """
 
-__all__ = ['IRevNet', 'irevnet301']
+__all__ = ['IRevNet', 'irevnet301', 'IRevDownscale', 'IRevSplitBlock', 'IRevMergeBlock']
 
 import os
 from mxnet import cpu

@@ -4,7 +4,7 @@
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 """
 
-__all__ = ['FishNet', 'fishnet99', 'fishnet150']
+__all__ = ['FishNet', 'fishnet99', 'fishnet150', 'InterpolationBlock', 'ChannelSqueeze']
 
 import os
 import torch.nn as nn

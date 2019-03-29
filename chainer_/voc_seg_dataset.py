@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import mxnet as mx
 from PIL import Image
 from .seg_dataset import SegDataset
 
@@ -86,7 +85,7 @@ class VOCSegDataset(SegDataset):
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
         # np_mask[np_mask == 255] = VOCSegDataset.vague_idx
-        return mx.nd.array(np_mask, mx.cpu())
+        return np_mask
 
     def __len__(self):
         return len(self.images)

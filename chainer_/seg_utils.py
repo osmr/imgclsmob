@@ -2,13 +2,13 @@
     Segmentation datasets (VOC2012/ADE20K/COCO/Cityscapes) routines.
 """
 
-__all__ = ['add_dataset_parser_arguments', 'get_test_data_iterator', 'get_metainfo', 'SegPredictor']
+__all__ = ['add_dataset_parser_arguments', 'get_test_dataset', 'get_metainfo', 'SegPredictor']
 
 import numpy as np
 import chainer
-from chainer import iterators
 from chainer import Chain
 from .voc_seg_dataset import VOCSegDataset
+from .ade20k_seg_dataset import ADE20KSegDataset
 
 
 def add_dataset_parser_arguments(parser,
@@ -106,6 +106,8 @@ class SegPredictor(Chain):
             predictions = self.model(imgs)
 
         output = chainer.backends.cuda.to_cpu(predictions.array)
+        # output = np.argmax(output, axis=1).astype(np.int32)
+
         return output
 
 
@@ -117,33 +119,28 @@ def get_metainfo(dataset_name):
             "background_idx": VOCSegDataset.background_idx,
             "ignore_bg": VOCSegDataset.ignore_bg}
     elif dataset_name == "ADE20K":
-        return None
+        return {
+            "vague_idx": ADE20KSegDataset.vague_idx,
+            "use_vague": ADE20KSegDataset.use_vague,
+            "background_idx": ADE20KSegDataset.background_idx,
+            "ignore_bg": ADE20KSegDataset.ignore_bg}
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
 
-def get_test_data_iterator(dataset_name,
-                           dataset_dir,
-                           batch_size,
-                           num_workers):
+def get_test_dataset(dataset_name,
+                     dataset_dir):
 
     if dataset_name == "VOC":
-        test_ds = VOCSegDataset(
-            root=dataset_dir,
-            mode="test",
-            transform=None)
+        dataset_class = VOCSegDataset
+    elif dataset_name == "ADE20K":
+        dataset_class = ADE20KSegDataset
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
-    test_dataset = test_ds
-    test_dataset_len = len(test_dataset)
+    dataset = dataset_class(
+        root=dataset_dir,
+        mode="test",
+        transform=None)
 
-    test_iterator = iterators.MultiprocessIterator(
-        dataset=test_dataset,
-        batch_size=batch_size,
-        repeat=False,
-        shuffle=False,
-        n_processes=num_workers,
-        shared_mem=300000000)
-
-    return test_iterator, test_dataset_len, test_dataset
+    return dataset

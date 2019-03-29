@@ -1,10 +1,8 @@
 import argparse
 import time
 import logging
-# import numpy as np
 
 from chainer import cuda, global_config
-# import chainer.functions as F
 from chainer import iterators
 
 from chainercv.utils import apply_to_iterator
@@ -13,9 +11,10 @@ from chainercv.utils import ProgressHook
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
 from chainer_.seg_utils import add_dataset_parser_arguments
-from chainer_.seg_utils import get_test_data_iterator
-# from chainer_.seg_utils import SegPredictor
-from chainercv.evaluations import eval_semantic_segmentation
+from chainer_.seg_utils import get_test_dataset
+from chainer_.seg_utils import SegPredictor
+from chainer_.seg_utils import get_metainfo
+from chainer_.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def parse_args():
@@ -86,12 +85,13 @@ def parse_args():
 
 
 def test(net,
-         test_iterator,
-         test_dataset_len,
          test_dataset,
          num_gpus,
+         num_classes,
          calc_weight_count=False,
-         extended_log=False):
+         extended_log=False,
+         dataset_metainfo=None):
+    assert (dataset_metainfo is not None)
     tic = time.time()
 
     it = iterators.SerialIterator(
@@ -100,8 +100,17 @@ def test(net,
         repeat=False,
         shuffle=False)
 
+    predictor = SegPredictor(base_model=net)
+
+    if num_gpus > 0:
+        predictor.to_gpu()
+
+    if calc_weight_count:
+        weight_count = net.count_params()
+        logging.info('Model: {} trainable parameters'.format(weight_count))
+
     in_values, out_values, rest_values = apply_to_iterator(
-        net.predict,
+        predictor.predict,
         it,
         hook=ProgressHook(len(test_dataset)))
     del in_values
@@ -109,41 +118,42 @@ def test(net,
     pred_labels, = out_values
     gt_labels, = rest_values
 
-    result1 = eval_semantic_segmentation(pred_labels, gt_labels)
-    assert (result1 is not None)
+    metrics = []
+    pix_acc_macro_average = False
+    metrics.append(PixelAccuracyMetric(
+        vague_idx=dataset_metainfo["vague_idx"],
+        use_vague=dataset_metainfo["use_vague"],
+        macro_average=pix_acc_macro_average))
+    mean_iou_macro_average = False
+    metrics.append(MeanIoUMetric(
+        num_classes=num_classes,
+        vague_idx=dataset_metainfo["vague_idx"],
+        use_vague=dataset_metainfo["use_vague"],
+        bg_idx=dataset_metainfo["background_idx"],
+        ignore_bg=dataset_metainfo["ignore_bg"],
+        macro_average=mean_iou_macro_average))
 
-    # predictor = SegPredictor(base_model=net)
-    #
-    # if num_gpus > 0:
-    #     predictor.to_gpu()
-    #
-    # if calc_weight_count:
-    #     weight_count = net.count_params()
-    #     logging.info('Model: {} trainable parameters'.format(weight_count))
-    #
-    # in_values, out_values, rest_values = apply_to_iterator(
-    #     predictor.predict,
-    #     test_iterator,
-    #     hook=ProgressHook(test_dataset_len))
-    # del in_values
-    #
-    # pred_probs, = out_values
-    # gt_labels, = rest_values
+    labels = iter(gt_labels)
+    preds = iter(pred_labels)
+    for label, pred in zip(labels, preds):
+        for metric in metrics:
+            metric.update(label, pred)
 
-    # y = np.array(list(pred_probs))
-    # t = np.array(list(gt_labels))
-    #
-    # acc_val_value = F.accuracy(
-    #     y=y,
-    #     t=t).data
-    # err_val = 1.0 - acc_val_value
-    #
-    # if extended_log:
-    #     logging.info('Test: err={err:.4f} ({err})'.format(
-    #         err=err_val))
-    # else:
-    #     logging.info('Test: err={err:.4f}'.format(
-    #         err=err_val))
+    accuracy_info = [metric.get() for metric in metrics]
+    pix_acc = accuracy_info[0][1]
+    mean_iou = accuracy_info[1][1]
+    pix_macro = "macro" if pix_acc_macro_average else "micro"
+    iou_macro = "macro" if mean_iou_macro_average else "micro"
+
+    if extended_log:
+        logging.info(
+            "Test: {pix_macro}-pix_acc={pix_acc:.4f} ({pix_acc}), "
+            "{iou_macro}-mean_iou={mean_iou:.4f} ({mean_iou})".format(
+                pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
+    else:
+        logging.info("Test: {pix_macro}-pix_acc={pix_acc:.4f}, {iou_macro}-mean_iou={mean_iou:.4f}".format(
+            pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
+
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
@@ -171,21 +181,19 @@ def main():
         net_extra_kwargs={"aux": False, "fixed_size": False},
         num_gpus=num_gpus)
 
-    test_iterator, test_dataset_len, test_dataset = get_test_data_iterator(
+    test_dataset = get_test_dataset(
         dataset_name=args.dataset,
-        dataset_dir=args.data_dir,
-        batch_size=1,
-        num_workers=args.num_workers)
+        dataset_dir=args.data_dir)
 
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,
-        test_iterator=test_iterator,
-        test_dataset_len=test_dataset_len,
         test_dataset=test_dataset,
         num_gpus=num_gpus,
+        num_classes=args.num_classes,
         calc_weight_count=True,
-        extended_log=True)
+        extended_log=True,
+        dataset_metainfo=get_metainfo(args.dataset))
 
 
 if __name__ == '__main__':

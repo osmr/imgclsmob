@@ -117,7 +117,7 @@ Some remarks:
 | PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
 | NIN | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |
 | RoR-3 | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1608.02908) | - | 2016 |
-| RiR | BCD | BCD | BCD | - | - | [link](https://arxiv.org/abs/1603.08029) | - | 2016 |
+| RiR | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1603.08029) | - | 2016 |
 | ResDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1603.09382) | [link](https://github.com/yueatsprograms/Stochastic_Depth) | 2016 |
 | Shake-Shake-ResNet | B+C+ | B+C+ | B+C+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BC | BC | BC | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |

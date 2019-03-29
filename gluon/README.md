@@ -202,7 +202,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | BagNet-33 | 36.43 | 14.95 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1495-87527d82.params.log)) |
 | DLA-34 | 26.14 | 8.21 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0821-1127fa0a.params.log)) |
 | DLA-46-C | 33.84 | 12.86 | 1,301,400 | 585.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.182/dla46c-1286-5b38b67f.params.log)) |
-| DLA-X-46-C | 33.85 | 12.77 | 1,068,440 | 546.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.258/dla46xc-1277-e02af27f.params.log)) |
+| DLA-X-46-C | 32.96 | 12.25 | 1,068,440 | 546.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.293/dla46xc-1225-e570f5f0.params.log)) |
 | DLA-60 | 23.84 | 7.08 | 22,036,632 | 4,255.49M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60-0708-954571d6.params.log)) |
 | DLA-X-60 | 22.48 | 6.21 | 17,352,344 | 3,543.68M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60x-0621-35774214.params.log)) |
 | DLA-X-60-C | 30.67 | 10.74 | 1,319,832 | 596.06M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1074-1b4e4048.params.log)) |

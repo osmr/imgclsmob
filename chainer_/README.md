@@ -182,7 +182,7 @@ Some remarks:
 | BagNet-33 | 36.41 | 14.92 | 18,310,184 | 16,371.52M | From [wielandbrendel/bag...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.255/bagnet33-1492-a7be162c.npz.log)) |
 | DLA-34 | 26.14 | 8.23 | 15,742,104 | 3,071.37M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla34-0823-45504b09.npz.log)) |
 | DLA-46-C | 33.85 | 12.92 | 1,301,400 | 585.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.282/dla46c-1292-98e3efd5.npz.log)) |
-| DLA-X-46-C | 33.76 | 12.76 | 1,068,440 | 546.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.258/dla46xc-1276-f147a12d.npz.log)) |
+| DLA-X-46-C | 32.90 | 12.28 | 1,068,440 | 546.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.293/dla46xc-1228-c2dc61bc.npz.log)) |
 | DLA-60 | 23.78 | 7.11 | 22,036,632 | 4,255.49M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60-0711-92693875.npz.log)) |
 | DLA-X-60 | 22.46 | 6.20 | 17,352,344 | 3,543.68M | From [ucbdrive/dla] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.202/dla60x-0620-444f31ea.npz.log)) |
 | DLA-X-60-C | 30.70 | 10.76 | 1,319,832 | 596.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.289/dla60xc-1076-4c418399.npz.log)) |

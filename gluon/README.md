@@ -326,6 +326,7 @@ Some remarks:
 | WRN-40-8 | 2.37 | 512 | 35,748,314 | 5,176.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn40_8_cifar10-0237-3b81d261.params.log)) |
 | RoR-3-56 | 5.43 | 64 | 762,746 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.228/ror3_56_cifar10-0543-ee31a69a.params.log)) |
 | RoR-3-110 | 4.35 | 64 | 1,637,690 | 242.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.235/ror3_110_cifar10-0435-03599165.params.log)) |
+| RoR-3-164 | 3.93 | 64 | 2,512,634 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_cifar10-0393-cc11aa06.params.log)) |
 | RiR | 3.28 | 384 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_cifar10-0328-5bed6f35.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 5.15 | 64 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.215/shakeshakeresnet20_2x16d_cifar10-0515-a7b8a2f7.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 3.17 | 64 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.217/shakeshakeresnet26_2x32d_cifar10-0317-21e60e62.params.log)) |
@@ -362,6 +363,7 @@ Some remarks:
 | WRN-16-10 | 18.95 | 17,174,324 | 2,414.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.204/wrn16_10_cifar100-1895-bcb5c89c.params.log)) |
 | RoR-3-56 | 25.49 | 768,596 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.229/ror3_56_cifar100-2549-43345593.params.log)) |
 | RoR-3-110 | 23.64 | 1,643,540 | 242.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.236/ror3_110_cifar100-2364-b8c4d317.params.log)) |
+| RoR-3-164 | 22.34 | 2,518,484 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_cifar100-2234-eb6a7fb8.params.log)) |
 | RiR | 19.23 | 9,527,720 | 1,283.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_cifar100-1923-c4256383.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 29.22 | 546,932 | 81.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.247/shakeshakeresnet20_2x16d_cifar100-2922-e46e31a7.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 18.80 | 2,934,772 | 428.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.222/shakeshakeresnet26_2x32d_cifar100-1880-bd46a741.params.log)) |
@@ -389,6 +391,7 @@ Some remarks:
 | WRN-40-8 | 2.54 | 35,748,314 | 5,176.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.277/wrn40_8_svhn-0254-be7a21da.params.log)) |
 | RoR-3-56 | 2.69 | 762,746 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.287/ror3_56_svhn-0269-56617cf9.params.log)) |
 | RoR-3-110 | 2.57 | 1,637,690 | 242.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.287/ror3_110_svhn-0257-0677b7df.params.log)) |
+| RoR-3-164 | 2.73 | 2,512,634 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_svhn-0273-b008c1b0.params.log)) |
 | RiR | 2.68 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_svhn-0268-1c0718de.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv

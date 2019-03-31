@@ -1,9 +1,9 @@
 """
-    ShakeDrop-ResNet for CIFAR, implemented in Chainer.
+    ShakeDrop-ResNet for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'ShakeDrop Regularization for Deep Residual Learning,' https://arxiv.org/abs/1802.02375.
 """
 
-__all__ = ['CIFARShakeDropResNet', 'shakedropresnet20_cifar10', 'shakedropresnet20_cifar100']
+__all__ = ['CIFARShakeDropResNet', 'shakedropresnet20_cifar10', 'shakedropresnet20_cifar100', 'shakedropresnet20_svhn']
 
 import os
 import chainer
@@ -288,6 +288,24 @@ def shakedropresnet20_cifar100(classes=100, **kwargs):
                                      model_name="shakedropresnet20_cifar100", **kwargs)
 
 
+def shakedropresnet20_svhn(classes=10, **kwargs):
+    """
+    ShakeDrop-ResNet-20 model for SVHN from 'ShakeDrop Regularization for Deep Residual Learning,'
+    https://arxiv.org/abs/1802.02375.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakedropresnet_cifar(classes=classes, blocks=20, bottleneck=False,
+                                     model_name="shakedropresnet20_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -299,6 +317,7 @@ def _test():
     models = [
         (shakedropresnet20_cifar10, 10),
         (shakedropresnet20_cifar100, 100),
+        (shakedropresnet20_svhn, 10),
     ]
 
     for model, classes in models:
@@ -308,6 +327,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shakedropresnet20_cifar10 or weight_count == 272474)
         assert (model != shakedropresnet20_cifar100 or weight_count == 278324)
+        assert (model != shakedropresnet20_svhn or weight_count == 272474)
 
         x = np.zeros((14, 3, 32, 32), np.float32)
         y = net(x)

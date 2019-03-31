@@ -530,6 +530,7 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
+    'shakedropresnet20_svhn': shakedropresnet20_svhn,
 
     'fractalnet_cifar10': fractalnet_cifar10,
     'fractalnet_cifar100': fractalnet_cifar100,

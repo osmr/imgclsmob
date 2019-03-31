@@ -496,6 +496,7 @@ _models = {
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
+    'shakedropresnet20_svhn': shakedropresnet20_svhn,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

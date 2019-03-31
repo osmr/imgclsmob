@@ -1,9 +1,9 @@
 """
-    ShakeDrop-ResNet for CIFAR, implemented in Gluon.
+    ShakeDrop-ResNet for CIFAR/SVHN, implemented in Gluon.
     Original paper: 'ShakeDrop Regularization for Deep Residual Learning,' https://arxiv.org/abs/1802.02375.
 """
 
-__all__ = ['CIFARShakeDropResNet', 'shakedropresnet20_cifar10', 'shakedropresnet20_cifar100']
+__all__ = ['CIFARShakeDropResNet', 'shakedropresnet20_cifar10', 'shakedropresnet20_cifar100', 'shakedropresnet20_svhn']
 
 import os
 import numpy as np
@@ -90,7 +90,7 @@ class ShakeDropResUnit(HybridBlock):
                     activation=None,
                     activate=False)
             self.activ = nn.Activation("relu")
-            self.shake_drop = ShakeDrop(self.life_prob)
+            # self.shake_drop = ShakeDrop(self.life_prob)
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
@@ -98,8 +98,8 @@ class ShakeDropResUnit(HybridBlock):
         else:
             identity = x
         x = self.body(x)
-        # x = ShakeDrop(self.life_prob)(x) + identity
-        x = self.shake_drop(x) + identity
+        x = ShakeDrop(self.life_prob)(x) + identity
+        # x = self.shake_drop(x) + identity
         x = self.activ(x)
         return x
 
@@ -292,6 +292,26 @@ def shakedropresnet20_cifar100(classes=100, **kwargs):
                                      model_name="shakedropresnet20_cifar100", **kwargs)
 
 
+def shakedropresnet20_svhn(classes=10, **kwargs):
+    """
+    ShakeDrop-ResNet-20 model for SVHN from 'ShakeDrop Regularization for Deep Residual Learning,'
+    https://arxiv.org/abs/1802.02375.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakedropresnet_cifar(classes=classes, blocks=20, bottleneck=False,
+                                     model_name="shakedropresnet20_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -301,6 +321,7 @@ def _test():
     models = [
         (shakedropresnet20_cifar10, 10),
         (shakedropresnet20_cifar100, 100),
+        (shakedropresnet20_svhn, 10),
     ]
 
     for model, classes in models:
@@ -321,12 +342,13 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shakedropresnet20_cifar10 or weight_count == 272474)
         assert (model != shakedropresnet20_cifar100 or weight_count == 278324)
+        assert (model != shakedropresnet20_svhn or weight_count == 272474)
 
         x = mx.nd.zeros((14, 3, 32, 32), ctx=ctx)
-        y = net(x)
-        # with mx.autograd.record():
-        #     y = net(x)
-        #     y.backward()
+        # y = net(x)
+        with mx.autograd.record():
+            y = net(x)
+            y.backward()
         assert (y.shape == (14, classes))
 
 

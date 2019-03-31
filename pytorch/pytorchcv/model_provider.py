@@ -523,8 +523,10 @@ _models = {
 
     'shakeshakeresnet20_2x16d_cifar10': shakeshakeresnet20_2x16d_cifar10,
     'shakeshakeresnet20_2x16d_cifar100': shakeshakeresnet20_2x16d_cifar100,
+    'shakeshakeresnet20_2x16d_svhn': shakeshakeresnet20_2x16d_svhn,
     'shakeshakeresnet26_2x32d_cifar10': shakeshakeresnet26_2x32d_cifar10,
     'shakeshakeresnet26_2x32d_cifar100': shakeshakeresnet26_2x32d_cifar100,
+    'shakeshakeresnet26_2x32d_svhn': shakeshakeresnet26_2x32d_svhn,
 
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,

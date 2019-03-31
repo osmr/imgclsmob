@@ -1,10 +1,11 @@
 """
-    Shake-Shake-ResNet for CIFAR, implemented in Gluon.
+    Shake-Shake-ResNet for CIFAR/SVHN, implemented in Gluon.
     Original paper: 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
 """
 
 __all__ = ['CIFARShakeShakeResNet', 'shakeshakeresnet20_2x16d_cifar10', 'shakeshakeresnet20_2x16d_cifar100',
-           'shakeshakeresnet26_2x32d_cifar10', 'shakeshakeresnet26_2x32d_cifar100']
+           'shakeshakeresnet20_2x16d_svhn', 'shakeshakeresnet26_2x32d_cifar10', 'shakeshakeresnet26_2x32d_cifar100',
+           'shakeshakeresnet26_2x32d_svhn']
 
 import os
 import mxnet as mx
@@ -321,6 +322,25 @@ def shakeshakeresnet20_2x16d_cifar100(classes=100, **kwargs):
                                       model_name="shakeshakeresnet20_2x16d_cifar100", **kwargs)
 
 
+def shakeshakeresnet20_2x16d_svhn(classes=10, **kwargs):
+    """
+    Shake-Shake-ResNet-20-2x16d model for SVHN from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=20, bottleneck=False, first_stage_channels=16,
+                                      model_name="shakeshakeresnet20_2x16d_svhn", **kwargs)
+
+
 def shakeshakeresnet26_2x32d_cifar10(classes=10, **kwargs):
     """
     Shake-Shake-ResNet-26-2x32d model for CIFAR-10 from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
@@ -359,6 +379,25 @@ def shakeshakeresnet26_2x32d_cifar100(classes=100, **kwargs):
                                       model_name="shakeshakeresnet26_2x32d_cifar100", **kwargs)
 
 
+def shakeshakeresnet26_2x32d_svhn(classes=10, **kwargs):
+    """
+    Shake-Shake-ResNet-26-2x32d model for SVHN from 'Shake-Shake regularization,' https://arxiv.org/abs/1705.07485.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_shakeshakeresnet_cifar(classes=classes, blocks=26, bottleneck=False, first_stage_channels=32,
+                                      model_name="shakeshakeresnet26_2x32d_svhn", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -368,8 +407,10 @@ def _test():
     models = [
         (shakeshakeresnet20_2x16d_cifar10, 10),
         (shakeshakeresnet20_2x16d_cifar100, 100),
+        (shakeshakeresnet20_2x16d_svhn, 10),
         (shakeshakeresnet26_2x32d_cifar10, 10),
         (shakeshakeresnet26_2x32d_cifar100, 100),
+        (shakeshakeresnet26_2x32d_svhn, 10),
     ]
 
     for model, classes in models:
@@ -390,8 +431,10 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != shakeshakeresnet20_2x16d_cifar10 or weight_count == 541082)
         assert (model != shakeshakeresnet20_2x16d_cifar100 or weight_count == 546932)
+        assert (model != shakeshakeresnet20_2x16d_svhn or weight_count == 541082)
         assert (model != shakeshakeresnet26_2x32d_cifar10 or weight_count == 2923162)
         assert (model != shakeshakeresnet26_2x32d_cifar100 or weight_count == 2934772)
+        assert (model != shakeshakeresnet26_2x32d_svhn or weight_count == 2923162)
 
         x = mx.nd.zeros((14, 3, 32, 32), ctx=ctx)
         y = net(x)

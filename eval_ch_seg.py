@@ -19,14 +19,14 @@ from chainer_.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (Chainer/VOC2012/ADE20K/COCO/Cityscapes)',
+        description='Evaluate a model for image segmentation (Chainer/VOC2012/ADE20K/Cityscapes/COCO)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         '--dataset',
         type=str,
         default="VOC",
-        help='dataset name. options are VOC, ADE20K, COCO, Cityscapes')
+        help='dataset name. options are VOC, ADE20K, Cityscapes, COCO')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)

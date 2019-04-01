@@ -1,5 +1,5 @@
 """
-    Segmentation datasets (VOC2012/ADE20K/COCO/Cityscapes) routines.
+    Segmentation datasets (VOC2012/ADE20K/Cityscapes/COCO) routines.
 """
 
 __all__ = ['add_dataset_parser_arguments', 'get_test_dataset', 'get_metainfo', 'SegPredictor']
@@ -9,6 +9,7 @@ import chainer
 from chainer import Chain
 from .voc_seg_dataset import VOCSegDataset
 from .ade20k_seg_dataset import ADE20KSegDataset
+from .cityscapes_seg_dataset import CityscapesSegDataset
 
 
 def add_dataset_parser_arguments(parser,
@@ -18,7 +19,7 @@ def add_dataset_parser_arguments(parser,
             '--data-dir',
             type=str,
             default='../imgclsmob_data/voc',
-            help='path to directory with Pascal VOC dataset')
+            help='path to directory with Pascal VOC2012 dataset')
         parser.add_argument(
             '--num-classes',
             type=int,
@@ -35,17 +36,6 @@ def add_dataset_parser_arguments(parser,
             type=int,
             default=150,
             help='number of classes')
-    elif dataset_name == "COCO":
-        parser.add_argument(
-            '--data-dir',
-            type=str,
-            default='../imgclsmob_data/coco',
-            help='path to directory with COCO dataset')
-        parser.add_argument(
-            '--num-classes',
-            type=int,
-            default=21,
-            help='number of classes')
     elif dataset_name == "Cityscapes":
         parser.add_argument(
             '--data-dir',
@@ -56,6 +46,17 @@ def add_dataset_parser_arguments(parser,
             '--num-classes',
             type=int,
             default=19,
+            help='number of classes')
+    elif dataset_name == "COCO":
+        parser.add_argument(
+            '--data-dir',
+            type=str,
+            default='../imgclsmob_data/coco',
+            help='path to directory with COCO dataset')
+        parser.add_argument(
+            '--num-classes',
+            type=int,
+            default=21,
             help='number of classes')
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
@@ -124,6 +125,12 @@ def get_metainfo(dataset_name):
             "use_vague": ADE20KSegDataset.use_vague,
             "background_idx": ADE20KSegDataset.background_idx,
             "ignore_bg": ADE20KSegDataset.ignore_bg}
+    elif dataset_name == "Cityscapes":
+        return {
+            "vague_idx": CityscapesSegDataset.vague_idx,
+            "use_vague": CityscapesSegDataset.use_vague,
+            "background_idx": CityscapesSegDataset.background_idx,
+            "ignore_bg": CityscapesSegDataset.ignore_bg}
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -135,6 +142,8 @@ def get_test_dataset(dataset_name,
         dataset_class = VOCSegDataset
     elif dataset_name == "ADE20K":
         dataset_class = ADE20KSegDataset
+    elif dataset_name == "Cityscapes":
+        dataset_class = CityscapesSegDataset
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

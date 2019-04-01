@@ -393,6 +393,8 @@ Some remarks:
 | RoR-3-110 | 2.57 | 1,637,690 | 242.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.287/ror3_110_svhn-0257-0677b7df.params.log)) |
 | RoR-3-164 | 2.73 | 2,512,634 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_svhn-0273-b008c1b0.params.log)) |
 | RiR | 2.68 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_svhn-0268-1c0718de.params.log)) |
+| Shake-Shake-ResNet-20-2x16d | 3.17 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet20_2x16d_svhn-0317-7a48fde5.params.log)) |
+| Shake-Shake-ResNet-26-2x32d | 2.62 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet26_2x32d_svhn-0262-f1dbb8ef.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

@@ -269,8 +269,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('rir_svhn', '0268', '1c0718deaef5836efca4d5ded6140f0cd51424ab', 'v0.0.292'),
     ('shakeshakeresnet20_2x16d_cifar10', '0515', 'a7b8a2f77457e151da5d5ad3b9a2473594fecfc0', 'v0.0.215'),
     ('shakeshakeresnet20_2x16d_cifar100', '2922', 'e46e31a7d8308b57d9c0687000c40f15623998c2', 'v0.0.247'),
+    ('shakeshakeresnet20_2x16d_svhn', '0317', '7a48fde5e1ccd5ff695892adf7094c15368ec778', 'v0.0.295'),
     ('shakeshakeresnet26_2x32d_cifar10', '0317', '21e60e626765001aaaf4eb26f7cb8f4a69ea3dc1', 'v0.0.217'),
-    ('shakeshakeresnet26_2x32d_cifar100', '1880', 'bd46a7418374e3b3c844b33e12b09b6a98eb4e6e', 'v0.0.222')]}
+    ('shakeshakeresnet26_2x32d_cifar100', '1880', 'bd46a7418374e3b3c844b33e12b09b6a98eb4e6e', 'v0.0.222'),
+    ('shakeshakeresnet26_2x32d_svhn', '0262', 'f1dbb8ef162d9ec56478e2579272f85ed78ad896', 'v0.0.295')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

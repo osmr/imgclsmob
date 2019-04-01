@@ -1,4 +1,5 @@
 import os
+import logging
 import numpy as np
 import mxnet as mx
 from PIL import Image
@@ -43,7 +44,7 @@ class COCOSegDataset(SegDataset):
         self.coco = COCO(annotations_file_path)
         self.coco_mask = mask
         if os.path.exists(idx_file_path):
-            with open(idx_file_path, 'rb') as f:
+            with open(idx_file_path, "rb") as f:
                 self.ids = pickle.load(f)
         else:
             ids = list(self.coco.imgs.keys())
@@ -102,7 +103,7 @@ class COCOSegDataset(SegDataset):
         return mask
 
     def _preprocess(self, ids, ids_file):
-        print("Preprocessing mask, this will take a while. But don't worry, it only run once for each split.")
+        logging.info("Preprocessing mask, this will take a while. But don't worry, it only run once for each split.")
         tbar = trange(len(ids))
         new_ids = []
         for i in tbar:
@@ -111,13 +112,13 @@ class COCOSegDataset(SegDataset):
             img_metadata = self.coco.loadImgs(img_id)[0]
             mask = self._gen_seg_mask(
                 cocotarget,
-                img_metadata['height'],
-                img_metadata['width'])
+                img_metadata["height"],
+                img_metadata["width"])
             # more than 1k pixels
             if (mask > 0).sum() > 1000:
                 new_ids.append(img_id)
-            tbar.set_description('Doing: {}/{}, got {} qualified images'.format(i, len(ids), len(new_ids)))
-        print('Found number of qualified images: ', len(new_ids))
+            tbar.set_description("Doing: {}/{}, got {} qualified images".format(i, len(ids), len(new_ids)))
+        logging.info("Found number of qualified images: ", len(new_ids))
         with open(ids_file, 'wb') as f:
             pickle.dump(new_ids, f)
         return new_ids

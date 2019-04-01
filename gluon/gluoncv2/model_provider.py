@@ -558,8 +558,8 @@ _models = {
     'pspnet_resnetd101b_coco': pspnet_resnetd101b_coco,
     'pspnet_resnetd50b_ade20k': pspnet_resnetd50b_ade20k,
     'pspnet_resnetd101b_ade20k': pspnet_resnetd101b_ade20k,
-    'pspnet_resnetd50b_sityscapes': pspnet_resnetd50b_sityscapes,
-    'pspnet_resnetd101b_sityscapes': pspnet_resnetd101b_sityscapes,
+    'pspnet_resnetd50b_cityscapes': pspnet_resnetd50b_cityscapes,
+    'pspnet_resnetd101b_cityscapes': pspnet_resnetd101b_cityscapes,
 
     'oth_psp_resnet101_coco': oth_psp_resnet101_coco,
     'oth_psp_resnet101_voc': oth_psp_resnet101_voc,

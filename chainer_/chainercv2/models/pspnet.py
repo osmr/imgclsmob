@@ -5,7 +5,7 @@
 
 __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_resnetd50b_coco',
            'pspnet_resnetd101b_coco', 'pspnet_resnetd50b_ade20k', 'pspnet_resnetd101b_ade20k',
-           'pspnet_resnetd50b_sityscapes', 'pspnet_resnetd101b_sityscapes']
+           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes']
 
 import os
 import chainer.functions as F
@@ -384,7 +384,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
                       **kwargs)
 
 
-def pspnet_resnetd50b_sityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet(D)-50b for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -404,11 +404,11 @@ def pspnet_resnetd50b_sityscapes(pretrained_backbone=False, classes=19, aux=True
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
     del backbone.final_pool
-    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_sityscapes",
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_cityscapes",
                       **kwargs)
 
 
-def pspnet_resnetd101b_sityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     PSPNet model on the base of ResNet(D)-101b for Cityscapes from 'Pyramid Scene Parsing Network,'
     https://arxiv.org/abs/1612.01105.
@@ -428,7 +428,7 @@ def pspnet_resnetd101b_sityscapes(pretrained_backbone=False, classes=19, aux=Tru
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
     del backbone.final_pool
-    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_sityscapes",
+    return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes",
                       **kwargs)
 
 
@@ -449,8 +449,8 @@ def _test():
         (pspnet_resnetd101b_coco, 21),
         (pspnet_resnetd50b_ade20k, 150),
         (pspnet_resnetd101b_ade20k, 150),
-        (pspnet_resnetd50b_sityscapes, 19),
-        (pspnet_resnetd101b_sityscapes, 19),
+        (pspnet_resnetd50b_cityscapes, 19),
+        (pspnet_resnetd101b_cityscapes, 19),
     ]
 
     for model, classes in models:
@@ -465,8 +465,8 @@ def _test():
             assert (model != pspnet_resnetd101b_coco or weight_count == 68073706)
             assert (model != pspnet_resnetd50b_ade20k or weight_count == 49180908)
             assert (model != pspnet_resnetd101b_ade20k or weight_count == 68173036)
-            assert (model != pspnet_resnetd50b_sityscapes or weight_count == 49080038)
-            assert (model != pspnet_resnetd101b_sityscapes or weight_count == 68072166)
+            assert (model != pspnet_resnetd50b_cityscapes or weight_count == 49080038)
+            assert (model != pspnet_resnetd101b_cityscapes or weight_count == 68072166)
         else:
             assert (model != pspnet_resnetd50b_voc or weight_count == 46716373)
             assert (model != pspnet_resnetd101b_voc or weight_count == 65708501)
@@ -474,8 +474,8 @@ def _test():
             assert (model != pspnet_resnetd101b_coco or weight_count == 65708501)
             assert (model != pspnet_resnetd50b_ade20k or weight_count == 46782550)
             assert (model != pspnet_resnetd101b_ade20k or weight_count == 65774678)
-            assert (model != pspnet_resnetd50b_sityscapes or weight_count == 46715347)
-            assert (model != pspnet_resnetd101b_sityscapes or weight_count == 65707475)
+            assert (model != pspnet_resnetd50b_cityscapes or weight_count == 46715347)
+            assert (model != pspnet_resnetd101b_cityscapes or weight_count == 65707475)
 
         x = np.zeros((1, 3, in_size[0], in_size[1]), np.float32)
         ys = net(x)

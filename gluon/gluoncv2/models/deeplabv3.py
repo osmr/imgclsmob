@@ -123,7 +123,7 @@ class AtrousSpatialPyramidPooling(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 upscale_out_size=upscale_out_size))
-            self.conv = conv1x1(
+            self.conv = conv1x1_block(
                 in_channels=project_in_channels,
                 out_channels=mid_channels)
             self.dropout = nn.Dropout(rate=0.5)

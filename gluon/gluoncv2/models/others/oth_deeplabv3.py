@@ -4,8 +4,8 @@ from mxnet.gluon import nn
 from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
 from mxnet import gluon
-from .segbase import SegBaseModel
-from .fcn import _FCNHead
+from .oth_segbase import SegBaseModel
+from .oth_fcn import _FCNHead
 # pylint: disable-all
 
 __all__ = ['DeepLabV3', 'get_deeplab', 'oth_deeplab_resnet101_coco',
@@ -39,13 +39,18 @@ class DeepLabV3(SegBaseModel):
                  base_size=520, crop_size=480, **kwargs):
         super(DeepLabV3, self).__init__(nclass, aux, backbone, ctx=ctx, base_size=base_size,
                                      crop_size=crop_size, pretrained_base=pretrained_base, **kwargs)
+        if "classes" in kwargs:
+            del kwargs["classes"]
+        if "in_channels" in kwargs:
+            del kwargs["in_channels"]
         with self.name_scope():
             self.head = _DeepLabHead(nclass, height=self._up_kwargs['height']//8,
                                      width=self._up_kwargs['width']//8, **kwargs)
             self.head.initialize(ctx=ctx)
             self.head.collect_params().setattr('lr_mult', 10)
             if self.aux:
-                self.auxlayer = _FCNHead(1024, nclass, **kwargs)
+                aux_kwargs = kwargs
+                self.auxlayer = _FCNHead(1024, nclass, **aux_kwargs)
                 self.auxlayer.initialize(ctx=ctx)
                 self.auxlayer.collect_params().setattr('lr_mult', 10)
 
@@ -169,7 +174,7 @@ class _ASPP(nn.HybridBlock):
 
 
 def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
-            root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+            root='~/.mxnet/models', ctx=cpu(0), pretrained_base=True, num_class=150, **kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -182,11 +187,6 @@ def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False)
-    >>> print(model)
     """
     acronyms = {
         'pascal_voc': 'voc',
@@ -194,13 +194,14 @@ def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'ade20k': 'ade',
         'coco': 'coco',
     }
-    from ..data import datasets
+    # from ..data import datasets
     # infer number of classes
-    model = DeepLabV3(datasets[dataset].NUM_CLASS, backbone=backbone, ctx=ctx, **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('deeplab_%s_%s'%(backbone, acronyms[dataset]),
-                                             tag=pretrained, root=root), ctx=ctx)
+    model = DeepLabV3(num_class, backbone=backbone,
+                      pretrained_base=pretrained_base, ctx=ctx, **kwargs)
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file('deeplab_%s_%s'%(backbone, acronyms[dataset]),
+    #                                          tag=pretrained, root=root), ctx=ctx)
     return model
 
 def oth_deeplab_resnet101_coco(**kwargs):
@@ -214,13 +215,8 @@ def oth_deeplab_resnet101_coco(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet101_coco(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('coco', 'resnet101', **kwargs)
+    return get_deeplab('coco', 'resnet101', num_class=21, **kwargs)
 
 def oth_deeplab_resnet152_coco(**kwargs):
     r"""DeepLabV3
@@ -233,13 +229,8 @@ def oth_deeplab_resnet152_coco(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet152_coco(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('coco', 'resnet152', **kwargs)
+    return get_deeplab('coco', 'resnet152', num_class=21, **kwargs)
 
 def oth_deeplab_resnet101_voc(**kwargs):
     r"""DeepLabV3
@@ -252,13 +243,8 @@ def oth_deeplab_resnet101_voc(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet101_voc(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('pascal_voc', 'resnet101', **kwargs)
+    return get_deeplab('pascal_voc', 'resnet101', num_class=21, **kwargs)
 
 def oth_deeplab_resnet152_voc(**kwargs):
     r"""DeepLabV3
@@ -271,13 +257,8 @@ def oth_deeplab_resnet152_voc(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet152_voc(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('pascal_voc', 'resnet152', **kwargs)
+    return get_deeplab('pascal_voc', 'resnet152', num_class=21, **kwargs)
 
 def oth_deeplab_resnet50_ade(**kwargs):
     r"""DeepLabV3
@@ -290,13 +271,8 @@ def oth_deeplab_resnet50_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('ade20k', 'resnet50', **kwargs)
+    return get_deeplab('ade20k', 'resnet50', num_class=150, **kwargs)
 
 def oth_deeplab_resnet101_ade(**kwargs):
     r"""DeepLabV3
@@ -309,10 +285,5 @@ def oth_deeplab_resnet101_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = oth_deeplab_resnet101_ade(pretrained=True)
-    >>> print(model)
     """
-    return get_deeplab('ade20k', 'resnet101', **kwargs)
+    return get_deeplab('ade20k', 'resnet101', num_class=150, **kwargs)

@@ -3,14 +3,17 @@
     Original paper: 'Rethinking Atrous Convolution for Semantic Image Segmentation,' https://arxiv.org/abs/1706.05587.
 """
 
-__all__ = ['DeepLabv3', 'deeplabv3_resnetd50b_voc', 'deeplabv3_resnetd101b_voc', 'deeplabv3_resnetd50b_ade20k']
+__all__ = ['DeepLabv3', 'deeplabv3_resnetd50b_voc', 'deeplabv3_resnetd101b_voc', 'deeplabv3_resnetd152b_voc',
+           'deeplabv3_resnetd50b_coco', 'deeplabv3_resnetd101b_coco', 'deeplabv3_resnetd152b_coco',
+           'deeplabv3_resnetd50b_ade20k', 'deeplabv3_resnetd101b_ade20k', 'deeplabv3_resnetd50b_cityscapes',
+           'deeplabv3_resnetd101b_cityscapes']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
 from .common import conv1x1, conv1x1_block, conv3x3_block
-from .resnetd import resnetd50b, resnetd101b
+from .resnetd import resnetd50b, resnetd101b, resnetd152b
 
 
 class DeepLabv3FinalBlock(HybridBlock):
@@ -273,7 +276,7 @@ def deeplabv3_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, **
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnet50_voc", **kwargs)
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_voc", **kwargs)
 
 
 def deeplabv3_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
@@ -297,7 +300,103 @@ def deeplabv3_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, *
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnet101_voc", **kwargs)
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_voc", **kwargs)
+
+
+def deeplabv3_resnetd152b_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-152b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 21
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_voc", **kwargs)
+
+
+def deeplabv3_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-50b for COCO from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 21
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_coco", **kwargs)
+
+
+def deeplabv3_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-101b for COCO from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 21
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_coco", **kwargs)
+
+
+def deeplabv3_resnetd152b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-152b for COCO from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 21
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_coco", **kwargs)
 
 
 def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
@@ -321,7 +420,83 @@ def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
-    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnet50_ade20k", **kwargs)
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_ade20k",
+                         **kwargs)
+
+
+def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-101b for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 150
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_ade20k",
+                         **kwargs)
+
+
+def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-50b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 19
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_cityscapes",
+                         **kwargs)
+
+
+def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+    """
+    DeepLabv3 model on the base of ResNet(D)-101b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
+    Segmentation,' https://arxiv.org/abs/1706.05587.
+
+    Parameters:
+    ----------
+    pretrained_backbone : bool, default False
+        Whether to load the pretrained weights for feature extractor.
+    classes : int, default 19
+        Number of segmentation classes.
+    aux : bool, default True
+        Whether to output an auxiliary result.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_cityscapes",
+                         **kwargs)
 
 
 def _test():
@@ -329,13 +504,20 @@ def _test():
     import mxnet as mx
 
     in_size = (480, 480)
-    aux = True
+    aux = False
     pretrained = False
 
     models = [
         (deeplabv3_resnetd50b_voc, 21),
         (deeplabv3_resnetd101b_voc, 21),
+        (deeplabv3_resnetd152b_voc, 21),
+        (deeplabv3_resnetd50b_coco, 21),
+        (deeplabv3_resnetd101b_coco, 21),
+        (deeplabv3_resnetd152b_coco, 21),
         (deeplabv3_resnetd50b_ade20k, 150),
+        (deeplabv3_resnetd101b_ade20k, 150),
+        (deeplabv3_resnetd50b_cityscapes, 19),
+        (deeplabv3_resnetd101b_cityscapes, 19),
     ]
 
     for model, classes in models:
@@ -355,13 +537,27 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
-            assert (model != deeplabv3_resnetd50b_voc or weight_count == 42127338)
-            assert (model != deeplabv3_resnetd101b_voc or weight_count == 61119466)
-            assert (model != deeplabv3_resnetd50b_ade20k or weight_count == 42193644)
+            assert (model != deeplabv3_resnetd50b_voc or weight_count == 42127850)
+            assert (model != deeplabv3_resnetd101b_voc or weight_count == 61119978)
+            assert (model != deeplabv3_resnetd152b_voc or weight_count == 76763626)
+            assert (model != deeplabv3_resnetd50b_coco or weight_count == 42127850)
+            assert (model != deeplabv3_resnetd101b_coco or weight_count == 61119978)
+            assert (model != deeplabv3_resnetd152b_coco or weight_count == 76763626)
+            assert (model != deeplabv3_resnetd50b_ade20k or weight_count == 42194156)
+            assert (model != deeplabv3_resnetd101b_ade20k or weight_count == 61186284)
+            assert (model != deeplabv3_resnetd50b_cityscapes or weight_count == 42126822)
+            assert (model != deeplabv3_resnetd101b_cityscapes or weight_count == 61118950)
         else:
-            assert (model != deeplabv3_resnetd50b_voc or weight_count == 39762133)
-            assert (model != deeplabv3_resnetd101b_voc or weight_count == 58754261)
-            assert (model != deeplabv3_resnetd50b_ade20k or weight_count == 39795286)
+            assert (model != deeplabv3_resnetd50b_voc or weight_count == 39762645)
+            assert (model != deeplabv3_resnetd101b_voc or weight_count == 58754773)
+            assert (model != deeplabv3_resnetd152b_voc or weight_count == 74398421)
+            assert (model != deeplabv3_resnetd50b_coco or weight_count == 39762645)
+            assert (model != deeplabv3_resnetd101b_coco or weight_count == 58754773)
+            assert (model != deeplabv3_resnetd152b_coco or weight_count == 74398421)
+            assert (model != deeplabv3_resnetd50b_ade20k or weight_count == 39795798)
+            assert (model != deeplabv3_resnetd101b_ade20k or weight_count == 58787926)
+            assert (model != deeplabv3_resnetd50b_cityscapes or weight_count == 39762131)
+            assert (model != deeplabv3_resnetd101b_cityscapes or weight_count == 58754259)
 
         x = mx.nd.zeros((1, 3, in_size[0], in_size[1]), ctx=ctx)
         ys = net(x)

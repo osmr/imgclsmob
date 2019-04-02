@@ -135,7 +135,7 @@ class _AsppPooling(nn.HybridBlock):
 
 class _ASPP(nn.HybridBlock):
     def __init__(self, in_channels, atrous_rates, norm_layer, norm_kwargs,
-                 height=60, width=60):
+                 height=60, width=60, **kwargs):
         super(_ASPP, self).__init__()
         out_channels = 256
         b0 = nn.HybridSequential()

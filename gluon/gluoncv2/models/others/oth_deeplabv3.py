@@ -8,9 +8,9 @@ from .segbase import SegBaseModel
 from .fcn import _FCNHead
 # pylint: disable-all
 
-__all__ = ['DeepLabV3', 'get_deeplab', 'get_deeplab_resnet101_coco',
-    'get_deeplab_resnet101_voc', 'get_deeplab_resnet50_ade', 'get_deeplab_resnet101_ade',
-    'get_deeplab_resnet152_coco', 'get_deeplab_resnet152_voc']
+__all__ = ['DeepLabV3', 'get_deeplab', 'oth_deeplab_resnet101_coco',
+           'oth_deeplab_resnet101_voc', 'oth_deeplab_resnet50_ade', 'oth_deeplab_resnet101_ade',
+           'oth_deeplab_resnet152_coco', 'oth_deeplab_resnet152_voc']
 
 class DeepLabV3(SegBaseModel):
     r"""DeepLabV3
@@ -203,7 +203,7 @@ def get_deeplab(dataset='pascal_voc', backbone='resnet50', pretrained=False,
                                              tag=pretrained, root=root), ctx=ctx)
     return model
 
-def get_deeplab_resnet101_coco(**kwargs):
+def oth_deeplab_resnet101_coco(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -217,12 +217,12 @@ def get_deeplab_resnet101_coco(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet101_coco(pretrained=True)
+    >>> model = oth_deeplab_resnet101_coco(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('coco', 'resnet101', **kwargs)
 
-def get_deeplab_resnet152_coco(**kwargs):
+def oth_deeplab_resnet152_coco(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -236,12 +236,12 @@ def get_deeplab_resnet152_coco(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet152_coco(pretrained=True)
+    >>> model = oth_deeplab_resnet152_coco(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('coco', 'resnet152', **kwargs)
 
-def get_deeplab_resnet101_voc(**kwargs):
+def oth_deeplab_resnet101_voc(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -255,12 +255,12 @@ def get_deeplab_resnet101_voc(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet101_voc(pretrained=True)
+    >>> model = oth_deeplab_resnet101_voc(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('pascal_voc', 'resnet101', **kwargs)
 
-def get_deeplab_resnet152_voc(**kwargs):
+def oth_deeplab_resnet152_voc(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -274,12 +274,12 @@ def get_deeplab_resnet152_voc(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet152_voc(pretrained=True)
+    >>> model = oth_deeplab_resnet152_voc(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('pascal_voc', 'resnet152', **kwargs)
 
-def get_deeplab_resnet50_ade(**kwargs):
+def oth_deeplab_resnet50_ade(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -293,12 +293,12 @@ def get_deeplab_resnet50_ade(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet50_ade(pretrained=True)
+    >>> model = oth_deeplab_resnet50_ade(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('ade20k', 'resnet50', **kwargs)
 
-def get_deeplab_resnet101_ade(**kwargs):
+def oth_deeplab_resnet101_ade(**kwargs):
     r"""DeepLabV3
     Parameters
     ----------
@@ -312,7 +312,7 @@ def get_deeplab_resnet101_ade(**kwargs):
 
     Examples
     --------
-    >>> model = get_deeplab_resnet101_ade(pretrained=True)
+    >>> model = oth_deeplab_resnet101_ade(pretrained=True)
     >>> print(model)
     """
     return get_deeplab('ade20k', 'resnet101', **kwargs)

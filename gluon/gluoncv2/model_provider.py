@@ -79,6 +79,8 @@ from .models.resnetd import *
 from .models.others.oth_resnetv1b import *
 from .models.pspnet import *
 from .models.others.oth_pspnet import *
+from .models.deeplabv3 import *
+from .models.others.oth_deeplabv3 import *
 
 __all__ = ['get_model']
 
@@ -566,6 +568,17 @@ _models = {
     'oth_psp_resnet50_ade': oth_psp_resnet50_ade,
     'oth_psp_resnet101_ade': oth_psp_resnet101_ade,
     'oth_psp_resnet101_citys': oth_psp_resnet101_citys,
+
+    'deeplabv3_resnetd50b_voc': deeplabv3_resnetd50b_voc,
+    'deeplabv3_resnetd101b_voc': deeplabv3_resnetd101b_voc,
+    'deeplabv3_resnetd50b_ade20k': deeplabv3_resnetd50b_ade20k,
+
+    'oth_deeplab_resnet101_coco': oth_deeplab_resnet101_coco,
+    'oth_deeplab_resnet101_voc': oth_deeplab_resnet101_voc,
+    'oth_deeplab_resnet50_ade': oth_deeplab_resnet50_ade,
+    'oth_deeplab_resnet101_ade': oth_deeplab_resnet101_ade,
+    'oth_deeplab_resnet152_coco': oth_deeplab_resnet152_coco,
+    'oth_deeplab_resnet152_voc': oth_deeplab_resnet152_voc,
 }
 
 

@@ -1,5 +1,5 @@
 """
-    DeepLabv3 for image segmentation, implemented in PyTorch.
+    DeepLabv3 for image segmentation, implemented in Chainer.
     Original paper: 'Rethinking Atrous Convolution for Semantic Image Segmentation,' https://arxiv.org/abs/1706.05587.
 """
 
@@ -9,14 +9,15 @@ __all__ = ['DeepLabv3', 'deeplabv3_resnetd50b_voc', 'deeplabv3_resnetd101b_voc',
            'deeplabv3_resnetd101b_cityscapes']
 
 import os
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
+import chainer.functions as F
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
 from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent
 from .resnetd import resnetd50b, resnetd101b, resnetd152b
 
 
-class DeepLabv3FinalBlock(nn.Module):
+class DeepLabv3FinalBlock(Chain):
     """
     DeepLabv3 final block.
 
@@ -37,24 +38,27 @@ class DeepLabv3FinalBlock(nn.Module):
         assert (in_channels % bottleneck_factor == 0)
         mid_channels = in_channels // bottleneck_factor
 
-        self.conv1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.dropout = nn.Dropout(p=0.1, inplace=False)
-        self.conv2 = conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bias=True)
+        with self.init_scope():
+            self.conv1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.dropout = partial(
+                F.dropout,
+                ratio=0.1)
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                use_bias=True)
 
-    def forward(self, x, out_size):
+    def __call__(self, x, out_size):
         x = self.conv1(x)
         x = self.dropout(x)
         x = self.conv2(x)
-        x = F.interpolate(x, size=out_size, mode="bilinear", align_corners=True)
+        x = F.resize_images(x, output_shape=out_size)
         return x
 
 
-class ASPPAvgBranch(nn.Module):
+class ASPPAvgBranch(Chain):
     """
     ASPP branch with average pooling.
 
@@ -74,20 +78,23 @@ class ASPPAvgBranch(nn.Module):
         super(ASPPAvgBranch, self).__init__()
         self.upscale_out_size = upscale_out_size
 
-        self.pool = nn.AdaptiveAvgPool2d(1)
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
+        with self.init_scope():
+            self.pool = partial(
+                F.average_pooling_2d,
+                ksize=1)
+            self.conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels)
 
-    def forward(self, x):
+    def __call__(self, x):
         in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
         x = self.pool(x)
         x = self.conv(x)
-        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=True)
+        x = F.resize_images(x, output_shape=in_size)
         return x
 
 
-class AtrousSpatialPyramidPooling(nn.Module):
+class AtrousSpatialPyramidPooling(Chain):
     """
     Atrous Spatial Pyramid Pooling (ASPP) module.
 
@@ -107,33 +114,37 @@ class AtrousSpatialPyramidPooling(nn.Module):
         mid_channels = in_channels // 8
         project_in_channels = 5 * mid_channels
 
-        self.branches = Concurrent()
-        self.branches.add_module("branch1", conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels))
-        for i, atrous_rate in enumerate(atrous_rates):
-            self.branches.add_module("branch{}".format(i + 2), conv3x3_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                padding=atrous_rate,
-                dilation=atrous_rate))
-        self.branches.add_module("branch5", ASPPAvgBranch(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            upscale_out_size=upscale_out_size))
-        self.conv = conv1x1_block(
-            in_channels=project_in_channels,
-            out_channels=mid_channels)
-        self.dropout = nn.Dropout2d(p=0.5, inplace=False)
+        with self.init_scope():
+            self.branches = Concurrent()
+            with self.branches.init_scope():
+                setattr(self.branches, "branch1", conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=mid_channels))
+                for i, atrous_rate in enumerate(atrous_rates):
+                    setattr(self.branches, "branch{}".format(i + 2), conv3x3_block(
+                        in_channels=in_channels,
+                        out_channels=mid_channels,
+                        pad=atrous_rate,
+                        dilate=atrous_rate))
+                setattr(self.branches, "branch5", ASPPAvgBranch(
+                    in_channels=in_channels,
+                    out_channels=mid_channels,
+                    upscale_out_size=upscale_out_size))
+            self.conv = conv1x1_block(
+                in_channels=project_in_channels,
+                out_channels=mid_channels)
+            self.dropout = partial(
+                F.dropout,
+                ratio=0.5)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.branches(x)
         x = self.conv(x)
         x = self.dropout(x)
         return x
 
 
-class DeepLabv3(nn.Module):
+class DeepLabv3(Chain):
     """
     DeepLabv3 model from 'Rethinking Atrous Convolution for Semantic Image Segmentation,'
     https://arxiv.org/abs/1706.05587.
@@ -152,7 +163,7 @@ class DeepLabv3(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     """
     def __init__(self,
@@ -162,41 +173,33 @@ class DeepLabv3(nn.Module):
                  fixed_size=True,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=21):
+                 classes=21):
         super(DeepLabv3, self).__init__()
         assert (in_channels > 0)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         self.aux = aux
         self.fixed_size = fixed_size
 
-        self.backbone = backbone
-        pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if fixed_size else None
-        self.pool = AtrousSpatialPyramidPooling(
-            in_channels=backbone_out_channels,
-            upscale_out_size=pool_out_size)
-        pool_out_channels = backbone_out_channels // 8
-        self.final_block = DeepLabv3FinalBlock(
-            in_channels=pool_out_channels,
-            out_channels=num_classes,
-            bottleneck_factor=1)
-        if self.aux:
-            aux_out_channels = backbone_out_channels // 2
-            self.aux_block = DeepLabv3FinalBlock(
-                in_channels=aux_out_channels,
-                out_channels=num_classes,
-                bottleneck_factor=4)
+        with self.init_scope():
+            self.backbone = backbone
+            pool_out_size = (self.in_size[0] // 8, self.in_size[1] // 8) if fixed_size else None
+            self.pool = AtrousSpatialPyramidPooling(
+                in_channels=backbone_out_channels,
+                upscale_out_size=pool_out_size)
+            pool_out_channels = backbone_out_channels // 8
+            self.final_block = DeepLabv3FinalBlock(
+                in_channels=pool_out_channels,
+                out_channels=classes,
+                bottleneck_factor=1)
+            if self.aux:
+                aux_out_channels = backbone_out_channels // 2
+                self.aux_block = DeepLabv3FinalBlock(
+                    in_channels=aux_out_channels,
+                    out_channels=classes,
+                    bottleneck_factor=4)
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         in_size = self.in_size if self.fixed_size else x.shape[2:]
         x, y = self.backbone(x)
         x = self.pool(x)
@@ -209,11 +212,11 @@ class DeepLabv3(nn.Module):
 
 
 def get_deeplabv3(backbone,
-                  num_classes,
+                  classes,
                   aux=False,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join('~', '.chainer', 'models'),
                   **kwargs):
     """
     Create DeepLabv3 model with specific parameters.
@@ -230,29 +233,30 @@ def get_deeplabv3(backbone,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
     net = DeepLabv3(
         backbone=backbone,
-        num_classes=num_classes,
+        classes=classes,
         aux=aux,
         **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
 
-def deeplabv3_resnetd50b_voc(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-50b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -261,22 +265,22 @@ def deeplabv3_resnetd50b_voc(pretrained_backbone=False, num_classes=21, aux=True
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd50b_voc",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_voc",
                          **kwargs)
 
 
-def deeplabv3_resnetd101b_voc(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-101b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -285,22 +289,22 @@ def deeplabv3_resnetd101b_voc(pretrained_backbone=False, num_classes=21, aux=Tru
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd101b_voc",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_voc",
                          **kwargs)
 
 
-def deeplabv3_resnetd152b_voc(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd152b_voc(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-152b for Pascal VOC from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -309,22 +313,22 @@ def deeplabv3_resnetd152b_voc(pretrained_backbone=False, num_classes=21, aux=Tru
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd152b_voc",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_voc",
                          **kwargs)
 
 
-def deeplabv3_resnetd50b_coco(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-50b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -333,22 +337,22 @@ def deeplabv3_resnetd50b_coco(pretrained_backbone=False, num_classes=21, aux=Tru
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd50b_coco",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_coco",
                          **kwargs)
 
 
-def deeplabv3_resnetd101b_coco(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-101b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -357,22 +361,22 @@ def deeplabv3_resnetd101b_coco(pretrained_backbone=False, num_classes=21, aux=Tr
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd101b_coco",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_coco",
                          **kwargs)
 
 
-def deeplabv3_resnetd152b_coco(pretrained_backbone=False, num_classes=21, aux=True, **kwargs):
+def deeplabv3_resnetd152b_coco(pretrained_backbone=False, classes=21, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-152b for COCO from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -381,22 +385,22 @@ def deeplabv3_resnetd152b_coco(pretrained_backbone=False, num_classes=21, aux=Tr
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 21
+    classes : int, default 21
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd152b_coco",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_coco",
                          **kwargs)
 
 
-def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, num_classes=150, aux=True, **kwargs):
+def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-50b for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -405,22 +409,22 @@ def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, num_classes=150, aux=
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 150
+    classes : int, default 150
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd50b_ade20k",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_ade20k",
                          **kwargs)
 
 
-def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, num_classes=150, aux=True, **kwargs):
+def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-101b for ADE20K from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -429,22 +433,22 @@ def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, num_classes=150, aux
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 150
+    classes : int, default 150
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux, model_name="deeplabv3_resnetd101b_ade20k",
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_ade20k",
                          **kwargs)
 
 
-def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, num_classes=19, aux=True, **kwargs):
+def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-50b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -453,22 +457,22 @@ def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, num_classes=19, a
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux,
-                         model_name="deeplabv3_resnetd50b_cityscapes", **kwargs)
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_cityscapes",
+                         **kwargs)
 
 
-def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, aux=True, **kwargs):
+def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
     """
     DeepLabv3 model on the base of ResNet(D)-101b for Cityscapes from 'Rethinking Atrous Convolution for Semantic Image
     Segmentation,' https://arxiv.org/abs/1706.05587.
@@ -477,36 +481,29 @@ def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, 
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    num_classes : int, default 19
+    classes : int, default 19
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
-    del backbone[-1]
-    return get_deeplabv3(backbone=backbone, num_classes=num_classes, aux=aux,
-                         model_name="deeplabv3_resnetd101b_cityscapes", **kwargs)
-
-
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
+    del backbone.final_pool
+    return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_cityscapes",
+                         **kwargs)
 
 
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     in_size = (480, 480)
-    aux = True
+    aux = False
     pretrained = False
 
     models = [
@@ -522,13 +519,10 @@ def _test():
         (deeplabv3_resnetd101b_cityscapes, 19),
     ]
 
-    for model, num_classes in models:
+    for model, classes in models:
 
         net = model(pretrained=pretrained, in_size=in_size, aux=aux)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
             assert (model != deeplabv3_resnetd50b_voc or weight_count == 42127850)
@@ -553,12 +547,11 @@ def _test():
             assert (model != deeplabv3_resnetd50b_cityscapes or weight_count == 39762131)
             assert (model != deeplabv3_resnetd101b_cityscapes or weight_count == 58754259)
 
-        x = Variable(torch.randn(1, 3, in_size[0], in_size[1]))
+        x = np.zeros((1, 3, in_size[0], in_size[1]), np.float32)
         ys = net(x)
         y = ys[0] if aux else ys
-        y.sum().backward()
-        assert ((y.size(0) == x.size(0)) and (y.size(1) == num_classes) and (y.size(2) == x.size(2)) and
-                (y.size(3) == x.size(3)))
+        assert ((y.shape[0] == x.shape[0]) and (y.shape[1] == classes) and (y.shape[2] == x.shape[2]) and
+                (y.shape[3] == x.shape[3]))
 
 
 if __name__ == "__main__":

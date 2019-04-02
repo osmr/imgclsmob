@@ -14,3 +14,4 @@ Pillow
 imgaug
 scipy
 tqdm
+pycocotools

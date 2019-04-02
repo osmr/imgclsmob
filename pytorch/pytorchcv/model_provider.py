@@ -77,6 +77,7 @@ from .models.fractalnet_cifar import *
 
 from .models.resnetd import *
 from .models.pspnet import *
+from .models.deeplabv3 import *
 
 __all__ = ['get_model']
 
@@ -554,6 +555,17 @@ _models = {
     'pspnet_resnetd101b_ade20k': pspnet_resnetd101b_ade20k,
     'pspnet_resnetd50b_cityscapes': pspnet_resnetd50b_cityscapes,
     'pspnet_resnetd101b_cityscapes': pspnet_resnetd101b_cityscapes,
+
+    'deeplabv3_resnetd50b_voc': deeplabv3_resnetd50b_voc,
+    'deeplabv3_resnetd101b_voc': deeplabv3_resnetd101b_voc,
+    'deeplabv3_resnetd152b_voc': deeplabv3_resnetd152b_voc,
+    'deeplabv3_resnetd50b_coco': deeplabv3_resnetd50b_coco,
+    'deeplabv3_resnetd101b_coco': deeplabv3_resnetd101b_coco,
+    'deeplabv3_resnetd152b_coco': deeplabv3_resnetd152b_coco,
+    'deeplabv3_resnetd50b_ade20k': deeplabv3_resnetd50b_ade20k,
+    'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
+    'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
+    'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 }
 
 

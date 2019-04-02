@@ -115,7 +115,7 @@ class COCOSegDataset(SegDataset):
             if (mask > 0).sum() > pixels_thr:
                 filtered_idx.append(img_id)
             tbar.set_description("Doing: {}/{}, got {} qualified images".format(i, len(idx), len(filtered_idx)))
-        logging.info("Found number of qualified images: ", len(filtered_idx))
+        logging.info("Found number of qualified images: {}".format(len(filtered_idx)))
         np.save(idx_file, np.array(filtered_idx, np.int32))
         return filtered_idx
 

@@ -57,6 +57,9 @@ class DeepLabV3(SegBaseModel):
                 self.auxlayer.collect_params().setattr('lr_mult', 10)
 
     def hybrid_forward(self, F, x):
+        self._up_kwargs['height'] = x.shape[2]
+        self._up_kwargs['width'] = x.shape[3]
+
         c3, c4 = self.base_forward(x)
         outputs = []
         x = self.head(c4)
@@ -67,6 +70,8 @@ class DeepLabV3(SegBaseModel):
             auxout = self.auxlayer(c3)
             auxout = F.contrib.BilinearResize2D(auxout, **self._up_kwargs)
             outputs.append(auxout)
+        else:
+            return outputs[0]
         return tuple(outputs)
 
     def demo(self, x):
@@ -96,6 +101,10 @@ class _DeepLabHead(HybridBlock):
                                      kernel_size=1))
 
     def hybrid_forward(self, F, x):
+        h, w = x.shape[2:]
+        self.aspp.concurent[-1]._up_kwargs['height'] = h
+        self.aspp.concurent[-1]._up_kwargs['width'] = w
+
         x = self.aspp(x)
         return self.block(x)
 
@@ -132,6 +141,9 @@ class _AsppPooling(nn.HybridBlock):
             self.gap.add(nn.Activation("relu"))
 
     def hybrid_forward(self, F, x):
+        # self._up_kwargs['height'] = x.shape[2]
+        # self._up_kwargs['width'] = x.shape[3]
+
         pool = self.gap(x)
         return F.contrib.BilinearResize2D(pool, **self._up_kwargs)
 

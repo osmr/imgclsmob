@@ -12,9 +12,7 @@ from .voc_seg_dataset import VOCSegDataset
 from .ade20k_seg_dataset import ADE20KSegDataset
 from .cityscapes_seg_dataset import CityscapesSegDataset
 from .coco_seg_dataset import COCOSegDataset
-
 # from gluoncv.data.mscoco.segmentation import COCOSegmentation
-# from gluoncv.data.ade20k.segmentation import ADE20KSegmentation
 
 
 def add_dataset_parser_arguments(parser,

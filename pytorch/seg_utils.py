@@ -10,6 +10,7 @@ import torchvision.transforms as transforms
 from .voc_seg_dataset import VOCSegDataset
 from .ade20k_seg_dataset import ADE20KSegDataset
 from .cityscapes_seg_dataset import CityscapesSegDataset
+from .coco_seg_dataset import COCOSegDataset
 # import torchvision.datasets as datasets
 
 
@@ -97,6 +98,12 @@ def get_metainfo(dataset_name):
             "use_vague": CityscapesSegDataset.use_vague,
             "background_idx": CityscapesSegDataset.background_idx,
             "ignore_bg": CityscapesSegDataset.ignore_bg}
+    elif dataset_name == "COCO":
+        return {
+            "vague_idx": COCOSegDataset.vague_idx,
+            "use_vague": COCOSegDataset.use_vague,
+            "background_idx": COCOSegDataset.background_idx,
+            "ignore_bg": COCOSegDataset.ignore_bg}
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -121,8 +128,8 @@ def get_test_data_loader(dataset_name,
         dataset_class = ADE20KSegDataset
     elif dataset_name == "Cityscapes":
         dataset_class = CityscapesSegDataset
-    # elif dataset_name == "COCO":
-    #     dataset = None
+    elif dataset_name == "COCO":
+        dataset_class = COCOSegDataset
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

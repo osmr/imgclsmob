@@ -94,6 +94,7 @@ Some remarks:
 - Top1/Top5 are the standard 1-crop Top-1/Top-5 errors (in percents) on the validation subset of the ImageNet-1K dataset.
 - FLOPs/2 is the number of FLOPs divided by two to be similar to the number of MACs.
 - Remark `Converted from GL model` means that the model was trained on `MXNet/Gluon` and then converted to Chainer.
+- ResNet(D) is a dilated ResNet intended for use as an feature extractor in some segmentation networks.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -259,6 +260,9 @@ Some remarks:
 | NASNet-A 4@1056 | 25.36 | 7.96 | 5,289,978 | 584.90M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0796-f09950c0.npz.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.22 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0422-d49d4663.npz.log)) |
 | PNASNet-5-Large | 17.90 | 4.26 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.114/pnasnet5large-0426-3c2755dc.npz.log)) |
+| ResNet(D)-50b | 20.80 | 5.50 | 25,680,808 | 20,497.60M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0550-7ba88f04.npz.log)) |
+| ResNet(D)-101b | 19.49 | 4.60 | 44,672,936 | 35,392.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0460-b90f971e.npz.log)) |
+| ResNet(D)-152b | 19.36 | 4.70 | 60,316,584 | 47,662.18M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd152b-0470-41442334.npz.log)) |
 
 ### CIFAR-10
 

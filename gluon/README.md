@@ -107,6 +107,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 - ResNet/PreResNet models do not use biases in convolutions at all.
 - CondenseNet models are only so-called converted versions.
 - ShuffleNetV2 and ShuffleNetV2b are different implementations of the same architecture.
+- ResNet(D) is a dilated ResNet intended for use as an feature extractor in some segmentation networks.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -279,6 +280,9 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | NASNet-A 4@1056 | 25.37 | 7.95 | 5,289,978 | 584.90M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0795-5c78908e.params.log)) |
 | NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |
 | PNASNet-5-Large | 17.90 | 4.28 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.114/pnasnet5large-0428-998a548f.params.log)) |
+| ResNet(D)-50b | 20.79 | 5.49 | 25,680,808 | 20,496.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0549-17d6004b.params.log)) |
+| ResNet(D)-101b | 19.49 | 4.61 | 44,672,936 | 35,391.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0461-fead1bcb.params.log)) |
+| ResNet(D)-152b | 19.39 | 4.67 | 60,316,584 | 47,661.38M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd152b-0467-d0fe2fe0.params.log)) |
 
 ### CIFAR-10
 

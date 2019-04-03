@@ -103,6 +103,7 @@ Some remarks:
 - You may notice that quality estimations are quite different from ones for the corresponding models in other frameworks. This
 is due to the fact that the quality is estimated on the standard TorchVision stack of image transformations. Using
 OpenCV `Resize` transformation instead of PIL one quality evaluation results will be similar to ones for the Gluon models.
+- ResNet(D) is a dilated ResNet intended for use as an feature extractor in some segmentation networks.
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -274,6 +275,9 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | NASNet-A 4@1056 | 25.68 | 8.16 | 5,289,978 | 584.90M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.97/nasnet_4a1056-0816-d21bbaf5.pth.log)) |
 | NASNet-A 6@4032 | 18.14 | 4.21 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0421-f354d28f.pth.log)) |
 | PNASNet-5-Large | 17.88 | 4.28 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.114/pnasnet5large-0428-65de46eb.pth.log)) |
+| ResNet(D)-50b | 21.04 | 5.65 | 25,680,808 | 20,497.60M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd50b-0565-ec03d815.pth.log)) |
+| ResNet(D)-101b | 19.59 | 4.73 | 44,672,936 | 35,392.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd101b-0473-f851c920.pth.log)) |
+| ResNet(D)-152b | 19.42 | 4.82 | 60,316,584 | 47,662.18M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.296/resnetd152b-0482-112e216d.pth.log)) |
 
 ### CIFAR-10
 

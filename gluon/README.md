@@ -1,11 +1,13 @@
-# Image classification models on MXNet/Gluon
+# Computer vision models on MXNet/Gluon
 
 [![PyPI](https://img.shields.io/pypi/v/gluoncv2.svg)](https://pypi.python.org/pypi/gluoncv2)
 [![Downloads](https://pepy.tech/badge/gluoncv2)](https://pepy.tech/project/gluoncv2)
 
-This is a collection of image classification models. Many of them are pretrained on
-[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
-[SVHN](http://ufldl.stanford.edu/housenumbers) datasets and loaded automatically during use. All pretrained models
+This is a collection of image classification and segmentation models. Many of them are pretrained on
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
+[SVHN](http://ufldl.stanford.edu/housenumbers), [Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012),
+[ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K), [Cityscapes](https://www.cityscapes-dataset.com),
+and [COCO](http://cocodataset.org) datasets and loaded automatically during use. All pretrained models
 require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
 [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
@@ -70,6 +72,7 @@ require the same ordinary normalization. Scripts for training/evaluating/convert
 - Shake-Shake-ResNet (['Shake-Shake regularization'](https://arxiv.org/abs/1705.07485))
 - ShakeDrop-ResNet (['ShakeDrop Regularization for Deep Residual Learning'](https://arxiv.org/abs/1802.02375))
 - FractalNet (['FractalNet: Ultra-Deep Neural Networks without Residuals'](https://arxiv.org/abs/1605.07648))
+- PSPNet (['Pyramid Scene Parsing Network'](https://arxiv.org/abs/1612.01105))
 
 ## Installation
 
@@ -399,6 +402,31 @@ Some remarks:
 | RiR | 2.68 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_svhn-0268-1c0718de.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 3.17 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet20_2x16d_svhn-0317-7a48fde5.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 2.62 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet26_2x32d_svhn-0262-f1dbb8ef.params.log)) |
+
+### Pascal VOC20102
+
+| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-101b | 98.09 | 81.44 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_voc-8144-e15319bf.params.log)) |
+
+### ADE20K
+
+| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-50b | 79.37 | 36.87 | 46,782,550 | 162,410.82M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd50b_ade20k-3687-f0dcdf73.params.log)) |
+| PSPNet | ResNet(D)-101b | 79.93 | 37.97 | 65,774,678 | 230,824.47M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_ade20k-3797-c1280aea.params.log)) |
+
+### Cityscapes
+
+| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-101b | 96.17 | 71.72 | 65,707,475 | 230,583.01M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_cityscapes-7172-d5ad2fa4.params.log)) |
+
+### COCO
+
+| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-101b | 92.05 | 67.41 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_coco-6741-87582b79.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

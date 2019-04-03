@@ -1,11 +1,11 @@
-# Large-scale image classification networks for embedded systems
+# Sandbox for training convolutional networks for computer vision
 
 [![Build Status](https://travis-ci.org/osmr/imgclsmob.svg?branch=master)](https://travis-ci.org/osmr/imgclsmob)
 [![GitHub License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-2.7%2C3.6-lightgrey.svg)](https://github.com/osmr/imgclsmob)
 
-This repo is used to research large-scale image classification models for embedded systems. For this purpose,
-the repo contains (re)implementations of various classification models and scripts for training/evaluating/converting.
+This repo is used to research convolutional networks for task of computer vision. For this purpose, the repo contains
+(re)implementations of various classification and segmentation models and scripts for training/evaluating/converting.
 
 The following frameworks are used:
 - MXNet/Gluon ([info](https://mxnet.apache.org)),
@@ -22,8 +22,10 @@ For each supported framework, there is a PIP-package containing pure models with
 - [tensorflowcv](https://pypi.org/project/tensorflowcv) for TensorFlow.
 
 Currently, models are mostly implemented on Gluon and then ported to other frameworks. Some models are pretrained on
-[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
-[SVHN](http://ufldl.stanford.edu/housenumbers) datasets. All pretrained weights are loaded automatically during use.
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
+[SVHN](http://ufldl.stanford.edu/housenumbers), [Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012),
+[ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K), [Cityscapes](https://www.cityscapes-dataset.com),
+and [COCO](http://cocodataset.org) datasets. All pretrained weights are loaded automatically during use.
 See examples of such automatic loading of weights in the corresponding sections of the documentation dedicated to a
 particular package:
 - [Gluon models](gluon/README.md),

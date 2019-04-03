@@ -274,7 +274,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('shakeshakeresnet20_2x16d_svhn', '0317', 'a693ec24fb8fe2c9f15bcc6b1050943c0c5d595a', 'v0.0.295'),
     ('shakeshakeresnet26_2x32d_cifar10', '0317', 'ecd1f8337cc90b5378b4217fb2591f2ed0f02bdf', 'v0.0.217'),
     ('shakeshakeresnet26_2x32d_cifar100', '1880', 'b47e371f60c9fed9eaac960568783fb6f83a362f', 'v0.0.222'),
-    ('shakeshakeresnet26_2x32d_svhn', '0262', 'c1b8099ece97e17ce85213e4ecc6e50a064050cf', 'v0.0.295')]}
+    ('shakeshakeresnet26_2x32d_svhn', '0262', 'c1b8099ece97e17ce85213e4ecc6e50a064050cf', 'v0.0.295'),
+    ('pspnet_resnetd101b_voc', '8144', 'c22f021948461a7b7ab1ef1265a7948762770c83', 'v0.0.297'),
+    ('pspnet_resnetd50b_ade20k', '3687', '13f22137d7dd06c6de2ffc47e6ed33403d3dd2cf', 'v0.0.297'),
+    ('pspnet_resnetd101b_ade20k', '3797', '115d62bf66477221b83337208aefe0f2f0266da2', 'v0.0.297'),
+    ('pspnet_resnetd101b_cityscapes', '7172', '0a6efb497bd4fc763d27e2121211e06f72ada7ed', 'v0.0.297'),
+    ('pspnet_resnetd101b_coco', '6741', 'c8b13be65cb43402fce8bae945f6e0d0a3246b92', 'v0.0.297'),
+]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

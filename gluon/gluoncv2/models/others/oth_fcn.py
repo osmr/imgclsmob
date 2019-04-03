@@ -69,6 +69,8 @@ class FCN(SegBaseModel):
             auxout = self.auxlayer(c3)
             auxout = F.contrib.BilinearResize2D(auxout, **self._up_kwargs)
             outputs.append(auxout)
+        else:
+            return outputs[0]
         return tuple(outputs)
 
 

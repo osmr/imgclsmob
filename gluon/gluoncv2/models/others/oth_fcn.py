@@ -39,6 +39,12 @@ class FCN(SegBaseModel):
                  base_size=520, crop_size=480, **kwargs):
         super(FCN, self).__init__(nclass, aux, backbone, ctx=ctx, base_size=base_size,
                                   crop_size=crop_size, pretrained_base=pretrained_base, **kwargs)
+        if "fixed_size" in kwargs:
+            del kwargs["fixed_size"]
+        if "classes" in kwargs:
+            del kwargs["classes"]
+        if "in_channels" in kwargs:
+            del kwargs["in_channels"]
         with self.name_scope():
             self.head = _FCNHead(2048, nclass, **kwargs)
             self.head.initialize(ctx=ctx)

@@ -124,7 +124,7 @@ class AtrousSpatialPyramidPooling(nn.Module):
         self.conv = conv1x1_block(
             in_channels=project_in_channels,
             out_channels=mid_channels)
-        self.dropout = nn.Dropout2d(p=0.5, inplace=False)
+        self.dropout = nn.Dropout(p=0.5, inplace=False)
 
     def forward(self, x):
         x = self.branches(x)

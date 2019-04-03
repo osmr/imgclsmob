@@ -76,6 +76,7 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.resnetd import *
+from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
@@ -546,6 +547,15 @@ _models = {
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
+
+    'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
+    'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,
+    'fcn8sd_resnetd50b_coco': fcn8sd_resnetd50b_coco,
+    'fcn8sd_resnetd101b_coco': fcn8sd_resnetd101b_coco,
+    'fcn8sd_resnetd50b_ade20k': fcn8sd_resnetd50b_ade20k,
+    'fcn8sd_resnetd101b_ade20k': fcn8sd_resnetd101b_ade20k,
+    'fcn8sd_resnetd50b_cityscapes': fcn8sd_resnetd50b_cityscapes,
+    'fcn8sd_resnetd101b_cityscapes': fcn8sd_resnetd101b_cityscapes,
 
     'pspnet_resnetd50b_voc': pspnet_resnetd50b_voc,
     'pspnet_resnetd101b_voc': pspnet_resnetd101b_voc,

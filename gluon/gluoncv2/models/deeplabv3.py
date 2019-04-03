@@ -155,7 +155,7 @@ class DeepLabv3(HybridBlock):
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
+    in_size : tuple of two ints, default (480, 480)
         Spatial size of the expected input image.
     classes : int, default 21
         Number of segmentation classes.
@@ -166,7 +166,7 @@ class DeepLabv3(HybridBlock):
                  aux=False,
                  fixed_size=True,
                  in_channels=3,
-                 in_size=(224, 224),
+                 in_size=(480, 480),
                  classes=21,
                  **kwargs):
         super(DeepLabv3, self).__init__(**kwargs)

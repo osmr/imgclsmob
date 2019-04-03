@@ -76,10 +76,13 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.resnetd import *
-from .models.others.oth_resnetv1b import *
+from .models.fcn8sd import *
 from .models.pspnet import *
-from .models.others.oth_pspnet import *
 from .models.deeplabv3 import *
+
+from .models.others.oth_resnetv1b import *
+from .models.others.oth_fcn import *
+from .models.others.oth_pspnet import *
 from .models.others.oth_deeplabv3 import *
 
 __all__ = ['get_model']
@@ -550,9 +553,14 @@ _models = {
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
 
-    'oth_resnet50_v1s': oth_resnet50_v1s,
-    'oth_resnet101_v1s': oth_resnet101_v1s,
-    'oth_resnet152_v1s': oth_resnet152_v1s,
+    'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
+    'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,
+    'fcn8sd_resnetd50b_coco': fcn8sd_resnetd50b_coco,
+    'fcn8sd_resnetd101b_coco': fcn8sd_resnetd101b_coco,
+    'fcn8sd_resnetd50b_ade20k': fcn8sd_resnetd50b_ade20k,
+    'fcn8sd_resnetd101b_ade20k': fcn8sd_resnetd101b_ade20k,
+    'fcn8sd_resnetd50b_cityscapes': fcn8sd_resnetd50b_cityscapes,
+    'fcn8sd_resnetd101b_cityscapes': fcn8sd_resnetd101b_cityscapes,
 
     'pspnet_resnetd50b_voc': pspnet_resnetd50b_voc,
     'pspnet_resnetd101b_voc': pspnet_resnetd101b_voc,
@@ -562,12 +570,6 @@ _models = {
     'pspnet_resnetd101b_ade20k': pspnet_resnetd101b_ade20k,
     'pspnet_resnetd50b_cityscapes': pspnet_resnetd50b_cityscapes,
     'pspnet_resnetd101b_cityscapes': pspnet_resnetd101b_cityscapes,
-
-    'oth_psp_resnet101_coco': oth_psp_resnet101_coco,
-    'oth_psp_resnet101_voc': oth_psp_resnet101_voc,
-    'oth_psp_resnet50_ade': oth_psp_resnet50_ade,
-    'oth_psp_resnet101_ade': oth_psp_resnet101_ade,
-    'oth_psp_resnet101_citys': oth_psp_resnet101_citys,
 
     'deeplabv3_resnetd50b_voc': deeplabv3_resnetd50b_voc,
     'deeplabv3_resnetd101b_voc': deeplabv3_resnetd101b_voc,
@@ -579,6 +581,22 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'oth_resnet50_v1s': oth_resnet50_v1s,
+    'oth_resnet101_v1s': oth_resnet101_v1s,
+    'oth_resnet152_v1s': oth_resnet152_v1s,
+
+    'oth_fcn_resnet50_voc': oth_fcn_resnet50_voc,
+    'oth_fcn_resnet101_voc': oth_fcn_resnet101_voc,
+    'oth_fcn_resnet101_coco': oth_fcn_resnet101_coco,
+    'oth_fcn_resnet50_ade': oth_fcn_resnet50_ade,
+    'oth_fcn_resnet101_ade': oth_fcn_resnet101_ade,
+
+    'oth_psp_resnet101_coco': oth_psp_resnet101_coco,
+    'oth_psp_resnet101_voc': oth_psp_resnet101_voc,
+    'oth_psp_resnet50_ade': oth_psp_resnet50_ade,
+    'oth_psp_resnet101_ade': oth_psp_resnet101_ade,
+    'oth_psp_resnet101_citys': oth_psp_resnet101_citys,
 
     'oth_deeplab_resnet101_coco': oth_deeplab_resnet101_coco,
     'oth_deeplab_resnet101_voc': oth_deeplab_resnet101_voc,

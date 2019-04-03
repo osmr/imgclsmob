@@ -5,8 +5,8 @@ from mxnet.context import cpu
 from mxnet.gluon.nn import HybridBlock
 from .oth_segbase import SegBaseModel
 
-__all__ = ['FCN', 'get_fcn', 'get_fcn_resnet50_voc', 'get_fcn_resnet101_voc',
-           'get_fcn_resnet101_coco', 'get_fcn_resnet50_ade', 'get_fcn_resnet101_ade']
+__all__ = ['FCN', 'get_fcn', 'oth_fcn_resnet50_voc', 'oth_fcn_resnet101_voc',
+           'oth_fcn_resnet101_coco', 'oth_fcn_resnet50_ade', 'oth_fcn_resnet101_ade']
 
 
 class FCN(SegBaseModel):
@@ -33,11 +33,6 @@ class FCN(SegBaseModel):
 
         Long, Jonathan, Evan Shelhamer, and Trevor Darrell. "Fully convolutional networks
         for semantic segmentation." *CVPR*, 2015
-
-    Examples
-    --------
-    >>> model = FCN(nclass=21, backbone='resnet50')
-    >>> print(model)
     """
     # pylint: disable=arguments-differ
     def __init__(self, nclass, backbone='resnet50', aux=True, ctx=cpu(), pretrained_base=True,
@@ -54,6 +49,9 @@ class FCN(SegBaseModel):
                 self.auxlayer.collect_params().setattr('lr_mult', 10)
 
     def hybrid_forward(self, F, x):
+        self._up_kwargs['height'] = x.shape[2]
+        self._up_kwargs['width'] = x.shape[3]
+
         c3, c4 = self.base_forward(x)
 
         outputs = []
@@ -91,7 +89,7 @@ class _FCNHead(HybridBlock):
 
 
 def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
-            root='~/.mxnet/models', ctx=cpu(0), pretrained_base=True, **kwargs):
+            root='~/.mxnet/models', ctx=cpu(0), pretrained_base=True, num_class=150, **kwargs):
     r"""FCN model from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
 
@@ -108,11 +106,6 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         Location for keeping the model parameters.
     pretrained_base : bool or str, default True
         This will load pretrained backbone network, that was trained on ImageNet.
-
-    Examples
-    --------
-    >>> model = get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False)
-    >>> print(model)
     """
     acronyms = {
         'pascal_voc': 'voc',
@@ -120,17 +113,17 @@ def get_fcn(dataset='pascal_voc', backbone='resnet50', pretrained=False,
         'ade20k': 'ade',
         'coco': 'coco',
     }
-    from ..data import datasets
+    # from ..data import datasets
     # infer number of classes
-    model = FCN(datasets[dataset].NUM_CLASS, backbone=backbone, pretrained_base=pretrained_base,
+    model = FCN(num_class, backbone=backbone, pretrained_base=pretrained_base,
                 ctx=ctx, **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file(
-            'fcn_%s_%s'%(backbone, acronyms[dataset]), tag=pretrained, root=root), ctx=ctx)
+    # if pretrained:
+    #     from .model_store import get_model_file
+    #     model.load_parameters(get_model_file(
+    #         'fcn_%s_%s'%(backbone, acronyms[dataset]), tag=pretrained, root=root), ctx=ctx)
     return model
 
-def get_fcn_resnet50_voc(**kwargs):
+def oth_fcn_resnet50_voc(**kwargs):
     r"""FCN model with base network ResNet-50 pre-trained on Pascal VOC dataset
     from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
@@ -144,15 +137,10 @@ def get_fcn_resnet50_voc(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet50_voc(pretrained=True)
-    >>> print(model)
     """
-    return get_fcn('pascal_voc', 'resnet50', **kwargs)
+    return get_fcn('pascal_voc', 'resnet50', num_class=21, **kwargs)
 
-def get_fcn_resnet101_coco(**kwargs):
+def oth_fcn_resnet101_coco(**kwargs):
     r"""FCN model with base network ResNet-101 pre-trained on Pascal VOC dataset
     from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
@@ -166,16 +154,11 @@ def get_fcn_resnet101_coco(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet101_coco(pretrained=True)
-    >>> print(model)
     """
-    return get_fcn('coco', 'resnet101', **kwargs)
+    return get_fcn('coco', 'resnet101', num_class=21, **kwargs)
 
 
-def get_fcn_resnet101_voc(**kwargs):
+def oth_fcn_resnet101_voc(**kwargs):
     r"""FCN model with base network ResNet-101 pre-trained on Pascal VOC dataset
     from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
@@ -189,15 +172,10 @@ def get_fcn_resnet101_voc(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet101_voc(pretrained=True)
-    >>> print(model)
     """
-    return get_fcn('pascal_voc', 'resnet101', **kwargs)
+    return get_fcn('pascal_voc', 'resnet101', num_class=21, **kwargs)
 
-def get_fcn_resnet50_ade(**kwargs):
+def oth_fcn_resnet50_ade(**kwargs):
     r"""FCN model with base network ResNet-50 pre-trained on ADE20K dataset
     from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
@@ -211,15 +189,10 @@ def get_fcn_resnet50_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
-    return get_fcn('ade20k', 'resnet50', **kwargs)
+    return get_fcn('ade20k', 'resnet50', num_class=150, **kwargs)
 
-def get_fcn_resnet101_ade(**kwargs):
+def oth_fcn_resnet101_ade(**kwargs):
     r"""FCN model with base network ResNet-50 pre-trained on ADE20K dataset
     from the paper `"Fully Convolutional Network for semantic segmentation"
     <https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf>`_
@@ -233,10 +206,5 @@ def get_fcn_resnet101_ade(**kwargs):
         The context in which to load the pretrained weights.
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
-
-    Examples
-    --------
-    >>> model = get_fcn_resnet50_ade(pretrained=True)
-    >>> print(model)
     """
-    return get_fcn('ade20k', 'resnet101', **kwargs)
+    return get_fcn('ade20k', 'resnet101', num_class=150, **kwargs)

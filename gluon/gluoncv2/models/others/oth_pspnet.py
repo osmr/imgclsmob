@@ -35,6 +35,13 @@ class PSPNet(SegBaseModel):
                  base_size=520, crop_size=480, **kwargs):
         super(PSPNet, self).__init__(nclass, aux, backbone, ctx=ctx, base_size=base_size,
                                      crop_size=crop_size, pretrained_base=pretrained_base, **kwargs)
+        if "fixed_size" in kwargs:
+            del kwargs["fixed_size"]
+        if "classes" in kwargs:
+            del kwargs["classes"]
+        if "in_channels" in kwargs:
+            del kwargs["in_channels"]
+
         with self.name_scope():
             self.head = _PSPHead(nclass, height=self._up_kwargs['height']//8,
                                  width=self._up_kwargs['width']//8, **kwargs)

@@ -149,7 +149,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-18 x0.5 | 33.67 | 13.19 | 5,802,440 | 608.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.273/preresnet18_wd2-1319-63e55c24.params.log)) |
 | PreResNet-18 x0.75 | 29.96 | 10.68 | 8,473,784 | 1,129.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.274/preresnet18_w3d4-1068-eb569861.params.log)) |
 | PreResNet-18 | 28.16 | 9.51 | 11,687,848 | 1,820.56M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.140/preresnet18-0951-71279a0b.params.log)) |
-| PreResNet-34 | 25.88 | 8.11 | 21,796,008 | 3,672.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet34-0811-f8fe98a2.params.log)) |
+| PreResNet-34 | 24.55 | 7.51 | 21,796,008 | 3,672.83M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.300/preresnet34-0751-ba9c829e.params.log)) |
 | PreResNet-50 | 23.39 | 6.68 | 25,549,480 | 3,875.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet50-0668-4940c94b.params.log)) |
 | PreResNet-50b | 23.16 | 6.64 | 25,549,480 | 4,107.97M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet50b-0664-2fcfddb1.params.log)) |
 | PreResNet-101 | 21.45 | 5.75 | 44,541,608 | 7,595.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet101-0575-e2887e53.params.log)) |

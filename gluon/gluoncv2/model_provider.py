@@ -80,11 +80,6 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
-from .models.others.oth_resnetv1b import *
-from .models.others.oth_fcn import *
-from .models.others.oth_pspnet import *
-from .models.others.oth_deeplabv3 import *
-
 __all__ = ['get_model']
 
 
@@ -581,29 +576,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'oth_resnet50_v1s': oth_resnet50_v1s,
-    'oth_resnet101_v1s': oth_resnet101_v1s,
-    'oth_resnet152_v1s': oth_resnet152_v1s,
-
-    'oth_fcn_resnet50_voc': oth_fcn_resnet50_voc,
-    'oth_fcn_resnet101_voc': oth_fcn_resnet101_voc,
-    'oth_fcn_resnet101_coco': oth_fcn_resnet101_coco,
-    'oth_fcn_resnet50_ade': oth_fcn_resnet50_ade,
-    'oth_fcn_resnet101_ade': oth_fcn_resnet101_ade,
-
-    'oth_psp_resnet101_coco': oth_psp_resnet101_coco,
-    'oth_psp_resnet101_voc': oth_psp_resnet101_voc,
-    'oth_psp_resnet50_ade': oth_psp_resnet50_ade,
-    'oth_psp_resnet101_ade': oth_psp_resnet101_ade,
-    'oth_psp_resnet101_citys': oth_psp_resnet101_citys,
-
-    'oth_deeplab_resnet101_coco': oth_deeplab_resnet101_coco,
-    'oth_deeplab_resnet101_voc': oth_deeplab_resnet101_voc,
-    'oth_deeplab_resnet50_ade': oth_deeplab_resnet50_ade,
-    'oth_deeplab_resnet101_ade': oth_deeplab_resnet101_ade,
-    'oth_deeplab_resnet152_coco': oth_deeplab_resnet152_coco,
-    'oth_deeplab_resnet152_voc': oth_deeplab_resnet152_voc,
 }
 
 

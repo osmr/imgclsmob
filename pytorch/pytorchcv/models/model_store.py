@@ -280,6 +280,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('pspnet_resnetd101b_ade20k', '3797', '115d62bf66477221b83337208aefe0f2f0266da2', 'v0.0.297'),
     ('pspnet_resnetd101b_cityscapes', '7172', '0a6efb497bd4fc763d27e2121211e06f72ada7ed', 'v0.0.297'),
     ('pspnet_resnetd101b_coco', '6741', 'c8b13be65cb43402fce8bae945f6e0d0a3246b92', 'v0.0.297'),
+    ('deeplabv3_resnetd101b_voc', '8024', 'fd8bf74ffc96c97b30bcd3b6ce194a2daed68098', 'v0.0.298'),
+    ('deeplabv3_resnetd152b_voc', '8120', 'f2dae198b3cdc41920ea04f674b665987c68d7dc', 'v0.0.298'),
+    ('deeplabv3_resnetd50b_ade20k', '3713', 'bddbb458e362e18f5812c2307b322840394314bc', 'v0.0.298'),
+    ('deeplabv3_resnetd101b_ade20k', '3784', '977446a5fb32b33f168f2240fb6b7ef9f561fc1e', 'v0.0.298'),
+    ('deeplabv3_resnetd101b_coco', '6773', 'e59c1d8f7ed5bcb83f927d2820580a2f4970e46f', 'v0.0.298'),
+    ('deeplabv3_resnetd152b_coco', '6899', '7e946d7a63ed255dd38afacebb0a0525e735da64', 'v0.0.298'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

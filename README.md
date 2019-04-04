@@ -1,4 +1,4 @@
-# Sandbox for training convolutional networks for computer vision
+# Convolutional neural networks for computer vision
 
 [![Build Status](https://travis-ci.org/osmr/imgclsmob.svg?branch=master)](https://travis-ci.org/osmr/imgclsmob)
 [![GitHub License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)

@@ -287,6 +287,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('deeplabv3_resnetd101b_ade20k', '3784', '6224836f8f31a00be1718a530a20670136bb3958', 'v0.0.298'),
     ('deeplabv3_resnetd101b_coco', '6773', '74dc9914078e47feb3ff64fba717d1d4040d8235', 'v0.0.298'),
     ('deeplabv3_resnetd152b_coco', '6899', 'edd79b4ca095f1674e7a68ee0dc8ed8bcd0b6a26', 'v0.0.298'),
+    ('fcn8sd_resnetd101b_voc', '8040', 'f6c67c75bce4f9a3e17bf555369c0c9332ab5c1f', 'v0.0.299'),
+    ('fcn8sd_resnetd50b_ade20k', '3339', '9856c5ee8186d1ac4b0eb5177c73e76c4cd63bb0', 'v0.0.299'),
+    ('fcn8sd_resnetd101b_ade20k', '3588', '081774b2fb373d7b759cda2160fa0d2599b1c5f1', 'v0.0.299'),
+    ('fcn8sd_resnetd101b_coco', '6011', '05e97cc5f5fcdf1c5ec5c617062d43adfe150d88', 'v0.0.299'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

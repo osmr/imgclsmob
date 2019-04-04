@@ -74,6 +74,7 @@ require the same ordinary normalization. Scripts for training/evaluating/convert
 - FractalNet (['FractalNet: Ultra-Deep Neural Networks without Residuals'](https://arxiv.org/abs/1605.07648))
 - PSPNet (['Pyramid Scene Parsing Network'](https://arxiv.org/abs/1612.01105))
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
+- FCN-8s (['Fully Convolutional Networks for Semantic Segmentation'](https://arxiv.org/abs/1411.4038))
 
 ## Installation
 
@@ -411,6 +412,7 @@ Some remarks:
 | PSPNet | ResNet(D)-101b | 98.09 | 81.44 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_voc-8144-e15319bf.params.log)) |
 | DeepLabv3 | ResNet(D)-101b | 97.95 | 80.24 | 58,754,773 | 47,624.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_voc-8024-8ee3099c.params.log)) |
 | DeepLabv3 | ResNet(D)-152b | 98.11 | 81.20 | 74,398,421 | 59,894.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd152b_voc-8120-88fb315d.params.log)) |
+| FCN-8s(d) | ResNet(D)-101b | 97.80 | 80.40 | 52,072,917 | 196,562.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.299/fcn8sd_resnetd101b_voc-8040-f6c67c75.params.log)) |
 
 ### ADE20K
 
@@ -420,6 +422,8 @@ Some remarks:
 | PSPNet | ResNet(D)-101b | 79.93 | 37.97 | 65,774,678 | 230,824.47M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_ade20k-3797-c1280aea.params.log)) |
 | DeepLabv3 | ResNet(D)-50b | 79.72 | 37.13 | 39,795,798 | 32,755.38M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd50b_ade20k-3713-5d5e2f74.params.log)) |
 | DeepLabv3 | ResNet(D)-101b | 80.21 | 37.84 | 58,787,926 | 47,650.43M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_ade20k-3784-6224836f.params.log)) |
+| FCN-8s(d) | ResNet(D)-50b | 76.92 | 33.39 | 33,146,966 | 128,387.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.299/fcn8sd_resnetd50b_ade20k-3339-9856c5ee.params.log)) |
+| FCN-8s(d) | ResNet(D)-101b | 79.01 | 35.88 | 52,139,094 | 196,800.73M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.299/fcn8sd_resnetd101b_ade20k-3588-081774b2.params.log)) |
 
 ### Cityscapes
 
@@ -434,6 +438,7 @@ Some remarks:
 | PSPNet | ResNet(D)-101b | 92.05 | 67.41 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_coco-6741-87582b79.params.log)) |
 | DeepLabv3 | ResNet(D)-101b | 92.19 | 67.73 | 58,754,773 | 47,624.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_coco-6773-74dc9914.params.log)) |
 | DeepLabv3 | ResNet(D)-152b | 92.24 | 68.99 | 74,398,421 | 275,084.22M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd152b_coco-6899-edd79b4c.params.log)) |
+| FCN-8s(d) | ResNet(D)-101b | 91.44 | 60.11 | 52,072,917 | 196,562.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.299/fcn8sd_resnetd101b_coco-6011-05e97cc5.params.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

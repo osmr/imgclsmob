@@ -42,7 +42,7 @@ git clone git@github.com:osmr/imgclsmob.git
 pip install -r requirements.txt
 ```
 
-## Table of implemented models
+## Table of implemented classification models
 
 Some remarks:
 - `Repo` is an author repository, if it exists.
@@ -124,3 +124,17 @@ Some remarks:
 | Shake-Shake-ResNet | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BCD | BCD | BCD | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |
 | FractalNet | BC | BC | - | - | - | [link](https://arxiv.org/abs/1605.07648) | [link](https://github.com/gustavla/fractalnet) | 2016 |
+
+## Table of implemented segmentation models
+
+Some remarks:
+- `A` corresponds to Pascal VOC2012.
+- `B` corresponds to Pascal ADE20K.
+- `C` corresponds to Pascal Cityscapes.
+- `D` corresponds to Pascal COCO.
+
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TensorFlow](tensorflow_/README.md) | Paper | Repo | Year |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| PSPNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | - | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
+| DeepLabv3 | A+B+CD+ | A+B+CD+ | A+B+CD+ | - | - | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
+| FCN-8s(d) | A+B+CD+ | A+B+CD+ | A+B+CD+ | - | - | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |

@@ -5,7 +5,7 @@
 
 __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
            'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b', 'ResBlock', 'ResBottleneck', 'ResUnit', 'ResInitBlock']
+           'resnet200', 'resnet200b', 'resnet26', 'resnetbn26b', 'ResBlock', 'ResBottleneck', 'ResUnit', 'ResInitBlock']
 
 import os
 from mxnet import cpu
@@ -302,6 +302,7 @@ class ResNet(HybridBlock):
 
 
 def get_resnet(blocks,
+               bottleneck=None,
                conv1_stride=True,
                width_scale=1.0,
                model_name=None,
@@ -316,6 +317,8 @@ def get_resnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float, default 1.0
@@ -329,6 +332,8 @@ def get_resnet(blocks,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
 
     if blocks == 10:
         layers = [1, 1, 1, 1]
@@ -350,17 +355,24 @@ def get_resnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
+        layers = [2, 2, 2, 2]
     else:
         raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
@@ -673,6 +685,40 @@ def resnet200b(**kwargs):
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
+def resnet26(**kwargs):
+    """
+    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+
+
+def resnetbn26b(**kwargs):
+    """
+    ResNet-BN-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbn26b", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -698,6 +744,9 @@ def _test():
         resnet152b,
         resnet200,
         resnet200b,
+
+        resnet26,
+        resnetbn26b,
     ]
 
     for model in models:
@@ -733,6 +782,8 @@ def _test():
         assert (model != resnet152b or weight_count == 60192808)
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
+        assert (model != resnet26 or weight_count == 17960232)
+        assert (model != resnetbn26b or weight_count == 15995176)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

@@ -122,6 +122,9 @@ _models = {
     'resnet200': resnet200,
     'resnet200b': resnet200b,
 
+'resnet26': resnet26,
+'resnetbn26b': resnetbn26b,
+
     'preresnet10': preresnet10,
     'preresnet12': preresnet12,
     'preresnet14': preresnet14,

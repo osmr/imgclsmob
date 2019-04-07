@@ -5,7 +5,8 @@
 __all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ConcurrentSum',
+           'MultiOutputConcurrent']
 
 import math
 from inspect import isfunction
@@ -924,3 +925,38 @@ class MultiOutputSequential(nn.Sequential):
             if hasattr(module, "do_output") and module.do_output:
                 outs.append(x)
         return [x] + outs
+
+
+class ConcurrentSum(nn.Sequential):
+    """
+    A container for sum of modules on the base of the sequential container.
+    """
+
+    def __init__(self):
+        super(ConcurrentSum, self).__init__()
+
+    def forward(self, x):
+        out = None
+        for module in self._modules.values():
+            y = module(x)
+            if out is None:
+                out = y
+            else:
+                out = out + y
+        return out
+
+
+class MultiOutputConcurrent(nn.Sequential):
+    """
+    A container for list of modules on the base of the sequential container.
+    """
+
+    def __init__(self):
+        super(MultiOutputConcurrent, self).__init__()
+
+    def forward(self, x):
+        outs = []
+        for module in self._modules.values():
+            y = module(x)
+            outs.append(y)
+        return outs

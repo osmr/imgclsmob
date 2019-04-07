@@ -1,9 +1,9 @@
 """
-    ResDrop-ResNet for CIFAR, implemented in PyTorch.
+    ResDrop-ResNet for CIFAR/SVHN, implemented in PyTorch.
     Original paper: 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 """
 
-__all__ = ['CIFARResDropResNet', 'resdropresnet20_cifar10', 'resdropresnet20_cifar100']
+__all__ = ['CIFARResDropResNet', 'resdropresnet20_cifar10', 'resdropresnet20_cifar100', 'resdropresnet20_svhn']
 
 import os
 import torch
@@ -244,6 +244,23 @@ def resdropresnet20_cifar100(classes=100, **kwargs):
                                    **kwargs)
 
 
+def resdropresnet20_svhn(classes=10, **kwargs):
+    """
+    ResDrop-ResNet-20 model for SVHN from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resdropresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resdropresnet20_svhn",
+                                   **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -262,6 +279,7 @@ def _test():
     models = [
         (resdropresnet20_cifar10, 10),
         (resdropresnet20_cifar100, 100),
+        (resdropresnet20_svhn, 10),
     ]
 
     for model, num_classes in models:
@@ -274,6 +292,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resdropresnet20_cifar10 or weight_count == 272474)
         assert (model != resdropresnet20_cifar100 or weight_count == 278324)
+        assert (model != resdropresnet20_svhn or weight_count == 272474)
 
         x = Variable(torch.randn(14, 3, 32, 32))
         y = net(x)

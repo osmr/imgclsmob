@@ -1,9 +1,9 @@
 """
-    ResDrop-ResNet for CIFAR, implemented in Gluon.
+    ResDrop-ResNet for CIFAR/SVHN, implemented in Gluon.
     Original paper: 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
 """
 
-__all__ = ['CIFARResDropResNet', 'resdropresnet20_cifar10', 'resdropresnet20_cifar100']
+__all__ = ['CIFARResDropResNet', 'resdropresnet20_cifar10', 'resdropresnet20_cifar100', 'resdropresnet20_svhn']
 
 import os
 import numpy as np
@@ -261,6 +261,25 @@ def resdropresnet20_cifar100(classes=100, **kwargs):
                                    **kwargs)
 
 
+def resdropresnet20_svhn(classes=10, **kwargs):
+    """
+    ResDrop-ResNet-20 model for SVHN from 'Deep Networks with Stochastic Depth,' https://arxiv.org/abs/1603.09382.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resdropresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resdropresnet20_svhn",
+                                   **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -270,6 +289,7 @@ def _test():
     models = [
         (resdropresnet20_cifar10, 10),
         (resdropresnet20_cifar100, 100),
+        (resdropresnet20_svhn, 10),
     ]
 
     for model, classes in models:
@@ -290,6 +310,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resdropresnet20_cifar10 or weight_count == 272474)
         assert (model != resdropresnet20_cifar100 or weight_count == 278324)
+        assert (model != resdropresnet20_svhn or weight_count == 272474)
 
         x = mx.nd.zeros((14, 3, 32, 32), ctx=ctx)
         y = net(x)

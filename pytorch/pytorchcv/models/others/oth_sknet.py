@@ -87,9 +87,10 @@ class SKNet(nn.Module):
                  nums_block_list=[3, 4, 6, 3]):
         super(SKNet,self).__init__()
         self.inplanes=64
-        self.conv=nn.Sequential(nn.Conv2d(3,64,7,2,3,bias=False),
-                                nn.BatchNorm2d(64),
-                                nn.ReLU(inplace=True))
+        self.conv=nn.Sequential(
+            nn.Conv2d(3,64,7,2,3,bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True))
         self.maxpool=nn.MaxPool2d(3,2,1)
         self.layer1=self._make_layer(block,128,nums_block_list[0],stride=1)
         self.layer2=self._make_layer(block,256,nums_block_list[1],stride=2)
@@ -98,6 +99,23 @@ class SKNet(nn.Module):
         self.avgpool=nn.AdaptiveAvgPool2d(1)
         self.fc=nn.Linear(1024*block.expansion,nums_class)
         self.softmax=nn.Softmax(-1)
+
+    def _make_layer(self,
+                    block,
+                    planes,
+                    nums_block,
+                    stride=1):
+        downsample=None
+        if stride!=1 or self.inplanes!=planes*block.expansion:
+            downsample=nn.Sequential(
+                nn.Conv2d(self.inplanes,planes*block.expansion,1,stride,bias=False),
+                nn.BatchNorm2d(planes*block.expansion))
+        layers=[]
+        layers.append(block(self.inplanes,planes,stride,downsample))
+        self.inplanes=planes*block.expansion
+        for _ in range(1,nums_block):
+            layers.append(block(self.inplanes,planes))
+        return nn.Sequential(*layers)
 
     def forward(self, input):
         output=self.conv(input)
@@ -112,29 +130,54 @@ class SKNet(nn.Module):
         output=self.softmax(output)
         return output
 
-    def _make_layer(self,
-                    block,
-                    planes,
-                    nums_block,
-                    stride=1):
-        downsample=None
-        if stride!=1 or self.inplanes!=planes*block.expansion:
-            downsample=nn.Sequential(nn.Conv2d(self.inplanes,planes*block.expansion,1,stride,bias=False),
-                                     nn.BatchNorm2d(planes*block.expansion))
-        layers=[]
-        layers.append(block(self.inplanes,planes,stride,downsample))
-        self.inplanes=planes*block.expansion
-        for _ in range(1,nums_block):
-            layers.append(block(self.inplanes,planes))
-        return nn.Sequential(*layers)
 
-
-def SKNet50(nums_class=1000):
+def oth_SKNet50(pretrained=False, nums_class=1000):
     return SKNet(nums_class,SKBlock,[3, 4, 6, 3])
 
 
-def SKNet101(nums_class=1000):
+def oth_SKNet101(pretrained=False, nums_class=1000):
     return SKNet(nums_class,SKBlock,[3, 4, 23, 3])
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+    from torch.autograd import Variable
+
+    pretrained = False
+
+    models = [
+        oth_SKNet50,
+        oth_SKNet101,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_SKNet50 or weight_count == 27479784)
+        assert (model != oth_SKNet101 or weight_count == 48736040)
+
+        x = Variable(torch.randn(1, 3, 224, 224))
+        y = net(x)
+        y.sum().backward()
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()
 
 
 # if __name__=='__main__':
@@ -150,4 +193,3 @@ def SKNet101(nums_class=1000):
 #     temp=SKNet50().cuda()
 #     pred=temp(img)
 #     print(pred)
-

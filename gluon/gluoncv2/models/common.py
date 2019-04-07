@@ -5,7 +5,7 @@
 __all__ = ['ReLU6', 'PReLU2', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
+           'Concurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -836,6 +836,36 @@ class ParametricSequential(nn.HybridSequential):
         for block in self._children.values():
             x = block(x, *args, **kwargs)
         return x
+
+
+class Concurrent(nn.HybridSequential):
+    """
+    A container for concatenation of blocks on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False,
+                 **kwargs):
+        super(Concurrent, self).__init__(**kwargs)
+        self.axis = axis
+        self.stack = stack
+
+    def hybrid_forward(self, F, x):
+        out = []
+        for block in self._children.values():
+            out.append(block(x))
+        if self.stack:
+            out = F.stack(*out, axis=self.axis)
+        else:
+            out = F.concat(*out, dim=self.axis)
+        return out
 
 
 class ParametricConcurrent(nn.HybridSequential):

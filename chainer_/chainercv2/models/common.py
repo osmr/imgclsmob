@@ -712,16 +712,24 @@ class Concurrent(SimpleSequential):
     ----------
     axis : int, default 1
         The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
     """
-    def __init__(self, axis=1):
+    def __init__(self,
+                 axis=1,
+                 stack=False):
         super(Concurrent, self).__init__()
         self.axis = axis
+        self.stack = stack
 
     def __call__(self, x):
         out = []
         for name in self.layer_names:
             out.append(self[name](x))
-        out = F.concat(tuple(out), axis=self.axis)
+        if self.stack:
+            out = F.stack(tuple(out), axis=self.axis)
+        else:
+            out = F.concat(tuple(out), axis=self.axis)
         return out
 
 

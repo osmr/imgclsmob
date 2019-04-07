@@ -221,7 +221,7 @@ _models = {
     'resattnet200': resattnet200,
     'resattnet236': resattnet236,
     'resattnet452': resattnet452,
-    
+
     'sknet50': sknet50,
     'sknet101': sknet101,
     'sknet152': sknet152,

@@ -6,10 +6,9 @@
 __all__ = ['SKNet', 'sknet50', 'sknet101', 'sknet152']
 
 import os
-from functools import reduce
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1, conv1x1_block, conv3x3_block, MultiOutputConcurrent
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent
 from .resnet import ResInitBlock
 
 
@@ -28,11 +27,11 @@ class SKConvBlock(nn.Module):
     groups : int, default 32
         Number of groups in branches.
     num_branches : int, default 2
-        Number of branches.
+        Number of branches (`M` parameter in the paper).
     reduction : int, default 16
-        Reduction value for intermediate channels.
+        Reduction value for intermediate channels (`r` parameter in the paper).
     min_channels : int, default 32
-        Minimal number of intermediate channels.
+        Minimal number of intermediate channels (`L` parameter in the paper).
     """
 
     def __init__(self,
@@ -48,7 +47,7 @@ class SKConvBlock(nn.Module):
         self.out_channels = out_channels
         mid_channels = max(in_channels // reduction, min_channels)
 
-        self.branches = MultiOutputConcurrent()
+        self.branches = Concurrent(stack=True)
         for i in range(num_branches):
             dilation = 1 + i
             self.branches.add_module("branch{}".format(i + 2), conv3x3_block(
@@ -58,7 +57,7 @@ class SKConvBlock(nn.Module):
                 padding=dilation,
                 dilation=dilation,
                 groups=groups))
-        self.global_pool = nn.AdaptiveAvgPool2d(1)
+        self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.fc1 = conv1x1_block(
             in_channels=out_channels,
             out_channels=mid_channels)
@@ -68,22 +67,21 @@ class SKConvBlock(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        batch = x.size(0)
+        y = self.branches(x)
 
-        outs = self.branches(x)
-
-        u = reduce(lambda y1, y2: y1 + y2, outs)
-        s = self.global_pool(u)
+        u = y.sum(dim=1)
+        s = self.pool(u)
         z = self.fc1(s)
         w = self.fc2(z)
-        w = w.reshape(batch, self.num_branches, self.out_channels, -1)
-        w = self.softmax(w)
 
-        w = list(w.chunk(self.num_branches, dim=1))
-        w = list(map(lambda y: y.reshape(batch, self.out_channels, 1, 1), w))
-        v = list(map(lambda y1, y2: y1 * y2, outs, w))
-        v = reduce(lambda y1, y2: y1 + y2, v)
-        return v
+        batch = w.size(0)
+        w = w.view(batch, self.num_branches, self.out_channels)
+        w = self.softmax(w)
+        w = w.unsqueeze(-1).unsqueeze(-1)
+
+        y = y * w
+        y = y.sum(dim=1)
+        return y
 
 
 class SKNetBottleneck(nn.Module):
@@ -363,10 +361,10 @@ def _test():
         assert (model != sknet101 or weight_count == 48736040)
         assert (model != sknet152 or weight_count == 66295656)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = Variable(torch.randn(14, 3, 224, 224))
         y = net(x)
         y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (tuple(y.size()) == (14, 1000))
 
 
 if __name__ == "__main__":

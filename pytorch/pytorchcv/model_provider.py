@@ -18,6 +18,7 @@ from .models.airnext import *
 from .models.bamresnet import *
 from .models.cbamresnet import *
 from .models.resattnet import *
+from .models.sknet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.sharesnet import *
@@ -220,6 +221,10 @@ _models = {
     'resattnet200': resattnet200,
     'resattnet236': resattnet236,
     'resattnet452': resattnet452,
+    
+    'sknet50': sknet50,
+    'sknet101': sknet101,
+    'sknet152': sknet152,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 

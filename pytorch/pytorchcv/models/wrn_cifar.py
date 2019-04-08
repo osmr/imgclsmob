@@ -167,7 +167,7 @@ def wrn16_10_cifar100(num_classes=100, **kwargs):
 
 def wrn16_10_svhn(num_classes=10, **kwargs):
     """
-    WRN-16-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+    WRN-16-10 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -215,7 +215,7 @@ def wrn28_10_cifar100(num_classes=100, **kwargs):
 
 def wrn28_10_svhn(num_classes=10, **kwargs):
     """
-    WRN-28-10 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+    WRN-28-10 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
@@ -263,7 +263,7 @@ def wrn40_8_cifar100(num_classes=100, **kwargs):
 
 def wrn40_8_svhn(num_classes=10, **kwargs):
     """
-    WRN-40-8 model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+    WRN-40-8 model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------

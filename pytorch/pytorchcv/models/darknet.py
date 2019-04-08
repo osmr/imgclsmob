@@ -99,15 +99,15 @@ class DarkNet(nn.Module):
             self.features.add_module("stage{}".format(i + 1), stage)
 
         self.output = nn.Sequential()
-        self.output.add_module('final_conv', nn.Conv2d(
+        self.output.add_module("final_conv", nn.Conv2d(
             in_channels=in_channels,
             out_channels=num_classes,
             kernel_size=1))
         if cls_activ:
-            self.output.add_module('final_activ', nn.LeakyReLU(
+            self.output.add_module("final_activ", nn.LeakyReLU(
                 negative_slope=alpha,
                 inplace=True))
-        self.output.add_module('final_pool', nn.AvgPool2d(
+        self.output.add_module("final_pool", nn.AvgPool2d(
             kernel_size=avg_pool_size,
             stride=1))
 
@@ -116,7 +116,7 @@ class DarkNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                if 'final_conv' in name:
+                if "final_conv" in name:
                     init.normal_(module.weight, mean=0.0, std=0.01)
                 else:
                     init.kaiming_uniform_(module.weight)

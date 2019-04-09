@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1802.08530.
 """
 
-__all__ = ['CIFARWRN1bit', 'wrn20_10_1bit_cifar10', 'wrn20_10_1bit_cifar100', 'wrn20_10_1bit_svhn']
+__all__ = ['CIFARWRN1bit', 'wrn20_10_1bit_cifar10', 'wrn20_10_1bit_cifar100', 'wrn20_10_1bit_svhn',
+           'wrn20_10_32bit_cifar10', 'wrn20_10_32bit_cifar100', 'wrn20_10_32bit_svhn']
 
 import os
 import math
@@ -618,6 +619,7 @@ class CIFARWRN1bit(HybridBlock):
 def get_wrn1bit_cifar(classes,
                       blocks,
                       width_factor,
+                      binarized=False,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
@@ -634,6 +636,8 @@ def get_wrn1bit_cifar(classes,
         Number of blocks.
     width_factor : int
         Wide scale factor for width of layers.
+    binarized : bool, default False
+        Whether to use binarization.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -655,6 +659,7 @@ def get_wrn1bit_cifar(classes,
     net = CIFARWRN1bit(
         channels=channels,
         init_block_channels=init_block_channels,
+        binarized=binarized,
         classes=classes,
         **kwargs)
 
@@ -686,7 +691,8 @@ def wrn20_10_1bit_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar10", **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=True,
+                             model_name="wrn20_10_1bit_cifar10", **kwargs)
 
 
 def wrn20_10_1bit_cifar100(classes=100, **kwargs):
@@ -704,7 +710,8 @@ def wrn20_10_1bit_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar100", **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=True,
+                             model_name="wrn20_10_1bit_cifar100", **kwargs)
 
 
 def wrn20_10_1bit_svhn(classes=10, **kwargs):
@@ -722,7 +729,63 @@ def wrn20_10_1bit_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_svhn", **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=True,
+                             model_name="wrn20_10_1bit_svhn", **kwargs)
+
+
+def wrn20_10_32bit_cifar10(classes=10, **kwargs):
+    """
+    WRN-20-10-32bit model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_cifar10", **kwargs)
+
+
+def wrn20_10_32bit_cifar100(classes=100, **kwargs):
+    """
+    WRN-20-10-32bit model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_cifar100",
+                             **kwargs)
+
+
+def wrn20_10_32bit_svhn(classes=10, **kwargs):
+    """
+    WRN-20-10-32bit model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_svhn", **kwargs)
 
 
 def _test():
@@ -730,19 +793,19 @@ def _test():
     import mxnet as mx
 
     pretrained = False
-    binarized = True
 
     models = [
         (wrn20_10_1bit_cifar10, 10),
         (wrn20_10_1bit_cifar100, 100),
         (wrn20_10_1bit_svhn, 10),
+        (wrn20_10_32bit_cifar10, 10),
+        (wrn20_10_32bit_cifar100, 100),
+        (wrn20_10_32bit_svhn, 10),
     ]
 
     for model, classes in models:
 
-        net = model(
-            pretrained=pretrained,
-            binarized=binarized)
+        net = model(pretrained=pretrained)
 
         ctx = mx.cpu()
         if not pretrained:
@@ -758,6 +821,9 @@ def _test():
         assert (model != wrn20_10_1bit_cifar10 or weight_count == 26737140)
         assert (model != wrn20_10_1bit_cifar100 or weight_count == 26794920)
         assert (model != wrn20_10_1bit_svhn or weight_count == 26737140)
+        assert (model != wrn20_10_32bit_cifar10 or weight_count == 26737140)
+        assert (model != wrn20_10_32bit_cifar100 or weight_count == 26794920)
+        assert (model != wrn20_10_32bit_svhn or weight_count == 26737140)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

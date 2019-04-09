@@ -95,7 +95,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('shufflenetv2_wd2', '1840', '9b4b0964301ba3f2e393c3d3b9a43de3bb480b05', 'v0.0.90'),
     ('shufflenetv2_w1', '1133', 'bcba973eb9f0c333564ed9761ecfd77d28326e5b', 'v0.0.133'),
     ('shufflenetv2_w3d2', '0927', '17a260398afbc6b27b9ab917d538e36993c12fb9', 'v0.0.288'),
-    ('shufflenetv2_w2', '1223', '632914682dbfe87c883d35e89e14561b4da9e72e', 'v0.0.84'),
+    ('shufflenetv2_w2', '0822', 'a0209f14172e8c7c7c4a8e54307641ed69838beb', 'v0.0.301'),
     ('shufflenetv2b_wd2', '1783', 'ca8409ae44489695b468ceb7104e1cc63cb09873', 'v0.0.211'),
     ('shufflenetv2b_w1', '1101', '1caf1b22107357e3ed7409545eff6e815044bcb7', 'v0.0.211'),
     ('shufflenetv2b_w3d2', '0880', '265c3c7c077dd66f435bcc5f239010fd975f7006', 'v0.0.211'),

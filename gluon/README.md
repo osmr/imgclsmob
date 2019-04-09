@@ -36,6 +36,7 @@ require the same ordinary normalization. Scripts for training/evaluating/convert
 - SparseNet (['Sparsely Aggregated Convolutional Networks'](https://arxiv.org/abs/1801.05895))
 - PeleeNet (['Pelee: A Real-Time Object Detection System on Mobile Devices'](https://arxiv.org/abs/1804.06882))
 - WRN (['Wide Residual Networks'](https://arxiv.org/abs/1605.07146))
+- WRN-1bit (['Training wide residual networks for deployment using a single bit for each weight'](https://arxiv.org/abs/1802.08530))
 - DRN-C/DRN-D (['Dilated Residual Networks'](https://arxiv.org/abs/1705.09914))
 - DPN (['Dual Path Networks'](https://arxiv.org/abs/1707.01629))
 - DarkNet Ref/Tiny/19 (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet))

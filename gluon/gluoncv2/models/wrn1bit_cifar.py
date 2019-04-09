@@ -549,7 +549,7 @@ class CIFARWRN1bit(HybridBlock):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    binarized : bool, default False
+    binarized : bool, default True
         Whether to use binarization.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -564,7 +564,7 @@ class CIFARWRN1bit(HybridBlock):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 binarized=False,
+                 binarized=True,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(32, 32),
@@ -619,7 +619,7 @@ class CIFARWRN1bit(HybridBlock):
 def get_wrn1bit_cifar(classes,
                       blocks,
                       width_factor,
-                      binarized=False,
+                      binarized=True,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
@@ -636,7 +636,7 @@ def get_wrn1bit_cifar(classes,
         Number of blocks.
     width_factor : int
         Wide scale factor for width of layers.
-    binarized : bool, default False
+    binarized : bool, default True
         Whether to use binarization.
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -748,7 +748,8 @@ def wrn20_10_32bit_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_cifar10", **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=False,
+                             model_name="wrn20_10_32bit_cifar10", **kwargs)
 
 
 def wrn20_10_32bit_cifar100(classes=100, **kwargs):
@@ -766,8 +767,8 @@ def wrn20_10_32bit_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_cifar100",
-                             **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=False,
+                             model_name="wrn20_10_32bit_cifar100", **kwargs)
 
 
 def wrn20_10_32bit_svhn(classes=10, **kwargs):
@@ -785,7 +786,8 @@ def wrn20_10_32bit_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_32bit_svhn", **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, binarized=False,
+                             model_name="wrn20_10_32bit_svhn", **kwargs)
 
 
 def _test():

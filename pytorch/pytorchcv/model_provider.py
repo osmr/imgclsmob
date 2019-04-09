@@ -585,7 +585,6 @@ _models = {
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
-
     'wrn20_10_1bit_cifar10': wrn20_10_1bit_cifar10,
     'wrn20_10_1bit_cifar100': wrn20_10_1bit_cifar100,
     'wrn20_10_1bit_svhn': wrn20_10_1bit_svhn,

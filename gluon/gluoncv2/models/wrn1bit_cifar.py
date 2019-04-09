@@ -13,26 +13,19 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 
 
-def init_weight(*args):
-    # return nn.Parameter(nn.init.kaiming_normal_(mxnet.zeros(*args), mode="fan_out", nonlinearity="relu"))
-    return None
-
-
-class ForwardSign(mx.autograd.Function):
+class Binarize(mx.autograd.Function):
     """
     Fake sign op for 1-bit weights.
     """
-    def __init__(self):
-        super(ForwardSign, self).__init__()
 
     def forward(self, x):
-        return math.sqrt(2. / (x.shape[1] * x.shape[2] * x.shape[3])) * x.sign()
+        return math.sqrt(2.0 / (x.shape[1] * x.shape[2] * x.shape[3])) * x.sign()
 
     def backward(self, dy):
         return dy
 
 
-class Conv1bit(HybridBlock):
+class Conv2D1bit(nn.Conv2D):
     """
     Standard convolution block with binarization.
 
@@ -44,7 +37,7 @@ class Conv1bit(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
@@ -52,7 +45,7 @@ class Conv1bit(HybridBlock):
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
@@ -61,44 +54,36 @@ class Conv1bit(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding=1,
                  dilation=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False,
                  **kwargs):
-        super(Conv1bit, self).__init__(**kwargs)
-        assert isinstance(kernel_size, int)
-        assert (not bias)
-        self.stride = stride
-        self.padding = padding
-        self.dilation = dilation
-        self.groups = groups
+        super(Conv2D1bit, self).__init__(
+            in_channels=in_channels,
+            channels=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            use_bias=use_bias,
+            **kwargs)
         self.binarized = binarized
 
-        self.register_parameter("conv", init_weight(out_channels, in_channels, kernel_size, kernel_size))
-
-    def hybrid_forward(self, F, x):
-        x = F.conv2d(
-            x,
-            weight=self._get_weight("conv"),
-            stride=self.stride,
-            padding=self.padding,
-            dilation=self.dilation,
-            groups=self.groups)
-        return x
-
-    def _get_weight(self, name):
-        w = getattr(self, name)
-        return ForwardSign.apply(w) if self.binarized else w
+    def hybrid_forward(self, F, x, weight, bias=None):
+        weight_1bit = Binarize()(weight) if self.binarized else weight
+        bias_1bit = Binarize()(bias) if bias is not None and self.binarized else bias
+        return super(Conv2D1bit, self).hybrid_forward(F, x, weight=weight_1bit, bias=bias_1bit)
 
 
 def conv1x1_1bit(in_channels,
                  out_channels,
-                 stride=1,
+                 strides=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False):
     """
     Convolution 1x1 layer with binarization.
@@ -109,32 +94,32 @@ def conv1x1_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
     """
-    return Conv1bit(
+    return Conv2D1bit(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        stride=stride,
+        strides=strides,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         binarized=binarized)
 
 
 def conv3x3_1bit(in_channels,
                  out_channels,
-                 stride=1,
+                 strides=1,
                  padding=1,
                  dilation=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False):
     """
     Convolution 3x3 layer with binarization.
@@ -145,26 +130,26 @@ def conv3x3_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
     """
-    return Conv1bit(
+    return Conv2D1bit(
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        stride=stride,
+        strides=strides,
         padding=padding,
         dilation=dilation,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         binarized=binarized)
 
 
@@ -180,7 +165,7 @@ class ConvBlock1bit(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
@@ -188,7 +173,7 @@ class ConvBlock1bit(HybridBlock):
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -203,11 +188,11 @@ class ConvBlock1bit(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
                  dilation=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  bn_affine=True,
                  bn_use_global_stats=False,
                  activate=True,
@@ -217,18 +202,18 @@ class ConvBlock1bit(HybridBlock):
         self.activate = activate
 
         with self.name_scope():
-            self.conv = Conv1bit(
+            self.conv = Conv2D1bit(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
-                stride=stride,
+                strides=strides,
                 padding=padding,
                 dilation=dilation,
                 groups=groups,
-                bias=bias,
+                use_bias=use_bias,
                 binarized=binarized)
             self.bn = nn.BatchNorm(
-                num_features=out_channels,
+                in_channels=out_channels,
                 center=bn_affine,
                 scale=bn_affine,
                 use_global_stats=bn_use_global_stats)
@@ -245,10 +230,10 @@ class ConvBlock1bit(HybridBlock):
 
 def conv1x1_block_1bit(in_channels,
                        out_channels,
-                       stride=1,
+                       strides=1,
                        padding=0,
                        groups=1,
-                       bias=False,
+                       use_bias=False,
                        bn_affine=True,
                        bn_use_global_stats=False,
                        activate=True,
@@ -262,13 +247,13 @@ def conv1x1_block_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 0
         Padding value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -283,10 +268,10 @@ def conv1x1_block_1bit(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=1,
-        stride=stride,
+        strides=strides,
         padding=padding,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         bn_affine=bn_affine,
         bn_use_global_stats=bn_use_global_stats,
         activate=activate,
@@ -305,13 +290,13 @@ class PreConvBlock1bit(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     padding : int or tuple/list of 2 int
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -328,10 +313,10 @@ class PreConvBlock1bit(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
+                 strides,
                  padding,
                  dilation=1,
-                 bias=False,
+                 use_bias=False,
                  bn_affine=True,
                  bn_use_global_stats=False,
                  return_preact=False,
@@ -344,20 +329,20 @@ class PreConvBlock1bit(HybridBlock):
 
         with self.name_scope():
             self.bn = nn.BatchNorm(
-                num_features=in_channels,
+                in_channels=in_channels,
                 center=bn_affine,
                 scale=bn_affine,
                 use_global_stats=bn_use_global_stats)
             if self.activate:
                 self.activ = nn.Activation("relu")
-            self.conv = Conv1bit(
+            self.conv = Conv2D1bit(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
-                stride=stride,
+                strides=strides,
                 padding=padding,
                 dilation=dilation,
-                bias=bias,
+                use_bias=use_bias,
                 binarized=binarized)
 
     def hybrid_forward(self, F, x):
@@ -375,7 +360,7 @@ class PreConvBlock1bit(HybridBlock):
 
 def pre_conv3x3_block_1bit(in_channels,
                            out_channels,
-                           stride=1,
+                           strides=1,
                            padding=1,
                            dilation=1,
                            bn_affine=True,
@@ -392,7 +377,7 @@ def pre_conv3x3_block_1bit(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int, default 1
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
@@ -413,7 +398,7 @@ def pre_conv3x3_block_1bit(in_channels,
         in_channels=in_channels,
         out_channels=out_channels,
         kernel_size=3,
-        stride=stride,
+        strides=strides,
         padding=padding,
         dilation=dilation,
         bn_affine=bn_affine,
@@ -433,7 +418,7 @@ class PreResBlock1bit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -443,7 +428,7 @@ class PreResBlock1bit(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
+                 strides,
                  bn_use_global_stats,
                  binarized=False,
                  **kwargs):
@@ -452,7 +437,7 @@ class PreResBlock1bit(HybridBlock):
             self.conv1 = pre_conv3x3_block_1bit(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
+                strides=strides,
                 bn_affine=False,
                 bn_use_global_stats=bn_use_global_stats,
                 return_preact=False,
@@ -480,7 +465,7 @@ class PreResUnit1bit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the convolution.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -501,7 +486,7 @@ class PreResUnit1bit(HybridBlock):
             self.body = PreResBlock1bit(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=strides,
+                strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 binarized=binarized)
             if self.resize_identity:
@@ -541,7 +526,7 @@ class PreResActivation(HybridBlock):
         super(PreResActivation, self).__init__(**kwargs)
         with self.name_scope():
             self.bn = nn.BatchNorm(
-                num_features=in_channels,
+                in_channels=in_channels,
                 center=bn_affine,
                 scale=bn_affine,
                 use_global_stats=bn_use_global_stats)
@@ -745,7 +730,7 @@ def _test():
     import mxnet as mx
 
     pretrained = False
-    binarized = False
+    binarized = True
 
     models = [
         (wrn20_10_1bit_cifar10, 10),

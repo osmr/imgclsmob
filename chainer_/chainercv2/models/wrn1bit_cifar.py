@@ -1,5 +1,5 @@
 """
-    WRN-1bit for CIFAR/SVHN, implemented in PyTorch.
+    WRN-1bit for CIFAR/SVHN, implemented in Chainer.
     Original paper: 'Training wide residual networks for deployment using a single bit for each weight,'
     https://arxiv.org/abs/1802.08530.
 """
@@ -8,27 +8,32 @@ __all__ = ['CIFARWRN1bit', 'wrn20_10_1bit_cifar10', 'wrn20_10_1bit_cifar100', 'w
 
 import os
 import math
-import torch
-import torch.nn as nn
-import torch.nn.init as init
-import torch.nn.functional as F
+import chainer
+from chainer import backend
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import SimpleSequential
 
 
-class Binarize(torch.autograd.Function):
+class Binarize(chainer.function.Function):
     """
     Fake sign op for 1-bit weights.
     """
 
-    @staticmethod
-    def forward(ctx, x):
-        return math.sqrt(2.0 / (x.shape[1] * x.shape[2] * x.shape[3])) * x.sign()
+    def forward(self, inputs):
+        x, = inputs
+        xp = backend.get_array_module(x)
+        return math.sqrt(2.0 / (x.shape[1] * x.shape[2] * x.shape[3])) * xp.sign(x),
 
-    @staticmethod
-    def backward(ctx, dy):
-        return dy
+    def backward(self, inputs, grad_outputs):
+        dy, = grad_outputs
+        return dy,
 
 
-class Conv2d1bit(nn.Conv2d):
+class Convolution2D1bit(L.Convolution2D):
     """
     Standard convolution block with binarization.
 
@@ -38,17 +43,17 @@ class Conv2d1bit(nn.Conv2d):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        pad value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        dilate value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
@@ -56,34 +61,34 @@ class Conv2d1bit(nn.Conv2d):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding=1,
-                 dilation=1,
+                 pad=1,
+                 dilate=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False):
-        super(Conv2d1bit, self).__init__(
+        super(Convolution2D1bit, self).__init__(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=kernel_size,
+            ksize=ksize,
             stride=stride,
-            padding=padding,
-            dilation=dilation,
+            pad=pad,
+            dilate=dilate,
             groups=groups,
-            bias=bias)
+            nobias=(not use_bias))
         self.binarized = binarized
 
-    def forward(self, input):
-        weight = Binarize.apply(self.weight) if self.binarized else self.weight
-        bias = Binarize.apply(self.bias) if self.bias is not None and self.binarized else self.bias
-        return F.conv2d(
-            input=input,
-            weight=weight,
-            bias=bias,
+    def forward(self, x):
+        W_1bit = Binarize()(self.W) if self.binarized else self.W
+        b_1bit = Binarize()(self.b) if self.b is not None and self.binarized else self.b
+        return F.convolution_2d(
+            x=x,
+            W=W_1bit,
+            b=b_1bit,
             stride=self.stride,
-            padding=self.padding,
-            dilation=self.dilation,
+            pad=self.pad,
+            dilate=self.dilate,
             groups=self.groups)
 
 
@@ -91,7 +96,7 @@ def conv1x1_1bit(in_channels,
                  out_channels,
                  stride=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False):
     """
     Convolution 1x1 layer with binarization.
@@ -103,31 +108,31 @@ def conv1x1_1bit(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
+        Stride of the convolution.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
     """
-    return Conv2d1bit(
+    return Convolution2D1bit(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
+        ksize=1,
         stride=stride,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         binarized=binarized)
 
 
 def conv3x3_1bit(in_channels,
                  out_channels,
                  stride=1,
-                 padding=1,
-                 dilation=1,
+                 pad=1,
+                 dilate=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  binarized=False):
     """
     Convolution 3x3 layer with binarization.
@@ -139,29 +144,29 @@ def conv3x3_1bit(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for convolution layer.
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        pad value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     binarized : bool, default False
         Whether to use binarization.
     """
-    return Conv2d1bit(
+    return Convolution2D1bit(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        ksize=3,
         stride=stride,
-        padding=padding,
-        dilation=dilation,
+        pad=pad,
+        dilate=dilate,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         binarized=binarized)
 
 
-class ConvBlock1bit(nn.Module):
+class ConvBlock1bit(Chain):
     """
     Standard convolution block with Batch normalization and ReLU activation, and binarization.
 
@@ -171,17 +176,17 @@ class ConvBlock1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        pad value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        dilate value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -193,35 +198,38 @@ class ConvBlock1bit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding,
-                 dilation=1,
+                 pad,
+                 dilate=1,
                  groups=1,
-                 bias=False,
+                 use_bias=False,
                  bn_affine=True,
                  activate=True,
                  binarized=False):
         super(ConvBlock1bit, self).__init__()
         self.activate = activate
 
-        self.conv = Conv2d1bit(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias,
-            binarized=binarized)
-        self.bn = nn.BatchNorm2d(
-            num_features=out_channels,
-            affine=bn_affine)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.conv = Convolution2D1bit(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                dilate=dilate,
+                groups=groups,
+                use_bias=use_bias,
+                binarized=binarized)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=1e-5,
+                use_gamma=bn_affine,
+                use_beta=bn_affine)
+            if self.activate:
+                self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv(x)
         x = self.bn(x)
         if self.activate:
@@ -232,9 +240,9 @@ class ConvBlock1bit(nn.Module):
 def conv1x1_block_1bit(in_channels,
                        out_channels,
                        stride=1,
-                       padding=0,
+                       pad=0,
                        groups=1,
-                       bias=False,
+                       use_bias=False,
                        bn_affine=True,
                        activate=True,
                        binarized=False):
@@ -248,12 +256,12 @@ def conv1x1_block_1bit(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 0
-        Padding value for convolution layer.
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 0
+        pad value for convolution layer.
     groups : int, default 1
         Number of groups.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -265,17 +273,17 @@ def conv1x1_block_1bit(in_channels,
     return ConvBlock1bit(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=1,
+        ksize=1,
         stride=stride,
-        padding=padding,
+        pad=pad,
         groups=groups,
-        bias=bias,
+        use_bias=use_bias,
         bn_affine=bn_affine,
         activate=activate,
         binarized=binarized)
 
 
-class PreConvBlock1bit(nn.Module):
+class PreConvBlock1bit(Chain):
     """
     Convolution block with Batch normalization and ReLU pre-activation, and binarization.
 
@@ -285,15 +293,15 @@ class PreConvBlock1bit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
-    bias : bool, default False
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        pad value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        dilate value for convolution layer.
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
@@ -307,11 +315,11 @@ class PreConvBlock1bit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding,
-                 dilation=1,
-                 bias=False,
+                 pad,
+                 dilate=1,
+                 use_bias=False,
                  bn_affine=True,
                  return_preact=False,
                  activate=True,
@@ -320,22 +328,25 @@ class PreConvBlock1bit(nn.Module):
         self.return_preact = return_preact
         self.activate = activate
 
-        self.bn = nn.BatchNorm2d(
-            num_features=in_channels,
-            affine=bn_affine)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
-        self.conv = Conv2d1bit(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            bias=bias,
-            binarized=binarized)
+        with self.init_scope():
+            self.bn = L.BatchNormalization(
+                size=in_channels,
+                eps=1e-5,
+                use_gamma=bn_affine,
+                use_beta=bn_affine)
+            if self.activate:
+                self.activ = F.relu
+            self.conv = Convolution2D1bit(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                dilate=dilate,
+                use_bias=use_bias,
+                binarized=binarized)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.bn(x)
         if self.activate:
             x = self.activ(x)
@@ -351,8 +362,8 @@ class PreConvBlock1bit(nn.Module):
 def pre_conv3x3_block_1bit(in_channels,
                            out_channels,
                            stride=1,
-                           padding=1,
-                           dilation=1,
+                           pad=1,
+                           dilate=1,
                            bn_affine=True,
                            return_preact=False,
                            activate=True,
@@ -367,11 +378,11 @@ def pre_conv3x3_block_1bit(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for convolution layer.
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        pad value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        dilate value for convolution layer.
     bn_affine : bool, default True
         Whether the BatchNorm layer learns affine parameters.
     return_preact : bool, default False
@@ -384,17 +395,17 @@ def pre_conv3x3_block_1bit(in_channels,
     return PreConvBlock1bit(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        ksize=3,
         stride=stride,
-        padding=padding,
-        dilation=dilation,
+        pad=pad,
+        dilate=dilate,
         bn_affine=bn_affine,
         return_preact=return_preact,
         activate=activate,
         binarized=binarized)
 
 
-class PreResBlock1bit(nn.Module):
+class PreResBlock1bit(Chain):
     """
     Simple PreResNet block for residual path in ResNet unit (with binarization).
 
@@ -405,7 +416,7 @@ class PreResBlock1bit(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     binarized : bool, default False
         Whether to use binarization.
     """
@@ -415,26 +426,27 @@ class PreResBlock1bit(nn.Module):
                  stride,
                  binarized=False):
         super(PreResBlock1bit, self).__init__()
-        self.conv1 = pre_conv3x3_block_1bit(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            bn_affine=False,
-            return_preact=False,
-            binarized=binarized)
-        self.conv2 = pre_conv3x3_block_1bit(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            bn_affine=False,
-            binarized=binarized)
+        with self.init_scope():
+            self.conv1 = pre_conv3x3_block_1bit(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                bn_affine=False,
+                return_preact=False,
+                binarized=binarized)
+            self.conv2 = pre_conv3x3_block_1bit(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                bn_affine=False,
+                binarized=binarized)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class PreResUnit1bit(nn.Module):
+class PreResUnit1bit(Chain):
     """
     PreResNet unit with residual connection (with binarization).
 
@@ -445,7 +457,7 @@ class PreResUnit1bit(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     binarized : bool, default False
         Whether to use binarization.
     """
@@ -457,28 +469,31 @@ class PreResUnit1bit(nn.Module):
         super(PreResUnit1bit, self).__init__()
         self.resize_identity = (stride != 1)
 
-        self.body = PreResBlock1bit(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            binarized=binarized)
-        if self.resize_identity:
-            self.identity_pool = nn.AvgPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=1)
+        with self.init_scope():
+            self.body = PreResBlock1bit(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                binarized=binarized)
+            if self.resize_identity:
+                self.identity_pool = partial(
+                    F.average_pooling_2d,
+                    ksize=3,
+                    stride=2,
+                    pad=1)
 
-    def forward(self, x):
+    def __call__(self, x):
         identity = x
         x = self.body(x)
         if self.resize_identity:
             identity = self.identity_pool(identity)
-            identity = torch.cat((identity, torch.zeros_like(identity)), dim=1)
+            channels = identity.shape[1]
+            identity = F.pad(identity, pad_width=((0, 0), (0, channels), (0, 0), (0, 0)), mode="constant", constant_values=0)
         x = x + identity
         return x
 
 
-class PreResActivation(nn.Module):
+class PreResActivation(Chain):
     """
     PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
 
@@ -493,18 +508,21 @@ class PreResActivation(nn.Module):
                  in_channels,
                  bn_affine=True):
         super(PreResActivation, self).__init__()
-        self.bn = nn.BatchNorm2d(
-            num_features=in_channels,
-            affine=bn_affine)
-        self.activ = nn.ReLU(inplace=True)
+        with self.init_scope():
+            self.bn = L.BatchNormalization(
+                size=in_channels,
+                eps=1e-5,
+                use_gamma=bn_affine,
+                use_beta=bn_affine)
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.bn(x)
         x = self.activ(x)
         return x
 
 
-class CIFARWRN1bit(nn.Module):
+class CIFARWRN1bit(Chain):
     """
     WRN-1bit model for CIFAR from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
@@ -520,7 +538,7 @@ class CIFARWRN1bit(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (32, 32)
         Spatial size of the expected input image.
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     """
     def __init__(self,
@@ -529,71 +547,69 @@ class CIFARWRN1bit(nn.Module):
                  binarized=False,
                  in_channels=3,
                  in_size=(32, 32),
-                 num_classes=10):
+                 classes=10):
         super(CIFARWRN1bit, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", conv3x3_1bit(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            binarized=binarized))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), PreResUnit1bit(
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", conv3x3_1bit(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride,
+                    out_channels=init_block_channels,
                     binarized=binarized))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("post_activ", PreResActivation(
-            in_channels=in_channels,
-            bn_affine=False))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            stride = 2 if (j == 0) and (i != 0) else 1
+                            setattr(stage, "unit{}".format(j + 1), PreResUnit1bit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                binarized=binarized))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, "post_activ", PreResActivation(
+                    in_channels=in_channels,
+                    bn_affine=False))
 
-        self.output = nn.Sequential()
-        self.output.add_module("final_conv", conv1x1_block_1bit(
-            in_channels=in_channels,
-            out_channels=num_classes,
-            activate=False,
-            binarized=binarized))
-        self.output.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=8,
-            stride=1))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'final_conv', conv1x1_block_1bit(
+                    in_channels=in_channels,
+                    out_channels=classes,
+                    activate=False,
+                    binarized=binarized))
+                setattr(self.output, 'final_pool', partial(
+                    F.average_pooling_2d,
+                    ksize=8,
+                    stride=1))
+                setattr(self.output, 'final_flatten', partial(
+                    F.reshape,
+                    shape=(-1, classes)))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
-        x = x.view(x.size(0), -1)
         return x
 
 
-def get_wrn1bit_cifar(num_classes,
+def get_wrn1bit_cifar(classes,
                       blocks,
                       width_factor,
                       model_name=None,
                       pretrained=False,
-                      root=os.path.join('~', '.torch', 'models'),
+                      root=os.path.join('~', '.chainer', 'models'),
                       **kwargs):
     """
     Create WRN-1bit model for CIFAR with specific parameters.
 
     Parameters:
     ----------
-    num_classes : int
+    classes : int
         Number of classification classes.
     blocks : int
         Number of blocks.
@@ -603,7 +619,7 @@ def get_wrn1bit_cifar(num_classes,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
@@ -618,87 +634,78 @@ def get_wrn1bit_cifar(num_classes,
     net = CIFARWRN1bit(
         channels=channels,
         init_block_channels=init_block_channels,
-        num_classes=num_classes,
+        classes=classes,
         **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
 
-def wrn20_10_1bit_cifar10(num_classes=10, **kwargs):
+def wrn20_10_1bit_cifar10(classes=10, **kwargs):
     """
     WRN-20-10-1bit model for CIFAR-10 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(num_classes=num_classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar10",
-                             **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar10", **kwargs)
 
 
-def wrn20_10_1bit_cifar100(num_classes=100, **kwargs):
+def wrn20_10_1bit_cifar100(classes=100, **kwargs):
     """
     WRN-20-10-1bit model for CIFAR-100 from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
-    num_classes : int, default 100
+    classes : int, default 100
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(num_classes=num_classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar100",
-                             **kwargs)
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_cifar100", **kwargs)
 
 
-def wrn20_10_1bit_svhn(num_classes=10, **kwargs):
+def wrn20_10_1bit_svhn(classes=10, **kwargs):
     """
     WRN-20-10-1bit model for SVHN from 'Wide Residual Networks,' https://arxiv.org/abs/1605.07146.
 
     Parameters:
     ----------
-    num_classes : int, default 10
+    classes : int, default 10
         Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_wrn1bit_cifar(num_classes=num_classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_svhn",
-                             **kwargs)
-
-
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
+    return get_wrn1bit_cifar(classes=classes, blocks=20, width_factor=10, model_name="wrn20_10_1bit_svhn", **kwargs)
 
 
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
-    binarized = True
+    binarized = False
 
     models = [
         (wrn20_10_1bit_cifar10, 10),
@@ -706,24 +713,20 @@ def _test():
         (wrn20_10_1bit_svhn, 10),
     ]
 
-    for model, num_classes in models:
+    for model, classes in models:
 
         net = model(
             pretrained=pretrained,
             binarized=binarized)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != wrn20_10_1bit_cifar10 or weight_count == 26737140)
         assert (model != wrn20_10_1bit_cifar100 or weight_count == 26794920)
         assert (model != wrn20_10_1bit_svhn or weight_count == 26737140)
 
-        x = Variable(torch.randn(1, 3, 32, 32))
+        x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, num_classes))
+        assert (y.shape == (1, classes))
 
 
 if __name__ == "__main__":

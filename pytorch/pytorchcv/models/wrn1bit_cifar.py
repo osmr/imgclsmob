@@ -514,7 +514,7 @@ class CIFARWRN1bit(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    binarized : bool, default False
+    binarized : bool, default True
         Whether to use binarization.
     in_channels : int, default 3
         Number of input channels.
@@ -526,7 +526,7 @@ class CIFARWRN1bit(nn.Module):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 binarized=False,
+                 binarized=True,
                  in_channels=3,
                  in_size=(32, 32),
                  num_classes=10):

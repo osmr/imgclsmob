@@ -915,7 +915,7 @@ class ProxylessNASNets(BasicUnit):
 
 def proxyless_nas_cpu(pretrained=False):
     import json
-    net_config_path = "/home/semery/Downloads/proxyless_cpu.config"
+    net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
     net_config_json = json.load(open(net_config_path, 'r'))
     return ProxylessNASNets.build_from_config(net_config_json)
 

@@ -113,9 +113,15 @@ def prepare_src_model(src_fwk,
             src_param_keys = [key for key in src_param_keys if
                               not (key.startswith("features.") and key.endswith(".bias"))]
 
-        if src_model in ["oth_resnet18_v2", "oth_resnet34_v2", "oth_resnet50_v2", "oth_resnet101_v2",
-                         "oth_resnet152_v2"]:
-            src_param_keys = src_param_keys[4:]
+        if src_model in ["oth_resnet50_v1", "oth_resnet101_v1", "oth_resnet152_v1", "oth_resnet50_v1b",
+                         "oth_resnet101_v1b", "oth_resnet152_v1b"]:
+            src_param_keys = [key for key in src_param_keys if
+                              not (key.startswith("features.") and key.endswith(".bias"))]
+
+        if src_model.startswith("wrn20_10_1bit") or src_model.startswith("wrn20_10_32bit"):
+            src_param_keys = [key for key in src_param_keys if
+                              not (key.startswith("features.") and
+                                   (key.endswith(".bn.gamma") or key.endswith(".bn.beta")))]
 
         if dst_fwk == "chainer":
             src_param_keys_ = src_param_keys.copy()

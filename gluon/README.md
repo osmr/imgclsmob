@@ -335,6 +335,8 @@ Some remarks:
 | WRN-16-10 | 2.93 | 640 | 17,116,634 | 2,414.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn16_10_cifar10-0293-ecf1c17c.params.log)) |
 | WRN-28-10 | 2.39 | 640 | 36,479,194 | 5,246.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn28_10_cifar10-0239-16f3c8a2.params.log)) |
 | WRN-40-8 | 2.37 | 512 | 35,748,314 | 5,176.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.166/wrn40_8_cifar10-0237-3b81d261.params.log)) |
+| WRN-20-10-1bit | 3.26 | 640 | 26,737,140 | 4,019.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_1bit_cifar10-0326-c1a8ba4f.params.log)) |
+| WRN-20-10-32bit | 3.14 | 640 | 26,737,140 | 4,019.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_32bit_cifar10-0314-35549618.params.log)) |
 | RoR-3-56 | 5.43 | 64 | 762,746 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.228/ror3_56_cifar10-0543-ee31a69a.params.log)) |
 | RoR-3-110 | 4.35 | 64 | 1,637,690 | 242.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.235/ror3_110_cifar10-0435-03599165.params.log)) |
 | RoR-3-164 | 3.93 | 64 | 2,512,634 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_cifar10-0393-cc11aa06.params.log)) |
@@ -372,6 +374,8 @@ Some remarks:
 | X-DenseNet-BC-40-2 (k=24) | 23.96 | 714,196 | 293.11M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.227/xdensenet40_2_k24_bc_cifar100-2396-73d5ba88.params.log)) |
 | X-DenseNet-BC-40-2 (k=36) | 21.65 | 1,578,412 | 654.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.234/xdensenet40_2_k36_bc_cifar100-2165-78b6e754.params.log)) |
 | WRN-16-10 | 18.95 | 17,174,324 | 2,414.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.204/wrn16_10_cifar100-1895-bcb5c89c.params.log)) |
+| WRN-20-10-1bit | 19.04 | 26,794,920 | 4,022.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_1bit_cifar100-1904-adae01d6.params.log)) |
+| WRN-20-10-32bit | 18.12 | 26,794,920 | 4,022.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_32bit_cifar100-1812-d064f38a.params.log)) |
 | RoR-3-56 | 25.49 | 768,596 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.229/ror3_56_cifar100-2549-43345593.params.log)) |
 | RoR-3-110 | 23.64 | 1,643,540 | 242.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.236/ror3_110_cifar100-2364-b8c4d317.params.log)) |
 | RoR-3-164 | 22.34 | 2,518,484 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_cifar100-2234-eb6a7fb8.params.log)) |
@@ -400,6 +404,8 @@ Some remarks:
 | WRN-16-10 | 2.78 | 17,116,634 | 2,414.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.271/wrn16_10_svhn-0278-76f4e136.params.log)) |
 | WRN-28-10 | 2.71 | 36,479,194 | 5,246.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.276/wrn28_10_svhn-0271-fcd7a6b0.params.log)) |
 | WRN-40-8 | 2.54 | 35,748,314 | 5,176.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.277/wrn40_8_svhn-0254-be7a21da.params.log)) |
+| WRN-20-10-1bit | 2.73 | 26,737,140 | 4,019.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_1bit_svhn-0273-ce9f819c.params.log)) |
+| WRN-20-10-32bit | 2.59 | 26,737,140 | 4,019.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_32bit_svhn-0259-d9e8b46e.params.log)) |
 | RoR-3-56 | 2.69 | 762,746 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.287/ror3_56_svhn-0269-56617cf9.params.log)) |
 | RoR-3-110 | 2.57 | 1,637,690 | 242.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.287/ror3_110_svhn-0257-0677b7df.params.log)) |
 | RoR-3-164 | 2.73 | 2,512,634 | 370.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.294/ror3_164_svhn-0273-b008c1b0.params.log)) |

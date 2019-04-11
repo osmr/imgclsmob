@@ -69,6 +69,7 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.xdensenet_cifar import *
 from .models.wrn_cifar import *
+from .models.wrn1bit_cifar import *
 from .models.ror_cifar import *
 from .models.rir_cifar import *
 from .models.resdropresnet_cifar import *
@@ -80,8 +81,6 @@ from .models.resnetd import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
-
-from .models.wrn1bit_cifar import *
 
 __all__ = ['get_model']
 
@@ -517,6 +516,13 @@ _models = {
     'wrn40_8_cifar100': wrn40_8_cifar100,
     'wrn40_8_svhn': wrn40_8_svhn,
 
+    'wrn20_10_1bit_cifar10': wrn20_10_1bit_cifar10,
+    'wrn20_10_1bit_cifar100': wrn20_10_1bit_cifar100,
+    'wrn20_10_1bit_svhn': wrn20_10_1bit_svhn,
+    'wrn20_10_32bit_cifar10': wrn20_10_32bit_cifar10,
+    'wrn20_10_32bit_cifar100': wrn20_10_32bit_cifar100,
+    'wrn20_10_32bit_svhn': wrn20_10_32bit_svhn,
+
     'ror3_56_cifar10': ror3_56_cifar10,
     'ror3_56_cifar100': ror3_56_cifar100,
     'ror3_56_svhn': ror3_56_svhn,
@@ -588,13 +594,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'wrn20_10_1bit_cifar10': wrn20_10_1bit_cifar10,
-    'wrn20_10_1bit_cifar100': wrn20_10_1bit_cifar100,
-    'wrn20_10_1bit_svhn': wrn20_10_1bit_svhn,
-    'wrn20_10_32bit_cifar10': wrn20_10_32bit_cifar10,
-    'wrn20_10_32bit_cifar100': wrn20_10_32bit_cifar100,
-    'wrn20_10_32bit_svhn': wrn20_10_32bit_svhn,
 }
 
 

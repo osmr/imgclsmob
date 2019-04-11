@@ -508,10 +508,19 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage1_hg/', '/hg/') for key in dst_param_keys]
 
-    ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
-    ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]
-    ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
-    ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
+    if src_model.startswith("wrn20_10_1bit") or src_model.startswith("wrn20_10_32bit"):
+        ext2_src_param_keys = [key.replace('.conv.weight', '.bn.beta') for key in src_param_keys if
+                               key.endswith(".conv.weight")]
+        ext2_src_param_keys.append("features.4.bn.beta")
+        ext2_dst_param_keys = [key.replace('/conv/W', '/bn/beta') for key in dst_param_keys if key.endswith("/conv/W")]
+        ext2_dst_param_keys.append("/features/post_activ/bn/beta")
+        ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
+        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
+    else:
+        ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
+        ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]
+        ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
+        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
 
     for i, src_key in enumerate(ext_src_param_keys):
         src_key1 = src_key.split(".")[-1]

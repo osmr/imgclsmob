@@ -30,7 +30,6 @@ def set_layer_from_config(layer_config):
 
     name2layer = {
         ConvLayer.__name__: ConvLayer,
-        DepthConvLayer.__name__: DepthConvLayer,
         PoolingLayer.__name__: PoolingLayer,
         IdentityLayer.__name__: IdentityLayer,
         LinearLayer.__name__: LinearLayer,
@@ -49,22 +48,20 @@ class BasicLayer(BasicUnit):
                  in_channels,
                  out_channels,
                  use_bn=True,
-                 act_func='relu',
+                 act_func='relu6',
                  dropout_rate=0,
                  ops_order='weight_bn_act'):
         super(BasicLayer, self).__init__()
 
-        self.in_channels = in_channels
-        self.out_channels = out_channels
+        assert (act_func is None) or (act_func == 'relu6')
+        assert (dropout_rate == 0.0)
+        assert (ops_order == 'weight_bn_act')
 
-        self.use_bn = use_bn
-        self.act_func = act_func
-        self.dropout_rate = dropout_rate
         self.ops_order = ops_order
 
         """ add modules """
         # batch norm
-        if self.use_bn:
+        if use_bn:
             if self.bn_before_weight:
                 self.bn = nn.BatchNorm2d(in_channels)
             else:
@@ -72,23 +69,13 @@ class BasicLayer(BasicUnit):
         else:
             self.bn = None
         # activation
-        if act_func == 'relu':
-            if self.ops_list[0] == 'act':
-                self.activation = nn.ReLU(inplace=False)
-            else:
-                self.activation = nn.ReLU(inplace=True)
-        elif act_func == 'relu6':
+        if act_func == 'relu6':
             if self.ops_list[0] == 'act':
                 self.activation = nn.ReLU6(inplace=False)
             else:
                 self.activation = nn.ReLU6(inplace=True)
         else:
             self.activation = None
-        # dropout
-        if self.dropout_rate > 0:
-            self.dropout = nn.Dropout2d(self.dropout_rate, inplace=True)
-        else:
-            self.dropout = None
 
     @property
     def ops_list(self):
@@ -109,9 +96,6 @@ class BasicLayer(BasicUnit):
     def forward(self, x):
         for op in self.ops_list:
             if op == 'weight':
-                # dropout before weight operation
-                if self.dropout is not None:
-                    x = self.dropout(x)
                 x = self.weight_call(x)
             elif op == 'bn':
                 if self.bn is not None:
@@ -144,107 +128,41 @@ class ConvLayer(BasicLayer):
                  bias=False,
                  has_shuffle=False,
                  use_bn=True,
-                 act_func='relu',
+                 act_func='relu6',
                  dropout_rate=0,
                  ops_order='weight_bn_act'):
         super(ConvLayer, self).__init__(in_channels, out_channels, use_bn, act_func, dropout_rate, ops_order)
 
+        assert (act_func is None) or (act_func == 'relu6')
         assert (not has_shuffle)
+        assert (dropout_rate == 0.0)
+        assert (ops_order == 'weight_bn_act')
 
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.dilation = dilation
-        self.groups = groups
-        self.bias = bias
-        self.has_shuffle = has_shuffle
-
-        padding = get_same_padding(self.kernel_size)
+        padding = get_same_padding(kernel_size)
         if isinstance(padding, int):
-            padding *= self.dilation
+            padding *= dilation
         else:
-            padding[0] *= self.dilation
-            padding[1] *= self.dilation
+            padding[0] *= dilation
+            padding[1] *= dilation
+
         # `kernel_size`, `stride`, `padding`, `dilation` can either be `int` or `tuple` of int
         self.conv = nn.Conv2d(
             in_channels,
             out_channels,
-            kernel_size=self.kernel_size,
-            stride=self.stride,
+            kernel_size=kernel_size,
+            stride=stride,
             padding=padding,
-            dilation=self.dilation,
-            groups=self.groups,
-            bias=self.bias)
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
 
     def weight_call(self, x):
         x = self.conv(x)
-        assert (not self.has_shuffle)
-        # if self.has_shuffle and self.groups > 1:
-        #     x = shuffle_layer(x, self.groups)
         return x
 
     @staticmethod
     def build_from_config(config):
         return ConvLayer(**config)
-
-
-class DepthConvLayer(BasicLayer):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size=3,
-                 stride=1,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 has_shuffle=False,
-                 use_bn=True,
-                 act_func='relu',
-                 dropout_rate=0,
-                 ops_order='weight_bn_act'):
-        super(DepthConvLayer, self).__init__(in_channels, out_channels, use_bn, act_func, dropout_rate, ops_order)
-
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.dilation = dilation
-        self.groups = groups
-        self.bias = bias
-        self.has_shuffle = has_shuffle
-
-        padding = get_same_padding(self.kernel_size)
-        if isinstance(padding, int):
-            padding *= self.dilation
-        else:
-            padding[0] *= self.dilation
-            padding[1] *= self.dilation
-        # `kernel_size`, `stride`, `padding`, `dilation` can either be `int` or `tuple` of int
-        self.depth_conv = nn.Conv2d(
-            in_channels,
-            in_channels,
-            kernel_size=self.kernel_size,
-            stride=self.stride,
-            padding=padding,
-            dilation=self.dilation,
-            groups=in_channels,
-            bias=False)
-        self.point_conv = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size=1,
-            groups=self.groups,
-            bias=self.bias)
-
-    def weight_call(self, x):
-        x = self.depth_conv(x)
-        x = self.point_conv(x)
-        assert (not self.has_shuffle)
-        # if self.has_shuffle and self.groups > 1:
-        #     x = shuffle_layer(x, self.groups)
-        return x
-
-    @staticmethod
-    def build_from_config(config):
-        return DepthConvLayer(**config)
 
 
 class PoolingLayer(BasicLayer):
@@ -261,26 +179,27 @@ class PoolingLayer(BasicLayer):
                  ops_order='weight_bn_act'):
         super(PoolingLayer, self).__init__(in_channels, out_channels, use_bn, act_func, dropout_rate, ops_order)
 
-        self.pool_type = pool_type
-        self.kernel_size = kernel_size
-        self.stride = stride
+        assert (act_func is None)
+        assert (not use_bn)
+        assert (dropout_rate == 0.0)
+        assert (ops_order == 'weight_bn_act')
 
-        if self.stride == 1:
+        if stride == 1:
             # same padding if `stride == 1`
-            padding = get_same_padding(self.kernel_size)
+            padding = get_same_padding(kernel_size)
         else:
             padding = 0
 
-        if self.pool_type == 'avg':
+        if pool_type == 'avg':
             self.pool = nn.AvgPool2d(
-                self.kernel_size,
-                stride=self.stride,
+                kernel_size,
+                stride=stride,
                 padding=padding,
                 count_include_pad=False)
-        elif self.pool_type == 'max':
+        elif pool_type == 'max':
             self.pool = nn.MaxPool2d(
-                self.kernel_size,
-                stride=self.stride,
+                kernel_size,
+                stride=stride,
                 padding=padding)
         else:
             raise NotImplementedError
@@ -304,6 +223,11 @@ class IdentityLayer(BasicLayer):
                  ops_order='weight_bn_act'):
         super(IdentityLayer, self).__init__(in_channels, out_channels, use_bn, act_func, dropout_rate, ops_order)
 
+        assert (act_func is None)
+        assert (not use_bn)
+        assert (dropout_rate == 0.0)
+        assert (ops_order == 'weight_bn_act')
+
     def weight_call(self, x):
         return x
 
@@ -324,77 +248,17 @@ class LinearLayer(BasicUnit):
                  ops_order='weight_bn_act'):
         super(LinearLayer, self).__init__()
 
-        self.in_features = in_features
-        self.out_features = out_features
-        self.bias = bias
+        assert (act_func is None)
+        assert (dropout_rate == 0.0)
+        assert (not use_bn)
+        assert (ops_order == 'weight_bn_act')
 
-        self.use_bn = use_bn
-        self.act_func = act_func
-        self.dropout_rate = dropout_rate
         self.ops_order = ops_order
 
-        """ add modules """
-        # batch norm
-        if self.use_bn:
-            if self.bn_before_weight:
-                self.bn = nn.BatchNorm1d(in_features)
-            else:
-                self.bn = nn.BatchNorm1d(out_features)
-        else:
-            self.bn = None
-        # activation
-        if act_func == 'relu':
-            if self.ops_list[0] == 'act':
-                self.activation = nn.ReLU(inplace=False)
-            else:
-                self.activation = nn.ReLU(inplace=True)
-        elif act_func == 'relu6':
-            if self.ops_list[0] == 'act':
-                self.activation = nn.ReLU6(inplace=False)
-            else:
-                self.activation = nn.ReLU6(inplace=True)
-        elif act_func == 'tanh':
-            self.activation = nn.Tanh()
-        elif act_func == 'sigmoid':
-            self.activation = nn.Sigmoid()
-        else:
-            self.activation = None
-        # dropout
-        if self.dropout_rate > 0:
-            self.dropout = nn.Dropout(self.dropout_rate, inplace=True)
-        else:
-            self.dropout = None
-        # linear
-        self.linear = nn.Linear(self.in_features, self.out_features, self.bias)
-
-    @property
-    def ops_list(self):
-        return self.ops_order.split('_')
-
-    @property
-    def bn_before_weight(self):
-        for op in self.ops_list:
-            if op == 'bn':
-                return True
-            elif op == 'weight':
-                return False
-        raise ValueError('Invalid ops_order: %s' % self.ops_order)
+        self.linear = nn.Linear(in_features, out_features, bias)
 
     def forward(self, x):
-        for op in self.ops_list:
-            if op == 'weight':
-                # dropout before weight operation
-                if self.dropout is not None:
-                    x = self.dropout(x)
-                x = self.linear(x)
-            elif op == 'bn':
-                if self.bn is not None:
-                    x = self.bn(x)
-            elif op == 'act':
-                if self.activation is not None:
-                    x = self.activation(x)
-            else:
-                raise ValueError('Unrecognized op: %s' % op)
+        x = self.linear(x)
         return x
 
     @staticmethod
@@ -415,47 +279,36 @@ class MBInvertedConvLayer(BasicUnit):
                  stride=1,
                  expand_ratio=6):
         super(MBInvertedConvLayer, self).__init__()
+        assert (expand_ratio >= 1)
+        mid_channels = round(in_channels * expand_ratio)
 
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.expand_ratio = expand_ratio
-
-        if self.expand_ratio > 1:
-            feature_dim = round(in_channels * self.expand_ratio)
+        if expand_ratio > 1:
             self.inverted_bottleneck = nn.Sequential(OrderedDict([
-                ('conv', nn.Conv2d(in_channels, feature_dim, 1, 1, 0, bias=False)),
-                ('bn', nn.BatchNorm2d(feature_dim)),
+                ('conv', nn.Conv2d(in_channels, mid_channels, 1, 1, 0, bias=False)),
+                ('bn', nn.BatchNorm2d(mid_channels)),
                 ('relu', nn.ReLU6(inplace=True)),
             ]))
         else:
-            feature_dim = in_channels
             self.inverted_bottleneck = None
 
-        # depthwise convolution
-        pad = get_same_padding(self.kernel_size)
+        pad = get_same_padding(kernel_size)
         self.depth_conv = nn.Sequential(OrderedDict([
             ('conv', nn.Conv2d(
-                feature_dim,
-                feature_dim,
+                mid_channels,
+                mid_channels,
                 kernel_size,
                 stride,
                 pad,
-                groups=feature_dim,
+                groups=mid_channels,
                 bias=False)),
-            ('bn', nn.BatchNorm2d(feature_dim)),
+            ('bn', nn.BatchNorm2d(mid_channels)),
             ('relu', nn.ReLU6(inplace=True)),
         ]))
 
-        # pointwise linear
-        self.point_linear = OrderedDict([
-            ('conv', nn.Conv2d(feature_dim, out_channels, 1, 1, 0, bias=False)),
+        self.point_linear = nn.Sequential(OrderedDict([
+            ('conv', nn.Conv2d(mid_channels, out_channels, 1, 1, 0, bias=False)),
             ('bn', nn.BatchNorm2d(out_channels)),
-        ])
-
-        self.point_linear = nn.Sequential(self.point_linear)
+        ]))
 
     def forward(self, x):
         if self.inverted_bottleneck:
@@ -505,6 +358,9 @@ class MobileInvertedResidualBlock(BasicUnit):
                  mobile_inverted_conv,
                  shortcut):
         super(MobileInvertedResidualBlock, self).__init__()
+
+        assert (type(mobile_inverted_conv) in [MBInvertedConvLayer, ZeroLayer])
+        assert (shortcut is None) or (type(shortcut) == IdentityLayer)
 
         self.mobile_inverted_conv = mobile_inverted_conv
         self.shortcut = shortcut
@@ -565,28 +421,28 @@ class ProxylessNASNets(BasicUnit):
         return ProxylessNASNets(first_conv, blocks, feature_mix_layer, classifier)
 
 
-def proxyless_nas_cpu(pretrained=False):
+def oth_proxyless_nas_cpu(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
     net_config_json = json.load(open(net_config_path, 'r'))
     return ProxylessNASNets.build_from_config(net_config_json)
 
 
-def proxyless_nas_gpu(pretrained=False):
+def oth_proxyless_nas_gpu(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_gpu.config"
     net_config_json = json.load(open(net_config_path, 'r'))
     return ProxylessNASNets.build_from_config(net_config_json)
 
 
-def proxyless_nas_mobile(pretrained=False):
+def oth_proxyless_nas_mobile(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile.config"
     net_config_json = json.load(open(net_config_path, 'r'))
     return ProxylessNASNets.build_from_config(net_config_json)
 
 
-def proxyless_nas_mobile_14(pretrained=False):
+def oth_proxyless_nas_mobile_14(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile_14.config"
     net_config_json = json.load(open(net_config_path, 'r'))
@@ -609,10 +465,10 @@ def _test():
     pretrained = False
 
     models = [
-        (proxyless_nas_cpu, 1000),
-        (proxyless_nas_gpu, 1000),
-        (proxyless_nas_mobile, 1000),
-        (proxyless_nas_mobile_14, 1000),
+        (oth_proxyless_nas_cpu, 1000),
+        (oth_proxyless_nas_gpu, 1000),
+        (oth_proxyless_nas_mobile, 1000),
+        (oth_proxyless_nas_mobile_14, 1000),
     ]
 
     for model, num_classes in models:
@@ -623,10 +479,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != proxyless_nas_cpu or weight_count == 4361648)
-        assert (model != proxyless_nas_gpu or weight_count == 7119848)
-        assert (model != proxyless_nas_mobile or weight_count == 4080512)
-        assert (model != proxyless_nas_mobile_14 or weight_count == 6857568)
+        assert (model != oth_proxyless_nas_cpu or weight_count == 4361648)
+        assert (model != oth_proxyless_nas_gpu or weight_count == 7119848)
+        assert (model != oth_proxyless_nas_mobile or weight_count == 4080512)
+        assert (model != oth_proxyless_nas_mobile_14 or weight_count == 6857568)
 
         x = Variable(torch.randn(14, 3, 224, 224))
         y = net(x)

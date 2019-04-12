@@ -4,42 +4,30 @@ from .common import ConvBlock, conv1x1_block, conv3x3_block
 __all__ = ['proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14']
 
 
-def get_same_padding(kernel_size):
-    if isinstance(kernel_size, tuple):
-        assert len(kernel_size) == 2, 'invalid kernel size: %s' % kernel_size
-        p1 = get_same_padding(kernel_size[0])
-        p2 = get_same_padding(kernel_size[1])
-        return p1, p2
-    assert isinstance(kernel_size, int), 'kernel size should be either `int` or `tuple`'
-    assert kernel_size % 2 > 0, 'kernel size should be odd number'
-    return kernel_size // 2
-
-
-class MBInvertedConvLayer(nn.Module):
+class ProxylessBlock(nn.Module):
 
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size=3,
                  stride=1,
-                 expand_ratio=6,
-                 **kwargs):
-        super(MBInvertedConvLayer, self).__init__()
+                 expand_ratio=6):
+        super(ProxylessBlock, self).__init__()
         assert (type(kernel_size) == int)
         assert (expand_ratio >= 1)
         assert (kernel_size in [3, 5, 7])
         mid_channels = round(in_channels * expand_ratio)
 
         if expand_ratio > 1:
-            self.inverted_bottleneck = conv1x1_block(
+            self.bc_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 activation="relu6")
         else:
-            self.inverted_bottleneck = None
+            self.bc_conv = None
 
         padding = (kernel_size - 1) // 2
-        self.depth_conv = ConvBlock(
+        self.dw_conv = ConvBlock(
             in_channels=mid_channels,
             out_channels=mid_channels,
             kernel_size=kernel_size,
@@ -48,17 +36,17 @@ class MBInvertedConvLayer(nn.Module):
             groups=mid_channels,
             activation="relu6")
 
-        self.point_linear = conv1x1_block(
+        self.pw_conv = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             activation=None,
             activate=False)
 
     def forward(self, x):
-        if self.inverted_bottleneck:
-            x = self.inverted_bottleneck(x)
-        x = self.depth_conv(x)
-        x = self.point_linear(x)
+        if self.bc_conv:
+            x = self.bc_conv(x)
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
         return x
 
 
@@ -74,10 +62,10 @@ class ProxylessUnit(nn.Module):
         if self.mobile_inverted_conv is None:
             res = x
         elif not self.use_shortcut:
-            assert (type(self.mobile_inverted_conv) == MBInvertedConvLayer)
+            assert (type(self.mobile_inverted_conv) == ProxylessBlock)
             res = self.mobile_inverted_conv(x)
         else:
-            assert (type(self.mobile_inverted_conv) == MBInvertedConvLayer)
+            assert (type(self.mobile_inverted_conv) == ProxylessBlock)
             conv_x = self.mobile_inverted_conv(x)
             skip_x = x
             res = skip_x + conv_x
@@ -118,7 +106,7 @@ class ProxylessNAS(nn.Module):
                     kernel_size = kernel_sizes_per_stage[j]
                     stride = 2 if (j == 0) and (i != 0) else 1
                     expand_ratio = expand_ratios_per_stage[j]
-                    mobile_inverted_conv = MBInvertedConvLayer(
+                    mobile_inverted_conv = ProxylessBlock(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         kernel_size=kernel_size,

@@ -1,8 +1,3 @@
-if __name__ == '__main__' and __package__ is None:
-    import sys
-    from os import path
-    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
-
 import argparse
 import os
 import zipfile
@@ -10,8 +5,13 @@ import logging
 import shutil
 import numpy as np
 import pandas as pd
-
 from common.logger_utils import initialize_logging
+if __name__ == '__main__' and __package__ is None:
+    import sys
+    from os import path
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+
+
 
 
 def parse_args():

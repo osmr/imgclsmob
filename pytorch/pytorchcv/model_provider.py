@@ -52,6 +52,7 @@ from .models.mobilenetv2 import *
 from .models.igcv3 import *
 from .models.mnasnet import *
 from .models.darts import *
+from .models.proxylessnas import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
@@ -81,9 +82,6 @@ from .models.resnetd import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
-
-from .models.proxylessnas import *
-from .models.others.oth_proxyless_nas import *
 
 __all__ = ['get_model']
 
@@ -388,6 +386,11 @@ _models = {
 
     'darts': darts,
 
+    'proxylessnas_cpu': proxylessnas_cpu,
+    'proxylessnas_gpu': proxylessnas_gpu,
+    'proxylessnas_mobile': proxylessnas_mobile,
+    'proxylessnas_mobile14': proxylessnas_mobile14,
+
     'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
@@ -593,16 +596,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'proxylessnas_cpu': proxylessnas_cpu,
-    'proxylessnas_gpu': proxylessnas_gpu,
-    'proxylessnas_mobile': proxylessnas_mobile,
-    'proxylessnas_mobile14': proxylessnas_mobile14,
-
-    'oth_proxyless_nas_cpu': oth_proxyless_nas_cpu,
-    'oth_proxyless_nas_gpu': oth_proxyless_nas_gpu,
-    'oth_proxyless_nas_mobile': oth_proxyless_nas_mobile,
-    'oth_proxyless_nas_mobile_14': oth_proxyless_nas_mobile_14,
 }
 
 

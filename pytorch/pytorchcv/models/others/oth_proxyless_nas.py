@@ -2,6 +2,9 @@ import os, sys
 import math
 from collections import OrderedDict
 
+__all__ = ['oth_proxyless_nas_cpu', 'oth_proxyless_nas_gpu', 'oth_proxyless_nas_mobile', 'oth_proxyless_nas_mobile_14']
+
+
 try:
     from urllib import urlretrieve
 except ImportError:
@@ -913,9 +916,30 @@ class ProxylessNASNets(BasicUnit):
         return new_v
 
 
-def proxyless_nas_cpu(pretrained=False):
+def oth_proxyless_nas_cpu(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
+    net_config_json = json.load(open(net_config_path, 'r'))
+    return ProxylessNASNets.build_from_config(net_config_json)
+
+
+def oth_proxyless_nas_gpu(pretrained=False):
+    import json
+    net_config_path = "../imgclsmob_data/proxyless/proxyless_gpu.config"
+    net_config_json = json.load(open(net_config_path, 'r'))
+    return ProxylessNASNets.build_from_config(net_config_json)
+
+
+def oth_proxyless_nas_mobile(pretrained=False):
+    import json
+    net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile.config"
+    net_config_json = json.load(open(net_config_path, 'r'))
+    return ProxylessNASNets.build_from_config(net_config_json)
+
+
+def oth_proxyless_nas_mobile_14(pretrained=False):
+    import json
+    net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile_14.config"
     net_config_json = json.load(open(net_config_path, 'r'))
     return ProxylessNASNets.build_from_config(net_config_json)
 
@@ -936,7 +960,7 @@ def _test():
     pretrained = False
 
     models = [
-        (proxyless_nas_cpu, 1000),
+        (oth_proxyless_nas_cpu, 1000),
     ]
 
     for model, num_classes in models:
@@ -947,7 +971,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != proxyless_nas_cpu or weight_count == 4361648)
+        assert (model != oth_proxyless_nas_cpu or weight_count == 4361648)
 
         x = Variable(torch.randn(14, 3, 224, 224))
         y = net(x)

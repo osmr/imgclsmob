@@ -83,7 +83,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.proxylessnas import *
-from .models.others.oth_proxyless_nas2 import *
+from .models.others.oth_proxyless_nas import *
 
 __all__ = ['get_model']
 

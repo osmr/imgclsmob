@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .common import ConvBlock, conv1x1_block, conv3x3_block
+from common import ConvBlock, conv1x1_block, conv3x3_block, conv5x5_block, conv7x7_block
 
 __all__ = ['proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14']
 
@@ -26,35 +26,37 @@ class MBInvertedConvLayer(nn.Module):
                  **kwargs):
         super(MBInvertedConvLayer, self).__init__()
         assert (expand_ratio >= 1)
+        assert (kernel_size in [3, 5, 7])
         mid_channels = round(in_channels * expand_ratio)
 
         if expand_ratio > 1:
-            self.inverted_bottleneck = ConvBlock(
+            self.inverted_bottleneck = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                kernel_size=1,
-                stride=1,
-                padding=0,
                 activation="relu6")
         else:
             self.inverted_bottleneck = None
 
-        pad = get_same_padding(kernel_size)
-        self.depth_conv = ConvBlock(
+        if kernel_size == 3:
+            depth_conv_class = conv3x3_block
+        elif kernel_size == 5:
+            depth_conv_class = conv5x5_block
+        elif kernel_size == 7:
+            depth_conv_class = conv7x7_block
+
+        # pad = get_same_padding(kernel_size)
+        self.depth_conv = depth_conv_class(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            kernel_size=kernel_size,
+            # kernel_size=kernel_size,
             stride=stride,
-            padding=pad,
+            # padding=pad,
             groups=mid_channels,
             activation="relu6")
 
-        self.point_linear = ConvBlock(
+        self.point_linear = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            kernel_size=1,
-            stride=1,
-            padding=0,
             activation=None,
             activate=False)
 

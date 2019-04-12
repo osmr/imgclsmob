@@ -10,9 +10,9 @@ class SegDataset(GetterDataset):
 
     Parameters
     ----------
-    root : string
+    root : str
         Path to data folder.
-    mode: string
+    mode: str
         'train', 'val', 'test', or 'demo'.
     transform : callable
         A function that transforms the image.

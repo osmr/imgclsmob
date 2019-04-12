@@ -147,7 +147,7 @@ class CIFARRiR(nn.Module):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    final_block_channels, : int
+    final_block_channels : int
         Number of output channels for the final unit.
     in_channels : int, default 3
         Number of input channels.

@@ -169,7 +169,7 @@ class CIFARRiR(HybridBlock):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    final_block_channels, : int
+    final_block_channels : int
         Number of output channels for the final unit.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.

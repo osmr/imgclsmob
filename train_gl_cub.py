@@ -14,16 +14,15 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
 
-from gluon.imagenet1k import add_dataset_parser_arguments
-from gluon.imagenet1k import get_batch_fn
-from gluon.imagenet1k import get_train_data_source
-from gluon.imagenet1k import get_val_data_source
-from gluon.imagenet1k import num_training_samples
+from gluon.cub200_2011_utils import add_dataset_parser_arguments
+from gluon.cub200_2011_utils import batch_fn
+from gluon.cub200_2011_utils import get_train_data_source
+from gluon.cub200_2011_utils import get_val_data_source
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Gluon/ImageNet-1K)',
+        description='Train a model for image classification (Gluon/CUB-200-2011)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)
@@ -566,19 +565,19 @@ def main():
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     train_data = get_train_data_source(
-        dataset_args=args,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size)
     val_data = get_val_data_source(
-        dataset_args=args,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_args=args)
-    data_source_needs_reset = args.use_rec
+    data_source_needs_reset = False
 
+    num_training_samples = len(train_data._dataset)
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,

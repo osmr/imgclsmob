@@ -972,7 +972,7 @@ def main():
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
         packages += ["mxnet"]
-        pip_packages += ["mxnet-cu92", "mxnet-cu100mkl"]
+        pip_packages += ["mxnet-cu100"]
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
@@ -983,7 +983,7 @@ def main():
         pip_packages += ["keras", "keras-mxnet", "keras-applications", "keras-preprocessing"]
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
-        pip_packages += ["tensorflow-gpu", "tensorpack", "mxnet-cu90"]
+        pip_packages += ["tensorflow-gpu", "tensorpack", "mxnet-cu100"]
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,

@@ -123,6 +123,8 @@ class ConvBlock(nn.Module):
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     activate : bool, default True
@@ -137,6 +139,7 @@ class ConvBlock(nn.Module):
                  dilation=1,
                  groups=1,
                  bias=False,
+                 bn_eps=1e-5,
                  activation=(lambda: nn.ReLU(inplace=True)),
                  activate=True):
         super(ConvBlock, self).__init__()
@@ -151,7 +154,9 @@ class ConvBlock(nn.Module):
             dilation=dilation,
             groups=groups,
             bias=bias)
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
+        self.bn = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=bn_eps)
         if self.activate:
             assert (activation is not None)
             if isfunction(activation):
@@ -180,6 +185,7 @@ def conv1x1_block(in_channels,
                   padding=0,
                   groups=1,
                   bias=False,
+                  bn_eps=1e-5,
                   activation=(lambda: nn.ReLU(inplace=True)),
                   activate=True):
     """
@@ -199,6 +205,8 @@ def conv1x1_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     activate : bool, default True
@@ -212,6 +220,7 @@ def conv1x1_block(in_channels,
         padding=padding,
         groups=groups,
         bias=bias,
+        bn_eps=bn_eps,
         activation=activation,
         activate=activate)
 
@@ -223,6 +232,7 @@ def conv3x3_block(in_channels,
                   dilation=1,
                   groups=1,
                   bias=False,
+                  bn_eps=1e-5,
                   activation=(lambda: nn.ReLU(inplace=True)),
                   activate=True):
     """
@@ -244,6 +254,8 @@ def conv3x3_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     activate : bool, default True
@@ -258,6 +270,7 @@ def conv3x3_block(in_channels,
         dilation=dilation,
         groups=groups,
         bias=bias,
+        bn_eps=bn_eps,
         activation=activation,
         activate=activate)
 

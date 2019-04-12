@@ -1,5 +1,5 @@
 """
-    ProxylessNAS, implemented in PyTorch.
+    ProxylessNAS, implemented in Gluon.
     Original paper: 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 """
@@ -8,12 +8,12 @@ __all__ = ['ProxylessNAS', 'proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas
            'ProxylessUnit']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import ConvBlock, conv1x1_block, conv3x3_block
 
 
-class ProxylessBlock(nn.Module):
+class ProxylessBlock(HybridBlock):
     """
     ProxylessNAS block for residual path in ProxylessNAS unit.
 
@@ -25,10 +25,12 @@ class ProxylessBlock(nn.Module):
         Number of output channels.
     kernel_size : int
         Convolution window size.
-    stride : int
+    strides : int
         Strides of the convolution.
-    bn_eps : float
+    bn_epsilon : float
         Small float added to variance in Batch norm.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     expansion : int
         Expansion ratio.
     """
@@ -36,38 +38,43 @@ class ProxylessBlock(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
-                 bn_eps,
+                 strides,
+                 bn_epsilon,
+                 bn_use_global_stats,
                  expansion):
         super(ProxylessBlock, self).__init__()
         self.use_bc = (expansion > 1)
         mid_channels = in_channels * expansion
 
-        if self.use_bc:
-            self.bc_conv = conv1x1_block(
-                in_channels=in_channels,
+        with self.name_scope():
+            if self.use_bc:
+                self.bc_conv = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=mid_channels,
+                    bn_epsilon=bn_epsilon,
+                    bn_use_global_stats=bn_use_global_stats,
+                    activation="relu6")
+
+            padding = (kernel_size - 1) // 2
+            self.dw_conv = ConvBlock(
+                in_channels=mid_channels,
                 out_channels=mid_channels,
-                bn_eps=bn_eps,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                groups=mid_channels,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
                 activation="relu6")
+            self.pw_conv = conv1x1_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                activation=None,
+                activate=False)
 
-        padding = (kernel_size - 1) // 2
-        self.dw_conv = ConvBlock(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=mid_channels,
-            bn_eps=bn_eps,
-            activation="relu6")
-        self.pw_conv = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps,
-            activation=None,
-            activate=False)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if self.use_bc:
             x = self.bc_conv(x)
         x = self.dw_conv(x)
@@ -75,7 +82,7 @@ class ProxylessBlock(nn.Module):
         return x
 
 
-class ProxylessUnit(nn.Module):
+class ProxylessUnit(HybridBlock):
     """
     ProxylessNAS unit.
 
@@ -87,10 +94,12 @@ class ProxylessUnit(nn.Module):
         Number of output channels.
     kernel_size : int
         Convolution window size for body block.
-    stride : int
+    strides : int
         Strides of the convolution.
-    bn_eps : float
+    bn_epsilon : float
         Small float added to variance in Batch norm.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     expansion : int
         Expansion ratio for body block.
     residual : bool
@@ -102,8 +111,9 @@ class ProxylessUnit(nn.Module):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 stride,
-                 bn_eps,
+                 strides,
+                 bn_epsilon,
+                 bn_use_global_stats,
                  expansion,
                  residual,
                  shortcut):
@@ -112,16 +122,18 @@ class ProxylessUnit(nn.Module):
         self.residual = residual
         self.shortcut = shortcut
 
-        if self.residual:
-            self.body = ProxylessBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                bn_eps=bn_eps,
-                expansion=expansion)
+        with self.name_scope():
+            if self.residual:
+                self.body = ProxylessBlock(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    kernel_size=kernel_size,
+                    strides=strides,
+                    bn_epsilon=bn_epsilon,
+                    bn_use_global_stats=bn_use_global_stats,
+                    expansion=expansion)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         if not self.residual:
             return x
         if not self.shortcut:
@@ -132,7 +144,7 @@ class ProxylessUnit(nn.Module):
         return x
 
 
-class ProxylessNAS(nn.Module):
+class ProxylessNAS(HybridBlock):
     """
     ProxylessNAS model from 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
@@ -153,13 +165,16 @@ class ProxylessNAS(nn.Module):
         Convolution window size for each units.
     expansions : list of list of int
         Expansion ratio for each units.
-    bn_eps : float, default 1e-3
+    bn_epsilon : float, default 1e-3
         Small float added to variance in Batch norm.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -170,71 +185,69 @@ class ProxylessNAS(nn.Module):
                  shortcuts,
                  kernel_sizes,
                  expansions,
-                 bn_eps=1e-3,
+                 bn_epsilon=1e-3,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
+                 classes=1000):
         super(ProxylessNAS, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", conv3x3_block(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            stride=2,
-            bn_eps=bn_eps,
-            activation="relu6"))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            residuals_per_stage = residuals[i]
-            shortcuts_per_stage = shortcuts[i]
-            kernel_sizes_per_stage = kernel_sizes[i]
-            expansions_per_stage = expansions[i]
-            for j, out_channels in enumerate(channels_per_stage):
-                residual = (residuals_per_stage[j] == 1)
-                shortcut = (shortcuts_per_stage[j] == 1)
-                kernel_size = kernel_sizes_per_stage[j]
-                expansion = expansions_per_stage[j]
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), ProxylessUnit(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    stride=stride,
-                    bn_eps=bn_eps,
-                    expansion=expansion,
-                    residual=residual,
-                    shortcut=shortcut))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_block", conv1x1_block(
-            in_channels=in_channels,
-            out_channels=final_block_channels,
-            bn_eps=bn_eps,
-            activation="relu6"))
-        in_channels = final_block_channels
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        with self.name_scope():
+            self.features = nn.HybridSequential(prefix='')
+            self.features.add(conv3x3_block(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                strides=2,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                activation="relu6"))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                residuals_per_stage = residuals[i]
+                shortcuts_per_stage = shortcuts[i]
+                kernel_sizes_per_stage = kernel_sizes[i]
+                expansions_per_stage = expansions[i]
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        residual = (residuals_per_stage[j] == 1)
+                        shortcut = (shortcuts_per_stage[j] == 1)
+                        kernel_size = kernel_sizes_per_stage[j]
+                        expansion = expansions_per_stage[j]
+                        strides = 2 if (j == 0) and (i != 0) else 1
+                        stage.add(ProxylessUnit(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            kernel_size=kernel_size,
+                            strides=strides,
+                            bn_epsilon=bn_epsilon,
+                            bn_use_global_stats=bn_use_global_stats,
+                            expansion=expansion,
+                            residual=residual,
+                            shortcut=shortcut))
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(conv1x1_block(
+                in_channels=in_channels,
+                out_channels=final_block_channels,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                activation="relu6"))
+            in_channels = final_block_channels
+            self.features.add(nn.AvgPool2D(
+                pool_size=7,
+                strides=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix='')
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -242,7 +255,8 @@ class ProxylessNAS(nn.Module):
 def get_proxylessnas(version,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.torch', 'models'),
+                     ctx=cpu(),
+                     root=os.path.join('~', '.mxnet', 'models'),
                      **kwargs):
     """
     Create ProxylessNAS model with specific parameters.
@@ -255,7 +269,9 @@ def get_proxylessnas(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
 
@@ -309,11 +325,12 @@ def get_proxylessnas(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -327,7 +344,9 @@ def proxylessnas_cpu(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_proxylessnas(version="cpu", model_name="proxylessnas_cpu", **kwargs)
@@ -342,7 +361,9 @@ def proxylessnas_gpu(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_proxylessnas(version="gpu", model_name="proxylessnas_gpu", **kwargs)
@@ -357,7 +378,9 @@ def proxylessnas_mobile(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_proxylessnas(version="mobile", model_name="proxylessnas_mobile", **kwargs)
@@ -372,24 +395,17 @@ def proxylessnas_mobile14(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_proxylessnas(version="mobile14", model_name="proxylessnas_mobile14", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -404,19 +420,26 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != proxylessnas_cpu or weight_count == 4361648)
         assert (model != proxylessnas_gpu or weight_count == 7119848)
         assert (model != proxylessnas_mobile or weight_count == 4080512)
         assert (model != proxylessnas_mobile14 or weight_count == 6857568)
 
-        x = Variable(torch.randn(14, 3, 224, 224))
+        x = mx.nd.zeros((14, 3, 224, 224), ctx=ctx)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (14, 1000))
+        assert (y.shape == (14, 1000))
 
 
 if __name__ == "__main__":

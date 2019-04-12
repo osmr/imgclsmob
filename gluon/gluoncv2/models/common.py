@@ -159,6 +159,8 @@ class ConvBlock(HybridBlock):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -175,6 +177,7 @@ class ConvBlock(HybridBlock):
                  dilation=1,
                  groups=1,
                  use_bias=False,
+                 bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  activation=(lambda: nn.Activation("relu")),
                  activate=True,
@@ -194,6 +197,7 @@ class ConvBlock(HybridBlock):
                 in_channels=in_channels)
             self.bn = nn.BatchNorm(
                 in_channels=out_channels,
+                epsilon=bn_epsilon,
                 use_global_stats=bn_use_global_stats)
             if self.activate:
                 assert (activation is not None)
@@ -220,6 +224,7 @@ def conv1x1_block(in_channels,
                   strides=1,
                   groups=1,
                   use_bias=False,
+                  bn_epsilon=1e-5,
                   bn_use_global_stats=False,
                   activation=(lambda: nn.Activation("relu")),
                   activate=True,
@@ -239,6 +244,8 @@ def conv1x1_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -254,6 +261,7 @@ def conv1x1_block(in_channels,
         padding=0,
         groups=groups,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
         activate=activate,
@@ -267,6 +275,7 @@ def conv3x3_block(in_channels,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  bn_epsilon=1e-5,
                   bn_use_global_stats=False,
                   activation=(lambda: nn.Activation("relu")),
                   activate=True,
@@ -290,6 +299,8 @@ def conv3x3_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -306,6 +317,7 @@ def conv3x3_block(in_channels,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
         activate=activate,

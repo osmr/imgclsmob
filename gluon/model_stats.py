@@ -7,6 +7,7 @@ from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReL
 from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock
+from .gluoncv2.models.proxylessnas import ProxylessUnit
 
 __all__ = ['measure_model']
 
@@ -159,6 +160,9 @@ def measure_model(model,
             extra_num_flops = x[0].size
             extra_num_macs = 0
         elif isinstance(block, RiRFinalBlock):
+            extra_num_flops = x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, ProxylessUnit):
             extra_num_flops = x[0].size
             extra_num_macs = 0
         else:

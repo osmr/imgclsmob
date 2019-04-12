@@ -73,6 +73,8 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
+from .models.proxylessnas import *
+
 __all__ = ['get_model']
 
 
@@ -546,6 +548,11 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'proxylessnas_cpu': proxylessnas_cpu,
+    'proxylessnas_gpu': proxylessnas_gpu,
+    'proxylessnas_mobile': proxylessnas_mobile,
+    'proxylessnas_mobile14': proxylessnas_mobile14,
 }
 
 

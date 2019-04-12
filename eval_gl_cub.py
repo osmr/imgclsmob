@@ -5,25 +5,19 @@ import logging
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate1
+from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
 from gluon.model_stats import measure_model
-from gluon.cifar import add_dataset_parser_arguments
-from gluon.cifar import batch_fn
-from gluon.cifar import get_val_data_source
+from gluon.cub200_2011_utils import add_dataset_parser_arguments
+from gluon.cub200_2011_utils import batch_fn
+from gluon.cub200_2011_utils import get_val_data_source
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Gluon/CIFAR/SVHN)',
+        description='Evaluate a model for image classification (Gluon/CUB-200-2011)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--dataset',
-        type=str,
-        default="CIFAR10",
-        help='dataset name. options are CIFAR10, CIFAR100, and SVHN')
 
-    args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -93,7 +87,7 @@ def parse_args():
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='mxnet-cu100',
+        default='mxnet-cu92, mxnet-cu100mkl',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args
@@ -101,6 +95,7 @@ def parse_args():
 
 def test(net,
          val_data,
+         batch_fn,
          data_source_needs_reset,
          dtype,
          ctx,
@@ -111,10 +106,12 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        accuracy_metric = mx.metric.Accuracy()
+        acc_top1 = mx.metric.Accuracy()
+        acc_top5 = mx.metric.TopKAccuracy(5)
         tic = time.time()
-        err_val = validate1(
-            accuracy_metric=accuracy_metric,
+        err_top1_val, err_top5_val = validate(
+            acc_top1=acc_top1,
+            acc_top5=acc_top5,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -122,11 +119,11 @@ def test(net,
             dtype=dtype,
             ctx=ctx)
         if extended_log:
-            logging.info('Test: err={err:.4f} ({err})'.format(
-                err=err_val))
+            logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+                top1=err_top1_val, top5=err_top5_val))
         else:
-            logging.info('Test: err={err:.4f}'.format(
-                err=err_val))
+            logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+                top1=err_top1_val, top5=err_top5_val))
         logging.info('Time cost: {:.4f} sec'.format(
             time.time() - tic))
 
@@ -165,22 +162,25 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
+        tune_layers="",
         classes=args.num_classes,
         in_channels=args.in_channels,
         do_hybridize=(not args.calc_flops),
         ctx=ctx)
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (32, 32)
+    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     val_data = get_val_data_source(
-        dataset_name=args.dataset,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
-        num_workers=args.num_workers)
+        num_workers=args.num_workers,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
         val_data=val_data,
+        batch_fn=batch_fn,
         data_source_needs_reset=False,
         dtype=args.dtype,
         ctx=ctx,

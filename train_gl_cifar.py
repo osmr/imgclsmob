@@ -236,7 +236,7 @@ def parse_args():
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='mxnet-cu92, mxnet-cu100mkl',
+        default='mxnet-cu100',
         help='list of pip packages for logging')
 
     parser.add_argument(

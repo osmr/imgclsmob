@@ -7,6 +7,7 @@ from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity
 from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
+from .pytorchcv.models.proxylessnas import ProxylessUnit
 
 __all__ = ['measure_model']
 
@@ -167,6 +168,9 @@ def measure_model(model,
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
         elif isinstance(module, RiRFinalBlock):
+            extra_num_flops = x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, ProxylessUnit):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
         else:

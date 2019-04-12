@@ -2,6 +2,8 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 
+__all__ = ['oth_proxyless_nas_cpu', 'oth_proxyless_nas_gpu', 'oth_proxyless_nas_mobile', 'oth_proxyless_nas_mobile_14']
+
 
 def get_same_padding(kernel_size):
     if isinstance(kernel_size, tuple):

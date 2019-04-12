@@ -1,6 +1,8 @@
 import torch.nn as nn
 from .common import ConvBlock, conv1x1_block, conv3x3_block
 
+__all__ = ['proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14']
+
 
 def get_same_padding(kernel_size):
     if isinstance(kernel_size, tuple):
@@ -89,11 +91,13 @@ class ProxylessUnit(nn.Module):
 class ProxylessNAS(nn.Module):
 
     def __init__(self,
-                 blocks_config,
                  channels,
                  init_block_channels,
                  final_block_channels,
-                 shortcut_list,
+                 residuals,
+                 shortcuts,
+                 kernel_sizes,
+                 expand_ratios,
                  in_channels=3,
                  num_classes=1000):
         super(ProxylessNAS, self).__init__()
@@ -105,40 +109,35 @@ class ProxylessNAS(nn.Module):
             stride=2))
         in_channels = init_block_channels
 
-        for i, block_config in enumerate(blocks_config):
-            in_channels = -1
-            out_channels = -1
-            kernel_size = -1
-            stride = -1
-            expand_ratio = -1
-
-            mobile_inverted_conv_config = block_config['mobile_inverted_conv']
-            mobile_inverted_conv_layer_name = mobile_inverted_conv_config['name']
-            if mobile_inverted_conv_layer_name == "ZeroLayer":
-                mobile_inverted_conv = None
-            else:
-                in_channels = mobile_inverted_conv_config['in_channels']
-                out_channels = mobile_inverted_conv_config['out_channels']
-                kernel_size = mobile_inverted_conv_config['kernel_size']
-                stride = mobile_inverted_conv_config['stride']
-                expand_ratio = mobile_inverted_conv_config['expand_ratio']
-                mobile_inverted_conv = MBInvertedConvLayer(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_size,
-                    stride=stride,
-                    expand_ratio=expand_ratio)
-
-            print("i={}, in_channels={}, out_channels={}, stride={}".format(i, in_channels, out_channels, stride))
-
-            use_shortcut = (shortcut_list[i] == 1)
-
-            self.features.add_module("unit{}".format(i + 1), ProxylessUnit(
-                mobile_inverted_conv=mobile_inverted_conv,
-                use_shortcut=use_shortcut))
+        for i, channels_per_stage in enumerate(channels):
+            stage = nn.Sequential()
+            residuals_per_stage = residuals[i]
+            shortcuts_per_stage = shortcuts[i]
+            kernel_sizes_per_stage = kernel_sizes[i]
+            expand_ratios_per_stage = expand_ratios[i]
+            for j, out_channels in enumerate(channels_per_stage):
+                residual = residuals_per_stage[j]
+                shortcut = shortcuts_per_stage[j]
+                if residual == 1:
+                    kernel_size = kernel_sizes_per_stage[j]
+                    stride = 2 if (j == 0) and (i != 0) else 1
+                    expand_ratio = expand_ratios_per_stage[j]
+                    mobile_inverted_conv = MBInvertedConvLayer(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        kernel_size=kernel_size,
+                        stride=stride,
+                        expand_ratio=expand_ratio)
+                else:
+                    mobile_inverted_conv = None
+                stage.add_module("unit{}".format(j + 1), ProxylessUnit(
+                    mobile_inverted_conv=mobile_inverted_conv,
+                    use_shortcut=shortcut))
+                in_channels = out_channels
+            self.features.add_module("stage{}".format(i + 1), stage)
 
         self.features.add_module("final_block", conv1x1_block(
-            in_channels=channels[-1],
+            in_channels=channels[-1][-1],
             out_channels=final_block_channels))
         in_channels = final_block_channels
         self.features.add_module("final_pool", nn.AvgPool2d(
@@ -158,38 +157,56 @@ class ProxylessNAS(nn.Module):
 
 def get_proxylessnas(version):
     if version == 'cpu':
-        net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
-        channels = [360]
+        # net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
+        residuals = [[1], [1, 1, 1, 1], [1, 1, 1, 1], [1, 0, 0, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
+        channels = [[24], [32, 32, 32, 32], [48, 48, 48, 48], [88, 88, 88, 88, 104, 104, 104, 104],
+                    [216, 216, 216, 216, 360]]
+        kernel_sizes = [[3], [3, 3, 3, 3], [3, 3, 3, 5], [3, 3, 3, 3, 5, 3, 3, 3], [5, 5, 5, 3, 5]]
+        expand_ratios = [[1], [6, 3, 3, 3], [6, 3, 3, 3], [6, 3, 3, 3, 6, 3, 3, 3], [6, 3, 3, 3, 6]]
         init_block_channels = 40
         final_block_channels = 1432
     elif version == 'gpu':
-        net_config_path = "../imgclsmob_data/proxyless/proxyless_gpu.config"
-        channels = [432]
+        # net_config_path = "../imgclsmob_data/proxyless/proxyless_gpu.config"
+        residuals = [[1], [1, 0, 0, 0], [1, 0, 0, 1], [1, 0, 0, 1, 1, 0, 1, 1], [1, 1, 1, 1, 1]]
+        channels = [[24], [32, 32, 32, 32], [56, 56, 56, 56], [112, 112, 112, 112, 128, 128, 128, 128],
+                    [256, 256, 256, 256, 432]]
+        kernel_sizes = [[3], [5, 3, 3, 3], [7, 3, 3, 3], [7, 5, 5, 5, 5, 3, 3, 5], [7, 7, 7, 5, 7]]
+        expand_ratios = [[1], [3, 3, 3, 3], [3, 3, 3, 3], [6, 3, 3, 3, 6, 3, 3, 3], [6, 6, 6, 6, 6]]
         init_block_channels = 40
         final_block_channels = 1728
     elif version == 'mobile':
-        net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile.config"
-        channels = [320]
+        # net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile.config"
+        residuals = [[1], [1, 1, 0, 0], [1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
+        channels = [[16], [32, 32, 32, 32], [40, 40, 40, 40], [80, 80, 80, 80, 96, 96, 96, 96],
+                    [192, 192, 192, 192, 320]]
+        kernel_sizes = [[3], [5, 3, 3, 3], [7, 3, 5, 5], [7, 5, 5, 5, 5, 5, 5, 5], [7, 7, 7, 7, 7]]
+        expand_ratios = [[1], [3, 3, 3, 3], [3, 3, 3, 3], [6, 3, 3, 3, 6, 3, 3, 3], [6, 6, 3, 3, 6]]
         init_block_channels = 32
         final_block_channels = 1280
     elif version == 'mobile14':
-        net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile_14.config"
-        channels = [448]
+        # net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile_14.config"
+        residuals = [[1], [1, 1, 0, 0], [1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
+        channels = [[24], [40, 40, 40, 40], [56, 56, 56, 56], [112, 112, 112, 112, 136, 136, 136, 136],
+                    [256, 256, 256, 256, 448]]
+        kernel_sizes = [[3], [5, 3, 3, 3], [7, 3, 5, 5], [7, 5, 5, 5, 5, 5, 5, 5], [7, 7, 7, 7, 7]]
+        expand_ratios = [[1], [3, 3, 3, 3], [3, 3, 3, 3], [6, 3, 3, 3, 6, 3, 3, 3], [6, 6, 3, 3, 6]]
         init_block_channels = 48
         final_block_channels = 1792
     else:
         raise ValueError("Unsupported proxylessnas version {}".format(version))
 
-    shortcut_list = [0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0]
+    shortcuts = [[0], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 1, 0, 1, 1, 1], [0, 1, 1, 1, 0]]
 
-    import json
-    config = json.load(open(net_config_path, 'r'))
+    # import json
+    # config = json.load(open(net_config_path, 'r'))
     net = ProxylessNAS(
-        blocks_config=config['blocks'],
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
-        shortcut_list=shortcut_list)
+        residuals=residuals,
+        shortcuts=shortcuts,
+        kernel_sizes=kernel_sizes,
+        expand_ratios=expand_ratios)
 
     return net
 

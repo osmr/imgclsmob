@@ -148,11 +148,20 @@ class ProxylessNAS(nn.Module):
             in_features=in_channels,
             out_features=num_classes)
 
+        self.set_bn_param(bn_momentum=0.1, bn_eps=1e-3)
+
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
+
+    def set_bn_param(self, bn_momentum, bn_eps):
+        for m in self.modules():
+            if isinstance(m, nn.BatchNorm2d):
+                m.momentum = bn_momentum
+                m.eps = bn_eps
+        return
 
 
 def get_proxylessnas(version):

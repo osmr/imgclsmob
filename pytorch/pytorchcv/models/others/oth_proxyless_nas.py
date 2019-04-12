@@ -920,28 +920,36 @@ def oth_proxyless_nas_cpu(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_cpu.config"
     net_config_json = json.load(open(net_config_path, 'r'))
-    return ProxylessNASNets.build_from_config(net_config_json)
+    net = ProxylessNASNets.build_from_config(net_config_json)
+    net.set_bn_param(bn_momentum=0.1, bn_eps=1e-3)
+    return net
 
 
 def oth_proxyless_nas_gpu(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_gpu.config"
     net_config_json = json.load(open(net_config_path, 'r'))
-    return ProxylessNASNets.build_from_config(net_config_json)
+    net = ProxylessNASNets.build_from_config(net_config_json)
+    net.set_bn_param(bn_momentum=0.1, bn_eps=1e-3)
+    return net
 
 
 def oth_proxyless_nas_mobile(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile.config"
     net_config_json = json.load(open(net_config_path, 'r'))
-    return ProxylessNASNets.build_from_config(net_config_json)
+    net = ProxylessNASNets.build_from_config(net_config_json)
+    net.set_bn_param(bn_momentum=0.1, bn_eps=1e-3)
+    return net
 
 
 def oth_proxyless_nas_mobile_14(pretrained=False):
     import json
     net_config_path = "../imgclsmob_data/proxyless/proxyless_mobile_14.config"
     net_config_json = json.load(open(net_config_path, 'r'))
-    return ProxylessNASNets.build_from_config(net_config_json)
+    net = ProxylessNASNets.build_from_config(net_config_json)
+    net.set_bn_param(bn_momentum=0.1, bn_eps=1e-3)
+    return net
 
 
 def _calc_width(net):

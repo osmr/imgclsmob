@@ -109,12 +109,14 @@ _models = {
     'resnet10': resnet10,
     'resnet12': resnet12,
     'resnet14': resnet14,
+    'resnetbc14b': resnetbc14b,
     'resnet16': resnet16,
     'resnet18_wd4': resnet18_wd4,
     'resnet18_wd2': resnet18_wd2,
     'resnet18_w3d4': resnet18_w3d4,
-
     'resnet18': resnet18,
+    'resnet26': resnet26,
+    'resnetbc26b': resnetbc26b,
     'resnet34': resnet34,
     'resnet50': resnet50,
     'resnet50b': resnet50b,
@@ -503,8 +505,10 @@ _models = {
 
     'xdensenet40_2_k24_bc_cifar10': xdensenet40_2_k24_bc_cifar10,
     'xdensenet40_2_k24_bc_cifar100': xdensenet40_2_k24_bc_cifar100,
+    'xdensenet40_2_k24_bc_svhn': xdensenet40_2_k24_bc_svhn,
     'xdensenet40_2_k36_bc_cifar10': xdensenet40_2_k36_bc_cifar10,
     'xdensenet40_2_k36_bc_cifar100': xdensenet40_2_k36_bc_cifar100,
+    'xdensenet40_2_k36_bc_svhn': xdensenet40_2_k36_bc_svhn,
 
     'wrn16_10_cifar10': wrn16_10_cifar10,
     'wrn16_10_cifar100': wrn16_10_cifar100,

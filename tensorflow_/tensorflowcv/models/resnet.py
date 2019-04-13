@@ -3,9 +3,10 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
-           'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b', 'res_block', 'res_bottleneck_block', 'res_unit', 'res_init_block']
+__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet16', 'resnet18_wd4', 'resnet18_wd2',
+           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnet50', 'resnet50b', 'resnet101',
+           'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'res_block', 'res_bottleneck_block',
+           'res_unit', 'res_init_block']
 
 import os
 import tensorflow as tf
@@ -363,6 +364,7 @@ class ResNet(object):
 
 
 def get_resnet(blocks,
+               bottleneck=None,
                conv1_stride=True,
                width_scale=1.0,
                model_name=None,
@@ -376,6 +378,8 @@ def get_resnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float, default 1.0
@@ -392,16 +396,24 @@ def get_resnet(blocks,
     functor
         Functor for model graph creation with extra fields.
     """
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
 
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:
         layers = [2, 1, 1, 1]
-    elif blocks == 14:
+    elif blocks == 14 and not bottleneck:
         layers = [2, 2, 1, 1]
+    elif (blocks == 14) and bottleneck:
+        layers = [1, 1, 1, 1]
     elif blocks == 16:
         layers = [2, 2, 2, 1]
     elif blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -416,19 +428,21 @@ def get_resnet(blocks,
     else:
         raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
@@ -512,6 +526,26 @@ def resnet14(**kwargs):
         Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+
+
+def resnetbc14b(**kwargs):
+    """
+    ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
+    """
+    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
 
 
 def resnet16(**kwargs):
@@ -611,6 +645,46 @@ def resnet18(**kwargs):
         Functor for model graph creation with extra fields.
     """
     return get_resnet(blocks=18, model_name="resnet18", **kwargs)
+
+
+def resnet26(**kwargs):
+    """
+    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
+    """
+    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+
+
+def resnetbc26b(**kwargs):
+    """
+    ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
+    """
+    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
 
 
 def resnet34(**kwargs):
@@ -799,12 +873,14 @@ def _test():
         resnet10,
         resnet12,
         resnet14,
+        resnetbc14b,
         resnet16,
         resnet18_wd4,
         resnet18_wd2,
         resnet18_w3d4,
-
         resnet18,
+        resnet26,
+        resnetbc26b,
         resnet34,
         resnet50,
         resnet50b,
@@ -830,11 +906,14 @@ def _test():
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)
+        assert (model != resnetbc14b or weight_count == 10064936)
         assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 3937400)  # 831096
-        assert (model != resnet18_wd2 or weight_count == 5804296)  # 3055880
-        assert (model != resnet18_w3d4 or weight_count == 8476056)  # 6675352
+        assert (model != resnet18_wd4 or weight_count == 3937400)
+        assert (model != resnet18_wd2 or weight_count == 5804296)
+        assert (model != resnet18_w3d4 or weight_count == 8476056)
         assert (model != resnet18 or weight_count == 11689512)
+        assert (model != resnet26 or weight_count == 17960232)
+        assert (model != resnetbc26b or weight_count == 15995176)
         assert (model != resnet34 or weight_count == 21797672)
         assert (model != resnet50 or weight_count == 25557032)
         assert (model != resnet50b or weight_count == 25557032)

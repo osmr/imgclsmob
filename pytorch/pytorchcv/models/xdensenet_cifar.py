@@ -1,11 +1,12 @@
 """
-    X-DenseNet for CIFAR, implemented in PyTorch.
+    X-DenseNet for CIFAR/SVHN, implemented in PyTorch.
     Original paper: 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 """
 
 __all__ = ['CIFARXDenseNet', 'xdensenet40_2_k24_bc_cifar10', 'xdensenet40_2_k24_bc_cifar100',
-           'xdensenet40_2_k36_bc_cifar10', 'xdensenet40_2_k36_bc_cifar100']
+           'xdensenet40_2_k24_bc_svhn', 'xdensenet40_2_k36_bc_cifar10', 'xdensenet40_2_k36_bc_cifar100',
+           'xdensenet40_2_k36_bc_svhn']
 
 import os
 import torch
@@ -247,6 +248,24 @@ def xdensenet40_2_k24_bc_cifar100(num_classes=100, **kwargs):
                                model_name="xdensenet40_2_k24_bc_cifar100", **kwargs)
 
 
+def xdensenet40_2_k24_bc_svhn(num_classes=10, **kwargs):
+    """
+    X-DenseNet-BC-40-2 (k=24) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    Theory,' https://arxiv.org/abs/1711.08757.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=24, bottleneck=True,
+                               model_name="xdensenet40_2_k24_bc_svhn", **kwargs)
+
+
 def xdensenet40_2_k36_bc_cifar10(num_classes=10, **kwargs):
     """
     X-DenseNet-BC-40-2 (k=36) model for CIFAR-10 from 'Deep Expander Networks: Efficient Deep Networks from Graph
@@ -283,6 +302,24 @@ def xdensenet40_2_k36_bc_cifar100(num_classes=100, **kwargs):
                                model_name="xdensenet40_2_k36_bc_cifar100", **kwargs)
 
 
+def xdensenet40_2_k36_bc_svhn(num_classes=10, **kwargs):
+    """
+    X-DenseNet-BC-40-2 (k=36) model for SVHN from 'Deep Expander Networks: Efficient Deep Networks from Graph
+    Theory,' https://arxiv.org/abs/1711.08757.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_xdensenet_cifar(num_classes=num_classes, blocks=40, growth_rate=36, bottleneck=True,
+                               model_name="xdensenet40_2_k36_bc_svhn", **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -301,8 +338,10 @@ def _test():
     models = [
         (xdensenet40_2_k24_bc_cifar10, 10),
         (xdensenet40_2_k24_bc_cifar100, 100),
+        (xdensenet40_2_k24_bc_svhn, 10),
         (xdensenet40_2_k36_bc_cifar10, 10),
         (xdensenet40_2_k36_bc_cifar100, 100),
+        (xdensenet40_2_k36_bc_svhn, 10),
     ]
 
     for model, num_classes in models:
@@ -315,8 +354,10 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != xdensenet40_2_k24_bc_cifar10 or weight_count == 690346)
         assert (model != xdensenet40_2_k24_bc_cifar100 or weight_count == 714196)
+        assert (model != xdensenet40_2_k24_bc_svhn or weight_count == 690346)
         assert (model != xdensenet40_2_k36_bc_cifar10 or weight_count == 1542682)
         assert (model != xdensenet40_2_k36_bc_cifar100 or weight_count == 1578412)
+        assert (model != xdensenet40_2_k36_bc_svhn or weight_count == 1542682)
 
         x = Variable(torch.randn(1, 3, 32, 32))
         y = net(x)

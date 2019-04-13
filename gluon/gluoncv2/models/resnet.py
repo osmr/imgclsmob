@@ -3,9 +3,9 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnet16', 'resnet18_wd4', 'resnet18_wd2', 'resnet18_w3d4',
-           'resnet18', 'resnet34', 'resnet50', 'resnet50b', 'resnet101', 'resnet101b', 'resnet152', 'resnet152b',
-           'resnet200', 'resnet200b', 'resnetbn14b', 'resnet26', 'resnetbn26b', 'ResBlock', 'ResBottleneck', 'ResUnit',
+__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet16', 'resnet18_wd4', 'resnet18_wd2',
+           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnet50', 'resnet50b', 'resnet101',
+           'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'ResBlock', 'ResBottleneck', 'ResUnit',
            'ResInitBlock']
 
 import os
@@ -455,6 +455,23 @@ def resnet14(**kwargs):
     return get_resnet(blocks=14, model_name="resnet14", **kwargs)
 
 
+def resnetbc14b(**kwargs):
+    """
+    ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
+
+
 def resnet16(**kwargs):
     """
     ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
@@ -537,6 +554,40 @@ def resnet18(**kwargs):
         Location for keeping the model parameters.
     """
     return get_resnet(blocks=18, model_name="resnet18", **kwargs)
+
+
+def resnet26(**kwargs):
+    """
+    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+
+
+def resnetbc26b(**kwargs):
+    """
+    ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
 
 
 def resnet34(**kwargs):
@@ -688,57 +739,6 @@ def resnet200b(**kwargs):
     return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
 
 
-def resnetbn14b(**kwargs):
-    """
-    ResNet-BN-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbn14b", **kwargs)
-
-
-def resnet26(**kwargs):
-    """
-    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
-
-
-def resnetbn26b(**kwargs):
-    """
-    ResNet-BN-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbn26b", **kwargs)
-
-
 def _test():
     import numpy as np
     import mxnet as mx
@@ -749,12 +749,14 @@ def _test():
         resnet10,
         resnet12,
         resnet14,
+        resnetbc14b,
         resnet16,
         resnet18_wd4,
         resnet18_wd2,
         resnet18_w3d4,
-
         resnet18,
+        resnet26,
+        resnetbc26b,
         resnet34,
         resnet50,
         resnet50b,
@@ -764,10 +766,6 @@ def _test():
         resnet152b,
         resnet200,
         resnet200b,
-
-        resnetbn14b,
-        resnet26,
-        resnetbn26b,
     ]
 
     for model in models:
@@ -789,11 +787,14 @@ def _test():
         assert (model != resnet10 or weight_count == 5418792)
         assert (model != resnet12 or weight_count == 5492776)
         assert (model != resnet14 or weight_count == 5788200)
+        assert (model != resnetbc14b or weight_count == 10064936)
         assert (model != resnet16 or weight_count == 6968872)
         assert (model != resnet18_wd4 or weight_count == 3937400)
         assert (model != resnet18_wd2 or weight_count == 5804296)
         assert (model != resnet18_w3d4 or weight_count == 8476056)
         assert (model != resnet18 or weight_count == 11689512)
+        assert (model != resnet26 or weight_count == 17960232)
+        assert (model != resnetbc26b or weight_count == 15995176)
         assert (model != resnet34 or weight_count == 21797672)
         assert (model != resnet50 or weight_count == 25557032)
         assert (model != resnet50b or weight_count == 25557032)
@@ -803,9 +804,6 @@ def _test():
         assert (model != resnet152b or weight_count == 60192808)
         assert (model != resnet200 or weight_count == 64673832)
         assert (model != resnet200b or weight_count == 64673832)
-        assert (model != resnetbn14b or weight_count == 10064936)
-        assert (model != resnet26 or weight_count == 17960232)
-        assert (model != resnetbn26b or weight_count == 15995176)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

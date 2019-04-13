@@ -3,10 +3,11 @@
     Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
-__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnet16', 'preresnet18_wd4',
-           'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet34', 'preresnet50', 'preresnet50b',
-           'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b', 'preresnet200', 'preresnet200b',
-           'preresnet269b', 'PreResBlock', 'PreResBottleneck', 'PreResUnit', 'PreResInitBlock', 'PreResActivation']
+__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetbc14b', 'preresnet16', 'preresnet18_wd4',
+           'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet26', 'preresnetbc26b', 'preresnet34',
+           'preresnet50', 'preresnet50b', 'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b',
+           'preresnet200', 'preresnet200b', 'preresnet269b', 'PreResBlock', 'PreResBottleneck', 'PreResUnit',
+           'PreResInitBlock', 'PreResActivation']
 
 import os
 from mxnet import cpu
@@ -315,6 +316,7 @@ class PreResNet(HybridBlock):
 
 
 def get_preresnet(blocks,
+                  bottleneck=None,
                   conv1_stride=True,
                   width_scale=1.0,
                   model_name=None,
@@ -329,6 +331,8 @@ def get_preresnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float, default 1.0
@@ -342,16 +346,24 @@ def get_preresnet(blocks,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
 
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:
         layers = [2, 1, 1, 1]
-    elif blocks == 14:
+    elif blocks == 14 and not bottleneck:
         layers = [2, 2, 1, 1]
+    elif (blocks == 14) and bottleneck:
+        layers = [1, 1, 1, 1]
     elif blocks == 16:
         layers = [2, 2, 2, 1]
     elif blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
@@ -368,19 +380,21 @@ def get_preresnet(blocks,
     else:
         raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
     if width_scale != 1.0:
-        # channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
         channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
@@ -454,6 +468,23 @@ def preresnet14(**kwargs):
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
+
+
+def preresnetbc14b(**kwargs):
+    """
+    PreResNet-BC-14b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="preresnetbc14b", **kwargs)
 
 
 def preresnet16(**kwargs):
@@ -538,6 +569,40 @@ def preresnet18(**kwargs):
         Location for keeping the model parameters.
     """
     return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
+
+
+def preresnet26(**kwargs):
+    """
+    PreResNet-26 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=26, bottleneck=False, model_name="preresnet26", **kwargs)
+
+
+def preresnetbc26b(**kwargs):
+    """
+    PreResNet-BC-26b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="preresnetbc26b", **kwargs)
 
 
 def preresnet34(**kwargs):
@@ -715,12 +780,14 @@ def _test():
         preresnet10,
         preresnet12,
         preresnet14,
+        preresnetbc14b,
         preresnet16,
         preresnet18_wd4,
         preresnet18_wd2,
         preresnet18_w3d4,
-
         preresnet18,
+        preresnet26,
+        preresnetbc26b,
         preresnet34,
         preresnet50,
         preresnet50b,
@@ -752,11 +819,14 @@ def _test():
         assert (model != preresnet10 or weight_count == 5417128)
         assert (model != preresnet12 or weight_count == 5491112)
         assert (model != preresnet14 or weight_count == 5786536)
+        assert (model != preresnetbc14b or weight_count == 10057384)
         assert (model != preresnet16 or weight_count == 6967208)
         assert (model != preresnet18_wd4 or weight_count == 3935960)
         assert (model != preresnet18_wd2 or weight_count == 5802440)
         assert (model != preresnet18_w3d4 or weight_count == 8473784)
         assert (model != preresnet18 or weight_count == 11687848)
+        assert (model != preresnet26 or weight_count == 17958568)
+        assert (model != preresnetbc26b or weight_count == 15987624)
         assert (model != preresnet34 or weight_count == 21796008)
         assert (model != preresnet50 or weight_count == 25549480)
         assert (model != preresnet50b or weight_count == 25549480)

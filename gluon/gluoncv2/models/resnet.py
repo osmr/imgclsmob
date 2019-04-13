@@ -362,6 +362,8 @@ def get_resnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
+    elif blocks == 269:
+        layers = [3, 30, 48, 8]
     else:
         raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
 

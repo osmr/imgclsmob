@@ -30,7 +30,7 @@ def add_dataset_parser_arguments(parser):
     parser.add_argument(
         '--num-classes',
         type=int,
-        default=1000,
+        default=200,
         help='number of classes')
     parser.add_argument(
         '--in-channels',

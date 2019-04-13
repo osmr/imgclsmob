@@ -76,7 +76,7 @@ class CUB200_2011(dataset.Dataset):
         subset_df = df[df.split_flag == split_flag]
 
         self.image_ids = subset_df["image_id"].values.astype(np.int32)
-        self.class_ids = subset_df["class_id"].values.astype(np.uint8)
+        self.class_ids = subset_df["class_id"].values.astype(np.int32) - 1
         self.image_file_names = subset_df["image_path"].values.astype(np.unicode)
 
         images_dir_name = "images"

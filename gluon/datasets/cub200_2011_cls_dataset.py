@@ -70,8 +70,7 @@ class CUB200_2011(dataset.Dataset):
             index_col=False,
             names=["image_id", "split_flag"],
             dtype={"image_id": np.int32, "split_flag": np.uint8})
-        df = images_df.join(class_df.set_index("image_id"), how='inner')
-        df = df.join(split_df.set_index("image_id"), how='inner')
+        df = images_df.join(class_df, rsuffix="_class_df").join(split_df, rsuffix="_split_df")
         split_flag = 1 if train else 0
         subset_df = df[df.split_flag == split_flag]
 

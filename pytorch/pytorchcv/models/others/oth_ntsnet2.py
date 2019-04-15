@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
-from oth_nts_resnet import resnet50
+from .oth_nts_resnet import resnet50
 
 __all__ = ['oth_ntsnet']
 

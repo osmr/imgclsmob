@@ -1,8 +1,7 @@
 import os
 import numpy as np
-import mxnet as mx
 from PIL import Image
-from .seg_dataset import SegDataset
+from pytorch.datasets.seg_dataset import SegDataset
 
 
 class CityscapesSegDataset(SegDataset):
@@ -105,7 +104,7 @@ class CityscapesSegDataset(SegDataset):
         np_mask = np.array(mask).astype(np.int32)
         np_mask = CityscapesSegDataset._class_to_index(np_mask)
         np_mask[np_mask == -1] = CityscapesSegDataset.vague_idx
-        return mx.nd.array(np_mask, mx.cpu())
+        return np_mask
 
     def __len__(self):
         return len(self.images)

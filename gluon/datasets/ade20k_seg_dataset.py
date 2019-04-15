@@ -2,7 +2,7 @@ import os
 import numpy as np
 import mxnet as mx
 from PIL import Image
-from .seg_dataset import SegDataset
+from gluon.datasets.seg_dataset import SegDataset
 
 
 class ADE20KSegDataset(SegDataset):

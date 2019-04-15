@@ -8,10 +8,10 @@ __all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_test_data_source', '
 from tqdm import tqdm
 from mxnet import gluon
 from mxnet.gluon.data.vision import transforms
-from .voc_seg_dataset import VOCSegDataset
-from .ade20k_seg_dataset import ADE20KSegDataset
-from .cityscapes_seg_dataset import CityscapesSegDataset
-from .coco_seg_dataset import COCOSegDataset
+from gluon.datasets.voc_seg_dataset import VOCSegDataset
+from gluon.datasets.ade20k_seg_dataset import ADE20KSegDataset
+from gluon.datasets.cityscapes_seg_dataset import CityscapesSegDataset
+from gluon.datasets.coco_seg_dataset import COCOSegDataset
 # from gluoncv.data.mscoco.segmentation import COCOSegmentation
 
 

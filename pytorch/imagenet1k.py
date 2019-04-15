@@ -132,10 +132,12 @@ def get_train_data_loader(data_dir,
             mean=mean_rgb,
             std=std_rgb)])
 
+    dataset = datasets.ImageFolder(
+        root=os.path.join(data_dir, 'train'),
+        transform=transform_train)
+
     train_loader = torch.utils.data.DataLoader(
-        dataset=datasets.ImageFolder(
-            root=os.path.join(data_dir, 'train'),
-            transform=transform_train),
+        dataset=dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,

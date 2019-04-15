@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from PIL import Image
 from tqdm import trange
-from .seg_dataset import SegDataset
+from pytorch.datasets.seg_dataset import SegDataset
 
 
 class COCOSegDataset(SegDataset):
@@ -48,30 +48,18 @@ class COCOSegDataset(SegDataset):
 
         self.transform = transform
 
-        self.add_getter('img', self._get_image)
-        self.add_getter('label', self._get_label)
-
-    def _get_image(self, i):
-        image_idx = int(self.idx[i])
+    def __getitem__(self, index):
+        image_idx = int(self.idx[index])
         img_metadata = self.coco.loadImgs(image_idx)[0]
         image_file_name = img_metadata["file_name"]
 
         image_file_path = os.path.join(self.image_dir_path, image_file_name)
         image = Image.open(image_file_path).convert("RGB")
-
-        assert (self.mode in ("test", "demo"))
-        image = self._img_transform(image)
-        if self.transform is not None:
-            image = self.transform(image)
-        return image
-
-    def _get_label(self, i):
         if self.mode == "demo":
-            return os.path.basename(self.images[i])
-        assert (self.mode == "test")
-
-        image_idx = int(self.idx[i])
-        img_metadata = self.coco.loadImgs(image_idx)[0]
+            image = self._img_transform(image)
+            if self.transform is not None:
+                image = self.transform(image)
+            return image, os.path.basename(self.images[index])
 
         coco_target = self.coco.loadAnns(self.coco.getAnnIds(imgIds=image_idx))
         mask = Image.fromarray(self._gen_seg_mask(
@@ -79,8 +67,18 @@ class COCOSegDataset(SegDataset):
             img_metadata["height"],
             img_metadata["width"]))
 
-        mask = self._mask_transform(mask)
-        return mask
+        if self.mode == "train":
+            image, mask = self._sync_transform(image, mask)
+        elif self.mode == "val":
+            image, mask = self._val_sync_transform(image, mask)
+        else:
+            assert (self.mode == "test")
+            image, mask = self._img_transform(image), self._mask_transform(mask)
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image, mask
 
     def _gen_seg_mask(self, target, h, w):
         cat_list = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]

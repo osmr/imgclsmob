@@ -1,7 +1,8 @@
 import os
 import numpy as np
+import mxnet as mx
 from PIL import Image
-from .seg_dataset import SegDataset
+from gluon.datasets.seg_dataset import SegDataset
 
 
 class CityscapesSegDataset(SegDataset):
@@ -55,24 +56,27 @@ class CityscapesSegDataset(SegDataset):
         if len(self.images) == 0:
             raise RuntimeError("Found 0 images in subfolders of: {}\n".format(image_dir_path))
 
-        self.add_getter('img', self._get_image)
-        self.add_getter('label', self._get_label)
+    def __getitem__(self, index):
+        image = Image.open(self.images[index]).convert("RGB")
+        if self.mode == "demo":
+            image = self._img_transform(image)
+            if self.transform is not None:
+                image = self.transform(image)
+            return image, os.path.basename(self.images[index])
+        mask = Image.open(self.masks[index])
 
-    def _get_image(self, i):
-        image = Image.open(self.images[i]).convert("RGB")
-        assert (self.mode in ("test", "demo"))
-        image = self._img_transform(image)
+        if self.mode == "train":
+            image, mask = self._sync_transform(image, mask)
+        elif self.mode == "val":
+            image, mask = self._val_sync_transform(image, mask)
+        else:
+            assert (self.mode == "test")
+            image = self._img_transform(image)
+            mask = self._mask_transform(mask)
+
         if self.transform is not None:
             image = self.transform(image)
-        return image
-
-    def _get_label(self, i):
-        if self.mode == "demo":
-            return os.path.basename(self.images[i])
-        assert (self.mode == "test")
-        mask = Image.open(self.masks[i])
-        mask = self._mask_transform(mask)
-        return mask
+        return image, mask
 
     classes = 19
     vague_idx = 19
@@ -101,7 +105,7 @@ class CityscapesSegDataset(SegDataset):
         np_mask = np.array(mask).astype(np.int32)
         np_mask = CityscapesSegDataset._class_to_index(np_mask)
         np_mask[np_mask == -1] = CityscapesSegDataset.vague_idx
-        return np_mask
+        return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):
         return len(self.images)

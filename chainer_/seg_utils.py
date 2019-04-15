@@ -7,10 +7,10 @@ __all__ = ['add_dataset_parser_arguments', 'get_test_dataset', 'get_metainfo', '
 import numpy as np
 import chainer
 from chainer import Chain
-from .voc_seg_dataset import VOCSegDataset
-from .ade20k_seg_dataset import ADE20KSegDataset
-from .cityscapes_seg_dataset import CityscapesSegDataset
-from .coco_seg_dataset import COCOSegDataset
+from chainer_.datasets.voc_seg_dataset import VOCSegDataset
+from chainer_.datasets.ade20k_seg_dataset import ADE20KSegDataset
+from chainer_.datasets.cityscapes_seg_dataset import CityscapesSegDataset
+from chainer_.datasets.coco_seg_dataset import COCOSegDataset
 
 
 def add_dataset_parser_arguments(parser,

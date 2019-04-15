@@ -1,7 +1,8 @@
 import os
 import numpy as np
+import mxnet as mx
 from PIL import Image
-from .seg_dataset import SegDataset
+from gluon.datasets.seg_dataset import SegDataset
 
 
 class VOCSegDataset(SegDataset):
@@ -53,27 +54,27 @@ class VOCSegDataset(SegDataset):
 
         assert (len(self.images) == len(self.masks))
 
-        # self.images = self.images[:10]
-        # self.masks = self.masks[:10]
+    def __getitem__(self, index):
+        image = Image.open(self.images[index]).convert("RGB")
+        if self.mode == "demo":
+            image = self._img_transform(image)
+            if self.transform is not None:
+                image = self.transform(image)
+            return image, os.path.basename(self.images[index])
+        mask = Image.open(self.masks[index])
 
-        self.add_getter('img', self._get_image)
-        self.add_getter('label', self._get_label)
+        if self.mode == "train":
+            image, mask = self._sync_transform(image, mask)
+        elif self.mode == "val":
+            image, mask = self._val_sync_transform(image, mask)
+        else:
+            assert self.mode == "test"
+            image, mask = self._img_transform(image), self._mask_transform(mask)
 
-    def _get_image(self, i):
-        image = Image.open(self.images[i]).convert("RGB")
-        assert (self.mode in ("test", "demo"))
-        image = self._img_transform(image)
         if self.transform is not None:
             image = self.transform(image)
-        return image
 
-    def _get_label(self, i):
-        if self.mode == "demo":
-            return os.path.basename(self.images[i])
-        assert (self.mode == "test")
-        mask = Image.open(self.masks[i])
-        mask = self._mask_transform(mask)
-        return mask
+        return image, mask
 
     classes = 21
     vague_idx = 255
@@ -85,7 +86,7 @@ class VOCSegDataset(SegDataset):
     def _mask_transform(mask):
         np_mask = np.array(mask).astype(np.int32)
         # np_mask[np_mask == 255] = VOCSegDataset.vague_idx
-        return np_mask
+        return mx.nd.array(np_mask, mx.cpu())
 
     def __len__(self):
         return len(self.images)

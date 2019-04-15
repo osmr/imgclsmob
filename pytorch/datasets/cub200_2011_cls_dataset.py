@@ -5,11 +5,11 @@
 import os
 import numpy as np
 import pandas as pd
-import mxnet as mx
-from mxnet.gluon.data import dataset
+from PIL import Image
+import torch.utils.data as data
 
 
-class CUB200_2011(dataset.Dataset):
+class CUB200_2011(data.Dataset):
     """
     Load the CUB-200-2011 classification dataset.
 
@@ -18,17 +18,20 @@ class CUB200_2011(dataset.Dataset):
 
     Parameters
     ----------
-    root : str, default '~/.mxnet/datasets/CUB_200_2011'
+    root : str, default '~/.torch/datasets/CUB_200_2011'
         Path to the folder stored the dataset.
     train : bool, default True
         Whether to load the training or validation set.
     transform : function, default None
-        A function that takes data and label and transforms them.
+        A function that takes data and transforms it.
+    target_transform : function, default None
+        A function that takes label and transforms it.
     """
     def __init__(self,
-                 root=os.path.join("~", ".mxnet", "datasets", "CUB_200_2011"),
+                 root=os.path.join("~", ".torch", "datasets", "CUB_200_2011"),
                  train=True,
-                 transform=None):
+                 transform=None,
+                 target_transform=None):
         super(CUB200_2011, self).__init__()
 
         root_dir_path = os.path.expanduser(root)
@@ -70,8 +73,7 @@ class CUB200_2011(dataset.Dataset):
             index_col=False,
             names=["image_id", "split_flag"],
             dtype={"image_id": np.int32, "split_flag": np.uint8})
-        df = images_df.join(class_df.set_index("image_id"), how='inner')
-        df = df.join(split_df.set_index("image_id"), how='inner')
+        df = images_df.join(class_df, rsuffix="_class_df").join(split_df, rsuffix="_split_df")
         split_flag = 1 if train else 0
         subset_df = df[df.split_flag == split_flag]
 
@@ -84,14 +86,19 @@ class CUB200_2011(dataset.Dataset):
         assert os.path.exists(self.images_dir_path)
 
         self._transform = transform
+        self._target_transform = target_transform
 
     def __getitem__(self, index):
         image_file_name = self.image_file_names[index]
         image_file_path = os.path.join(self.images_dir_path, image_file_name)
-        img = mx.image.imread(image_file_path, flag=1)
-        label = self.class_ids[index]
+        img = Image.open(image_file_path).convert("RGB")
+        label = int(self.class_ids[index])
+
         if self._transform is not None:
-            return self._transform(img, label)
+            img = self._transform(img)
+        if self._target_transform is not None:
+            label = self._target_transform(label)
+
         return img, label
 
     def __len__(self):

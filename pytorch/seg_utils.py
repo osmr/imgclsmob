@@ -7,10 +7,10 @@ __all__ = ['add_dataset_parser_arguments', 'get_test_data_loader', 'validate1', 
 from tqdm import tqdm
 import torch.utils.data
 import torchvision.transforms as transforms
-from .voc_seg_dataset import VOCSegDataset
-from .ade20k_seg_dataset import ADE20KSegDataset
-from .cityscapes_seg_dataset import CityscapesSegDataset
-from .coco_seg_dataset import COCOSegDataset
+from pytorch.datasets.voc_seg_dataset import VOCSegDataset
+from pytorch.datasets.ade20k_seg_dataset import ADE20KSegDataset
+from pytorch.datasets.cityscapes_seg_dataset import CityscapesSegDataset
+from pytorch.datasets.coco_seg_dataset import COCOSegDataset
 # import torchvision.datasets as datasets
 
 

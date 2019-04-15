@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
-from .seg_dataset import SegDataset
+from chainer_.seg_dataset import SegDataset
 
 
 class VOCSegDataset(SegDataset):
@@ -53,27 +53,27 @@ class VOCSegDataset(SegDataset):
 
         assert (len(self.images) == len(self.masks))
 
-    def __getitem__(self, index):
-        image = Image.open(self.images[index]).convert("RGB")
-        if self.mode == "demo":
-            image = self._img_transform(image)
-            if self.transform is not None:
-                image = self.transform(image)
-            return image, os.path.basename(self.images[index])
-        mask = Image.open(self.masks[index])
+        # self.images = self.images[:10]
+        # self.masks = self.masks[:10]
 
-        if self.mode == "train":
-            image, mask = self._sync_transform(image, mask)
-        elif self.mode == "val":
-            image, mask = self._val_sync_transform(image, mask)
-        else:
-            assert self.mode == "test"
-            image, mask = self._img_transform(image), self._mask_transform(mask)
+        self.add_getter('img', self._get_image)
+        self.add_getter('label', self._get_label)
 
+    def _get_image(self, i):
+        image = Image.open(self.images[i]).convert("RGB")
+        assert (self.mode in ("test", "demo"))
+        image = self._img_transform(image)
         if self.transform is not None:
             image = self.transform(image)
+        return image
 
-        return image, mask
+    def _get_label(self, i):
+        if self.mode == "demo":
+            return os.path.basename(self.images[i])
+        assert (self.mode == "test")
+        mask = Image.open(self.masks[i])
+        mask = self._mask_transform(mask)
+        return mask
 
     classes = 21
     vague_idx = 255

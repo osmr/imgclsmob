@@ -4,7 +4,7 @@ import numpy as np
 import mxnet as mx
 from PIL import Image
 from tqdm import trange
-from .seg_dataset import SegDataset
+from gluon.datasets.seg_dataset import SegDataset
 
 
 class COCOSegDataset(SegDataset):

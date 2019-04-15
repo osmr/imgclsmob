@@ -83,7 +83,7 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
-from .models.others.oth_ntsnet import *
+from .models.others.oth_ntsnet2 import *
 
 __all__ = ['get_model']
 

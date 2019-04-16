@@ -2,25 +2,13 @@ import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
-# from torchvision.models.resnet import resnet50
-from resnet import resnet50
+from resnet import resnet50b
+from common import conv1x1, conv3x3
 
-__all__ = ['oth_ntsnet']
-
-
-INPUT_SIZE = (448, 448)  # (w, h)
-CAT_NUM = 4
-PROPOSAL_NUM = 6
+__all__ = ['ntsnet']
 
 
-_default_anchors_setting = (
-    dict(layer='p3', stride=32, size=48, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
-    dict(layer='p4', stride=64, size=96, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
-    dict(layer='p5', stride=128, size=192, scale=[1, 2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
-)
-
-
-def generate_default_anchor_maps(anchors_setting=None, input_shape=INPUT_SIZE):
+def generate_default_anchor_maps(anchors_setting=None, input_shape=(448, 448)):
     """
     generate default anchor
 
@@ -31,6 +19,12 @@ def generate_default_anchor_maps(anchors_setting=None, input_shape=INPUT_SIZE):
              anchor_area: # anchors * 1 (area)
     """
     if anchors_setting is None:
+        _default_anchors_setting = (
+            dict(layer='p3', stride=32, size=48, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
+            dict(layer='p4', stride=64, size=96, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
+            dict(layer='p5', stride=128, size=192, scale=[1, 2 ** (1. / 3.), 2 ** (2. / 3.)],
+                 aspect_ratio=[0.667, 1, 1.5]),
+        )
         anchors_setting = _default_anchors_setting
 
     center_anchors = np.zeros((0, 4), dtype=np.float32)
@@ -73,9 +67,12 @@ def generate_default_anchor_maps(anchors_setting=None, input_shape=INPUT_SIZE):
     return center_anchors, edge_anchors, anchor_areas
 
 
-def hard_nms(cdds, topn=10, iou_thresh=0.25):
-    if not (type(cdds).__module__ == 'numpy' and len(cdds.shape) == 2 and cdds.shape[1] >= 5):
-        raise TypeError('edge_box_map should be N * 5+ ndarray')
+def hard_nms(cdds,
+             top_n=10,
+             iou_thresh=0.25):
+    assert (type(cdds) == np.ndarray)
+    assert (len(cdds.shape) == 2)
+    assert (cdds.shape[1] >= 5)
 
     cdds = cdds.copy()
     indices = np.argsort(cdds[:, 0])
@@ -87,7 +84,7 @@ def hard_nms(cdds, topn=10, iou_thresh=0.25):
     while res.any():
         cdd = res[-1]
         cdd_results.append(cdd)
-        if len(cdd_results) == topn:
+        if len(cdd_results) == top_n:
             return np.array(cdd_results)
         res = res[:-1]
 
@@ -103,25 +100,65 @@ def hard_nms(cdds, topn=10, iou_thresh=0.25):
     return np.array(cdd_results)
 
 
+class ProposalBlock(nn.Module):
+    """
+    Proposal block for Proposal network.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride):
+        super(ProposalBlock, self).__init__()
+        mid_channels = 128
+
+        self.down_conv = conv3x3(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            stride=stride,
+            bias=True)
+        self.activ = nn.ReLU(inplace=False)
+        self.tidy_conv = conv1x1(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            bias=True)
+
+    def forward(self, x):
+        y = self.down_conv(x)
+        y = self.activ(y)
+        z = self.tidy_conv(y)
+        z = z.view(z.size(0), -1)
+        return z, y
+
+
 class ProposalNet(nn.Module):
     def __init__(self):
         super(ProposalNet, self).__init__()
-        self.down1 = nn.Conv2d(2048, 128, 3, 1, 1)
-        self.down2 = nn.Conv2d(128, 128, 3, 2, 1)
-        self.down3 = nn.Conv2d(128, 128, 3, 2, 1)
-        self.ReLU = nn.ReLU()
-        self.tidy1 = nn.Conv2d(128, 6, 1, 1, 0)
-        self.tidy2 = nn.Conv2d(128, 6, 1, 1, 0)
-        self.tidy3 = nn.Conv2d(128, 9, 1, 1, 0)
+        self.branch1 = ProposalBlock(
+            in_channels=2048,
+            out_channels=6,
+            stride=1)
+        self.branch2 = ProposalBlock(
+            in_channels=128,
+            out_channels=6,
+            stride=2)
+        self.branch3 = ProposalBlock(
+            in_channels=128,
+            out_channels=9,
+            stride=2)
 
     def forward(self, x):
-        batch_size = x.size(0)
-        d1 = self.ReLU(self.down1(x))
-        d2 = self.ReLU(self.down2(d1))
-        d3 = self.ReLU(self.down3(d2))
-        t1 = self.tidy1(d1).view(batch_size, -1)
-        t2 = self.tidy2(d2).view(batch_size, -1)
-        t3 = self.tidy3(d3).view(batch_size, -1)
+        t1, x = self.branch1(x)
+        t2, x = self.branch2(x)
+        t3, _ = self.branch3(x)
         return torch.cat((t1, t2, t3), dim=1)
 
 
@@ -136,77 +173,85 @@ class Flatten(nn.Module):
 
 class NTSNet(nn.Module):
     def __init__(self,
-                 topN=4,
-                 full_output=False):
+                 backbone,
+                 top_n=4,
+                 aux=False):
         super(NTSNet, self).__init__()
-        self.topN = topN
+        self.top_n = top_n
+        self.aux = aux
+        self.CAT_NUM = 4
+
         _, edge_anchors, _ = generate_default_anchor_maps()
-        self.pad_side = 224
         self.edge_anchors = (edge_anchors + 224).astype(np.int)
-        self.full_output = full_output
+        self.edge_anchors = np.concatenate(
+            (self.edge_anchors.copy(), np.arange(0, len(self.edge_anchors)).reshape(-1, 1)), axis=1)
 
-        self.pretrained_model = resnet50(pretrained=False).features
-        del self.pretrained_model[-1]
-        self.pretrained_model_tail = nn.Sequential()
-        self.pretrained_model_tail.add_module("final_pool", nn.AdaptiveAvgPool2d(1))
-        self.pretrained_model_tail.add_module("flatten", Flatten())
-        self.pretrained_model_tail.add_module("dropout", nn.Dropout(p=0.5))
-        self.pretrained_model_fc = nn.Linear(512 * 4, 200)
+        self.backbone = backbone
 
-        # self.pretrained_model_avgpool = nn.AdaptiveAvgPool2d(1)
-        # self.pretrained_model.avgpool = nn.AdaptiveAvgPool2d(1)
-        # self.pretrained_model.fc = nn.Linear(512 * 4, 200)
+        self.backbone_tail = nn.Sequential()
+        self.backbone_tail.add_module("final_pool", nn.AdaptiveAvgPool2d(1))
+        self.backbone_tail.add_module("flatten", Flatten())
+        self.backbone_tail.add_module("dropout", nn.Dropout(p=0.5))
+        self.backbone_classifier = nn.Linear(512 * 4, 200)
+
+        pad_side = 224
+        self.pad = nn.ZeroPad2d(padding=(pad_side, pad_side, pad_side, pad_side))
 
         self.proposal_net = ProposalNet()
-        self.concat_net = nn.Linear(2048 * (CAT_NUM + 1), 200)
+        self.concat_net = nn.Linear(2048 * (self.CAT_NUM + 1), 200)
         self.partcls_net = nn.Linear(512 * 4, 200)
 
     def forward(self, x):
-        # resnet_out, rpn_feature, feature = self.pretrained_model(x)
-        rpn_feature = self.pretrained_model(x)
-        feature = self.pretrained_model_tail(rpn_feature)
-        resnet_out = self.pretrained_model_fc(feature)
+        raw_pre_features = self.backbone(x)
 
-        x_pad = F.pad(x, (self.pad_side, self.pad_side, self.pad_side, self.pad_side), mode='constant', value=0)
-        batch = x.size(0)
-        # we will reshape rpn to shape: batch * nb_anchor
-        rpn_score = self.proposal_net(rpn_feature.detach())
-        all_cdds = [
-            np.concatenate((x.reshape(-1, 1), self.edge_anchors.copy(), np.arange(0, len(x)).reshape(-1, 1)), axis=1)
-            for x in rpn_score.data.cpu().numpy()]
-        top_n_cdds = [hard_nms(x, topn=self.topN, iou_thresh=0.25) for x in all_cdds]
+        rpn_score = self.proposal_net(raw_pre_features)
+        all_cdds = [np.concatenate((y.reshape(-1, 1), self.edge_anchors.copy()), axis=1)
+                    for y in rpn_score.detach().numpy()]
+        top_n_cdds = [hard_nms(y, top_n=self.top_n, iou_thresh=0.25) for y in all_cdds]
         top_n_cdds = np.array(top_n_cdds)
         top_n_index = top_n_cdds[:, :, -1].astype(np.int)
         top_n_index = torch.from_numpy(top_n_index).long().to(x.device)
         top_n_prob = torch.gather(rpn_score, dim=1, index=top_n_index)
-        part_imgs = torch.zeros([batch, self.topN, 3, 224, 224]).to(x.device)
-        for i in range(batch):
-            for j in range(self.topN):
-                [y0, x0, y1, x1] = top_n_cdds[i][j, 1:5].astype(np.int)
-                part_imgs[i:i + 1, j] = F.interpolate(x_pad[i:i + 1, :, y0:y1, x0:x1], size=(224, 224), mode='bilinear',
-                                                      align_corners=True)
-        part_imgs = part_imgs.view(batch * self.topN, 3, 224, 224)
-        # _, _, part_features = self.pretrained_model(part_imgs.detach())
-        x_f2 = self.pretrained_model(part_imgs.detach())
-        part_features = self.pretrained_model_tail(x_f2)
 
-        part_feature = part_features.view(batch, self.topN, -1)
-        part_feature = part_feature[:, :CAT_NUM, ...].contiguous()
-        part_feature = part_feature.view(batch, -1)
+        batch = x.size(0)
+        part_imgs = torch.zeros([batch, self.top_n, 3, 224, 224]).to(x.device)
+        x_pad = self.pad(x)
+        for i in range(batch):
+            for j in range(self.top_n):
+                [y0, x0, y1, x1] = top_n_cdds[i][j, 1:5].astype(np.int)
+                part_imgs[i:i + 1, j] = F.interpolate(
+                    x_pad[i:i + 1, :, y0:y1, x0:x1],
+                    size=(224, 224),
+                    mode="bilinear",
+                    align_corners=True)
+        part_imgs = part_imgs.view(batch * self.top_n, 3, 224, 224)
+        part_features = self.backbone_tail(self.backbone(part_imgs.detach()))
+
+        part_features = part_features.view(batch, self.top_n, -1)
+        part_features = part_features[:, :self.CAT_NUM, ...].contiguous()
+        part_features = part_features.view(batch, -1)
+
+        raw_features = self.backbone_tail(raw_pre_features.detach())
+
         # concat_logits have the shape: B*200
-        concat_out = torch.cat([part_feature, feature], dim=1)
+        concat_out = torch.cat([part_features, raw_features], dim=1)
         concat_logits = self.concat_net(concat_out)
-        raw_logits = resnet_out
-        # part_logits have the shape: B*N*200
-        part_logits = self.partcls_net(part_features).view(batch, self.topN, -1)
-        if self.full_output:
-            return [raw_logits, concat_logits, part_logits, top_n_index, top_n_prob]
+
+        if self.aux:
+            raw_logits = self.backbone_classifier(raw_features)
+
+            # part_logits have the shape: B*N*200
+            part_logits = self.partcls_net(part_features).view(batch, self.top_n, -1)
+
+            return concat_logits, raw_logits, part_logits, top_n_prob
         else:
             return concat_logits
 
 
-def oth_ntsnet(pretrained=False):
-    return NTSNet()
+def ntsnet(pretrained=False, pretrained_backbone=False, aux=True):
+    backbone = resnet50b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return NTSNet(backbone=backbone, aux=aux)
 
 
 def _calc_width(net):
@@ -223,26 +268,27 @@ def _test():
     from torch.autograd import Variable
 
     pretrained = False
+    aux = False
 
     models = [
-        oth_ntsnet,
+        ntsnet,
     ]
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, aux=aux)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_ntsnet or weight_count == 29033133)
+        assert (model != ntsnet or weight_count == 29033133)
 
-        x = Variable(torch.randn(1, 3, 448, 448))
-        y = net(x)
-        # y.sum().backward()
-        # assert (tuple(y[0].size()) == (1, 200))
-        assert (tuple(y.size()) == (1, 200))
+        x = Variable(torch.randn(2, 3, 448, 448))
+        ys = net(x)
+        y = ys[0] if aux else ys
+        y.sum().backward()
+        assert (tuple(y.size()) == (2, 200))
 
 
 if __name__ == "__main__":

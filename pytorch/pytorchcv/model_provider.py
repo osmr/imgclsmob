@@ -83,7 +83,7 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
-from .models.others.oth_ntsnet2 import *
+# from .models.others.oth_ntsnet2 import *
 from .models.ntsnet import *
 
 __all__ = ['get_model']
@@ -604,7 +604,7 @@ _models = {
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
-    'oth_ntsnet': oth_ntsnet,
+    # 'oth_ntsnet': oth_ntsnet,
     'ntsnet': ntsnet,
 }
 

@@ -425,7 +425,7 @@ Some remarks:
 
 ### Pascal VOC20102
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 98.09 | 81.44 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_voc-8144-e15319bf.params.log)) |
 | DeepLabv3 | ResNet(D)-101b | 97.95 | 80.24 | 58,754,773 | 47,624.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_voc-8024-8ee3099c.params.log)) |
@@ -434,7 +434,7 @@ Some remarks:
 
 ### ADE20K
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-50b | 79.37 | 36.87 | 46,782,550 | 162,410.82M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd50b_ade20k-3687-f0dcdf73.params.log)) |
 | PSPNet | ResNet(D)-101b | 79.93 | 37.97 | 65,774,678 | 230,824.47M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_ade20k-3797-c1280aea.params.log)) |
@@ -445,13 +445,13 @@ Some remarks:
 
 ### Cityscapes
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 96.17 | 71.72 | 65,707,475 | 230,583.01M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_cityscapes-7172-d5ad2fa4.params.log)) |
 
 ### COCO
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.05 | 67.41 | 65,708,501 | 230,586.69M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_coco-6741-87582b79.params.log)) |
 | DeepLabv3 | ResNet(D)-101b | 92.19 | 67.73 | 58,754,773 | 47,624.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_coco-6773-74dc9914.params.log)) |

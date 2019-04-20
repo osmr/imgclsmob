@@ -413,7 +413,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 
 ### Pascal VOC20102
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 98.09 | 81.44 | 65,708,501 | 230,771.01M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_voc-8144-c22f0219.pth.log)) |
 | DeepLabv3 | ResNet(D)-101b | 97.95 | 80.24 | 58,754,773 | 47,625.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_voc-8024-fd8bf74f.pth.log)) |
@@ -422,7 +422,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 
 ### ADE20K
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-50b | 79.37 | 36.87 | 46,782,550 | 162,595.14M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd50b_ade20k-3687-13f22137.pth.log)) |
 | PSPNet | ResNet(D)-101b | 79.93 | 37.97 | 65,774,678 | 231,008.79M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_ade20k-3797-115d62bf.pth.log)) |
@@ -433,13 +433,13 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 
 ### Cityscapes
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 96.17 | 71.72 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_cityscapes-7172-0a6efb49.pth.log)) |
 
 ### COCO
 
-| Model | Extractor | Pix.Acc., % | mIoU, % | Params | FLOPs/2 | Remarks |
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.05 | 67.41 | 65,708,501 | 230,771.01M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_coco-6741-c8b13be6.pth.log)) |
 | DeepLabv3 | ResNet(D)-101b | 92.19 | 67.73 | 58,754,773 | 47,625.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd101b_coco-6773-e59c1d8f.pth.log)) |

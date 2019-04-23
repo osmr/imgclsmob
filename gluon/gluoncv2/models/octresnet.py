@@ -97,16 +97,16 @@ class OctConv(nn.Conv2D):
 
         hhy = F.Convolution(
             hx,
-            weight=weight[0:h_out_channels, 0:h_in_channels, :, :],
-            bias=bias[0:h_out_channels] if bias is not None else None,
+            weight=weight.slice(begin=(None, None), end=(h_out_channels, h_in_channels)),
+            bias=bias.slice(begin=(None,), end=(h_out_channels,)) if bias is not None else None,
             num_filter=h_out_channels,
             **conv_kwargs)
 
         if self.oct_mode != "first":
             hlx = F.Convolution(
                 lx,
-                weight=weight[0:h_out_channels, h_in_channels:, :, :],
-                bias=bias[0:h_out_channels] if bias is not None else None,
+                weight=weight.slice(begin=(None, h_in_channels), end=(h_out_channels, None)),
+                bias=bias.slice(begin=(None,), end=(h_out_channels,)) if bias is not None else None,
                 num_filter=h_out_channels,
                 **conv_kwargs)
 
@@ -118,8 +118,8 @@ class OctConv(nn.Conv2D):
         lhx = F.Pooling(hx, kernel=(2, 2), stride=(2, 2), pool_type="avg")
         lhy = F.Convolution(
             lhx,
-            weight=weight[h_out_channels:, 0:h_in_channels, :, :],
-            bias=bias[h_out_channels:] if bias is not None else None,
+            weight=weight.slice(begin=(h_out_channels, None), end=(None, h_in_channels)),
+            bias=bias.slice(begin=(h_out_channels,), end=(None,)) if bias is not None else None,
             num_filter=l_out_channels,
             **conv_kwargs)
 
@@ -136,8 +136,8 @@ class OctConv(nn.Conv2D):
             llx = lx
         lly = F.Convolution(
             llx,
-            weight=weight[h_out_channels:, h_in_channels:, :, :],
-            bias=bias[h_out_channels:] if bias is not None else None,
+            weight=weight.slice(begin=(h_out_channels, h_in_channels), end=(None, None)),
+            bias=bias.slice(begin=(h_out_channels,), end=(None,)) if bias is not None else None,
             num_filter=l_out_channels,
             **conv_kwargs)
 

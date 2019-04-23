@@ -83,6 +83,9 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
+from .models.octresnet import *
+from .models.octresnet_cifar import *
+
 __all__ = ['get_model']
 
 
@@ -603,6 +606,17 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+
+    'octresnet10_ad2': octresnet10_ad2,
+    'octresnet50b_ad2': octresnet50b_ad2,
+
+    'octresnet20_ad2_cifar10': octresnet20_ad2_cifar10,
+    'octresnet20_ad2_cifar100': octresnet20_ad2_cifar100,
+    'octresnet20_ad2_svhn': octresnet20_ad2_svhn,
+    'octresnet56_ad2_cifar10': octresnet56_ad2_cifar10,
+    'octresnet56_ad2_cifar100': octresnet56_ad2_cifar100,
+    'octresnet56_ad2_svhn': octresnet56_ad2_svhn,
 }
 
 

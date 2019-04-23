@@ -4,14 +4,14 @@
     Convolution,' https://arxiv.org/abs/1904.05049.
 """
 
-__all__ = ['OctResNet', 'octresnet10_ad2', 'octresnet50b_ad2', 'OctResUnit']
+__all__ = ['OctResNet', 'octresnet50b']
 
 import os
 from inspect import isfunction
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import ReLU6, DualPathSequential
-from .resnet import ResInitBlock
+from common import ReLU6, conv1x1_block, DualPathSequential
+from resnet import ResInitBlock, ResUnit
 
 
 class OctConv(nn.Conv2D):
@@ -168,6 +168,184 @@ class OctConv(nn.Conv2D):
         return s.format(name=self.__class__.__name__,
                         mapping='{0} -> {1}'.format(shape[1] if shape[1] else None, shape[0]),
                         **self._kwargs)
+
+
+class UpSamplingBlock(HybridBlock):
+    """
+    UpSampling block (neighbour nearest).
+
+    Parameters:
+    ----------
+    scale : int
+        Multiplier for spatial size.
+    sample_type : str, default 'nearest'
+        Type of interpolation.
+    """
+    def __init__(self,
+                 scale,
+                 sample_type="nearest",
+                 **kwargs):
+        super(UpSamplingBlock, self).__init__(**kwargs)
+        self.scale = scale
+        self.sample_type = sample_type
+
+    def hybrid_forward(self, F, x):
+        return F.UpSampling(x, scale=self.scale, sample_type=self.sample_type)
+
+
+class OctConv1(HybridBlock):
+    """
+    Octave convolution layer (actually block).
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    oct_alpha : float, default 0.0
+        Octave alpha coefficient.
+    oct_mode : str, default 'last'
+        Octave convolution mode. It can be 'first', 'norm', or 'last'.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 oct_alpha=0.0,
+                 oct_mode="last",
+                 **kwargs):
+        super(OctConv1, self).__init__(**kwargs)
+        if isinstance(strides, int):
+            strides = (strides, strides)
+        self.downsample = (strides[0] > 1) or (strides[1] > 1)
+
+        self.first = False
+        self.last = False
+        if oct_mode == "first":
+            self.first = True
+            in_alpha = 0.0
+            out_alpha = oct_alpha
+        elif oct_mode == "norm":
+            in_alpha = oct_alpha
+            out_alpha = oct_alpha
+        elif oct_mode == "last":
+            self.last = True
+            in_alpha = oct_alpha
+            out_alpha = 0.0
+        else:
+            raise ValueError("Unsupported octave convolution mode: {}".format(oct_mode))
+
+        h_in_channels = int(in_channels * (1.0 - in_alpha))
+        h_out_channels = int(out_channels * (1.0 - out_alpha))
+        l_in_channels = in_channels - h_in_channels
+        l_out_channels = out_channels - h_out_channels
+
+        with self.name_scope():
+            if self.downsample:
+                self.down_pool = nn.AvgPool2D(
+                    pool_size=strides,
+                    strides=strides)
+            self.hh_conv = nn.Conv2D(
+                channels=h_out_channels,
+                kernel_size=kernel_size,
+                strides=1,
+                padding=padding,
+                dilation=dilation,
+                groups=groups,
+                use_bias=use_bias,
+                in_channels=h_in_channels)
+            if not self.last:
+                self.lh_pool = nn.AvgPool2D(
+                    pool_size=2,
+                    strides=2)
+                self.lh_conv = nn.Conv2D(
+                    channels=l_out_channels,
+                    kernel_size=kernel_size,
+                    strides=1,
+                    padding=padding,
+                    dilation=dilation,
+                    groups=groups,
+                    use_bias=use_bias,
+                    in_channels=h_in_channels)
+            if not self.first:
+                self.hl_conv = nn.Conv2D(
+                    channels=h_out_channels,
+                    kernel_size=kernel_size,
+                    strides=1,
+                    padding=padding,
+                    dilation=dilation,
+                    groups=groups,
+                    use_bias=use_bias,
+                    in_channels=l_in_channels)
+                if not self.last:
+                    if self.downsample:
+                        self.ll_pool = nn.AvgPool2D(
+                            pool_size=2,
+                            strides=2)
+                    else:
+                        self.hl_upsample = UpSamplingBlock(scale=2)
+                    self.ll_conv = nn.Conv2D(
+                        channels=l_out_channels,
+                        kernel_size=kernel_size,
+                        strides=1,
+                        padding=padding,
+                        dilation=dilation,
+                        groups=groups,
+                        use_bias=use_bias,
+                        in_channels=l_in_channels)
+
+    def hybrid_forward(self, F, hx, lx=None):
+        if self.downsample:
+            hx = self.down_pool(hx)
+
+        hhy = self.hh_conv(hx)
+
+        if not self.first:
+            hlx = self.hl_conv(lx)
+
+        if self.last:
+            hy = hhy + hlx
+            ly = None
+            return hy, ly
+
+        lhx = self.lh_pool(hx)
+        lhy = self.lh_conv(lhx)
+
+        if self.first:
+            hy = hhy
+            ly = lhy
+            return hy, ly
+
+        if self.downsample:
+            hly = hlx
+            llx = self.ll_pool(lx)
+        else:
+            hly = self.hl_upsample(hlx)
+            llx = lx
+        lly = self.ll_conv(llx)
+
+        hy = hhy + hly
+        ly = lhy + lly
+
+        return hy, ly
 
 
 class OctConvBlock(HybridBlock):
@@ -428,13 +606,13 @@ class OctResBlock(HybridBlock):
                 out_channels=out_channels,
                 strides=strides,
                 oct_alpha=oct_alpha,
-                oct_mode=oct_mode,
+                oct_mode=(oct_mode if oct_mode != "last" else "norm"),
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = oct_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 oct_alpha=oct_alpha,
-                oct_mode=("std" if oct_mode == "last" else (oct_mode if oct_mode != "first" else "norm")),
+                oct_mode=(oct_mode if oct_mode != "first" else "norm"),
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None,
                 activate=False)
@@ -486,6 +664,7 @@ class OctResBottleneck(HybridBlock):
                  **kwargs):
         super(OctResBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // bottleneck_factor
+        self.last = (oct_mode == "last")
 
         with self.name_scope():
             self.conv1 = oct_conv1x1_block(
@@ -502,21 +681,32 @@ class OctResBottleneck(HybridBlock):
                 padding=padding,
                 dilation=dilation,
                 oct_alpha=oct_alpha,
-                oct_mode=(oct_mode if oct_mode != "first" else "norm"),
+                oct_mode=("last" if oct_mode == "last" else "norm"),
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv3 = oct_conv1x1_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                oct_alpha=oct_alpha,
-                oct_mode=("std" if oct_mode == "last" else (oct_mode if oct_mode != "first" else "norm")),
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+            if oct_mode != "last":
+                self.conv3 = oct_conv1x1_block(
+                    in_channels=mid_channels,
+                    out_channels=out_channels,
+                    oct_alpha=oct_alpha,
+                    oct_mode="norm",
+                    bn_use_global_stats=bn_use_global_stats,
+                    activation=None,
+                    activate=False)
+            else:
+                self.conv3 = conv1x1_block(
+                    in_channels=mid_channels,
+                    out_channels=out_channels,
+                    bn_use_global_stats=bn_use_global_stats,
+                    activation=None,
+                    activate=False)
 
     def hybrid_forward(self, F, hx, lx=None):
         hx, lx = self.conv1(hx, lx)
         hx, lx = self.conv2(hx, lx)
-        hx, lx = self.conv3(hx, lx)
+        if not self.last:
+            hx, lx = self.conv3(hx, lx)
+        else:
+            hx, lx = self.conv3(hx), None
         return hx, lx
 
 
@@ -560,8 +750,7 @@ class OctResUnit(HybridBlock):
                  conv1_stride=False,
                  **kwargs):
         super(OctResUnit, self).__init__(**kwargs)
-        self.resize_identity = (in_channels != out_channels) or (strides != 1) or\
-                               ((oct_mode == "first") and (oct_alpha != 0.0))
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
             if bottleneck:
@@ -663,7 +852,13 @@ class OctResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix="stage{}_".format(i + 1))
+                if i != len(channels) - 1:
+                    last_ordinals = 0
+                else:
+                    last_ordinals = len(channels_per_stage) - 1
+                stage = DualPathSequential(
+                    last_ordinals=last_ordinals,
+                    prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -671,19 +866,26 @@ class OctResNet(HybridBlock):
                             oct_mode = "first"
                         elif (i == len(channels) - 1) and (j == 0):
                             oct_mode = "last"
-                        elif (i == len(channels) - 1) and (j != 0):
-                            oct_mode = "std"
                         else:
                             oct_mode = "norm"
-                        stage.add(OctResUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            oct_alpha=oct_alpha,
-                            oct_mode=oct_mode,
-                            bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
+                        if (i != len(channels) - 1) or (j == 0):
+                            stage.add(OctResUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                strides=strides,
+                                oct_alpha=oct_alpha,
+                                oct_mode=oct_mode,
+                                bn_use_global_stats=bn_use_global_stats,
+                                bottleneck=bottleneck,
+                                conv1_stride=conv1_stride))
+                        else:
+                            stage.add(ResUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                strides=strides,
+                                bn_use_global_stats=bn_use_global_stats,
+                                bottleneck=bottleneck,
+                                conv1_stride=conv1_stride))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -705,7 +907,6 @@ class OctResNet(HybridBlock):
 def get_octresnet(blocks,
                   bottleneck=None,
                   conv1_stride=True,
-                  oct_alpha=0.5,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
@@ -723,8 +924,6 @@ def get_octresnet(blocks,
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
-    oct_alpha : float, default 0.5
-        Octave alpha coefficient.
     width_scale : float, default 1.0
         Scale factor for width of layers.
     model_name : str or None, default None
@@ -794,7 +993,6 @@ def get_octresnet(blocks,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
         conv1_stride=conv1_stride,
-        oct_alpha=oct_alpha,
         **kwargs)
 
     if pretrained:
@@ -810,10 +1008,10 @@ def get_octresnet(blocks,
     return net
 
 
-def octresnet10_ad2(**kwargs):
+def octresnet50b(**kwargs):
     """
-    Oct-ResNet-10 (alpha=1/2) model from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-    with Octave Convolution,' https://arxiv.org/abs/1904.05049.
+    Oct-ResNet-50 model with stride at the second convolution in bottleneck block from 'Drop an Octave: Reducing Spatial
+    Redundancy in Convolutional Neural Networks with Octave Convolution,' https://arxiv.org/abs/1904.05049.
 
     Parameters:
     ----------
@@ -824,24 +1022,7 @@ def octresnet10_ad2(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_octresnet(blocks=10, oct_alpha=0.5, model_name="octresnet10_ad2", **kwargs)
-
-
-def octresnet50b_ad2(**kwargs):
-    """
-    Oct-ResNet-50b (alpha=1/2) model from 'Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks
-    with Octave Convolution,' https://arxiv.org/abs/1904.05049.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_octresnet(blocks=50, conv1_stride=False, oct_alpha=0.5, model_name="octresnet50b_ad2", **kwargs)
+    return get_octresnet(blocks=50, conv1_stride=False, model_name="octresnet50b", **kwargs)
 
 
 def _test():
@@ -851,8 +1032,7 @@ def _test():
     pretrained = False
 
     models = [
-        octresnet10_ad2,
-        octresnet50b_ad2,
+        octresnet50b,
     ]
 
     for model in models:
@@ -871,8 +1051,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != octresnet10_ad2 or weight_count == 5423016)
-        assert (model != octresnet50b_ad2 or weight_count == 25557032)
+        assert (model != octresnet50b or weight_count == 25557032)
 
         x = mx.nd.zeros((14, 3, 224, 224), ctx=ctx)
         y = net(x)

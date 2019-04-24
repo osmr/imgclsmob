@@ -607,7 +607,6 @@ _models = {
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
-
     'octresnet10_ad2': octresnet10_ad2,
     'octresnet50b_ad2': octresnet50b_ad2,
 

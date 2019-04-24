@@ -74,6 +74,8 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
+from .models.octresnet import *
+
 __all__ = ['get_model']
 
 
@@ -556,6 +558,9 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'octresnet10_ad2': octresnet10_ad2,
+    'octresnet50b_ad2': octresnet50b_ad2,
 }
 
 

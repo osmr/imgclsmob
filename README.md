@@ -80,6 +80,7 @@ Some remarks:
 | CondenseNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1711.09224) | [link](https://github.com/ShichenLiu/CondenseNet) | 2017 |
 | SparseNet | A | A | A | - | - | [link](https://arxiv.org/abs/1801.05895) | [link](https://github.com/Lyken17/SparseNet) | 2018 |
 | PeleeNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1804.06882) | [link](https://github.com/Robert-JunWang/Pelee) | 2018 |
+| Oct-ResNet | ABCD | A | A | - | - | [link](https://arxiv.org/abs/1904.05049) | - | 2019 |
 | WRN | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | - | [link](https://arxiv.org/abs/1605.07146) | [link](https://github.com/szagoruyko/wide-residual-networks) | 2016 |
 | WRN-1bit | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1802.08530) | [link](https://github.com/McDonnell-Lab/1-bit-per-weight) | 2018 |
 | DRN-C | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |

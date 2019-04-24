@@ -40,6 +40,8 @@ class OctConv(nn.Conv2D):
         Octave alpha coefficient.
     oct_mode : str, default 'std'
         Octave convolution mode. It can be 'first', 'norm', 'last', or 'std'.
+    oct_value : int, default 2
+        Octave value.
     """
     def __init__(self,
                  in_channels,
@@ -52,11 +54,33 @@ class OctConv(nn.Conv2D):
                  use_bias=False,
                  oct_alpha=0.0,
                  oct_mode="std",
+                 oct_value=2,
                  **kwargs):
         if isinstance(strides, int):
             strides = (strides, strides)
         self.downsample = (strides[0] > 1) or (strides[1] > 1)
+        assert (strides[0] in [1, oct_value]) and (strides[1] in [1, oct_value])
         strides = (1, 1)
+        if oct_mode == "first":
+            in_alpha = 0.0
+            out_alpha = oct_alpha
+        elif oct_mode == "norm":
+            in_alpha = oct_alpha
+            out_alpha = oct_alpha
+        elif oct_mode == "last":
+            in_alpha = oct_alpha
+            out_alpha = 0.0
+        elif oct_mode == "std":
+            in_alpha = 0.0
+            out_alpha = 0.0
+        else:
+            raise ValueError("Unsupported octave convolution mode: {}".format(oct_mode))
+        self.h_in_channels = int(in_channels * (1.0 - in_alpha))
+        self.h_out_channels = int(out_channels * (1.0 - out_alpha))
+        self.l_out_channels = out_channels - self.h_out_channels
+        self.oct_alpha = oct_alpha
+        self.oct_mode = oct_mode
+        self.oct_value = oct_value
         super(OctConv, self).__init__(
             in_channels=in_channels,
             channels=out_channels,
@@ -67,61 +91,51 @@ class OctConv(nn.Conv2D):
             groups=groups,
             use_bias=use_bias,
             **kwargs)
-        self.oct_alpha = oct_alpha
-        self.oct_mode = oct_mode
-        assert (self.oct_mode in ["first", "norm", "last", "std"])
+        self.conv_kwargs = self._kwargs.copy()
+        del self.conv_kwargs["num_filter"]
 
     def hybrid_forward(self, F, hx, lx=None, weight=None, bias=None):
         if self.oct_mode == "std":
             return super(OctConv, self).hybrid_forward(F, hx, weight=weight, bias=bias), None
 
-        if self.oct_mode == "first":
-            in_alpha = 0.0
-            out_alpha = self.oct_alpha
-        elif self.oct_mode == "norm":
-            in_alpha = self.oct_alpha
-            out_alpha = self.oct_alpha
-        elif self.oct_mode == "last":
-            in_alpha = self.oct_alpha
-            out_alpha = 0.0
-
-        h_in_channels = int(self._in_channels * (1.0 - in_alpha))
-        h_out_channels = int(self._channels * (1.0 - out_alpha))
-        l_out_channels = self._channels - h_out_channels
-
         if self.downsample:
-            hx = F.Pooling(hx, kernel=(2, 2), stride=(2, 2), pool_type="avg")
-
-        conv_kwargs = self._kwargs.copy()
-        del conv_kwargs["num_filter"]
+            hx = F.Pooling(
+                hx,
+                kernel=(self.oct_value, self.oct_value),
+                stride=(self.oct_value, self.oct_value),
+                pool_type="avg")
 
         hhy = F.Convolution(
             hx,
-            weight=weight.slice(begin=(None, None), end=(h_out_channels, h_in_channels)),
-            bias=bias.slice(begin=(None,), end=(h_out_channels,)) if bias is not None else None,
-            num_filter=h_out_channels,
-            **conv_kwargs)
+            weight=weight.slice(begin=(None, None), end=(self.h_out_channels, self.h_in_channels)),
+            bias=bias.slice(begin=(None,), end=(self.h_out_channels,)) if bias is not None else None,
+            num_filter=self.h_out_channels,
+            **self.conv_kwargs)
 
         if self.oct_mode != "first":
             hlx = F.Convolution(
                 lx,
-                weight=weight.slice(begin=(None, h_in_channels), end=(h_out_channels, None)),
-                bias=bias.slice(begin=(None,), end=(h_out_channels,)) if bias is not None else None,
-                num_filter=h_out_channels,
-                **conv_kwargs)
+                weight=weight.slice(begin=(None, self.h_in_channels), end=(self.h_out_channels, None)),
+                bias=bias.slice(begin=(None,), end=(self.h_out_channels,)) if bias is not None else None,
+                num_filter=self.h_out_channels,
+                **self.conv_kwargs)
 
         if self.oct_mode == "last":
             hy = hhy + hlx
             ly = None
             return hy, ly
 
-        lhx = F.Pooling(hx, kernel=(2, 2), stride=(2, 2), pool_type="avg")
+        lhx = F.Pooling(
+            hx,
+            kernel=(self.oct_value, self.oct_value),
+            stride=(self.oct_value, self.oct_value),
+            pool_type="avg")
         lhy = F.Convolution(
             lhx,
-            weight=weight.slice(begin=(h_out_channels, None), end=(None, h_in_channels)),
-            bias=bias.slice(begin=(h_out_channels,), end=(None,)) if bias is not None else None,
-            num_filter=l_out_channels,
-            **conv_kwargs)
+            weight=weight.slice(begin=(self.h_out_channels, None), end=(None, self.h_in_channels)),
+            bias=bias.slice(begin=(self.h_out_channels,), end=(None,)) if bias is not None else None,
+            num_filter=self.l_out_channels,
+            **self.conv_kwargs)
 
         if self.oct_mode == "first":
             hy = hhy
@@ -130,20 +144,23 @@ class OctConv(nn.Conv2D):
 
         if self.downsample:
             hly = hlx
-            llx = F.Pooling(lx, kernel=(2, 2), stride=(2, 2), pool_type="avg")
+            llx = F.Pooling(
+                lx,
+                kernel=(self.oct_value, self.oct_value),
+                stride=(self.oct_value, self.oct_value),
+                pool_type="avg")
         else:
-            hly = F.UpSampling(hlx, scale=2, sample_type="nearest")
+            hly = F.UpSampling(hlx, scale=self.oct_value, sample_type="nearest")
             llx = lx
         lly = F.Convolution(
             llx,
-            weight=weight.slice(begin=(h_out_channels, h_in_channels), end=(None, None)),
-            bias=bias.slice(begin=(h_out_channels,), end=(None,)) if bias is not None else None,
-            num_filter=l_out_channels,
-            **conv_kwargs)
+            weight=weight.slice(begin=(self.h_out_channels, self.h_in_channels), end=(None, None)),
+            bias=bias.slice(begin=(self.h_out_channels,), end=(None,)) if bias is not None else None,
+            num_filter=self.l_out_channels,
+            **self.conv_kwargs)
 
         hy = hhy + hly
         ly = lhy + lly
-
         return hy, ly
 
     def __repr__(self):

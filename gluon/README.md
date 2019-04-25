@@ -140,6 +140,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.75 | 30.00 | 10.66 | 8,476,056 | 1,129.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.266/resnet18_w3d4-1066-1a574a41.params.log)) |
 | ResNet-18 | 28.09 | 9.51 | 11,689,512 | 1,820.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.153/resnet18-0951-98a2545b.params.log)) |
 | ResNet-26 | 26.14 | 8.37 | 17,960,232 | 2,746.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.305/resnet26-0837-d81d836f.params.log)) |
+| ResNet-BC-26b | 24.86 | 7.58 | 15,995,176 | 2,356.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.313/resnetbc26b-0758-2b5e8d08.params.log)) |
 | ResNet-34 | 24.53 | 7.43 | 21,797,672 | 3,672.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.291/resnet34-0743-5cdeeccd.params.log)) |
 | ResNet-50 | 22.65 | 6.41 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0641-1eaa883b.params.log)) |
 | ResNet-50b | 22.06 | 6.11 | 25,557,032 | 4,110.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.308/resnet50b-0611-ca12f8d8.params.log)) |
@@ -187,7 +188,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | DiracNetV2-18 | 30.61 | 11.17 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet18v2-1117-27601f6f.params.log)) |
 | DiracNetV2-34 | 27.93 | 9.46 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.111/diracnet34v2-0946-1faa6f12.params.log)) |
 | CRU-Net-56 | 25.72 | 8.25 | 25,609,384 | 5,660.66M | From [cypw/CRU-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.197/crunet56-0825-ad16523b.params.log)) |
-| DenseNet-121 | 25.11 | 7.80 | 7,978,856 | 2,872.13M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet121-0780-49b72d04.params.log)) |
+| DenseNet-121 | 23.25 | 6.85 | 7,978,856 | 2,872.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.314/densenet121-0685-d3a1fae8.params.log)) |
 | DenseNet-161 | 22.40 | 6.18 | 28,681,000 | 7,793.16M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet161-0618-52e30516.params.log)) |
 | DenseNet-169 | 23.89 | 6.89 | 14,149,480 | 3,403.89M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet169-0689-281ec06b.params.log)) |
 | DenseNet-201 | 22.71 | 6.36 | 20,013,928 | 4,347.15M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.3/densenet201-0636-65b5d389.params.log)) |

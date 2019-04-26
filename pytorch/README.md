@@ -147,6 +147,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | PreResNet-10 | 35.11 | 14.21 | 5,417,128 | 894.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.249/preresnet10-1421-b3973cd4.pth.log)) |
 | PreResNet-12 | 33.86 | 13.48 | 5,491,112 | 1,126.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.257/preresnet12-1348-563066fa.pth.log)) |
 | PreResNet-14 | 32.64 | 12.39 | 5,786,536 | 1,358.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.260/preresnet14-1239-4be725fd.pth.log)) |
+| PreResNet-BC-14b | 31.29 | 11.81 | 10,057,384 | 1,476.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.315/preresnetbc14b-1181-a68d31c3.pth.log)) |
 | PreResNet-16 | 30.53 | 11.08 | 6,967,208 | 1,589.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.261/preresnet16-1108-06d8c87e.pth.log)) |
 | PreResNet-18 x0.25 | 40.06 | 18.11 | 3,935,960 | 270.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.272/preresnet18_wd4-1811-41135c15.pth.log)) |
 | PreResNet-18 x0.5 | 34.00 | 13.40 | 5,802,440 | 608.73M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.273/preresnet18_wd2-1340-c1fe4e31.pth.log)) |

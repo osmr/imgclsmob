@@ -151,6 +151,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-10 | 34.65 | 14.01 | 5,417,128 | 894.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.249/preresnet10-1401-2b96c081.params.log)) |
 | PreResNet-12 | 33.57 | 13.21 | 5,491,112 | 1,126.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.257/preresnet12-1321-b628efb5.params.log)) |
 | PreResNet-14 | 32.29 | 12.18 | 5,786,536 | 1,358.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.260/preresnet14-1218-d65fa628.params.log)) |
+| PreResNet-BC-14b | 30.67 | 11.51 | 10,057,384 | 1,476.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.315/preresnetbc14b-1151-c712a235.params.log)) |
 | PreResNet-16 | 30.21 | 10.81 | 6,967,208 | 1,589.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.261/preresnet16-1081-5b00b55f.params.log)) |
 | PreResNet-18 x0.25 | 39.62 | 17.78 | 3,935,960 | 270.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.272/preresnet18_wd4-1778-3d949d1a.params.log)) |
 | PreResNet-18 x0.5 | 33.67 | 13.19 | 5,802,440 | 608.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.273/preresnet18_wd2-1319-63e55c24.params.log)) |

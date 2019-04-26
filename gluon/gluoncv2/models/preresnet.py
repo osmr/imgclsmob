@@ -5,9 +5,9 @@
 
 __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetbc14b', 'preresnet16', 'preresnet18_wd4',
            'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet26', 'preresnetbc26b', 'preresnet34',
-           'preresnet50', 'preresnet50b', 'preresnet101', 'preresnet101b', 'preresnet152', 'preresnet152b',
-           'preresnet200', 'preresnet200b', 'preresnet269b', 'PreResBlock', 'PreResBottleneck', 'PreResUnit',
-           'PreResInitBlock', 'PreResActivation']
+           'preresnetbc38b', 'preresnet50', 'preresnet50b', 'preresnet101', 'preresnet101b', 'preresnet152',
+           'preresnet152b', 'preresnet200', 'preresnet200b', 'preresnet269b', 'PreResBlock', 'PreResBottleneck',
+           'PreResUnit', 'PreResInitBlock', 'PreResActivation']
 
 import os
 from mxnet import cpu
@@ -367,6 +367,8 @@ def get_preresnet(blocks,
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
+    elif (blocks == 38) and bottleneck:
+        layers = [3, 3, 3, 3]
     elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
@@ -621,6 +623,23 @@ def preresnet34(**kwargs):
     return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
 
+def preresnetbc38b(**kwargs):
+    """
+    PreResNet-BC-38b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="preresnetbc38b", **kwargs)
+
+
 def preresnet50(**kwargs):
     """
     PreResNet-50 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
@@ -789,6 +808,7 @@ def _test():
         preresnet26,
         preresnetbc26b,
         preresnet34,
+        preresnetbc38b,
         preresnet50,
         preresnet50b,
         preresnet101,
@@ -828,6 +848,7 @@ def _test():
         assert (model != preresnet26 or weight_count == 17958568)
         assert (model != preresnetbc26b or weight_count == 15987624)
         assert (model != preresnet34 or weight_count == 21796008)
+        assert (model != preresnetbc38b or weight_count == 21917864)
         assert (model != preresnet50 or weight_count == 25549480)
         assert (model != preresnet50b or weight_count == 25549480)
         assert (model != preresnet101 or weight_count == 44541608)

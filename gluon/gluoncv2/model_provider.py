@@ -143,6 +143,7 @@ _models = {
     'preresnet26': preresnet26,
     'preresnetbc26b': preresnetbc26b,
     'preresnet34': preresnet34,
+    'preresnetbc38b': preresnetbc38b,
     'preresnet50': preresnet50,
     'preresnet50b': preresnet50b,
     'preresnet101': preresnet101,

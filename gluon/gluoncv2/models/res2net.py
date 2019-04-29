@@ -8,7 +8,8 @@ __all__ = ['Res2Net', 'res2net50']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv3x3, conv1x1_block, conv3x3_block
+from mxnet.gluon.contrib.nn import Identity
+from .common import conv1x1, conv3x3, conv1x1_block
 from .resnet import ResInitBlock
 
 
@@ -62,9 +63,11 @@ class HierarchicalConcurrent(nn.HybridSequential):
     def hybrid_forward(self, F, x):
         out = []
         y_prev = None
+        if self.multi_input:
+            xs = F.split(x, axis=self.axis, num_outputs=len(self._children.values()))
         for i, block in enumerate(self._children.values()):
             if self.multi_input:
-                y = block(x[i])
+                y = block(xs[i])
             else:
                 y = block(x)
             if y_prev is not None:
@@ -73,135 +76,6 @@ class HierarchicalConcurrent(nn.HybridSequential):
             y_prev = y
         out = F.concat(*out, dim=self.axis)
         return out
-
-
-class ESPBlock(HybridBlock):
-    """
-    ESPNetv2 block (so-called EESP block).
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the branch convolution layers.
-    dilations : list of int
-        Dilation values for branches.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 dilations,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(ESPBlock, self).__init__(**kwargs)
-        num_branches = len(dilations)
-        assert (out_channels % num_branches == 0)
-        self.downsample = (strides != 1)
-        mid_channels = out_channels // num_branches
-
-        with self.name_scope():
-            self.reduce_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                groups=num_branches,
-                bn_use_global_stats=bn_use_global_stats)
-
-            self.branches = HierarchicalConcurrent(axis=1, multi_input=True, prefix='')
-            self.branches.add(nn.Identity())
-            for i in range(num_branches):
-                self.branches.add(conv3x3(
-                    in_channels=mid_channels,
-                    out_channels=mid_channels,
-                    strides=strides,
-                    padding=dilations[i],
-                    dilation=dilations[i],
-                    groups=mid_channels))
-
-            self.merge_conv = conv1x1_block(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                groups=num_branches,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
-            self.preactiv = PreActivation(in_channels=out_channels)
-            if not self.downsample:
-                self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x, x0):
-        y = self.reduce_conv(x)
-        y = self.branches(y)
-        y = self.preactiv(y)
-        y = self.merge_conv(y)
-        if not self.downsample:
-            y = y + x
-            y = self.activ(y)
-        return y, x0
-
-
-class Res2NetBlock(HybridBlock):
-    """
-    Res2Net block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bottleneck_factor : int, default 4
-        Bottleneck factor.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 padding=1,
-                 dilation=1,
-                 bn_use_global_stats=False,
-                 bottleneck_factor=4,
-                 **kwargs):
-        super(Res2NetBlock, self).__init__(**kwargs)
-        mid_channels = out_channels // bottleneck_factor
-
-        with self.name_scope():
-            self.conv1 = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv3 = conv1x1_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        return x
 
 
 class Res2NetUnit(HybridBlock):
@@ -215,33 +89,56 @@ class Res2NetUnit(HybridBlock):
     out_channels : int
         Number of output channels.
     strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer in bottleneck.
-    bn_use_global_stats : bool, default False
+        Strides of the branch convolution layers.
+    num_branches : int
+        Number of branches.
+    bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bottleneck_factor : int, default 4
+        Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 padding=1,
-                 dilation=1,
-                 bn_use_global_stats=False,
+                 num_branches,
+                 bn_use_global_stats,
+                 bottleneck_factor=4,
                  **kwargs):
         super(Res2NetUnit, self).__init__(**kwargs)
-        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+        self.num_branches = num_branches
+        downsample = (strides != 1)
+        self.resize_identity = (in_channels != out_channels) or downsample
+        assert (out_channels % bottleneck_factor == 0)
+        mid_channels = out_channels // bottleneck_factor
+        assert (mid_channels % num_branches == 0)
+        brn_channels = mid_channels // num_branches
 
         with self.name_scope():
-            self.body = Res2NetBlock(
+            self.reduce_conv = conv1x1_block(
                 in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
+                out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats)
+            self.branches = HierarchicalConcurrent(axis=1, multi_input=True, prefix='')
+            if downsample:
+                self.branches.add(conv1x1(
+                    in_channels=brn_channels,
+                    out_channels=brn_channels,
+                    strides=strides))
+            else:
+                self.branches.add(Identity())
+            for i in range(num_branches - 1):
+                self.branches.add(conv3x3(
+                    in_channels=brn_channels,
+                    out_channels=brn_channels,
+                    strides=strides))
+            self.merge_conv = conv1x1_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                activation=None,
+                activate=False)
+            self.preactiv = PreActivation(in_channels=out_channels)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
@@ -257,10 +154,13 @@ class Res2NetUnit(HybridBlock):
             identity = self.identity_conv(x)
         else:
             identity = x
-        x = self.body(x)
-        x = x + identity
-        x = self.activ(x)
-        return x
+        y = self.reduce_conv(x)
+        y = self.branches(y)
+        y = self.preactiv(y)
+        y = self.merge_conv(y)
+        y = y + identity
+        y = self.activ(y)
+        return y
 
 
 class Res2Net(HybridBlock):
@@ -273,6 +173,8 @@ class Res2Net(HybridBlock):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
+    num_branches : int, default 4
+        Number of branches in module.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -286,6 +188,7 @@ class Res2Net(HybridBlock):
     def __init__(self,
                  channels,
                  init_block_channels,
+                 num_branches=4,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -311,6 +214,7 @@ class Res2Net(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
+                            num_branches=num_branches,
                             bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
@@ -442,7 +346,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != res2net50 or weight_count == 25557032)
+        assert (model != res2net50 or weight_count == 16405928)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

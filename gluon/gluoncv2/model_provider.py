@@ -85,6 +85,7 @@ from .models.deeplabv3 import *
 
 from .models.octresnet import *
 from .models.octresnet_cifar import *
+from .models.res2net import *
 
 __all__ = ['get_model']
 
@@ -619,6 +620,8 @@ _models = {
     'octresnet56_ad2_cifar10': octresnet56_ad2_cifar10,
     'octresnet56_ad2_cifar100': octresnet56_ad2_cifar100,
     'octresnet56_ad2_svhn': octresnet56_ad2_svhn,
+
+    'res2net50': res2net50,
 }
 
 

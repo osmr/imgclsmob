@@ -621,7 +621,8 @@ _models = {
     'octresnet56_ad2_cifar100': octresnet56_ad2_cifar100,
     'octresnet56_ad2_svhn': octresnet56_ad2_svhn,
 
-    'res2net50': res2net50,
+    'res2net50_w14_s8': res2net50_w14_s8,
+    'res2net50_w26_s8': res2net50_w26_s8,
 }
 
 

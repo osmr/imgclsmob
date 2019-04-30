@@ -3,7 +3,7 @@
     Original paper: 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
 """
 
-__all__ = ['Res2Net', 'res2net50']
+__all__ = ['Res2Net', 'res2net50_w14_s8', 'res2net50_w26_s8']
 
 import os
 from mxnet import cpu
@@ -90,29 +90,27 @@ class Res2NetUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the branch convolution layers.
-    num_branches : int
-        Number of branches.
+    width : int
+        Width of filters.
+    scale : int
+        Number of scale.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bottleneck_factor : int, default 4
-        Bottleneck factor.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 num_branches,
+                 width,
+                 scale,
                  bn_use_global_stats,
-                 bottleneck_factor=4,
                  **kwargs):
         super(Res2NetUnit, self).__init__(**kwargs)
-        self.num_branches = num_branches
+        self.scale = scale
         downsample = (strides != 1)
         self.resize_identity = (in_channels != out_channels) or downsample
-        assert (out_channels % bottleneck_factor == 0)
-        mid_channels = out_channels // bottleneck_factor
-        assert (mid_channels % num_branches == 0)
-        brn_channels = mid_channels // num_branches
+        mid_channels = width * scale
+        brn_channels = width
 
         with self.name_scope():
             self.reduce_conv = conv1x1_block(
@@ -127,7 +125,7 @@ class Res2NetUnit(HybridBlock):
                     strides=strides))
             else:
                 self.branches.add(Identity())
-            for i in range(num_branches - 1):
+            for i in range(scale - 1):
                 self.branches.add(conv3x3(
                     in_channels=brn_channels,
                     out_channels=brn_channels,
@@ -173,8 +171,10 @@ class Res2Net(HybridBlock):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    num_branches : int, default 4
-        Number of branches in module.
+    width : int
+        Width of filters.
+    scale : int
+        Number of scale.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -188,7 +188,8 @@ class Res2Net(HybridBlock):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 num_branches=4,
+                 width,
+                 scale,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -214,7 +215,8 @@ class Res2Net(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            num_branches=num_branches,
+                            width=width,
+                            scale=scale,
                             bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
@@ -235,7 +237,8 @@ class Res2Net(HybridBlock):
 
 
 def get_res2net(blocks,
-                width_scale=1.0,
+                width,
+                scale,
                 model_name=None,
                 pretrained=False,
                 ctx=cpu(),
@@ -248,8 +251,10 @@ def get_res2net(blocks,
     ----------
     blocks : int
         Number of blocks.
-    width_scale : float, default 1.0
-        Scale factor for width of layers.
+    width : int
+        Width of filters.
+    scale : int
+        Number of scale.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -281,14 +286,11 @@ def get_res2net(blocks,
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    if width_scale != 1.0:
-        channels = [[int(cij * width_scale) if (i != len(channels) - 1) or (j != len(ci) - 1) else cij
-                     for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
-        init_block_channels = int(init_block_channels * width_scale)
-
     net = Res2Net(
         channels=channels,
         init_block_channels=init_block_channels,
+        width=width,
+        scale=scale,
         **kwargs)
 
     if pretrained:
@@ -304,9 +306,9 @@ def get_res2net(blocks,
     return net
 
 
-def res2net50(**kwargs):
+def res2net50_w14_s8(**kwargs):
     """
-    Res2Net-50 model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
+    Res2Net-50 (14wx8s) model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
 
     Parameters:
     ----------
@@ -317,7 +319,23 @@ def res2net50(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_res2net(blocks=50, model_name="res2net50", **kwargs)
+    return get_res2net(blocks=50, width=14, scale=8, model_name="res2net50_w14_s8", **kwargs)
+
+
+def res2net50_w26_s8(**kwargs):
+    """
+    Res2Net-50 (26wx8s) model from 'Res2Net: A New Multi-scale Backbone Architecture,' https://arxiv.org/abs/1904.01169.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_res2net(blocks=50, width=26, scale=8, model_name="res2net50_w14_s8", **kwargs)
 
 
 def _test():
@@ -327,7 +345,8 @@ def _test():
     pretrained = False
 
     models = [
-        res2net50,
+        res2net50_w14_s8,
+        res2net50_w26_s8,
     ]
 
     for model in models:
@@ -346,7 +365,8 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != res2net50 or weight_count == 16405928)
+        assert (model != res2net50_w14_s8 or weight_count == 8258356)
+        assert (model != res2net50_w26_s8 or weight_count == 11456212)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

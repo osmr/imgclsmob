@@ -1,5 +1,5 @@
 """
-    AirNet, implemented in Chainer.
+    AirNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 """

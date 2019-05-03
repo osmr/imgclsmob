@@ -1,5 +1,5 @@
 """
-    AirNeXt, implemented in Chainer.
+    AirNeXt for ImageNet-1K, implemented in Chainer.
     Original paper: 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 """

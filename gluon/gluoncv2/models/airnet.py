@@ -1,5 +1,5 @@
 """
-    AirNet, implemented in Gluon.
+    AirNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Attention Inspiring Receptive-Fields Network for Learning Invariant Representations,'
     https://ieeexplore.ieee.org/document/8510896.
 """

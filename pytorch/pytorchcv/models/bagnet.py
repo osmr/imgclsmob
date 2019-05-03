@@ -1,5 +1,5 @@
 """
-    BagNet, implemented in PyTorch.
+    BagNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet,'
     https://openreview.net/pdf?id=SkfMWhAqYQ.
 """

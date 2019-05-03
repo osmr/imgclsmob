@@ -1,5 +1,5 @@
 """
-    AlexNet, implemented in Gluon.
+    AlexNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997.
 """

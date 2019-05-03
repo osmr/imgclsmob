@@ -377,6 +377,7 @@ Some remarks:
 | ResNeXt-29 (32x4d) | 19.50 | 4,868,004 | 780.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.200/resnext29_32x4d_cifar100-1950-5f2eedcd.params.log)) |
 | PyramidNet-110 (a=48) | 20.95 | 1,778,556 | 408.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.186/pyramidnet110_a48_cifar100-2095-00fd42a0.params.log)) |
 | PyramidNet-110 (a=84) | 18.87 | 3,913,536 | 778.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.199/pyramidnet110_a84_cifar100-1887-6712d5dc.params.log)) |
+| PyramidNet-110 (a=270) | 17.10 | 28,511,307 | 4,730.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.319/pyramidnet110_a270_cifar100-1710-2732fc64.params.log)) |
 | PyramidNet-164 (a=270, BN) | 16.70 | 27,319,071 | 4,608.91M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.312/pyramidnet164_a270_bn_cifar100-1670-08f46c7f.params.log)) |
 | PyramidNet-200 (a=240, BN) | 16.09 | 26,844,952 | 4,563.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.317/pyramidnet200_a240_bn_cifar100-1609-e61e7e7e.params.log)) |
 | PyramidNet-236 (a=220, BN) | 16.34 | 27,054,096 | 4,631.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.312/pyramidnet236_a220_bn_cifar100-1634-f066b3c6.params.log)) |
@@ -386,11 +387,14 @@ Some remarks:
 | DenseNet-BC-40 (k=24) | 22.67 | 714,196 | 293.11M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.221/densenet40_k24_bc_cifar100-2267-2c4ef7c4.params.log)) |
 | DenseNet-BC-40 (k=36) | 20.50 | 1,578,412 | 654.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.225/densenet40_k36_bc_cifar100-2050-d7275d39.params.log)) |
 | DenseNet-100 (k=12) | 19.64 | 4,129,600 | 1,353.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.206/densenet100_k12_cifar100-1964-2ed5ec27.params.log)) |
+| DenseNet-100 (k=24) | 18.08 | 16,236,268 | 5,354.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.318/densenet100_k24_cifar100-1808-9bfa3e9c.params.log)) |
 | DenseNet-BC-100 (k=12) | 21.19 | 800,032 | 298.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.208/densenet100_k12_bc_cifar100-2119-fbd8a54c.params.log)) |
 | DenseNet-BC-250 (k=24) | 17.39 | 15,480,556 | 5,519.69M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.303/densenet250_k24_bc_cifar100-1739-598e91b7.params.log)) |
 | X-DenseNet-BC-40-2 (k=24) | 23.96 | 714,196 | 293.11M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.227/xdensenet40_2_k24_bc_cifar100-2396-73d5ba88.params.log)) |
 | X-DenseNet-BC-40-2 (k=36) | 21.65 | 1,578,412 | 654.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.234/xdensenet40_2_k36_bc_cifar100-2165-78b6e754.params.log)) |
 | WRN-16-10 | 18.95 | 17,174,324 | 2,414.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.204/wrn16_10_cifar100-1895-bcb5c89c.params.log)) |
+| WRN-28-10 | 17.88 | 36,536,884 | 5,247.04M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.320/wrn28_10_cifar100-1788-67ec43c6.params.log)) |
+| WRN-40-8 | 18.03 | 35,794,484 | 5,176.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.321/wrn40_8_cifar100-1803-114f6be2.params.log)) |
 | WRN-20-10-1bit | 19.04 | 26,794,920 | 4,022.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_1bit_cifar100-1904-adae01d6.params.log)) |
 | WRN-20-10-32bit | 18.12 | 26,794,920 | 4,022.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.302/wrn20_10_32bit_cifar100-1812-d064f38a.params.log)) |
 | RoR-3-56 | 25.49 | 768,596 | 113.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.229/ror3_56_cifar100-2549-43345593.params.log)) |

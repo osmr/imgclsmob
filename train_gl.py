@@ -18,15 +18,21 @@ from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_train_data_source
 from gluon.imagenet1k_utils import get_val_data_source
-from gluon.imagenet1k_utils import num_training_samples
+from gluon.imagenet1k_utils import get_dataset_metainfo
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Train a model for image classification (Gluon/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="ImageNet1K_rec",
+        help='dataset name. options are ImageNet1K and ImageNet1K_rec')
 
-    add_dataset_parser_arguments(parser)
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -566,19 +572,23 @@ def main():
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     train_data = get_train_data_source(
-        dataset_args=args,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size)
     val_data = get_val_data_source(
-        dataset_args=args,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_args=args)
-    data_source_needs_reset = args.use_rec
+    batch_fn = get_batch_fn(dataset_name=args.dataset)
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
 
+    num_training_samples = len(train_data._dataset)
+    assert (num_training_samples == 1281167)
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -633,7 +643,7 @@ def main():
         train_data=train_data,
         val_data=val_data,
         batch_fn=batch_fn,
-        data_source_needs_reset=data_source_needs_reset,
+        data_source_needs_reset=dataset_metainfo.use_imgrec,
         dtype=args.dtype,
         net=net,
         trainer=trainer,
@@ -649,5 +659,5 @@ def main():
         ctx=ctx)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

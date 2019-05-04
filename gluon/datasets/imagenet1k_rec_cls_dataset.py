@@ -5,6 +5,22 @@
 import mxnet as mx
 
 
+class ImageNet1KRecMetaInfo(object):
+    label = "ImageNet1K_rec"
+    root_dir_name = "imagenet_rec"
+    dataset_class = None
+    num_training_samples = None
+    in_channels = 3
+    num_classes = 1000
+    input_image_size = (224, 224)
+    resize_inv_factor = 0.875
+    train_imgrec_file_path = "train.rec"
+    train_imgidx_file_path = "train.idx"
+    val_imgrec_file_path = "val.rec"
+    val_imgidx_file_path = "val.idx"
+    use_imgrec = True
+
+
 def imagenet_train_imgrec_iter(imgrec_file_path,
                                imgidx_file_path,
                                batch_size,

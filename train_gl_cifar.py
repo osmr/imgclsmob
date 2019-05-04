@@ -281,15 +281,15 @@ def prepare_trainer(net,
                     state_file_path=None):
 
     if gamma_wd_mult != 1.0:
-        for k, v in net.collect_params('.*gamma').items():
+        for k, v in net.collect_params(".*gamma").items():
             v.wd_mult = gamma_wd_mult
 
     if beta_wd_mult != 1.0:
-        for k, v in net.collect_params('.*beta').items():
+        for k, v in net.collect_params(".*beta").items():
             v.wd_mult = beta_wd_mult
 
     if bias_wd_mult != 1.0:
-        for k, v in net.collect_params('.*bias').items():
+        for k, v in net.collect_params(".*bias").items():
             v.wd_mult = bias_wd_mult
 
     if lr_decay_period > 0:
@@ -310,12 +310,12 @@ def prepare_trainer(net,
         warmup_lr=warmup_lr,
         warmup_mode=warmup_mode)
 
-    optimizer_params = {'learning_rate': lr,
-                        'wd': wd,
-                        'momentum': momentum,
-                        'lr_scheduler': lr_scheduler}
-    if dtype != 'float32':
-        optimizer_params['multi_precision'] = True
+    optimizer_params = {"learning_rate": lr,
+                        "wd": wd,
+                        "momentum": momentum,
+                        "lr_scheduler": lr_scheduler}
+    if dtype != "float32":
+        optimizer_params["multi_precision"] = True
 
     trainer = gluon.Trainer(
         params=net.collect_params(),
@@ -323,11 +323,11 @@ def prepare_trainer(net,
         optimizer_params=optimizer_params)
 
     if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
-        logging.info('Loading trainer states: {}'.format(state_file_path))
+        logging.info("Loading trainer states: {}".format(state_file_path))
         trainer.load_states(state_file_path)
         if trainer._optimizer.wd != wd:
             trainer._optimizer.wd = wd
-            logging.info('Reset the weight decay: {}'.format(wd))
+            logging.info("Reset the weight decay: {}".format(wd))
         # lr_scheduler = trainer._optimizer.lr_scheduler
         trainer._optimizer.lr_scheduler = lr_scheduler
 
@@ -337,8 +337,8 @@ def prepare_trainer(net,
 def save_params(file_stem,
                 net,
                 trainer):
-    net.save_parameters(file_stem + '.params')
-    trainer.save_states(file_stem + '.states')
+    net.save_parameters(file_stem + ".params")
+    trainer.save_states(file_stem + ".states")
 
 
 def train_epoch(epoch,
@@ -421,7 +421,7 @@ def train_epoch(epoch,
             btic = time.time()
             _, acc_train_value = acc_metric_train.get()
             err_train_value = 1.0 - acc_train_value
-            logging.info('Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\terr={:.4f}\tlr={:.5f}'.format(
+            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\terr={:.4f}\tlr={:.5f}".format(
                 epoch + 1, i, speed, err_train_value, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
@@ -430,13 +430,13 @@ def train_epoch(epoch,
             p.zero_grad()
 
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
-    logging.info('[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec'.format(
+    logging.info("[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec".format(
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
     _, acc_train_value = acc_metric_train.get()
     err_train_value = 1.0 - acc_train_value
-    logging.info('[Epoch {}] training: err={:.4f}\tloss={:.4f}'.format(
+    logging.info("[Epoch {}] training: err={:.4f}\tloss={:.4f}".format(
         epoch + 1, err_train_value, train_loss))
 
     return err_train_value, train_loss
@@ -466,7 +466,7 @@ def train_net(batch_size,
 
     if batch_size_scale != 1:
         for p in net.collect_params().values():
-            p.grad_req = 'add'
+            p.grad_req = "add"
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
@@ -479,7 +479,7 @@ def train_net(batch_size,
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
-        logging.info('Start training from [Epoch {}]'.format(start_epoch1))
+        logging.info("Start training from [Epoch {}]".format(start_epoch1))
         err_val = validate1(
             accuracy_metric=acc_metric_val,
             net=net,
@@ -488,7 +488,7 @@ def train_net(batch_size,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        logging.info('[Epoch {}] validation: err={:.4f}'.format(
+        logging.info("[Epoch {}] validation: err={:.4f}".format(
             start_epoch1 - 1, err_val))
 
     gtic = time.time()
@@ -523,19 +523,19 @@ def train_net(batch_size,
             dtype=dtype,
             ctx=ctx)
 
-        logging.info('[Epoch {}] validation: err={:.4f}'.format(
+        logging.info("[Epoch {}] validation: err={:.4f}".format(
             epoch + 1, err_val))
 
         if lp_saver is not None:
-            lp_saver_kwargs = {'net': net, 'trainer': trainer}
+            lp_saver_kwargs = {"net": net, "trainer": trainer}
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
                 params=[err_val, err_train, train_loss, trainer.learning_rate],
                 **lp_saver_kwargs)
 
-    logging.info('Total time cost: {:.2f} sec'.format(time.time() - gtic))
+    logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
     if lp_saver is not None:
-        logging.info('Best err: {:.4f} at {} epoch'.format(
+        logging.info("Best err: {:.4f} at {} epoch".format(
             lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
@@ -565,8 +565,8 @@ def main():
         do_hybridize=(not args.not_hybridize),
         ctx=ctx)
 
-    assert (hasattr(net, 'classes'))
-    num_classes = net.classes if hasattr(net, 'classes') else 10
+    assert (hasattr(net, "classes"))
+    num_classes = net.classes if hasattr(net, "classes") else 10
 
     train_data = get_train_data_source(
         dataset_name=args.dataset,
@@ -579,6 +579,8 @@ def main():
         batch_size=batch_size,
         num_workers=args.num_workers)
 
+    num_training_samples = len(train_data._dataset)
+    assert (num_training_samples == get_num_training_samples(args.dataset))
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -596,7 +598,7 @@ def main():
         warmup_mode=args.warmup_mode,
         batch_size=batch_size,
         num_epochs=args.num_epochs,
-        num_training_samples=get_num_training_samples(args.dataset),
+        num_training_samples=num_training_samples,
         dtype=args.dtype,
         gamma_wd_mult=args.gamma_wd_mult,
         beta_wd_mult=args.beta_wd_mult,
@@ -605,7 +607,7 @@ def main():
 
     if args.save_dir and args.save_interval:
         lp_saver = TrainLogParamSaver(
-            checkpoint_file_name_prefix='{}_{}'.format(args.dataset.lower(), args.model),
+            checkpoint_file_name_prefix="{}_{}".format(args.dataset.lower(), args.model),
             last_checkpoint_file_name_suffix="last",
             best_checkpoint_file_name_suffix=None,
             last_checkpoint_dir_path=args.save_dir,
@@ -613,16 +615,16 @@ def main():
             last_checkpoint_file_count=2,
             best_checkpoint_file_count=2,
             checkpoint_file_save_callback=save_params,
-            checkpoint_file_exts=('.params', '.states'),
+            checkpoint_file_exts=(".params", ".states"),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=['Val.Err', 'Train.Err', 'Train.Loss', 'LR'],
+            param_names=["Val.Err", "Train.Err", "Train.Loss", "LR"],
             acc_ind=0,
             # bigger=[True],
             # mask=None,
-            score_log_file_path=os.path.join(args.save_dir, 'score.log'),
+            score_log_file_path=os.path.join(args.save_dir, "score.log"),
             score_log_attempt_value=args.attempt,
-            best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
+            best_map_log_file_path=os.path.join(args.save_dir, "best_map.log"))
     else:
         lp_saver = None
 
@@ -648,5 +650,5 @@ def main():
         ctx=ctx)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

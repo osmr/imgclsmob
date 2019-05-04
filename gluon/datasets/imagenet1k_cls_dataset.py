@@ -8,9 +8,9 @@ from mxnet.gluon.data.vision import ImageFolderDataset
 from mxnet.gluon.data.vision import transforms
 
 
-class ImageNet(ImageFolderDataset):
+class ImageNet1K(ImageFolderDataset):
     """
-    Load the ImageNet classification dataset.
+    Load the ImageNet-1K classification dataset.
 
     Refer to :doc:`../build/examples_datasets/imagenet` for the description of
     this dataset and how to prepare it.
@@ -30,7 +30,19 @@ class ImageNet(ImageFolderDataset):
                  transform=None):
         split = "train" if train else "val"
         root = os.path.join(root, split)
-        super(ImageNet, self).__init__(root=root, flag=1, transform=transform)
+        super(ImageNet1K, self).__init__(root=root, flag=1, transform=transform)
+
+
+class ImageNet1KMetaInfo(object):
+    label = "ImageNet1K"
+    root_dir_name = "imagenet"
+    dataset_class = ImageNet1K
+    num_training_samples = None
+    in_channels = 3
+    num_classes = 1000
+    input_image_size = (224, 224)
+    resize_inv_factor = 0.875
+    use_imgrec = False
 
 
 def imagenet_train_transform(input_image_size=(224, 224),

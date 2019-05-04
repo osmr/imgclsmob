@@ -17,8 +17,14 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description='Evaluate a model for image classification (Gluon/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="ImageNet1K_rec",
+        help='dataset name. options are ImageNet1K and ImageNet1K_rec')
 
-    in1k_add_dataset_parser_arguments(parser)
+    args, _ = parser.parse_known_args()
+    in1k_add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
         '--model',
@@ -171,12 +177,13 @@ def main():
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
     val_data = get_val_data_source(
-        dataset_args=args,
+        dataset_name=args.dataset,
+        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_args=args)
+    batch_fn = get_batch_fn(dataset_name=args.dataset)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
@@ -195,5 +202,5 @@ def main():
         extended_log=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,74 +1,16 @@
 """
-    KHPA dataset routines.
+    KHPA classification dataset.
 """
 
-__all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_source', 'get_val_data_source', 'validate']
-
 import os
-import math
 import json
 import logging
 import numpy as np
 import pandas as pd
 import mxnet as mx
-from mxnet import gluon
 from mxnet.gluon.data import Dataset
 from imgaug import augmenters as iaa
 from imgaug import parameters as iap
-from .weighted_random_sampler import WeightedRandomSampler
-
-
-def add_dataset_parser_arguments(parser):
-    parser.add_argument(
-        '--data-path',
-        type=str,
-        default='../imgclsmob_data/khpa',
-        help='path to KHPA dataset')
-    parser.add_argument(
-        '--split-file',
-        type=str,
-        default='../imgclsmob_data/khpa/split.csv',
-        help='path to file with splitting training subset on training and validation ones')
-    parser.add_argument(
-        '--gen-split',
-        action='store_true',
-        help='whether generate split file')
-    parser.add_argument(
-        '--num-split-folders',
-        type=int,
-        default=10,
-        help='number of folders for validation subsets')
-    parser.add_argument(
-        '--stats-file',
-        type=str,
-        default='../imgclsmob_data/khpa/stats.json',
-        help='path to file with the dataset statistics')
-    parser.add_argument(
-        '--gen-stats',
-        action='store_true',
-        help='whether generate a file with the dataset statistics')
-
-    parser.add_argument(
-        '--input-size',
-        type=int,
-        default=224,
-        help='size of the input for model')
-    parser.add_argument(
-        '--resize-inv-factor',
-        type=float,
-        default=0.875,
-        help='inverted ratio for input image crop')
-
-    parser.add_argument(
-        '--num-classes',
-        type=int,
-        default=56,
-        help='number of classes')
-    parser.add_argument(
-        '--in-channels',
-        type=int,
-        default=4,
-        help='number of input channels')
 
 
 class KHPA(Dataset):
@@ -83,12 +25,12 @@ class KHPA(Dataset):
         Whether to load the training or validation set.
     """
     def __init__(self,
-                 root=os.path.join('~', '.mxnet', 'datasets', 'khpa'),
-                 split_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'split.csv'),
+                 root=os.path.join("~", ".mxnet", "datasets", "khpa"),
+                 split_file_path=os.path.join("~", ".mxnet", "datasets", "khpa", "split.csv"),
                  generate_split=False,
                  num_split_folders=10,
                  working_split_folder_ind1=1,
-                 stats_file_path=os.path.join('~', '.mxnet', 'datasets', 'khpa', 'stats.json'),
+                 stats_file_path=os.path.join("~", ".mxnet", "datasets", "khpa", "stats.json"),
                  generate_stats=False,
                  num_classes=28,
                  preproc_resize_image_size=(256, 256),
@@ -111,24 +53,24 @@ class KHPA(Dataset):
 
         train_df = pd.read_csv(
             train_file_path,
-            sep=',',
+            sep=",",
             index_col=False,
-            dtype={'Id': np.unicode, 'Target': np.unicode})
-        train_file_ids = train_df['Id'].values.astype(np.unicode)
-        train_file_labels = train_df['Target'].values.astype(np.unicode)
+            dtype={"Id": np.unicode, "Target": np.unicode})
+        train_file_ids = train_df["Id"].values.astype(np.unicode)
+        train_file_labels = train_df["Target"].values.astype(np.unicode)
 
         image_count = len(train_file_ids)
 
         if os.path.exists(split_file_path):
             if generate_split:
-                logging.info('Split file already exists: {}'.format(split_file_path))
+                logging.info("Split file already exists: {}".format(split_file_path))
 
             slice_df = pd.read_csv(
                 split_file_path,
-                sep=',',
+                sep=",",
                 index_col=False,
             )
-            categories = slice_df['Folder{}'.format(working_split_folder_ind1)].values.astype(np.uint8)
+            categories = slice_df["Folder{}".format(working_split_folder_ind1)].values.astype(np.uint8)
         else:
             if not generate_split:
                 raise Exception("Split file doesn't exist: {}".format(split_file_path))
@@ -147,7 +89,7 @@ class KHPA(Dataset):
                 unique_label_position_lists=unique_label_position_lists)
             assert (image_count == dataset_folder_table.sum())
 
-            slice_df_dict = {'Id': train_file_ids}
+            slice_df_dict = {"Id": train_file_ids}
             slice_df_dict.update({"Folder{}".format(i + 1): dataset_folder_table[i]
                                   for i in range(num_split_folders)})
 
@@ -158,13 +100,13 @@ class KHPA(Dataset):
                 sep=',',
                 index=False)
 
-            categories = slice_df['Folder{}'.format(working_split_folder_ind1)].values.astype(np.uint8)
+            categories = slice_df["Folder{}".format(working_split_folder_ind1)].values.astype(np.uint8)
 
         if os.path.exists(stats_file_path):
             if generate_stats:
-                logging.info('Stats file already exists: {}'.format(stats_file_path))
+                logging.info("Stats file already exists: {}".format(stats_file_path))
 
-            with open(stats_file_path, 'r') as f:
+            with open(stats_file_path, "r") as f:
                 stats_dict = json.load(f)
 
             mean_rgby = np.array(stats_dict["mean_rgby"], np.float32)
@@ -216,7 +158,7 @@ class KHPA(Dataset):
                 crop_image_size=model_input_image_size)
 
     def __str__(self):
-        return self.__class__.__name__ + '({})'.format(len(self.train_file_ids))
+        return self.__class__.__name__ + "({})".format(len(self.train_file_ids))
 
     def __len__(self):
         return len(self.train_file_ids)
@@ -522,127 +464,11 @@ class KHPAValTransform(object):
         return img, label
 
 
-def get_batch_fn():
-    def batch_fn(batch, ctx):
-        data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-        label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-        # weight = gluon.utils.split_and_load(batch[2].astype(np.float32, copy=False), ctx_list=ctx, batch_axis=0)
-        return data, label
-    return batch_fn
-
-
-def get_train_data_loader(data_dir_path,
-                          split_file_path,
-                          generate_split,
-                          num_split_folders,
-                          stats_file_path,
-                          generate_stats,
-                          batch_size,
-                          num_workers,
-                          model_input_image_size):
-    dataset = KHPA(
-        root=data_dir_path,
-        split_file_path=split_file_path,
-        generate_split=generate_split,
-        num_split_folders=num_split_folders,
-        stats_file_path=stats_file_path,
-        generate_stats=generate_stats,
-        model_input_image_size=model_input_image_size,
-        train=True)
-    sampler = WeightedRandomSampler(
-        length=len(dataset),
-        weights=dataset.sample_weights)
-    return gluon.data.DataLoader(
-        dataset=dataset,
-        batch_size=batch_size,
-        # shuffle=True,
-        sampler=sampler,
-        last_batch='discard',
-        num_workers=num_workers)
-
-
-def get_val_data_loader(data_dir_path,
-                        split_file_path,
-                        generate_split,
-                        num_split_folders,
-                        stats_file_path,
-                        generate_stats,
-                        batch_size,
-                        num_workers,
-                        model_input_image_size,
-                        preproc_resize_image_size):
-    return gluon.data.DataLoader(
-        dataset=KHPA(
-            root=data_dir_path,
-            split_file_path=split_file_path,
-            generate_split=generate_split,
-            num_split_folders=num_split_folders,
-            stats_file_path=stats_file_path,
-            generate_stats=generate_stats,
-            preproc_resize_image_size=preproc_resize_image_size,
-            model_input_image_size=model_input_image_size,
-            train=False),
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=num_workers)
-
-
-def get_train_data_source(dataset_args,
-                          batch_size,
-                          num_workers,
-                          input_image_size=(224, 224)):
-    return get_train_data_loader(
-        data_dir_path=dataset_args.data_path,
-        split_file_path=dataset_args.split_file,
-        generate_split=dataset_args.gen_split,
-        num_split_folders=dataset_args.num_split_folders,
-        stats_file_path=dataset_args.stats_file,
-        generate_stats=dataset_args.gen_stats,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        model_input_image_size=input_image_size)
-
-
-def get_val_data_source(dataset_args,
-                        batch_size,
-                        num_workers,
-                        input_image_size=(224, 224),
-                        resize_inv_factor=0.875):
-    assert (resize_inv_factor > 0.0)
-    if isinstance(input_image_size, int):
-        input_image_size = (input_image_size, input_image_size)
-    resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
-
-    return get_val_data_loader(
-        data_dir_path=dataset_args.data_path,
-        split_file_path=dataset_args.split_file,
-        generate_split=dataset_args.gen_split,
-        num_split_folders=dataset_args.num_split_folders,
-        stats_file_path=dataset_args.stats_file,
-        generate_stats=dataset_args.gen_stats,
-        batch_size=batch_size,
-        num_workers=num_workers,
-        model_input_image_size=input_image_size,
-        preproc_resize_image_size=resize_value)
-
-
-def validate(metric_calc,
-             net,
-             val_data,
-             batch_fn,
-             data_source_needs_reset,
-             dtype,
-             ctx):
-    if data_source_needs_reset:
-        val_data.reset()
-    metric_calc.reset()
-    for batch in val_data:
-        data_list, labels_list = batch_fn(batch, ctx)
-        onehot_outputs_list = [net(X.astype(dtype, copy=False)).reshape(0, -1, 2) for X in data_list]
-        labels_list_ = [Y.reshape(-1,) for Y in labels_list]
-        onehot_outputs_list_ = [Y.reshape(-1, 2) for Y in onehot_outputs_list]
-        metric_calc.update(
-            labels=labels_list_,
-            preds=onehot_outputs_list_)
-    metric_name_value = metric_calc.get()
-    return metric_name_value
+class KHPAMetaInfo(object):
+    label = "KHPA"
+    root_dir_name = "khpa"
+    dataset_class = KHPA
+    num_training_samples = None
+    in_channels = 4
+    num_classes = 56
+    input_image_size = (224, 224)

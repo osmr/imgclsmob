@@ -14,11 +14,11 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model
 
-from gluon.khpa import add_dataset_parser_arguments
-from gluon.khpa import get_batch_fn
-from gluon.khpa import get_train_data_source
-from gluon.khpa import get_val_data_source
-from gluon.khpa import validate
+from gluon.khpa_utils import add_dataset_parser_arguments
+from gluon.khpa_utils import get_batch_fn
+from gluon.khpa_utils import get_train_data_source
+from gluon.khpa_utils import get_val_data_source
+from gluon.khpa_utils import validate
 
 
 def parse_args():

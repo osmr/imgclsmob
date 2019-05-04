@@ -12,14 +12,13 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy
+from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
 from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_train_data_source
 from gluon.imagenet1k_utils import get_val_data_source
 from gluon.imagenet1k_utils import get_dataset_metainfo
-from gluon.cls_metrics import Top1Error, TopKError
 
 
 def parse_args():
@@ -457,6 +456,9 @@ def train_net(batch_size,
               num_classes,
               grad_clip_value,
               batch_size_scale,
+              val_metric,
+              train_metric,
+              opt_metric_name,
               ctx):
 
     assert (not (mixup and label_smoothing))
@@ -467,11 +469,6 @@ def train_net(batch_size,
 
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
-
-    val_metric = mx.metric.CompositeEvalMetric()
-    val_metric.add(Top1Error(name="err-top1"))
-    val_metric.add(TopKError(top_k=5, name="err-top5"))
-    train_metric = Top1Error(name="err-top1")
 
     loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
 
@@ -538,8 +535,8 @@ def train_net(batch_size,
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
     if lp_saver is not None:
-        logging.info("Best err-top5: {:.4f} at {} epoch".format(
-            lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
+        logging.info("Best {}: {:.4f} at {} epoch".format(
+            opt_metric_name, lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
 def main():
@@ -572,24 +569,23 @@ def main():
     num_classes = net.classes
     input_image_size = net.in_size
 
-    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     train_data = get_train_data_source(
-        dataset_metainfo=dataset_metainfo,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size)
     val_data = get_val_data_source(
-        dataset_metainfo=dataset_metainfo,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(use_imgrec=dataset_metainfo.use_imgrec)
+    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
 
-    num_training_samples = len(train_data._dataset) if not dataset_metainfo.use_imgrec else\
-        dataset_metainfo.num_training_samples
+    num_training_samples = len(train_data._dataset) if not ds_metainfo.use_imgrec else ds_metainfo.num_training_samples
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -615,8 +611,9 @@ def main():
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:
+        param_names = ds_metainfo.val_metric_capts + ds_metainfo.train_metric_capts + ["Train.Loss", "LR"]
         lp_saver = TrainLogParamSaver(
-            checkpoint_file_name_prefix="{}_{}".format(dataset_metainfo.short_label, args.model),
+            checkpoint_file_name_prefix="{}_{}".format(ds_metainfo.short_label, args.model),
             last_checkpoint_file_name_suffix="last",
             best_checkpoint_file_name_suffix=None,
             last_checkpoint_dir_path=args.save_dir,
@@ -627,8 +624,8 @@ def main():
             checkpoint_file_exts=(".params", ".states"),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=["Val.Top1", "Val.Top5", "Train.Top1", "Train.Loss", "LR"],
-            acc_ind=1,
+            param_names=param_names,
+            acc_ind=ds_metainfo.saver_acc_ind,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, "score.log"),
@@ -644,7 +641,7 @@ def main():
         train_data=train_data,
         val_data=val_data,
         batch_fn=batch_fn,
-        data_source_needs_reset=dataset_metainfo.use_imgrec,
+        data_source_needs_reset=ds_metainfo.use_imgrec,
         dtype=args.dtype,
         net=net,
         trainer=trainer,
@@ -657,6 +654,9 @@ def main():
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
+        val_metric=get_composite_metric(ds_metainfo.val_metric_names),
+        train_metric=get_composite_metric(ds_metainfo.train_metric_names),
+        opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         ctx=ctx)
 
 

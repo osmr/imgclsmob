@@ -108,3 +108,8 @@ class CUB200MetaInfo(object):
     input_image_size = (224, 224)
     resize_inv_factor = 0.875
     use_imgrec = False
+    val_metric_capts = ["Val.Top1"]
+    val_metric_names = ["err-top1"]
+    train_metric_capts = ["Train.Top1"]
+    train_metric_names = ["err-top1"]
+    saver_acc_ind = 0

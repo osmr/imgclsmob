@@ -44,6 +44,11 @@ class ImageNet1KMetaInfo(object):
     input_image_size = (224, 224)
     resize_inv_factor = 0.875
     use_imgrec = False
+    val_metric_capts = ["Val.Top1", "Val.Top5"]
+    val_metric_names = ["err-top1", "err-top5"]
+    train_metric_capts = ["Train.Top1"]
+    train_metric_names = ["err-top1"]
+    saver_acc_ind = 1
 
 
 def imagenet_train_transform(input_image_size=(224, 224),

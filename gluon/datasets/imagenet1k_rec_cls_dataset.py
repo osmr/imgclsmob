@@ -20,6 +20,11 @@ class ImageNet1KRecMetaInfo(object):
     val_imgrec_file_path = "val.rec"
     val_imgidx_file_path = "val.idx"
     use_imgrec = True
+    val_metric_capts = ["Val.Top1", "Val.Top5"]
+    val_metric_names = ["err-top1", "err-top5"]
+    train_metric_capts = ["Train.Top1"]
+    train_metric_names = ["err-top1"]
+    saver_acc_ind = 1
 
 
 def imagenet_train_imgrec_iter(imgrec_file_path,

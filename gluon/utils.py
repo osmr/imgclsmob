@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import mxnet as mx
 from .gluoncv2.model_provider import get_model
+from .cls_metrics import Top1Error, TopKError
 
 
 def prepare_mx_context(num_gpus,
@@ -136,3 +137,22 @@ def report_accuracy(metric,
     else:
         raise Exception("Wrong metric type: {}".format(type(metric)))
     return msg
+
+
+def get_metric(metric_name):
+    if metric_name == "err-top1":
+        return Top1Error(name="err-top1")
+    elif metric_name == "err-top5":
+        return TopKError(top_k=5, name="err-top5")
+    else:
+        raise Exception("Wrong metric name: {}".format(metric_name))
+
+
+def get_composite_metric(metric_names):
+    if len(metric_names) == 1:
+        val_metric = get_metric(metric_names[0])
+    else:
+        val_metric = mx.metric.CompositeEvalMetric()
+        for name in metric_names:
+            val_metric.add(get_metric(name))
+    return val_metric

@@ -8,94 +8,95 @@ from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
 from gluon.model_stats import measure_model
 
-from gluon.imagenet1k_utils import add_dataset_parser_arguments as in1k_add_dataset_parser_arguments
+from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_val_data_source
+from gluon.imagenet1k_utils import get_dataset_metainfo
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Gluon/ImageNet-1K)',
+        description="Evaluate a model for image classification (Gluon)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--dataset',
+        "--dataset",
         type=str,
         default="ImageNet1K_rec",
-        help='dataset name. options are ImageNet1K and ImageNet1K_rec')
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec and CUB_200_2011")
 
     args, _ = parser.parse_known_args()
-    in1k_add_dataset_parser_arguments(parser, args.dataset)
+    add_dataset_parser_arguments(parser, args.dataset)
 
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options.')
+        help="type of model to use. see model_provider for options")
     parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model from gluon.')
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from gluon.")
     parser.add_argument(
-        '--dtype',
+        "--dtype",
         type=str,
-        default='float32',
-        help='data type for training. default is float32')
+        default="float32",
+        help="data type for training. default is float32")
     parser.add_argument(
-        '--resume',
+        "--resume",
         type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
+        default="",
+        help="resume from previously saved parameters if not None")
     parser.add_argument(
-        '--calc-flops',
-        dest='calc_flops',
-        action='store_true',
-        help='calculate FLOPs')
+        "--calc-flops",
+        dest="calc_flops",
+        action="store_true",
+        help="calculate FLOPs")
     parser.add_argument(
-        '--calc-flops-only',
-        dest='calc_flops_only',
-        action='store_true',
-        help='calculate FLOPs without quality estimation')
+        "--calc-flops-only",
+        dest="calc_flops_only",
+        action="store_true",
+        help="calculate FLOPs without quality estimation")
 
     parser.add_argument(
-        '--num-gpus',
+        "--num-gpus",
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help="number of gpus to use")
     parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
         default=4,
         type=int,
-        help='number of preprocessing workers')
+        help="number of preprocessing workers")
 
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=512,
-        help='training batch size per device (CPU/GPU).')
+        help="training batch size per device (CPU/GPU)")
 
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
 
     parser.add_argument(
-        '--log-packages',
+        "--log-packages",
         type=str,
-        default='mxnet',
-        help='list of python packages for logging')
+        default="mxnet",
+        help="list of python packages for logging")
     parser.add_argument(
-        '--log-pip-packages',
+        "--log-pip-packages",
         type=str,
-        default='mxnet-cu100',
-        help='list of pip packages for logging')
+        default="mxnet-cu100",
+        help="list of pip packages for logging")
     args = parser.parse_args()
     return args
 
@@ -125,12 +126,12 @@ def test(net,
             dtype=dtype,
             ctx=ctx)
         if extended_log:
-            logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
                 top1=err_top1_val, top5=err_top5_val))
         else:
-            logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
                 top1=err_top1_val, top5=err_top5_val))
-        logging.info('Time cost: {:.4f} sec'.format(
+        logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
 
     if calc_weight_count:
@@ -173,16 +174,19 @@ def main():
         in_channels=args.in_channels,
         do_hybridize=(not args.calc_flops),
         ctx=ctx)
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
+    assert (hasattr(net, "in_size"))
+    input_image_size = net.in_size
+
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     val_data = get_val_data_source(
-        dataset_name=args.dataset,
+        dataset_metainfo=dataset_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(dataset_name=args.dataset)
+    batch_fn = get_batch_fn(use_imgrec=dataset_metainfo.use_imgrec)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(

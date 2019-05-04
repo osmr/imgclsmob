@@ -7,6 +7,7 @@ import mxnet as mx
 
 class ImageNet1KRecMetaInfo(object):
     label = "ImageNet1K_rec"
+    short_label = "imagenet"
     root_dir_name = "imagenet_rec"
     dataset_class = None
     num_training_samples = 1281167

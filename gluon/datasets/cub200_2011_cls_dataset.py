@@ -98,10 +98,13 @@ class CUB200_2011(dataset.Dataset):
 
 
 class CUB200MetaInfo(object):
-    label = "CUB"
+    label = "CUB_200_2011"
+    short_label = "cub"
     root_dir_name = "CUB_200_2011"
     dataset_class = CUB200_2011
     num_training_samples = None
     in_channels = 3
     num_classes = 200
     input_image_size = (224, 224)
+    resize_inv_factor = 0.875
+    use_imgrec = False

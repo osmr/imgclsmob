@@ -1,5 +1,5 @@
 """
-    ImageNet-1K dataset routines.
+    ImageNet-1K/CUB-200-2011 dataset routines.
 """
 
 __all__ = ['get_dataset_metainfo', 'add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_source',
@@ -7,10 +7,12 @@ __all__ = ['get_dataset_metainfo', 'add_dataset_parser_arguments', 'get_batch_fn
 
 import os
 from mxnet import gluon
-from gluon.datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo, ImageNet1K, calc_val_resize_value,\
-    imagenet_val_transform, imagenet_train_transform
-from gluon.datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo, imagenet_train_imgrec_iter,\
-    imagenet_val_imgrec_iter
+from gluon.datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
+from gluon.datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo
+from gluon.datasets.cub200_2011_cls_dataset import CUB200MetaInfo
+from gluon.datasets.imagenet1k_cls_dataset import calc_val_resize_value, imagenet_val_transform,\
+    imagenet_train_transform
+from gluon.datasets.imagenet1k_rec_cls_dataset import imagenet_train_imgrec_iter, imagenet_val_imgrec_iter
 
 
 def get_dataset_metainfo(dataset_name):
@@ -18,6 +20,8 @@ def get_dataset_metainfo(dataset_name):
         return ImageNet1KMetaInfo
     elif dataset_name == "ImageNet1K_rec":
         return ImageNet1KRecMetaInfo
+    elif dataset_name == "CUB_200_2011":
+        return CUB200MetaInfo
     else:
         raise Exception("Unrecognized dataset: {}".format(dataset_name))
 
@@ -31,30 +35,29 @@ def add_dataset_parser_arguments(parser,
         default=os.path.join("..", "imgclsmob_data", dataset_metainfo.root_dir_name),
         help="path to directory with {} dataset".format(dataset_metainfo.label))
     parser.add_argument(
-        '--input-size',
+        "--input-size",
         type=int,
         default=dataset_metainfo.input_image_size[0],
-        help='size of the input for model')
+        help="size of the input for model")
     parser.add_argument(
-        '--resize-inv-factor',
+        "--resize-inv-factor",
         type=float,
         default=dataset_metainfo.resize_inv_factor,
-        help='inverted ratio for input image crop')
+        help="inverted ratio for input image crop")
     parser.add_argument(
-        '--num-classes',
+        "--num-classes",
         type=int,
         default=dataset_metainfo.num_classes,
-        help='number of classes')
+        help="number of classes")
     parser.add_argument(
-        '--in-channels',
+        "--in-channels",
         type=int,
         default=dataset_metainfo.in_channels,
-        help='number of input channels')
+        help="number of input channels")
 
 
-def get_batch_fn(dataset_name):
-    dataset_metainfo = get_dataset_metainfo(dataset_name)
-    if dataset_metainfo.use_imgrec:
+def get_batch_fn(use_imgrec):
+    if use_imgrec:
         def batch_fn(batch, ctx):
             data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
             label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
@@ -68,12 +71,11 @@ def get_batch_fn(dataset_name):
         return batch_fn
 
 
-def get_train_data_source(dataset_name,
+def get_train_data_source(dataset_metainfo,
                           dataset_dir,
                           batch_size,
                           num_workers,
                           input_image_size=(224, 224)):
-    dataset_metainfo = get_dataset_metainfo(dataset_name)
     if dataset_metainfo.use_imgrec:
         if isinstance(input_image_size, int):
             input_image_size = (input_image_size, input_image_size)
@@ -85,8 +87,9 @@ def get_train_data_source(dataset_name,
             num_workers=num_workers,
             data_shape=data_shape)
     else:
+        dataset_class = dataset_metainfo.dataset_class
         transform_train = imagenet_train_transform(input_image_size=input_image_size)
-        dataset = ImageNet1K(
+        dataset = dataset_class(
             root=dataset_dir,
             train=True).transform_first(fn=transform_train)
         return gluon.data.DataLoader(
@@ -97,13 +100,12 @@ def get_train_data_source(dataset_name,
             num_workers=num_workers)
 
 
-def get_val_data_source(dataset_name,
+def get_val_data_source(dataset_metainfo,
                         dataset_dir,
                         batch_size,
                         num_workers,
                         input_image_size=(224, 224),
                         resize_inv_factor=0.875):
-    dataset_metainfo = get_dataset_metainfo(dataset_name)
     resize_value = calc_val_resize_value(
         input_image_size=input_image_size,
         resize_inv_factor=resize_inv_factor)
@@ -119,10 +121,11 @@ def get_val_data_source(dataset_name,
             data_shape=data_shape,
             resize_value=resize_value)
     else:
+        dataset_class = dataset_metainfo.dataset_class
         transform_val = imagenet_val_transform(
             input_image_size=input_image_size,
             resize_value=resize_value)
-        dataset = ImageNet1K(
+        dataset = dataset_class(
             root=dataset_dir,
             train=False).transform_first(fn=transform_val)
         return gluon.data.DataLoader(

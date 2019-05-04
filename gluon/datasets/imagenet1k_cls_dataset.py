@@ -35,6 +35,7 @@ class ImageNet1K(ImageFolderDataset):
 
 class ImageNet1KMetaInfo(object):
     label = "ImageNet1K"
+    short_label = "imagenet"
     root_dir_name = "imagenet"
     dataset_class = ImageNet1K
     num_training_samples = None

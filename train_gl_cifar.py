@@ -438,7 +438,7 @@ def train_epoch(epoch,
     logging.info("[Epoch {}] training: {}\tloss={:.4f}".format(
         epoch + 1, train_accuracy_msg, train_loss))
 
-    return err_train_value, train_loss
+    return train_loss
 
 
 def train_net(batch_size,

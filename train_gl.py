@@ -12,13 +12,14 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, validate
+from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy
 
 from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_train_data_source
 from gluon.imagenet1k_utils import get_val_data_source
 from gluon.imagenet1k_utils import get_dataset_metainfo
+from gluon.cls_metrics import Top1Error, TopKError
 
 
 def parse_args():
@@ -339,7 +340,7 @@ def save_params(file_stem,
 
 def train_epoch(epoch,
                 net,
-                acc_top1_train,
+                train_metric,
                 train_data,
                 batch_fn,
                 data_source_needs_reset,
@@ -363,7 +364,7 @@ def train_epoch(epoch,
     tic = time.time()
     if data_source_needs_reset:
         train_data.reset()
-    acc_top1_train.reset()
+    train_metric.reset()
     train_loss = 0.0
 
     btic = time.time()
@@ -409,17 +410,16 @@ def train_epoch(epoch,
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
-        acc_top1_train.update(
+        train_metric.update(
             labels=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             btic = time.time()
-            _, top1 = acc_top1_train.get()
-            err_top1_train = 1.0 - top1
-            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.5f}".format(
-                epoch + 1, i, speed, err_top1_train, trainer.learning_rate))
+            train_accuracy_msg = report_accuracy(metric=train_metric)
+            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\tlr={:.5f}".format(
+                epoch + 1, i, speed, train_accuracy_msg, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -431,12 +431,11 @@ def train_epoch(epoch,
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
-    _, top1 = acc_top1_train.get()
-    err_top1_train = 1.0 - top1
-    logging.info("[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}".format(
-        epoch + 1, err_top1_train, train_loss))
+    train_accuracy_msg = report_accuracy(metric=train_metric)
+    logging.info("[Epoch {}] training: {}\tloss={:.4f}".format(
+        epoch + 1, train_accuracy_msg, train_loss))
 
-    return err_top1_train, train_loss
+    return train_loss
 
 
 def train_net(batch_size,
@@ -469,9 +468,10 @@ def train_net(batch_size,
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    acc_top1_val = mx.metric.Accuracy()
-    acc_top5_val = mx.metric.TopKAccuracy(5)
-    acc_top1_train = mx.metric.Accuracy()
+    val_metric = mx.metric.CompositeEvalMetric()
+    val_metric.add(Top1Error(name="err-top1"))
+    val_metric.add(TopKError(top_k=5, name="err-top5"))
+    train_metric = Top1Error(name="err-top1")
 
     loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
 
@@ -479,24 +479,23 @@ def train_net(batch_size,
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info("Start training from [Epoch {}]".format(start_epoch1))
-        err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1_val,
-            acc_top5=acc_top5_val,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        logging.info("[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}".format(
-            start_epoch1 - 1, err_top1_val, err_top5_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(start_epoch1 - 1, val_accuracy_msg))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        err_top1_train, train_loss = train_epoch(
+        train_loss = train_epoch(
             epoch=epoch,
             net=net,
-            acc_top1_train=acc_top1_train,
+            train_metric=train_metric,
             train_data=train_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
@@ -515,24 +514,24 @@ def train_net(batch_size,
             grad_clip_value=grad_clip_value,
             batch_size_scale=batch_size_scale)
 
-        err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1_val,
-            acc_top5=acc_top5_val,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-
-        logging.info("[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}".format(
-            epoch + 1, err_top1_val, err_top5_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(epoch + 1, val_accuracy_msg))
 
         if lp_saver is not None:
             lp_saver_kwargs = {"net": net, "trainer": trainer}
+            val_acc_values = list(val_metric.get()[1])
+            train_acc_values = list(train_metric.get()[1])
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, err_top1_train, err_top5_val, train_loss, trainer.learning_rate],
+                params=(val_acc_values + train_acc_values + [train_loss, trainer.learning_rate]),
                 **lp_saver_kwargs)
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
@@ -626,8 +625,8 @@ def main():
             checkpoint_file_exts=(".params", ".states"),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=["Val.Top1", "Train.Top1", "Val.Top5", "Train.Loss", "LR"],
-            acc_ind=2,
+            param_names=["Val.Top1", "Val.Top5", "Train.Top1", "Train.Loss", "LR"],
+            acc_ind=1,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, "score.log"),

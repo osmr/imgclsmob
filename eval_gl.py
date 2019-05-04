@@ -5,13 +5,14 @@ import logging
 import mxnet as mx
 
 from common.logger_utils import initialize_logging
-from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
+from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate, report_accuracy
 from gluon.model_stats import measure_model
 
 from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_val_data_source
 from gluon.imagenet1k_utils import get_dataset_metainfo
+from gluon.cls_metrics import Top1Error, TopKError
 
 
 def parse_args():
@@ -104,6 +105,7 @@ def parse_args():
 def test(net,
          val_data,
          batch_fn,
+         data_source_needs_reset,
          dtype,
          ctx,
          input_image_size,
@@ -113,24 +115,22 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        acc_top1 = mx.metric.Accuracy()
-        acc_top5 = mx.metric.TopKAccuracy(5)
+        metric = mx.metric.CompositeEvalMetric()
+        metric.add(Top1Error(name="err-top1"))
+        metric.add(TopKError(top_k=5, name="err-top5"))
         tic = time.time()
-        err_top1_val, err_top5_val = validate(
-            acc_top1=acc_top1,
-            acc_top5=acc_top5,
+        validate(
+            metric=metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
-            data_source_needs_reset=True,
+            data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        if extended_log:
-            logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
-                top1=err_top1_val, top5=err_top5_val))
-        else:
-            logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
-                top1=err_top1_val, top5=err_top5_val))
+        accuracy_msg = report_accuracy(
+            metric=metric,
+            extended_log=extended_log)
+        logging.info("Test: {}".format(accuracy_msg))
         logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
 
@@ -193,6 +193,7 @@ def main():
         net=net,
         val_data=val_data,
         batch_fn=batch_fn,
+        data_source_needs_reset=dataset_metainfo.use_imgrec,
         dtype=args.dtype,
         ctx=ctx,
         input_image_size=input_image_size,

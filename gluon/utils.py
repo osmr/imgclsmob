@@ -122,7 +122,7 @@ def report_accuracy(metric,
 
 
 def get_metric(metric_name):
-    if metric_name == "err-top1":
+    if metric_name in ["err-top1", "err"]:
         return Top1Error(name="err-top1")
     elif metric_name == "err-top5":
         return TopKError(top_k=5, name="err-top5")

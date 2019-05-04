@@ -12,13 +12,14 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, validate1
+from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
 from gluon.cifar_utils import add_dataset_parser_arguments
 from gluon.cifar_utils import batch_fn
 from gluon.cifar_utils import get_train_data_source
 from gluon.cifar_utils import get_val_data_source
 from gluon.cifar_utils import get_num_training_samples
+from gluon.cifar_utils import get_dataset_metainfo
 
 
 def parse_args():
@@ -343,7 +344,7 @@ def save_params(file_stem,
 
 def train_epoch(epoch,
                 net,
-                acc_metric_train,
+                train_metric,
                 train_data,
                 data_source_needs_reset,
                 dtype,
@@ -366,7 +367,7 @@ def train_epoch(epoch,
     tic = time.time()
     if data_source_needs_reset:
         train_data.reset()
-    acc_metric_train.reset()
+    train_metric.reset()
     train_loss = 0.0
 
     btic = time.time()
@@ -412,17 +413,16 @@ def train_epoch(epoch,
 
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
-        acc_metric_train.update(
+        train_metric.update(
             labels=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
             preds=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             btic = time.time()
-            _, acc_train_value = acc_metric_train.get()
-            err_train_value = 1.0 - acc_train_value
-            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\terr={:.4f}\tlr={:.5f}".format(
-                epoch + 1, i, speed, err_train_value, trainer.learning_rate))
+            train_accuracy_msg = report_accuracy(metric=train_metric)
+            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\tlr={:.5f}".format(
+                epoch + 1, i, speed, train_accuracy_msg, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -434,10 +434,9 @@ def train_epoch(epoch,
         epoch + 1, throughput, time.time() - tic))
 
     train_loss /= (i + 1)
-    _, acc_train_value = acc_metric_train.get()
-    err_train_value = 1.0 - acc_train_value
-    logging.info("[Epoch {}] training: err={:.4f}\tloss={:.4f}".format(
-        epoch + 1, err_train_value, train_loss))
+    train_accuracy_msg = report_accuracy(metric=train_metric)
+    logging.info("[Epoch {}] training: {}\tloss={:.4f}".format(
+        epoch + 1, train_accuracy_msg, train_loss))
 
     return err_train_value, train_loss
 
@@ -460,6 +459,9 @@ def train_net(batch_size,
               num_classes,
               grad_clip_value,
               batch_size_scale,
+              val_metric,
+              train_metric,
+              opt_metric_name,
               ctx):
 
     assert (not (mixup and label_smoothing))
@@ -471,32 +473,29 @@ def train_net(batch_size,
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    acc_metric_val = mx.metric.Accuracy()
-    acc_metric_train = mx.metric.Accuracy()
-
     loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info("Start training from [Epoch {}]".format(start_epoch1))
-        err_val = validate1(
-            accuracy_metric=acc_metric_val,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-        logging.info("[Epoch {}] validation: err={:.4f}".format(
-            start_epoch1 - 1, err_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(start_epoch1 - 1, val_accuracy_msg))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
-        err_train, train_loss = train_epoch(
+        train_loss = train_epoch(
             epoch=epoch,
             net=net,
-            acc_metric_train=acc_metric_train,
+            train_metric=train_metric,
             train_data=train_data,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
@@ -514,29 +513,32 @@ def train_net(batch_size,
             grad_clip_value=grad_clip_value,
             batch_size_scale=batch_size_scale)
 
-        err_val = validate1(
-            accuracy_metric=acc_metric_val,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
-
-        logging.info("[Epoch {}] validation: err={:.4f}".format(
-            epoch + 1, err_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(epoch + 1, val_accuracy_msg))
 
         if lp_saver is not None:
             lp_saver_kwargs = {"net": net, "trainer": trainer}
+            val_acc_values = val_metric.get()[1]
+            train_acc_values = train_metric.get()[1]
+            val_acc_values = val_acc_values if type(val_acc_values) == list else [val_acc_values]
+            train_acc_values = train_acc_values if type(train_acc_values) == list else [train_acc_values]
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_val, err_train, train_loss, trainer.learning_rate],
+                params=(val_acc_values + train_acc_values + [train_loss, trainer.learning_rate]),
                 **lp_saver_kwargs)
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
     if lp_saver is not None:
-        logging.info("Best err: {:.4f} at {} epoch".format(
-            lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
+        logging.info("Best {}: {:.4f} at {} epoch".format(
+            opt_metric_name, lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
 def main():
@@ -568,6 +570,7 @@ def main():
     assert (hasattr(net, "classes"))
     num_classes = net.classes if hasattr(net, "classes") else 10
 
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     train_data = get_train_data_source(
         dataset_name=args.dataset,
         dataset_dir=args.data_dir,
@@ -606,6 +609,7 @@ def main():
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:
+        param_names = ds_metainfo.val_metric_capts + ds_metainfo.train_metric_capts + ["Train.Loss", "LR"]
         lp_saver = TrainLogParamSaver(
             checkpoint_file_name_prefix="{}_{}".format(args.dataset.lower(), args.model),
             last_checkpoint_file_name_suffix="last",
@@ -618,8 +622,8 @@ def main():
             checkpoint_file_exts=(".params", ".states"),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=["Val.Err", "Train.Err", "Train.Loss", "LR"],
-            acc_ind=0,
+            param_names=param_names,
+            acc_ind=ds_metainfo.saver_acc_ind,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, "score.log"),
@@ -647,6 +651,9 @@ def main():
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
+        val_metric=get_composite_metric(ds_metainfo.val_metric_names),
+        train_metric=get_composite_metric(ds_metainfo.train_metric_names),
+        opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         ctx=ctx)
 
 

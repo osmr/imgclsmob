@@ -527,8 +527,10 @@ def train_net(batch_size,
 
         if lp_saver is not None:
             lp_saver_kwargs = {"net": net, "trainer": trainer}
-            val_acc_values = list(val_metric.get()[1])
-            train_acc_values = list(train_metric.get()[1])
+            val_acc_values = val_metric.get()[1]
+            train_acc_values = train_metric.get()[1]
+            val_acc_values = val_acc_values if type(val_acc_values) == list else [val_acc_values]
+            train_acc_values = train_acc_values if type(train_acc_values) == list else [train_acc_values]
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
                 params=(val_acc_values + train_acc_values + [train_loss, trainer.learning_rate]),

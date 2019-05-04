@@ -2,17 +2,15 @@ import argparse
 import time
 import logging
 
-import mxnet as mx
-
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate, report_accuracy
+from gluon.utils import get_composite_metric
 from gluon.model_stats import measure_model
 
 from gluon.imagenet1k_utils import add_dataset_parser_arguments
 from gluon.imagenet1k_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_val_data_source
 from gluon.imagenet1k_utils import get_dataset_metainfo
-from gluon.cls_metrics import Top1Error, TopKError
 
 
 def parse_args():
@@ -106,6 +104,7 @@ def test(net,
          val_data,
          batch_fn,
          data_source_needs_reset,
+         val_metric,
          dtype,
          ctx,
          input_image_size,
@@ -115,12 +114,9 @@ def test(net,
          calc_flops_only=True,
          extended_log=False):
     if not calc_flops_only:
-        metric = mx.metric.CompositeEvalMetric()
-        metric.add(Top1Error(name="err-top1"))
-        metric.add(TopKError(top_k=5, name="err-top5"))
         tic = time.time()
         validate(
-            metric=metric,
+            metric=val_metric,
             net=net,
             val_data=val_data,
             batch_fn=batch_fn,
@@ -128,7 +124,7 @@ def test(net,
             dtype=dtype,
             ctx=ctx)
         accuracy_msg = report_accuracy(
-            metric=metric,
+            metric=val_metric,
             extended_log=extended_log)
         logging.info("Test: {}".format(accuracy_msg))
         logging.info("Time cost: {:.4f} sec".format(
@@ -178,22 +174,23 @@ def main():
     assert (hasattr(net, "in_size"))
     input_image_size = net.in_size
 
-    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     val_data = get_val_data_source(
-        dataset_metainfo=dataset_metainfo,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
         resize_inv_factor=args.resize_inv_factor)
-    batch_fn = get_batch_fn(use_imgrec=dataset_metainfo.use_imgrec)
+    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
         val_data=val_data,
         batch_fn=batch_fn,
-        data_source_needs_reset=dataset_metainfo.use_imgrec,
+        data_source_needs_reset=ds_metainfo.use_imgrec,
+        val_metric=get_composite_metric(ds_metainfo.val_metric_names),
         dtype=args.dtype,
         ctx=ctx,
         input_image_size=input_image_size,

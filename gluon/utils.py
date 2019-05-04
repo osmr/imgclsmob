@@ -101,24 +101,6 @@ def validate(metric,
     return metric
 
 
-def validate1(accuracy_metric,
-              net,
-              val_data,
-              batch_fn,
-              data_source_needs_reset,
-              dtype,
-              ctx):
-    if data_source_needs_reset:
-        val_data.reset()
-    accuracy_metric.reset()
-    for batch in val_data:
-        data_list, labels_list = batch_fn(batch, ctx)
-        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
-        accuracy_metric.update(labels_list, outputs_list)
-    _, accuracy_value = accuracy_metric.get()
-    return 1.0 - accuracy_value
-
-
 def report_accuracy(metric,
                     extended_log=False):
     metric_info = metric.get()

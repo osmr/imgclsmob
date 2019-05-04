@@ -23,7 +23,7 @@ from gluon.imagenet1k_utils import get_dataset_metainfo
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Train a model for image classification (Gluon)",
+        description="Train a model for image classification (Gluon/ImageNet1K)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",

@@ -27,23 +27,13 @@ def get_dataset_metainfo(dataset_name):
 
 
 def add_dataset_parser_arguments(parser,
-                                 dataset_name="ImageNet1K"):
+                                 dataset_name):
     dataset_metainfo = get_dataset_metainfo(dataset_name)
     parser.add_argument(
         "--data-dir",
         type=str,
         default=os.path.join("..", "imgclsmob_data", dataset_metainfo.root_dir_name),
         help="path to directory with {} dataset".format(dataset_metainfo.label))
-    parser.add_argument(
-        "--input-size",
-        type=int,
-        default=dataset_metainfo.input_image_size[0],
-        help="size of the input for model")
-    parser.add_argument(
-        "--resize-inv-factor",
-        type=float,
-        default=dataset_metainfo.resize_inv_factor,
-        help="inverted ratio for input image crop")
     parser.add_argument(
         "--num-classes",
         type=int,
@@ -54,6 +44,16 @@ def add_dataset_parser_arguments(parser,
         type=int,
         default=dataset_metainfo.in_channels,
         help="number of input channels")
+    parser.add_argument(
+        "--input-size",
+        type=int,
+        default=dataset_metainfo.input_image_size[0],
+        help="size of the input for model")
+    parser.add_argument(
+        "--resize-inv-factor",
+        type=float,
+        default=dataset_metainfo.resize_inv_factor,
+        help="inverted ratio for input image crop")
 
 
 def get_batch_fn(use_imgrec):

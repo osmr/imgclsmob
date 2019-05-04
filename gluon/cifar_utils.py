@@ -2,8 +2,8 @@
     CIFAR/SVHN dataset routines.
 """
 
-__all__ = ['add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source', 'get_val_data_source',
-           'get_num_training_samples']
+__all__ = ['get_dataset_metainfo', 'add_dataset_parser_arguments', 'batch_fn', 'get_train_data_source',
+           'get_val_data_source', 'get_num_training_samples']
 
 import os
 from mxnet import gluon

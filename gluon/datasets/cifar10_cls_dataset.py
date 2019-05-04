@@ -17,6 +17,12 @@ class CIFAR10MetaInfo(object):
     in_channels = 3
     num_classes = 10
     input_image_size = (32, 32)
+    use_imgrec = False
+    val_metric_capts = ["Val.Err"]
+    val_metric_names = ["err-top1"]
+    train_metric_capts = ["Train.Err"]
+    train_metric_names = ["err-top1"]
+    saver_acc_ind = 0
 
 
 class RandomCrop(Block):

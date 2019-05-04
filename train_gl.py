@@ -587,8 +587,8 @@ def main():
     batch_fn = get_batch_fn(dataset_name=args.dataset)
     dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
 
-    num_training_samples = len(train_data._dataset)
-    assert (num_training_samples == 1281167)
+    num_training_samples = len(train_data._dataset) if not dataset_metainfo.use_imgrec else\
+        dataset_metainfo.num_training_samples
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,

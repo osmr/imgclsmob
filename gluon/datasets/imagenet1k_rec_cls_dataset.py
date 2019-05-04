@@ -9,7 +9,7 @@ class ImageNet1KRecMetaInfo(object):
     label = "ImageNet1K_rec"
     root_dir_name = "imagenet_rec"
     dataset_class = None
-    num_training_samples = None
+    num_training_samples = 1281167
     in_channels = 3
     num_classes = 1000
     input_image_size = (224, 224)

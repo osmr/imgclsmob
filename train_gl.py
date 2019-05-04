@@ -14,11 +14,11 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
 
-from gluon.imagenet1k import add_dataset_parser_arguments
-from gluon.imagenet1k import get_batch_fn
-from gluon.imagenet1k import get_train_data_source
-from gluon.imagenet1k import get_val_data_source
-from gluon.imagenet1k import num_training_samples
+from gluon.imagenet1k_utils import add_dataset_parser_arguments
+from gluon.imagenet1k_utils import get_batch_fn
+from gluon.imagenet1k_utils import get_train_data_source
+from gluon.imagenet1k_utils import get_val_data_source
+from gluon.imagenet1k_utils import num_training_samples
 
 
 def parse_args():

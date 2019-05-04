@@ -9,7 +9,7 @@ from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
 from gluon.cub200_2011_utils import add_dataset_parser_arguments
 from gluon.cub200_2011_utils import batch_fn
-from gluon.cub200_2011_utils import get_val_data_source
+from gluon.cub200_2011_utils import cub200_val_data_loader
 
 
 def parse_args():
@@ -169,7 +169,7 @@ def main():
         ctx=ctx)
     input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
 
-    val_data = get_val_data_source(
+    val_data = cub200_val_data_loader(
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers,

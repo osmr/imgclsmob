@@ -7,9 +7,10 @@ import mxnet as mx
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate
 from gluon.model_stats import measure_model
-from gluon.imagenet1k import add_dataset_parser_arguments
-from gluon.imagenet1k import get_batch_fn
-from gluon.imagenet1k import get_val_data_source
+
+from gluon.imagenet1k_utils import add_dataset_parser_arguments as in1k_add_dataset_parser_arguments
+from gluon.imagenet1k_utils import get_batch_fn
+from gluon.imagenet1k_utils import get_val_data_source
 
 
 def parse_args():
@@ -17,7 +18,7 @@ def parse_args():
         description='Evaluate a model for image classification (Gluon/ImageNet-1K)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    add_dataset_parser_arguments(parser)
+    in1k_add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',

@@ -7,9 +7,9 @@ import mxnet as mx
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count, validate1
 from gluon.model_stats import measure_model
-from gluon.cifar import add_dataset_parser_arguments
-from gluon.cifar import batch_fn
-from gluon.cifar import get_val_data_source
+from gluon.cifar_utils import add_dataset_parser_arguments
+from gluon.cifar_utils import batch_fn
+from gluon.cifar_utils import get_val_data_source
 
 
 def parse_args():

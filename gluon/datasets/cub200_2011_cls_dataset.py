@@ -1,5 +1,5 @@
 """
-    CUB-200-2011 dataset.
+    CUB-200-2011 classification dataset.
 """
 
 import os
@@ -11,7 +11,7 @@ from mxnet.gluon.data import dataset
 
 class CUB200_2011(dataset.Dataset):
     """
-    Load the CUB-200-2011 classification dataset.
+    Load the CUB-200-2011 fine-grained classification dataset.
 
     Refer to :doc:`../build/examples_datasets/imagenet` for the description of
     this dataset and how to prepare it.
@@ -95,3 +95,13 @@ class CUB200_2011(dataset.Dataset):
 
     def __len__(self):
         return len(self.image_ids)
+
+
+class CUB200MetaInfo(object):
+    label = "CUB"
+    root_dir_name = "CUB_200_2011"
+    dataset_class = CUB200_2011
+    num_training_samples = None
+    in_channels = 3
+    num_classes = 200
+    input_image_size = (224, 224)

@@ -14,11 +14,11 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate1
 
-from gluon.cifar import add_dataset_parser_arguments
-from gluon.cifar import batch_fn
-from gluon.cifar import get_train_data_source
-from gluon.cifar import get_val_data_source
-from gluon.cifar import get_num_training_samples
+from gluon.cifar_utils import add_dataset_parser_arguments
+from gluon.cifar_utils import batch_fn
+from gluon.cifar_utils import get_train_data_source
+from gluon.cifar_utils import get_val_data_source
+from gluon.cifar_utils import get_num_training_samples
 
 
 def parse_args():

@@ -52,6 +52,8 @@ class ImageNet1KMetaInfo(MetaInfo):
         self.train_metric_capts = ["Train.Top1"]
         self.train_metric_names = ["err-top1"]
         self.saver_acc_ind = 1
+        self.train_transform = imagenet_train_transform
+        self.val_transform = imagenet_val_transform
 
     def add_dataset_parser_arguments(self,
                                      parser,
@@ -68,12 +70,19 @@ class ImageNet1KMetaInfo(MetaInfo):
             default=self.resize_inv_factor,
             help="inverted ratio for input image crop")
 
+    def update(self,
+               args):
+        super(ImageNet1KMetaInfo, self).update(args)
+        self.input_image_size = (args.input_size, args.input_size)
+        self.resize_inv_factor = args.resize_inv_factor
 
-def imagenet_train_transform(input_image_size=(224, 224),
+
+def imagenet_train_transform(ds_metainfo,
                              mean_rgb=(0.485, 0.456, 0.406),
                              std_rgb=(0.229, 0.224, 0.225),
                              jitter_param=0.4,
                              lighting_param=0.1):
+    input_image_size = ds_metainfo.input_image_size
     return transforms.Compose([
         transforms.RandomResizedCrop(input_image_size),
         transforms.RandomFlipLeftRight(),
@@ -89,10 +98,13 @@ def imagenet_train_transform(input_image_size=(224, 224),
     ])
 
 
-def imagenet_val_transform(input_image_size=(224, 224),
+def imagenet_val_transform(ds_metainfo,
                            mean_rgb=(0.485, 0.456, 0.406),
-                           std_rgb=(0.229, 0.224, 0.225),
-                           resize_value=256):
+                           std_rgb=(0.229, 0.224, 0.225)):
+    input_image_size = ds_metainfo.input_image_size
+    resize_value = calc_val_resize_value(
+        input_image_size=ds_metainfo.input_image_size,
+        resize_inv_factor=ds_metainfo.resize_inv_factor)
     return transforms.Compose([
         transforms.Resize(
             size=resize_value,

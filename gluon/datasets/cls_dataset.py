@@ -10,6 +10,7 @@ class MetaInfo(object):
         self.use_imgrec = False
         self.label = None
         self.root_dir_name = None
+        self.root_dir_path = None
         self.dataset_class = None
         self.num_training_samples = None
         self.in_channels = None
@@ -39,3 +40,9 @@ class MetaInfo(object):
             type=int,
             default=self.in_channels,
             help="number of input channels")
+
+    def update(self,
+               args):
+        self.root_dir_path = args.data_dir
+        self.num_classes = args.num_classes
+        self.in_channels = args.in_channels

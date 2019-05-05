@@ -2,8 +2,9 @@
     ImageNet-1K classification dataset (via MXNet image record iterators).
 """
 
+import os
 import mxnet as mx
-from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
+from .imagenet1k_cls_dataset import ImageNet1KMetaInfo, calc_val_resize_value
 
 
 class ImageNet1KRecMetaInfo(ImageNet1KMetaInfo):
@@ -18,17 +19,21 @@ class ImageNet1KRecMetaInfo(ImageNet1KMetaInfo):
         self.train_imgidx_file_path = "train.idx"
         self.val_imgrec_file_path = "val.rec"
         self.val_imgidx_file_path = "val.idx"
+        self.train_imgrec_iter = imagenet_train_imgrec_iter
+        self.val_imgrec_iter = imagenet_val_imgrec_iter
 
 
-def imagenet_train_imgrec_iter(imgrec_file_path,
-                               imgidx_file_path,
+def imagenet_train_imgrec_iter(ds_metainfo,
                                batch_size,
                                num_workers,
-                               data_shape=(3, 224, 224),
                                mean_rgb=(123.68, 116.779, 103.939),
                                std_rgb=(58.393, 57.12, 57.375),
                                jitter_param=0.4,
                                lighting_param=0.1):
+    assert (isinstance(ds_metainfo.input_image_size, tuple) and len(ds_metainfo.input_image_size) == 2)
+    imgrec_file_path = os.path.join(ds_metainfo.root_dir_path, ds_metainfo.train_imgrec_file_path)
+    imgidx_file_path = os.path.join(ds_metainfo.root_dir_path, ds_metainfo.train_imgidx_file_path)
+    data_shape = (ds_metainfo.in_channels,) + ds_metainfo.input_image_size
     return mx.io.ImageRecordIter(
         path_imgrec=imgrec_file_path,
         path_imgidx=imgidx_file_path,
@@ -54,14 +59,18 @@ def imagenet_train_imgrec_iter(imgrec_file_path,
         pca_noise=lighting_param)
 
 
-def imagenet_val_imgrec_iter(imgrec_file_path,
-                             imgidx_file_path,
+def imagenet_val_imgrec_iter(ds_metainfo,
                              batch_size,
                              num_workers,
-                             data_shape=(3, 224, 224),
                              mean_rgb=(123.68, 116.779, 103.939),
-                             std_rgb=(58.393, 57.12, 57.375),
-                             resize_value=256):
+                             std_rgb=(58.393, 57.12, 57.375)):
+    assert (isinstance(ds_metainfo.input_image_size, tuple) and len(ds_metainfo.input_image_size) == 2)
+    imgrec_file_path = os.path.join(ds_metainfo.root_dir_path, ds_metainfo.val_imgrec_file_path)
+    imgidx_file_path = os.path.join(ds_metainfo.root_dir_path, ds_metainfo.val_imgidx_file_path)
+    data_shape = (ds_metainfo.in_channels,) + ds_metainfo.input_image_size
+    resize_value = calc_val_resize_value(
+        input_image_size=ds_metainfo.input_image_size,
+        resize_inv_factor=ds_metainfo.resize_inv_factor)
     return mx.io.ImageRecordIter(
         path_imgrec=imgrec_file_path,
         path_imgidx=imgidx_file_path,

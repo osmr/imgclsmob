@@ -29,11 +29,17 @@ def parse_args():
         type=str,
         default="CIFAR10",
         help='dataset name. options are CIFAR10 and CIFAR100')
+    parser.add_argument(
+        "--work-dir",
+        type=str,
+        default=os.path.join("..", "imgclsmob_data"),
+        help="path to working directory only for dataset root path preset")
 
     args, _ = parser.parse_known_args()
     dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    work_dir_path = os.path.join("..", "imgclsmob_data")
-    dataset_metainfo.add_dataset_parser_arguments(parser, work_dir_path)
+    dataset_metainfo.add_dataset_parser_arguments(
+        parser=parser,
+        work_dir_path=args.work_dir)
 
     parser.add_argument(
         '--model',
@@ -569,11 +575,12 @@ def main():
         in_channels=args.in_channels,
         do_hybridize=(not args.not_hybridize),
         ctx=ctx)
-
     assert (hasattr(net, "classes"))
-    num_classes = net.classes if hasattr(net, "classes") else 10
+    num_classes = net.classes
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+
     train_data = get_train_data_source(
         dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,

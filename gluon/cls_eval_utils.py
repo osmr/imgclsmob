@@ -2,7 +2,8 @@
     Classification routines (for evaluation).
 """
 
-__all__ = ['get_dataset_metainfo', 'add_eval_cls_parser_arguments', 'get_batch_fn', 'test']
+__all__ = ['get_dataset_metainfo', 'add_eval_cls_parser_arguments', 'get_train_data_source', 'get_val_data_source',
+           'get_batch_fn', 'test']
 
 import time
 import logging
@@ -103,6 +104,47 @@ def add_eval_cls_parser_arguments(parser):
         type=str,
         default="mxnet-cu100",
         help="list of pip packages for logging")
+
+
+def get_train_data_source(ds_metainfo,
+                          batch_size,
+                          num_workers):
+    if ds_metainfo.use_imgrec:
+        return ds_metainfo.train_imgrec_iter(
+            ds_metainfo=ds_metainfo,
+            batch_size=batch_size,
+            num_workers=num_workers)
+    else:
+        transform_train = ds_metainfo.train_transform(ds_metainfo=ds_metainfo)
+        dataset = ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            train=True).transform_first(fn=transform_train)
+        return gluon.data.DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            last_batch="discard",
+            num_workers=num_workers)
+
+
+def get_val_data_source(ds_metainfo,
+                        batch_size,
+                        num_workers):
+    if ds_metainfo.use_imgrec:
+        return ds_metainfo.val_imgrec_iter(
+            ds_metainfo=ds_metainfo,
+            batch_size=batch_size,
+            num_workers=num_workers)
+    else:
+        transform_val = ds_metainfo.val_transform(ds_metainfo=ds_metainfo)
+        dataset = ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            train=False).transform_first(fn=transform_val)
+        return gluon.data.DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers)
 
 
 def get_batch_fn(use_imgrec):

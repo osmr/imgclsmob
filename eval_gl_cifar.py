@@ -1,12 +1,12 @@
+import os
 import argparse
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
 from gluon.utils import get_composite_metric
 from gluon.cls_eval_utils import add_eval_cls_parser_arguments, test
-from gluon.cifar_utils import add_dataset_parser_arguments
-from gluon.cifar_utils import batch_fn
+from gluon.cls_eval_utils import get_dataset_metainfo
+from gluon.cls_eval_utils import get_batch_fn
 from gluon.cifar_utils import get_val_data_source
-from gluon.cifar_utils import get_dataset_metainfo
 
 
 def parse_args():
@@ -20,7 +20,9 @@ def parse_args():
         help="dataset name. options are CIFAR10, CIFAR100, and SVHN")
 
     args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    work_dir_path = os.path.join("..", "imgclsmob_data")
+    dataset_metainfo.add_dataset_parser_arguments(parser, work_dir_path)
 
     add_eval_cls_parser_arguments(parser)
 
@@ -57,10 +59,11 @@ def main():
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     val_data = get_val_data_source(
-        dataset_name=args.dataset,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
+    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(

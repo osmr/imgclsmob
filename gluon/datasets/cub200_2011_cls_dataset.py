@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import mxnet as mx
 from mxnet.gluon.data import dataset
+from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
 
 
 class CUB200_2011(dataset.Dataset):
@@ -97,19 +98,17 @@ class CUB200_2011(dataset.Dataset):
         return len(self.image_ids)
 
 
-class CUB200MetaInfo(object):
-    label = "CUB_200_2011"
-    short_label = "cub"
-    root_dir_name = "CUB_200_2011"
-    dataset_class = CUB200_2011
-    num_training_samples = None
-    in_channels = 3
-    num_classes = 200
-    input_image_size = (224, 224)
-    resize_inv_factor = 0.875
-    use_imgrec = False
-    val_metric_capts = ["Val.Top1"]
-    val_metric_names = ["err-top1"]
-    train_metric_capts = ["Train.Top1"]
-    train_metric_names = ["err-top1"]
-    saver_acc_ind = 0
+class CUB200MetaInfo(ImageNet1KMetaInfo):
+    def __init__(self):
+        super(CUB200MetaInfo, self).__init__()
+        self.label = "CUB_200_2011"
+        self.short_label = "cub"
+        self.root_dir_name = "CUB_200_2011"
+        self.dataset_class = CUB200_2011
+        self.num_training_samples = None
+        self.num_classes = 200
+        self.val_metric_capts = ["Val.Top1"]
+        self.val_metric_names = ["err-top1"]
+        self.train_metric_capts = ["Train.Top1"]
+        self.train_metric_names = ["err-top1"]
+        self.saver_acc_ind = 0

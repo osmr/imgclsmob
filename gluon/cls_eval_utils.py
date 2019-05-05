@@ -2,10 +2,34 @@
     Classification routines (for evaluation).
 """
 
+__all__ = ['get_dataset_metainfo', 'add_eval_cls_parser_arguments', 'get_batch_fn', 'test']
+
 import time
 import logging
 from .utils import calc_net_weight_count, validate, report_accuracy
 from .model_stats import measure_model
+from gluon.datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
+from gluon.datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo
+from gluon.datasets.cub200_2011_cls_dataset import CUB200MetaInfo
+from gluon.datasets.cifar10_cls_dataset import CIFAR10MetaInfo
+from gluon.datasets.cifar100_cls_dataset import CIFAR100MetaInfo
+from gluon.datasets.svhn_cls_dataset import SVHNMetaInfo
+from mxnet import gluon
+
+
+def get_dataset_metainfo(dataset_name):
+    dataset_metainfo_map = {
+        "ImageNet1K": ImageNet1KMetaInfo,
+        "ImageNet1K_rec": ImageNet1KRecMetaInfo,
+        "CUB_200_2011": CUB200MetaInfo,
+        "CIFAR10": CIFAR10MetaInfo,
+        "CIFAR100": CIFAR100MetaInfo,
+        "SVHN": SVHNMetaInfo,
+    }
+    if dataset_name in dataset_metainfo_map.keys():
+        return dataset_metainfo_map[dataset_name]()
+    else:
+        raise Exception("Unrecognized dataset: {}".format(dataset_name))
 
 
 def add_eval_cls_parser_arguments(parser):
@@ -79,6 +103,21 @@ def add_eval_cls_parser_arguments(parser):
         type=str,
         default="mxnet-cu100",
         help="list of pip packages for logging")
+
+
+def get_batch_fn(use_imgrec):
+    if use_imgrec:
+        def batch_fn(batch, ctx):
+            data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+            label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+            return data, label
+        return batch_fn
+    else:
+        def batch_fn(batch, ctx):
+            data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            return data, label
+        return batch_fn
 
 
 def test(net,

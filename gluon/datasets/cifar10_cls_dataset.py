@@ -7,22 +7,25 @@ import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon import Block
 from mxnet.gluon.data.vision import transforms
+from .cls_dataset import MetaInfo
 
 
-class CIFAR10MetaInfo(object):
-    label = "CIFAR10"
-    root_dir_name = "cifar10"
-    dataset_class = gluon.data.vision.CIFAR10
-    num_training_samples = 50000
-    in_channels = 3
-    num_classes = 10
-    input_image_size = (32, 32)
-    use_imgrec = False
-    val_metric_capts = ["Val.Err"]
-    val_metric_names = ["err"]
-    train_metric_capts = ["Train.Err"]
-    train_metric_names = ["err"]
-    saver_acc_ind = 0
+class CIFAR10MetaInfo(MetaInfo):
+    def __init__(self):
+        super(CIFAR10MetaInfo, self).__init__()
+        self.label = "CIFAR10"
+        self.root_dir_name = "cifar10"
+        self.dataset_class = gluon.data.vision.CIFAR10
+        self.base = "cifar"
+        self.num_training_samples = 50000
+        self.in_channels = 3
+        self.num_classes = 10
+        self.input_image_size = (32, 32)
+        self.val_metric_capts = ["Val.Err"]
+        self.val_metric_names = ["err"]
+        self.train_metric_capts = ["Train.Err"]
+        self.train_metric_names = ["err"]
+        self.saver_acc_ind = 0
 
 
 class RandomCrop(Block):

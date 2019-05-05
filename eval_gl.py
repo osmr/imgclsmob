@@ -1,12 +1,12 @@
+import os
 import argparse
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
 from gluon.utils import get_composite_metric
 from gluon.cls_eval_utils import add_eval_cls_parser_arguments, test
-from gluon.imagenet1k_utils import add_dataset_parser_arguments
-from gluon.imagenet1k_utils import get_batch_fn
+from gluon.cls_eval_utils import get_dataset_metainfo
+from gluon.cls_eval_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_val_data_source
-from gluon.imagenet1k_utils import get_dataset_metainfo
 
 
 def parse_args():
@@ -20,7 +20,9 @@ def parse_args():
         help="dataset name. options are ImageNet1K, ImageNet1K_rec and CUB_200_2011")
 
     args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    work_dir_path = os.path.join("..", "imgclsmob_data")
+    dataset_metainfo.add_dataset_parser_arguments(parser, work_dir_path)
 
     add_eval_cls_parser_arguments(parser)
 

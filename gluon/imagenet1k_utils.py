@@ -2,73 +2,13 @@
     ImageNet-1K/CUB-200-2011 dataset routines.
 """
 
-__all__ = ['get_dataset_metainfo', 'add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_source',
-           'get_val_data_source']
+__all__ = ['get_train_data_source', 'get_val_data_source']
 
 import os
 from mxnet import gluon
-from gluon.datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
-from gluon.datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo
-from gluon.datasets.cub200_2011_cls_dataset import CUB200MetaInfo
 from gluon.datasets.imagenet1k_cls_dataset import calc_val_resize_value, imagenet_val_transform,\
     imagenet_train_transform
 from gluon.datasets.imagenet1k_rec_cls_dataset import imagenet_train_imgrec_iter, imagenet_val_imgrec_iter
-
-
-def get_dataset_metainfo(dataset_name):
-    if dataset_name == "ImageNet1K":
-        return ImageNet1KMetaInfo
-    elif dataset_name == "ImageNet1K_rec":
-        return ImageNet1KRecMetaInfo
-    elif dataset_name == "CUB_200_2011":
-        return CUB200MetaInfo
-    else:
-        raise Exception("Unrecognized dataset: {}".format(dataset_name))
-
-
-def add_dataset_parser_arguments(parser,
-                                 dataset_name):
-    dataset_metainfo = get_dataset_metainfo(dataset_name)
-    parser.add_argument(
-        "--data-dir",
-        type=str,
-        default=os.path.join("..", "imgclsmob_data", dataset_metainfo.root_dir_name),
-        help="path to directory with {} dataset".format(dataset_metainfo.label))
-    parser.add_argument(
-        "--num-classes",
-        type=int,
-        default=dataset_metainfo.num_classes,
-        help="number of classes")
-    parser.add_argument(
-        "--in-channels",
-        type=int,
-        default=dataset_metainfo.in_channels,
-        help="number of input channels")
-    parser.add_argument(
-        "--input-size",
-        type=int,
-        default=dataset_metainfo.input_image_size[0],
-        help="size of the input for model")
-    parser.add_argument(
-        "--resize-inv-factor",
-        type=float,
-        default=dataset_metainfo.resize_inv_factor,
-        help="inverted ratio for input image crop")
-
-
-def get_batch_fn(use_imgrec):
-    if use_imgrec:
-        def batch_fn(batch, ctx):
-            data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-            label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-            return data, label
-        return batch_fn
-    else:
-        def batch_fn(batch, ctx):
-            data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-            label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-            return data, label
-        return batch_fn
 
 
 def get_train_data_source(dataset_metainfo,

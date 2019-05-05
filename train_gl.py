@@ -14,11 +14,10 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
-from gluon.imagenet1k_utils import add_dataset_parser_arguments
-from gluon.imagenet1k_utils import get_batch_fn
+from gluon.cls_eval_utils import get_dataset_metainfo
+from gluon.cls_eval_utils import get_batch_fn
 from gluon.imagenet1k_utils import get_train_data_source
 from gluon.imagenet1k_utils import get_val_data_source
-from gluon.imagenet1k_utils import get_dataset_metainfo
 
 
 def parse_args():
@@ -32,7 +31,9 @@ def parse_args():
         help="dataset name. options are ImageNet1K and ImageNet1K_rec")
 
     args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    work_dir_path = os.path.join("..", "imgclsmob_data")
+    dataset_metainfo.add_dataset_parser_arguments(parser, work_dir_path)
 
     parser.add_argument(
         "--model",

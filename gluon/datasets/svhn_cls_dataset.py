@@ -7,6 +7,7 @@ import numpy as np
 import mxnet as mx
 from mxnet import gluon
 from mxnet.gluon.utils import download, check_sha1
+from .cifar10_cls_dataset import CIFAR10MetaInfo
 
 
 class SVHN(gluon.data.dataset._DownloadedDataset):
@@ -59,17 +60,10 @@ class SVHN(gluon.data.dataset._DownloadedDataset):
         np.place(self._label, self._label == 10, 0)
 
 
-class SVHNMetaInfo(object):
-    label = "SVHN"
-    root_dir_name = "svhn"
-    dataset_class = SVHN
-    num_training_samples = 73257
-    in_channels = 3
-    num_classes = 10
-    input_image_size = (32, 32)
-    use_imgrec = False
-    val_metric_capts = ["Val.Err"]
-    val_metric_names = ["err"]
-    train_metric_capts = ["Train.Err"]
-    train_metric_names = ["err"]
-    saver_acc_ind = 0
+class SVHNMetaInfo(CIFAR10MetaInfo):
+    def __init__(self):
+        super(SVHNMetaInfo, self).__init__()
+        self.label = "SVHN"
+        self.root_dir_name = "svhn"
+        self.dataset_class = SVHN
+        self.num_training_samples = 73257

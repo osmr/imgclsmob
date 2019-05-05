@@ -3,6 +3,7 @@
 """
 
 from mxnet import gluon
+from .cifar10_cls_dataset import CIFAR10MetaInfo
 
 
 class CIFAR100Fine(gluon.data.vision.CIFAR100):
@@ -16,17 +17,10 @@ class CIFAR100Fine(gluon.data.vision.CIFAR100):
             train=train)
 
 
-class CIFAR100MetaInfo(object):
-    label = "CIFAR100"
-    root_dir_name = "cifar100"
-    dataset_class = CIFAR100Fine
-    num_training_samples = 50000
-    in_channels = 3
-    num_classes = 100
-    input_image_size = (32, 32)
-    use_imgrec = False
-    val_metric_capts = ["Val.Err"]
-    val_metric_names = ["err"]
-    train_metric_capts = ["Train.Err"]
-    train_metric_names = ["err"]
-    saver_acc_ind = 0
+class CIFAR100MetaInfo(CIFAR10MetaInfo):
+    def __init__(self):
+        super(CIFAR100MetaInfo, self).__init__()
+        self.label = "CIFAR100"
+        self.root_dir_name = "cifar100"
+        self.dataset_class = CIFAR100Fine
+        self.num_classes = 100

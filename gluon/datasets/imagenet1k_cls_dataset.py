@@ -6,6 +6,7 @@ import os
 import math
 from mxnet.gluon.data.vision import ImageFolderDataset
 from mxnet.gluon.data.vision import transforms
+from .cls_dataset import MetaInfo
 
 
 class ImageNet1K(ImageFolderDataset):
@@ -33,22 +34,39 @@ class ImageNet1K(ImageFolderDataset):
         super(ImageNet1K, self).__init__(root=root, flag=1, transform=transform)
 
 
-class ImageNet1KMetaInfo(object):
-    label = "ImageNet1K"
-    short_label = "imagenet"
-    root_dir_name = "imagenet"
-    dataset_class = ImageNet1K
-    num_training_samples = None
-    in_channels = 3
-    num_classes = 1000
-    input_image_size = (224, 224)
-    resize_inv_factor = 0.875
-    use_imgrec = False
-    val_metric_capts = ["Val.Top1", "Val.Top5"]
-    val_metric_names = ["err-top1", "err-top5"]
-    train_metric_capts = ["Train.Top1"]
-    train_metric_names = ["err-top1"]
-    saver_acc_ind = 1
+class ImageNet1KMetaInfo(MetaInfo):
+    def __init__(self):
+        super(ImageNet1KMetaInfo, self).__init__()
+        self.label = "ImageNet1K"
+        self.short_label = "imagenet"
+        self.root_dir_name = "imagenet"
+        self.dataset_class = ImageNet1K
+        self.base = "imagenet"
+        self.num_training_samples = None
+        self.in_channels = 3
+        self.num_classes = 1000
+        self.input_image_size = (224, 224)
+        self.resize_inv_factor = 0.875
+        self.val_metric_capts = ["Val.Top1", "Val.Top5"]
+        self.val_metric_names = ["err-top1", "err-top5"]
+        self.train_metric_capts = ["Train.Top1"]
+        self.train_metric_names = ["err-top1"]
+        self.saver_acc_ind = 1
+
+    def add_dataset_parser_arguments(self,
+                                     parser,
+                                     work_dir_path):
+        super(ImageNet1KMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        parser.add_argument(
+            "--input-size",
+            type=int,
+            default=self.input_image_size[0],
+            help="size of the input for model")
+        parser.add_argument(
+            "--resize-inv-factor",
+            type=float,
+            default=self.resize_inv_factor,
+            help="inverted ratio for input image crop")
 
 
 def imagenet_train_transform(input_image_size=(224, 224),

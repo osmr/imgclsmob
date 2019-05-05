@@ -14,12 +14,10 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
-from gluon.cifar_utils import add_dataset_parser_arguments
-from gluon.cifar_utils import batch_fn
+from gluon.cls_eval_utils import get_dataset_metainfo
+from gluon.cls_eval_utils import get_batch_fn
 from gluon.cifar_utils import get_train_data_source
 from gluon.cifar_utils import get_val_data_source
-from gluon.cifar_utils import get_num_training_samples
-from gluon.cifar_utils import get_dataset_metainfo
 
 
 def parse_args():
@@ -33,7 +31,9 @@ def parse_args():
         help='dataset name. options are CIFAR10 and CIFAR100')
 
     args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    work_dir_path = os.path.join("..", "imgclsmob_data")
+    dataset_metainfo.add_dataset_parser_arguments(parser, work_dir_path)
 
     parser.add_argument(
         '--model',
@@ -346,6 +346,7 @@ def train_epoch(epoch,
                 net,
                 train_metric,
                 train_data,
+                batch_fn,
                 data_source_needs_reset,
                 dtype,
                 ctx,
@@ -446,6 +447,7 @@ def train_net(batch_size,
               start_epoch1,
               train_data,
               val_data,
+              batch_fn,
               data_source_needs_reset,
               dtype,
               net,
@@ -497,6 +499,7 @@ def train_net(batch_size,
             net=net,
             train_metric=train_metric,
             train_data=train_data,
+            batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx,
@@ -572,18 +575,18 @@ def main():
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     train_data = get_train_data_source(
-        dataset_name=args.dataset,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
     val_data = get_val_data_source(
-        dataset_name=args.dataset,
+        dataset_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
+    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
 
-    num_training_samples = len(train_data._dataset)
-    assert (num_training_samples == get_num_training_samples(args.dataset))
+    num_training_samples = len(train_data._dataset) if not ds_metainfo.use_imgrec else ds_metainfo.num_training_samples
     trainer, lr_scheduler = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -638,7 +641,8 @@ def main():
         start_epoch1=args.start_epoch,
         train_data=train_data,
         val_data=val_data,
-        data_source_needs_reset=False,
+        batch_fn=batch_fn,
+        data_source_needs_reset=ds_metainfo.use_imgrec,
         dtype=args.dtype,
         net=net,
         trainer=trainer,

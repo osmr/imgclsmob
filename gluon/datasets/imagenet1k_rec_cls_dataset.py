@@ -3,28 +3,21 @@
 """
 
 import mxnet as mx
+from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
 
 
-class ImageNet1KRecMetaInfo(object):
-    label = "ImageNet1K_rec"
-    short_label = "imagenet"
-    root_dir_name = "imagenet_rec"
-    dataset_class = None
-    num_training_samples = 1281167
-    in_channels = 3
-    num_classes = 1000
-    input_image_size = (224, 224)
-    resize_inv_factor = 0.875
-    train_imgrec_file_path = "train.rec"
-    train_imgidx_file_path = "train.idx"
-    val_imgrec_file_path = "val.rec"
-    val_imgidx_file_path = "val.idx"
-    use_imgrec = True
-    val_metric_capts = ["Val.Top1", "Val.Top5"]
-    val_metric_names = ["err-top1", "err-top5"]
-    train_metric_capts = ["Train.Top1"]
-    train_metric_names = ["err-top1"]
-    saver_acc_ind = 1
+class ImageNet1KRecMetaInfo(ImageNet1KMetaInfo):
+    def __init__(self):
+        super(ImageNet1KRecMetaInfo, self).__init__()
+        self.use_imgrec = True
+        self.label = "ImageNet1K_rec"
+        self.root_dir_name = "imagenet_rec"
+        self.dataset_class = None
+        self.num_training_samples = 1281167
+        self.train_imgrec_file_path = "train.rec"
+        self.train_imgidx_file_path = "train.idx"
+        self.val_imgrec_file_path = "val.rec"
+        self.val_imgidx_file_path = "val.idx"
 
 
 def imagenet_train_imgrec_iter(imgrec_file_path,

@@ -101,7 +101,7 @@ class CUB200_2011(dataset.Dataset):
 class CUB200MetaInfo(ImageNet1KMetaInfo):
     def __init__(self):
         super(CUB200MetaInfo, self).__init__()
-        self.label = "CUB_200_2011"
+        self.label = "CUB200_2011"
         self.short_label = "cub"
         self.root_dir_name = "CUB_200_2011"
         self.dataset_class = CUB200_2011

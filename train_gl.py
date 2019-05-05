@@ -2,8 +2,8 @@ import argparse
 import time
 import logging
 import os
-import numpy as np
 import random
+import numpy as np
 
 import mxnet as mx
 from mxnet import gluon
@@ -14,33 +14,13 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
-from gluon.cls_eval_utils import get_dataset_metainfo
-from gluon.cls_eval_utils import get_batch_fn
-from gluon.cls_eval_utils import get_train_data_source
-from gluon.cls_eval_utils import get_val_data_source
+from gluon.cls_utils import get_dataset_metainfo
+from gluon.cls_utils import get_batch_fn
+from gluon.cls_utils import get_train_data_source
+from gluon.cls_utils import get_val_data_source
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Train a model for image classification (Gluon/ImageNet1K)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default="ImageNet1K_rec",
-        help="dataset name. options are ImageNet1K and ImageNet1K_rec")
-    parser.add_argument(
-        "--work-dir",
-        type=str,
-        default=os.path.join("..", "imgclsmob_data"),
-        help="path to working directory only for dataset root path preset")
-
-    args, _ = parser.parse_known_args()
-    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    dataset_metainfo.add_dataset_parser_arguments(
-        parser=parser,
-        work_dir_path=args.work_dir)
-
+def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--model",
         type=str,
@@ -247,6 +227,31 @@ def parse_args():
         type=str,
         default="",
         help="regexp for selecting layers for fine tuning")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Train a model for image classification (Gluon)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="ImageNet1K_rec",
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB_200_2011, CIFAR10, CIFAR100, SVHN")
+    parser.add_argument(
+        "--work-dir",
+        type=str,
+        default=os.path.join("..", "imgclsmob_data"),
+        help="path to working directory only for dataset root path preset")
+
+    args, _ = parser.parse_known_args()
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    dataset_metainfo.add_dataset_parser_arguments(
+        parser=parser,
+        work_dir_path=args.work_dir)
+
+    add_train_cls_parser_arguments(parser)
+
     args = parser.parse_args()
     return args
 

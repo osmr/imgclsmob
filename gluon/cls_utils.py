@@ -17,7 +17,7 @@ def get_dataset_metainfo(dataset_name):
     dataset_metainfo_map = {
         "ImageNet1K": ImageNet1KMetaInfo,
         "ImageNet1K_rec": ImageNet1KRecMetaInfo,
-        "CUB_200_2011": CUB200MetaInfo,
+        "CUB200_2011": CUB200MetaInfo,
         "CIFAR10": CIFAR10MetaInfo,
         "CIFAR100": CIFAR100MetaInfo,
         "SVHN": SVHNMetaInfo,

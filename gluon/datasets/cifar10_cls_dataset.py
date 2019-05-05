@@ -14,9 +14,9 @@ class CIFAR10MetaInfo(MetaInfo):
     def __init__(self):
         super(CIFAR10MetaInfo, self).__init__()
         self.label = "CIFAR10"
+        self.short_label = "cifar"
         self.root_dir_name = "cifar10"
         self.dataset_class = gluon.data.vision.CIFAR10
-        self.base = "cifar"
         self.num_training_samples = 50000
         self.in_channels = 3
         self.num_classes = 10

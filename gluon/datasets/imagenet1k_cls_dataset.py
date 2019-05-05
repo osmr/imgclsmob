@@ -41,7 +41,6 @@ class ImageNet1KMetaInfo(MetaInfo):
         self.short_label = "imagenet"
         self.root_dir_name = "imagenet"
         self.dataset_class = ImageNet1K
-        self.base = "imagenet"
         self.num_training_samples = None
         self.in_channels = 3
         self.num_classes = 1000

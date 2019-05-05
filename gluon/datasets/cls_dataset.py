@@ -24,11 +24,11 @@ class MetaInfo(object):
 
     def add_dataset_parser_arguments(self,
                                      parser,
-                                     work_dir):
+                                     work_dir_path):
         parser.add_argument(
             "--data-dir",
             type=str,
-            default=os.path.join(work_dir, self.root_dir_name),
+            default=os.path.join(work_dir_path, self.root_dir_name),
             help="path to directory with {} dataset".format(self.label))
         parser.add_argument(
             "--num-classes",

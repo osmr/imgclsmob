@@ -382,20 +382,21 @@ def train_epoch(epoch,
     for i, batch in enumerate(train_data):
         data_list, labels_list = batch_fn(batch, ctx)
 
-        if mixup:
-            labels_list_inds = labels_list
-            labels_list = [Y.one_hot(depth=num_classes) for Y in labels_list]
-            if epoch < num_epochs - mixup_epoch_tail:
-                alpha = 1
-                lam = np.random.beta(alpha, alpha)
-                data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
-                labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
-        elif label_smoothing:
+        if label_smoothing:
             eta = 0.1
             on_value = 1 - eta + eta / num_classes
             off_value = eta / num_classes
             labels_list_inds = labels_list
             labels_list = [Y.one_hot(depth=num_classes, on_value=on_value, off_value=off_value) for Y in labels_list]
+        if mixup:
+            if not label_smoothing:
+                labels_list_inds = labels_list
+                labels_list = [Y.one_hot(depth=num_classes) for Y in labels_list]
+            if epoch < num_epochs - mixup_epoch_tail:
+                alpha = 1
+                lam = np.random.beta(alpha, alpha)
+                data_list = [lam * X + (1 - lam) * X[::-1] for X in data_list]
+                labels_list = [lam * Y + (1 - lam) * Y[::-1] for Y in labels_list]
 
         with ag.record():
             outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
@@ -472,8 +473,6 @@ def train_net(batch_size,
               train_metric,
               opt_metric_name,
               ctx):
-
-    assert (not (mixup and label_smoothing))
 
     if batch_size_scale != 1:
         for p in net.collect_params().values():

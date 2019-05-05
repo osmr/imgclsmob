@@ -107,8 +107,8 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
         self.dataset_class = CUB200_2011
         self.num_training_samples = None
         self.num_classes = 200
-        self.val_metric_capts = ["Val.Top1"]
-        self.val_metric_names = ["err-top1"]
-        self.train_metric_capts = ["Train.Top1"]
-        self.train_metric_names = ["err-top1"]
+        self.val_metric_capts = ["Val.Err"]
+        self.val_metric_names = ["err"]
+        self.train_metric_capts = ["Train.Err"]
+        self.train_metric_names = ["err"]
         self.saver_acc_ind = 0

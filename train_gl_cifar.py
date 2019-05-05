@@ -16,8 +16,8 @@ from gluon.utils import prepare_mx_context, prepare_model, validate, report_accu
 
 from gluon.cls_eval_utils import get_dataset_metainfo
 from gluon.cls_eval_utils import get_batch_fn
-from gluon.cifar_utils import get_train_data_source
-from gluon.cifar_utils import get_val_data_source
+from gluon.cls_eval_utils import get_train_data_source
+from gluon.cls_eval_utils import get_val_data_source
 
 
 def parse_args():
@@ -583,12 +583,10 @@ def main():
 
     train_data = get_train_data_source(
         ds_metainfo=ds_metainfo,
-        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
     val_data = get_val_data_source(
         ds_metainfo=ds_metainfo,
-        dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
     batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)

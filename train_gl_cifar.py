@@ -582,12 +582,12 @@ def main():
     ds_metainfo.update(args=args)
 
     train_data = get_train_data_source(
-        dataset_metainfo=ds_metainfo,
+        ds_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)
     val_data = get_val_data_source(
-        dataset_metainfo=ds_metainfo,
+        ds_metainfo=ds_metainfo,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
         num_workers=args.num_workers)

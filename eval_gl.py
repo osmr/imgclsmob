@@ -11,13 +11,13 @@ from gluon.cls_eval_utils import get_val_data_source
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Evaluate a model for image classification (Gluon/ImageNet1K)",
+        description="Evaluate a model for image classification (Gluon)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",
         type=str,
         default="ImageNet1K_rec",
-        help="dataset name. options are ImageNet1K, ImageNet1K_rec and CUB_200_2011")
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB_200_2011, CIFAR10, CIFAR100, SVHN")
     parser.add_argument(
         "--work-dir",
         type=str,

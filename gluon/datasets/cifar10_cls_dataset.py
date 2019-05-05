@@ -26,6 +26,8 @@ class CIFAR10MetaInfo(MetaInfo):
         self.train_metric_capts = ["Train.Err"]
         self.train_metric_names = ["err"]
         self.saver_acc_ind = 0
+        self.train_transform = cifar10_train_transform
+        self.val_transform = cifar10_val_transform
 
 
 class RandomCrop(Block):
@@ -68,10 +70,13 @@ class RandomCrop(Block):
         return mx.image.random_crop(mx.nd.array(x_pad), *self._args)[0]
 
 
-def cifar10_train_transform(mean_rgb=(0.4914, 0.4822, 0.4465),
+def cifar10_train_transform(ds_metainfo,
+                            mean_rgb=(0.4914, 0.4822, 0.4465),
                             std_rgb=(0.2023, 0.1994, 0.2010),
                             jitter_param=0.4,
                             lighting_param=0.1):
+    assert (ds_metainfo is not None)
+    assert (ds_metainfo.input_image_size[0] == 32)
     return transforms.Compose([
         RandomCrop(
             size=32,
@@ -89,8 +94,10 @@ def cifar10_train_transform(mean_rgb=(0.4914, 0.4822, 0.4465),
     ])
 
 
-def cifar10_val_transform(mean_rgb=(0.4914, 0.4822, 0.4465),
+def cifar10_val_transform(ds_metainfo,
+                          mean_rgb=(0.4914, 0.4822, 0.4465),
                           std_rgb=(0.2023, 0.1994, 0.2010)):
+    assert (ds_metainfo is not None)
     return transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(

@@ -21,7 +21,7 @@ def add_eval_cls_parser_arguments(parser):
     parser.add_argument(
         "--use-pretrained",
         action="store_true",
-        help="enable using pretrained model from gluon.")
+        help="enable using pretrained model from github")
     parser.add_argument(
         "--dtype",
         type=str,

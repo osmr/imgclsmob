@@ -8,82 +8,87 @@ from pytorch.imagenet1k import add_dataset_parser_arguments, get_val_data_loader
 from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate, AverageMeter
 
 
+def add_eval_cls_parser_arguments(parser):
+    parser.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        help="type of model to use. see model_provider for options")
+    parser.add_argument(
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from github")
+    parser.add_argument(
+        "--resume",
+        type=str,
+        default="",
+        help="resume from previously saved parameters if not None")
+    parser.add_argument(
+        "--calc-flops",
+        dest="calc_flops",
+        action="store_true",
+        help="calculate FLOPs")
+    parser.add_argument(
+        "--calc-flops-only",
+        dest="calc_flops_only",
+        action="store_true",
+        help="calculate FLOPs without quality estimation")
+    parser.add_argument(
+        "--remove-module",
+        action="store_true",
+        help="enable if stored model has module")
+
+    parser.add_argument(
+        "--num-gpus",
+        type=int,
+        default=0,
+        help="number of gpus to use")
+    parser.add_argument(
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
+        default=4,
+        type=int,
+        help="number of preprocessing workers")
+
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=32,
+        help="training batch size per device (CPU/GPU)")
+
+    parser.add_argument(
+        "--save-dir",
+        type=str,
+        default="",
+        help="directory of saved models and log-files")
+    parser.add_argument(
+        "--logging-file-name",
+        type=str,
+        default="train.log",
+        help="filename of training log")
+
+    parser.add_argument(
+        "--log-packages",
+        type=str,
+        default="torch, torchvision",
+        help="list of python packages for logging")
+    parser.add_argument(
+        "--log-pip-packages",
+        type=str,
+        default="",
+        help="list of pip packages for logging")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (PyTorch/ImageNet-1K)',
+        description="Evaluate a model for image classification (PyTorch/ImageNet-1K)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)
 
-    parser.add_argument(
-        '--model',
-        type=str,
-        required=True,
-        help='type of model to use. see model_provider for options.')
-    parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model from github.')
-    parser.add_argument(
-        '--resume',
-        type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
-    parser.add_argument(
-        '--calc-flops',
-        dest='calc_flops',
-        action='store_true',
-        help='calculate FLOPs')
-    parser.add_argument(
-        '--calc-flops-only',
-        dest='calc_flops_only',
-        action='store_true',
-        help='calculate FLOPs without quality estimation')
-    parser.add_argument(
-        '--remove-module',
-        action='store_true',
-        help='enable if stored model has module')
+    add_eval_cls_parser_arguments(parser)
 
-    parser.add_argument(
-        '--num-gpus',
-        type=int,
-        default=0,
-        help='number of gpus to use.')
-    parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
-        default=4,
-        type=int,
-        help='number of preprocessing workers')
-
-    parser.add_argument(
-        '--batch-size',
-        type=int,
-        default=32,
-        help='training batch size per device (CPU/GPU).')
-
-    parser.add_argument(
-        '--save-dir',
-        type=str,
-        default='',
-        help='directory of saved models and log-files')
-    parser.add_argument(
-        '--logging-file-name',
-        type=str,
-        default='train.log',
-        help='filename of training log')
-
-    parser.add_argument(
-        '--log-packages',
-        type=str,
-        default='torch, torchvision',
-        help='list of python packages for logging')
-    parser.add_argument(
-        '--log-pip-packages',
-        type=str,
-        default='',
-        help='list of pip packages for logging')
     args = parser.parse_args()
     return args
 
@@ -108,18 +113,18 @@ def test(net,
             val_data=val_data,
             use_cuda=use_cuda)
         if extended_log:
-            logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+            logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
                 top1=err_top1_val, top5=err_top5_val))
         else:
-            logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+            logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
                 top1=err_top1_val, top5=err_top5_val))
-        logging.info('Time cost: {:.4f} sec'.format(
+        logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
 
     if calc_weight_count:
         weight_count = calc_net_weight_count(net)
         if not calc_flops:
-            logging.info('Model: {} trainable parameters'.format(weight_count))
+            logging.info("Model: {} trainable parameters".format(weight_count))
     if calc_flops:
         num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
         assert (not calc_weight_count) or (weight_count == num_params)
@@ -152,10 +157,10 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
         remove_module=args.remove_module)
-    if hasattr(net, 'module'):
-        input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size
+    if hasattr(net, "module"):
+        input_image_size = net.module.in_size[0] if hasattr(net.module, "in_size") else args.input_size
     else:
-        input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
+        input_image_size = net.in_size[0] if hasattr(net, "in_size") else args.input_size
 
     val_data = get_val_data_loader(
         data_dir=args.data_dir,
@@ -179,5 +184,5 @@ def main():
         extended_log=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,7 +1,13 @@
+"""
+    Pascal VOC2012 semantic segmentation dataset.
+"""
+
 import os
 import numpy as np
 from PIL import Image
-from pytorch.datasets.seg_dataset import SegDataset
+import torchvision.transforms as transforms
+from .seg_dataset import SegDataset
+from .dataset_metainfo import DatasetMetaInfo
 
 
 class VOCSegDataset(SegDataset):
@@ -89,3 +95,78 @@ class VOCSegDataset(SegDataset):
 
     def __len__(self):
         return len(self.images)
+
+
+def voc_test_transform(ds_metainfo,
+                       mean_rgb=(0.485, 0.456, 0.406),
+                       std_rgb=(0.229, 0.224, 0.225)):
+    assert (ds_metainfo is not None)
+    return transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=mean_rgb,
+            std=std_rgb)
+    ])
+
+
+class VOCMetaInfo(DatasetMetaInfo):
+    def __init__(self):
+        super(VOCMetaInfo, self).__init__()
+        self.label = "VOC"
+        self.short_label = "voc"
+        self.root_dir_name = "voc"
+        self.dataset_class = VOCSegDataset
+        self.num_training_samples = None
+        self.in_channels = 3
+        self.num_classes = VOCSegDataset.classes
+        self.input_image_size = (480, 480)
+        self.train_metric_capts = None
+        self.train_metric_names = None
+        self.train_metric_extra_kwargs = None
+        self.val_metric_capts = None
+        self.val_metric_names = None
+        self.test_metric_extra_kwargs = None
+        self.test_metric_capts = ["Val.PixAcc", "Val.IoU"]
+        self.test_metric_names = ["PixelAccuracyMetric", "MeanIoUMetric"]
+        self.test_metric_extra_kwargs = [
+            {"vague_idx": VOCSegDataset.vague_idx,
+             "use_vague": VOCSegDataset.use_vague,
+             "macro_average": False},
+            {"num_classes": VOCSegDataset.classes,
+             "vague_idx": VOCSegDataset.vague_idx,
+             "use_vague": VOCSegDataset.use_vague,
+             "bg_idx": VOCSegDataset.background_idx,
+             "ignore_bg": VOCSegDataset.ignore_bg,
+             "macro_average": False}]
+        self.saver_acc_ind = 1
+        self.do_transform = True
+        self.train_transform = None
+        self.val_transform = voc_test_transform
+        self.test_transform = voc_test_transform
+        self.ml_type = "imgseg"
+        self.allow_hybridize = False
+        self.net_extra_kwargs = {"aux": False, "fixed_size": False}
+        self.load_ignore_extra = True
+        self.image_base_size = 520
+        self.image_crop_size = 480
+
+    def add_dataset_parser_arguments(self,
+                                     parser,
+                                     work_dir_path):
+        super(VOCMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        parser.add_argument(
+            '--image-base-size',
+            type=int,
+            default=520,
+            help='base image size')
+        parser.add_argument(
+            '--image-crop-size',
+            type=int,
+            default=480,
+            help='crop image size')
+
+    def update(self,
+               args):
+        super(VOCMetaInfo, self).update(args)
+        self.image_base_size = args.image_base_size
+        self.image_crop_size = args.image_crop_size

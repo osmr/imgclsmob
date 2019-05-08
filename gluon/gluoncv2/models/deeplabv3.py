@@ -250,7 +250,8 @@ def get_deeplabv3(backbone,
             filename=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            ctx=ctx,
+            ignore_extra=True)
 
     return net
 

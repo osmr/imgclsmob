@@ -1,8 +1,13 @@
+"""
+    ADE20K semantic segmentation dataset.
+"""
+
 import os
 import numpy as np
 import mxnet as mx
 from PIL import Image
-from gluon.datasets.seg_dataset import SegDataset
+from .seg_dataset import SegDataset
+from .voc_seg_dataset import VOCMetaInfo
 
 
 class ADE20KSegDataset(SegDataset):
@@ -96,3 +101,23 @@ class ADE20KSegDataset(SegDataset):
 
     def __len__(self):
         return len(self.images)
+
+
+class ADE20KMetaInfo(VOCMetaInfo):
+    def __init__(self):
+        super(ADE20KMetaInfo, self).__init__()
+        self.label = "ADE20K"
+        self.short_label = "voc"
+        self.root_dir_name = "ade20k"
+        self.dataset_class = ADE20KSegDataset
+        self.num_classes = ADE20KSegDataset.classes
+        self.test_metric_extra_kwargs = [
+            {"vague_idx": ADE20KSegDataset.vague_idx,
+             "use_vague": ADE20KSegDataset.use_vague,
+             "macro_average": False},
+            {"num_classes": ADE20KSegDataset.classes,
+             "vague_idx": ADE20KSegDataset.vague_idx,
+             "use_vague": ADE20KSegDataset.use_vague,
+             "bg_idx": ADE20KSegDataset.background_idx,
+             "ignore_bg": ADE20KSegDataset.ignore_bg,
+             "macro_average": False}]

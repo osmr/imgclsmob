@@ -80,7 +80,7 @@ class TopKError(mx.metric.TopKAccuracy):
             name=name,
             output_names=output_names,
             label_names=label_names)
-        self.name = name_.replace('_k_', '_{}_'.format(top_k))
+        self.name = name_.replace("_k_", "_{}_".format(top_k))
 
     def get(self):
         """

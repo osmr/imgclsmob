@@ -3,30 +3,17 @@ import argparse
 import time
 import logging
 import mxnet as mx
-
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
 from gluon.model_stats import measure_model
-from gluon.seg_utils import add_dataset_parser_arguments, get_metainfo
-from gluon.seg_utils import batch_fn
-from gluon.seg_utils import get_test_data_source
-from gluon.seg_utils import validate1
+from gluon.seg_utils1 import add_dataset_parser_arguments, get_metainfo
+from gluon.seg_utils1 import batch_fn
+from gluon.seg_utils1 import get_test_data_source
+from gluon.seg_utils1 import validate1
 from gluon.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (Gluon/VOC2012/ADE20K/Cityscapes/COCO)',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        '--dataset',
-        type=str,
-        default="VOC",
-        help='dataset name. options are VOC, ADE20K, Cityscapes, COCO')
-
-    args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
-
+def add_eval_seg_parser_arguments(parser):
     parser.add_argument(
         '--model',
         type=str,
@@ -91,6 +78,23 @@ def parse_args():
         type=str,
         default='mxnet-cu92, mxnet-cu100mkl, gluoncv',
         help='list of pip packages for logging')
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description='Evaluate a model for image segmentation (Gluon/VOC2012/ADE20K/Cityscapes/COCO)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--dataset',
+        type=str,
+        default="VOC",
+        help='dataset name. options are VOC, ADE20K, Cityscapes, COCO')
+
+    args, _ = parser.parse_known_args()
+    add_dataset_parser_arguments(parser, args.dataset)
+
+    add_eval_seg_parser_arguments(parser)
+
     args = parser.parse_args()
     return args
 

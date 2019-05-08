@@ -4,20 +4,21 @@
 
 import os
 import math
-from mxnet.gluon.data.vision import ImageFolderDataset
-from mxnet.gluon.data.vision import transforms
+import cv2
+import numpy as np
+from PIL import Image
+from torchvision.datasets import ImageFolder
+import torchvision.transforms as transforms
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class ImageNet1K(ImageFolderDataset):
+class ImageNet1K(ImageFolder):
     """
     ImageNet-1K classification dataset.
 
-    Refer to MXNet documentation for the description of this dataset and how to prepare it.
-
     Parameters
     ----------
-    root : str, default '~/.mxnet/datasets/imagenet'
+    root : str, default '~/.torch/datasets/imagenet'
         Path to the folder stored the dataset.
     mode: str, default 'train'
         'train', 'val', or 'test'.
@@ -25,12 +26,12 @@ class ImageNet1K(ImageFolderDataset):
         A function that takes data and label and transforms them.
     """
     def __init__(self,
-                 root=os.path.join("~", ".mxnet", "datasets", "imagenet"),
+                 root=os.path.join("~", ".torch", "datasets", "imagenet"),
                  mode="train",
                  transform=None):
         split = "train" if mode == "train" else "val"
         root = os.path.join(root, split)
-        super(ImageNet1K, self).__init__(root=root, flag=1, transform=transform)
+        super(ImageNet1K, self).__init__(root=root, transform=transform)
 
 
 class ImageNet1KMetaInfo(DatasetMetaInfo):
@@ -56,6 +57,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.val_transform = imagenet_val_transform
         self.test_transform = imagenet_val_transform
         self.ml_type = "imgcls"
+        self.use_cv_resize = False
 
     def add_dataset_parser_arguments(self,
                                      parser,
@@ -71,28 +73,30 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
             type=float,
             default=self.resize_inv_factor,
             help="inverted ratio for input image crop")
+        parser.add_argument(
+            '--use-cv-resize',
+            action='store_true',
+            help='use OpenCV resize preprocessing')
 
     def update(self,
                args):
         super(ImageNet1KMetaInfo, self).update(args)
         self.input_image_size = (args.input_size, args.input_size)
-        self.resize_inv_factor = args.resize_inv_factor
+        self.use_cv_resize = args.use_cv_resize
 
 
 def imagenet_train_transform(ds_metainfo,
                              mean_rgb=(0.485, 0.456, 0.406),
                              std_rgb=(0.229, 0.224, 0.225),
-                             jitter_param=0.4,
-                             lighting_param=0.1):
+                             jitter_param=0.4):
     input_image_size = ds_metainfo.input_image_size
     return transforms.Compose([
         transforms.RandomResizedCrop(input_image_size),
-        transforms.RandomFlipLeftRight(),
-        transforms.RandomColorJitter(
+        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(
             brightness=jitter_param,
             contrast=jitter_param,
             saturation=jitter_param),
-        transforms.RandomLighting(lighting_param),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=mean_rgb,
@@ -108,15 +112,73 @@ def imagenet_val_transform(ds_metainfo,
         input_image_size=ds_metainfo.input_image_size,
         resize_inv_factor=ds_metainfo.resize_inv_factor)
     return transforms.Compose([
-        transforms.Resize(
-            size=resize_value,
-            keep_ratio=True),
+        CvResize(resize_value) if ds_metainfo.use_cv_resize else transforms.Resize(resize_value),
         transforms.CenterCrop(size=input_image_size),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=mean_rgb,
             std=std_rgb)
     ])
+
+
+class CvResize(object):
+    """
+    Resize the input PIL Image to the given size via OpenCV.
+
+    Parameters
+    ----------
+    size : int or tuple of (W, H)
+        Size of output image.
+    interpolation : int, default PIL.Image.BILINEAR
+        Interpolation method for resizing. By default uses bilinear
+        interpolation.
+    """
+    def __init__(self,
+                 size,
+                 interpolation=Image.BILINEAR):
+        self.size = size
+        self.interpolation = interpolation
+
+    def __call__(self, img):
+        """
+        Resize image.
+
+        Parameters
+        ----------
+        img : PIL.Image
+            input image.
+
+        Returns
+        -------
+        PIL.Image
+            Resulted image.
+        """
+        if self.interpolation == Image.NEAREST:
+            cv_interpolation = cv2.INTER_NEAREST
+        elif self.interpolation == Image.BILINEAR:
+            cv_interpolation = cv2.INTER_LINEAR
+        elif self.interpolation == Image.BICUBIC:
+            cv_interpolation = cv2.INTER_CUBIC
+        elif self.interpolation == Image.LANCZOS:
+            cv_interpolation = cv2.INTER_LANCZOS4
+        else:
+            raise ValueError()
+
+        cv_img = np.array(img)
+
+        if isinstance(self.size, int):
+            w, h = img.size
+            if (w <= h and w == self.size) or (h <= w and h == self.size):
+                return img
+            if w < h:
+                out_size = (self.size, int(self.size * h / w))
+            else:
+                out_size = (int(self.size * w / h), self.size)
+            cv_img = cv2.resize(cv_img, dsize=out_size, interpolation=cv_interpolation)
+            return Image.fromarray(cv_img)
+        else:
+            cv_img = cv2.resize(cv_img, dsize=self.size, interpolation=cv_interpolation)
+            return Image.fromarray(cv_img)
 
 
 def calc_val_resize_value(input_image_size=(224, 224),

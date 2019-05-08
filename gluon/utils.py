@@ -5,6 +5,7 @@ import numpy as np
 import mxnet as mx
 from .gluoncv2.model_provider import get_model
 from .cls_metrics import Top1Error, TopKError
+from .seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def prepare_mx_context(num_gpus,
@@ -121,20 +122,24 @@ def report_accuracy(metric,
     return msg
 
 
-def get_metric(metric_name):
-    if metric_name in ["err-top1", "err"]:
-        return Top1Error(name=metric_name)
-    elif metric_name == "err-top5":
-        return TopKError(top_k=5, name=metric_name)
+def get_metric(metric_name, metric_extra_kwargs):
+    if metric_name == "Top1Error":
+        return Top1Error(**metric_extra_kwargs)
+    elif metric_name == "TopKError":
+        return TopKError(**metric_extra_kwargs)
+    elif metric_name == "PixelAccuracyMetric":
+        return PixelAccuracyMetric(**metric_extra_kwargs)
+    elif metric_name == "MeanIoUMetric":
+        return MeanIoUMetric(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 
 
-def get_composite_metric(metric_names):
+def get_composite_metric(metric_names, metric_extra_kwargs):
     if len(metric_names) == 1:
-        val_metric = get_metric(metric_names[0])
+        metric = get_metric(metric_names[0], metric_extra_kwargs[0])
     else:
-        val_metric = mx.metric.CompositeEvalMetric()
-        for name in metric_names:
-            val_metric.add(get_metric(name))
-    return val_metric
+        metric = mx.metric.CompositeEvalMetric()
+        for name, extra_kwargs in zip(metric_names, metric_extra_kwargs):
+            metric.add(get_metric(name, extra_kwargs))
+    return metric

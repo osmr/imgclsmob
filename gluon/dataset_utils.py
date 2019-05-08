@@ -1,15 +1,20 @@
 """
-    Classification routines.
+    Dataset routines.
 """
 
-__all__ = ['get_dataset_metainfo', 'get_train_data_source', 'get_val_data_source', 'get_batch_fn']
+__all__ = ['get_dataset_metainfo', 'get_train_data_source', 'get_val_data_source', 'get_test_data_source',
+           'get_batch_fn']
 
-from gluon.datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
-from gluon.datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo
-from gluon.datasets.cub200_2011_cls_dataset import CUB200MetaInfo
-from gluon.datasets.cifar10_cls_dataset import CIFAR10MetaInfo
-from gluon.datasets.cifar100_cls_dataset import CIFAR100MetaInfo
-from gluon.datasets.svhn_cls_dataset import SVHNMetaInfo
+from .datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
+from .datasets.imagenet1k_rec_cls_dataset import ImageNet1KRecMetaInfo
+from .datasets.cub200_2011_cls_dataset import CUB200MetaInfo
+from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
+from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
+from .datasets.svhn_cls_dataset import SVHNMetaInfo
+from .datasets.voc_seg_dataset import VOCMetaInfo
+from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
+from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
+from .datasets.coco_seg_dataset import COCOMetaInfo
 from mxnet import gluon
 
 
@@ -21,6 +26,10 @@ def get_dataset_metainfo(dataset_name):
         "CIFAR10": CIFAR10MetaInfo,
         "CIFAR100": CIFAR100MetaInfo,
         "SVHN": SVHNMetaInfo,
+        "VOC": VOCMetaInfo,
+        "ADE20K": ADE20KMetaInfo,
+        "Cityscapes": CityscapesMetaInfo,
+        "COCO": COCOMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -40,7 +49,10 @@ def get_train_data_source(ds_metainfo,
         transform_train = ds_metainfo.train_transform(ds_metainfo=ds_metainfo)
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
-            train=True).transform_first(fn=transform_train)
+            mode="train",
+            transform=(transform_train if ds_metainfo.do_transform else None))
+        if not ds_metainfo.do_transform:
+            dataset = dataset.transform_first(fn=transform_train)
         return gluon.data.DataLoader(
             dataset=dataset,
             batch_size=batch_size,
@@ -61,7 +73,33 @@ def get_val_data_source(ds_metainfo,
         transform_val = ds_metainfo.val_transform(ds_metainfo=ds_metainfo)
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
-            train=False).transform_first(fn=transform_val)
+            mode="val",
+            transform=(transform_val if ds_metainfo.do_transform else None))
+        if not ds_metainfo.do_transform:
+            dataset = dataset.transform_first(fn=transform_val)
+        return gluon.data.DataLoader(
+            dataset=dataset,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=num_workers)
+
+
+def get_test_data_source(ds_metainfo,
+                         batch_size,
+                         num_workers):
+    if ds_metainfo.use_imgrec:
+        return ds_metainfo.val_imgrec_iter(
+            ds_metainfo=ds_metainfo,
+            batch_size=batch_size,
+            num_workers=num_workers)
+    else:
+        transform_test = ds_metainfo.test_transform(ds_metainfo=ds_metainfo)
+        dataset = ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            mode="test",
+            transform=(transform_test if ds_metainfo.do_transform else None))
+        if not ds_metainfo.do_transform:
+            dataset = dataset.transform_first(fn=transform_test)
         return gluon.data.DataLoader(
             dataset=dataset,
             batch_size=batch_size,

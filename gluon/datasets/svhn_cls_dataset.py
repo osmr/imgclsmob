@@ -21,16 +21,16 @@ class SVHN(gluon.data.dataset._DownloadedDataset):
     ----------
     root : str, default $MXNET_HOME/datasets/svhn
         Path to temp folder for storing data.
-    train : bool, default True
-        Whether to load the training or testing set.
+    mode: str, default 'train'
+        'train', 'val', or 'test'.
     transform : function, default None
         A user defined callback that transforms each sample.
     """
     def __init__(self,
                  root=os.path.join("~", ".mxnet", "datasets", "svhn"),
-                 train=True,
+                 mode="train",
                  transform=None):
-        self._train = train
+        self._mode = mode
         self._train_data = [("http://ufldl.stanford.edu/housenumbers/train_32x32.mat", "train_32x32.mat",
                              "e6588cae42a1a5ab5efe608cc5cd3fb9aaffd674")]
         self._test_data = [("http://ufldl.stanford.edu/housenumbers/test_32x32.mat", "test_32x32.mat",
@@ -43,7 +43,7 @@ class SVHN(gluon.data.dataset._DownloadedDataset):
             for url, _, sha1 in self._train_data + self._test_data:
                 download(url=url, path=self._root, sha1_hash=sha1)
 
-        if self._train:
+        if self._mode == "train":
             data_files = self._train_data[0]
         else:
             data_files = self._test_data[0]

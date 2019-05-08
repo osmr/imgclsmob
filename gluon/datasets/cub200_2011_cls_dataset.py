@@ -12,23 +12,20 @@ from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
 
 class CUB200_2011(dataset.Dataset):
     """
-    Load the CUB-200-2011 fine-grained classification dataset.
-
-    Refer to :doc:`../build/examples_datasets/imagenet` for the description of
-    this dataset and how to prepare it.
+    CUB-200-2011 fine-grained classification dataset.
 
     Parameters
     ----------
     root : str, default '~/.mxnet/datasets/CUB_200_2011'
         Path to the folder stored the dataset.
-    train : bool, default True
-        Whether to load the training or validation set.
+    mode: str, default 'train'
+        'train', 'val', or 'test'.
     transform : function, default None
         A function that takes data and label and transforms them.
     """
     def __init__(self,
                  root=os.path.join("~", ".mxnet", "datasets", "CUB_200_2011"),
-                 train=True,
+                 mode="train",
                  transform=None):
         super(CUB200_2011, self).__init__()
 
@@ -72,7 +69,7 @@ class CUB200_2011(dataset.Dataset):
             names=["image_id", "split_flag"],
             dtype={"image_id": np.int32, "split_flag": np.uint8})
         df = images_df.join(class_df, rsuffix="_class_df").join(split_df, rsuffix="_split_df")
-        split_flag = 1 if train else 0
+        split_flag = 1 if mode == "train" else 0
         subset_df = df[df.split_flag == split_flag]
 
         self.image_ids = subset_df["image_id"].values.astype(np.int32)
@@ -107,8 +104,10 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
         self.dataset_class = CUB200_2011
         self.num_training_samples = None
         self.num_classes = 200
-        self.val_metric_capts = ["Val.Err"]
-        self.val_metric_names = ["err"]
         self.train_metric_capts = ["Train.Err"]
-        self.train_metric_names = ["err"]
+        self.train_metric_names = ["Top1Error"]
+        self.train_metric_extra_kwargs = [{"name": "err"}]
+        self.val_metric_capts = ["Val.Err"]
+        self.val_metric_names = ["Top1Error"]
+        self.val_metric_extra_kwargs = [{"name": "err"}]
         self.saver_acc_ind = 0

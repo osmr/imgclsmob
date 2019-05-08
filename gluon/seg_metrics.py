@@ -47,6 +47,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                  vague_idx=-1,
                  use_vague=False,
                  macro_average=True):
+        if name == "pix_acc":
+            name = "{}-pix_acc".format("macro" if macro_average else "micro")
         self.macro_average = macro_average
         super(PixelAccuracyMetric, self).__init__(
             name,
@@ -190,6 +192,8 @@ class MeanIoUMetric(mx.metric.EvalMetric):
                  bg_idx=-1,
                  ignore_bg=False,
                  macro_average=True):
+        if name == "pix_acc":
+            name = "{}-pix_acc".format("macro" if macro_average else "micro")
         self.macro_average = macro_average
         self.num_classes = num_classes
         self.ignore_bg = ignore_bg

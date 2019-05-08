@@ -3,31 +3,30 @@
 """
 
 import os
-from mxnet import gluon
+from torchvision.datasets import CIFAR100
 from .cifar10_cls_dataset import CIFAR10MetaInfo
 
 
-class CIFAR100Fine(gluon.data.vision.CIFAR100):
+class CIFAR100Fine(CIFAR100):
     """
     CIFAR-100 image classification dataset.
 
 
     Parameters
     ----------
-    root : str, default $MXNET_HOME/datasets/cifar100
+    root : str, default '~/.torch/datasets/cifar100'
         Path to temp folder for storing data.
     mode: str, default 'train'
         'train', 'val', or 'test'.
     transform : function, default None
-        A user defined callback that transforms each sample.
+        A function that takes data and label and transforms them.
     """
     def __init__(self,
-                 root=os.path.join("~", ".mxnet", "datasets", "cifar100"),
+                 root=os.path.join("~", ".torch", "datasets", "cifar100"),
                  mode="train",
                  transform=None):
         super(CIFAR100Fine, self).__init__(
             root=root,
-            fine_label=True,
             train=(mode == "train"),
             transform=transform)
 

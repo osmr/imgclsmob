@@ -6,13 +6,13 @@ from common.logger_utils import initialize_logging
 from gluon.utils import calc_net_weight_count, validate, report_accuracy
 from gluon.utils import prepare_mx_context, prepare_model
 from gluon.utils import get_composite_metric
-from gluon.cls_utils import get_dataset_metainfo
-from gluon.cls_utils import get_batch_fn
-from gluon.cls_utils import get_val_data_source
+from gluon.dataset_utils import get_dataset_metainfo
+from gluon.dataset_utils import get_batch_fn
+from gluon.dataset_utils import get_val_data_source, get_test_data_source
 from gluon.model_stats import measure_model
 
 
-def add_eval_cls_parser_arguments(parser):
+def add_eval_parser_arguments(parser):
     parser.add_argument(
         "--model",
         type=str,
@@ -21,17 +21,17 @@ def add_eval_cls_parser_arguments(parser):
     parser.add_argument(
         "--use-pretrained",
         action="store_true",
-        help="enable using pretrained model from github")
+        help="enable using pretrained model from github repo")
     parser.add_argument(
         "--dtype",
         type=str,
         default="float32",
-        help="data type for training. default is float32")
+        help="base data type for tensors")
     parser.add_argument(
         "--resume",
         type=str,
         default="",
-        help="resume from previously saved parameters if not None")
+        help="resume from previously saved parameters")
     parser.add_argument(
         "--calc-flops",
         dest="calc_flops",
@@ -42,6 +42,11 @@ def add_eval_cls_parser_arguments(parser):
         dest="calc_flops_only",
         action="store_true",
         help="calculate FLOPs without quality estimation")
+    parser.add_argument(
+        "--data-subset",
+        type=str,
+        default="val",
+        help="data subset. options are val and test")
 
     parser.add_argument(
         "--num-gpus",
@@ -84,16 +89,26 @@ def add_eval_cls_parser_arguments(parser):
         default="mxnet-cu100",
         help="list of pip packages for logging")
 
+    parser.add_argument(
+        "--disable-cudnn-autotune",
+        action="store_true",
+        help="disable cudnn autotune for segmentation models")
+    parser.add_argument(
+        "--show-progress",
+        action="store_true",
+        help="show progress bar")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Evaluate a model for image classification (Gluon)",
+        description="Evaluate a model for image classification/segmentation (Gluon)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",
         type=str,
         default="ImageNet1K_rec",
-        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN")
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, "
+             "ADE20K, Cityscapes, COCO")
     parser.add_argument(
         "--work-dir",
         type=str,
@@ -106,17 +121,17 @@ def parse_args():
         parser=parser,
         work_dir_path=args.work_dir)
 
-    add_eval_cls_parser_arguments(parser)
+    add_eval_parser_arguments(parser)
 
     args = parser.parse_args()
     return args
 
 
 def test(net,
-         val_data,
+         test_data,
          batch_fn,
          data_source_needs_reset,
-         val_metric,
+         metric,
          dtype,
          ctx,
          input_image_size,
@@ -128,15 +143,15 @@ def test(net,
     if not calc_flops_only:
         tic = time.time()
         validate(
-            metric=val_metric,
+            metric=metric,
             net=net,
-            val_data=val_data,
+            val_data=test_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
             dtype=dtype,
             ctx=ctx)
         accuracy_msg = report_accuracy(
-            metric=val_metric,
+            metric=metric,
             extended_log=extended_log)
         logging.info("Test: {}".format(accuracy_msg))
         logging.info("Time cost: {:.4f} sec".format(
@@ -161,12 +176,20 @@ def test(net,
 def main():
     args = parse_args()
 
+    if args.disable_cudnn_autotune:
+        os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
+
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
         script_args=args,
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
+
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+    assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
+    assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
     ctx, batch_size = prepare_mx_context(
         num_gpus=args.num_gpus,
@@ -177,29 +200,44 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
+        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
+        load_ignore_extra=ds_metainfo.load_ignore_extra,
         classes=args.num_classes,
         in_channels=args.in_channels,
-        do_hybridize=(not args.calc_flops),
+        do_hybridize=(ds_metainfo.allow_hybridize and (not args.calc_flops)),
         ctx=ctx)
     assert (hasattr(net, "in_size"))
     input_image_size = net.in_size
 
-    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    ds_metainfo.update(args=args)
-
-    val_data = get_val_data_source(
-        ds_metainfo=ds_metainfo,
-        batch_size=batch_size,
-        num_workers=args.num_workers)
+    if args.data_subset == "val":
+        test_data = get_val_data_source(
+            ds_metainfo=ds_metainfo,
+            batch_size=batch_size,
+            num_workers=args.num_workers)
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.val_metric_names,
+            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+    else:
+        test_data = get_test_data_source(
+            ds_metainfo=ds_metainfo,
+            batch_size=batch_size,
+            num_workers=args.num_workers)
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.test_metric_names,
+            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
     batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
+
+    if args.show_progress:
+        from tqdm import tqdm
+        test_data = tqdm(test_data)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(
         net=net,
-        val_data=val_data,
+        test_data=test_data,
         batch_fn=batch_fn,
         data_source_needs_reset=ds_metainfo.use_imgrec,
-        val_metric=get_composite_metric(ds_metainfo.val_metric_names),
+        metric=test_metric,
         dtype=args.dtype,
         ctx=ctx,
         input_image_size=input_image_size,

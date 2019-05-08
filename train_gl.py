@@ -14,10 +14,10 @@ from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
-from gluon.cls_utils import get_dataset_metainfo
-from gluon.cls_utils import get_batch_fn
-from gluon.cls_utils import get_train_data_source
-from gluon.cls_utils import get_val_data_source
+from gluon.dataset_utils import get_dataset_metainfo
+from gluon.dataset_utils import get_batch_fn
+from gluon.dataset_utils import get_train_data_source
+from gluon.dataset_utils import get_val_data_source
 
 
 def add_train_cls_parser_arguments(parser):
@@ -659,8 +659,8 @@ def main():
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
-        val_metric=get_composite_metric(ds_metainfo.val_metric_names),
-        train_metric=get_composite_metric(ds_metainfo.train_metric_names),
+        val_metric=get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs),
+        train_metric=get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs),
         opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         ctx=ctx)
 

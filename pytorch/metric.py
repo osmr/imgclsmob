@@ -1,4 +1,10 @@
-__all__ = ['EvalMetric', 'check_label_shapes']
+"""
+    Several base metrics.
+"""
+
+__all__ = ['EvalMetric', 'CompositeEvalMetric', 'check_label_shapes']
+
+from collections import OrderedDict
 
 
 def check_label_shapes(labels, preds, shape=0):
@@ -108,9 +114,9 @@ class EvalMetric(object):
            Value of the evaluations.
         """
         if self.num_inst == 0:
-            return (self.name, float('nan'))
+            return self.name, float('nan')
         else:
-            return (self.name, self.sum_metric / self.num_inst)
+            return self.name, self.sum_metric / self.num_inst
 
     def get_name_value(self):
         """
@@ -127,3 +133,135 @@ class EvalMetric(object):
         if not isinstance(value, list):
             value = [value]
         return list(zip(name, value))
+
+
+class CompositeEvalMetric(EvalMetric):
+    """
+    Manages multiple evaluation metrics.
+
+    Parameters
+    ----------
+    name : str, default 'composite'
+        Name of this metric instance for display.
+    output_names : list of str, or None, default None
+        Name of predictions that should be used when updating with update_dict.
+        By default include all predictions.
+    label_names : list of str, or None, default None
+        Name of labels that should be used when updating with update_dict.
+        By default include all labels.
+    """
+
+    def __init__(self,
+                 name="composite",
+                 output_names=None,
+                 label_names=None):
+        super(CompositeEvalMetric, self).__init__(
+            name,
+            output_names=output_names,
+            label_names=label_names,
+            has_global_stats=True)
+        self.metrics = []
+
+    def add(self, metric):
+        """
+        Adds a child metric.
+
+        Parameters
+        ----------
+        metric
+            A metric instance.
+        """
+        self.metrics.append(metric)
+
+    def update_dict(self, labels, preds):
+        if self.label_names is not None:
+            labels = OrderedDict([i for i in labels.items()
+                                  if i[0] in self.label_names])
+        if self.output_names is not None:
+            preds = OrderedDict([i for i in preds.items()
+                                 if i[0] in self.output_names])
+
+        for metric in self.metrics:
+            metric.update_dict(labels, preds)
+
+    def update(self, labels, preds):
+        """
+        Updates the internal evaluation result.
+
+        Parameters
+        ----------
+        labels : list of `NDArray`
+            The labels of the data.
+
+        preds : list of `NDArray`
+            Predicted values.
+        """
+        for metric in self.metrics:
+            metric.update(labels, preds)
+
+    def reset(self):
+        """
+        Resets the internal evaluation result to initial state."""
+        try:
+            for metric in self.metrics:
+                metric.reset()
+        except AttributeError:
+            pass
+
+    def reset_local(self):
+        """
+        Resets the local portion of the internal evaluation results
+        to initial state.
+        """
+        try:
+            for metric in self.metrics:
+                metric.reset_local()
+        except AttributeError:
+            pass
+
+    def get(self):
+        """
+        Returns the current evaluation result.
+
+        Returns
+        -------
+        names : list of str
+           Name of the metrics.
+        values : list of float
+           Value of the evaluations.
+        """
+        names = []
+        values = []
+        for metric in self.metrics:
+            name, value = metric.get()
+            name = [name]
+            value = [value]
+            names.extend(name)
+            values.extend(value)
+        return names, values
+
+    def get_global(self):
+        """
+        Returns the current evaluation result.
+
+        Returns
+        -------
+        names : list of str
+           Name of the metrics.
+        values : list of float
+           Value of the evaluations.
+        """
+        names = []
+        values = []
+        for metric in self.metrics:
+            name, value = metric.get_global()
+            name = [name]
+            value = [value]
+            names.extend(name)
+            values.extend(value)
+        return names, values
+
+    def get_config(self):
+        config = super(CompositeEvalMetric, self).get_config()
+        config.update({"metrics": [i.get_config() for i in self.metrics]})
+        return config

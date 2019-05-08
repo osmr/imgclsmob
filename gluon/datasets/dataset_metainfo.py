@@ -1,13 +1,14 @@
 """
-    Abstract classification dataset.
+    Base dataset metainfo class.
 """
 
 import os
 
 
-class MetaInfo(object):
+class DatasetMetaInfo(object):
     def __init__(self):
         self.use_imgrec = False
+        self.do_transform = False
         self.label = None
         self.root_dir_name = None
         self.root_dir_path = None
@@ -16,11 +17,20 @@ class MetaInfo(object):
         self.in_channels = None
         self.num_classes = None
         self.input_image_size = None
-        self.val_metric_capts = None
-        self.val_metric_names = None
         self.train_metric_capts = None
         self.train_metric_names = None
+        self.train_metric_extra_kwargs = None
+        self.val_metric_capts = None
+        self.val_metric_names = None
+        self.val_metric_extra_kwargs = None
+        self.test_metric_capts = None
+        self.test_metric_names = None
+        self.test_metric_extra_kwargs = None
         self.saver_acc_ind = None
+        self.ml_type = None
+        self.allow_hybridize = True
+        self.net_extra_kwargs = None
+        self.load_ignore_extra = False
 
     def add_dataset_parser_arguments(self,
                                      parser,

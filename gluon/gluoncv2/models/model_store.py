@@ -176,7 +176,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_w1', '0900', 'e2c3da1cffd8e42da7a052b80db2f86758c8d35b', 'v0.0.243'),
     ('mnasnet', '1144', 'c972fec0521e0222259934bf77c57ebeebff5bdf', 'v0.0.117'),
     ('darts', '0897', 'aafd645210df6b55587ef02f4edf08c76a15e5a3', 'v0.0.118'),
-    ('proxylessnas_cpu', '0786', '3cae5c6e41ece0e6cde171a5ac4696d3d4c89638', 'v0.0.304'),
+    ('proxylessnas_cpu', '0750', '256da7c8a05cd87a59e30e314b22dc1d4565946e', 'v0.0.324'),
     ('proxylessnas_gpu', '0780', '981df30d27c2ebec5428aefe92d66e76076bf2b6', 'v0.0.304'),
     ('proxylessnas_mobile', '0795', 'cc7dfdfc632cdb9174316f0538b8be8d24e6a813', 'v0.0.323'),
     ('proxylessnas_mobile14', '0684', '32ac831428fe244dab1db17e53b1f8e230029e7f', 'v0.0.304'),

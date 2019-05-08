@@ -266,7 +266,7 @@ Some remarks:
 | IGCV3 x1.0 | 27.70 | 8.98 | 3,491,688 | 340.79M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.243/igcv3_w1-0898-5fd85acd.npz.log)) |
 | MnasNet | 31.27 | 11.44 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-688e523d.npz.log)) |
 | DARTS | 27.29 | 8.97 | 4,718,752 | 539.86M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-8986fe64.npz.log)) |
-| ProxylessNAS CPU | 25.35 | 7.83 | 4,361,648 | 459.96M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_cpu-0783-43dd4fdb.npz.log)) |
+| ProxylessNAS CPU | 24.76 | 7.52 | 4,361,648 | 459.96M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.324/proxylessnas_cpu-0752-22bd211b.npz.log)) |
 | ProxylessNAS GPU | 25.53 | 7.79 | 7,119,848 | 476.08M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_gpu-0779-4774a8d1.npz.log)) |
 | ProxylessNAS Mobile | 25.57 | 7.98 | 4,080,512 | 332.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.323/proxylessnas_mobile-0798-75e48301.npz.log)) |
 | ProxylessNAS Mob-14 | 24.01 | 6.86 | 6,857,568 | 597.10M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_mobile14-0686-914ea577.npz.log)) |

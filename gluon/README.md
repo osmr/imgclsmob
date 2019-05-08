@@ -287,7 +287,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | IGCV3 x1.0 | 27.73 | 9.00 | 3,491,688 | 340.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.243/igcv3_w1-0900-e2c3da1c.params.log)) |
 | MnasNet | 31.32 | 11.44 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1144-c972fec0.params.log)) |
 | DARTS | 27.23 | 8.97 | 4,718,752 | 539.86M | From [quark0/darts] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.118/darts-0897-aafd6452.params.log)) |
-| ProxylessNAS CPU | 25.39 | 7.86 | 4,361,648 | 459.96M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_cpu-0786-3cae5c6e.params.log)) |
+| ProxylessNAS CPU | 24.78 | 7.50 | 4,361,648 | 459.96M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.324/proxylessnas_cpu-0750-256da7c8.params.log)) |
 | ProxylessNAS GPU | 25.57 | 7.80 | 7,119,848 | 476.08M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_gpu-0780-981df30d.params.log)) |
 | ProxylessNAS Mobile | 25.57 | 7.95 | 4,080,512 | 332.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.323/proxylessnas_mobile-0795-cc7dfdfc.params.log)) |
 | ProxylessNAS Mob-14 | 24.00 | 6.84 | 6,857,568 | 597.10M | From [MIT-HAN-LAB/ProxylessNAS] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.304/proxylessnas_mobile14-0684-32ac8314.params.log)) |

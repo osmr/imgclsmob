@@ -104,6 +104,7 @@ Some remarks:
 | PreResNet-18 x0.75 | 29.93 | 10.71 | 8,473,784 | 1,129.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.274/preresnet18_w3d4-1071-380470ee.tf.npz.log)) |
 | PreResNet-18 | 28.21 | 9.49 | 11,687,848 | 1,820.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.140/preresnet18-0949-692e6c11.tf.npz.log)) |
 | PreResNet-26 | 26.02 | 8.33 | 17,958,568 | 2,746.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.316/preresnet26-0833-8de37e08.tf.npz.log)) |
+| PreResNet-BC-26b | 25.24 | 7.89 | 15,987,624 | 2,354.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.325/preresnetbc26b-0789-993dd84a.tf.npz.log)) |
 | PreResNet-34 | 24.53 | 7.54 | 21,796,008 | 3,672.83M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.300/preresnet34-0754-9d563584.tf.npz.log)) |
 | PreResNet-50 | 23.42 | 6.68 | 25,549,480 | 3,875.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet50-0668-822837cf.tf.npz.log)) |
 | PreResNet-50b | 22.36 | 6.31 | 25,549,480 | 4,107.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.307/preresnet50b-0631-9fc00073.tf.npz.log)) |

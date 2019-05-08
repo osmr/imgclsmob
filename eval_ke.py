@@ -15,22 +15,22 @@ def parse_args():
     parser.add_argument(
         '--rec-train',
         type=str,
-        default='../imgclsmob_data/imagenet/rec/train.rec',
+        default='../imgclsmob_data/imagenet_rec/train.rec',
         help='the training data')
     parser.add_argument(
         '--rec-train-idx',
         type=str,
-        default='../imgclsmob_data/imagenet/rec/train.idx',
+        default='../imgclsmob_data/imagenet_rec/train.idx',
         help='the index of training data')
     parser.add_argument(
         '--rec-val',
         type=str,
-        default='../imgclsmob_data/imagenet/rec/val.rec',
+        default='../imgclsmob_data/imagenet_rec/val.rec',
         help='the validation data')
     parser.add_argument(
         '--rec-val-idx',
         type=str,
-        default='../imgclsmob_data/imagenet/rec/val.idx',
+        default='../imgclsmob_data/imagenet_rec/val.idx',
         help='the index of validation data')
 
     parser.add_argument(

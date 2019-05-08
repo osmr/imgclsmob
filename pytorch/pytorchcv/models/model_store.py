@@ -227,6 +227,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('resnext29_32x4d_cifar100', '1950', '13ba13d92f6751022549a3b370ae86d3b13ae2d1', 'v0.0.200'),
     ('resnext29_32x4d_svhn', '0280', 'e85c5217944cdfafb0a538dd7cc817cffaada7c4', 'v0.0.275'),
     ('resnext29_16x64d_cifar10', '0241', '4133d3d04f9b10b132dcb959601d36f10123f8c2', 'v0.0.176'),
+    ('resnext29_16x64d_cifar100', '1693', '05e9a7f113099a98b219cad622ecfad5517a3b54', 'v0.0.322'),
     ('pyramidnet110_a48_cifar10', '0372', 'eb185645cda89e0c3c47b11c4b2d14ff18fa0ae1', 'v0.0.184'),
     ('pyramidnet110_a48_cifar100', '2095', '95da1a209916b3cf4af7e8dc44374345a88c60f4', 'v0.0.186'),
     ('pyramidnet110_a48_svhn', '0247', 'd48bafbebaabe9a68e5924571752b3d7cd95d311', 'v0.0.281'),

@@ -375,6 +375,7 @@ Some remarks:
 | PreResNet-164(BN) | 20.18 | 1,726,388 | 255.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.192/preresnet164bn_cifar100-2018-a20557c8.params.log)) |
 | PreResNet-1001 | 18.41 | 10,350,836 | 1,536.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.283/preresnet1001_cifar100-1841-185e033d.params.log)) |
 | ResNeXt-29 (32x4d) | 19.50 | 4,868,004 | 780.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.200/resnext29_32x4d_cifar100-1950-5f2eedcd.params.log)) |
+| ResNeXt-29 (16x64d) | 16.93 | 68,247,460 | 10,709.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.322/resnext29_16x64d_cifar100-1693-1fcec90d.params.log)) |
 | PyramidNet-110 (a=48) | 20.95 | 1,778,556 | 408.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.186/pyramidnet110_a48_cifar100-2095-00fd42a0.params.log)) |
 | PyramidNet-110 (a=84) | 18.87 | 3,913,536 | 778.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.199/pyramidnet110_a84_cifar100-1887-6712d5dc.params.log)) |
 | PyramidNet-110 (a=270) | 17.10 | 28,511,307 | 4,730.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.319/pyramidnet110_a270_cifar100-1710-2732fc64.params.log)) |

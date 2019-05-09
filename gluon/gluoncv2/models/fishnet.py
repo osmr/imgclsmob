@@ -576,7 +576,7 @@ def get_fishnet(blocks,
                 model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join("~", ".mxnet", "models"),
                 **kwargs):
     """
     Create FishNet model with specific parameters.

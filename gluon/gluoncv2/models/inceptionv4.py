@@ -53,7 +53,7 @@ class InceptConv(HybridBlock):
                 epsilon=1e-3,
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -739,7 +739,7 @@ class InceptionV4(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
 
             for i, layers_per_stage in enumerate(layers):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j in range(layers_per_stage):
                         if (j == 0) and (i != 0):
@@ -770,7 +770,7 @@ class InceptionV4(HybridBlock):
 def get_inceptionv4(model_name=None,
                     pretrained=False,
                     ctx=cpu(),
-                    root=os.path.join('~', '.mxnet', 'models'),
+                    root=os.path.join("~", ".mxnet", "models"),
                     **kwargs):
     """
     Create InceptionV4 model with specific parameters.

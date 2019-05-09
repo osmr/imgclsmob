@@ -394,7 +394,7 @@ def get_fractalnet_cifar(num_classes,
                          model_name=None,
                          pretrained=False,
                          ctx=cpu(),
-                         root=os.path.join('~', '.mxnet', 'models'),
+                         root=os.path.join("~", ".mxnet", "models"),
                          **kwargs):
     """
     Create WRN model for CIFAR with specific parameters.

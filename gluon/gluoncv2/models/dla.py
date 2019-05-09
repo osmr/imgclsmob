@@ -437,7 +437,7 @@ def get_dla(levels,
             model_name=None,
             pretrained=False,
             ctx=cpu(),
-            root=os.path.join('~', '.mxnet', 'models'),
+            root=os.path.join("~", ".mxnet", "models"),
             **kwargs):
     """
     Create DLA model with specific parameters.

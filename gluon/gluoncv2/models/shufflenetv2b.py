@@ -179,13 +179,13 @@ class ShuffleNetV2b(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ShuffleInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         downsample = (j == 0)
@@ -206,7 +206,7 @@ class ShuffleNetV2b(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -223,7 +223,7 @@ def get_shufflenetv2b(width_scale,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
-                      root=os.path.join('~', '.mxnet', 'models'),
+                      root=os.path.join("~", ".mxnet", "models"),
                       **kwargs):
     """
     Create ShuffleNetV2(b) model with specific parameters.

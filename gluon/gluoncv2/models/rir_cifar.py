@@ -206,7 +206,7 @@ class CIFARRiR(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
+                stage = DualPathSequential(prefix="stage{}_".format(i + 1))
                 for j, out_channels in enumerate(channels_per_stage):
                     strides = 2 if (j == 0) and (i != 0) else 1
                     stage.add(RiRUnit(
@@ -241,7 +241,7 @@ def get_rir_cifar(classes,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create RiR model for CIFAR with specific parameters.

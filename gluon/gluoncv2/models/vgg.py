@@ -66,7 +66,7 @@ class VGGConv(HybridBlock):
                 self.bn = nn.BatchNorm(
                     in_channels=out_channels,
                     use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -130,7 +130,7 @@ class VGGDense(HybridBlock):
                 units=out_channels,
                 weight_initializer="normal",
                 in_units=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.dropout = nn.Dropout(rate=0.5)
 
     def hybrid_forward(self, F, x):
@@ -213,9 +213,9 @@ class VGG(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         stage.add(vgg_conv3x3(
@@ -231,7 +231,7 @@ class VGG(HybridBlock):
                         padding=0))
                 self.features.add(stage)
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             in_channels = in_channels * 7 * 7
             self.output.add(VGGOutputBlock(
@@ -250,7 +250,7 @@ def get_vgg(blocks,
             model_name=None,
             pretrained=False,
             ctx=cpu(),
-            root=os.path.join('~', '.mxnet', 'models'),
+            root=os.path.join("~", ".mxnet", "models"),
             **kwargs):
     """
     Create VGG model with specific parameters.

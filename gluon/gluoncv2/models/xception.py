@@ -92,7 +92,7 @@ class DwsConvBlock(HybridBlock):
 
         with self.name_scope():
             if self.activate:
-                self.activ = nn.Activation('relu')
+                self.activ = nn.Activation("relu")
             self.conv = DwsConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -277,7 +277,7 @@ class XceptionFinalBlock(HybridBlock):
                 out_channels=2048,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.pool = nn.AvgPool2D(
                 pool_size=10,
                 strides=1)
@@ -326,7 +326,7 @@ class Xception(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = 64
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         stage.add(XceptionUnit(
@@ -356,7 +356,7 @@ class Xception(HybridBlock):
 def get_xception(model_name=None,
                  pretrained=False,
                  ctx=cpu(),
-                 root=os.path.join('~', '.mxnet', 'models'),
+                 root=os.path.join("~", ".mxnet", "models"),
                  **kwargs):
     """
     Create Xception model with specific parameters.

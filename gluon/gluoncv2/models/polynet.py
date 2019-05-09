@@ -59,7 +59,7 @@ class PolyConv(HybridBlock):
                 setattr(self, "bn{}".format(i + 1), nn.BatchNorm(
                     in_channels=out_channels,
                     use_global_stats=bn_use_global_stats))
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x, index):
         x = self.conv(x)
@@ -557,7 +557,7 @@ class MultiResidual(HybridBlock):
         with self.name_scope():
             for i in range(num_blocks):
                 setattr(self, "res_block{}".format(i + 1), res_block(bn_use_global_stats=bn_use_global_stats))
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         out = x
@@ -603,7 +603,7 @@ class PolyResidual(HybridBlock):
                 num_blocks=num_blocks)
             for i in range(num_blocks):
                 setattr(self, "res_block{}".format(i + 1), res_block(bn_use_global_stats=bn_use_global_stats))
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         out = x
@@ -1015,7 +1015,7 @@ class PolyNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
 
             for i, (two_way_scales_per_stage, poly_scales_per_stage) in enumerate(zip(two_way_scales, poly_scales)):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, (two_way_scale, poly_scale) in enumerate(zip(two_way_scales_per_stage, poly_scales_per_stage)):
                         if (j == 0) and (i != 0):
@@ -1049,7 +1049,7 @@ class PolyNet(HybridBlock):
 def get_polynet(model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join("~", ".mxnet", "models"),
                 **kwargs):
     """
     Create PolyNet model with specific parameters.

@@ -44,7 +44,7 @@ class NINConv(HybridBlock):
                 padding=padding,
                 use_bias=True,
                 in_channels=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -128,7 +128,7 @@ def get_nin_cifar(classes,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create NIN model for CIFAR with specific parameters.

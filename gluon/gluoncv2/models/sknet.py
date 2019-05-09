@@ -223,7 +223,7 @@ class SKNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -245,7 +245,7 @@ class SKNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -261,7 +261,7 @@ def get_sknet(blocks,
               model_name=None,
               pretrained=False,
               ctx=cpu(),
-              root=os.path.join('~', '.mxnet', 'models'),
+              root=os.path.join("~", ".mxnet", "models"),
               **kwargs):
     """
     Create SKNet model with specific parameters.

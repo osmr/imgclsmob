@@ -688,7 +688,7 @@ class SEBlock(HybridBlock):
                 in_channels=channels,
                 out_channels=mid_cannels,
                 use_bias=True)
-            self.relu = nn.Activation('relu')
+            self.relu = nn.Activation("relu")
             self.conv2 = conv1x1(
                 in_channels=mid_cannels,
                 out_channels=channels,

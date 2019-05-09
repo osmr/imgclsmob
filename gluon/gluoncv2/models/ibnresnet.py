@@ -312,7 +312,7 @@ def get_ibnresnet(blocks,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create IBN-ResNet model with specific parameters.

@@ -58,7 +58,7 @@ class PreActivation(HybridBlock):
         super(PreActivation, self).__init__(**kwargs)
         with self.name_scope():
             self.bn = dpn_batch_norm(channels=channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -96,7 +96,7 @@ class DPNConv(HybridBlock):
         super(DPNConv, self).__init__(**kwargs)
         with self.name_scope():
             self.bn = dpn_batch_norm(channels=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -287,7 +287,7 @@ class DPNInitBlock(HybridBlock):
                 use_bias=False,
                 in_channels=in_channels)
             self.bn = dpn_batch_norm(channels=out_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -392,7 +392,7 @@ class DPN(HybridBlock):
                 padding=init_block_padding))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
+                stage = DualPathSequential(prefix="stage{}_".format(i + 1))
                 r = rs[i]
                 bw = bws[i]
                 inc = incs[i]
@@ -413,7 +413,7 @@ class DPN(HybridBlock):
                 self.features.add(stage)
             self.features.add(DPNFinalBlock(channels=in_channels))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             if for_training or not test_time_pool:
                 self.output.add(nn.GlobalAvgPool2D())
                 self.output.add(conv1x1(
@@ -444,7 +444,7 @@ def get_dpn(num_layers,
             model_name=None,
             pretrained=False,
             ctx=cpu(),
-            root=os.path.join('~', '.mxnet', 'models'),
+            root=os.path.join("~", ".mxnet", "models"),
             **kwargs):
     """
     Create DPN model with specific parameters.

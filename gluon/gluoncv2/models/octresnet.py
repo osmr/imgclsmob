@@ -707,7 +707,7 @@ class OctResNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -727,7 +727,7 @@ def get_octresnet(blocks,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create Oct-ResNet model with specific parameters.

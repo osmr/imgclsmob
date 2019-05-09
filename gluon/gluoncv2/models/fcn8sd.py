@@ -121,7 +121,7 @@ def get_fcn8sd(backbone,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create FCN-8s(d) model with specific parameters.

@@ -575,14 +575,14 @@ class CIFARWRN1bit(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3_1bit(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 binarized=binarized))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -599,7 +599,7 @@ class CIFARWRN1bit(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats,
                 bn_affine=False))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(conv1x1_block_1bit(
                 in_channels=in_channels,
                 out_channels=classes,
@@ -623,7 +623,7 @@ def get_wrn1bit_cifar(classes,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
-                      root=os.path.join('~', '.mxnet', 'models'),
+                      root=os.path.join("~", ".mxnet", "models"),
                       **kwargs):
     """
     Create WRN-1bit model for CIFAR with specific parameters.

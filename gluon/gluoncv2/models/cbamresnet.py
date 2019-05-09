@@ -35,7 +35,7 @@ class MLP(HybridBlock):
             self.fc1 = nn.Dense(
                 units=mid_channels,
                 in_units=channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.fc2 = nn.Dense(
                 units=channels,
                 in_units=mid_channels)
@@ -195,7 +195,7 @@ class CbamResUnit(HybridBlock):
                     bn_use_global_stats=bn_use_global_stats,
                     activate=False)
             self.cbam = CbamBlock(channels=out_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
@@ -252,7 +252,7 @@ class CbamResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -284,7 +284,7 @@ def get_resnet(blocks,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create CBAM-ResNet model with specific parameters.

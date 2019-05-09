@@ -151,7 +151,7 @@ def get_densenet_cifar(classes,
                        model_name=None,
                        pretrained=False,
                        ctx=cpu(),
-                       root=os.path.join('~', '.mxnet', 'models'),
+                       root=os.path.join("~", ".mxnet", "models"),
                        **kwargs):
     """
     Create DenseNet model for CIFAR with specific parameters.

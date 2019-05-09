@@ -45,7 +45,7 @@ class AlexConv(HybridBlock):
                 padding=padding,
                 use_bias=True,
                 in_channels=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -75,7 +75,7 @@ class AlexDense(HybridBlock):
                 units=out_channels,
                 weight_initializer="normal",
                 in_units=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.dropout = nn.Dropout(rate=0.5)
 
     def hybrid_forward(self, F, x):
@@ -160,7 +160,7 @@ class AlexNet(HybridBlock):
         with self.name_scope():
             self.features = nn.HybridSequential(prefix='')
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         stage.add(AlexConv(
@@ -192,7 +192,7 @@ class AlexNet(HybridBlock):
 def get_alexnet(model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join("~", ".mxnet", "models"),
                 **kwargs):
     """
     Create AlexNet model with specific parameters.

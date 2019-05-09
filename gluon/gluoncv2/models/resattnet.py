@@ -176,7 +176,7 @@ class ResBlockSequence(HybridBlock):
                  **kwargs):
         super(ResBlockSequence, self).__init__(**kwargs)
         with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i in range(length):
                 self.blocks.add(ResBlock(
                     in_channels=in_channels,
@@ -339,9 +339,9 @@ class AttBlock(HybridBlock):
                 length=scale_p,
                 bn_use_global_stats=bn_use_global_stats)
 
-            down_seq = nn.HybridSequential(prefix='')
-            up_seq = nn.HybridSequential(prefix='')
-            skip_seq = nn.HybridSequential(prefix='')
+            down_seq = nn.HybridSequential(prefix="")
+            up_seq = nn.HybridSequential(prefix="")
+            skip_seq = nn.HybridSequential(prefix="")
             for i in range(hourglass_depth):
                 down_seq.add(DownAttBlock(
                     in_channels=in_channels,
@@ -445,7 +445,7 @@ class PreActivation(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -492,7 +492,7 @@ class ResAttNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ResAttInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -501,7 +501,7 @@ class ResAttNet(HybridBlock):
             in_size = tuple([x // 4 for x in in_size])
             for i, channels_per_stage in enumerate(channels):
                 hourglass_depth = len(channels) - 1 - i
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -529,7 +529,7 @@ class ResAttNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -545,7 +545,7 @@ def get_resattnet(blocks,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create ResAttNet model with specific parameters.

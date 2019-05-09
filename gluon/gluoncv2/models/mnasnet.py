@@ -59,7 +59,7 @@ class ConvBlock(HybridBlock):
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
             if self.activate:
-                self.activ = nn.Activation('relu')
+                self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -314,7 +314,7 @@ class MnasNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(MnasInitBlock(
                 in_channels=in_channels,
                 out_channels_list=init_block_channels,
@@ -323,7 +323,7 @@ class MnasNet(HybridBlock):
             for i, channels_per_stage in enumerate(channels):
                 kernel_sizes_per_stage = kernel_sizes[i]
                 expansion_factors_per_stage = expansion_factors[i]
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         kernel_size = kernel_sizes_per_stage[j]
@@ -348,7 +348,7 @@ class MnasNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -363,7 +363,7 @@ class MnasNet(HybridBlock):
 def get_mnasnet(model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join("~", ".mxnet", "models"),
                 **kwargs):
     """
     Create MnasNet model with specific parameters.

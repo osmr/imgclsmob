@@ -107,7 +107,7 @@ class CIFARXDenseNet(HybridBlock):
         unit_class = XDenseUnit if bottleneck else XDenseSimpleUnit
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
@@ -137,7 +137,7 @@ class CIFARXDenseNet(HybridBlock):
                 pool_size=8,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -157,7 +157,7 @@ def get_xdensenet_cifar(classes,
                         model_name=None,
                         pretrained=False,
                         ctx=cpu(),
-                        root=os.path.join('~', '.mxnet', 'models'),
+                        root=os.path.join("~", ".mxnet", "models"),
                         **kwargs):
     """
     Create X-DenseNet model for CIFAR with specific parameters.

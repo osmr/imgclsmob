@@ -38,7 +38,7 @@ class DenseBlock(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.fc(x)
@@ -78,7 +78,7 @@ class ChannelGate(HybridBlock):
                 in_channels=channels,
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.main_fcs = nn.HybridSequential(prefix='')
+            self.main_fcs = nn.HybridSequential(prefix="")
             for i in range(num_layers - 1):
                 self.main_fcs.add(DenseBlock(
                     in_channels=mid_channels,
@@ -281,7 +281,7 @@ class BamResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -313,7 +313,7 @@ def get_resnet(blocks,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create BAM-ResNet model with specific parameters.

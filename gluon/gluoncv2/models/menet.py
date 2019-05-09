@@ -68,7 +68,7 @@ class MEUnit(HybridBlock):
             self.expand_bn3 = nn.BatchNorm(in_channels=out_channels)
             if downsample:
                 self.avgpool = nn.AvgPool2D(pool_size=3, strides=2, padding=1)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
             # fusion branch
             self.s_merge_conv = conv1x1(
@@ -145,7 +145,7 @@ class MEInitBlock(HybridBlock):
                 use_bias=False,
                 in_channels=in_channels)
             self.bn = nn.BatchNorm(in_channels=out_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -201,7 +201,7 @@ class MENet(HybridBlock):
                 out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         downsample = (j == 0)
@@ -237,7 +237,7 @@ def get_menet(first_stage_channels,
               model_name=None,
               pretrained=False,
               ctx=cpu(),
-              root=os.path.join('~', '.mxnet', 'models'),
+              root=os.path.join("~", ".mxnet", "models"),
               **kwargs):
     """
     Create MENet model with specific parameters.

@@ -39,7 +39,7 @@ class FireConv(HybridBlock):
                 kernel_size=kernel_size,
                 padding=padding,
                 in_channels=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -128,7 +128,7 @@ class SqueezeInitBlock(HybridBlock):
                 kernel_size=kernel_size,
                 strides=2,
                 in_channels=in_channels)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -179,7 +179,7 @@ class SqueezeNet(HybridBlock):
                 kernel_size=init_block_kernel_size))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     stage.add(nn.MaxPool2D(
                         pool_size=3,
@@ -203,7 +203,7 @@ class SqueezeNet(HybridBlock):
                 channels=classes,
                 kernel_size=1,
                 in_channels=in_channels))
-            self.output.add(nn.Activation('relu'))
+            self.output.add(nn.Activation("relu"))
             self.output.add(nn.AvgPool2D(
                 pool_size=13,
                 strides=1))
@@ -220,7 +220,7 @@ def get_squeezenet(version,
                    model_name=None,
                    pretrained=False,
                    ctx=cpu(),
-                   root=os.path.join('~', '.mxnet', 'models'),
+                   root=os.path.join("~", ".mxnet", "models"),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.

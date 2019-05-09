@@ -221,7 +221,7 @@ def get_shakeshakeresnet_cifar(classes,
                                model_name=None,
                                pretrained=False,
                                ctx=cpu(),
-                               root=os.path.join('~', '.mxnet', 'models'),
+                               root=os.path.join("~", ".mxnet", "models"),
                                **kwargs):
     """
     Create Shake-Shake-ResNet model for CIFAR with specific parameters.

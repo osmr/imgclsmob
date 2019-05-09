@@ -97,7 +97,7 @@ class DartsConv(HybridBlock):
 
         with self.name_scope():
             if self.activate:
-                self.activ = nn.Activation('relu')
+                self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -192,7 +192,7 @@ class DartsDwsConv(HybridBlock):
                  **kwargs):
         super(DartsDwsConv, self).__init__(**kwargs)
         with self.name_scope():
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = DwsConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -282,7 +282,7 @@ class DartsReduceBranch(HybridBlock):
         mid_channels = out_channels // 2
 
         with self.name_scope():
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv1 = conv1x1(
                 in_channels=in_channels,
                 out_channels=mid_channels,
@@ -595,7 +595,7 @@ class DARTS(HybridBlock):
             in_channels = stem_blocks_channels
 
             for i, channels_per_stage in enumerate(channels):
-                stage = nasnet_dual_path_sequential(prefix='stage{}_'.format(i + 1))
+                stage = nasnet_dual_path_sequential(prefix="stage{}_".format(i + 1))
                 for j, out_channels in enumerate(channels_per_stage):
                     reduction = (i != 0) and (j == 0)
                     prev_reduction = ((i == 0) and (j == 0)) or ((i != 0) and (j == 1))
@@ -614,7 +614,7 @@ class DARTS(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -629,7 +629,7 @@ class DARTS(HybridBlock):
 def get_darts(model_name=None,
               pretrained=False,
               ctx=cpu(),
-              root=os.path.join('~', '.mxnet', 'models'),
+              root=os.path.join("~", ".mxnet", "models"),
               **kwargs):
     """
     Create DARTS model with specific parameters.

@@ -368,7 +368,7 @@ class ESPNetv2(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = DualPathSequential(prefix='stage{}_'.format(i + 1))
+                stage = DualPathSequential(prefix="stage{}_".format(i + 1))
                 for j, out_channels in enumerate(channels_per_stage):
                     if j == 0:
                         unit = DownsampleBlock(
@@ -397,7 +397,7 @@ class ESPNetv2(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dropout(rate=dropout_rate))
             self.output.add(nn.Dense(
@@ -414,7 +414,7 @@ def get_espnetv2(width_scale,
                  model_name=None,
                  pretrained=False,
                  ctx=cpu(),
-                 root=os.path.join('~', '.mxnet', 'models'),
+                 root=os.path.join("~", ".mxnet", "models"),
                  **kwargs):
     """
     Create ESPNetv2 model with specific parameters.

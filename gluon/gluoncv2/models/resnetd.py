@@ -59,7 +59,7 @@ class ResNetD(HybridBlock):
         self.multi_output = multi_output
 
         with self.name_scope():
-            self.features = MultiOutputSequential(prefix='')
+            self.features = MultiOutputSequential(prefix="")
             if ordinary_init:
                 self.features.add(ResInitBlock(
                     in_channels=in_channels,
@@ -93,7 +93,7 @@ class ResNetD(HybridBlock):
                 self.features.add(stage)
             self.features.add(nn.GlobalAvgPool2D())
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -115,7 +115,7 @@ def get_resnetd(blocks,
                 model_name=None,
                 pretrained=False,
                 ctx=cpu(),
-                root=os.path.join('~', '.mxnet', 'models'),
+                root=os.path.join("~", ".mxnet", "models"),
                 **kwargs):
     """
     Create ResNet(D) with dilation model with specific parameters.

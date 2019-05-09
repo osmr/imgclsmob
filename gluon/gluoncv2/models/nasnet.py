@@ -279,7 +279,7 @@ class NasConv(HybridBlock):
                  **kwargs):
         super(NasConv, self).__init__(**kwargs)
         with self.name_scope():
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -630,7 +630,7 @@ class NasPathBlock(HybridBlock):
         mid_channels = out_channels // 2
 
         with self.name_scope():
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.path1 = NasPathBranch(
                 in_channels=in_channels,
                 out_channels=mid_channels)
@@ -1176,7 +1176,7 @@ class NASNet(HybridBlock):
                         in_channels = out_channels
                 self.features.add(stage)
 
-            self.features.add(nn.Activation('relu'))
+            self.features.add(nn.Activation("relu"))
             self.features.add(nn.AvgPool2D(
                 pool_size=final_pool_size,
                 strides=1))
@@ -1204,7 +1204,7 @@ def get_nasnet(repeat,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create NASNet-A model with specific parameters.

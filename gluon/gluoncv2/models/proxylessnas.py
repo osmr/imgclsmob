@@ -256,7 +256,7 @@ def get_proxylessnas(version,
                      model_name=None,
                      pretrained=False,
                      ctx=cpu(),
-                     root=os.path.join('~', '.mxnet', 'models'),
+                     root=os.path.join("~", ".mxnet", "models"),
                      **kwargs):
     """
     Create ProxylessNAS model with specific parameters.

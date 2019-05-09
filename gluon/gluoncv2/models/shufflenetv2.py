@@ -67,7 +67,7 @@ class ShuffleUnit(HybridBlock):
                     out_channels=mid_channels)
                 self.expand_bn5 = nn.BatchNorm(in_channels=mid_channels)
 
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.c_shuffle = ChannelShuffle(
                 channels=out_channels,
                 groups=2)
@@ -177,7 +177,7 @@ class ShuffleNetV2(HybridBlock):
                 out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         downsample = (j == 0)
@@ -213,7 +213,7 @@ def get_shufflenetv2(width_scale,
                      model_name=None,
                      pretrained=False,
                      ctx=cpu(),
-                     root=os.path.join('~', '.mxnet', 'models'),
+                     root=os.path.join("~", ".mxnet", "models"),
                      **kwargs):
     """
     Create ShuffleNetV2 model with specific parameters.

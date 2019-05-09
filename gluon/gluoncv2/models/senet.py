@@ -3,7 +3,7 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SENet', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
+__all__ = ['SENet', 'senet16', 'senet28', 'senet40', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
 
 import os
 import math
@@ -227,7 +227,7 @@ class SENet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(SEInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -253,7 +253,7 @@ class SENet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dropout(rate=0.2))
             self.output.add(nn.Dense(
@@ -270,7 +270,7 @@ def get_senet(blocks,
               model_name=None,
               pretrained=False,
               ctx=cpu(),
-              root=os.path.join('~', '.mxnet', 'models'),
+              root=os.path.join("~", ".mxnet", "models"),
               **kwargs):
     """
     Create SENet model with specific parameters.
@@ -289,7 +289,16 @@ def get_senet(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 52:
+    if blocks == 16:
+        layers = [1, 1, 1, 1]
+        cardinality = 32
+    elif blocks == 28:
+        layers = [2, 2, 2, 2]
+        cardinality = 32
+    elif blocks == 40:
+        layers = [3, 3, 3, 3]
+        cardinality = 32
+    elif blocks == 52:
         layers = [3, 4, 6, 3]
         cardinality = 32
     elif blocks == 103:
@@ -325,6 +334,54 @@ def get_senet(blocks,
             ctx=ctx)
 
     return net
+
+
+def senet16(**kwargs):
+    """
+    SENet-16 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=16, model_name="senet16", **kwargs)
+
+
+def senet28(**kwargs):
+    """
+    SENet-28 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=28, model_name="senet28", **kwargs)
+
+
+def senet40(**kwargs):
+    """
+    SENet-40 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=40, model_name="senet40", **kwargs)
 
 
 def senet52(**kwargs):
@@ -382,6 +439,9 @@ def _test():
     pretrained = False
 
     models = [
+        senet16,
+        senet28,
+        senet40,
         senet52,
         senet103,
         senet154,
@@ -403,6 +463,9 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != senet16 or weight_count == 31366168)
+        assert (model != senet28 or weight_count == 36453768)
+        assert (model != senet40 or weight_count == 41541368)
         assert (model != senet52 or weight_count == 44659416)
         assert (model != senet103 or weight_count == 60963096)
         assert (model != senet154 or weight_count == 115088984)

@@ -49,7 +49,7 @@ class WRNConv(HybridBlock):
                 use_bias=True,
                 in_channels=in_channels)
             if self.activate:
-                self.activ = nn.Activation('relu')
+                self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -196,7 +196,7 @@ class WRNUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     activate=False)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:
@@ -276,13 +276,13 @@ class WRN(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(WRNInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
@@ -297,7 +297,7 @@ class WRN(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -314,7 +314,7 @@ def get_wrn(blocks,
             model_name=None,
             pretrained=False,
             ctx=cpu(),
-            root=os.path.join('~', '.mxnet', 'models'),
+            root=os.path.join("~", ".mxnet", "models"),
             **kwargs):
     """
     Create WRN model with specific parameters.

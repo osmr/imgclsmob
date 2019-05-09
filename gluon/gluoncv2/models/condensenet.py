@@ -47,7 +47,7 @@ class CondenseSimpleConv(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -127,7 +127,7 @@ class CondenseComplexConv(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
                 channels=out_channels,
                 kernel_size=kernel_size,
@@ -140,10 +140,10 @@ class CondenseComplexConv(HybridBlock):
                 channels=out_channels,
                 groups=groups)
             self.index = self.params.get(
-                'index',
-                grad_req='null',
+                "index",
+                grad_req="null",
                 shape=(in_channels,),
-                init='zeros',
+                init="zeros",
                 allow_deferred_init=True,
                 differentiable=False)
 
@@ -299,7 +299,7 @@ class PostActivation(HybridBlock):
             self.bn = nn.BatchNorm(
                 in_channels=in_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -332,10 +332,10 @@ class CondenseDense(HybridBlock):
                 units=units,
                 in_units=drop_in_units)
             self.index = self.params.get(
-                'index',
-                grad_req='null',
+                "index",
+                grad_req="null",
                 shape=(drop_in_units,),
-                init='zeros',
+                init="zeros",
                 allow_deferred_init=True,
                 differentiable=False)
 
@@ -382,13 +382,13 @@ class CondenseNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(CondenseInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     if i != 0:
                         stage.add(TransitionBlock())
@@ -407,7 +407,7 @@ class CondenseNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(CondenseDense(
                 units=classes,
@@ -424,7 +424,7 @@ def get_condensenet(num_layers,
                     model_name=None,
                     pretrained=False,
                     ctx=cpu(),
-                    root=os.path.join('~', '.mxnet', 'models'),
+                    root=os.path.join("~", ".mxnet", "models"),
                     **kwargs):
     """
     Create CondenseNet (converted) model with specific parameters.

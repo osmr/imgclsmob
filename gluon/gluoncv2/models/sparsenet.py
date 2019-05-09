@@ -114,7 +114,7 @@ class SparseStage(HybridBlock):
                     out_channels=(in_channels // 2),
                     bn_use_global_stats=bn_use_global_stats)
                 in_channels = in_channels // 2
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i, out_channels in enumerate(channels_per_stage):
                 self.blocks.add(SparseBlock(
                     in_channels=in_channels,
@@ -174,7 +174,7 @@ class SparseNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(PreResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -197,7 +197,7 @@ class SparseNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -213,7 +213,7 @@ def get_sparsenet(num_layers,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create SparseNet model with specific parameters.

@@ -154,7 +154,7 @@ def get_seresnext(blocks,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create SE-ResNeXt model with specific parameters.

@@ -54,7 +54,7 @@ class InceptConv(HybridBlock):
                 epsilon=1e-3,
                 in_channels=out_channels,
                 use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
@@ -204,7 +204,7 @@ class ConvSeqBranch(HybridBlock):
         assert (len(out_channels_list) == len(padding_list))
 
         with self.name_scope():
-            self.conv_list = nn.HybridSequential(prefix='')
+            self.conv_list = nn.HybridSequential(prefix="")
             for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                     out_channels_list, kernel_size_list, strides_list, padding_list)):
                 self.conv_list.add(InceptConv(
@@ -261,7 +261,7 @@ class InceptionAUnit(HybridBlock):
                 in_channels=128,
                 out_channels=in_channels,
                 use_bias=True)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         identity = x
@@ -343,7 +343,7 @@ class InceptionBUnit(HybridBlock):
                 in_channels=384,
                 out_channels=in_channels,
                 use_bias=True)
-            self.activ = nn.Activation('relu')
+            self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         identity = x
@@ -440,7 +440,7 @@ class InceptionCUnit(HybridBlock):
                 out_channels=in_channels,
                 use_bias=True)
             if self.activate:
-                self.activ = nn.Activation('relu')
+                self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
         identity = x
@@ -604,13 +604,13 @@ class InceptionResNetV2(HybridBlock):
         reduction_units = [ReductionAUnit, ReductionBUnit]
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(InceptInitBlock(
                 in_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats))
 
             for i, layers_per_stage in enumerate(layers):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j in range(layers_per_stage):
                         if (j == 0) and (i != 0):
@@ -634,7 +634,7 @@ class InceptionResNetV2(HybridBlock):
                 pool_size=8,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             if dropout_rate > 0.0:
                 self.output.add(nn.Dropout(rate=dropout_rate))
@@ -651,7 +651,7 @@ class InceptionResNetV2(HybridBlock):
 def get_inceptionresnetv2(model_name=None,
                           pretrained=False,
                           ctx=cpu(),
-                          root=os.path.join('~', '.mxnet', 'models'),
+                          root=os.path.join("~", ".mxnet", "models"),
                           **kwargs):
     """
     Create InceptionResNetV2 model with specific parameters.

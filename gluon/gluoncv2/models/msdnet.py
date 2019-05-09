@@ -252,7 +252,7 @@ class MSDLayer(HybridBlock):
         assert (self.dec_scales >= 0)
 
         with self.name_scope():
-            self.scale_blocks = nn.HybridSequential(prefix='')
+            self.scale_blocks = nn.HybridSequential(prefix="")
             for i in range(out_scales):
                 if (i == 0) and (self.dec_scales == 0):
                     self.scale_blocks.add(MSDFirstScaleBlock(
@@ -338,7 +338,7 @@ class MSDFeatureBlock(HybridBlock):
                  **kwargs):
         super(MSDFeatureBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.blocks = DualPathSequential(prefix='')
+            self.blocks = DualPathSequential(prefix="")
             for i, out_channels_per_layer in enumerate(out_channels):
                 if len(bottleneck_factors[i]) == 0:
                     self.blocks.add(MSDTransitionLayer(
@@ -375,7 +375,7 @@ class MSDClassifier(HybridBlock):
                  **kwargs):
         super(MSDClassifier, self).__init__(**kwargs)
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
@@ -388,7 +388,7 @@ class MSDClassifier(HybridBlock):
                 pool_size=2,
                 strides=2))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -444,8 +444,8 @@ class MSDNet(HybridBlock):
                 out_channels=init_layer_channels)
             in_channels = init_layer_channels
 
-            self.feature_blocks = nn.HybridSequential(prefix='')
-            self.classifiers = nn.HybridSequential(prefix='')
+            self.feature_blocks = nn.HybridSequential(prefix="")
+            self.classifiers = nn.HybridSequential(prefix="")
             for i in range(num_feature_blocks):
                 self.feature_blocks.add(MSDFeatureBlock(
                     in_channels=in_channels,
@@ -474,7 +474,7 @@ def get_msdnet(blocks,
                model_name=None,
                pretrained=False,
                ctx=cpu(),
-               root=os.path.join('~', '.mxnet', 'models'),
+               root=os.path.join("~", ".mxnet", "models"),
                **kwargs):
     """
     Create MSDNet model with specific parameters.

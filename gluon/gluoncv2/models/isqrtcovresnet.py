@@ -209,7 +209,7 @@ class iSQRTCOVResNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -236,7 +236,7 @@ class iSQRTCOVResNet(HybridBlock):
             in_channels = final_block_channels
             self.features.add(iSQRTCOVPool())
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             in_units = in_channels * (in_channels + 1) // 2
             self.output.add(nn.Dense(
@@ -254,7 +254,7 @@ def get_isqrtcovresnet(blocks,
                        model_name=None,
                        pretrained=False,
                        ctx=cpu(),
-                       root=os.path.join('~', '.mxnet', 'models'),
+                       root=os.path.join("~", ".mxnet", "models"),
                        **kwargs):
     """
     Create iSQRT-COV-ResNet model with specific parameters.

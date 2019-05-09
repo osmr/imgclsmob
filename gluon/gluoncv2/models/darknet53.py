@@ -91,7 +91,7 @@ class DarkNet53(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -99,7 +99,7 @@ class DarkNet53(HybridBlock):
                 activation=nn.LeakyReLU(alpha=alpha)))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix='stage{}_'.format(i + 1))
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         if j == 0:
@@ -121,7 +121,7 @@ class DarkNet53(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,
@@ -136,7 +136,7 @@ class DarkNet53(HybridBlock):
 def get_darknet53(model_name=None,
                   pretrained=False,
                   ctx=cpu(),
-                  root=os.path.join('~', '.mxnet', 'models'),
+                  root=os.path.join("~", ".mxnet", "models"),
                   **kwargs):
     """
     Create DarkNet model with specific parameters.

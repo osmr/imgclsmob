@@ -53,7 +53,7 @@ class CIFARResNeXt(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3_block(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -96,7 +96,7 @@ def get_resnext_cifar(classes,
                       model_name=None,
                       pretrained=False,
                       ctx=cpu(),
-                      root=os.path.join('~', '.mxnet', 'models'),
+                      root=os.path.join("~", ".mxnet", "models"),
                       **kwargs):
     """
     ResNeXt model for CIFAR with specific parameters.

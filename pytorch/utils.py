@@ -23,7 +23,7 @@ def prepare_model(model_name,
                   ignore_extra=False,
                   remap_to_cpu=False,
                   remove_module=False):
-    kwargs = {'pretrained': use_pretrained}
+    kwargs = {"pretrained": use_pretrained}
     if net_extra_kwargs is not None:
         kwargs.update(net_extra_kwargs)
 
@@ -31,12 +31,12 @@ def prepare_model(model_name,
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        logging.info("Loading model: {}".format(pretrained_model_file_path))
         checkpoint = torch.load(
             pretrained_model_file_path,
-            map_location=(None if use_cuda and not remap_to_cpu else 'cpu'))
-        if (type(checkpoint) == dict) and ('state_dict' in checkpoint):
-            checkpoint = checkpoint['state_dict']
+            map_location=(None if use_cuda and not remap_to_cpu else "cpu"))
+        if (type(checkpoint) == dict) and ("state_dict" in checkpoint):
+            checkpoint = checkpoint["state_dict"]
 
         if ignore_extra:
             pretrained_state = checkpoint
@@ -70,7 +70,9 @@ def calc_net_weight_count(net):
 
 
 class AverageMeter(object):
-    """Computes and stores the average and current value"""
+    """
+    Computes and stores the average and current value
+    """
     def __init__(self):
         self.reset()
 
@@ -88,7 +90,9 @@ class AverageMeter(object):
 
 
 def accuracy(output, target, topk=(1,)):
-    """Computes the precision@k for the specified values of k"""
+    """
+    Computes the precision@k for the specified values of k
+    """
     with torch.no_grad():
         maxk = max(topk)
         batch_size = target.size(0)

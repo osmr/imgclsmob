@@ -15,7 +15,8 @@ from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import COCOMetaInfo
-from mxnet import gluon
+from mxnet.gluon.data import DataLoader
+from mxnet.gluon.utils import split_and_load
 
 
 def get_dataset_metainfo(dataset_name):
@@ -53,7 +54,7 @@ def get_train_data_source(ds_metainfo,
             transform=(transform_train if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_train)
-        return gluon.data.DataLoader(
+        return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=True,
@@ -77,7 +78,7 @@ def get_val_data_source(ds_metainfo,
             transform=(transform_val if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_val)
-        return gluon.data.DataLoader(
+        return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
@@ -100,7 +101,7 @@ def get_test_data_source(ds_metainfo,
             transform=(transform_test if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_test)
-        return gluon.data.DataLoader(
+        return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
@@ -110,13 +111,13 @@ def get_test_data_source(ds_metainfo,
 def get_batch_fn(use_imgrec):
     if use_imgrec:
         def batch_fn(batch, ctx):
-            data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-            label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+            data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
             return data, label
         return batch_fn
     else:
         def batch_fn(batch, ctx):
-            data = gluon.utils.split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-            label = gluon.utils.split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
             return data, label
         return batch_fn

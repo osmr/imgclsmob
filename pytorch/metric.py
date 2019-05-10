@@ -2,19 +2,9 @@
     Several base metrics.
 """
 
-__all__ = ['EvalMetric', 'CompositeEvalMetric', 'check_label_shapes']
+__all__ = ['EvalMetric', 'CompositeEvalMetric']
 
 from collections import OrderedDict
-
-
-def check_label_shapes(labels, preds, shape=0):
-    if shape == 0:
-        label_shape, pred_shape = len(labels), len(preds)
-    else:
-        label_shape, pred_shape = labels.shape, preds.shape
-
-    if label_shape != pred_shape:
-        raise ValueError("Shape of labels {} does not match shape of predictions {}".format(label_shape, pred_shape))
 
 
 class EvalMetric(object):
@@ -53,10 +43,10 @@ class EvalMetric(object):
         """
         config = self._kwargs.copy()
         config.update({
-            'metric': self.__class__.__name__,
-            'name': self.name,
-            'output_names': self.output_names,
-            'label_names': self.label_names})
+            "metric": self.__class__.__name__,
+            "name": self.name,
+            "output_names": self.output_names,
+            "label_names": self.label_names})
         return config
 
     def update_dict(self, label, pred):
@@ -114,7 +104,7 @@ class EvalMetric(object):
            Value of the evaluations.
         """
         if self.num_inst == 0:
-            return self.name, float('nan')
+            return self.name, float("nan")
         else:
             return self.name, self.sum_metric / self.num_inst
 
@@ -190,10 +180,10 @@ class CompositeEvalMetric(EvalMetric):
 
         Parameters
         ----------
-        labels : list of `NDArray`
+        labels : torch.Tensor
             The labels of the data.
 
-        preds : list of `NDArray`
+        preds : torch.Tensor
             Predicted values.
         """
         for metric in self.metrics:
@@ -201,7 +191,8 @@ class CompositeEvalMetric(EvalMetric):
 
     def reset(self):
         """
-        Resets the internal evaluation result to initial state."""
+        Resets the internal evaluation result to initial state.
+        """
         try:
             for metric in self.metrics:
                 metric.reset()

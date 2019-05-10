@@ -139,7 +139,6 @@ class VOCMetaInfo(DatasetMetaInfo):
              "ignore_bg": VOCSegDataset.ignore_bg,
              "macro_average": False}]
         self.saver_acc_ind = 1
-        self.do_transform = True
         self.train_transform = None
         self.val_transform = voc_test_transform
         self.test_transform = voc_test_transform

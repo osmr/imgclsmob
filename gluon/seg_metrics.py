@@ -136,14 +136,14 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         """
         if self.macro_average:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, self.sum_metric / self.num_inst)
+                return self.name, self.sum_metric / self.num_inst
         else:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, float(self.sum_metric) / self.num_inst)
+                return self.name, float(self.sum_metric) / self.num_inst
 
 
 class MeanIoUMetric(mx.metric.EvalMetric):
@@ -295,14 +295,14 @@ class MeanIoUMetric(mx.metric.EvalMetric):
         """
         if self.macro_average:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, self.sum_metric / self.num_inst)
+                return self.name, self.sum_metric / self.num_inst
         else:
             class_count = (self.area_union > 0).sum()
             if class_count == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             eps = np.finfo(np.float32).eps
             area_union_eps = self.area_union + eps
             mean_iou = (self.area_inter / area_union_eps).sum() / class_count
-            return (self.name, mean_iou)
+            return self.name, mean_iou

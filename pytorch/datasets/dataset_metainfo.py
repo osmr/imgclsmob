@@ -8,7 +8,6 @@ import os
 class DatasetMetaInfo(object):
     def __init__(self):
         self.use_imgrec = False
-        self.do_transform = False
         self.label = None
         self.root_dir_name = None
         self.root_dir_path = None

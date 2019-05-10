@@ -3,11 +3,11 @@
 """
 
 import os
-from mxnet import gluon
+from mxnet.gluon.data.vision import CIFAR100
 from .cifar10_cls_dataset import CIFAR10MetaInfo
 
 
-class CIFAR100Fine(gluon.data.vision.CIFAR100):
+class CIFAR100Fine(CIFAR100):
     """
     CIFAR-100 image classification dataset.
 

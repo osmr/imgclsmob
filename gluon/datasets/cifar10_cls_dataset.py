@@ -5,13 +5,13 @@
 import os
 import numpy as np
 import mxnet as mx
-from mxnet import gluon
 from mxnet.gluon import Block
+from mxnet.gluon.data.vision import CIFAR10
 from mxnet.gluon.data.vision import transforms
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CIFAR10Fine(gluon.data.vision.CIFAR10):
+class CIFAR10Fine(CIFAR10):
     """
     CIFAR-10 image classification dataset.
 

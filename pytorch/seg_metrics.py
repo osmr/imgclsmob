@@ -70,27 +70,28 @@ class PixelAccuracyMetric(EvalMetric):
         preds : torch.Tensor
             Predicted values.
         """
-        check_label_shapes(labels, preds)
-        if self.on_cpu:
-            if self.sparse_label:
-                label_imask = labels.cpu().numpy().astype(np.int32)
+        with torch.no_grad():
+            check_label_shapes(labels, preds)
+            if self.on_cpu:
+                if self.sparse_label:
+                    label_imask = labels.cpu().numpy().astype(np.int32)
+                else:
+                    label_imask = torch.argmax(labels, dim=self.axis).cpu().numpy().astype(np.int32)
+                pred_imask = torch.argmax(preds, dim=self.axis).cpu().numpy().astype(np.int32)
+                acc = seg_pixel_accuracy_np(
+                    label_imask=label_imask,
+                    pred_imask=pred_imask,
+                    vague_idx=self.vague_idx,
+                    use_vague=self.use_vague,
+                    macro_average=self.macro_average)
+                if self.macro_average:
+                    self.sum_metric += acc
+                    self.num_inst += 1
+                else:
+                    self.sum_metric += acc[0]
+                    self.num_inst += acc[1]
             else:
-                label_imask = torch.argmax(labels, dim=self.axis).cpu().numpy().astype(np.int32)
-            pred_imask = torch.argmax(preds, dim=self.axis).cpu().numpy().astype(np.int32)
-            acc = seg_pixel_accuracy_np(
-                label_imask=label_imask,
-                pred_imask=pred_imask,
-                vague_idx=self.vague_idx,
-                use_vague=self.use_vague,
-                macro_average=self.macro_average)
-            if self.macro_average:
-                self.sum_metric += acc
-                self.num_inst += 1
-            else:
-                self.sum_metric += acc[0]
-                self.num_inst += acc[1]
-        else:
-            assert False
+                assert False
 
     def reset(self):
         """
@@ -116,14 +117,14 @@ class PixelAccuracyMetric(EvalMetric):
         """
         if self.macro_average:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, self.sum_metric / self.num_inst)
+                return self.name, self.sum_metric / self.num_inst
         else:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, float(self.sum_metric) / self.num_inst)
+                return self.name, float(self.sum_metric) / self.num_inst
 
 
 class MeanIoUMetric(EvalMetric):
@@ -202,34 +203,35 @@ class MeanIoUMetric(EvalMetric):
             Predicted values.
         """
         assert (len(labels) == len(preds))
-        if self.on_cpu:
-            if self.sparse_label:
-                label_imask = labels.cpu().numpy().astype(np.int32)
-            else:
-                assert False
-            pred_imask = torch.argmax(preds, dim=self.axis).cpu().numpy().astype(np.int32)
-            batch_size = labels.shape[0]
-            for k in range(batch_size):
+        with torch.no_grad():
+            if self.on_cpu:
                 if self.sparse_label:
-                    acc = seg_mean_iou_imasks_np(
-                        label_imask=label_imask[k, :, :],
-                        pred_imask=pred_imask[k, :, :],
-                        num_classes=self.num_classes,
-                        vague_idx=self.vague_idx,
-                        use_vague=self.use_vague,
-                        bg_idx=self.bg_idx,
-                        ignore_bg=self.ignore_bg,
-                        macro_average=self.macro_average)
+                    label_imask = labels.cpu().numpy().astype(np.int32)
                 else:
                     assert False
-                if self.macro_average:
-                    self.sum_metric += acc
-                    self.num_inst += 1
-                else:
-                    self.area_inter += acc[0]
-                    self.area_union += acc[1]
-        else:
-            assert False
+                pred_imask = torch.argmax(preds, dim=self.axis).cpu().numpy().astype(np.int32)
+                batch_size = labels.shape[0]
+                for k in range(batch_size):
+                    if self.sparse_label:
+                        acc = seg_mean_iou_imasks_np(
+                            label_imask=label_imask[k, :, :],
+                            pred_imask=pred_imask[k, :, :],
+                            num_classes=self.num_classes,
+                            vague_idx=self.vague_idx,
+                            use_vague=self.use_vague,
+                            bg_idx=self.bg_idx,
+                            ignore_bg=self.ignore_bg,
+                            macro_average=self.macro_average)
+                    else:
+                        assert False
+                    if self.macro_average:
+                        self.sum_metric += acc
+                        self.num_inst += 1
+                    else:
+                        self.area_inter += acc[0]
+                        self.area_union += acc[1]
+            else:
+                assert False
 
     def reset(self):
         """
@@ -256,14 +258,14 @@ class MeanIoUMetric(EvalMetric):
         """
         if self.macro_average:
             if self.num_inst == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             else:
-                return (self.name, self.sum_metric / self.num_inst)
+                return self.name, self.sum_metric / self.num_inst
         else:
             class_count = (self.area_union > 0).sum()
             if class_count == 0:
-                return (self.name, float('nan'))
+                return self.name, float("nan")
             eps = np.finfo(np.float32).eps
             area_union_eps = self.area_union + eps
             mean_iou = (self.area_inter / area_union_eps).sum() / class_count
-            return (self.name, mean_iou)
+            return self.name, mean_iou

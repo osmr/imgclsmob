@@ -29,7 +29,8 @@ class CIFAR10Fine(CIFAR10):
         super(CIFAR10Fine, self).__init__(
             root=root,
             train=(mode == "train"),
-            transform=transform)
+            transform=transform,
+            download=True)
 
 
 class CIFAR10MetaInfo(DatasetMetaInfo):

@@ -3,9 +3,10 @@ import time
 import logging
 import argparse
 from common.logger_utils import initialize_logging
-from gluon.utils import calc_net_weight_count, validate, report_accuracy
 from gluon.utils import prepare_mx_context, prepare_model
+from gluon.utils import calc_net_weight_count, validate
 from gluon.utils import get_composite_metric
+from gluon.utils import report_accuracy
 from gluon.dataset_utils import get_dataset_metainfo
 from gluon.dataset_utils import get_batch_fn
 from gluon.dataset_utils import get_val_data_source, get_test_data_source

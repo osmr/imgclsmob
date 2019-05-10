@@ -2,9 +2,31 @@
     Several base metrics.
 """
 
-__all__ = ['EvalMetric', 'CompositeEvalMetric']
+__all__ = ['EvalMetric', 'CompositeEvalMetric', 'check_label_shapes']
 
 from collections import OrderedDict
+
+
+def check_label_shapes(labels, preds, shape=False):
+    """
+    Helper function for checking shape of label and prediction
+
+    Parameters
+    ----------
+    labels : list of torch.Tensor
+        The labels of the data.
+    preds : list of torch.Tensor
+        Predicted values.
+    shape : boolean
+        If True, check the shape of labels and preds, otherwise only check their length.
+    """
+    if not shape:
+        label_shape, pred_shape = len(labels), len(preds)
+    else:
+        label_shape, pred_shape = labels.shape, preds.shape
+
+    if label_shape != pred_shape:
+        raise ValueError("Shape of labels {} does not match shape of predictions {}".format(label_shape, pred_shape))
 
 
 class EvalMetric(object):
@@ -15,10 +37,10 @@ class EvalMetric(object):
     ----------
     name : str
         Name of this metric instance for display.
-    output_names : list of str, or None
+    output_names : list of str, or None, default None
         Name of predictions that should be used when updating with update_dict.
         By default include all predictions.
-    label_names : list of str, or None
+    label_names : list of str, or None, default None
         Name of labels that should be used when updating with update_dict.
         By default include all labels.
     """
@@ -31,6 +53,7 @@ class EvalMetric(object):
         self.name = str(name)
         self.output_names = output_names
         self.label_names = label_names
+        self._has_global_stats = kwargs.pop("has_global_stats", False)
         self._kwargs = kwargs
         self.reset()
 
@@ -55,9 +78,9 @@ class EvalMetric(object):
 
         Parameters
         ----------
-        labels : list of np.array
+        labels : OrderedDict of str -> torch.Tensor
             name to array mapping for labels.
-        preds : list of np.array
+        preds : OrderedDict of str -> torch.Tensor
             name to array mapping of predicted outputs.
         """
         if self.output_names is not None:
@@ -78,9 +101,9 @@ class EvalMetric(object):
 
         Parameters
         ----------
-        labels : list of np.array
+        labels : torch.Tensor
             The labels of the data.
-        preds : list of np.array
+        preds : torch.Tensor
             Predicted values.
         """
         raise NotImplementedError()
@@ -88,6 +111,15 @@ class EvalMetric(object):
     def reset(self):
         """
         Resets the internal evaluation result to initial state.
+        """
+        self.num_inst = 0
+        self.sum_metric = 0.0
+        self.global_num_inst = 0
+        self.global_sum_metric = 0.0
+
+    def reset_local(self):
+        """
+        Resets the local portion of the internal evaluation results to initial state.
         """
         self.num_inst = 0
         self.sum_metric = 0.0
@@ -108,6 +140,25 @@ class EvalMetric(object):
         else:
             return self.name, self.sum_metric / self.num_inst
 
+    def get_global(self):
+        """
+        Gets the current global evaluation result.
+
+        Returns
+        -------
+        names : list of str
+           Name of the metrics.
+        values : list of float
+           Value of the evaluations.
+        """
+        if self._has_global_stats:
+            if self.global_num_inst == 0:
+                return self.name, float("nan")
+            else:
+                return self.name, self.global_sum_metric / self.global_num_inst
+        else:
+            return self.get()
+
     def get_name_value(self):
         """
         Returns zipped name and value pairs.
@@ -123,6 +174,25 @@ class EvalMetric(object):
         if not isinstance(value, list):
             value = [value]
         return list(zip(name, value))
+
+    def get_global_name_value(self):
+        """
+        Returns zipped name and value pairs for global results.
+
+        Returns
+        -------
+        list of tuples
+            A (name, value) tuple list.
+        """
+        if self._has_global_stats:
+            name, value = self.get_global()
+            if not isinstance(name, list):
+                name = [name]
+            if not isinstance(value, list):
+                value = [value]
+            return list(zip(name, value))
+        else:
+            return self.get_name_value()
 
 
 class CompositeEvalMetric(EvalMetric):

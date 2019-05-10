@@ -174,7 +174,7 @@ def main():
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
         net_extra_kwargs={"aux": False, "fixed_size": False},
-        ignore_extra=True,
+        load_ignore_extra=True,
         remove_module=args.remove_module)
     if hasattr(net, 'module'):
         input_image_size = net.module.in_size[0] if hasattr(net.module, 'in_size') else args.input_size

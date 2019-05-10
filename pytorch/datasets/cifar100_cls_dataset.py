@@ -28,7 +28,8 @@ class CIFAR100Fine(CIFAR100):
         super(CIFAR100Fine, self).__init__(
             root=root,
             train=(mode == "train"),
-            transform=transform)
+            transform=transform,
+            download=True)
 
 
 class CIFAR100MetaInfo(CIFAR10MetaInfo):

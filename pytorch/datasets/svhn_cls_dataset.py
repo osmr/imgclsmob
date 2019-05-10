@@ -30,7 +30,8 @@ class SVHNFine(SVHN):
         super(SVHNFine, self).__init__(
             root=root,
             split=("train" if mode == "train" else "test"),
-            transform=transform)
+            transform=transform,
+            download=True)
 
 
 class SVHNMetaInfo(CIFAR10MetaInfo):

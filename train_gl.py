@@ -15,9 +15,8 @@ from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
 
 from gluon.dataset_utils import get_dataset_metainfo
+from gluon.dataset_utils import get_train_data_source, get_val_data_source
 from gluon.dataset_utils import get_batch_fn
-from gluon.dataset_utils import get_train_data_source
-from gluon.dataset_utils import get_val_data_source
 
 
 def add_train_cls_parser_arguments(parser):

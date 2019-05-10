@@ -11,26 +11,22 @@ import torch.utils.data
 
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
-from pytorch.imagenet1k import add_dataset_parser_arguments, get_train_data_loader, get_val_data_loader
-from pytorch.utils import prepare_pt_context, prepare_model, validate0, accuracy, AverageMeter
+from pytorch.utils import prepare_pt_context, prepare_model, validate, report_accuracy, get_composite_metric
+
+from pytorch.dataset_utils import get_dataset_metainfo
+from pytorch.dataset_utils import get_train_data_source, get_val_data_source
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Train a model for image classification (PyTorch/ImageNet-1K)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    add_dataset_parser_arguments(parser)
-
+def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--model",
         type=str,
         required=True,
-        help="type of model to use. see model_provider for options.")
+        help="type of model to use. see model_provider for options")
     parser.add_argument(
         "--use-pretrained",
         action="store_true",
-        help="enable using pretrained model from gluon.")
+        help="enable using pretrained model from gluon")
     parser.add_argument(
         "--resume",
         type=str,
@@ -46,7 +42,7 @@ def parse_args():
         "--num-gpus",
         type=int,
         default=0,
-        help="number of gpus to use.")
+        help="number of gpus to use")
     parser.add_argument(
         "-j",
         "--num-data-workers",
@@ -58,13 +54,18 @@ def parse_args():
     parser.add_argument(
         "--batch-size",
         type=int,
-        default=32,
-        help="training batch size per device (CPU/GPU).")
+        default=512,
+        help="training batch size per device (CPU/GPU)")
+    parser.add_argument(
+        "--batch-size-scale",
+        type=int,
+        default=1,
+        help="manual batch-size increasing factor")
     parser.add_argument(
         "--num-epochs",
         type=int,
-        default=3,
-        help="number of training epochs.")
+        default=120,
+        help="number of training epochs")
     parser.add_argument(
         "--start-epoch",
         type=int,
@@ -74,7 +75,7 @@ def parse_args():
         "--attempt",
         type=int,
         default=1,
-        help="current number of training")
+        help="current attempt number for training")
 
     parser.add_argument(
         "--optimizer-name",
@@ -85,53 +86,102 @@ def parse_args():
         "--lr",
         type=float,
         default=0.1,
-        help="learning rate. default is 0.1.")
+        help="learning rate")
     parser.add_argument(
         "--lr-mode",
         type=str,
-        default="step",
-        help="learning rate scheduler mode. options are step, poly and cosine.")
+        default="cosine",
+        help="learning rate scheduler mode. options are step, poly and cosine")
     parser.add_argument(
         "--lr-decay",
         type=float,
         default=0.1,
-        help="decay rate of learning rate. default is 0.1.")
+        help="decay rate of learning rate")
     parser.add_argument(
         "--lr-decay-period",
         type=int,
         default=0,
-        help="interval for periodic learning rate decays. default is 0 to disable.")
+        help="interval for periodic learning rate decays. default is 0 to disable")
     parser.add_argument(
         "--lr-decay-epoch",
         type=str,
         default="40,60",
-        help="epoches at which learning rate decays. default is 40,60.")
+        help="epoches at which learning rate decays")
     parser.add_argument(
-        "--warmup-lr",
+        "--target-lr",
         type=float,
-        default=0.0,
-        help="starting warmup learning rate. default is 0.0.")
+        default=1e-8,
+        help="ending learning rate")
+    parser.add_argument(
+        "--poly-power",
+        type=float,
+        default=2,
+        help="power value for poly LR scheduler")
     parser.add_argument(
         "--warmup-epochs",
         type=int,
         default=0,
-        help="number of warmup epochs.")
+        help="number of warmup epochs")
+    parser.add_argument(
+        "--warmup-lr",
+        type=float,
+        default=1e-8,
+        help="starting warmup learning rate")
+    parser.add_argument(
+        "--warmup-mode",
+        type=str,
+        default="linear",
+        help="learning rate scheduler warmup mode. options are linear, poly and constant")
     parser.add_argument(
         "--momentum",
         type=float,
         default=0.9,
-        help="momentum value for optimizer, default is 0.9.")
+        help="momentum value for optimizer")
     parser.add_argument(
         "--wd",
         type=float,
         default=0.0001,
-        help="weight decay rate. default is 0.0001.")
+        help="weight decay rate")
+    parser.add_argument(
+        "--gamma-wd-mult",
+        type=float,
+        default=1.0,
+        help="weight decay multiplier for batchnorm gamma")
+    parser.add_argument(
+        "--beta-wd-mult",
+        type=float,
+        default=1.0,
+        help="weight decay multiplier for batchnorm beta")
+    parser.add_argument(
+        "--bias-wd-mult",
+        type=float,
+        default=1.0,
+        help="weight decay multiplier for bias")
+    parser.add_argument(
+        "--grad-clip",
+        type=float,
+        default=None,
+        help="max_norm for gradient clipping")
+    parser.add_argument(
+        "--label-smoothing",
+        action="store_true",
+        help="use label smoothing")
+
+    parser.add_argument(
+        "--mixup",
+        action="store_true",
+        help="use mixup strategy")
+    parser.add_argument(
+        "--mixup-epoch-tail",
+        type=int,
+        default=20,
+        help="number of epochs without mixup at the end of training")
 
     parser.add_argument(
         "--log-interval",
         type=int,
         default=50,
-        help="number of batches to wait before logging.")
+        help="number of batches to wait before logging")
     parser.add_argument(
         "--save-interval",
         type=int,
@@ -163,6 +213,37 @@ def parse_args():
         type=str,
         default="",
         help="list of pip packages for logging")
+
+    parser.add_argument(
+        "--tune-layers",
+        type=str,
+        default="",
+        help="regexp for selecting layers for fine tuning")
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Train a model for image classification (PyTorch)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="ImageNet1K",
+        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN")
+    parser.add_argument(
+        "--work-dir",
+        type=str,
+        default=os.path.join("..", "imgclsmob_data"),
+        help="path to working directory only for dataset root path preset")
+
+    args, _ = parser.parse_known_args()
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    dataset_metainfo.add_dataset_parser_arguments(
+        parser=parser,
+        work_dir_path=args.work_dir)
+
+    add_train_cls_parser_arguments(parser)
+
     args = parser.parse_args()
     return args
 
@@ -260,8 +341,8 @@ def save_params(file_stem,
 
 
 def train_epoch(epoch,
-                acc_top1,
                 net,
+                train_metric,
                 train_data,
                 use_cuda,
                 L,
@@ -272,7 +353,7 @@ def train_epoch(epoch,
 
     tic = time.time()
     net.train()
-    acc_top1.reset()
+    train_metric.reset()
     train_loss = 0.0
 
     btic = time.time()
@@ -287,28 +368,28 @@ def train_epoch(epoch,
         optimizer.step()
 
         train_loss += loss.item()
-        prec1 = accuracy(output, target, topk=(1, ))
-        acc_top1.update(prec1[0], data.size(0))
+
+        train_metric.update(
+            labels=target,
+            preds=output)
 
         if log_interval and not (i + 1) % log_interval:
-            top1 = acc_top1.avg.item()
-            err_top1_train = 1.0 - top1
             speed = batch_size * log_interval / (time.time() - btic)
-            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\ttop1-err={:.4f}\tlr={:.4f}".format(
-                epoch + 1, i, speed, err_top1_train, optimizer.param_groups[0]["lr"]))
             btic = time.time()
+            train_accuracy_msg = report_accuracy(metric=train_metric)
+            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\tlr={:.5f}".format(
+                epoch + 1, i, speed, train_accuracy_msg, optimizer.param_groups[0]["lr"]))
 
-    top1 = acc_top1.avg.item()
-    err_top1_train = 1.0 - top1
-    train_loss /= (i + 1)
     throughput = int(batch_size * (i + 1) / (time.time() - tic))
-
-    logging.info("[Epoch {}] training: err-top1={:.4f}\tloss={:.4f}".format(
-        epoch + 1, err_top1_train, train_loss))
     logging.info("[Epoch {}] speed: {:.2f} samples/sec\ttime cost: {:.2f} sec".format(
         epoch + 1, throughput, time.time() - tic))
 
-    return err_top1_train, train_loss
+    train_loss /= (i + 1)
+    train_accuracy_msg = report_accuracy(metric=train_metric)
+    logging.info("[Epoch {}] training: {}\tloss={:.4f}".format(
+        epoch + 1, train_accuracy_msg, train_loss))
+
+    return train_loss
 
 
 def train_net(batch_size,
@@ -321,9 +402,12 @@ def train_net(batch_size,
               lr_scheduler,
               lp_saver,
               log_interval,
+              num_classes,
+              val_metric,
+              train_metric,
+              opt_metric_name,
               use_cuda):
-    acc_top1 = AverageMeter()
-    acc_top5 = AverageMeter()
+    assert (num_classes > 0)
 
     L = nn.CrossEntropyLoss()
     if use_cuda:
@@ -333,40 +417,37 @@ def train_net(batch_size,
     assert (start_epoch1 >= 1)
     if start_epoch1 > 1:
         logging.info("Start training from [Epoch {}]".format(start_epoch1))
-        err_top1_val, err_top5_val = validate0(
-            acc_top1=acc_top1,
-            acc_top5=acc_top5,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             use_cuda=use_cuda)
-        logging.info("[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}".format(
-            start_epoch1 - 1, err_top1_val, err_top5_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(start_epoch1 - 1, val_accuracy_msg))
 
     gtic = time.time()
     for epoch in range(start_epoch1 - 1, num_epochs):
         lr_scheduler.step()
 
-        err_top1_train, train_loss = train_epoch(
-            epoch,
-            acc_top1,
-            net,
-            train_data,
-            use_cuda,
-            L,
-            optimizer,
+        train_loss = train_epoch(
+            epoch=epoch,
+            net=net,
+            train_metric=train_metric,
+            train_data=train_data,
+            use_cuda=use_cuda,
+            L=L,
+            optimizer=optimizer,
             # lr_scheduler,
-            batch_size,
-            log_interval)
+            batch_size=batch_size,
+            log_interval=log_interval)
 
-        err_top1_val, err_top5_val = validate0(
-            acc_top1=acc_top1,
-            acc_top5=acc_top5,
+        validate(
+            metric=val_metric,
             net=net,
             val_data=val_data,
             use_cuda=use_cuda)
-
-        logging.info("[Epoch {}] validation: err-top1={:.4f}\terr-top5={:.4f}".format(
-            epoch + 1, err_top1_val, err_top5_val))
+        val_accuracy_msg = report_accuracy(metric=val_metric)
+        logging.info("[Epoch {}] validation: {}".format(epoch + 1, val_accuracy_msg))
 
         if lp_saver is not None:
             state = {
@@ -375,9 +456,13 @@ def train_net(batch_size,
                 "optimizer": optimizer.state_dict(),
             }
             lp_saver_kwargs = {"state": state}
+            val_acc_values = val_metric.get()[1]
+            train_acc_values = train_metric.get()[1]
+            val_acc_values = val_acc_values if type(val_acc_values) == list else [val_acc_values]
+            train_acc_values = train_acc_values if type(train_acc_values) == list else [train_acc_values]
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=[err_top1_val, err_top1_train, err_top5_val, train_loss],
+                params=(val_acc_values + train_acc_values + [train_loss, optimizer.param_groups[0]["lr"]]),
                 **lp_saver_kwargs)
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
@@ -406,25 +491,22 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda)
-    if hasattr(net, "module"):
-        input_image_size = net.module.in_size[0] if hasattr(net.module, "in_size") else args.input_size
-    else:
-        input_image_size = net.in_size[0] if hasattr(net, "in_size") else args.input_size
+    real_net = net.module if hasattr(net, "module") else net
+    assert (hasattr(real_net, "num_classes"))
+    num_classes = real_net.num_classes
 
-    train_data = get_train_data_loader(
-        data_dir=args.data_dir,
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+
+    train_data = get_train_data_source(
+        ds_metainfo=ds_metainfo,
         batch_size=batch_size,
-        num_workers=args.num_workers,
-        input_image_size=input_image_size)
-
-    val_data = get_val_data_loader(
-        data_dir=args.data_dir,
+        num_workers=args.num_workers)
+    val_data = get_val_data_source(
+        ds_metainfo=ds_metainfo,
         batch_size=batch_size,
-        num_workers=args.num_workers,
-        input_image_size=input_image_size,
-        resize_inv_factor=args.resize_inv_factor)
+        num_workers=args.num_workers)
 
-    # num_training_samples = 1281167
     optimizer, lr_scheduler, start_epoch = prepare_trainer(
         net=net,
         optimizer_name=args.optimizer_name,
@@ -440,12 +522,11 @@ def main():
         num_epochs=args.num_epochs,
         # num_training_samples=num_training_samples,
         state_file_path=args.resume_state)
-    # if start_epoch is not None:
-    #     args.start_epoch = start_epoch
 
     if args.save_dir and args.save_interval:
+        param_names = ds_metainfo.val_metric_capts + ds_metainfo.train_metric_capts + ["Train.Loss", "LR"]
         lp_saver = TrainLogParamSaver(
-            checkpoint_file_name_prefix="imagenet_{}".format(args.model),
+            checkpoint_file_name_prefix="{}_{}".format(ds_metainfo.short_label, args.model),
             last_checkpoint_file_name_suffix="last",
             best_checkpoint_file_name_suffix=None,
             last_checkpoint_dir_path=args.save_dir,
@@ -456,8 +537,8 @@ def main():
             checkpoint_file_exts=(".pth", ".states"),
             save_interval=args.save_interval,
             num_epochs=args.num_epochs,
-            param_names=["Val.Top1", "Train.Top1", "Val.Top5", "Train.Loss"],
-            acc_ind=2,
+            param_names=param_names,
+            acc_ind=ds_metainfo.saver_acc_ind,
             # bigger=[True],
             # mask=None,
             score_log_file_path=os.path.join(args.save_dir, "score.log"),
@@ -477,6 +558,10 @@ def main():
         lr_scheduler=lr_scheduler,
         lp_saver=lp_saver,
         log_interval=args.log_interval,
+        num_classes=num_classes,
+        val_metric=get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs),
+        train_metric=get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs),
+        opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         use_cuda=use_cuda)
 
 

@@ -4,23 +4,18 @@ import logging
 
 from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
-from pytorch.cifar import add_dataset_parser_arguments, get_val_data_loader
-from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, validate1, AverageMeter
+from pytorch.cub200_2011_utils1 import add_dataset_parser_arguments, get_val_data_loader
+from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count, AverageMeter
+# from pytorch.utils import validate
+from pytorch.utils import validate1
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (PyTorch/CIFAR/SVHN)',
+        description='Evaluate a model for image classification (PyTorch/CUB-200-2011)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument(
-        '--dataset',
-        type=str,
-        default="CIFAR10",
-        help='dataset name. options are CIFAR10, CIFAR100, and SVHN')
-
-    args, _ = parser.parse_known_args()
-    add_dataset_parser_arguments(parser, args.dataset)
+    add_dataset_parser_arguments(parser)
 
     parser.add_argument(
         '--model',
@@ -67,7 +62,7 @@ def parse_args():
     parser.add_argument(
         '--batch-size',
         type=int,
-        default=512,
+        default=32,
         help='training batch size per device (CPU/GPU).')
 
     parser.add_argument(
@@ -93,6 +88,50 @@ def parse_args():
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args
+
+
+# def test(net,
+#          val_data,
+#          use_cuda,
+#          input_image_size,
+#          in_channels,
+#          calc_weight_count=False,
+#          calc_flops=False,
+#          calc_flops_only=True,
+#          extended_log=False):
+#     if not calc_flops_only:
+#         acc_top1 = AverageMeter()
+#         acc_top5 = AverageMeter()
+#         tic = time.time()
+#         err_top1_val, err_top5_val = validate(
+#             acc_top1=acc_top1,
+#             acc_top5=acc_top5,
+#             net=net,
+#             val_data=val_data,
+#             use_cuda=use_cuda)
+#         if extended_log:
+#             logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+#                 top1=err_top1_val, top5=err_top5_val))
+#         else:
+#             logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+#                 top1=err_top1_val, top5=err_top5_val))
+#         logging.info('Time cost: {:.4f} sec'.format(
+#             time.time() - tic))
+#
+#     if calc_weight_count:
+#         weight_count = calc_net_weight_count(net)
+#         if not calc_flops:
+#             logging.info('Model: {} trainable parameters'.format(weight_count))
+#     if calc_flops:
+#         num_flops, num_macs, num_params = measure_model(net, in_channels, input_image_size)
+#         assert (not calc_weight_count) or (weight_count == num_params)
+#         stat_msg = "Params: {params} ({params_m:.2f}M), FLOPs: {flops} ({flops_m:.2f}M)," \
+#                    " FLOPs/2: {flops2} ({flops2_m:.2f}M), MACs: {macs} ({macs_m:.2f}M)"
+#         logging.info(stat_msg.format(
+#             params=num_params, params_m=num_params / 1e6,
+#             flops=num_flops, flops_m=num_flops / 1e6,
+#             flops2=num_flops / 2, flops2_m=num_flops / 2 / 1e6,
+#             macs=num_macs, macs_m=num_macs / 1e6))
 
 
 def test(net,
@@ -163,10 +202,11 @@ def main():
         input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
 
     val_data = get_val_data_loader(
-        dataset_name=args.dataset,
         dataset_dir=args.data_dir,
         batch_size=batch_size,
-        num_workers=args.num_workers)
+        num_workers=args.num_workers,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor)
 
     assert (args.use_pretrained or args.resume.strip() or args.calc_flops_only)
     test(

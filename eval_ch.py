@@ -120,20 +120,21 @@ def parse_args():
 
 
 def prepare_ch_context(num_gpus):
-    if num_gpus > 0:
+    use_gpus = (num_gpus > 0)
+    if use_gpus:
         cuda.get_device(0).use()
-    return num_gpus
+    return use_gpus
 
 
 def test(net,
          test_data,
-         num_gpus,
+         use_gpus,
          calc_weight_count=False,
          extended_log=False):
     tic = time.time()
 
     predictor = test_data["predictor_class"](base_model=net)
-    if num_gpus > 0:
+    if use_gpus:
         predictor.to_gpu()
 
     if calc_weight_count:
@@ -191,14 +192,16 @@ def main():
     assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
     global_config.train = False
-    num_gpus = prepare_ch_context(args.num_gpus)
+    use_gpus = prepare_ch_context(args.num_gpus)
 
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
+        use_gpus=use_gpus,
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
-        num_gpus=num_gpus)
+        num_classes=args.num_classes,
+        in_channels=args.in_channels)
     assert (hasattr(net, "classes"))
     assert (hasattr(net, "in_size"))
     # num_classes = net.classes
@@ -223,7 +226,7 @@ def main():
     test(
         net=net,
         test_data=test_data,
-        num_gpus=num_gpus,
+        use_gpus=use_gpus,
         calc_weight_count=True,
         extended_log=True)
 

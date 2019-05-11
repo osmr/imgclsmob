@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 def check_label_shapes(labels, preds, shape=False):
     """
-    Helper function for checking shape of label and prediction
+    Helper function for checking shape of label and prediction.
 
     Parameters
     ----------
@@ -61,8 +61,8 @@ class EvalMetric(object):
         return "EvalMetric: {}".format(dict(self.get_name_value()))
 
     def get_config(self):
-        """Save configurations of metric. Can be recreated
-        from configs with metric.create(**config)
+        """
+        Save configurations of metric. Can be recreated from configs with metric.create(**config).
         """
         config = self._kwargs.copy()
         config.update({
@@ -271,8 +271,7 @@ class CompositeEvalMetric(EvalMetric):
 
     def reset_local(self):
         """
-        Resets the local portion of the internal evaluation results
-        to initial state.
+        Resets the local portion of the internal evaluation results to initial state.
         """
         try:
             for metric in self.metrics:

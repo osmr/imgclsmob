@@ -179,7 +179,7 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         net_extra_kwargs={"aux": False, "fixed_size": False},
-        num_gpus=num_gpus)
+        use_gpus=(num_gpus > 0))
 
     test_dataset = get_test_dataset(
         dataset_name=args.dataset,

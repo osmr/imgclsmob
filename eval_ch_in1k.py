@@ -180,7 +180,7 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        num_gpus=num_gpus)
+        use_gpus=(num_gpus > 0))
     num_classes = net.classes if hasattr(net, "classes") else 1000
     input_image_size = net.in_size[0] if hasattr(net, "in_size") else args.input_size
 

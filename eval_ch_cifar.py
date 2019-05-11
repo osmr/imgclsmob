@@ -153,7 +153,7 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        num_gpus=num_gpus)
+        use_gpus=(num_gpus > 0))
 
     val_iterator, val_dataset_len = get_val_data_iterator(
         dataset_name=args.dataset,

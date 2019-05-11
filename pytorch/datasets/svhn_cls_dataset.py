@@ -18,7 +18,7 @@ class SVHNFine(SVHN):
     ----------
     root : str, default '~/.torch/datasets/svhn'
         Path to temp folder for storing data.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', or 'test'.
     transform : function, default None
         A function that takes data and label and transforms them.

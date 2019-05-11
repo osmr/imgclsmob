@@ -19,7 +19,7 @@ class ImageNet1K(ImageFolderDataset):
     ----------
     root : str, default '~/.mxnet/datasets/imagenet'
         Path to the folder stored the dataset.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', or 'test'.
     transform : function, default None
         A function that takes data and label and transforms them.

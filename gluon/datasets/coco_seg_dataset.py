@@ -20,7 +20,7 @@ class COCOSegDataset(SegDataset):
     ----------
     root : string
         Path to `annotations`, `train2017`, and `val2017` folders.
-    mode: string, default 'train'
+    mode : string, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.

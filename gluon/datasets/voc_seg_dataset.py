@@ -19,7 +19,7 @@ class VOCSegDataset(SegDataset):
     ----------
     root : str
         Path to VOCdevkit folder.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.

@@ -1,5 +1,4 @@
-import os
-# import math
+import math
 import time
 import logging
 import argparse
@@ -15,8 +14,9 @@ from common.logger_utils import initialize_logging
 from chainer_.top_k_accuracy import top_k_accuracy
 from chainer_.utils import prepare_model
 
-from chainer_.dataset_utils import get_dataset_metainfo
-from chainer_.dataset_utils import get_val_data_source, get_test_data_source
+from chainer_.imagenet1k import add_dataset_parser_arguments
+from chainer_.imagenet1k import get_val_data_iterator
+from chainer_.imagenet1k import ImagenetPredictor
 
 
 def add_eval_parser_arguments(parser):
@@ -95,23 +95,7 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Evaluate a model for image classification/segmentation (Chainer)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--dataset",
-        type=str,
-        default="ImageNet1K",
-        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, ADE20K, Cityscapes, "
-             "COCO")
-    parser.add_argument(
-        "--work-dir",
-        type=str,
-        default=os.path.join("..", "imgclsmob_data"),
-        help="path to working directory only for dataset root path preset")
-
-    args, _ = parser.parse_known_args()
-    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    dataset_metainfo.add_dataset_parser_arguments(
-        parser=parser,
-        work_dir_path=args.work_dir)
+    add_dataset_parser_arguments(parser)
 
     add_eval_parser_arguments(parser)
 
@@ -119,20 +103,24 @@ def parse_args():
     return args
 
 
-def prepare_ch_context(num_gpus):
-    if num_gpus > 0:
-        cuda.get_device(0).use()
-    return num_gpus
-
-
 def test(net,
-         test_data,
+         val_iterator,
+         val_dataset_len,
          num_gpus,
+         input_image_size=224,
+         resize_inv_factor=0.875,
          calc_weight_count=False,
          extended_log=False):
+    assert (resize_inv_factor > 0.0)
+    resize_value = int(math.ceil(float(input_image_size) / resize_inv_factor))
+
     tic = time.time()
 
-    predictor = test_data["predictor_class"](base_model=net)
+    predictor = ImagenetPredictor(
+        base_model=net,
+        scale_size=resize_value,
+        crop_size=input_image_size)
+
     if num_gpus > 0:
         predictor.to_gpu()
 
@@ -142,8 +130,8 @@ def test(net,
 
     in_values, out_values, rest_values = apply_to_iterator(
         predictor.predict,
-        test_data["iterator"],
-        hook=ProgressHook(test_data["ds_len"]))
+        val_iterator,
+        hook=ProgressHook(val_dataset_len))
     del in_values
 
     pred_probs, = out_values
@@ -175,9 +163,6 @@ def test(net,
 def main():
     args = parse_args()
 
-    if args.disable_cudnn_autotune:
-        os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
-
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,
         logging_file_name=args.logging_file_name,
@@ -185,45 +170,34 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
-    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    ds_metainfo.update(args=args)
-    assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
-    assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
-
     global_config.train = False
-    num_gpus = prepare_ch_context(args.num_gpus)
+
+    num_gpus = args.num_gpus
+    if num_gpus > 0:
+        cuda.get_device(0).use()
 
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
         num_gpus=num_gpus)
-    assert (hasattr(net, "classes"))
-    assert (hasattr(net, "in_size"))
-    # num_classes = net.classes
-    # input_image_size = net.in_size[0]
+    num_classes = net.classes if hasattr(net, "classes") else 1000
+    input_image_size = net.in_size[0] if hasattr(net, "in_size") else args.input_size
 
-    if args.data_subset == "val":
-        test_data = get_val_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=args.batch_size)
-        # test_metric = get_composite_metric(
-        #     metric_names=ds_metainfo.val_metric_names,
-        #     metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
-    else:
-        test_data = get_test_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=args.batch_size)
-        # test_metric = get_composite_metric(
-        #     metric_names=ds_metainfo.test_metric_names,
-        #     metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+    val_iterator, val_dataset_len = get_val_data_iterator(
+        data_dir=args.data_dir,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        num_classes=num_classes)
 
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,
-        test_data=test_data,
+        val_iterator=val_iterator,
+        val_dataset_len=val_dataset_len,
         num_gpus=num_gpus,
+        input_image_size=input_image_size,
+        resize_inv_factor=args.resize_inv_factor,
         calc_weight_count=True,
         extended_log=True)
 

@@ -21,7 +21,7 @@ class SVHN(gluon.data.dataset._DownloadedDataset):
     ----------
     root : str, default $MXNET_HOME/datasets/svhn
         Path to temp folder for storing data.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', or 'test'.
     transform : function, default None
         A user defined callback that transforms each sample.

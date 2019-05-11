@@ -1,7 +1,8 @@
 import os
 import numpy as np
 from PIL import Image
-from chainer_.seg_dataset import SegDataset
+from .seg_dataset import SegDataset
+from .voc_seg_dataset import VOCMetaInfo
 
 
 class CityscapesSegDataset(SegDataset):
@@ -12,7 +13,7 @@ class CityscapesSegDataset(SegDataset):
     ----------
     root : str
         Path to a folder with `leftImg8bit` and `gtFine` subfolders.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.
@@ -105,3 +106,23 @@ class CityscapesSegDataset(SegDataset):
 
     def __len__(self):
         return len(self.images)
+
+
+class CityscapesMetaInfo(VOCMetaInfo):
+    def __init__(self):
+        super(CityscapesMetaInfo, self).__init__()
+        self.label = "Cityscapes"
+        self.short_label = "voc"
+        self.root_dir_name = "cityscapes"
+        self.dataset_class = CityscapesSegDataset
+        self.num_classes = CityscapesSegDataset.classes
+        self.test_metric_extra_kwargs = [
+            {"vague_idx": CityscapesSegDataset.vague_idx,
+             "use_vague": CityscapesSegDataset.use_vague,
+             "macro_average": False},
+            {"num_classes": CityscapesSegDataset.classes,
+             "vague_idx": CityscapesSegDataset.vague_idx,
+             "use_vague": CityscapesSegDataset.use_vague,
+             "bg_idx": CityscapesSegDataset.background_idx,
+             "ignore_bg": CityscapesSegDataset.ignore_bg,
+             "macro_average": False}]

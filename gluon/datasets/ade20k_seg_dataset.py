@@ -18,7 +18,7 @@ class ADE20KSegDataset(SegDataset):
     ----------
     root : str
         Path to a folder with `ADEChallengeData2016` subfolder.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.

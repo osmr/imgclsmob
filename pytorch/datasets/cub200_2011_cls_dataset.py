@@ -18,7 +18,7 @@ class CUB200_2011(data.Dataset):
     ----------
     root : str, default '~/.torch/datasets/CUB_200_2011'
         Path to the folder stored the dataset.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', or 'test'.
     transform : function, default None
         A function that takes data and transforms it.

@@ -3,7 +3,8 @@ import logging
 import numpy as np
 from PIL import Image
 from tqdm import trange
-from chainer_.seg_dataset import SegDataset
+from .seg_dataset import SegDataset
+from .voc_seg_dataset import VOCMetaInfo
 
 
 class COCOSegDataset(SegDataset):
@@ -12,7 +13,7 @@ class COCOSegDataset(SegDataset):
 
     Parameters
     ----------
-    root : str
+    root: str
         Path to `annotations`, `train2017`, and `val2017` folders.
     mode: str, default 'train'
         'train', 'val', 'test', or 'demo'.
@@ -134,3 +135,23 @@ class COCOSegDataset(SegDataset):
 
     def __len__(self):
         return len(self.idx)
+
+
+class COCOMetaInfo(VOCMetaInfo):
+    def __init__(self):
+        super(COCOMetaInfo, self).__init__()
+        self.label = "COCO"
+        self.short_label = "voc"
+        self.root_dir_name = "coco"
+        self.dataset_class = COCOSegDataset
+        self.num_classes = COCOSegDataset.classes
+        self.test_metric_extra_kwargs = [
+            {"vague_idx": COCOSegDataset.vague_idx,
+             "use_vague": COCOSegDataset.use_vague,
+             "macro_average": False},
+            {"num_classes": COCOSegDataset.classes,
+             "vague_idx": COCOSegDataset.vague_idx,
+             "use_vague": COCOSegDataset.use_vague,
+             "bg_idx": COCOSegDataset.background_idx,
+             "ignore_bg": COCOSegDataset.ignore_bg,
+             "macro_average": False}]

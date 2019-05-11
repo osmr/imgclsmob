@@ -13,7 +13,7 @@ class CityscapesSegDataset(SegDataset):
     ----------
     root : str
         Path to a folder with `leftImg8bit` and `gtFine` subfolders.
-    mode: str, default 'train'
+    mode : str, default 'train'
         'train', 'val', 'test', or 'demo'.
     transform : callable, optional
         A function that transforms the image.

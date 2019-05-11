@@ -12,7 +12,7 @@ class SegDataset(data.Dataset):
     ----------
     root : str
         Path to data folder.
-    mode: str
+    mode : str
         'train', 'val', 'test', or 'demo'.
     transform : callable
         A function that transforms the image.

@@ -103,7 +103,7 @@ class SegPredictor(Chain):
     def predict(self, imgs):
         imgs = self.xp.asarray([self._preprocess(img) for img in imgs])
 
-        with chainer.using_config('train', False), chainer.function.no_backprop_mode():
+        with chainer.using_config("train", False), chainer.function.no_backprop_mode():
             imgs = chainer.Variable(imgs)
             predictions = self.model(imgs)
 

@@ -1,20 +1,16 @@
 import os
-# import math
 import time
 import logging
 import argparse
-import numpy as np
 
 from chainer import cuda, global_config
-import chainer.functions as F
-
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.top_k_accuracy import top_k_accuracy
 from chainer_.utils import prepare_model
-
+from chainer_.utils import get_composite_metric
+from chainer_.utils import report_accuracy
 from chainer_.dataset_utils import get_dataset_metainfo
 from chainer_.dataset_utils import get_val_data_source, get_test_data_source
 
@@ -128,6 +124,7 @@ def prepare_ch_context(num_gpus):
 
 def test(net,
          test_data,
+         metric,
          use_gpus,
          calc_weight_count=False,
          extended_log=False):
@@ -147,28 +144,18 @@ def test(net,
         hook=ProgressHook(test_data["ds_len"]))
     del in_values
 
-    pred_probs, = out_values
+    pred_labels, = out_values
     gt_labels, = rest_values
 
-    y = np.array(list(pred_probs))
-    t = np.array(list(gt_labels))
+    labels = iter(gt_labels)
+    preds = iter(pred_labels)
+    for label, pred in zip(labels, preds):
+        metric.update(label, pred)
 
-    top1_acc = F.accuracy(
-        y=y,
-        t=t).data
-    top5_acc = top_k_accuracy(
-        y=y,
-        t=t,
-        k=5).data
-    err_top1_val = 1.0 - top1_acc
-    err_top5_val = 1.0 - top5_acc
-
-    if extended_log:
-        logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
-            top1=err_top1_val, top5=err_top5_val))
-    else:
-        logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
-            top1=err_top1_val, top5=err_top5_val))
+    accuracy_msg = report_accuracy(
+        metric=metric,
+        extended_log=extended_log)
+    logging.info("Test: {}".format(accuracy_msg))
     logging.info("Time cost: {:.4f} sec".format(
         time.time() - tic))
 
@@ -211,21 +198,22 @@ def main():
         test_data = get_val_data_source(
             ds_metainfo=ds_metainfo,
             batch_size=args.batch_size)
-        # test_metric = get_composite_metric(
-        #     metric_names=ds_metainfo.val_metric_names,
-        #     metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.val_metric_names,
+            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
     else:
         test_data = get_test_data_source(
             ds_metainfo=ds_metainfo,
             batch_size=args.batch_size)
-        # test_metric = get_composite_metric(
-        #     metric_names=ds_metainfo.test_metric_names,
-        #     metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.test_metric_names,
+            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
 
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,
         test_data=test_data,
+        metric=test_metric,
         use_gpus=use_gpus,
         calc_weight_count=True,
         extended_log=True)

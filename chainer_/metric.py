@@ -13,9 +13,9 @@ def check_label_shapes(labels, preds, shape=False):
 
     Parameters
     ----------
-    labels : list of torch.Tensor
+    labels : list of xp.array
         The labels of the data.
-    preds : list of torch.Tensor
+    preds : list of xp.array
         Predicted values.
     shape : boolean
         If True, check the shape of labels and preds, otherwise only check their length.
@@ -101,9 +101,9 @@ class EvalMetric(object):
 
         Parameters
         ----------
-        labels : torch.Tensor
+        labels : xp.array
             The labels of the data.
-        preds : torch.Tensor
+        preds : xp.array
             Predicted values.
         """
         raise NotImplementedError()
@@ -250,10 +250,10 @@ class CompositeEvalMetric(EvalMetric):
 
         Parameters
         ----------
-        labels : torch.Tensor
+        labels : xp.array
             The labels of the data.
 
-        preds : torch.Tensor
+        preds : xp.array
             Predicted values.
         """
         for metric in self.metrics:

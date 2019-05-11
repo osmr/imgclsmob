@@ -195,7 +195,7 @@ def get_resnext(blocks,
                 bottleneck_width,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create ResNeXt model with specific parameters.

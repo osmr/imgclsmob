@@ -219,7 +219,7 @@ def get_shakeshakeresnet_cifar(classes,
                                first_stage_channels=16,
                                model_name=None,
                                pretrained=False,
-                               root=os.path.join('~', '.chainer', 'models'),
+                               root=os.path.join("~", ".chainer", "models"),
                                **kwargs):
     """
     Create Shake-Shake-ResNet model for CIFAR with specific parameters.

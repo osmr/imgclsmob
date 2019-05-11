@@ -212,7 +212,7 @@ class ZFNet(nn.Module):
 
 def get_alexnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create ZFNet model with specific parameters.

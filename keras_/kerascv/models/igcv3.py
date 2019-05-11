@@ -159,7 +159,7 @@ def igcv3(channels,
 def get_igcv3(width_scale,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.keras', 'models'),
+              root=os.path.join("~", ".keras", "models"),
               **kwargs):
     """
     Create IGCV3-D model with specific parameters.

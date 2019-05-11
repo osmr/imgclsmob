@@ -265,7 +265,7 @@ def get_pyramidnet(blocks,
                    alpha,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.chainer', 'models'),
+                   root=os.path.join("~", ".chainer", "models"),
                    **kwargs):
     """
     Create PyramidNet model with specific parameters.

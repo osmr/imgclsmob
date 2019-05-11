@@ -281,7 +281,7 @@ class BamResNet(Chain):
 def get_resnet(blocks,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create BAM-ResNet model with specific parameters.

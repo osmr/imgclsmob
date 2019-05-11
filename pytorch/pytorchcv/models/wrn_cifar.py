@@ -87,7 +87,7 @@ def get_wrn_cifar(num_classes,
                   width_factor,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create WRN model for CIFAR with specific parameters.

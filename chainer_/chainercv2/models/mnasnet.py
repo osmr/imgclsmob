@@ -332,7 +332,7 @@ class MnasNet(Chain):
 
 def get_mnasnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create MnasNet model with specific parameters.

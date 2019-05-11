@@ -197,7 +197,7 @@ class SparseNet(nn.Module):
 def get_sparsenet(num_layers,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create SparseNet model with specific parameters.

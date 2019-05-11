@@ -93,7 +93,7 @@ def get_resnet_cifar(classes,
                      bottleneck,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.chainer', 'models'),
+                     root=os.path.join("~", ".chainer", "models"),
                      **kwargs):
     """
     Create ResNet model for CIFAR with specific parameters.

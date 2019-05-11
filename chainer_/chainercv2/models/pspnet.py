@@ -204,7 +204,7 @@ def get_pspnet(backbone,
                aux=False,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create PSPNet model with specific parameters.

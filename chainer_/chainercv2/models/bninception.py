@@ -373,7 +373,7 @@ class BNInception(Chain):
 
 def get_bninception(model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
+                    root=os.path.join("~", ".chainer", "models"),
                     **kwargs):
     """
     Create BN-Inception model with specific parameters.

@@ -200,7 +200,7 @@ def get_squeezenext(version,
                     width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.torch', 'models'),
+                    root=os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create SqueezeNext model with specific parameters.

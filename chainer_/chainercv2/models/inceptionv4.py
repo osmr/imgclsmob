@@ -664,7 +664,7 @@ class InceptionV4(Chain):
 
 def get_inceptionv4(model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
+                    root=os.path.join("~", ".chainer", "models"),
                     **kwargs):
     """
     Create InceptionV4 model with specific parameters.

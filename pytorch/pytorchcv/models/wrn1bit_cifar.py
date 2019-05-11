@@ -588,7 +588,7 @@ def get_wrn1bit_cifar(num_classes,
                       binarized=True,
                       model_name=None,
                       pretrained=False,
-                      root=os.path.join('~', '.torch', 'models'),
+                      root=os.path.join("~", ".torch", "models"),
                       **kwargs):
     """
     Create WRN-1bit model for CIFAR with specific parameters.

@@ -247,7 +247,7 @@ class SKNet(Chain):
 def get_sknet(blocks,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.chainer', 'models'),
+              root=os.path.join("~", ".chainer", "models"),
               **kwargs):
     """
     Create SKNet model with specific parameters.

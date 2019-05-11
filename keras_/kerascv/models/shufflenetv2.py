@@ -242,7 +242,7 @@ def shufflenetv2(channels,
 def get_shufflenetv2(width_scale,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.keras', 'models'),
+                     root=os.path.join("~", ".keras", "models"),
                      **kwargs):
     """
     Create ShuffleNetV2 model with specific parameters.

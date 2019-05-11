@@ -520,7 +520,7 @@ class PNASNet(Chain):
 
 def get_pnasnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create PNASNet model with specific parameters.

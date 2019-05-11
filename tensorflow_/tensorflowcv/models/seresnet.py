@@ -204,7 +204,7 @@ def get_seresnet(blocks,
                  conv1_stride=True,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.tensorflow', 'models'),
+                 root=os.path.join("~", ".tensorflow", "models"),
                  **kwargs):
     """
     Create SE-ResNet model with specific parameters.

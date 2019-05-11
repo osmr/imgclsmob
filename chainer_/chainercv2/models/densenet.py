@@ -168,7 +168,7 @@ class DenseNet(Chain):
 def get_densenet(blocks,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.chainer', 'models'),
+                 root=os.path.join("~", ".chainer", "models"),
                  **kwargs):
     """
     Create DenseNet model with specific parameters.

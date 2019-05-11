@@ -249,7 +249,7 @@ def get_vgg(blocks,
             use_bn=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.keras', 'models'),
+            root=os.path.join("~", ".keras", "models"),
             **kwargs):
     """
     Create VGG model with specific parameters.

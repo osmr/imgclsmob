@@ -155,7 +155,7 @@ class IGCV3(Chain):
 def get_mobilenetv2(width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
+                    root=os.path.join("~", ".chainer", "models"),
                     **kwargs):
     """
     Create IGCV3-D model with specific parameters.

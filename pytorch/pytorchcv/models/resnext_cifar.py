@@ -94,7 +94,7 @@ def get_resnext_cifar(num_classes,
                       bottleneck_width,
                       model_name=None,
                       pretrained=False,
-                      root=os.path.join('~', '.torch', 'models'),
+                      root=os.path.join("~", ".torch", "models"),
                       **kwargs):
     """
     ResNeXt model for CIFAR with specific parameters.

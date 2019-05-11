@@ -382,7 +382,7 @@ class ESPNetv2(Chain):
 def get_espnetv2(width_scale,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.chainer', 'models'),
+                 root=os.path.join("~", ".chainer", "models"),
                  **kwargs):
     """
     Create ESPNetv2 model with specific parameters.

@@ -635,7 +635,7 @@ class InceptionV3(Chain):
 
 def get_inceptionv3(model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.chainer', 'models'),
+                    root=os.path.join("~", ".chainer", "models"),
                     **kwargs):
     """
     Create InceptionV3 model with specific parameters.

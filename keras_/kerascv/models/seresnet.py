@@ -155,7 +155,7 @@ def get_seresnet(blocks,
                  conv1_stride=True,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.keras', 'models'),
+                 root=os.path.join("~", ".keras", "models"),
                  **kwargs):
     """
     Create SE-ResNet model with specific parameters.

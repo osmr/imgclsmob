@@ -228,7 +228,7 @@ class ShuffleNetV2(Chain):
 def get_shufflenetv2(width_scale,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.chainer', 'models'),
+                     root=os.path.join("~", ".chainer", "models"),
                      **kwargs):
     """
     Create ShuffleNetV2 model with specific parameters.

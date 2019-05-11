@@ -20,66 +20,66 @@ from chainer_.imagenet1k import ImagenetPredictor
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Chainer/ImageNet-1K)',
+        description="Evaluate a model for image classification (Chainer/ImageNet-1K)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     add_dataset_parser_arguments(parser)
 
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options.')
+        help="type of model to use. see model_provider for options.")
     parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model from gluon.')
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from gluon.")
     parser.add_argument(
-        '--resume',
+        "--resume",
         type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
+        default="",
+        help="resume from previously saved parameters if not None")
 
     parser.add_argument(
-        '--num-gpus',
+        "--num-gpus",
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help="number of gpus to use.")
     parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
         default=4,
         type=int,
-        help='number of preprocessing workers')
+        help="number of preprocessing workers")
 
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=32,
-        help='training batch size per device (CPU/GPU).')
+        help="training batch size per device (CPU/GPU).")
 
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
 
     parser.add_argument(
-        '--log-packages',
+        "--log-packages",
         type=str,
-        default='chainer, chainercv',
-        help='list of python packages for logging')
+        default="chainer, chainercv",
+        help="list of python packages for logging")
     parser.add_argument(
-        '--log-pip-packages',
+        "--log-pip-packages",
         type=str,
-        default='cupy-cuda92, cupy-cuda100, chainer, chainercv',
-        help='list of pip packages for logging')
+        default="cupy-cuda92, cupy-cuda100, chainer, chainercv",
+        help="list of pip packages for logging")
     args = parser.parse_args()
     return args
 
@@ -107,7 +107,7 @@ def test(net,
 
     if calc_weight_count:
         weight_count = net.count_params()
-        logging.info('Model: {} trainable parameters'.format(weight_count))
+        logging.info("Model: {} trainable parameters".format(weight_count))
 
     in_values, out_values, rest_values = apply_to_iterator(
         predictor.predict,
@@ -132,12 +132,12 @@ def test(net,
     err_top5_val = 1.0 - top5_acc
 
     if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+        logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
             top1=err_top1_val, top5=err_top5_val))
     else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+        logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
             top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
+    logging.info("Time cost: {:.4f} sec".format(
         time.time() - tic))
 
 
@@ -162,8 +162,8 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         num_gpus=num_gpus)
-    num_classes = net.classes if hasattr(net, 'classes') else 1000
-    input_image_size = net.in_size[0] if hasattr(net, 'in_size') else args.input_size
+    num_classes = net.classes if hasattr(net, "classes") else 1000
+    input_image_size = net.in_size[0] if hasattr(net, "in_size") else args.input_size
 
     val_iterator, val_dataset_len = get_val_data_iterator(
         data_dir=args.data_dir,
@@ -183,5 +183,5 @@ def main():
         extended_log=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

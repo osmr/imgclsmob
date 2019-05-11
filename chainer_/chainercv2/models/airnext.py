@@ -221,7 +221,7 @@ def get_airnext(blocks,
                 ratio,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create AirNet model with specific parameters.

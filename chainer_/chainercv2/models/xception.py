@@ -332,7 +332,7 @@ class Xception(Chain):
 
 def get_xception(model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.chainer', 'models'),
+                 root=os.path.join("~", ".chainer", "models"),
                  **kwargs):
     """
     Create Xception model with specific parameters.

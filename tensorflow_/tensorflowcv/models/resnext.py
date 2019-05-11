@@ -259,7 +259,7 @@ def get_resnext(blocks,
                 bottleneck_width,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.tensorflow', 'models'),
+                root=os.path.join("~", ".tensorflow", "models"),
                 **kwargs):
     """
     Create ResNeXt model with specific parameters.

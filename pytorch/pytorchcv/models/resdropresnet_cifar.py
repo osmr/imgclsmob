@@ -149,7 +149,7 @@ def get_resdropresnet_cifar(classes,
                             bottleneck,
                             model_name=None,
                             pretrained=False,
-                            root=os.path.join('~', '.torch', 'models'),
+                            root=os.path.join("~", ".torch", "models"),
                             **kwargs):
     """
     Create ResDrop-ResNet model for CIFAR with specific parameters.

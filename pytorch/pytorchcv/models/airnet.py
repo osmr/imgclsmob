@@ -283,7 +283,7 @@ def get_airnet(blocks,
                ratio,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
+               root=os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create AirNet model with specific parameters.

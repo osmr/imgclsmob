@@ -706,7 +706,7 @@ class ChannelNet(object):
 
 def get_channelnet(model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.tensorflow', 'models'),
+                   root=os.path.join("~", ".tensorflow", "models"),
                    **kwargs):
     """
     Create ChannelNet model with specific parameters.

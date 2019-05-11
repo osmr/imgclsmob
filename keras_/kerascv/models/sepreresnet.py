@@ -155,7 +155,7 @@ def get_sepreresnet(blocks,
                     conv1_stride=True,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.keras', 'models'),
+                    root=os.path.join("~", ".keras", "models"),
                     **kwargs):
     """
     Create PreResNet or SE-PreResNet model with specific parameters.

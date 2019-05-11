@@ -258,7 +258,7 @@ class CbamResNet(Chain):
 def get_resnet(blocks,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create CBAM-ResNet model with specific parameters.

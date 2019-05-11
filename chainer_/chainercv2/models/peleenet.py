@@ -291,7 +291,7 @@ class PeleeNet(Chain):
 
 def get_peleenet(model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.chainer', 'models'),
+                 root=os.path.join("~", ".chainer", "models"),
                  **kwargs):
     """
     Create PeleeNet model with specific parameters.

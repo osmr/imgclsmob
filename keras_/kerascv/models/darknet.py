@@ -129,7 +129,7 @@ def darknet(channels,
 def get_darknet(version,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.keras', 'models'),
+                root=os.path.join("~", ".keras", "models"),
                 **kwargs):
     """
     Create DarkNet model with specific parameters.

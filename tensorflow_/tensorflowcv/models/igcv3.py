@@ -207,7 +207,7 @@ class IGCV3(object):
 def get_igcv3(width_scale,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.tensorflow', 'models'),
+              root=os.path.join("~", ".tensorflow", "models"),
               **kwargs):
     """
     Create IGCV3-D model with specific parameters.

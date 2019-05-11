@@ -282,7 +282,7 @@ def get_preresnet(blocks,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create PreResNet model with specific parameters.

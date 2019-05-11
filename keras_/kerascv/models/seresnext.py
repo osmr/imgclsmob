@@ -150,7 +150,7 @@ def get_seresnext(blocks,
                   bottleneck_width,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.keras', 'models'),
+                  root=os.path.join("~", ".keras", "models"),
                   **kwargs):
     """
     Create SE-ResNeXt model with specific parameters.

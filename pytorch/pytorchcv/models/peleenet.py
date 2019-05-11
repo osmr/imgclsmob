@@ -280,7 +280,7 @@ class PeleeNet(nn.Module):
 
 def get_peleenet(model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.torch', 'models'),
+                 root=os.path.join("~", ".torch", "models"),
                  **kwargs):
     """
     Create PeleeNet model with specific parameters.

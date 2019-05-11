@@ -236,7 +236,7 @@ class DenseNet(object):
 def get_densenet(blocks,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.tensorflow', 'models'),
+                 root=os.path.join("~", ".tensorflow", "models"),
                  **kwargs):
     """
     Create DenseNet model with specific parameters.

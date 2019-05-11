@@ -222,7 +222,7 @@ class CIFARRiR(Chain):
 def get_rir_cifar(classes,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create RiR model for CIFAR with specific parameters.

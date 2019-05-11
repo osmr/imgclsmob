@@ -152,7 +152,7 @@ def get_xdensenet_cifar(classes,
                         expand_ratio=2,
                         model_name=None,
                         pretrained=False,
-                        root=os.path.join('~', '.chainer', 'models'),
+                        root=os.path.join("~", ".chainer", "models"),
                         **kwargs):
     """
     Create X-DenseNet model for CIFAR with specific parameters.

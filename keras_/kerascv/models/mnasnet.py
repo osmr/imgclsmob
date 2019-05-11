@@ -377,7 +377,7 @@ def mnasnet_model(channels,
 
 def get_mnasnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.keras', 'models'),
+                root=os.path.join("~", ".keras", "models"),
                 **kwargs):
     """
     Create MnasNet model with specific parameters.

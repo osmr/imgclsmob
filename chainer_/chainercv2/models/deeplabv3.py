@@ -216,7 +216,7 @@ def get_deeplabv3(backbone,
                   aux=False,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create DeepLabv3 model with specific parameters.

@@ -387,7 +387,7 @@ def get_sharesnet(blocks,
                   conv1_stride=True,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create ShaResNet model with specific parameters.

@@ -143,7 +143,7 @@ class MobileNetV2(nn.Module):
 def get_mobilenetv2(width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.torch', 'models'),
+                    root=os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create MobileNetV2 model with specific parameters.

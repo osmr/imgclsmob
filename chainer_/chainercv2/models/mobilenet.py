@@ -125,7 +125,7 @@ def get_mobilenet(version,
                   width_scale,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create MobileNet or FD-MobileNet model with specific parameters.

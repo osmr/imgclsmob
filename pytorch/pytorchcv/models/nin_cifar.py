@@ -131,7 +131,7 @@ class CIFARNIN(nn.Module):
 def get_nin_cifar(num_classes,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create NIN model for CIFAR with specific parameters.

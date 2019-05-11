@@ -347,7 +347,7 @@ class SENet(object):
 def get_senet(blocks,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.tensorflow', 'models'),
+              root=os.path.join("~", ".tensorflow", "models"),
               **kwargs):
     """
     Create SENet model with specific parameters.

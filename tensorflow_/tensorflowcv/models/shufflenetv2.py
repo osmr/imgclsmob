@@ -306,7 +306,7 @@ class ShuffleNetV2(object):
 def get_shufflenetv2(width_scale,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.tensorflow', 'models'),
+                     root=os.path.join("~", ".tensorflow", "models"),
                      **kwargs):
     """
     Create ShuffleNetV2 model with specific parameters.

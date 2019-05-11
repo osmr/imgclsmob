@@ -223,7 +223,7 @@ def get_squeezenet(version,
                    residual=False,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.torch', 'models'),
+                   root=os.path.join("~", ".torch", "models"),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.

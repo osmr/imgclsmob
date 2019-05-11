@@ -379,7 +379,7 @@ class CIFARFractalNet(nn.Module):
 def get_fractalnet_cifar(num_classes,
                          model_name=None,
                          pretrained=False,
-                         root=os.path.join('~', '.torch', 'models'),
+                         root=os.path.join("~", ".torch", "models"),
                          **kwargs):
     """
     Create WRN model for CIFAR with specific parameters.

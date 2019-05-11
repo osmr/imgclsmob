@@ -139,7 +139,7 @@ class CIFARNIN(Chain):
 def get_nin_cifar(classes,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create NIN model for CIFAR with specific parameters.

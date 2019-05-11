@@ -253,7 +253,7 @@ class SENet(Chain):
 def get_senet(blocks,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.chainer', 'models'),
+              root=os.path.join("~", ".chainer", "models"),
               **kwargs):
     """
     Create SENet model with specific parameters.

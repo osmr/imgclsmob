@@ -286,7 +286,7 @@ def get_resnet(blocks,
                width_scale=1.0,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create ResNet model with specific parameters.

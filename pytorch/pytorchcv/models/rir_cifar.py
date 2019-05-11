@@ -217,7 +217,7 @@ class CIFARRiR(nn.Module):
 def get_rir_cifar(num_classes,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.torch', 'models'),
+                  root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
     Create RiR model for CIFAR with specific parameters.

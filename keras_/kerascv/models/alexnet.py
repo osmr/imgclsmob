@@ -198,7 +198,7 @@ def alexnet_model(channels,
 
 def get_alexnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.keras', 'models'),
+                root=os.path.join("~", ".keras", "models"),
                 **kwargs):
     """
     Create AlexNet model with specific parameters.

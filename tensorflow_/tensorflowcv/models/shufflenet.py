@@ -277,7 +277,7 @@ def get_shufflenet(groups,
                    width_scale,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.tensorflow', 'models'),
+                   root=os.path.join("~", ".tensorflow", "models"),
                    **kwargs):
     """
     Create ShuffleNet model with specific parameters.

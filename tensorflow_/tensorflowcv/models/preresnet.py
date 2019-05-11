@@ -406,7 +406,7 @@ def get_preresnet(blocks,
                   width_scale=1.0,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.tensorflow', 'models'),
+                  root=os.path.join("~", ".tensorflow", "models"),
                   **kwargs):
     """
     Create PreResNet or SE-PreResNet model with specific parameters.

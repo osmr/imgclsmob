@@ -227,7 +227,7 @@ def get_vgg(blocks,
             use_bn=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.torch', 'models'),
+            root=os.path.join("~", ".torch", "models"),
             **kwargs):
     """
     Create VGG model with specific parameters.

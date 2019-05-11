@@ -271,7 +271,7 @@ def senet(channels,
 def get_senet(blocks,
               model_name=None,
               pretrained=False,
-              root=os.path.join('~', '.keras', 'models'),
+              root=os.path.join("~", ".keras", "models"),
               **kwargs):
     """
     Create SENet model with specific parameters.

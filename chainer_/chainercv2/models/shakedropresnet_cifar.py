@@ -190,7 +190,7 @@ def get_shakedropresnet_cifar(classes,
                               bottleneck,
                               model_name=None,
                               pretrained=False,
-                              root=os.path.join('~', '.chainer', 'models'),
+                              root=os.path.join("~", ".chainer", "models"),
                               **kwargs):
     """
     Create ShakeDrop-ResNet model for CIFAR with specific parameters.

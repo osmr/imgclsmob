@@ -319,7 +319,7 @@ def get_wrn(blocks,
             width_factor,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.chainer', 'models'),
+            root=os.path.join("~", ".chainer", "models"),
             **kwargs):
     """
     Create WRN model with specific parameters.

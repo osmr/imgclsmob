@@ -257,7 +257,7 @@ class CbamResNet(nn.Module):
 def get_resnet(blocks,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
+               root=os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create CBAM-ResNet model with specific parameters.

@@ -224,7 +224,7 @@ def get_squeezenet(version,
                    residual=False,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.chainer', 'models'),
+                   root=os.path.join("~", ".chainer", "models"),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.

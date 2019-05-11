@@ -183,7 +183,7 @@ class DarkNet53(object):
 
 def get_darknet53(model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.tensorflow', 'models'),
+                  root=os.path.join("~", ".tensorflow", "models"),
                   **kwargs):
     """
     Create DarkNet model with specific parameters.

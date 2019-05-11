@@ -217,7 +217,7 @@ class BagNet(nn.Module):
 def get_bagnet(field,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.torch', 'models'),
+               root=os.path.join("~", ".torch", "models"),
                **kwargs):
     """
     Create BagNet model with specific parameters.

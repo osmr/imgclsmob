@@ -1195,7 +1195,7 @@ def get_nasnet(repeat,
                in_size,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create NASNet-A model with specific parameters.

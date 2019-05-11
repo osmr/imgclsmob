@@ -214,7 +214,7 @@ def get_squeezenext(version,
                     width_scale,
                     model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.keras', 'models'),
+                    root=os.path.join("~", ".keras", "models"),
                     **kwargs):
     """
     Create SqueezeNext model with specific parameters.

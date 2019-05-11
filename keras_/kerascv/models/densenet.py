@@ -176,7 +176,7 @@ def densenet(channels,
 def get_densenet(blocks,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.keras', 'models'),
+                 root=os.path.join("~", ".keras", "models"),
                  **kwargs):
     """
     Create DenseNet model with specific parameters.

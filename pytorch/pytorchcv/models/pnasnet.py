@@ -514,7 +514,7 @@ class PNASNet(nn.Module):
 
 def get_pnasnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create PNASNet model with specific parameters.

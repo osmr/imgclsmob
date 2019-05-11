@@ -225,7 +225,7 @@ def get_shufflenetv2b(width_scale,
                       shuffle_group_first=True,
                       model_name=None,
                       pretrained=False,
-                      root=os.path.join('~', '.torch', 'models'),
+                      root=os.path.join("~", ".torch", "models"),
                       **kwargs):
     """
     Create ShuffleNetV2(b) model with specific parameters.

@@ -607,7 +607,7 @@ class InceptionV3(nn.Module):
 
 def get_inceptionv3(model_name=None,
                     pretrained=False,
-                    root=os.path.join('~', '.torch', 'models'),
+                    root=os.path.join("~", ".torch", "models"),
                     **kwargs):
     """
     Create InceptionV3 model with specific parameters.

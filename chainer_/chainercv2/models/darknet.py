@@ -132,7 +132,7 @@ class DarkNet(Chain):
 def get_darknet(version,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create DarkNet model with specific parameters.

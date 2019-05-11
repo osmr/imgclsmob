@@ -384,7 +384,7 @@ class IRevNet(nn.Module):
 def get_irevnet(blocks,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create i-RevNet model with specific parameters.

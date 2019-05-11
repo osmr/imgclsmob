@@ -318,7 +318,7 @@ class Xception(nn.Module):
 
 def get_xception(model_name=None,
                  pretrained=False,
-                 root=os.path.join('~', '.torch', 'models'),
+                 root=os.path.join("~", ".torch", "models"),
                  **kwargs):
     """
     Create Xception model with specific parameters.

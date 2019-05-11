@@ -538,7 +538,7 @@ class FishNet(Chain):
 def get_fishnet(blocks,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.chainer', 'models'),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create FishNet model with specific parameters.

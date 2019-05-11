@@ -369,7 +369,7 @@ def get_resnet(blocks,
                width_scale=1.0,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.tensorflow', 'models'),
+               root=os.path.join("~", ".tensorflow", "models"),
                **kwargs):
     """
     Create ResNet or SE-ResNet model with specific parameters.

@@ -394,7 +394,7 @@ def get_dla(levels,
             residual_root=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.torch', 'models'),
+            root=os.path.join("~", ".torch", "models"),
             **kwargs):
     """
     Create DLA model with specific parameters.

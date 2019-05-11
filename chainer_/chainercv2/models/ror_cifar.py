@@ -276,7 +276,7 @@ def get_ror_cifar(classes,
                   blocks,
                   model_name=None,
                   pretrained=False,
-                  root=os.path.join('~', '.chainer', 'models'),
+                  root=os.path.join("~", ".chainer", "models"),
                   **kwargs):
     """
     Create RoR-3 model for CIFAR with specific parameters.

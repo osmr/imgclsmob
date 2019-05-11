@@ -399,7 +399,7 @@ def get_dla(levels,
             residual_root=False,
             model_name=None,
             pretrained=False,
-            root=os.path.join('~', '.chainer', 'models'),
+            root=os.path.join("~", ".chainer", "models"),
             **kwargs):
     """
     Create DLA model with specific parameters.

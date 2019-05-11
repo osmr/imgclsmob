@@ -245,7 +245,7 @@ class ProxylessNAS(Chain):
 def get_proxylessnas(version,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join('~', '.chainer', 'models'),
+                     root=os.path.join("~", ".chainer", "models"),
                      **kwargs):
     """
     Create ProxylessNAS model with specific parameters.

@@ -576,7 +576,7 @@ class InceptionResNetV2(Chain):
 
 def get_inceptionresnetv2(model_name=None,
                           pretrained=False,
-                          root=os.path.join('~', '.chainer', 'models'),
+                          root=os.path.join("~", ".chainer", "models"),
                           **kwargs):
     """
     Create InceptionResNetV2 model with specific parameters.

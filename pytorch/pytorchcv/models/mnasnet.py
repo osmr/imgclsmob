@@ -323,7 +323,7 @@ class MnasNet(nn.Module):
 
 def get_mnasnet(model_name=None,
                 pretrained=False,
-                root=os.path.join('~', '.torch', 'models'),
+                root=os.path.join("~", ".torch", "models"),
                 **kwargs):
     """
     Create MnasNet model with specific parameters.

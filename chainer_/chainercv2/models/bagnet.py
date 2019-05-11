@@ -222,7 +222,7 @@ class BagNet(Chain):
 def get_bagnet(field,
                model_name=None,
                pretrained=False,
-               root=os.path.join('~', '.chainer', 'models'),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create BagNet model with specific parameters.

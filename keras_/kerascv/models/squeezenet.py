@@ -240,7 +240,7 @@ def get_squeezenet(version,
                    residual=False,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join('~', '.keras', 'models'),
+                   root=os.path.join("~", ".keras", "models"),
                    **kwargs):
     """
     Create SqueezeNet model with specific parameters.

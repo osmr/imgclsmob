@@ -11,7 +11,8 @@ import torch.utils.data
 
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
-from pytorch.utils import prepare_pt_context, prepare_model, validate, report_accuracy, get_composite_metric
+from pytorch.utils import prepare_pt_context, prepare_model, validate
+from pytorch.utils import report_accuracy, get_composite_metric, get_metric_name
 
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_train_data_source, get_val_data_source
@@ -405,7 +406,6 @@ def train_net(batch_size,
               num_classes,
               val_metric,
               train_metric,
-              opt_metric_name,
               use_cuda):
     assert (num_classes > 0)
 
@@ -467,8 +467,9 @@ def train_net(batch_size,
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
     if lp_saver is not None:
-        logging.info("Best err-top5: {:.4f} at {} epoch".format(
-            lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
+        opt_metric_name = get_metric_name(val_metric, lp_saver.acc_ind)
+        logging.info("Best {}: {:.4f} at {} epoch".format(
+            opt_metric_name, lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
 
 def main():
@@ -561,7 +562,6 @@ def main():
         num_classes=num_classes,
         val_metric=get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs),
         train_metric=get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs),
-        opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         use_cuda=use_cuda)
 
 

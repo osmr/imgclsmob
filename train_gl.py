@@ -12,7 +12,8 @@ from mxnet import autograd as ag
 from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
-from gluon.utils import prepare_mx_context, prepare_model, validate, report_accuracy, get_composite_metric
+from gluon.utils import prepare_mx_context, prepare_model, validate
+from gluon.utils import report_accuracy, get_composite_metric, get_metric_name
 
 from gluon.dataset_utils import get_dataset_metainfo
 from gluon.dataset_utils import get_train_data_source, get_val_data_source
@@ -470,7 +471,6 @@ def train_net(batch_size,
               batch_size_scale,
               val_metric,
               train_metric,
-              opt_metric_name,
               ctx):
 
     if batch_size_scale != 1:
@@ -545,6 +545,7 @@ def train_net(batch_size,
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
     if lp_saver is not None:
+        opt_metric_name = get_metric_name(val_metric, lp_saver.acc_ind)
         logging.info("Best {}: {:.4f} at {} epoch".format(
             opt_metric_name, lp_saver.best_eval_metric_value, lp_saver.best_eval_metric_epoch))
 
@@ -660,7 +661,6 @@ def main():
         batch_size_scale=args.batch_size_scale,
         val_metric=get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs),
         train_metric=get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs),
-        opt_metric_name=ds_metainfo.val_metric_names[ds_metainfo.saver_acc_ind],
         ctx=ctx)
 
 

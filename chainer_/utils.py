@@ -78,3 +78,13 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
         for name, extra_kwargs in zip(metric_names, metric_extra_kwargs):
             metric.add(get_metric(name, extra_kwargs))
     return metric
+
+
+def get_metric_name(metric, index):
+    if isinstance(metric, CompositeEvalMetric):
+        return metric.metrics[index].name
+    elif isinstance(metric, EvalMetric):
+        assert (index == 0)
+        return metric.name
+    else:
+        raise Exception("Wrong metric type: {}".format(type(metric)))

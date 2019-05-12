@@ -125,7 +125,7 @@ class VOCMetaInfo(DatasetMetaInfo):
         self.train_metric_extra_kwargs = None
         self.val_metric_capts = None
         self.val_metric_names = None
-        self.test_metric_extra_kwargs = None
+        self.test_metric_extra_kwargs = [{}, {}]
         self.test_metric_capts = ["Val.PixAcc", "Val.IoU"]
         self.test_metric_names = ["PixelAccuracyMetric", "MeanIoUMetric"]
         self.test_metric_extra_kwargs = [

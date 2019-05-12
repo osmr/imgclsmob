@@ -1,7 +1,7 @@
-import argparse
+import os
 import time
 import logging
-import os
+import argparse
 import random
 import numpy as np
 
@@ -27,7 +27,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--use-pretrained",
         action="store_true",
-        help="enable using pretrained model from gluon")
+        help="enable using pretrained model from github repo")
     parser.add_argument(
         "--resume",
         type=str,

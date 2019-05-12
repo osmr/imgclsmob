@@ -4,9 +4,9 @@
 """
 
 __all__ = ['resnet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet16', 'resnet18_wd4', 'resnet18_wd2',
-           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnet50', 'resnet50b', 'resnet101',
-           'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'res_block', 'res_bottleneck_block',
-           'res_unit', 'res_init_block']
+           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnetbc38b', 'resnet50', 'resnet50b',
+           'resnet101', 'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'res_block',
+           'res_bottleneck_block', 'res_unit', 'res_init_block']
 
 import os
 from keras import layers as nn
@@ -332,6 +332,8 @@ def get_resnet(blocks,
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
+    elif (blocks == 38) and bottleneck:
+        layers = [3, 3, 3, 3]
     elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
@@ -559,6 +561,21 @@ def resnet34(**kwargs):
     return get_resnet(blocks=34, model_name="resnet34", **kwargs)
 
 
+def resnetbc38b(**kwargs):
+    """
+    ResNet-BC-38b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="resnetbc38b", **kwargs)
+
+
 def resnet50(**kwargs):
     """
     ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
@@ -696,6 +713,7 @@ def _test():
         resnet26,
         resnetbc26b,
         resnet34,
+        resnetbc38b,
         resnet50,
         resnet50b,
         resnet101,
@@ -724,6 +742,7 @@ def _test():
         assert (model != resnet26 or weight_count == 17960232)
         assert (model != resnetbc26b or weight_count == 15995176)
         assert (model != resnet34 or weight_count == 21797672)
+        assert (model != resnetbc38b or weight_count == 21925416)
         assert (model != resnet50 or weight_count == 25557032)
         assert (model != resnet50b or weight_count == 25557032)
         assert (model != resnet101 or weight_count == 44549160)

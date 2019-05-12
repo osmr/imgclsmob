@@ -220,8 +220,8 @@ def prepare_trainer(net,
 
     trainer.extend(
         extension=extensions.Evaluator(
-            val_data["iterator"],
-            net,
+            iterator=val_data["iterator"],
+            target=net,
             device=devices[0]),
         trigger=val_interval)
     trainer.extend(extensions.dump_graph("main/loss"))

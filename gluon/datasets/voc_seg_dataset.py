@@ -156,15 +156,15 @@ class VOCMetaInfo(DatasetMetaInfo):
                                      work_dir_path):
         super(VOCMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
         parser.add_argument(
-            '--image-base-size',
+            "--image-base-size",
             type=int,
             default=520,
-            help='base image size')
+            help="base image size")
         parser.add_argument(
-            '--image-crop-size',
+            "--image-crop-size",
             type=int,
             default=480,
-            help='crop image size')
+            help="crop image size")
 
     def update(self,
                args):

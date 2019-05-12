@@ -41,12 +41,7 @@ def get_train_data_source(ds_metainfo,
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="train",
-        transform=None)
-    # iterator = iterators.SerialIterator(
-    #     dataset=dataset,
-    #     batch_size=batch_size,
-    #     repeat=False,
-    #     shuffle=False)
+        transform=transform)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
@@ -55,7 +50,7 @@ def get_train_data_source(ds_metainfo,
         n_processes=num_workers,
         shared_mem=300000000)
     return {
-        "transform": transform,
+        # "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }
@@ -69,11 +64,6 @@ def get_val_data_source(ds_metainfo,
         root=ds_metainfo.root_dir_path,
         mode="val",
         transform=transform)
-    # iterator = iterators.SerialIterator(
-    #     dataset=dataset,
-    #     batch_size=batch_size,
-    #     repeat=False,
-    #     shuffle=False)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
@@ -82,7 +72,7 @@ def get_val_data_source(ds_metainfo,
         n_processes=num_workers,
         shared_mem=300000000)
     return {
-        "transform": transform,
+        # "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }
@@ -96,11 +86,6 @@ def get_test_data_source(ds_metainfo,
         root=ds_metainfo.root_dir_path,
         mode="test",
         transform=transform)
-    # iterator = iterators.SerialIterator(
-    #     dataset=dataset,
-    #     batch_size=batch_size,
-    #     repeat=False,
-    #     shuffle=False)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
@@ -109,7 +94,7 @@ def get_test_data_source(ds_metainfo,
         n_processes=num_workers,
         shared_mem=300000000)
     return {
-        "transform": transform,
+        # "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }

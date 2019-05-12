@@ -135,11 +135,17 @@ def test(net,
         hook=ProgressHook(test_data["ds_len"]))
     assert (len(rest_values) == 1)
     assert (len(out_values) == 1)
-    labels = iter(rest_values[0])
-    preds = iter(out_values[0])
 
-    for label, pred in zip(labels, preds):
-        metric.update(label, pred)
+    if False:
+        labels = iter(rest_values[0])
+        preds = iter(out_values[0])
+        for label, pred in zip(labels, preds):
+            metric.update(label, pred)
+    else:
+        import numpy as np
+        metric.update(
+            labels=np.array(list(rest_values[0])),
+            preds=np.array(list(out_values[0])))
 
     accuracy_msg = report_accuracy(
         metric=metric,

@@ -1,10 +1,56 @@
 import logging
 import os
+from chainer import cuda
+from chainer import using_config, Variable
+from chainer.function import no_backprop_mode
+from chainer.backends.cuda import to_cpu
 from chainer.serializers import load_npz
 from .chainercv2.model_provider import get_model
 from .metric import EvalMetric, CompositeEvalMetric
 from .cls_metrics import Top1Error, TopKError
 from .seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+
+
+def prepare_ch_context(num_gpus):
+    use_gpus = (num_gpus > 0)
+    if use_gpus:
+        cuda.get_device(0).use()
+    return use_gpus
+
+
+class Predictor(object):
+    """
+    Model predictor with preprocessing.
+
+    Parameters
+    ----------
+    model : Chain
+        Base model.
+    transform : callable, optional
+        A function that transforms the image.
+    """
+    def __init__(self,
+                 model,
+                 transform=None):
+        super(Predictor, self).__init__()
+        self.model = model
+        self.transform = transform
+
+    def do_transform(self, img):
+        if self.transform is not None:
+            return self.transform(img)
+        else:
+            return img
+
+    def __call__(self, imgs):
+        imgs = self.model.xp.asarray([self.do_transform(img) for img in imgs])
+
+        with using_config("train", False), no_backprop_mode():
+            imgs = Variable(imgs)
+            predictions = self.model(imgs)
+
+        output = to_cpu(predictions.array)
+        return output
 
 
 def prepare_model(model_name,
@@ -16,7 +62,7 @@ def prepare_model(model_name,
                   in_channels=None):
     kwargs = {'pretrained': use_pretrained}
     if num_classes is not None:
-        kwargs["num_classes"] = num_classes
+        kwargs["classes"] = num_classes
     if in_channels is not None:
         kwargs["in_channels"] = in_channels
     if net_extra_kwargs is not None:

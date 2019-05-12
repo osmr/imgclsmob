@@ -202,21 +202,19 @@ def main():
     input_image_size = real_net.in_size[0] if hasattr(real_net, "in_size") else args.input_size
 
     if args.data_subset == "val":
-        test_data = get_val_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=batch_size,
-            num_workers=args.num_workers)
+        get_test_data_source_class = get_val_data_source
         test_metric = get_composite_metric(
             metric_names=ds_metainfo.val_metric_names,
             metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
     else:
-        test_data = get_test_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=batch_size,
-            num_workers=args.num_workers)
+        get_test_data_source_class = get_test_data_source
         test_metric = get_composite_metric(
             metric_names=ds_metainfo.test_metric_names,
             metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+    test_data = get_test_data_source_class(
+        ds_metainfo=ds_metainfo,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers)
 
     if args.show_progress:
         from tqdm import tqdm

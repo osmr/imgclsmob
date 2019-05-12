@@ -51,17 +51,20 @@ class Accuracy(EvalMetric):
             Prediction values for samples. Each prediction value can either be the class index,
             or a vector of likelihoods for all classes.
         """
-        assert (len(labels) == len(preds))
-        assert (preds.shape != labels.shape)
+        if len(preds.shape) == 1:
+            num_samples = 1
+            num_correct = (preds.argmax() == labels)
+        else:
+            assert (len(labels) == len(preds))
+            num_samples = preds.shape[0]
+            label = labels.astype(np.int32).flat
+            pred_label = preds.argmax(axis=self.axis).astype(np.int32).flat
+            num_correct = (pred_label == label).sum()
 
-        label = labels.astype(np.int32).flat
-        pred_label = preds.argmax(axis=self.axis).astype(np.int32).flat
-
-        num_correct = (pred_label == label).sum()
         self.sum_metric += num_correct
         self.global_sum_metric += num_correct
-        self.num_inst += len(pred_label)
-        self.global_num_inst += len(pred_label)
+        self.num_inst += num_samples
+        self.global_num_inst += num_samples
 
 
 class TopKAccuracy(EvalMetric):
@@ -107,11 +110,16 @@ class TopKAccuracy(EvalMetric):
         preds : xp.array
             Predicted values.
         """
-        assert (len(labels) == len(preds))
         xp = cuda.get_array_module(preds)
-        argsorted_pred = xp.argsort(preds)[:, -self.top_k:]
-        num_correct = xp.any(argsorted_pred.T == labels, axis=0)
-        num_samples = labels.size(0)
+        if len(preds.shape) == 1:
+            num_samples = 1
+            argsorted_pred = xp.argsort(preds)[-self.top_k:]
+            num_correct = int(xp.any(argsorted_pred.T == labels, axis=0))
+        else:
+            assert (len(labels) == len(preds))
+            num_samples = preds.shape[0]
+            argsorted_pred = xp.argsort(preds)[:, -self.top_k:]
+            num_correct = xp.any(argsorted_pred.T == labels, axis=0).sum()
         assert (num_correct <= num_samples)
         self.sum_metric += num_correct
         self.global_sum_metric += num_correct

@@ -3,14 +3,13 @@ import time
 import logging
 import argparse
 
-from chainer import cuda, global_config
+from chainer import global_config
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.utils import prepare_model
-from chainer_.utils import get_composite_metric
-from chainer_.utils import report_accuracy
+from chainer_.utils import prepare_ch_context, prepare_model, Predictor
+from chainer_.utils import get_composite_metric, report_accuracy
 from chainer_.dataset_utils import get_dataset_metainfo
 from chainer_.dataset_utils import get_val_data_source, get_test_data_source
 
@@ -115,40 +114,30 @@ def parse_args():
     return args
 
 
-def prepare_ch_context(num_gpus):
-    use_gpus = (num_gpus > 0)
-    if use_gpus:
-        cuda.get_device(0).use()
-    return use_gpus
-
-
 def test(net,
          test_data,
          metric,
-         use_gpus,
          calc_weight_count=False,
          extended_log=False):
     tic = time.time()
 
-    predictor = test_data["predictor_class"](base_model=net)
-    if use_gpus:
-        predictor.to_gpu()
+    predictor = Predictor(
+        model=net,
+        transform=None)
 
     if calc_weight_count:
         weight_count = net.count_params()
         logging.info("Model: {} trainable parameters".format(weight_count))
 
-    in_values, out_values, rest_values = apply_to_iterator(
-        predictor.predict,
-        test_data["iterator"],
+    _, out_values, rest_values = apply_to_iterator(
+        func=predictor,
+        iterator=test_data["iterator"],
         hook=ProgressHook(test_data["ds_len"]))
-    del in_values
+    assert (len(rest_values) == 1)
+    assert (len(out_values) == 1)
+    labels = iter(rest_values[0])
+    preds = iter(out_values[0])
 
-    pred_labels, = out_values
-    gt_labels, = rest_values
-
-    labels = iter(gt_labels)
-    preds = iter(pred_labels)
     for label, pred in zip(labels, preds):
         metric.update(label, pred)
 
@@ -191,30 +180,27 @@ def main():
         in_channels=args.in_channels)
     assert (hasattr(net, "classes"))
     assert (hasattr(net, "in_size"))
-    # num_classes = net.classes
-    # input_image_size = net.in_size[0]
 
     if args.data_subset == "val":
-        test_data = get_val_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=args.batch_size)
+        get_test_data_source_class = get_val_data_source
         test_metric = get_composite_metric(
             metric_names=ds_metainfo.val_metric_names,
             metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
     else:
-        test_data = get_test_data_source(
-            ds_metainfo=ds_metainfo,
-            batch_size=args.batch_size)
+        get_test_data_source_class = get_test_data_source
         test_metric = get_composite_metric(
             metric_names=ds_metainfo.test_metric_names,
             metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+    test_data = get_test_data_source_class(
+        ds_metainfo=ds_metainfo,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers)
 
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,
         test_data=test_data,
         metric=test_metric,
-        use_gpus=use_gpus,
         calc_weight_count=True,
         extended_log=True)
 

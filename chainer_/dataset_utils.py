@@ -4,8 +4,8 @@
 
 __all__ = ['get_dataset_metainfo', 'get_train_data_source', 'get_val_data_source', 'get_test_data_source']
 
-from chainer import iterators
-# from .datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
+from chainer.iterators import MultiprocessIterator
+from .datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
 # from .datasets.cub200_2011_cls_dataset import CUB200MetaInfo
 # from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
 # from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
@@ -18,7 +18,7 @@ from .datasets.coco_seg_dataset import COCOMetaInfo
 
 def get_dataset_metainfo(dataset_name):
     dataset_metainfo_map = {
-        # "ImageNet1K": ImageNet1KMetaInfo,
+        "ImageNet1K": ImageNet1KMetaInfo,
         # "CUB200_2011": CUB200MetaInfo,
         # "CIFAR10": CIFAR10MetaInfo,
         # "CIFAR100": CIFAR100MetaInfo,
@@ -35,57 +35,78 @@ def get_dataset_metainfo(dataset_name):
 
 
 def get_train_data_source(ds_metainfo,
-                          batch_size):
-    predictor_class = ds_metainfo.train_transform
+                          batch_size,
+                          num_workers):
+    transform = ds_metainfo.train_transform(ds_metainfo=ds_metainfo)
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="train",
         transform=None)
-    iterator = iterators.SerialIterator(
+    # iterator = iterators.SerialIterator(
+    #     dataset=dataset,
+    #     batch_size=batch_size,
+    #     repeat=False,
+    #     shuffle=False)
+    iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
         repeat=False,
-        shuffle=False)
+        shuffle=True,
+        n_processes=num_workers)
     return {
-        "predictor_class": predictor_class,
+        "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }
 
 
 def get_val_data_source(ds_metainfo,
-                        batch_size):
-    predictor_class = ds_metainfo.val_transform
+                        batch_size,
+                        num_workers):
+    transform = ds_metainfo.val_transform(ds_metainfo=ds_metainfo)
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="val",
-        transform=None)
-    iterator = iterators.SerialIterator(
+        transform=transform)
+    # iterator = iterators.SerialIterator(
+    #     dataset=dataset,
+    #     batch_size=batch_size,
+    #     repeat=False,
+    #     shuffle=False)
+    iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
         repeat=False,
-        shuffle=False)
+        shuffle=False,
+        n_processes=num_workers)
     return {
-        "predictor_class": predictor_class,
+        "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }
 
 
 def get_test_data_source(ds_metainfo,
-                         batch_size):
-    predictor_class = ds_metainfo.test_transform
+                         batch_size,
+                         num_workers):
+    transform = ds_metainfo.test_transform(ds_metainfo=ds_metainfo)
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="test",
-        transform=None)
-    iterator = iterators.SerialIterator(
+        transform=transform)
+    # iterator = iterators.SerialIterator(
+    #     dataset=dataset,
+    #     batch_size=batch_size,
+    #     repeat=False,
+    #     shuffle=False)
+    iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
         repeat=False,
-        shuffle=False)
+        shuffle=False,
+        n_processes=num_workers)
     return {
-        "predictor_class": predictor_class,
+        "transform": transform,
         "iterator": iterator,
         "ds_len": len(dataset)
     }

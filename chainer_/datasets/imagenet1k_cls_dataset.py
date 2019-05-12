@@ -95,14 +95,14 @@ class ImageNetValTransform(object):
     """
     def __init__(self,
                  ds_metainfo,
-                 mean=(0.485, 0.456, 0.406),
-                 std=(0.229, 0.224, 0.225)):
+                 mean_rgb=(0.485, 0.456, 0.406),
+                 std_rgb=(0.229, 0.224, 0.225)):
         self.input_image_size = ds_metainfo.input_image_size
         self.resize_value = calc_val_resize_value(
             input_image_size=ds_metainfo.input_image_size,
             resize_inv_factor=ds_metainfo.resize_inv_factor)
-        self.mean = np.array(mean, np.float32)[:, np.newaxis, np.newaxis]
-        self.std = np.array(std, np.float32)[:, np.newaxis, np.newaxis]
+        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
 
     def __call__(self, img):
         img = scale(img=img, size=self.resize_value)

@@ -7,7 +7,7 @@ __all__ = ['get_dataset_metainfo', 'get_train_data_source', 'get_val_data_source
 from chainer.iterators import MultiprocessIterator
 from .datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
 # from .datasets.cub200_2011_cls_dataset import CUB200MetaInfo
-# from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
+from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
 # from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
 # from .datasets.svhn_cls_dataset import SVHNMetaInfo
 from .datasets.voc_seg_dataset import VOCMetaInfo
@@ -20,7 +20,7 @@ def get_dataset_metainfo(dataset_name):
     dataset_metainfo_map = {
         "ImageNet1K": ImageNet1KMetaInfo,
         # "CUB200_2011": CUB200MetaInfo,
-        # "CIFAR10": CIFAR10MetaInfo,
+        "CIFAR10": CIFAR10MetaInfo,
         # "CIFAR100": CIFAR100MetaInfo,
         # "SVHN": SVHNMetaInfo,
         "VOC": VOCMetaInfo,

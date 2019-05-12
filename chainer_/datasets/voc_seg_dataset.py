@@ -93,6 +93,29 @@ class VOCSegDataset(SegDataset):
         return len(self.images)
 
 
+class VOCSegTrainTransform(object):
+    """
+    ImageNet-1K training transform.
+    """
+    def __init__(self,
+                 ds_metainfo,
+                 mean_rgb=(0.485, 0.456, 0.406),
+                 std_rgb=(0.229, 0.224, 0.225)):
+        assert (ds_metainfo is not None)
+        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
+
+    def __call__(self, img):
+        dtype = get_dtype(None)
+        img = img.transpose(2, 0, 1)
+        img = img.astype(dtype)
+        img *= 1.0 / 255.0
+
+        img -= self.mean
+        img /= self.std
+        return img
+
+
 class VOCSegTestTransform(object):
     """
     ImageNet-1K validation transform.
@@ -146,7 +169,7 @@ class VOCMetaInfo(DatasetMetaInfo):
              "ignore_bg": VOCSegDataset.ignore_bg,
              "macro_average": False}]
         self.saver_acc_ind = 1
-        self.train_transform = None
+        self.train_transform = VOCSegTrainTransform
         self.val_transform = VOCSegTestTransform
         self.test_transform = VOCSegTestTransform
         self.ml_type = "imgseg"

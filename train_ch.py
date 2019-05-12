@@ -154,13 +154,14 @@ def add_train_cls_parser_arguments(parser):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Train a model for image classification (Chainer)",
+        description="Train a model for image classification/segmentation (Chainer)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",
         type=str,
         default="ImageNet1K",
-        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN")
+        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, ADE20K, Cityscapes, "
+             "COCO")
     parser.add_argument(
         "--work-dir",
         type=str,

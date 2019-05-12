@@ -6,6 +6,8 @@ import os
 import numpy as np
 from chainer.dataset import DatasetMixin
 from chainer.datasets.cifar import get_cifar10
+from chainercv.transforms import random_crop
+from chainercv.transforms import random_flip
 from .dataset_metainfo import DatasetMetaInfo
 
 
@@ -59,10 +61,30 @@ class CIFAR10MetaInfo(DatasetMetaInfo):
         self.val_metric_names = ["Top1Error"]
         self.val_metric_extra_kwargs = [{"name": "err"}]
         self.saver_acc_ind = 0
-        self.train_transform = None
+        self.train_transform = CIFARTrainTransform
         self.val_transform = CIFARValTransform
         self.test_transform = CIFARValTransform
         self.ml_type = "imgcls"
+
+
+class CIFARTrainTransform(object):
+    """
+    CIFAR-10 training transform.
+    """
+    def __init__(self,
+                 ds_metainfo,
+                 mean_rgb=(0.4914, 0.4822, 0.4465),
+                 std_rgb=(0.2023, 0.1994, 0.2010)):
+        assert (ds_metainfo is not None)
+        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
+
+    def __call__(self, img):
+        img = random_crop(img=img, size=self.resize_value)
+        img = random_flip(img=img, x_random=True)
+        img -= self.mean
+        img /= self.std
+        return img
 
 
 class CIFARValTransform(object):

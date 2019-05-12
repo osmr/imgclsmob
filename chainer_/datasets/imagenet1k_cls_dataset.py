@@ -6,6 +6,9 @@ import os
 import math
 import numpy as np
 from chainer.dataset import DatasetMixin
+from chainercv.transforms import random_crop
+from chainercv.transforms import random_flip
+from chainercv.transforms import pca_lighting
 from chainercv.transforms import scale
 from chainercv.transforms import center_crop
 from chainercv.datasets import DirectoryParsingLabelDataset
@@ -62,7 +65,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.val_metric_names = ["Top1Error", "TopKError"]
         self.val_metric_extra_kwargs = [{"name": "err-top1"}, {"name": "err-top5", "top_k": 5}]
         self.saver_acc_ind = 1
-        self.train_transform = None
+        self.train_transform = ImageNetTrainTransform
         self.val_transform = ImageNetValTransform
         self.test_transform = ImageNetValTransform
         self.ml_type = "imgcls"
@@ -87,6 +90,33 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
                args):
         super(ImageNet1KMetaInfo, self).update(args)
         self.input_image_size = (args.input_size, args.input_size)
+
+
+class ImageNetTrainTransform(object):
+    """
+    ImageNet-1K training transform.
+    """
+    def __init__(self,
+                 ds_metainfo,
+                 mean_rgb=(0.485, 0.456, 0.406),
+                 std_rgb=(0.229, 0.224, 0.225)):
+        self.input_image_size = ds_metainfo.input_image_size
+        self.resize_value = calc_val_resize_value(
+            input_image_size=ds_metainfo.input_image_size,
+            resize_inv_factor=ds_metainfo.resize_inv_factor)
+        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
+
+    def __call__(self, img):
+        img = random_crop(img=img, size=self.resize_value)
+        img = random_flip(img=img, x_random=True)
+        img = pca_lighting(img=img, sigma=25.5)
+        img = scale(img=img, size=self.resize_value)
+        img = center_crop(img, self.input_image_size)
+        img /= 255.0
+        img -= self.mean
+        img /= self.std
+        return img
 
 
 class ImageNetValTransform(object):

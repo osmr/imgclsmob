@@ -3,11 +3,12 @@
 """
 
 import os
-from torchvision.datasets import SVHN
+from chainer.dataset import DatasetMixin
+from chainer.datasets.svhn import get_svhn
 from .cifar10_cls_dataset import CIFAR10MetaInfo
 
 
-class SVHNFine(SVHN):
+class SVHN(DatasetMixin):
     """
     SVHN image classification dataset from http://ufldl.stanford.edu/housenumbers/.
     Each sample is an image (in 3D NDArray) with shape (32, 32, 3).
@@ -16,7 +17,7 @@ class SVHNFine(SVHN):
 
     Parameters
     ----------
-    root : str, default '~/.torch/datasets/svhn'
+    root : str, default '~/.chainer/datasets/svhn'
         Path to temp folder for storing data.
     mode : str, default 'train'
         'train', 'val', or 'test'.
@@ -24,14 +25,21 @@ class SVHNFine(SVHN):
         A function that takes data and label and transforms them.
     """
     def __init__(self,
-                 root=os.path.join("~", ".torch", "datasets", "svhn"),
+                 root=os.path.join("~", ".chainer", "datasets", "svhn"),
                  mode="train",
                  transform=None):
-        super(SVHNFine, self).__init__(
-            root=root,
-            split=("train" if mode == "train" else "test"),
-            transform=transform,
-            download=True)
+        assert (root is not None)
+        self.transform = transform
+        train_ds, test_ds = get_svhn()
+        self.base = train_ds if mode == "train" else test_ds
+
+    def __len__(self):
+        return len(self.base)
+
+    def get_example(self, i):
+        image, label = self.base[i]
+        image = self.transform(image)
+        return image, label
 
 
 class SVHNMetaInfo(CIFAR10MetaInfo):
@@ -39,5 +47,5 @@ class SVHNMetaInfo(CIFAR10MetaInfo):
         super(SVHNMetaInfo, self).__init__()
         self.label = "SVHN"
         self.root_dir_name = "svhn"
-        self.dataset_class = SVHNFine
+        self.dataset_class = SVHN
         self.num_training_samples = 73257

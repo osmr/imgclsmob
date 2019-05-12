@@ -1,32 +1,31 @@
 import argparse
 import time
 import logging
+import numpy as np
 
 from chainer import cuda, global_config
-from chainer import iterators
+import chainer.functions as F
 
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
-from chainer_.seg_utils import add_dataset_parser_arguments
-from chainer_.seg_utils import get_test_dataset
-from chainer_.seg_utils import SegPredictor
-from chainer_.seg_utils import get_metainfo
-from chainer_.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from chainer_.cifar1 import add_dataset_parser_arguments
+from chainer_.cifar1 import get_val_data_iterator
+from chainer_.cifar1 import CIFARPredictor
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image segmentation (Chainer/VOC2012/ADE20K/Cityscapes/COCO)',
+        description='Evaluate a model for image classification (Chainer/CIFAR/SVHN)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument(
         '--dataset',
         type=str,
-        default="VOC",
-        help='dataset name. options are VOC, ADE20K, Cityscapes, COCO')
+        default="CIFAR10",
+        help='dataset name. options are CIFAR10, CIFAR100, and SVHN')
 
     args, _ = parser.parse_known_args()
     add_dataset_parser_arguments(parser, args.dataset)
@@ -60,6 +59,12 @@ def parse_args():
         help='number of preprocessing workers')
 
     parser.add_argument(
+        '--batch-size',
+        type=int,
+        default=32,
+        help='training batch size per device (CPU/GPU).')
+
+    parser.add_argument(
         '--save-dir',
         type=str,
         default='',
@@ -85,22 +90,14 @@ def parse_args():
 
 
 def test(net,
-         test_dataset,
+         val_iterator,
+         val_dataset_len,
          num_gpus,
-         num_classes,
          calc_weight_count=False,
-         extended_log=False,
-         dataset_metainfo=None):
-    assert (dataset_metainfo is not None)
+         extended_log=False):
     tic = time.time()
 
-    it = iterators.SerialIterator(
-        dataset=test_dataset,
-        batch_size=1,
-        repeat=False,
-        shuffle=False)
-
-    predictor = SegPredictor(base_model=net)
+    predictor = CIFARPredictor(base_model=net)
 
     if num_gpus > 0:
         predictor.to_gpu()
@@ -111,49 +108,27 @@ def test(net,
 
     in_values, out_values, rest_values = apply_to_iterator(
         predictor.predict,
-        it,
-        hook=ProgressHook(len(test_dataset)))
+        val_iterator,
+        hook=ProgressHook(val_dataset_len))
     del in_values
 
-    pred_labels, = out_values
+    pred_probs, = out_values
     gt_labels, = rest_values
 
-    metrics = []
-    pix_acc_macro_average = False
-    metrics.append(PixelAccuracyMetric(
-        vague_idx=dataset_metainfo["vague_idx"],
-        use_vague=dataset_metainfo["use_vague"],
-        macro_average=pix_acc_macro_average))
-    mean_iou_macro_average = False
-    metrics.append(MeanIoUMetric(
-        num_classes=num_classes,
-        vague_idx=dataset_metainfo["vague_idx"],
-        use_vague=dataset_metainfo["use_vague"],
-        bg_idx=dataset_metainfo["background_idx"],
-        ignore_bg=dataset_metainfo["ignore_bg"],
-        macro_average=mean_iou_macro_average))
+    y = np.array(list(pred_probs))
+    t = np.array(list(gt_labels))
 
-    labels = iter(gt_labels)
-    preds = iter(pred_labels)
-    for label, pred in zip(labels, preds):
-        for metric in metrics:
-            metric.update(label, pred)
-
-    accuracy_info = [metric.get() for metric in metrics]
-    pix_acc = accuracy_info[0][1]
-    mean_iou = accuracy_info[1][1]
-    pix_macro = "macro" if pix_acc_macro_average else "micro"
-    iou_macro = "macro" if mean_iou_macro_average else "micro"
+    acc_val_value = F.accuracy(
+        y=y,
+        t=t).data
+    err_val = 1.0 - acc_val_value
 
     if extended_log:
-        logging.info(
-            "Test: {pix_macro}-pix_acc={pix_acc:.4f} ({pix_acc}), "
-            "{iou_macro}-mean_iou={mean_iou:.4f} ({mean_iou})".format(
-                pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
+        logging.info('Test: err={err:.4f} ({err})'.format(
+            err=err_val))
     else:
-        logging.info("Test: {pix_macro}-pix_acc={pix_acc:.4f}, {iou_macro}-mean_iou={mean_iou:.4f}".format(
-            pix_macro=pix_macro, pix_acc=pix_acc, iou_macro=iou_macro, mean_iou=mean_iou))
-
+        logging.info('Test: err={err:.4f}'.format(
+            err=err_val))
     logging.info('Time cost: {:.4f} sec'.format(
         time.time() - tic))
 
@@ -178,22 +153,21 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        net_extra_kwargs={"aux": False, "fixed_size": False},
         use_gpus=(num_gpus > 0))
 
-    test_dataset = get_test_dataset(
+    val_iterator, val_dataset_len = get_val_data_iterator(
         dataset_name=args.dataset,
-        dataset_dir=args.data_dir)
+        batch_size=args.batch_size,
+        num_workers=args.num_workers)
 
     assert (args.use_pretrained or args.resume.strip())
     test(
         net=net,
-        test_dataset=test_dataset,
+        val_iterator=val_iterator,
+        val_dataset_len=val_dataset_len,
         num_gpus=num_gpus,
-        num_classes=args.num_classes,
         calc_weight_count=True,
-        extended_log=True,
-        dataset_metainfo=get_metainfo(args.dataset))
+        extended_log=True)
 
 
 if __name__ == '__main__':

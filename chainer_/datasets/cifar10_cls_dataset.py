@@ -9,7 +9,7 @@ from chainer.datasets.cifar import get_cifar10
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CIFAR10Fine(DatasetMixin):
+class CIFAR10(DatasetMixin):
     """
     CIFAR-10 image classification dataset.
 
@@ -47,7 +47,7 @@ class CIFAR10MetaInfo(DatasetMetaInfo):
         self.label = "CIFAR10"
         self.short_label = "cifar"
         self.root_dir_name = "cifar10"
-        self.dataset_class = CIFAR10Fine
+        self.dataset_class = CIFAR10
         self.num_training_samples = 50000
         self.in_channels = 3
         self.num_classes = 10

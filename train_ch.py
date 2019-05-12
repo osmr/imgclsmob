@@ -9,8 +9,8 @@ from chainer.serializers import save_npz
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
-from chainer_.imagenet1k import add_dataset_parser_arguments
-from chainer_.imagenet1k import get_data_iterators
+from chainer_.imagenet1k1 import add_dataset_parser_arguments
+from chainer_.imagenet1k1 import get_data_iterators
 
 
 def parse_args():

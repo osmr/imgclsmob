@@ -1,8 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
-import chainer
-from chainer import Chain
+from chainer import get_dtype
 from .seg_dataset import SegDataset
 from .dataset_metainfo import DatasetMetaInfo
 
@@ -94,20 +93,20 @@ class VOCSegDataset(SegDataset):
         return len(self.images)
 
 
-class VOCSegTestPredictor(Chain):
-
+class VOCSegTestTransform(object):
+    """
+    ImageNet-1K validation transform.
+    """
     def __init__(self,
-                 base_model,
-                 mean=(0.485, 0.456, 0.406),
-                 std=(0.229, 0.224, 0.225)):
-        super(VOCSegTestPredictor, self).__init__()
-        self.mean = np.array(mean, np.float32)[:, np.newaxis, np.newaxis]
-        self.std = np.array(std, np.float32)[:, np.newaxis, np.newaxis]
-        with self.init_scope():
-            self.model = base_model
+                 ds_metainfo,
+                 mean_rgb=(0.485, 0.456, 0.406),
+                 std_rgb=(0.229, 0.224, 0.225)):
+        assert (ds_metainfo is not None)
+        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
 
-    def _preprocess(self, img):
-        dtype = chainer.get_dtype(None)
+    def __call__(self, img):
+        dtype = get_dtype(None)
         img = img.transpose(2, 0, 1)
         img = img.astype(dtype)
         img *= 1.0 / 255.0
@@ -115,18 +114,6 @@ class VOCSegTestPredictor(Chain):
         img -= self.mean
         img /= self.std
         return img
-
-    def predict(self, imgs):
-        imgs = self.xp.asarray([self._preprocess(img) for img in imgs])
-
-        with chainer.using_config("train", False), chainer.function.no_backprop_mode():
-            imgs = chainer.Variable(imgs)
-            predictions = self.model(imgs)
-
-        output = chainer.backends.cuda.to_cpu(predictions.array)
-        # output = np.argmax(output, axis=1).astype(np.int32)
-
-        return output
 
 
 class VOCMetaInfo(DatasetMetaInfo):
@@ -160,8 +147,8 @@ class VOCMetaInfo(DatasetMetaInfo):
              "macro_average": False}]
         self.saver_acc_ind = 1
         self.train_transform = None
-        self.val_transform = VOCSegTestPredictor
-        self.test_transform = VOCSegTestPredictor
+        self.val_transform = VOCSegTestTransform
+        self.test_transform = VOCSegTestTransform
         self.ml_type = "imgseg"
         self.allow_hybridize = False
         self.net_extra_kwargs = {"aux": False, "fixed_size": False}

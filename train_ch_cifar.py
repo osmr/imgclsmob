@@ -9,8 +9,8 @@ from chainer.serializers import save_npz
 
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_model
-from chainer_.cifar import add_dataset_parser_arguments
-from chainer_.cifar import get_data_iterators
+from chainer_.cifar1 import add_dataset_parser_arguments
+from chainer_.cifar1 import get_data_iterators
 
 
 def parse_args():

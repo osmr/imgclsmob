@@ -11,12 +11,12 @@ from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
 
 from common.logger_utils import initialize_logging
-from chainer_.top_k_accuracy import top_k_accuracy
+from chainer_.top_k_accuracy1 import top_k_accuracy
 from chainer_.utils import prepare_model
 
-from chainer_.imagenet1k import add_dataset_parser_arguments
-from chainer_.imagenet1k import get_val_data_iterator
-from chainer_.imagenet1k import ImagenetPredictor
+from chainer_.imagenet1k1 import add_dataset_parser_arguments
+from chainer_.imagenet1k1 import get_val_data_iterator
+from chainer_.imagenet1k1 import ImagenetPredictor
 
 
 def add_eval_parser_arguments(parser):

@@ -3,7 +3,8 @@
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'ResNeXtBottleneck', 'ResNeXtUnit']
+__all__ = ['ResNeXt', 'resnext14_32x4d', 'resnext26_32x4d', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d',
+           'ResNeXtBottleneck', 'ResNeXtUnit']
 
 import os
 import math
@@ -216,7 +217,13 @@ def get_resnext(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 50:
+    if blocks == 14:
+        layers = [1, 1, 1, 1]
+    elif blocks == 26:
+        layers = [2, 2, 2, 2]
+    elif blocks == 38:
+        layers = [3, 3, 3, 3]
+    elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
         layers = [3, 4, 23, 3]
@@ -246,6 +253,36 @@ def get_resnext(blocks,
             obj=net)
 
     return net
+
+
+def resnext14_32x4d(**kwargs):
+    """
+    ResNeXt-14 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=14, cardinality=32, bottleneck_width=4, model_name="resnext14_32x4d", **kwargs)
+
+
+def resnext26_32x4d(**kwargs):
+    """
+    ResNeXt-26 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext(blocks=26, cardinality=32, bottleneck_width=4, model_name="resnext26_32x4d", **kwargs)
 
 
 def resnext50_32x4d(**kwargs):
@@ -302,6 +339,8 @@ def _test():
     pretrained = False
 
     models = [
+        resnext14_32x4d,
+        resnext26_32x4d,
         resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
@@ -312,6 +351,8 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resnext14_32x4d or weight_count == 9411880)
+        assert (model != resnext26_32x4d or weight_count == 15389480)
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)

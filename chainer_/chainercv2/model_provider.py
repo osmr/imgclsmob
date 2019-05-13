@@ -144,6 +144,8 @@ _models = {
     'preresnet200b': preresnet200b,
     'preresnet269b': preresnet269b,
 
+    'resnext14_32x4d': resnext14_32x4d,
+    'resnext26_32x4d': resnext26_32x4d,
     'resnext50_32x4d': resnext50_32x4d,
     'resnext101_32x4d': resnext101_32x4d,
     'resnext101_64x4d': resnext101_64x4d,

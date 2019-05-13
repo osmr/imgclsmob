@@ -3,7 +3,8 @@
     Original papers: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
-__all__ = ['ResNeXt', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d', 'resnext_bottleneck']
+__all__ = ['ResNeXt', 'resnext14_32x4d', 'resnext26_32x4d', 'resnext50_32x4d', 'resnext101_32x4d', 'resnext101_64x4d',
+           'resnext_bottleneck']
 
 import os
 import math
@@ -285,7 +286,13 @@ def get_resnext(blocks,
         Functor for model graph creation with extra fields.
     """
 
-    if blocks == 50:
+    if blocks == 14:
+        layers = [1, 1, 1, 1]
+    elif blocks == 26:
+        layers = [2, 2, 2, 2]
+    elif blocks == 38:
+        layers = [3, 3, 3, 3]
+    elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
         layers = [3, 4, 23, 3]
@@ -316,6 +323,46 @@ def get_resnext(blocks,
         net.file_path = None
 
     return net
+
+
+def resnext14_32x4d(**kwargs):
+    """
+    ResNeXt-14 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
+    """
+    return get_resnext(blocks=14, cardinality=32, bottleneck_width=4, model_name="resnext14_32x4d", **kwargs)
+
+
+def resnext26_32x4d(**kwargs):
+    """
+    ResNeXt-26 (32x4d) model from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+
+    Returns
+    -------
+    functor
+        Functor for model graph creation with extra fields.
+    """
+    return get_resnext(blocks=26, cardinality=32, bottleneck_width=4, model_name="resnext26_32x4d", **kwargs)
 
 
 def resnext50_32x4d(**kwargs):
@@ -385,6 +432,8 @@ def _test():
     pretrained = False
 
     models = [
+        resnext14_32x4d,
+        resnext26_32x4d,
         resnext50_32x4d,
         resnext101_32x4d,
         resnext101_64x4d,
@@ -401,6 +450,8 @@ def _test():
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resnext14_32x4d or weight_count == 9411880)
+        assert (model != resnext26_32x4d or weight_count == 15389480)
         assert (model != resnext50_32x4d or weight_count == 25028904)
         assert (model != resnext101_32x4d or weight_count == 44177704)
         assert (model != resnext101_64x4d or weight_count == 83455272)

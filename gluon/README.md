@@ -143,6 +143,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-26 | 26.14 | 8.37 | 17,960,232 | 2,746.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.305/resnet26-0837-d81d836f.params.log)) |
 | ResNet-BC-26b | 24.86 | 7.58 | 15,995,176 | 2,356.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.313/resnetbc26b-0758-2b5e8d08.params.log)) |
 | ResNet-34 | 24.53 | 7.43 | 21,797,672 | 3,672.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.291/resnet34-0743-5cdeeccd.params.log)) |
+| ResNet-BC-38b | 23.50 | 6.72 | 21,925,416 | 3,234.21M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.328/resnetbc38b-0672-82094464.params.log)) |
 | ResNet-50 | 22.65 | 6.41 | 25,557,032 | 3,877.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.147/resnet50-0641-1eaa883b.params.log)) |
 | ResNet-50b | 22.06 | 6.11 | 25,557,032 | 4,110.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.308/resnet50b-0611-ca12f8d8.params.log)) |
 | ResNet-101 | 21.66 | 5.99 | 44,549,160 | 7,597.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet101-0599-a6d3a5f4.params.log)) |

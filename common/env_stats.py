@@ -1,11 +1,12 @@
 import os
 import sys
 import subprocess
+import platform
 import json
 
 
 def get_pip_versions(package_list,
-                     python_version=''):
+                     python_version=""):
     """
     Get packages information by using 'pip show' command.
 
@@ -25,9 +26,9 @@ def get_pip_versions(package_list,
     for module in package_list:
         try:
             out_bytes = subprocess.check_output([
-                'pip{0}'.format(python_version),
-                'show', module])
-            out_text = out_bytes.decode('utf-8').strip()
+                "pip{0}".format(python_version),
+                "show", module])
+            out_text = out_bytes.decode("utf-8").strip()
         except (subprocess.CalledProcessError, OSError):
             out_text = None
         module_versions[module] = out_text
@@ -55,7 +56,7 @@ def get_package_versions(package_list):
         except ImportError:
             module_versions[module] = None
         except AttributeError:
-            module_versions[module] = 'unknown'
+            module_versions[module] = "unknown"
     return module_versions
 
 
@@ -63,7 +64,8 @@ def get_pyenv_info(packages,
                    pip_packages,
                    python_ver,
                    pwd,
-                   git):
+                   git,
+                   sys_info=True):
     """
     Get all available information about Python environment: packages information, Python version, current path,
     git revision.
@@ -76,6 +78,12 @@ def get_pyenv_info(packages,
         List of package names to inspect by 'pip show'.
     python_version : str
         Python version ('2', '3', '') appended to 'pip' command.
+    pwd : bool
+        Whether to show pwd.
+    git : bool
+        Whether to show git info.
+    sys_info : bool, default True
+        Whether to show platform info.
 
     Returns
     -------
@@ -105,20 +113,23 @@ def get_pyenv_info(packages,
 
     if pwd:
         # set current path
-        pyenv_info['pwd'] = os.path.dirname(os.path.realpath(__file__))
+        pyenv_info["pwd"] = os.path.dirname(os.path.realpath(__file__))
 
     if git:
         # set git revision of the code
         try:
-            if os.name == 'nt':
-                command = 'cmd /V /C "cd {} && git log -n 1"'.format(pyenv_info['pwd'])
+            if os.name == "nt":
+                command = "cmd /V /C \"cd {} && git log -n 1\"".format(pyenv_info["pwd"])
             else:
-                command = ['cd {}; git log -n 1'.format(pyenv_info['pwd'])]
+                command = ["cd {}; git log -n 1".format(pyenv_info["pwd"])]
             out_bytes = subprocess.check_output(command, shell=True)
-            out_text = out_bytes.decode('utf-8')
+            out_text = out_bytes.decode("utf-8")
         except BaseException:
-            out_text = 'unknown'
+            out_text = "unknown"
         pyenv_info["git"] = out_text.strip()
+
+    if sys_info:
+        pyenv_info["platform"] = platform.platform()
 
     return pyenv_info
 
@@ -135,9 +146,10 @@ def get_env_stats(packages,
                   pip_packages,
                   python_ver=True,
                   pwd=True,
-                  git=True):
+                  git=True,
+                  sys_info=True):
     """
     Get env statistics.
     """
-    package_versions = get_pyenv_info(packages, pip_packages, python_ver, pwd, git)
+    package_versions = get_pyenv_info(packages, pip_packages, python_ver, pwd, git, sys_info)
     return pretty_print_dict2str(package_versions)

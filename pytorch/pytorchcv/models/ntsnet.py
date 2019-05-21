@@ -163,7 +163,7 @@ class NTSNet(nn.Module):
 
         self.top_n = top_n
         self.aux = aux
-        self.CAT_NUM = 4
+        self.num_cat = 4
 
         _, edge_anchors, _ = self._generate_default_anchor_maps()
         self.edge_anchors = (edge_anchors + 224).astype(np.int)
@@ -176,14 +176,15 @@ class NTSNet(nn.Module):
         self.backbone_tail.add_module("final_pool", nn.AdaptiveAvgPool2d(1))
         self.backbone_tail.add_module("flatten", Flatten())
         self.backbone_tail.add_module("dropout", nn.Dropout(p=0.5))
-        self.backbone_classifier = nn.Linear(512 * 4, 200)
+        self.backbone_classifier = nn.Linear(512 * 4, num_classes)
 
         pad_side = 224
         self.pad = nn.ZeroPad2d(padding=(pad_side, pad_side, pad_side, pad_side))
 
         self.navigator_unit = NavigatorUnit()
-        self.concat_net = nn.Linear(2048 * (self.CAT_NUM + 1), 200)
-        self.partcls_net = nn.Linear(512 * 4, 200)
+        self.concat_net = nn.Linear(2048 * (self.num_cat + 1), num_classes)
+        if self.aux:
+            self.partcls_net = nn.Linear(512 * 4, num_classes)
 
         self._init_params()
 
@@ -199,7 +200,7 @@ class NTSNet(nn.Module):
 
         rpn_score = self.navigator_unit(raw_pre_features)
         all_cdds = [np.concatenate((y.reshape(-1, 1), self.edge_anchors.copy()), axis=1)
-                    for y in rpn_score.detach().numpy()]
+                    for y in rpn_score.detach().cpu().numpy()]
         top_n_cdds = [hard_nms(y, top_n=self.top_n, iou_thresh=0.25) for y in all_cdds]
         top_n_cdds = np.array(top_n_cdds)
         top_n_index = top_n_cdds[:, :, -1].astype(np.int)
@@ -220,22 +221,18 @@ class NTSNet(nn.Module):
         part_imgs = part_imgs.view(batch * self.top_n, 3, 224, 224)
         part_features = self.backbone_tail(self.backbone(part_imgs.detach()))
 
-        part_features = part_features.view(batch, self.top_n, -1)
-        part_features = part_features[:, :self.CAT_NUM, ...].contiguous()
-        part_features = part_features.view(batch, -1)
+        part_feature = part_features.view(batch, self.top_n, -1)
+        part_feature = part_feature[:, :self.num_cat, :].contiguous()
+        part_feature = part_feature.view(batch, -1)
 
         raw_features = self.backbone_tail(raw_pre_features.detach())
 
-        # concat_logits have the shape: B*200
-        concat_out = torch.cat([part_features, raw_features], dim=1)
+        concat_out = torch.cat([part_feature, raw_features], dim=1)
         concat_logits = self.concat_net(concat_out)
 
         if self.aux:
             raw_logits = self.backbone_classifier(raw_features)
-
-            # part_logits have the shape: B*N*200
             part_logits = self.partcls_net(part_features).view(batch, self.top_n, -1)
-
             return concat_logits, raw_logits, part_logits, top_n_prob
         else:
             return concat_logits
@@ -248,7 +245,7 @@ class NTSNet(nn.Module):
         Parameters:
         ----------
         input_shape : tuple of 2 int
-            Imput image size.
+            Input image size.
 
         Returns
         -------
@@ -259,11 +256,13 @@ class NTSNet(nn.Module):
         anchor_area : np.array
             anchors * 1 (area).
         """
+        anchor_scale = [2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
+        anchor_aspect_ratio = [0.667, 1, 1.5]
         anchors_setting = (
-            dict(layer="p3", stride=32, size=48, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
-            dict(layer="p4", stride=64, size=96, scale=[2 ** (1. / 3.), 2 ** (2. / 3.)], aspect_ratio=[0.667, 1, 1.5]),
-            dict(layer="p5", stride=128, size=192, scale=[1, 2 ** (1. / 3.), 2 ** (2. / 3.)],
-                 aspect_ratio=[0.667, 1, 1.5]),
+            dict(layer="p3", stride=32, size=48, scale=anchor_scale, aspect_ratio=anchor_aspect_ratio),
+            dict(layer="p4", stride=64, size=96, scale=anchor_scale, aspect_ratio=anchor_aspect_ratio),
+            dict(layer="p5", stride=128, size=192, scale=[1, anchor_scale[0], anchor_scale[1]],
+                 aspect_ratio=anchor_aspect_ratio),
         )
 
         center_anchors = np.zeros((0, 4), dtype=np.float32)
@@ -280,8 +279,8 @@ class NTSNet(nn.Module):
 
             output_map_shape = np.ceil(input_shape.astype(np.float32) / stride)
             output_map_shape = output_map_shape.astype(np.int)
-            output_shape = tuple(output_map_shape) + (4,)
-            ostart = stride / 2.
+            output_shape = tuple(output_map_shape) + (4, )
+            ostart = stride / 2.0
             oy = np.arange(ostart, ostart + stride * output_shape[0], stride)
             oy = oy.reshape(output_shape[0], 1)
             ox = np.arange(ostart, ostart + stride * output_shape[1], stride)
@@ -289,16 +288,17 @@ class NTSNet(nn.Module):
             center_anchor_map_template = np.zeros(output_shape, dtype=np.float32)
             center_anchor_map_template[:, :, 0] = oy
             center_anchor_map_template[:, :, 1] = ox
-            for scale in scales:
-                for aspect_ratio in aspect_ratios:
+            for anchor_scale in scales:
+                for anchor_aspect_ratio in aspect_ratios:
                     center_anchor_map = center_anchor_map_template.copy()
-                    center_anchor_map[:, :, 2] = size * scale / float(aspect_ratio) ** 0.5
-                    center_anchor_map[:, :, 3] = size * scale * float(aspect_ratio) ** 0.5
+                    center_anchor_map[:, :, 2] = size * anchor_scale / float(anchor_aspect_ratio) ** 0.5
+                    center_anchor_map[:, :, 3] = size * anchor_scale * float(anchor_aspect_ratio) ** 0.5
 
-                    edge_anchor_map = np.concatenate((center_anchor_map[..., :2] - center_anchor_map[..., 2:4] / 2.,
-                                                      center_anchor_map[..., :2] + center_anchor_map[..., 2:4] / 2.),
-                                                     axis=-1)
-                    anchor_area_map = center_anchor_map[..., 2] * center_anchor_map[..., 3]
+                    edge_anchor_map = np.concatenate(
+                        (center_anchor_map[:, :, :2] - center_anchor_map[:, :, 2:4] / 2.0,
+                         center_anchor_map[:, :, :2] + center_anchor_map[:, :, 2:4] / 2.0),
+                        axis=-1)
+                    anchor_area_map = center_anchor_map[:, :, 2] * center_anchor_map[:, :, 3]
                     center_anchors = np.concatenate((center_anchors, center_anchor_map.reshape(-1, 4)))
                     edge_anchors = np.concatenate((edge_anchors, edge_anchor_map.reshape(-1, 4)))
                     anchor_areas = np.concatenate((anchor_areas, anchor_area_map.reshape(-1)))
@@ -379,7 +379,7 @@ def _test():
     from torch.autograd import Variable
 
     pretrained = False
-    aux = False
+    aux = True
 
     models = [
         ntsnet,
@@ -393,7 +393,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ntsnet or weight_count == 29033133)
+        if aux:
+            assert (model != ntsnet or weight_count == 29033133)
+        else:
+            assert (model != ntsnet or weight_count == 28623333)
 
         x = Variable(torch.randn(1, 3, 448, 448))
         ys = net(x)

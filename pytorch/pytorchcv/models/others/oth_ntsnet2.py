@@ -179,7 +179,7 @@ class NTSNet(nn.Module):
             return concat_logits
 
 
-def oth_ntsnet(pretrained=False):
+def oth_ntsnet(num_classes=200, in_channels=3, pretrained=False):
     return NTSNet()
 
 

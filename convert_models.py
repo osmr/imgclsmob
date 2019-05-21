@@ -791,6 +791,16 @@ def convert_pt2pt(dst_params_file_path,
         dst1n = [key for key in dst_param_keys if key not in dst1]
         dst_param_keys = dst1 + dst1n
 
+    elif dst_model == "ntsnet":
+        src1 = list(filter(re.compile("^proposal_net").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1 + src1n
+        dst1 = list(filter(re.compile("^navigator_unit\.branch\d+\.down").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst2 = list(filter(re.compile("^navigator_unit\.branch\d+\.tidy").search, dst1n))
+        dst2n = [key for key in dst1n if key not in dst2]
+        dst_param_keys = dst1 + dst2 + dst2n
+
     elif dst_model == "fishnet150":
         src1 = list(filter(re.compile("^(conv|fish\.fish\.[0-2])").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]

@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity
+from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten
 from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
@@ -22,8 +22,8 @@ def calc_block_num_params2(net):
 
 def calc_block_num_params(module):
     assert isinstance(module, nn.Module)
-    net_params = filter(lambda p: isinstance(p[1], nn.parameter.Parameter) and
-                                  p[1].requires_grad, module._parameters.items())
+    net_params = filter(lambda p: isinstance(p[1], nn.parameter.Parameter) and p[1].requires_grad,
+                        module._parameters.items())
     weight_count = 0
     for param in net_params:
         weight_count += np.prod(param[1].size())
@@ -58,7 +58,6 @@ def measure_model(model,
         if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock) or
                 isinstance(module, RiRFinalBlock)):
             assert (len(x) == 1)
-        assert (x[0].shape[0] == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):
             in_units = module.in_features
@@ -84,6 +83,7 @@ def measure_model(model,
             extra_num_flops = 3 * x[0].numel()
             extra_num_macs = 0
         elif isinstance(module, nn.Conv2d):
+            batch = x[0].shape[0]
             x_h = x[0].shape[2]
             x_w = x[0].shape[3]
             kernel_size = module.kernel_size
@@ -105,6 +105,8 @@ def measure_model(model,
                 extra_num_flops = (2 * kernel_total_size * y_size - 1) * in_channels * out_channels // groups
             else:
                 extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(module, nn.BatchNorm2d):
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
@@ -116,6 +118,7 @@ def measure_model(model,
             extra_num_macs = 0
         elif type(module) in [nn.MaxPool2d, nn.AvgPool2d]:
             assert (x[0].shape[1] == y.shape[1])
+            batch = x[0].shape[0]
             kernel_size = module.kernel_size if isinstance(module.kernel_size, tuple) else\
                 (module.kernel_size, module.kernel_size)
             y_h = y.shape[2]
@@ -125,8 +128,11 @@ def measure_model(model,
             pool_total_size = kernel_size[0] * kernel_size[1]
             extra_num_flops = channels * y_size * pool_total_size
             extra_num_macs = 0
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif type(module) in [nn.AdaptiveAvgPool2d, nn.AdaptiveMaxPool2d]:
             assert (x[0].shape[1] == y.shape[1])
+            batch = x[0].shape[0]
             x_h = x[0].shape[2]
             x_w = x[0].shape[3]
             y_h = y.shape[2]
@@ -136,6 +142,8 @@ def measure_model(model,
             pool_total_size = x_h * x_w
             extra_num_flops = channels * y_size * pool_total_size
             extra_num_macs = 0
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(module, nn.Dropout):
             extra_num_flops = 0
             extra_num_macs = 0
@@ -150,6 +158,9 @@ def measure_model(model,
             extra_num_flops = 0
             extra_num_macs = 0
         elif isinstance(module, Identity):
+            extra_num_flops = 0
+            extra_num_macs = 0
+        elif isinstance(module, Flatten):
             extra_num_flops = 0
             extra_num_macs = 0
         elif isinstance(module, InterpolationBlock):

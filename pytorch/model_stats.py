@@ -60,6 +60,7 @@ def measure_model(model,
             assert (len(x) == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):
+            batch = x[0].shape[0]
             in_units = module.in_features
             out_units = module.out_features
             extra_num_macs = in_units * out_units
@@ -67,6 +68,8 @@ def measure_model(model,
                 extra_num_flops = (2 * in_units - 1) * out_units
             else:
                 extra_num_flops = 2 * in_units * out_units
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(module, nn.ReLU):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0

@@ -62,9 +62,9 @@ def measure_model(model,
         if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock) or
                 isinstance(block, RiRFinalBlock)):
             assert (len(x) == 1)
-        assert (x[0].shape[0] == 1)
         assert (len(block._children) == 0)
         if isinstance(block, nn.Dense):
+            batch = x[0].shape[0]
             in_units = block._in_units
             out_units = block._units
             extra_num_macs = in_units * out_units
@@ -72,6 +72,8 @@ def measure_model(model,
                 extra_num_flops = (2 * in_units - 1) * out_units
             else:
                 extra_num_flops = 2 * in_units * out_units
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(block, nn.Activation):
             if block._act_type == "relu":
                 extra_num_flops = x[0].size
@@ -91,6 +93,7 @@ def measure_model(model,
             extra_num_flops = 3 * x[0].size
             extra_num_macs = 0
         elif isinstance(block, nn.Conv2D):
+            batch = x[0].shape[0]
             x_h = x[0].shape[2]
             x_w = x[0].shape[3]
             kernel_size = block._kwargs["kernel"]
@@ -112,6 +115,8 @@ def measure_model(model,
                 extra_num_flops = (2 * kernel_total_size * y_size - 1) * in_channels * out_channels // groups
             else:
                 extra_num_flops = 2 * kernel_total_size * in_channels * y_size * out_channels // groups
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(block, nn.BatchNorm):
             extra_num_flops = 4 * x[0].size
             extra_num_macs = 0
@@ -119,6 +124,7 @@ def measure_model(model,
             extra_num_flops = 4 * x[0].size
             extra_num_macs = 0
         elif type(block) in [nn.MaxPool2D, nn.AvgPool2D, nn.GlobalAvgPool2D, nn.GlobalMaxPool2D]:
+            batch = x[0].shape[0]
             assert (x[0].shape[1] == y.shape[1])
             pool_size = block._kwargs["kernel"]
             y_h = y.shape[2]
@@ -128,6 +134,8 @@ def measure_model(model,
             pool_total_size = pool_size[0] * pool_size[1]
             extra_num_flops = channels * y_size * pool_total_size
             extra_num_macs = 0
+            extra_num_flops *= batch
+            extra_num_macs *= batch
         elif isinstance(block, nn.Dropout):
             extra_num_flops = 0
             extra_num_macs = 0

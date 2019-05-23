@@ -75,6 +75,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.octresnet import *
+from .models.ntsnet import *
 
 __all__ = ['get_model']
 
@@ -567,6 +568,8 @@ _models = {
 
     'octresnet10_ad2': octresnet10_ad2,
     'octresnet50b_ad2': octresnet50b_ad2,
+
+    'ntsnet': ntsnet,
 }
 
 

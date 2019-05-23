@@ -1,5 +1,5 @@
 """
-    NTS-Net for CUB-200-2011, implemented in PyTorch.
+    NTS-Net for CUB-200-2011, implemented in Chainer.
     Original paper: 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 """
 
@@ -7,11 +7,12 @@ __all__ = ['NTSNet', 'ntsnet']
 
 import os
 import numpy as np
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
-from .common import conv1x1, conv3x3, Flatten
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from chainer.serializers import load_npz
+from functools import partial
+from .common import conv1x1, conv3x3, Flatten, AdaptiveAvgPool2D, SimpleSequential
 from .resnet import resnet50b
 
 
@@ -65,7 +66,7 @@ def hard_nms(cdds,
     return np.array(cdd_results)
 
 
-class NavigatorBranch(nn.Module):
+class NavigatorBranch(Chain):
     """
     Navigator branch block for Navigator unit.
 
@@ -76,7 +77,7 @@ class NavigatorBranch(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     """
     def __init__(self,
                  in_channels,
@@ -85,19 +86,20 @@ class NavigatorBranch(nn.Module):
         super(NavigatorBranch, self).__init__()
         mid_channels = 128
 
-        self.down_conv = conv3x3(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=stride,
-            bias=True)
-        self.activ = nn.ReLU(inplace=False)
-        self.tidy_conv = conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bias=True)
-        self.flatten = Flatten()
+        with self.init_scope():
+            self.down_conv = conv3x3(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=stride,
+                use_bias=True)
+            self.activ = F.relu
+            self.tidy_conv = conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                use_bias=True)
+            self.flatten = Flatten()
 
-    def forward(self, x):
+    def __call__(self, x):
         y = self.down_conv(x)
         y = self.activ(y)
         z = self.tidy_conv(y)
@@ -105,33 +107,34 @@ class NavigatorBranch(nn.Module):
         return z, y
 
 
-class NavigatorUnit(nn.Module):
+class NavigatorUnit(Chain):
     """
     Navigator init.
     """
     def __init__(self):
         super(NavigatorUnit, self).__init__()
-        self.branch1 = NavigatorBranch(
-            in_channels=2048,
-            out_channels=6,
-            stride=1)
-        self.branch2 = NavigatorBranch(
-            in_channels=128,
-            out_channels=6,
-            stride=2)
-        self.branch3 = NavigatorBranch(
-            in_channels=128,
-            out_channels=9,
-            stride=2)
+        with self.init_scope():
+            self.branch1 = NavigatorBranch(
+                in_channels=2048,
+                out_channels=6,
+                stride=1)
+            self.branch2 = NavigatorBranch(
+                in_channels=128,
+                out_channels=6,
+                stride=2)
+            self.branch3 = NavigatorBranch(
+                in_channels=128,
+                out_channels=9,
+                stride=2)
 
-    def forward(self, x):
+    def __call__(self, x):
         t1, x = self.branch1(x)
         t2, x = self.branch2(x)
         t3, _ = self.branch3(x)
-        return torch.cat((t1, t2, t3), dim=1)
+        return F.concat((t1, t2, t3), axis=1)
 
 
-class NTSNet(nn.Module):
+class NTSNet(Chain):
     """
     NTS-Net model from 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 
@@ -147,7 +150,7 @@ class NTSNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -156,13 +159,13 @@ class NTSNet(nn.Module):
                  top_n=4,
                  in_channels=3,
                  in_size=(448, 448),
-                 num_classes=200):
+                 classes=200):
         super(NTSNet, self).__init__()
         assert (in_channels > 0)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         pad_side = 224
-        pad_width = (pad_side, pad_side, pad_side, pad_side)
+        self.pad_width = ((0, 0), (0, 0), (pad_side, pad_side), (pad_side, pad_side))
 
         self.top_n = top_n
         self.aux = aux
@@ -173,75 +176,67 @@ class NTSNet(nn.Module):
         self.edge_anchors = np.concatenate(
             (self.edge_anchors.copy(), np.arange(0, len(self.edge_anchors)).reshape(-1, 1)), axis=1)
 
-        self.backbone = backbone
+        with self.init_scope():
+            self.backbone = backbone
 
-        self.backbone_tail = nn.Sequential()
-        self.backbone_tail.add_module("final_pool", nn.AdaptiveAvgPool2d(1))
-        self.backbone_tail.add_module("flatten", Flatten())
-        self.backbone_tail.add_module("dropout", nn.Dropout(p=0.5))
-        self.backbone_classifier = nn.Linear(
-            in_features=(512 * 4),
-            out_features=num_classes)
+            self.backbone_tail = SimpleSequential()
+            with self.backbone_tail.init_scope():
+                setattr(self.backbone_tail, "final_pool", AdaptiveAvgPool2D())
+                setattr(self.backbone_tail, "flatten", Flatten())
+                setattr(self.backbone_tail, "dropout", partial(
+                    F.dropout,
+                    ratio=0.5))
+            self.backbone_classifier = L.Linear(
+                in_size=(512 * 4),
+                out_size=classes)
 
-        self.pad = nn.ZeroPad2d(padding=pad_width)
+            self.navigator_unit = NavigatorUnit()
+            self.concat_net = L.Linear(
+                in_size=(2048 * (self.num_cat + 1)),
+                out_size=classes)
 
-        self.navigator_unit = NavigatorUnit()
-        self.concat_net = nn.Linear(
-            in_features=(2048 * (self.num_cat + 1)),
-            out_features=num_classes)
+            if self.aux:
+                self.partcls_net = L.Linear(
+                    in_size=(512 * 4),
+                    out_size=classes)
 
-        if self.aux:
-            self.partcls_net = nn.Linear(
-                in_features=(512 * 4),
-                out_features=num_classes)
-
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         raw_pre_features = self.backbone(x)
 
         rpn_score = self.navigator_unit(raw_pre_features)
         all_cdds = [np.concatenate((y.reshape(-1, 1), self.edge_anchors.copy()), axis=1)
-                    for y in rpn_score.detach().cpu().numpy()]
+                    for y in rpn_score.array]
         top_n_cdds = [hard_nms(y, top_n=self.top_n, iou_thresh=0.25) for y in all_cdds]
         top_n_cdds = np.array(top_n_cdds)
         top_n_index = top_n_cdds[:, :, -1].astype(np.int64)
-        top_n_index = torch.from_numpy(top_n_index).long().to(x.device)
-        top_n_prob = torch.gather(rpn_score, dim=1, index=top_n_index)
+        top_n_index = self.xp.array(top_n_index, dtype=np.int64)
+        top_n_prob = self.xp.take_along_axis(rpn_score.array, top_n_index, axis=1)
 
-        batch = x.size(0)
-        part_imgs = torch.zeros(batch, self.top_n, 3, 224, 224, dtype=x.dtype, device=x.device)
-        x_pad = self.pad(x)
+        batch = x.shape[0]
+        x_pad = F.pad(x, pad_width=self.pad_width, mode="constant", constant_values=0)
+        part_imgs = []
         for i in range(batch):
             for j in range(self.top_n):
                 y0, x0, y1, x1 = tuple(top_n_cdds[i][j, 1:5].astype(np.int64))
-                part_imgs[i:i + 1, j] = F.interpolate(
-                    input=x_pad[i:i + 1, :, y0:y1, x0:x1],
-                    size=(224, 224),
-                    mode="bilinear",
-                    align_corners=True)
-        part_imgs = part_imgs.view(batch * self.top_n, 3, 224, 224)
-        part_features = self.backbone_tail(self.backbone(part_imgs.detach()))
+                x_res = F.resize_images(
+                    x_pad[i:i + 1, :, y0:y1, x0:x1],
+                    output_shape=(224, 224))
+                part_imgs.append(x_res)
+        part_imgs = F.concat(tuple(part_imgs), axis=0)
+        part_features = self.backbone_tail(self.backbone(part_imgs))
 
-        part_feature = part_features.view(batch, self.top_n, -1)
-        part_feature = part_feature[:, :self.num_cat, :].contiguous()
-        part_feature = part_feature.view(batch, -1)
+        part_feature = part_features.reshape((batch, self.top_n, -1))
+        part_feature = part_feature[:, :self.num_cat, :]
+        part_feature = part_feature.reshape((batch, -1))
 
-        raw_features = self.backbone_tail(raw_pre_features.detach())
+        raw_features = self.backbone_tail(raw_pre_features)
 
-        concat_out = torch.cat((part_feature, raw_features), dim=1)
+        concat_out = F.concat((part_feature, raw_features), axis=1)
         concat_logits = self.concat_net(concat_out)
 
         if self.aux:
             raw_logits = self.backbone_classifier(raw_features)
-            part_logits = self.partcls_net(part_features).view(batch, self.top_n, -1)
+            part_logits = self.partcls_net(part_features).reshape((batch, self.top_n, -1))
             return concat_logits, raw_logits, part_logits, top_n_prob
         else:
             return concat_logits
@@ -319,7 +314,7 @@ def get_ntsnet(backbone,
                aux=False,
                model_name=None,
                pretrained=False,
-               root=os.path.join("~", ".torch", "models"),
+               root=os.path.join("~", ".chainer", "models"),
                **kwargs):
     """
     Create NTS-Net model with specific parameters.
@@ -334,7 +329,7 @@ def get_ntsnet(backbone,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     net = NTSNet(
@@ -345,11 +340,12 @@ def get_ntsnet(backbone,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -366,29 +362,22 @@ def ntsnet(pretrained_backbone=False, aux=True, **kwargs):
         Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features
-    del backbone[-1]
+    del backbone.final_pool
     return get_ntsnet(backbone=backbone, aux=aux, model_name="ntsnet", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
-    from torch.autograd import Variable
+    import numpy as np
+    import chainer
 
-    pretrained = False
+    chainer.global_config.train = False
+
     aux = True
+    pretrained = False
 
     models = [
         ntsnet,
@@ -397,21 +386,17 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained, aux=aux)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
             assert (model != ntsnet or weight_count == 29033133)
         else:
             assert (model != ntsnet or weight_count == 28623333)
 
-        x = Variable(torch.randn(5, 3, 448, 448))
+        x = np.zeros((5, 3, 448, 448), np.float32)
         ys = net(x)
         y = ys[0] if aux else ys
-        y.sum().backward()
-        assert (tuple(y.size()) == (5, 200))
+        assert ((y.shape[0] == x.shape[0]) and (y.shape[1] == 200))
 
 
 if __name__ == "__main__":

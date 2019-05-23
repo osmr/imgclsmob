@@ -216,7 +216,7 @@ class NTSNet(HybridBlock):
         x_pad = F.pad(x, mode="constant", pad_width=self.pad_width, constant_value=0)
         for i in range(batch):
             for j in range(self.top_n):
-                [y0, x0, y1, x1] = top_n_cdds[i][j, 1:5].astype(np.int)
+                y0, x0, y1, x1 = tuple(top_n_cdds[i][j, 1:5].astype(np.int64))
                 part_imgs[i:i + 1, j] = F.contrib.BilinearResize2D(
                     x_pad[i:i + 1, :, y0:y1, x0:x1],
                     height=224,

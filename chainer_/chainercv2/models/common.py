@@ -6,7 +6,7 @@ __all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'con
            'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
            'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential']
+           'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
 
 from inspect import isfunction
 from chainer import Chain
@@ -930,3 +930,19 @@ class MultiOutputSequential(SimpleSequential):
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
         return [x] + outs
+
+
+class Flatten(Chain):
+    """
+    Simple flatten block.
+    """
+    def __call__(self, x):
+        return x.reshape(x.shape[0], -1)
+
+
+class AdaptiveAvgPool2D(Chain):
+    """
+    Simple adaptive average pooling block.
+    """
+    def __call__(self, x):
+        return F.average_pooling_2d(x, ksize=x.shape[2:])

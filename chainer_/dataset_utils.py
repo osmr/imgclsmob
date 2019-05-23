@@ -70,7 +70,7 @@ def get_val_data_source(ds_metainfo,
         repeat=False,
         shuffle=False,
         n_processes=num_workers,
-        shared_mem=300000000)
+        shared_mem=1000000)
     return {
         # "transform": transform,
         "iterator": iterator,

@@ -5,12 +5,12 @@
 import os
 import numpy as np
 import pandas as pd
-from chainer.dataset import DatasetMixin
+from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
 from chainercv.utils import read_image
 from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
 
 
-class CUB200_2011(DatasetMixin):
+class CUB200_2011(GetterDataset):
     """
     CUB-200-2011 fine-grained classification dataset.
 
@@ -82,23 +82,32 @@ class CUB200_2011(DatasetMixin):
 
         self._transform = transform
 
-    def __getitem__(self, index):
-        image_file_name = self.image_file_names[index]
+        self.add_getter('img', self._get_image)
+        self.add_getter('label', self._get_label)
+
+    def _get_image(self, i):
+        image_file_name = self.image_file_names[i]
         image_file_path = os.path.join(self.images_dir_path, image_file_name)
-        img = read_image(image_file_path, color=True)
-        label = int(self.class_ids[index])
-
+        image = read_image(image_file_path, color=True)
         if self._transform is not None:
-            img = self._transform(img)
+            image = self._transform(image)
+        return image
 
-        return img, label
+    def _get_label(self, i):
+        label = int(self.class_ids[i])
+        return label
 
     def __len__(self):
         return len(self.image_ids)
 
-    def get_example(self, i):
-        image, label = self[i]
-        return image, label
+    # def __getitem__(self, i):
+    #     image = self._get_image(i)
+    #     label = self._get_label(i)
+    #     return image, label
+    #
+    # def get_example(self, i):
+    #     image, label = self[i]
+    #     return image, label
 
 
 class CUB200MetaInfo(ImageNet1KMetaInfo):

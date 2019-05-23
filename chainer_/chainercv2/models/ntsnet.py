@@ -204,13 +204,14 @@ class NTSNet(Chain):
         raw_pre_features = self.backbone(x)
 
         rpn_score = self.navigator_unit(raw_pre_features)
+        rpn_score.to_cpu()
         all_cdds = [np.concatenate((y.reshape(-1, 1), self.edge_anchors.copy()), axis=1)
                     for y in rpn_score.array]
         top_n_cdds = [hard_nms(y, top_n=self.top_n, iou_thresh=0.25) for y in all_cdds]
         top_n_cdds = np.array(top_n_cdds)
         top_n_index = top_n_cdds[:, :, -1].astype(np.int64)
-        top_n_index = self.xp.array(top_n_index, dtype=np.int64)
-        top_n_prob = self.xp.take_along_axis(rpn_score.array, top_n_index, axis=1)
+        top_n_index = np.array(top_n_index, dtype=np.int64)
+        top_n_prob = np.take_along_axis(rpn_score.array, top_n_index, axis=1)
 
         batch = x.shape[0]
         x_pad = F.pad(x, pad_width=self.pad_width, mode="constant", constant_values=0)

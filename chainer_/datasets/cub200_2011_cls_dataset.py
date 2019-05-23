@@ -5,8 +5,8 @@
 import os
 import numpy as np
 import pandas as pd
-from PIL import Image
 from chainer.dataset import DatasetMixin
+from chainercv.utils import read_image
 from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
 
 
@@ -85,7 +85,7 @@ class CUB200_2011(DatasetMixin):
     def __getitem__(self, index):
         image_file_name = self.image_file_names[index]
         image_file_path = os.path.join(self.images_dir_path, image_file_name)
-        img = Image.open(image_file_path).convert("RGB")
+        img = read_image(image_file_path, color=True)
         label = int(self.class_ids[index])
 
         if self._transform is not None:

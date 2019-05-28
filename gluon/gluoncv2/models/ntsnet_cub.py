@@ -371,7 +371,7 @@ def ntsnet_cub(pretrained_backbone=False, aux=True, **kwargs):
         Location for keeping the model parameters.
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features[:-1]
-    return get_ntsnet(backbone=backbone, aux=aux, model_name="ntsnet", **kwargs)
+    return get_ntsnet(backbone=backbone, aux=aux, model_name="ntsnet_cub", **kwargs)
 
 
 def _test():

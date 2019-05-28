@@ -79,14 +79,13 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.resnetd import *
+
+from .models.octresnet import *
+from .models.ntsnet_cub import *
+
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
-
-from .models.octresnet import *
-
-from .models.others.oth_ntsnet2 import *
-from .models.ntsnet_cub import *
 
 __all__ = ['get_model']
 
@@ -583,6 +582,11 @@ _models = {
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
 
+    'octresnet10_ad2': octresnet10_ad2,
+    'octresnet50b_ad2': octresnet50b_ad2,
+
+    'ntsnet_cub': ntsnet_cub,
+
     'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
     'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,
     'fcn8sd_resnetd50b_coco': fcn8sd_resnetd50b_coco,
@@ -611,12 +615,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'octresnet10_ad2': octresnet10_ad2,
-    'octresnet50b_ad2': octresnet50b_ad2,
-
-    'oth_ntsnet': oth_ntsnet,
-    'ntsnet_cub': ntsnet_cub,
 }
 
 

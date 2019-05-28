@@ -79,14 +79,15 @@ from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
 
 from .models.resnetd import *
-from .models.fcn8sd import *
-from .models.pspnet import *
-from .models.deeplabv3 import *
 
 from .models.octresnet import *
 from .models.octresnet_cifar import *
 from .models.res2net import *
 from .models.ntsnet_cub import *
+
+from .models.fcn8sd import *
+from .models.pspnet import *
+from .models.deeplabv3 import *
 
 __all__ = ['get_model']
 
@@ -586,6 +587,21 @@ _models = {
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
 
+    'octresnet10_ad2': octresnet10_ad2,
+    'octresnet50b_ad2': octresnet50b_ad2,
+
+    'octresnet20_ad2_cifar10': octresnet20_ad2_cifar10,
+    'octresnet20_ad2_cifar100': octresnet20_ad2_cifar100,
+    'octresnet20_ad2_svhn': octresnet20_ad2_svhn,
+    'octresnet56_ad2_cifar10': octresnet56_ad2_cifar10,
+    'octresnet56_ad2_cifar100': octresnet56_ad2_cifar100,
+    'octresnet56_ad2_svhn': octresnet56_ad2_svhn,
+
+    'res2net50_w14_s8': res2net50_w14_s8,
+    'res2net50_w26_s8': res2net50_w26_s8,
+
+    'ntsnet_cub': ntsnet_cub,
+
     'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
     'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,
     'fcn8sd_resnetd50b_coco': fcn8sd_resnetd50b_coco,
@@ -614,21 +630,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'octresnet10_ad2': octresnet10_ad2,
-    'octresnet50b_ad2': octresnet50b_ad2,
-
-    'octresnet20_ad2_cifar10': octresnet20_ad2_cifar10,
-    'octresnet20_ad2_cifar100': octresnet20_ad2_cifar100,
-    'octresnet20_ad2_svhn': octresnet20_ad2_svhn,
-    'octresnet56_ad2_cifar10': octresnet56_ad2_cifar10,
-    'octresnet56_ad2_cifar100': octresnet56_ad2_cifar100,
-    'octresnet56_ad2_svhn': octresnet56_ad2_svhn,
-
-    'res2net50_w14_s8': res2net50_w14_s8,
-    'res2net50_w26_s8': res2net50_w26_s8,
-
-    'ntsnet_cub': ntsnet_cub,
 }
 
 

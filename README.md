@@ -23,11 +23,11 @@ For each supported framework, there is a PIP-package containing pure models with
 
 Currently, models are mostly implemented on Gluon and then ported to other frameworks. Some models are pretrained on
 [ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
-[SVHN](http://ufldl.stanford.edu/housenumbers), [Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012),
-[ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K), [Cityscapes](https://www.cityscapes-dataset.com),
-and [COCO](http://cocodataset.org) datasets. All pretrained weights are loaded automatically during use.
-See examples of such automatic loading of weights in the corresponding sections of the documentation dedicated to a
-particular package:
+[SVHN](http://ufldl.stanford.edu/housenumbers), [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html),
+[Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012), [ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K),
+[Cityscapes](https://www.cityscapes-dataset.com), and [COCO](http://cocodataset.org) datasets. All pretrained weights
+are loaded automatically during use. See examples of such automatic loading of weights in the corresponding sections of
+the documentation dedicated to a particular package:
 - [Gluon models](gluon/README.md),
 - [PyTorch models](pytorch/README.md),
 - [Chainer models](chainer_/README.md),
@@ -46,8 +46,8 @@ pip install -r requirements.txt
 
 Some remarks:
 - `Repo` is an author repository, if it exists.
-- `A`, `B`, `C`, and `D` means the implementation of a model for ImageNet-1K, CIFAR-10, CIFAR-100, and SVHN, respectively.
-- `A+`, `B+`, `C+`, and `D+` means having a pre-trained model for corresponding datasets.
+- `A`, `B`, `C`, `D`, and `E` means the implementation of a model for ImageNet-1K, CIFAR-10, CIFAR-100, SVHN, and CUB-200-2011, respectively.
+- `A+`, `B+`, `C+`, `D+`, and `E+` means having a pre-trained model for corresponding datasets.
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TensorFlow](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -129,6 +129,7 @@ Some remarks:
 | Shake-Shake-ResNet | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1705.07485) | [link](https://github.com/xgastaldi/shake-shake) | 2017 |
 | ShakeDrop-ResNet | BCD | BCD | BCD | - | - | [link](https://arxiv.org/abs/1802.02375) | - | 2018 |
 | FractalNet | BC | BC | - | - | - | [link](https://arxiv.org/abs/1605.07648) | [link](https://github.com/gustavla/fractalnet) | 2016 |
+| NTS-Net | E+ | E+ | E+ | - | - | [link](https://arxiv.org/abs/1809.00287) | [link](https://github.com/yangze0930/NTS-Net) | 2018 |
 
 ## Table of implemented segmentation models
 

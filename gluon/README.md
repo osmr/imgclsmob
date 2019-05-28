@@ -5,11 +5,11 @@
 
 This is a collection of image classification and segmentation models. Many of them are pretrained on
 [ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
-[SVHN](http://ufldl.stanford.edu/housenumbers), [Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012),
-[ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K), [Cityscapes](https://www.cityscapes-dataset.com),
-and [COCO](http://cocodataset.org) datasets and loaded automatically during use. All pretrained models
-require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
-[`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+[SVHN](http://ufldl.stanford.edu/housenumbers), [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html),
+[Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012), [ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K),
+[Cityscapes](https://www.cityscapes-dataset.com), and [COCO](http://cocodataset.org) datasets and loaded automatically
+during use. All pretrained models require the same ordinary normalization. Scripts for training/evaluating/converting
+models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 
@@ -77,9 +77,10 @@ require the same ordinary normalization. Scripts for training/evaluating/convert
 - Shake-Shake-ResNet (['Shake-Shake regularization'](https://arxiv.org/abs/1705.07485))
 - ShakeDrop-ResNet (['ShakeDrop Regularization for Deep Residual Learning'](https://arxiv.org/abs/1802.02375))
 - FractalNet (['FractalNet: Ultra-Deep Neural Networks without Residuals'](https://arxiv.org/abs/1605.07648))
+- NTS-Net (['Learning to Navigate for Fine-grained Classification'](https://arxiv.org/abs/1809.00287))
+- FCN-8s (['Fully Convolutional Networks for Semantic Segmentation'](https://arxiv.org/abs/1411.4038))
 - PSPNet (['Pyramid Scene Parsing Network'](https://arxiv.org/abs/1612.01105))
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
-- FCN-8s (['Fully Convolutional Networks for Semantic Segmentation'](https://arxiv.org/abs/1411.4038))
 
 ## Installation
 
@@ -443,6 +444,12 @@ Some remarks:
 | Shake-Shake-ResNet-20-2x16d | 3.17 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet20_2x16d_svhn-0317-7a48fde5.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 2.62 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet26_2x32d_svhn-0262-f1dbb8ef.params.log)) |
 
+### CUB-200-2011
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| NTS-Net | 13.26 | 28,623,333 | 33,361.39M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1326-75ae8cdc.params.log)) |
+
 ### Pascal VOC20102
 
 | Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
@@ -502,3 +509,4 @@ Some remarks:
 [jhjacobsen/pytorch-i-revnet]: https://github.com/jhjacobsen/pytorch-i-revnet
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
 [MIT-HAN-LAB/ProxylessNAS]: https://github.com/MIT-HAN-LAB/ProxylessNAS
+[yangze0930/NTS-Net]: https://github.com/yangze0930/NTS-Net

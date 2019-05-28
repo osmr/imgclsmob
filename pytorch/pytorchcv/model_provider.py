@@ -616,7 +616,7 @@ _models = {
     'octresnet50b_ad2': octresnet50b_ad2,
 
     'oth_ntsnet': oth_ntsnet,
-    'ntsnet': ntsnet_cub,
+    'ntsnet_cub': ntsnet_cub,
 }
 
 

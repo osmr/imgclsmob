@@ -302,6 +302,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('shakeshakeresnet26_2x32d_cifar10', '0317', '5422fce187dff99fa8f4678274a8dd1519e23e27', 'v0.0.217'),
     ('shakeshakeresnet26_2x32d_cifar100', '1880', '750a574e738cf53079b6965410e07fb3abef82fd', 'v0.0.222'),
     ('shakeshakeresnet26_2x32d_svhn', '0262', '844e1f6d067b830087b9456617159a77137138f7', 'v0.0.295'),
+    ('ntsnet_cub', '1286', '4d7595248f0fb042ef06c657d73bd0a2f3fc4f0d', 'v0.0.334'),
     ('pspnet_resnetd101b_voc', '7626', 'f90c0db9892ec6892623a774ba21000f7cc3995f', 'v0.0.297'),
     ('pspnet_resnetd50b_ade20k', '2746', '7b7ce5680fdfab567222ced11a2430cf1a452116', 'v0.0.297'),
     ('pspnet_resnetd101b_ade20k', '3286', 'c5e619c41740751865f662b539abbad5dd9be42b', 'v0.0.297'),

@@ -628,7 +628,7 @@ _models = {
     'res2net50_w14_s8': res2net50_w14_s8,
     'res2net50_w26_s8': res2net50_w26_s8,
 
-    'ntsnet': ntsnet_cub,
+    'ntsnet_cub': ntsnet_cub,
 }
 
 

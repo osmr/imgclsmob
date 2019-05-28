@@ -3,7 +3,7 @@
     Original paper: 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 """
 
-__all__ = ['NTSNet', 'ntsnet']
+__all__ = ['NTSNet', 'ntsnet_cub']
 
 import os
 import numpy as np
@@ -354,7 +354,7 @@ def get_ntsnet(backbone,
     return net
 
 
-def ntsnet(pretrained_backbone=False, aux=True, **kwargs):
+def ntsnet_cub(pretrained_backbone=False, aux=True, **kwargs):
     """
     NTS-Net model from 'Learning to Navigate for Fine-grained Classification,' https://arxiv.org/abs/1809.00287.
 
@@ -391,7 +391,7 @@ def _test():
     aux = True
 
     models = [
-        ntsnet,
+        ntsnet_cub,
     ]
 
     for model in models:
@@ -403,9 +403,9 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         if aux:
-            assert (model != ntsnet or weight_count == 29033133)
+            assert (model != ntsnet_cub or weight_count == 29033133)
         else:
-            assert (model != ntsnet or weight_count == 28623333)
+            assert (model != ntsnet_cub or weight_count == 28623333)
 
         x = Variable(torch.randn(5, 3, 448, 448))
         ys = net(x)

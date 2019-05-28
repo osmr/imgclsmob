@@ -86,7 +86,7 @@ from .models.deeplabv3 import *
 from .models.octresnet import *
 
 from .models.others.oth_ntsnet2 import *
-from .models.ntsnet import *
+from .models.ntsnet_cub import *
 
 __all__ = ['get_model']
 
@@ -616,7 +616,7 @@ _models = {
     'octresnet50b_ad2': octresnet50b_ad2,
 
     'oth_ntsnet': oth_ntsnet,
-    'ntsnet': ntsnet,
+    'ntsnet': ntsnet_cub,
 }
 
 

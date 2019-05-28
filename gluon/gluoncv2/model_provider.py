@@ -86,7 +86,7 @@ from .models.deeplabv3 import *
 from .models.octresnet import *
 from .models.octresnet_cifar import *
 from .models.res2net import *
-from .models.ntsnet import *
+from .models.ntsnet_cub import *
 
 __all__ = ['get_model']
 
@@ -628,7 +628,7 @@ _models = {
     'res2net50_w14_s8': res2net50_w14_s8,
     'res2net50_w26_s8': res2net50_w26_s8,
 
-    'ntsnet': ntsnet,
+    'ntsnet': ntsnet_cub,
 }
 
 

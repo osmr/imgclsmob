@@ -6,10 +6,10 @@ import mxnet as mx
 
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model, calc_net_weight_count
-from gluon.khpa.khpa_utils import add_dataset_parser_arguments
-from gluon.khpa.khpa_utils import get_batch_fn
-from gluon.khpa.khpa_utils import get_val_data_source
-from gluon.khpa.khpa_utils import validate
+from other.gluon.khpa.khpa_utils import add_dataset_parser_arguments
+from other.gluon.khpa.khpa_utils import get_batch_fn
+from other.gluon.khpa.khpa_utils import get_val_data_source
+from other.gluon.khpa.khpa_utils import validate
 
 
 def parse_args():

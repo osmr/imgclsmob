@@ -7,7 +7,7 @@ __all__ = ['add_dataset_parser_arguments', 'get_batch_fn', 'get_train_data_sourc
 import math
 from mxnet import gluon
 from gluon.weighted_random_sampler import WeightedRandomSampler
-from gluon.khpa.khpa_cls_dataset import KHPA
+from other.gluon.khpa.khpa_cls_dataset import KHPA
 
 
 def add_dataset_parser_arguments(parser):

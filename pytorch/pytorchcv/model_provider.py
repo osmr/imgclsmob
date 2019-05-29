@@ -81,6 +81,8 @@ from .models.fractalnet_cifar import *
 from .models.resnetd import *
 
 from .models.octresnet import *
+
+from .models.resnet_cub import *
 from .models.ntsnet_cub import *
 
 from .models.fcn8sd import *
@@ -584,6 +586,25 @@ _models = {
 
     'octresnet10_ad2': octresnet10_ad2,
     'octresnet50b_ad2': octresnet50b_ad2,
+
+    'resnet10_cub': resnet10_cub,
+    'resnet12_cub': resnet12_cub,
+    'resnet14_cub': resnet14_cub,
+    'resnetbc14b_cub': resnetbc14b_cub,
+    'resnet16_cub': resnet16_cub,
+    'resnet18_cub': resnet18_cub,
+    'resnet26_cub': resnet26_cub,
+    'resnetbc26b_cub': resnetbc26b_cub,
+    'resnet34_cub': resnet34_cub,
+    'resnetbc38b_cub': resnetbc38b_cub,
+    'resnet50_cub': resnet50_cub,
+    'resnet50b_cub': resnet50b_cub,
+    'resnet101_cub': resnet101_cub,
+    'resnet101b_cub': resnet101b_cub,
+    'resnet152_cub': resnet152_cub,
+    'resnet152b_cub': resnet152b_cub,
+    'resnet200_cub': resnet200_cub,
+    'resnet200b_cub': resnet200b_cub,
 
     'ntsnet_cub': ntsnet_cub,
 

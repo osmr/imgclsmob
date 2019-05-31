@@ -436,6 +436,10 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 
 | Model | Error, % | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | --- |
+| ResNet-10 | 27.77 | 5,008,392 | 893.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.335/resnet10_cub-2777-4525b593.pth.log)) |
+| ResNet-12 | 27.27 | 5,082,376 | 1,125.84M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.336/resnet12_cub-2727-c1524883.pth.log)) |
+| ResNet-14 | 24.77 | 5,377,800 | 1,357.53M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.337/resnet14_cub-2477-5051bbc6.pth.log)) |
+| ResNet-16 | 23.65 | 6,558,472 | 1,588.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.338/resnet16_cub-2365-b831356c.pth.log)) |
 | NTS-Net | 12.77 | 28,623,333 | 33,361.79M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1277-f6f330ab.pth.log)) |
 
 ### Pascal VOC20102

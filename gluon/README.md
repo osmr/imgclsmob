@@ -449,6 +449,10 @@ Some remarks:
 
 | Model | Error, % | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | --- |
+| ResNet-10 | 27.65 | 5,008,392 | 893.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.335/resnet10_cub-2765-9dab9a49.params.log)) |
+| ResNet-12 | 26.58 | 5,082,376 | 1,125.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.336/resnet12_cub-2658-a46b8ec2.params.log)) |
+| ResNet-14 | 24.35 | 5,377,800 | 1,357.53M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.337/resnet14_cub-2435-0b9801b2.params.log)) |
+| ResNet-16 | 23.21 | 6,558,472 | 1,588.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.338/resnet16_cub-2321-031374ad.params.log)) |
 | NTS-Net | 13.26 | 28,623,333 | 33,361.39M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1326-75ae8cdc.params.log)) |
 
 ### Pascal VOC20102

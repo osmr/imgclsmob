@@ -82,12 +82,12 @@ def add_eval_parser_arguments(parser):
     parser.add_argument(
         "--log-packages",
         type=str,
-        default="mxnet",
+        default="mxnet, numpy",
         help="list of python packages for logging")
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="mxnet-cu100, numpy",
+        default="mxnet-cu100",
         help="list of pip packages for logging")
 
     parser.add_argument(

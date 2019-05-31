@@ -214,7 +214,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--log-packages",
         type=str,
-        default="mxnet",
+        default="mxnet, numpy",
         help="list of python packages for logging")
     parser.add_argument(
         "--log-pip-packages",

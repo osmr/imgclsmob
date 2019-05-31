@@ -1,5 +1,5 @@
 """
-    BAM-ResNet, implemented in Gluon.
+    BAM-ResNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'BAM: Bottleneck Attention Module,' https://arxiv.org/abs/1807.06514.
 """
 

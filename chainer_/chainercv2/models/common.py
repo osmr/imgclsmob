@@ -2,11 +2,11 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['ReLU6', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
-           'conv7x7_block', 'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
+__all__ = ['ReLU6', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
+           'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
 
 from inspect import isfunction
 from chainer import Chain
@@ -18,11 +18,25 @@ class ReLU6(Chain):
     """
     ReLU6 activation layer.
     """
-    def __init__(self):
-        super(ReLU6, self).__init__()
-
     def __call__(self, x):
         return F.clip(x, 0.0, 6.0)
+
+
+class HSigmoid(Chain):
+    """
+    Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
+    https://arxiv.org/abs/1905.02244.
+    """
+    def __call__(self, x):
+        return F.clip(x + 3.0, 0.0, 6.0) / 6.0
+
+
+class HSwish(Chain):
+    """
+    H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+    """
+    def __call__(self, x):
+        return x * F.clip(x + 3.0, 0.0, 6.0) / 6.0
 
 
 def conv1x1(in_channels,
@@ -181,6 +195,8 @@ class ConvBlock(Chain):
                         self.activ = F.relu
                     elif activation == "relu6":
                         self.activ = ReLU6()
+                    elif activation == "hswish":
+                        self.activ = HSwish()
                     else:
                         raise NotImplementedError()
                 else:
@@ -287,6 +303,56 @@ def conv3x3_block(in_channels,
         activate=activate)
 
 
+def conv5x5_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  pad=2,
+                  dilate=1,
+                  groups=1,
+                  use_bias=False,
+                  bn_eps=1e-5,
+                  activation=(lambda: F.relu),
+                  activate=True):
+    """
+    5x5 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=5,
+        stride=stride,
+        pad=pad,
+        dilate=dilate,
+        groups=groups,
+        use_bias=use_bias,
+        bn_eps=bn_eps,
+        activation=activation,
+        activate=activate)
+
+
 def conv7x7_block(in_channels,
                   out_channels,
                   stride=1,
@@ -356,6 +422,48 @@ def dwconv3x3_block(in_channels,
         Whether activate the convolution block.
     """
     return conv3x3_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        stride=stride,
+        pad=pad,
+        dilate=dilate,
+        groups=out_channels,
+        use_bias=use_bias,
+        activation=activation,
+        activate=activate)
+
+
+def dwconv5x5_block(in_channels,
+                    out_channels,
+                    stride,
+                    pad=2,
+                    dilate=1,
+                    use_bias=False,
+                    activation=(lambda: F.relu),
+                    activate=True):
+    """
+    5x5 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return conv5x5_block(
         in_channels=in_channels,
         out_channels=out_channels,
         stride=stride,
@@ -614,10 +722,13 @@ class SEBlock(Chain):
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    approx_sigmoid : bool, default False
+        Whether to use approximated sigmoid function.
     """
     def __init__(self,
                  channels,
-                 reduction=16):
+                 reduction=16,
+                 approx_sigmoid=False):
         super(SEBlock, self).__init__()
         mid_cannels = channels // reduction
 
@@ -626,17 +737,19 @@ class SEBlock(Chain):
                 in_channels=channels,
                 out_channels=mid_cannels,
                 use_bias=True)
+            self.relu = F.relu
             self.conv2 = conv1x1(
                 in_channels=mid_cannels,
                 out_channels=channels,
                 use_bias=True)
+            self.sigmoid = HSigmoid() if approx_sigmoid else F.sigmoid
 
     def __call__(self, x):
         w = F.average_pooling_2d(x, ksize=x.shape[2:])
         w = self.conv1(w)
-        w = F.relu(w)
+        w = self.relu(w)
         w = self.conv2(w)
-        w = F.sigmoid(w)
+        w = self.sigmoid(w)
         x = x * w
         return x
 

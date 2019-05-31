@@ -2,15 +2,43 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
+__all__ = ['HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential',
+           'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'Flatten']
 
 import math
 from inspect import isfunction
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+
+
+class HSigmoid(nn.Module):
+    """
+    Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
+    https://arxiv.org/abs/1905.02244.
+    """
+    def forward(self, x):
+        return F.relu6(x + 3.0, inplace=True) / 6.0
+
+
+class HSwish(nn.Module):
+    """
+    H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    inplace : bool
+        Whether to use inplace version of the module.
+    """
+    def __init__(self, inplace=False):
+        super(HSwish, self).__init__()
+        self.inplace = inplace
+
+    def forward(self, x):
+        return x * F.relu6(x + 3.0, inplace=self.inplace) / 6.0
 
 
 def conv1x1(in_channels,
@@ -166,6 +194,8 @@ class ConvBlock(nn.Module):
                     self.activ = nn.ReLU(inplace=True)
                 elif activation == "relu6":
                     self.activ = nn.ReLU6(inplace=True)
+                elif activation == "hswish":
+                    self.activ = HSwish(inplace=True)
                 else:
                     raise NotImplementedError()
             else:
@@ -275,6 +305,56 @@ def conv3x3_block(in_channels,
         activate=activate)
 
 
+def conv5x5_block(in_channels,
+                  out_channels,
+                  stride=1,
+                  padding=2,
+                  dilation=1,
+                  groups=1,
+                  bias=False,
+                  bn_eps=1e-5,
+                  activation=(lambda: nn.ReLU(inplace=True)),
+                  activate=True):
+    """
+    5x5 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation,
+        activate=activate)
+
+
 def conv7x7_block(in_channels,
                   out_channels,
                   stride=1,
@@ -322,7 +402,7 @@ def dwconv3x3_block(in_channels,
                     activation=(lambda: nn.ReLU(inplace=True)),
                     activate=True):
     """
-    3x3 depthwise version of the standard convolution block with ReLU6 activation.
+    3x3 depthwise version of the standard convolution block.
 
     Parameters:
     ----------
@@ -344,6 +424,48 @@ def dwconv3x3_block(in_channels,
         Whether activate the convolution block.
     """
     return conv3x3_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
+        bias=bias,
+        activation=activation,
+        activate=activate)
+
+
+def dwconv5x5_block(in_channels,
+                    out_channels,
+                    stride,
+                    padding=2,
+                    dilation=1,
+                    bias=False,
+                    activation=(lambda: nn.ReLU(inplace=True)),
+                    activate=True):
+    """
+    5x5 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    return conv5x5_block(
         in_channels=in_channels,
         out_channels=out_channels,
         stride=stride,
@@ -605,10 +727,13 @@ class SEBlock(nn.Module):
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    approx_sigmoid : bool, default False
+        Whether to use approximated sigmoid function.
     """
     def __init__(self,
                  channels,
-                 reduction=16):
+                 reduction=16,
+                 approx_sigmoid=False):
         super(SEBlock, self).__init__()
         mid_cannels = channels // reduction
 
@@ -622,7 +747,7 @@ class SEBlock(nn.Module):
             in_channels=mid_cannels,
             out_channels=channels,
             bias=True)
-        self.sigmoid = nn.Sigmoid()
+        self.sigmoid = HSigmoid() if approx_sigmoid else nn.Sigmoid()
 
     def forward(self, x):
         w = self.pool(x)

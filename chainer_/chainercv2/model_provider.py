@@ -42,6 +42,7 @@ from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
 from .models.mobilenetv2 import *
+from .models.mobilenetv3 import *
 from .models.igcv3 import *
 from .models.mnasnet import *
 from .models.darts import *
@@ -358,6 +359,17 @@ _models = {
     'mobilenetv2_w3d4': mobilenetv2_w3d4,
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
+
+    'mobilenetv3_small_w7d20': mobilenetv3_small_w7d20,
+    'mobilenetv3_small_wd2': mobilenetv3_small_wd2,
+    'mobilenetv3_small_w3d4': mobilenetv3_small_w3d4,
+    'mobilenetv3_small_w1': mobilenetv3_small_w1,
+    'mobilenetv3_small_w5d4': mobilenetv3_small_w5d4,
+    'mobilenetv3_large_w7d20': mobilenetv3_large_w7d20,
+    'mobilenetv3_large_wd2': mobilenetv3_large_wd2,
+    'mobilenetv3_large_w3d4': mobilenetv3_large_w3d4,
+    'mobilenetv3_large_w1': mobilenetv3_large_w1,
+    'mobilenetv3_large_w5d4': mobilenetv3_large_w5d4,
 
     'igcv3_w1': igcv3_w1,
     'igcv3_w3d4': igcv3_w3d4,

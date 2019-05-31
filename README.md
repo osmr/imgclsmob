@@ -110,6 +110,7 @@ Some remarks:
 | MobileNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
 | FD-MobileNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1802.03750) | [link](https://github.com/clavichord93/FD-MobileNet) | 2018 |
 | MobileNetV2 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1801.04381) | [link](https://github.com/tensorflow/models) | 2018 |
+| MobileNetV3 | A | A | A | - | - | [link](https://arxiv.org/abs/1905.02244) | - | 2019 |
 | IGCV3 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1806.00178) | [link](https://github.com/homles11/IGCV3) | 2018 |
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |

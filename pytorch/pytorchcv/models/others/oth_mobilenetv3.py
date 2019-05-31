@@ -181,12 +181,12 @@ class MobileNetV3_Small(nn.Module):
         return out
 
 
-def oth_mobilenet_large(pretrained=False, **kwargs):
-    return MobileNetV3_Large(**kwargs)
-
-
 def oth_mobilenet_small(pretrained=False, **kwargs):
     return MobileNetV3_Small(**kwargs)
+
+
+def oth_mobilenet_large(pretrained=False, **kwargs):
+    return MobileNetV3_Large(**kwargs)
 
 
 def _calc_width(net):
@@ -205,8 +205,8 @@ def _test():
     pretrained = False
 
     models = [
-        oth_mobilenet_large,
         oth_mobilenet_small,
+        oth_mobilenet_large,
     ]
 
     for model in models:
@@ -217,8 +217,8 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_mobilenet_large or weight_count == 3955916)
         assert (model != oth_mobilenet_small or weight_count == 2509748)
+        assert (model != oth_mobilenet_large or weight_count == 3955916)
 
         x = Variable(torch.randn(1, 3, 224, 224))
         y = net(x)
@@ -228,13 +228,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-
-
-
-# def test():
-#     net = MobileNetV3_Small()
-#     x = torch.randn(2,3,224,224)
-#     y = net(x)
-#     print(y.size())
-#
-# # test()

@@ -1,5 +1,5 @@
 """
-    BN-Inception, implemented in PyTorch.
+    BN-Inception for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift,'
     https://arxiv.org/abs/1502.03167.
 """

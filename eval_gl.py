@@ -87,7 +87,7 @@ def add_eval_parser_arguments(parser):
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="mxnet-cu100",
+        default="mxnet-cu100, numpy",
         help="list of pip packages for logging")
 
     parser.add_argument(

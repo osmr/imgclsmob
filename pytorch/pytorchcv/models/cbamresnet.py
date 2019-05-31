@@ -1,5 +1,5 @@
 """
-    CBAM-ResNet, implemented in PyTorch.
+    CBAM-ResNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 """
 

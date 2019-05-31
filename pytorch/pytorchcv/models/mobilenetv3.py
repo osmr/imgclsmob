@@ -287,7 +287,7 @@ def get_mobilenetv3(version,
         Location for keeping the model parameters.
     """
 
-    if version == 'small':
+    if version == "small":
         init_block_channels = 16
         channels = [[16], [24, 24], [40, 40, 40, 48, 48], [96, 96, 96]]
         exp_channels = [[16], [72, 88], [96, 240, 240, 120, 144], [288, 576, 576]]
@@ -297,7 +297,7 @@ def get_mobilenetv3(version,
         first_stride = True
         final_use_se = True
         final_block_channels = 576
-    elif version == 'large':
+    elif version == "large":
         init_block_channels = 16
         channels = [[16], [24, 24], [40, 40, 40], [80, 80, 80, 80, 112, 112], [160, 160, 160]]
         exp_channels = [[16], [64, 72], [72, 120, 120], [240, 200, 184, 184, 480, 672], [672, 960, 960]]

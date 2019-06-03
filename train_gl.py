@@ -36,6 +36,10 @@ def add_train_cls_parser_arguments(parser):
         default="float32",
         help="data type for training")
     parser.add_argument(
+        '--not-hybridize',
+        action='store_true',
+        help='do not hybridize model')
+    parser.add_argument(
         "--resume",
         type=str,
         default="",
@@ -573,6 +577,7 @@ def main():
         tune_layers=args.tune_layers,
         classes=args.num_classes,
         in_channels=args.in_channels,
+        do_hybridize=(not args.not_hybridize),
         ctx=ctx)
     assert (hasattr(net, "classes"))
     num_classes = net.classes

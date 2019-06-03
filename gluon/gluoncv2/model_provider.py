@@ -79,7 +79,7 @@ from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.fractalnet_cifar import *
-# from .models.diaresnet_cifar import *
+from .models.diaresnet_cifar import *
 
 from .models.resnetd import *
 
@@ -611,24 +611,24 @@ _models = {
     'fractalnet_cifar10': fractalnet_cifar10,
     'fractalnet_cifar100': fractalnet_cifar100,
 
-    # 'diaresnet20_cifar10': diaresnet20_cifar10,
-    # 'diaresnet20_cifar100': diaresnet20_cifar100,
-    # 'diaresnet20_svhn': diaresnet20_svhn,
-    # 'diaresnet56_cifar10': diaresnet56_cifar10,
-    # 'diaresnet56_cifar100': diaresnet56_cifar100,
-    # 'diaresnet56_svhn': diaresnet56_svhn,
-    # 'diaresnet110_cifar10': diaresnet110_cifar10,
-    # 'diaresnet110_cifar100': diaresnet110_cifar100,
-    # 'diaresnet110_svhn': diaresnet110_svhn,
-    # 'diaresnet164bn_cifar10': diaresnet164bn_cifar10,
-    # 'diaresnet164bn_cifar100': diaresnet164bn_cifar100,
-    # 'diaresnet164bn_svhn': diaresnet164bn_svhn,
-    # 'diaresnet1001_cifar10': diaresnet1001_cifar10,
-    # 'diaresnet1001_cifar100': diaresnet1001_cifar100,
-    # 'diaresnet1001_svhn': diaresnet1001_svhn,
-    # 'diaresnet1202_cifar10': diaresnet1202_cifar10,
-    # 'diaresnet1202_cifar100': diaresnet1202_cifar100,
-    # 'diaresnet1202_svhn': diaresnet1202_svhn,
+    'diaresnet20_cifar10': diaresnet20_cifar10,
+    'diaresnet20_cifar100': diaresnet20_cifar100,
+    'diaresnet20_svhn': diaresnet20_svhn,
+    'diaresnet56_cifar10': diaresnet56_cifar10,
+    'diaresnet56_cifar100': diaresnet56_cifar100,
+    'diaresnet56_svhn': diaresnet56_svhn,
+    'diaresnet110_cifar10': diaresnet110_cifar10,
+    'diaresnet110_cifar100': diaresnet110_cifar100,
+    'diaresnet110_svhn': diaresnet110_svhn,
+    'diaresnet164bn_cifar10': diaresnet164bn_cifar10,
+    'diaresnet164bn_cifar100': diaresnet164bn_cifar100,
+    'diaresnet164bn_svhn': diaresnet164bn_svhn,
+    'diaresnet1001_cifar10': diaresnet1001_cifar10,
+    'diaresnet1001_cifar100': diaresnet1001_cifar100,
+    'diaresnet1001_svhn': diaresnet1001_svhn,
+    'diaresnet1202_cifar10': diaresnet1202_cifar10,
+    'diaresnet1202_cifar100': diaresnet1202_cifar100,
+    'diaresnet1202_svhn': diaresnet1202_svhn,
 
     'isqrtcovresnet18': isqrtcovresnet18,
     'isqrtcovresnet34': isqrtcovresnet34,

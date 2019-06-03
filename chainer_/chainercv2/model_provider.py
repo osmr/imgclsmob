@@ -15,6 +15,7 @@ from .models.bamresnet import *
 from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.sknet import *
+from .models.diaresnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.sharesnet import *
@@ -69,6 +70,7 @@ from .models.rir_cifar import *
 from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
+# from .models.diaresnet_cifar import *
 
 from .models.resnetd import *
 
@@ -216,6 +218,25 @@ _models = {
     'sknet50': sknet50,
     'sknet101': sknet101,
     'sknet152': sknet152,
+
+    'diaresnet10': diaresnet10,
+    'diaresnet12': diaresnet12,
+    'diaresnet14': diaresnet14,
+    'diaresnetbc14b': diaresnetbc14b,
+    'diaresnet16': diaresnet16,
+    'diaresnet18': diaresnet18,
+    'diaresnet26': diaresnet26,
+    'diaresnetbc26b': diaresnetbc26b,
+    'diaresnet34': diaresnet34,
+    'diaresnetbc38b': diaresnetbc38b,
+    'diaresnet50': diaresnet50,
+    'diaresnet50b': diaresnet50b,
+    'diaresnet101': diaresnet101,
+    'diaresnet101b': diaresnet101b,
+    'diaresnet152': diaresnet152,
+    'diaresnet152b': diaresnet152b,
+    'diaresnet200': diaresnet200,
+    'diaresnet200b': diaresnet200b,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 
@@ -547,6 +568,25 @@ _models = {
     'shakedropresnet20_cifar10': shakedropresnet20_cifar10,
     'shakedropresnet20_cifar100': shakedropresnet20_cifar100,
     'shakedropresnet20_svhn': shakedropresnet20_svhn,
+
+    # 'diaresnet20_cifar10': diaresnet20_cifar10,
+    # 'diaresnet20_cifar100': diaresnet20_cifar100,
+    # 'diaresnet20_svhn': diaresnet20_svhn,
+    # 'diaresnet56_cifar10': diaresnet56_cifar10,
+    # 'diaresnet56_cifar100': diaresnet56_cifar100,
+    # 'diaresnet56_svhn': diaresnet56_svhn,
+    # 'diaresnet110_cifar10': diaresnet110_cifar10,
+    # 'diaresnet110_cifar100': diaresnet110_cifar100,
+    # 'diaresnet110_svhn': diaresnet110_svhn,
+    # 'diaresnet164bn_cifar10': diaresnet164bn_cifar10,
+    # 'diaresnet164bn_cifar100': diaresnet164bn_cifar100,
+    # 'diaresnet164bn_svhn': diaresnet164bn_svhn,
+    # 'diaresnet1001_cifar10': diaresnet1001_cifar10,
+    # 'diaresnet1001_cifar100': diaresnet1001_cifar100,
+    # 'diaresnet1001_svhn': diaresnet1001_svhn,
+    # 'diaresnet1202_cifar10': diaresnet1202_cifar10,
+    # 'diaresnet1202_cifar100': diaresnet1202_cifar100,
+    # 'diaresnet1202_svhn': diaresnet1202_svhn,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

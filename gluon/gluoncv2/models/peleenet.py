@@ -128,7 +128,7 @@ class StemBlock(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats,
                 strides=2)
 
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(PeleeBranch1(
                 in_channels=out_channels,
                 out_channels=out_channels,

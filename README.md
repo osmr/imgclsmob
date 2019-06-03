@@ -56,7 +56,7 @@ Some remarks:
 | VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |
 | BN-Inception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |
-| ResNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
+| ResNet | A+B+C+D+E+ | A+B+C+D+E+ | A+B+C+D+E+ | A+ | A+ | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
 | PreResNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
 | ResNeXt | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
@@ -72,6 +72,7 @@ Some remarks:
 | CBAM-ResNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | A | A | A | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
+| DIA-ResNet | A | ABCD | A | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | PyramidNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | - | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |
 | DiracNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
 | ShaResNet | A | A | A | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |

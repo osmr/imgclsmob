@@ -25,7 +25,7 @@ class RoRBlock(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -71,7 +71,7 @@ class RoRResUnit(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     last_activate : bool, default True
         Whether activate output.
@@ -126,7 +126,7 @@ class RoRResStage(HybridBlock):
         Number of output channels for each unit.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     downsample : bool, default True
         Whether downsample output.
@@ -188,7 +188,7 @@ class RoRResBody(HybridBlock):
         Number of output channels for each stage.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,

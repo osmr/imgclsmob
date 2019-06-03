@@ -29,7 +29,7 @@ class XDenseSimpleUnit(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     expand_ratio : int
         Ratio of expansion.

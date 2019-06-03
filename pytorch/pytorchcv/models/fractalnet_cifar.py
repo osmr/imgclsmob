@@ -31,7 +31,7 @@ class DropConvBlock(nn.Module):
         Padding value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    dropout_rate : bool, default 0.0
+    dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -87,7 +87,7 @@ def drop_conv3x3_block(in_channels,
         Padding value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
-    dropout_rate : bool, default 0.0
+    dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     return DropConvBlock(

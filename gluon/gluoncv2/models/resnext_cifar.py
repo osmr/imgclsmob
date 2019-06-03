@@ -77,7 +77,7 @@ class CIFARResNeXt(HybridBlock):
                 pool_size=8,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

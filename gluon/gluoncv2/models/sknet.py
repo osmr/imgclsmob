@@ -52,7 +52,7 @@ class SKConvBlock(HybridBlock):
         mid_channels = max(in_channels // reduction, min_channels)
 
         with self.name_scope():
-            self.branches = Concurrent(stack=True, prefix='')
+            self.branches = Concurrent(stack=True, prefix="")
             for i in range(num_branches):
                 dilation = 1 + i
                 self.branches.add(conv3x3_block(

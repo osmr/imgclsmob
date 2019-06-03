@@ -90,7 +90,7 @@ class MobileNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             init_block_channels = channels[0][0]
             self.features.add(conv3x3_block(
                 in_channels=in_channels,
@@ -114,7 +114,7 @@ class MobileNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

@@ -134,7 +134,7 @@ class SpatialGate(HybridBlock):
                 use_bias=True,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=True)
-            self.dil_convs = nn.HybridSequential(prefix='')
+            self.dil_convs = nn.HybridSequential(prefix="")
             for i in range(num_dil_convs):
                 self.dil_convs.add(conv3x3_block(
                     in_channels=mid_channels,
@@ -183,7 +183,7 @@ class BamBlock(HybridBlock):
             self.sp_att = SpatialGate(
                 channels=channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.sigmoid = nn.Activation('sigmoid')
+            self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
         att = 1 + self.sigmoid(self.ch_att(x) * self.sp_att(x))
@@ -274,7 +274,7 @@ class BamResNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -297,7 +297,7 @@ class BamResNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

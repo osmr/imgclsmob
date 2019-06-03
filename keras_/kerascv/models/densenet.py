@@ -28,7 +28,7 @@ def dense_unit(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     name : str, default 'dense_unit'
         Unit name.

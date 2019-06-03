@@ -33,7 +33,7 @@ class DropConvBlock(HybridBlock):
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool, default 0.0
+    dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -98,7 +98,7 @@ def drop_conv3x3_block(in_channels,
         Whether the layer uses a bias vector.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool, default 0.0
+    dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     return DropConvBlock(
@@ -143,7 +143,7 @@ class FractalBlock(HybridBlock):
         self.loc_drop_prob = loc_drop_prob
 
         with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             depth = 2 ** (num_columns - 1)
             for i in range(depth):
                 level_block_i = nn.HybridSequential(prefix='block{}_'.format(i + 1))
@@ -366,7 +366,7 @@ class CIFARFractalNet(HybridBlock):
         self.num_columns = num_columns
 
         with self.name_scope():
-            self.features = ParametricSequential(prefix='')
+            self.features = ParametricSequential(prefix="")
             for i, out_channels in enumerate(channels):
                 dropout_prob = dropout_probs[i]
                 self.features.add(FractalUnit(

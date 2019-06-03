@@ -291,7 +291,7 @@ class MiddleAttBlock(HybridBlock):
                 in_channels=channels,
                 out_channels=channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.sigmoid = nn.Activation('sigmoid')
+            self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)

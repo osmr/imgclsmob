@@ -1,126 +1,156 @@
 """
-    ResNet for ImageNet-1K, implemented in Gluon.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet for ImageNet-1K, implemented in Gluon.
+    Original paper: 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet16', 'resnet18_wd4', 'resnet18_wd2',
-           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnetbc38b', 'resnet50', 'resnet50b',
-           'resnet101', 'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'ResBlock', 'ResBottleneck',
-           'ResUnit', 'ResInitBlock', 'get_resnet']
+__all__ = ['DIAResNet', 'diaresnet10', 'diaresnet12', 'diaresnet14', 'diaresnetbc14b', 'diaresnet16', 'diaresnet18',
+           'diaresnet26', 'diaresnetbc26b', 'diaresnet34', 'diaresnetbc38b', 'diaresnet50', 'diaresnet50b',
+           'diaresnet101', 'diaresnet101b', 'diaresnet152', 'diaresnet152b', 'diaresnet200', 'diaresnet200b',
+           'DIAAttention', 'DIAResUnit']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
+from .common import conv1x1_block, DualPathSequential
+from .resnet import ResBlock, ResBottleneck, ResInitBlock
 
 
-class ResBlock(HybridBlock):
+class FirstLSTMAmp(HybridBlock):
     """
-    Simple ResNet block for residual path in ResNet unit.
+    First LSTM amplifier branch.
 
     Parameters:
     ----------
-    in_channels : int
+    in_units : int
         Number of input channels.
-    out_channels : int
+    units : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 bn_use_global_stats=False,
+                 in_units,
+                 units,
                  **kwargs):
-        super(ResBlock, self).__init__(**kwargs)
+        super(FirstLSTMAmp, self).__init__(**kwargs)
+        mid_units = in_units // 4
+
         with self.name_scope():
-            self.conv1 = conv3x3_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+            self.fc1 = nn.Dense(
+                units=mid_units,
+                in_units=in_units)
+            self.activ = nn.Activation("relu")
+            self.fc2 = nn.Dense(
+                units=units,
+                in_units=mid_units)
 
     def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
+        x = self.fc1(x)
+        x = self.activ(x)
+        x = self.fc2(x)
         return x
 
 
-class ResBottleneck(HybridBlock):
+class DIALSTMCell(HybridBlock):
     """
-    ResNet bottleneck block for residual path in ResNet unit.
+    DIA-LSTM cell.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    conv1_stride : bool, default False
-        Whether to use stride in the first or the second convolution layer of the block.
-    bottleneck_factor : int, default 4
-        Bottleneck factor.
+    in_x_features : int
+        Number of x input channels.
+    in_h_features : int
+        Number of h input channels.
+    num_layers : int
+        Number of amplifiers.
+    dropout_rate : float, default 0.1
+        Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 padding=1,
-                 dilation=1,
-                 bn_use_global_stats=False,
-                 conv1_stride=False,
-                 bottleneck_factor=4,
+                 in_x_features,
+                 in_h_features,
+                 num_layers,
+                 dropout_rate=0.1,
                  **kwargs):
-        super(ResBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // bottleneck_factor
+        super(DIALSTMCell, self).__init__(**kwargs)
+        out_features = 4 * in_h_features
 
         with self.name_scope():
-            self.conv1 = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                strides=(strides if conv1_stride else 1),
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv3x3_block(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                strides=(1 if conv1_stride else strides),
-                padding=padding,
-                dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv3 = conv1x1_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+            self.x_amps = nn.HybridSequential(prefix="")
+            self.h_amps = nn.HybridSequential(prefix="")
+            for i in range(num_layers):
+                amp_class = FirstLSTMAmp if i == 0 else nn.Dense
+                self.x_amps.add(amp_class(
+                    in_units=in_x_features,
+                    units=out_features))
+                self.h_amps.add(amp_class(
+                    in_units=in_h_features,
+                    units=out_features))
+                in_x_features = in_h_features
+            self.dropout = nn.Dropout(rate=dropout_rate)
 
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
-        return x
+    def hybrid_forward(self, F, x, h, c):
+        hy = []
+        cy = []
+        for i in range(len(self.x_amps._children)):
+            hx_i = h[i]
+            cx_i = c[i]
+            gates = self.x_amps[i](x) + self.h_amps[i](hx_i)
+            i_gate, f_gate, c_gate, o_gate = F.split(gates, axis=1, num_outputs=4)
+            i_gate = F.sigmoid(i_gate)
+            f_gate = F.sigmoid(f_gate)
+            c_gate = F.tanh(c_gate)
+            o_gate = F.sigmoid(o_gate)
+            cy_i = (f_gate * cx_i) + (i_gate * c_gate)
+            hy_i = o_gate * F.sigmoid(cy_i)
+            cy.append(cy_i)
+            hy.append(hy_i)
+            x = self.dropout(hy_i)
+        hy = F.stack(*hy, axis=0)
+        cy = F.stack(*cy, axis=0)
+        return hy, cy
 
 
-class ResUnit(HybridBlock):
+class DIAAttention(HybridBlock):
     """
-    ResNet unit with residual connection.
+    DIA-Net attention module.
+
+    Parameters:
+    ----------
+    in_x_features : int
+        Number of x input channels.
+    in_h_features : int
+        Number of h input channels.
+    num_layers : int, default 1
+        Number of amplifiers.
+    """
+    def __init__(self,
+                 in_x_features,
+                 in_h_features,
+                 num_layers=1,
+                 **kwargs):
+        super(DIAAttention, self).__init__(**kwargs)
+        with self.name_scope():
+            self.lstm = DIALSTMCell(
+                in_x_features=in_x_features,
+                in_h_features=in_h_features,
+                num_layers=num_layers)
+
+    def hybrid_forward(self, F, x, hc=None):
+        w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
+        w = w.flatten()
+        if hc is None:
+            h = F.zeros_like(w).expand_dims(axis=0)
+            c = F.zeros_like(w).expand_dims(axis=0)
+        else:
+            h, c = hc
+        h, c = self.lstm(w, h, c)
+        w = h.slice_axis(axis=0, begin=-1, end=None).squeeze(axis=0).expand_dims(axis=-1).expand_dims(axis=-1)
+        x = F.broadcast_mul(x, w)
+        return x, (h, c)
+
+
+class DIAResUnit(HybridBlock):
+    """
+    DIA-ResNet unit with residual connection.
 
     Parameters:
     ----------
@@ -140,6 +170,8 @@ class ResUnit(HybridBlock):
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
+    attention : nn.Module, default None
+        Attention module.
     """
     def __init__(self,
                  in_channels,
@@ -150,8 +182,9 @@ class ResUnit(HybridBlock):
                  bn_use_global_stats=False,
                  bottleneck=True,
                  conv1_stride=False,
+                 attention=None,
                  **kwargs):
-        super(ResUnit, self).__init__(**kwargs)
+        super(DIAResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         with self.name_scope():
@@ -179,57 +212,23 @@ class ResUnit(HybridBlock):
                     activation=None,
                     activate=False)
             self.activ = nn.Activation("relu")
+            self.attention = attention
 
-    def hybrid_forward(self, F, x):
+    def hybrid_forward(self, F, x, hc=None):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
             identity = x
         x = self.body(x)
+        x, hc = self.attention(x, hc)
         x = x + identity
         x = self.activ(x)
-        return x
+        return x, hc
 
 
-class ResInitBlock(HybridBlock):
+class DIAResNet(HybridBlock):
     """
-    ResNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_use_global_stats=False,
-                 **kwargs):
-        super(ResInitBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = conv7x7_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=2,
-                bn_use_global_stats=bn_use_global_stats)
-            self.pool = nn.MaxPool2D(
-                pool_size=3,
-                strides=2,
-                padding=1)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.pool(x)
-        return x
-
-
-class ResNet(HybridBlock):
-    """
-    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -261,7 +260,7 @@ class ResNet(HybridBlock):
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(ResNet, self).__init__(**kwargs)
+        super(DIAResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
@@ -273,17 +272,23 @@ class ResNet(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                stage = DualPathSequential(
+                    return_two=False,
+                    prefix="stage{}_".format(i + 1))
+                attention = DIAAttention(
+                    in_x_features=channels_per_stage[0],
+                    in_h_features=channels_per_stage[0])
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(ResUnit(
+                        stage.add(DIAResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
                             bn_use_global_stats=bn_use_global_stats,
                             bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
+                            conv1_stride=conv1_stride,
+                            attention=attention))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -302,15 +307,15 @@ class ResNet(HybridBlock):
         return x
 
 
-def get_resnet(blocks,
-               bottleneck=None,
-               conv1_stride=True,
-               width_scale=1.0,
-               model_name=None,
-               pretrained=False,
-               ctx=cpu(),
-               root=os.path.join("~", ".mxnet", "models"),
-               **kwargs):
+def get_diaresnet(blocks,
+                  bottleneck=None,
+                  conv1_stride=True,
+                  width_scale=1.0,
+                  model_name=None,
+                  pretrained=False,
+                  ctx=cpu(),
+                  root=os.path.join("~", ".mxnet", "models"),
+                  **kwargs):
     """
     Create ResNet model with specific parameters.
 
@@ -364,10 +369,8 @@ def get_resnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
-    elif blocks == 269:
-        layers = [3, 30, 48, 8]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported DIA-ResNet with number of blocks: {}".format(blocks))
 
     if bottleneck:
         assert (sum(layers) * 3 + 2 == blocks)
@@ -388,7 +391,7 @@ def get_resnet(blocks,
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
 
-    net = ResNet(
+    net = DIAResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -408,9 +411,9 @@ def get_resnet(blocks,
     return net
 
 
-def resnet10(**kwargs):
+def diaresnet10(**kwargs):
     """
-    ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-10 model from 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -422,12 +425,12 @@ def resnet10(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
+    return get_diaresnet(blocks=10, model_name="diaresnet10", **kwargs)
 
 
-def resnet12(**kwargs):
+def diaresnet12(**kwargs):
     """
-    ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-12 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -439,12 +442,12 @@ def resnet12(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
+    return get_diaresnet(blocks=12, model_name="diaresnet12", **kwargs)
 
 
-def resnet14(**kwargs):
+def diaresnet14(**kwargs):
     """
-    ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-14 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -456,12 +459,12 @@ def resnet14(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+    return get_diaresnet(blocks=14, model_name="diaresnet14", **kwargs)
 
 
-def resnetbc14b(**kwargs):
+def diaresnetbc14b(**kwargs):
     """
-    ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-BC-14b model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -473,12 +476,12 @@ def resnetbc14b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
+    return get_diaresnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="diaresnetbc14b", **kwargs)
 
 
-def resnet16(**kwargs):
+def diaresnet16(**kwargs):
     """
-    ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-16 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -490,13 +493,12 @@ def resnet16(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
+    return get_diaresnet(blocks=16, model_name="diaresnet16", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def diaresnet18(**kwargs):
     """
-    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    DIA-ResNet-18 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -507,62 +509,12 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_diaresnet(blocks=18, model_name="diaresnet18", **kwargs)
 
 
-def resnet18_wd2(**kwargs):
+def diaresnet26(**kwargs):
     """
-    ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
-
-
-def resnet18_w3d4(**kwargs):
-    """
-    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
-
-
-def resnet18(**kwargs):
-    """
-    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
-
-
-def resnet26(**kwargs):
-    """
-    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-26 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -574,12 +526,12 @@ def resnet26(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+    return get_diaresnet(blocks=26, bottleneck=False, model_name="diaresnet26", **kwargs)
 
 
-def resnetbc26b(**kwargs):
+def diaresnetbc26b(**kwargs):
     """
-    ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-BC-26b model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -591,12 +543,12 @@ def resnetbc26b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
+    return get_diaresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="diaresnetbc26b", **kwargs)
 
 
-def resnet34(**kwargs):
+def diaresnet34(**kwargs):
     """
-    ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-34 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -607,12 +559,12 @@ def resnet34(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
+    return get_diaresnet(blocks=34, model_name="diaresnet34", **kwargs)
 
 
-def resnetbc38b(**kwargs):
+def diaresnetbc38b(**kwargs):
     """
-    ResNet-BC-38b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-BC-38b model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -624,12 +576,12 @@ def resnetbc38b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="resnetbc38b", **kwargs)
+    return get_diaresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="diaresnetbc38b", **kwargs)
 
 
-def resnet50(**kwargs):
+def diaresnet50(**kwargs):
     """
-    ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-50 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -640,13 +592,13 @@ def resnet50(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
+    return get_diaresnet(blocks=50, model_name="diaresnet50", **kwargs)
 
 
-def resnet50b(**kwargs):
+def diaresnet50b(**kwargs):
     """
-    ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-50 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
+    Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -657,12 +609,12 @@ def resnet50b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
+    return get_diaresnet(blocks=50, conv1_stride=False, model_name="diaresnet50b", **kwargs)
 
 
-def resnet101(**kwargs):
+def diaresnet101(**kwargs):
     """
-    ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-101 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -673,13 +625,13 @@ def resnet101(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
+    return get_diaresnet(blocks=101, model_name="diaresnet101", **kwargs)
 
 
-def resnet101b(**kwargs):
+def diaresnet101b(**kwargs):
     """
-    ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-101 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
+    Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -690,12 +642,12 @@ def resnet101b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
+    return get_diaresnet(blocks=101, conv1_stride=False, model_name="diaresnet101b", **kwargs)
 
 
-def resnet152(**kwargs):
+def diaresnet152(**kwargs):
     """
-    ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-152 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -706,13 +658,13 @@ def resnet152(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
+    return get_diaresnet(blocks=152, model_name="diaresnet152", **kwargs)
 
 
-def resnet152b(**kwargs):
+def diaresnet152b(**kwargs):
     """
-    ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-152 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
+    Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -723,12 +675,12 @@ def resnet152b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
+    return get_diaresnet(blocks=152, conv1_stride=False, model_name="diaresnet152b", **kwargs)
 
 
-def resnet200(**kwargs):
+def diaresnet200(**kwargs):
     """
-    ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    DIA-ResNet-200 model 'DIANet: Dense-and-Implicit Attention Network,' https://arxiv.org/abs/1905.10671.
     It's an experimental model.
 
     Parameters:
@@ -740,13 +692,13 @@ def resnet200(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
+    return get_diaresnet(blocks=200, model_name="diaresnet200", **kwargs)
 
 
-def resnet200b(**kwargs):
+def diaresnet200b(**kwargs):
     """
-    ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
+    DIA-ResNet-200 model with stride at the second convolution in bottleneck block from 'DIANet: Dense-and-Implicit
+    Attention Network,' https://arxiv.org/abs/1905.10671.
 
     Parameters:
     ----------
@@ -757,7 +709,7 @@ def resnet200b(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
+    return get_diaresnet(blocks=200, conv1_stride=False, model_name="diaresnet200b", **kwargs)
 
 
 def _test():
@@ -767,27 +719,24 @@ def _test():
     pretrained = False
 
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnetbc14b,
-        resnet16,
-        resnet18_wd4,
-        resnet18_wd2,
-        resnet18_w3d4,
-        resnet18,
-        resnet26,
-        resnetbc26b,
-        resnet34,
-        resnetbc38b,
-        resnet50,
-        resnet50b,
-        resnet101,
-        resnet101b,
-        resnet152,
-        resnet152b,
-        resnet200,
-        resnet200b,
+        diaresnet10,
+        diaresnet12,
+        diaresnet14,
+        diaresnetbc14b,
+        diaresnet16,
+        diaresnet18,
+        diaresnet26,
+        diaresnetbc26b,
+        diaresnet34,
+        diaresnetbc38b,
+        diaresnet50,
+        diaresnet50b,
+        diaresnet101,
+        diaresnet101b,
+        diaresnet152,
+        diaresnet152b,
+        diaresnet200,
+        diaresnet200b,
     ]
 
     for model in models:
@@ -806,27 +755,24 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet10 or weight_count == 5418792)
-        assert (model != resnet12 or weight_count == 5492776)
-        assert (model != resnet14 or weight_count == 5788200)
-        assert (model != resnetbc14b or weight_count == 10064936)
-        assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 3937400)
-        assert (model != resnet18_wd2 or weight_count == 5804296)
-        assert (model != resnet18_w3d4 or weight_count == 8476056)
-        assert (model != resnet18 or weight_count == 11689512)
-        assert (model != resnet26 or weight_count == 17960232)
-        assert (model != resnetbc26b or weight_count == 15995176)
-        assert (model != resnet34 or weight_count == 21797672)
-        assert (model != resnetbc38b or weight_count == 21925416)
-        assert (model != resnet50 or weight_count == 25557032)
-        assert (model != resnet50b or weight_count == 25557032)
-        assert (model != resnet101 or weight_count == 44549160)
-        assert (model != resnet101b or weight_count == 44549160)
-        assert (model != resnet152 or weight_count == 60192808)
-        assert (model != resnet152b or weight_count == 60192808)
-        assert (model != resnet200 or weight_count == 64673832)
-        assert (model != resnet200b or weight_count == 64673832)
+        assert (model != diaresnet10 or weight_count == 6297352)
+        assert (model != diaresnet12 or weight_count == 6371336)
+        assert (model != diaresnet14 or weight_count == 6666760)
+        assert (model != diaresnetbc14b or weight_count == 24023976)
+        assert (model != diaresnet16 or weight_count == 7847432)
+        assert (model != diaresnet18 or weight_count == 12568072)
+        assert (model != diaresnet26 or weight_count == 18838792)
+        assert (model != diaresnetbc26b or weight_count == 29954216)
+        assert (model != diaresnet34 or weight_count == 22676232)
+        assert (model != diaresnetbc38b or weight_count == 35884456)
+        assert (model != diaresnet50 or weight_count == 39516072)
+        assert (model != diaresnet50b or weight_count == 39516072)
+        assert (model != diaresnet101 or weight_count == 58508200)
+        assert (model != diaresnet101b or weight_count == 58508200)
+        assert (model != diaresnet152 or weight_count == 74151848)
+        assert (model != diaresnet152b or weight_count == 74151848)
+        assert (model != diaresnet200 or weight_count == 78632872)
+        assert (model != diaresnet200b or weight_count == 78632872)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

@@ -27,6 +27,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - CBAM-ResNet (['CBAM: Convolutional Block Attention Module'](https://arxiv.org/abs/1807.06521))
 - ResAttNet (['Residual Attention Network for Image Classification'](https://arxiv.org/abs/1704.06904))
 - SKNet (['Selective Kernel Networks'](https://arxiv.org/abs/1903.06586))
+- DIA-ResNet (['DIANet: Dense-and-Implicit Attention Network'](https://arxiv.org/abs/1905.10671))
 - PyramidNet (['Deep Pyramidal Residual Networks'](https://arxiv.org/abs/1610.02915))
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
 - ShaResNet (['ShaResNet: reducing residual network parameter number by sharing weights'](https://arxiv.org/abs/1702.08782))

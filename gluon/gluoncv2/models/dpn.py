@@ -384,7 +384,7 @@ class DPN(HybridBlock):
                 return_two=False,
                 first_ordinals=1,
                 last_ordinals=0,
-                prefix='')
+                prefix="")
             self.features.add(DPNInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,

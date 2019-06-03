@@ -115,7 +115,7 @@ class PyramidPooling(HybridBlock):
         mid_channels = in_channels // 4
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Identity())
             for pool_out_size in pool_out_sizes:
                 self.branches.add(PyramidPoolingBranch(

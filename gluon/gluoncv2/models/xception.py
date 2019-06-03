@@ -181,7 +181,7 @@ class XceptionUnit(HybridBlock):
                     bn_use_global_stats=bn_use_global_stats,
                     activate=False)
 
-            self.body = nn.HybridSequential(prefix='')
+            self.body = nn.HybridSequential(prefix="")
             for i in range(reps):
                 if (grow_first and (i == 0)) or ((not grow_first) and (i == reps - 1)):
                     in_channels_i = in_channels
@@ -320,7 +320,7 @@ class Xception(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(XceptionInitBlock(
                 in_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats))
@@ -341,7 +341,7 @@ class Xception(HybridBlock):
                 self.features.add(stage)
             self.features.add(XceptionFinalBlock(bn_use_global_stats=bn_use_global_stats))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

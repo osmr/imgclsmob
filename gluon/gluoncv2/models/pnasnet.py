@@ -499,7 +499,7 @@ class PNASNet(HybridBlock):
                 pool_size=11,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dropout(rate=0.5))
             self.output.add(nn.Dense(

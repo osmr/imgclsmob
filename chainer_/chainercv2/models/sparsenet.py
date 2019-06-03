@@ -44,7 +44,7 @@ class SparseBlock(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -88,7 +88,7 @@ class SparseStage(Chain):
         Number of output channels for each unit in stage.
     growth_rate : int
         Growth rate for blocks.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     do_transition : bool
         Whether use transition block.

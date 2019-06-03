@@ -201,7 +201,7 @@ class ConvSeqBranch(HybridBlock):
         assert (len(out_channels_list) == len(padding_list))
 
         with self.name_scope():
-            self.conv_list = nn.HybridSequential(prefix='')
+            self.conv_list = nn.HybridSequential(prefix="")
             for out_channels, kernel_size, strides, padding in zip(
                     out_channels_list, kernel_size_list, strides_list, padding_list):
                 self.conv_list.add(InceptConv(
@@ -247,7 +247,7 @@ class ConvSeq3x3Branch(HybridBlock):
                  **kwargs):
         super(ConvSeq3x3Branch, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv_list = nn.HybridSequential(prefix='')
+            self.conv_list = nn.HybridSequential(prefix="")
             for out_channels, kernel_size, strides, padding in zip(
                     out_channels_list, kernel_size_list, strides_list, padding_list):
                 self.conv_list.add(InceptConv(
@@ -304,7 +304,7 @@ class InceptionAUnit(HybridBlock):
         pool_out_channels = out_channels - 224
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=64,
@@ -356,7 +356,7 @@ class ReductionAUnit(HybridBlock):
         assert (out_channels == 768)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(ConvSeqBranch(
                 in_channels=in_channels,
                 out_channels_list=(384,),
@@ -404,7 +404,7 @@ class InceptionBUnit(HybridBlock):
         assert (out_channels == 768)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=192,
@@ -456,7 +456,7 @@ class ReductionBUnit(HybridBlock):
         assert (out_channels == 1280)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(ConvSeqBranch(
                 in_channels=in_channels,
                 out_channels_list=(192, 320),
@@ -500,7 +500,7 @@ class InceptionCUnit(HybridBlock):
         assert (out_channels == 2048)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=320,
@@ -648,7 +648,7 @@ class InceptionV3(HybridBlock):
         reduction_units = [ReductionAUnit, ReductionBUnit]
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(InceptInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -681,7 +681,7 @@ class InceptionV3(HybridBlock):
                 pool_size=8,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dropout(rate=dropout_rate))
             self.output.add(nn.Dense(

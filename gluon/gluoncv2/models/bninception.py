@@ -240,7 +240,7 @@ class InceptionBlock(HybridBlock):
         assert (len(mid2_channels_list) == 4)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[0],
@@ -293,7 +293,7 @@ class ReductionBlock(HybridBlock):
         assert (len(mid2_channels_list) == 4)
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Inception3x3Branch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[1],

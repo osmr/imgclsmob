@@ -117,7 +117,7 @@ class Res2NetUnit(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats)
-            self.branches = HierarchicalConcurrent(axis=1, multi_input=True, prefix='')
+            self.branches = HierarchicalConcurrent(axis=1, multi_input=True, prefix="")
             if downsample:
                 self.branches.add(conv1x1(
                     in_channels=brn_channels,

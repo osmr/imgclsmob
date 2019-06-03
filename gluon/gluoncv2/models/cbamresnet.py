@@ -70,7 +70,7 @@ class ChannelGate(HybridBlock):
             self.mlp = MLP(
                 channels=channels,
                 reduction_ratio=reduction_ratio)
-            self.sigmoid = nn.Activation('sigmoid')
+            self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
         att1 = self.avg_pool(x)
@@ -103,7 +103,7 @@ class SpatialGate(HybridBlock):
                 out_channels=1,
                 bn_use_global_stats=bn_use_global_stats,
                 activate=False)
-            self.sigmoid = nn.Activation('sigmoid')
+            self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
         att1 = x.max(axis=1).expand_dims(1)
@@ -245,7 +245,7 @@ class CbamResNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -268,7 +268,7 @@ class CbamResNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

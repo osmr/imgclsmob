@@ -238,7 +238,7 @@ class InceptionAUnit(HybridBlock):
         in_channels = 320
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=32,
@@ -288,7 +288,7 @@ class ReductionAUnit(HybridBlock):
         in_channels = 320
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(ConvSeqBranch(
                 in_channels=in_channels,
                 out_channels_list=(384,),
@@ -327,7 +327,7 @@ class InceptionBUnit(HybridBlock):
         in_channels = 1088
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=192,
@@ -370,7 +370,7 @@ class ReductionBUnit(HybridBlock):
         in_channels = 1088
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(ConvSeqBranch(
                 in_channels=in_channels,
                 out_channels_list=(256, 384),
@@ -423,7 +423,7 @@ class InceptionCUnit(HybridBlock):
         in_channels = 2080
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=192,
@@ -468,7 +468,7 @@ class InceptBlock5b(HybridBlock):
         in_channels = 192
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(Conv1x1Branch(
                 in_channels=in_channels,
                 out_channels=96,

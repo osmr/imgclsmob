@@ -172,7 +172,7 @@ class SqueezeNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(SqueezeInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
@@ -198,7 +198,7 @@ class SqueezeNet(HybridBlock):
                 self.features.add(stage)
             self.features.add(nn.Dropout(rate=0.5))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Conv2D(
                 channels=classes,
                 kernel_size=1,

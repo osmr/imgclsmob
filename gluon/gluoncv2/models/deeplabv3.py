@@ -112,7 +112,7 @@ class AtrousSpatialPyramidPooling(HybridBlock):
         project_in_channels = 5 * mid_channels
 
         with self.name_scope():
-            self.branches = HybridConcurrent(axis=1, prefix='')
+            self.branches = HybridConcurrent(axis=1, prefix="")
             self.branches.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels))

@@ -81,7 +81,7 @@ class CIFARNIN(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
@@ -108,7 +108,7 @@ class CIFARNIN(HybridBlock):
                         in_channels = out_channels
                 self.features.add(stage)
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(NINConv(
                 in_channels=in_channels,
                 out_channels=classes,

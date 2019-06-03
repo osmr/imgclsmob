@@ -145,7 +145,7 @@ class ESPBlock(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats,
                 activation=(lambda: PReLU2(mid_channels)))
 
-            self.branches = HierarchicalConcurrent(axis=1, prefix='')
+            self.branches = HierarchicalConcurrent(axis=1, prefix="")
             for i in range(num_branches):
                 self.branches.add(conv3x3(
                     in_channels=mid_channels,
@@ -361,7 +361,7 @@ class ESPNetv2(HybridBlock):
                 return_two=False,
                 first_ordinals=0,
                 last_ordinals=2,
-                prefix='')
+                prefix="")
             self.features.add(ESPInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,

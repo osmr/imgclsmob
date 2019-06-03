@@ -115,7 +115,7 @@ class PreSEAttBlock(HybridBlock):
                 in_channels=mid_cannels,
                 out_channels=out_channels,
                 use_bias=True)
-            self.sigmoid = nn.Activation('sigmoid')
+            self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
         x = self.bn(x)
@@ -261,7 +261,7 @@ class DownUnit(HybridBlock):
                  **kwargs):
         super(DownUnit, self).__init__(**kwargs)
         with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i, out_channels in enumerate(out_channels_list):
                 self.blocks.add(FishBlock(
                     in_channels=in_channels,
@@ -301,7 +301,7 @@ class UpUnit(HybridBlock):
                  **kwargs):
         super(UpUnit, self).__init__(**kwargs)
         with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i, out_channels in enumerate(out_channels_list):
                 squeeze = (dilation > 1) and (i == 0)
                 self.blocks.add(FishBlock(
@@ -339,7 +339,7 @@ class SkipUnit(HybridBlock):
                  **kwargs):
         super(SkipUnit, self).__init__(**kwargs)
         with self.name_scope():
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i, out_channels in enumerate(out_channels_list):
                 self.blocks.add(FishBlock(
                     in_channels=in_channels,
@@ -391,7 +391,7 @@ class SkipAttUnit(HybridBlock):
                 out_channels=out_channels_list[-1],
                 bn_use_global_stats=bn_use_global_stats)
 
-            self.blocks = nn.HybridSequential(prefix='')
+            self.blocks = nn.HybridSequential(prefix="")
             for i, out_channels in enumerate(out_channels_list):
                 self.blocks.add(FishBlock(
                     in_channels=in_channels,
@@ -485,15 +485,15 @@ class FishNet(HybridBlock):
         skip2_channels = skip_channels[1]
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(SEInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
 
-            down1_seq = nn.HybridSequential(prefix='')
-            skip1_seq = nn.HybridSequential(prefix='')
+            down1_seq = nn.HybridSequential(prefix="")
+            skip1_seq = nn.HybridSequential(prefix="")
             for i in range(depth + 1):
                 skip1_channels_list = skip1_channels[i]
                 if i < depth:
@@ -514,8 +514,8 @@ class FishNet(HybridBlock):
                         bn_use_global_stats=bn_use_global_stats))
                     in_channels = skip1_channels_list[-1]
 
-            up_seq = nn.HybridSequential(prefix='')
-            skip2_seq = nn.HybridSequential(prefix='')
+            up_seq = nn.HybridSequential(prefix="")
+            skip2_seq = nn.HybridSequential(prefix="")
             for i in range(depth + 1):
                 skip2_channels_list = skip2_channels[i]
                 if i > 0:
@@ -536,7 +536,7 @@ class FishNet(HybridBlock):
                 else:
                     skip2_seq.add(Identity())
 
-            down2_seq = nn.HybridSequential(prefix='')
+            down2_seq = nn.HybridSequential(prefix="")
             for i in range(depth):
                 down2_channels_list = down2_channels[i]
                 down2_seq.add(DownUnit(
@@ -559,7 +559,7 @@ class FishNet(HybridBlock):
                 pool_size=7,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(conv1x1(
                 in_channels=in_channels,
                 out_channels=classes,

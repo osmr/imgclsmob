@@ -33,7 +33,7 @@ class DenseSimpleUnit(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -103,7 +103,7 @@ class CIFARDenseNet(HybridBlock):
         unit_class = DenseUnit if bottleneck else DenseSimpleUnit
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             self.features.add(conv3x3(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
@@ -132,7 +132,7 @@ class CIFARDenseNet(HybridBlock):
                 pool_size=8,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dense(
                 units=classes,

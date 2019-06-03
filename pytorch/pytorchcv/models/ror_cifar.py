@@ -23,7 +23,7 @@ class RoRBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,
@@ -62,7 +62,7 @@ class RoRResUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     last_activate : bool, default True
         Whether activate output.
@@ -110,7 +110,7 @@ class RoRResStage(nn.Module):
         Number of input channels.
     out_channels_list : list of int
         Number of output channels for each unit.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     downsample : bool, default True
         Whether downsample output.
@@ -164,7 +164,7 @@ class RoRResBody(nn.Module):
         Number of input channels.
     out_channels_lists : list of list of int
         Number of output channels for each stage.
-    dropout_rate : bool
+    dropout_rate : float
         Parameter of Dropout layer. Faction of the input units to drop.
     """
     def __init__(self,

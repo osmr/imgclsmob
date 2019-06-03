@@ -397,7 +397,7 @@ class NasDwsConv(HybridBlock):
         self.extra_padding = extra_padding
 
         with self.name_scope():
-            self.activ = nn.Activation(activation='relu')
+            self.activ = nn.Activation(activation="relu")
             self.conv = DwsConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
@@ -1127,7 +1127,7 @@ class NASNet(HybridBlock):
                 return_two=False,
                 first_ordinals=1,
                 last_ordinals=2,
-                prefix='')
+                prefix="")
             self.features.add(NASNetInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels))
@@ -1181,7 +1181,7 @@ class NASNet(HybridBlock):
                 pool_size=final_pool_size,
                 strides=1))
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
             self.output.add(nn.Dropout(rate=0.5))
             self.output.add(nn.Dense(

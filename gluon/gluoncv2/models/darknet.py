@@ -88,7 +88,7 @@ class DarkNet(HybridBlock):
         self.classes = classes
 
         with self.name_scope():
-            self.features = nn.HybridSequential(prefix='')
+            self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
@@ -106,7 +106,7 @@ class DarkNet(HybridBlock):
                             strides=2))
                 self.features.add(stage)
 
-            self.output = nn.HybridSequential(prefix='')
+            self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Conv2D(
                 channels=classes,
                 kernel_size=1,

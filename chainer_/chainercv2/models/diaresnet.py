@@ -111,8 +111,6 @@ class DIALSTMCell(Chain):
             cy.append(cy_i)
             hy.append(hy_i)
             x = self.dropout(hy_i)
-        hy = F.stack(hy, axis=0)
-        cy = F.stack(cy, axis=0)
         return hy, cy
 
 
@@ -134,6 +132,8 @@ class DIAAttention(Chain):
                  in_h_features,
                  num_layers=1):
         super(DIAAttention, self).__init__()
+        self.num_layers = num_layers
+
         with self.init_scope():
             self.lstm = DIALSTMCell(
                 in_x_features=in_x_features,
@@ -144,8 +144,8 @@ class DIAAttention(Chain):
         w = F.average_pooling_2d(x, ksize=x.shape[2:])
         w = w.reshape((w.shape[0], -1))
         if hc is None:
-            h = F.expand_dims(self.xp.zeros_like(w, dtype=w.dtype), axis=0)
-            c = F.expand_dims(self.xp.zeros_like(w, dtype=w.dtype), axis=0)
+            h = [self.xp.zeros_like(w, dtype=w.dtype)] * self.num_layers
+            c = [self.xp.zeros_like(w, dtype=w.dtype)] * self.num_layers
         else:
             h, c = hc
         h, c = self.lstm(w, h, c)
@@ -176,6 +176,8 @@ class DIAResUnit(Chain):
         Whether to use stride in the first or the second convolution layer of the block.
     attention : nn.Module, default None
         Attention module.
+    hold_attention : bool, default False
+        Whether hold attention module.
     """
     def __init__(self,
                  in_channels,
@@ -185,7 +187,8 @@ class DIAResUnit(Chain):
                  dilate=1,
                  bottleneck=True,
                  conv1_stride=False,
-                 attention=None):
+                 attention=None,
+                 hold_attention=True):
         super(DIAResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -211,6 +214,9 @@ class DIAResUnit(Chain):
                     activation=None,
                     activate=False)
             self.activ = F.relu
+            if hold_attention:
+                self.attention = attention
+        if not hold_attention:
             self.attention = attention
 
     def __call__(self, x, hc=None):
@@ -279,7 +285,8 @@ class DIAResNet(Chain):
                                 stride=stride,
                                 bottleneck=bottleneck,
                                 conv1_stride=conv1_stride,
-                                attention=attention))
+                                attention=attention,
+                                hold_attention=(j == 0)))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
                 setattr(self.features, "final_pool", partial(
@@ -702,24 +709,24 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != diaresnet10 or weight_count == 6297352)
-        # assert (model != diaresnet12 or weight_count == 6371336)
-        # assert (model != diaresnet14 or weight_count == 6666760)
-        # assert (model != diaresnetbc14b or weight_count == 24023976)
-        # assert (model != diaresnet16 or weight_count == 7847432)
-        # assert (model != diaresnet18 or weight_count == 12568072)
-        # assert (model != diaresnet26 or weight_count == 18838792)
-        # assert (model != diaresnetbc26b or weight_count == 29954216)
-        # assert (model != diaresnet34 or weight_count == 22676232)
-        # assert (model != diaresnetbc38b or weight_count == 35884456)
-        # assert (model != diaresnet50 or weight_count == 39516072)
-        # assert (model != diaresnet50b or weight_count == 39516072)
-        # assert (model != diaresnet101 or weight_count == 58508200)
-        # assert (model != diaresnet101b or weight_count == 58508200)
-        # assert (model != diaresnet152 or weight_count == 74151848)
-        # assert (model != diaresnet152b or weight_count == 74151848)
-        # assert (model != diaresnet200 or weight_count == 78632872)
-        # assert (model != diaresnet200b or weight_count == 78632872)
+        assert (model != diaresnet10 or weight_count == 6297352)
+        assert (model != diaresnet12 or weight_count == 6371336)
+        assert (model != diaresnet14 or weight_count == 6666760)
+        assert (model != diaresnetbc14b or weight_count == 24023976)
+        assert (model != diaresnet16 or weight_count == 7847432)
+        assert (model != diaresnet18 or weight_count == 12568072)
+        assert (model != diaresnet26 or weight_count == 18838792)
+        assert (model != diaresnetbc26b or weight_count == 29954216)
+        assert (model != diaresnet34 or weight_count == 22676232)
+        assert (model != diaresnetbc38b or weight_count == 35884456)
+        assert (model != diaresnet50 or weight_count == 39516072)
+        assert (model != diaresnet50b or weight_count == 39516072)
+        assert (model != diaresnet101 or weight_count == 58508200)
+        assert (model != diaresnet101b or weight_count == 58508200)
+        assert (model != diaresnet152 or weight_count == 74151848)
+        assert (model != diaresnet152b or weight_count == 74151848)
+        assert (model != diaresnet200 or weight_count == 78632872)
+        assert (model != diaresnet200b or weight_count == 78632872)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

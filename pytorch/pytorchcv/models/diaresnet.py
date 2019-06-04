@@ -69,6 +69,7 @@ class DIALSTMCell(nn.Module):
                  num_layers,
                  dropout_rate=0.1):
         super(DIALSTMCell, self).__init__()
+        self.num_layers = num_layers
         out_features = 4 * in_h_features
 
         self.x_amps = nn.Sequential()
@@ -87,7 +88,7 @@ class DIALSTMCell(nn.Module):
     def forward(self, x, h, c):
         hy = []
         cy = []
-        for i in range(len(self.x_amps._modules)):
+        for i in range(self.num_layers):
             hx_i = h[i]
             cx_i = c[i]
             gates = self.x_amps[i](x) + self.h_amps[i](hx_i)
@@ -101,8 +102,6 @@ class DIALSTMCell(nn.Module):
             cy.append(cy_i)
             hy.append(hy_i)
             x = self.dropout(hy_i)
-        hy = torch.stack(hy, dim=0)
-        cy = torch.stack(cy, dim=0)
         return hy, cy
 
 
@@ -124,6 +123,8 @@ class DIAAttention(nn.Module):
                  in_h_features,
                  num_layers=1):
         super(DIAAttention, self).__init__()
+        self.num_layers = num_layers
+
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.lstm = DIALSTMCell(
             in_x_features=in_x_features,
@@ -134,12 +135,12 @@ class DIAAttention(nn.Module):
         w = self.pool(x)
         w = w.view(w.size(0), -1)
         if hc is None:
-            h = torch.zeros_like(w).unsqueeze(dim=0)
-            c = torch.zeros_like(w).unsqueeze(dim=0)
+            h = [torch.zeros_like(w)] * self.num_layers
+            c = [torch.zeros_like(w)] * self.num_layers
         else:
             h, c = hc
         h, c = self.lstm(w, h, c)
-        w = h[-1].unsqueeze(dim=2).unsqueeze(dim=3)
+        w = h[-1].unsqueeze(dim=-1).unsqueeze(dim=-1)
         x = x * w
         return x, (h, c)
 

@@ -71,6 +71,7 @@ class DIALSTMCell(HybridBlock):
                  dropout_rate=0.1,
                  **kwargs):
         super(DIALSTMCell, self).__init__(**kwargs)
+        self.num_layers = num_layers
         out_features = 4 * in_h_features
 
         with self.name_scope():
@@ -90,7 +91,7 @@ class DIALSTMCell(HybridBlock):
     def hybrid_forward(self, F, x, h, c):
         hy = []
         cy = []
-        for i in range(len(self.x_amps._children)):
+        for i in range(self.num_layers):
             hx_i = h[i]
             cx_i = c[i]
             gates = self.x_amps[i](x) + self.h_amps[i](hx_i)
@@ -104,8 +105,6 @@ class DIALSTMCell(HybridBlock):
             cy.append(cy_i)
             hy.append(hy_i)
             x = self.dropout(hy_i)
-        hy = F.stack(*hy, axis=0)
-        cy = F.stack(*cy, axis=0)
         return hy, cy
 
 
@@ -128,6 +127,8 @@ class DIAAttention(HybridBlock):
                  num_layers=1,
                  **kwargs):
         super(DIAAttention, self).__init__(**kwargs)
+        self.num_layers = num_layers
+
         with self.name_scope():
             self.lstm = DIALSTMCell(
                 in_x_features=in_x_features,
@@ -138,12 +139,12 @@ class DIAAttention(HybridBlock):
         w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
         w = w.flatten()
         if hc is None:
-            h = F.zeros_like(w).expand_dims(axis=0)
-            c = F.zeros_like(w).expand_dims(axis=0)
+            h = [F.zeros_like(w)] * self.num_layers
+            c = [F.zeros_like(w)] * self.num_layers
         else:
             h, c = hc
         h, c = self.lstm(w, h, c)
-        w = h.slice_axis(axis=0, begin=-1, end=None).squeeze(axis=0).expand_dims(axis=-1).expand_dims(axis=-1)
+        w = h[self.num_layers - 1].expand_dims(axis=-1).expand_dims(axis=-1)
         x = F.broadcast_mul(x, w)
         return x, (h, c)
 
@@ -774,9 +775,9 @@ def _test():
         assert (model != diaresnet200 or weight_count == 78632872)
         assert (model != diaresnet200b or weight_count == 78632872)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = mx.nd.zeros((14, 3, 224, 224), ctx=ctx)
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (y.shape == (14, 1000))
 
 
 if __name__ == "__main__":

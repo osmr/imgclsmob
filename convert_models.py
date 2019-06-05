@@ -480,6 +480,12 @@ def convert_gl2ch(dst_net,
                   ext_src_param_keys2,
                   src_model):
 
+    if src_model.startswith("diares"):
+        src1 = list(filter(re.compile("^features\.[0-9]*\.[1-9]*\.attention").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n
+        assert (len(src_param_keys) == len(dst_param_keys))
+
     dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/features/body/', '/features/zbody/') for key in dst_param_keys]
@@ -1028,6 +1034,8 @@ def main():
     if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]) or\
             ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
+    if (args.dst_fwk == "chainer") and args.src_model.startswith("diaresnet"):
+        assert (len(src_param_keys) >= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))
 

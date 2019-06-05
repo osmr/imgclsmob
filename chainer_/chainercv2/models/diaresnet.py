@@ -144,8 +144,8 @@ class DIAAttention(Chain):
         w = F.average_pooling_2d(x, ksize=x.shape[2:])
         w = w.reshape((w.shape[0], -1))
         if hc is None:
-            h = [self.xp.zeros_like(w, dtype=w.dtype)] * self.num_layers
-            c = [self.xp.zeros_like(w, dtype=w.dtype)] * self.num_layers
+            h = [self.xp.zeros_like(w.array, dtype=w.dtype)] * self.num_layers
+            c = [self.xp.zeros_like(w.array, dtype=w.dtype)] * self.num_layers
         else:
             h, c = hc
         h, c = self.lstm(w, h, c)
@@ -707,6 +707,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
+        # net.to_gpu()
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != diaresnet10 or weight_count == 6297352)
@@ -729,6 +730,8 @@ def _test():
         assert (model != diaresnet200b or weight_count == 78632872)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
+        # import cupy
+        # x = cupy.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
         assert (y.shape == (1, 1000))
 

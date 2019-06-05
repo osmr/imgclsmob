@@ -363,6 +363,10 @@ Some remarks:
 | RiR | 3.28 | 384 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_cifar10-0328-5bed6f35.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 5.15 | 64 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.215/shakeshakeresnet20_2x16d_cifar10-0515-a7b8a2f7.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 3.17 | 64 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.217/shakeshakeresnet26_2x32d_cifar10-0317-21e60e62.params.log)) |
+| DIA-ResNet-20 | 6.22 | 64 | 286,866 | 41.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet20_cifar10-0622-3e47641d.params.log)) |
+| DIA-ResNet-56 | 5.05 | 64 | 870,162 | 127.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet56_cifar10-0505-45df6974.params.log)) |
+| DIA-ResNet-110 | 4.10 | 64 | 1,745,106 | 255.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet110_cifar10-0410-56f547ec.params.log)) |
+| DIA-ResNet-164(BN) | 3.50 | 256 | 1,923,002 | 259.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet164bn_cifar10-0350-533e7c6a.params.log)) |
 
 ### CIFAR-100
 

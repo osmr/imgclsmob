@@ -481,7 +481,7 @@ def convert_gl2ch(dst_net,
                   src_model):
 
     if src_model.startswith("diares"):
-        src1 = list(filter(re.compile("^features\.[0-9]*\.[1-9]*\.attention").search, src_param_keys))
+        src1 = list(filter(re.compile("^features\.[0-9]*\.\d*[1-9]\d*\.attention").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n
         assert (len(src_param_keys) == len(dst_param_keys))

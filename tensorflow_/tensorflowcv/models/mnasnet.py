@@ -7,170 +7,7 @@ __all__ = ['MnasNet', 'mnasnet']
 
 import os
 import tensorflow as tf
-from .common import conv2d, batchnorm, is_channels_first, flatten
-
-
-def conv_block(x,
-               in_channels,
-               out_channels,
-               kernel_size,
-               strides,
-               padding,
-               groups,
-               activate,
-               training,
-               data_format,
-               name="conv_block"):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int
-        Number of groups.
-    activate : bool
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor
-      Whether to return the output in training mode or in inference mode.
-    data_format : str
-        The ordering of the dimensions in tensors.
-    name : str, default 'conv_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        groups=groups,
-        use_bias=False,
-        data_format=data_format,
-        name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        data_format=data_format,
-        name=name + "/bn")
-    if activate:
-        x = tf.nn.relu(x, name=name + "/activ")
-    return x
-
-
-def conv1x1_block(x,
-                  in_channels,
-                  out_channels,
-                  activate=True,
-                  training=False,
-                  data_format="channels_last",
-                  name="conv1x1_block"):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    activate : bool, default True
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    name : str, default 'conv1x1_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        groups=1,
-        activate=activate,
-        training=training,
-        data_format=data_format,
-        name=name)
-
-
-def dwconv_block(x,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 activate=True,
-                 training=False,
-                 data_format="channels_last",
-                 name="dwconv_block"):
-    """
-    Depthwise version of the standard convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    activate : bool, default True
-        Whether activate the convolution block.
-    training : bool, or a TensorFlow boolean scalar tensor, default False
-      Whether to return the output in training mode or in inference mode.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    name : str, default 'dwconv_block'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    return conv_block(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=(kernel_size // 2),
-        groups=out_channels,
-        activate=activate,
-        training=training,
-        data_format=data_format,
-        name=name)
+from .common import is_channels_first, flatten, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block
 
 
 def dws_conv_block(x,
@@ -202,12 +39,10 @@ def dws_conv_block(x,
     Tensor
         Resulted tensor.
     """
-    x = dwconv_block(
+    x = dwconv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=in_channels,
-        kernel_size=3,
-        strides=1,
         training=training,
         data_format=data_format,
         name=name + "/dw_conv")
@@ -261,6 +96,7 @@ def mnas_unit(x,
     """
     residual = (in_channels == out_channels) and (strides == 1)
     mid_channels = in_channels * expansion_factor
+    dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
     if residual:
         identity = x
@@ -269,17 +105,14 @@ def mnas_unit(x,
         x=x,
         in_channels=in_channels,
         out_channels=mid_channels,
-        activate=True,
         training=training,
         data_format=data_format,
         name=name + "/conv1")
-    x = dwconv_block(
+    x = dwconv_block_fn(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
-        kernel_size=kernel_size,
         strides=strides,
-        activate=True,
         training=training,
         data_format=data_format,
         name=name + "/conv2")
@@ -327,15 +160,11 @@ def mnas_init_block(x,
     Tensor
         Resulted tensor.
     """
-    x = conv_block(
+    x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels_list[0],
-        kernel_size=3,
         strides=2,
-        padding=1,
-        groups=1,
-        activate=True,
         training=training,
         data_format=data_format,
         name=name + "/conv1")

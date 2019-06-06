@@ -8,129 +8,7 @@ __all__ = ['MnasNet', 'mnasnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class ConvBlock(HybridBlock):
-    """
-    Standard convolution block with Batch normalization and ReLU activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    groups : int, default 1
-        Number of groups.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 groups=1,
-                 bn_use_global_stats=False,
-                 activate=True,
-                 **kwargs):
-        super(ConvBlock, self).__init__(**kwargs)
-        self.activate = activate
-
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                groups=groups,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
-
-
-def conv1x1_block(in_channels,
-                  out_channels,
-                  bn_use_global_stats,
-                  activate=True):
-    """
-    1x1 version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        groups=1,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
-
-
-def dwconv_block(in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 bn_use_global_stats,
-                 activate=True):
-    """
-    Depthwise version of the standard convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activate : bool, default True
-        Whether activate the convolution block.
-    """
-    return ConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=(kernel_size // 2),
-        groups=out_channels,
-        bn_use_global_stats=bn_use_global_stats,
-        activate=activate)
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block
 
 
 class DwsConvBlock(HybridBlock):
@@ -153,11 +31,9 @@ class DwsConvBlock(HybridBlock):
                  **kwargs):
         super(DwsConvBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.dw_conv = dwconv_block(
+            self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                kernel_size=3,
-                strides=1,
                 bn_use_global_stats=bn_use_global_stats)
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
@@ -200,20 +76,18 @@ class MnasUnit(HybridBlock):
         super(MnasUnit, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
         mid_channels = in_channels * expansion_factor
+        dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
         with self.name_scope():
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = dwconv_block(
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = dwconv_block_fn(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                kernel_size=kernel_size,
                 strides=strides,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -251,15 +125,11 @@ class MnasInitBlock(HybridBlock):
                  **kwargs):
         super(MnasInitBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = ConvBlock(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels_list[0],
-                kernel_size=3,
                 strides=2,
-                padding=1,
-                groups=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = DwsConvBlock(
                 in_channels=out_channels_list[0],
                 out_channels=out_channels_list[1],

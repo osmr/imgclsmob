@@ -131,7 +131,7 @@ def depthwise_conv3x3(channels,
 
 class ConvBlock(nn.Module):
     """
-    Standard convolution block with Batch normalization and ReLU/ReLU6 activation.
+    Standard convolution block with Batch normalization and activation.
 
     Parameters:
     ----------
@@ -395,7 +395,7 @@ def conv7x7_block(in_channels,
 
 def dwconv3x3_block(in_channels,
                     out_channels,
-                    stride,
+                    stride=1,
                     padding=1,
                     dilation=1,
                     bias=False,
@@ -410,7 +410,7 @@ def dwconv3x3_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
@@ -437,7 +437,7 @@ def dwconv3x3_block(in_channels,
 
 def dwconv5x5_block(in_channels,
                     out_channels,
-                    stride,
+                    stride=1,
                     padding=2,
                     dilation=1,
                     bias=False,
@@ -452,7 +452,7 @@ def dwconv5x5_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 2
         Padding value for convolution layer.

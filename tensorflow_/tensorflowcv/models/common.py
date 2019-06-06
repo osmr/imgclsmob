@@ -840,7 +840,7 @@ def conv7x7_block(x,
 def dwconv3x3_block(x,
                     in_channels,
                     out_channels,
-                    strides,
+                    strides=1,
                     padding=1,
                     dilation=1,
                     use_bias=False,
@@ -860,7 +860,7 @@ def dwconv3x3_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
@@ -903,7 +903,7 @@ def dwconv3x3_block(x,
 def dwconv5x5_block(x,
                     in_channels,
                     out_channels,
-                    strides,
+                    strides=1,
                     padding=2,
                     dilation=1,
                     use_bias=False,
@@ -923,7 +923,7 @@ def dwconv5x5_block(x,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int, default 1
         Strides of the convolution.
     padding : int or tuple/list of 2 int, default 2
         Padding value for convolution layer.

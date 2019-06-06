@@ -1031,10 +1031,10 @@ def main():
         num_classes=args.dst_num_classes,
         in_channels=args.dst_in_channels)
 
-    if (args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]) or\
+    if ((args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys])) or\
             ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
-    if (args.dst_fwk == "chainer") and args.src_model.startswith("diaresnet"):
+    elif (args.dst_fwk == "chainer") and args.src_model.startswith("diaresnet"):
         assert (len(src_param_keys) >= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

@@ -3,7 +3,7 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SENet', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
+__all__ = ['SENet', 'senet16', 'senet28', 'senet40', 'senet52', 'senet103', 'senet154', 'SEInitBlock']
 
 import os
 import math
@@ -270,7 +270,16 @@ def get_senet(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 52:
+    if blocks == 16:
+        layers = [1, 1, 1, 1]
+        cardinality = 32
+    elif blocks == 28:
+        layers = [2, 2, 2, 2]
+        cardinality = 32
+    elif blocks == 40:
+        layers = [3, 3, 3, 3]
+        cardinality = 32
+    elif blocks == 52:
         layers = [3, 4, 6, 3]
         cardinality = 32
     elif blocks == 103:
@@ -306,6 +315,48 @@ def get_senet(blocks,
             obj=net)
 
     return net
+
+
+def senet16(**kwargs):
+    """
+    SENet-16 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=16, model_name="senet16", **kwargs)
+
+
+def senet28(**kwargs):
+    """
+    SENet-28 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=28, model_name="senet28", **kwargs)
+
+
+def senet40(**kwargs):
+    """
+    SENet-40 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_senet(blocks=40, model_name="senet40", **kwargs)
 
 
 def senet52(**kwargs):

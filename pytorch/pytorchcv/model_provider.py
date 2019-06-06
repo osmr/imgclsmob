@@ -192,6 +192,9 @@ _models = {
     'seresnext101_32x4d': seresnext101_32x4d,
     'seresnext101_64x4d': seresnext101_64x4d,
 
+    'senet16': senet16,
+    'senet28': senet28,
+    'senet40': senet40,
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,

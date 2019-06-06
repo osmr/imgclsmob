@@ -211,8 +211,7 @@ class MnasNet(HybridBlock):
             self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True))
+                bn_use_global_stats=bn_use_global_stats))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,

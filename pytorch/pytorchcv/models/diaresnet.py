@@ -302,7 +302,7 @@ def get_diaresnet(blocks,
                   root=os.path.join("~", ".torch", "models"),
                   **kwargs):
     """
-    Create ResNet model with specific parameters.
+    Create DIA-ResNet model with specific parameters.
 
     Parameters:
     ----------

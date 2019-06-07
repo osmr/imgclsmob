@@ -722,6 +722,6 @@ def get_model(name, **kwargs):
     """
     name = name.lower()
     if name not in _models:
-        raise ValueError('Unsupported model: {}'.format(name))
+        raise ValueError("Unsupported model: {}".format(name))
     net = _models[name](**kwargs)
     return net

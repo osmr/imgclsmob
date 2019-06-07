@@ -410,6 +410,9 @@ def _test():
     pretrained = False
 
     models = [
+        senet16,
+        senet28,
+        senet40,
         senet52,
         senet103,
         senet154,
@@ -420,6 +423,9 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != senet16 or weight_count == 31366168)
+        assert (model != senet28 or weight_count == 36453768)
+        assert (model != senet40 or weight_count == 41541368)
         assert (model != senet52 or weight_count == 44659416)
         assert (model != senet103 or weight_count == 60963096)
         assert (model != senet154 or weight_count == 115088984)

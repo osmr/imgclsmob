@@ -91,7 +91,7 @@ class SpatialGate(Chain):
             self.conv = conv7x7_block(
                 in_channels=2,
                 out_channels=1,
-                activate=False)
+                activation=None)
 
     def __call__(self, x):
         att1 = F.expand_dims(F.max(x, axis=1), axis=1)
@@ -170,7 +170,7 @@ class CbamResUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
-                    activate=False)
+                    activation=None)
             self.cbam = CbamBlock(channels=out_channels)
             self.activ = F.relu
 

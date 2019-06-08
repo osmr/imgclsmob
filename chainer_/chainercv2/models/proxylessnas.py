@@ -67,8 +67,7 @@ class ProxylessBlock(Chain):
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_eps=bn_eps,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def __call__(self, x):
         if self.use_bc:

@@ -58,8 +58,7 @@ class CIFARPyramidNet(Chain):
                 setattr(self.features, "init_block", conv3x3_block(
                     in_channels=in_channels,
                     out_channels=init_block_channels,
-                    activation=None,
-                    activate=False))
+                    activation=None))
                 in_channels = init_block_channels
                 for i, channels_per_stage in enumerate(channels):
                     stage = SimpleSequential()

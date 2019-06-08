@@ -43,8 +43,7 @@ class RoRBlock(Chain):
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                activation=None,
-                activate=False)
+                activation=None)
             if self.use_dropout:
                 self.dropout = partial(
                     F.dropout,
@@ -91,8 +90,7 @@ class RoRResUnit(Chain):
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    activation=None,
-                    activate=False)
+                    activation=None)
             self.activ = F.relu
 
     def __call__(self, x):
@@ -134,8 +132,7 @@ class RoRResStage(Chain):
             self.shortcut = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels_list[-1],
-                activation=None,
-                activate=False)
+                activation=None)
             self.units = SimpleSequential()
             with self.units.init_scope():
                 for i, out_channels in enumerate(out_channels_list):
@@ -187,8 +184,7 @@ class RoRResBody(Chain):
                 in_channels=in_channels,
                 out_channels=out_channels_lists[-1][-1],
                 stride=4,
-                activation=None,
-                activate=False)
+                activation=None)
             self.stages = SimpleSequential()
             with self.stages.init_scope():
                 for i, channels_per_stage in enumerate(out_channels_lists):

@@ -61,7 +61,7 @@ class AirNeXtBottleneck(Chain):
             self.conv3 = conv1x1_block(
                 in_channels=group_width,
                 out_channels=out_channels,
-                activate=False)
+                activation=None)
             if self.use_air_block:
                 self.air = AirBlock(
                     in_channels=in_channels,
@@ -122,7 +122,7 @@ class AirNeXtUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
-                    activate=False)
+                    activation=None)
             self.activ = F.relu
 
     def __call__(self, x):

@@ -63,8 +63,7 @@ class ShortcutBlock(Chain):
             self.conv2 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def __call__(self, x):
         x = self.conv1(x)
@@ -146,8 +145,7 @@ class ESPBlock(Chain):
                 in_channels=out_channels,
                 out_channels=out_channels,
                 groups=num_branches,
-                activation=None,
-                activate=False)
+                activation=None)
             self.preactiv = PreActivation(in_channels=out_channels)
             self.activ = L.PReLU(shape=(out_channels,))
 

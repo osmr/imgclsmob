@@ -203,8 +203,7 @@ class CIFARRiR(Chain):
                 setattr(self.output, 'final_conv', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=classes,
-                    activation=None,
-                    activate=False))
+                    activation=None))
                 setattr(self.output, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=8,

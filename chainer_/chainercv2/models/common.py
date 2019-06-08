@@ -8,6 +8,7 @@ __all__ = ['ReLU6', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBl
            'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
            'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
 
+from functools import partial
 from inspect import isfunction
 from chainer import Chain
 import chainer.functions as F
@@ -37,6 +38,40 @@ class HSwish(Chain):
     """
     def __call__(self, x):
         return x * F.clip(x + 3.0, 0.0, 6.0) / 6.0
+
+
+def get_activation_layer(activation):
+    """
+    Create activation layer from string/function.
+
+    Parameters:
+    ----------
+    activation : function or str
+        Activation function or name of activation function.
+
+    Returns
+    -------
+    function
+        Activation layer.
+    """
+    assert (activation is not None)
+    if isfunction(activation):
+        return activation()
+    elif isinstance(activation, str):
+        if activation == "relu":
+            return F.relu
+        elif activation == "relu6":
+            return ReLU6()
+        elif activation == "swish":
+            return partial(
+                F.swish,
+                beta=1.0)
+        elif activation == "hswish":
+            return HSwish()
+        else:
+            raise NotImplementedError()
+    else:
+        return activation
 
 
 def conv1x1(in_channels,
@@ -155,8 +190,6 @@ class ConvBlock(Chain):
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     def __init__(self,
                  in_channels,
@@ -168,10 +201,9 @@ class ConvBlock(Chain):
                  groups=1,
                  use_bias=False,
                  bn_eps=1e-5,
-                 activation=(lambda: F.relu),
-                 activate=True):
+                 activation=(lambda: F.relu)):
         super(ConvBlock, self).__init__()
-        self.activate = activate
+        self.activate = (activation is not None)
 
         with self.init_scope():
             self.conv = L.Convolution2D(
@@ -187,20 +219,7 @@ class ConvBlock(Chain):
                 size=out_channels,
                 eps=bn_eps)
             if self.activate:
-                assert (activation is not None)
-                if isfunction(activation):
-                    self.activ = activation()
-                elif isinstance(activation, str):
-                    if activation == "relu":
-                        self.activ = F.relu
-                    elif activation == "relu6":
-                        self.activ = ReLU6()
-                    elif activation == "hswish":
-                        self.activ = HSwish()
-                    else:
-                        raise NotImplementedError()
-                else:
-                    self.activ = activation
+                self.activ = get_activation_layer(activation)
 
     def __call__(self, x):
         x = self.conv(x)
@@ -216,8 +235,7 @@ def conv1x1_block(in_channels,
                   groups=1,
                   use_bias=False,
                   bn_eps=1e-5,
-                  activation=(lambda: F.relu),
-                  activate=True):
+                  activation=(lambda: F.relu)):
     """
     1x1 version of the standard convolution block.
 
@@ -237,8 +255,6 @@ def conv1x1_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -249,8 +265,7 @@ def conv1x1_block(in_channels,
         groups=groups,
         use_bias=use_bias,
         bn_eps=bn_eps,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 def conv3x3_block(in_channels,
@@ -261,8 +276,7 @@ def conv3x3_block(in_channels,
                   groups=1,
                   use_bias=False,
                   bn_eps=1e-5,
-                  activation=(lambda: F.relu),
-                  activate=True):
+                  activation=(lambda: F.relu)):
     """
     3x3 version of the standard convolution block.
 
@@ -286,8 +300,6 @@ def conv3x3_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -299,8 +311,7 @@ def conv3x3_block(in_channels,
         groups=groups,
         use_bias=use_bias,
         bn_eps=bn_eps,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 def conv5x5_block(in_channels,
@@ -311,8 +322,7 @@ def conv5x5_block(in_channels,
                   groups=1,
                   use_bias=False,
                   bn_eps=1e-5,
-                  activation=(lambda: F.relu),
-                  activate=True):
+                  activation=(lambda: F.relu)):
     """
     5x5 version of the standard convolution block.
 
@@ -336,8 +346,6 @@ def conv5x5_block(in_channels,
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -349,8 +357,7 @@ def conv5x5_block(in_channels,
         groups=groups,
         use_bias=use_bias,
         bn_eps=bn_eps,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 def conv7x7_block(in_channels,
@@ -358,8 +365,7 @@ def conv7x7_block(in_channels,
                   stride=1,
                   pad=3,
                   use_bias=False,
-                  activation=(lambda: F.relu),
-                  activate=True):
+                  activation=(lambda: F.relu)):
     """
     7x7 version of the standard convolution block.
 
@@ -377,8 +383,6 @@ def conv7x7_block(in_channels,
         Whether the layer uses a bias vector.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return ConvBlock(
         in_channels=in_channels,
@@ -387,8 +391,7 @@ def conv7x7_block(in_channels,
         stride=stride,
         pad=pad,
         use_bias=use_bias,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 def dwconv3x3_block(in_channels,
@@ -397,8 +400,7 @@ def dwconv3x3_block(in_channels,
                     pad=1,
                     dilate=1,
                     use_bias=False,
-                    activation=(lambda: F.relu),
-                    activate=True):
+                    activation=(lambda: F.relu)):
     """
     3x3 depthwise version of the standard convolution block.
 
@@ -418,8 +420,6 @@ def dwconv3x3_block(in_channels,
         Whether the layer uses a bias vector.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return conv3x3_block(
         in_channels=in_channels,
@@ -429,8 +429,7 @@ def dwconv3x3_block(in_channels,
         dilate=dilate,
         groups=out_channels,
         use_bias=use_bias,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 def dwconv5x5_block(in_channels,
@@ -439,8 +438,7 @@ def dwconv5x5_block(in_channels,
                     pad=2,
                     dilate=1,
                     use_bias=False,
-                    activation=(lambda: F.relu),
-                    activate=True):
+                    activation=(lambda: F.relu)):
     """
     5x5 depthwise version of the standard convolution block.
 
@@ -460,8 +458,6 @@ def dwconv5x5_block(in_channels,
         Whether the layer uses a bias vector.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     return conv5x5_block(
         in_channels=in_channels,
@@ -471,8 +467,7 @@ def dwconv5x5_block(in_channels,
         dilate=dilate,
         groups=out_channels,
         use_bias=use_bias,
-        activation=activation,
-        activate=activate)
+        activation=activation)
 
 
 class PreConvBlock(Chain):
@@ -724,11 +719,14 @@ class SEBlock(Chain):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
+    activation : function or str, default F.relu
+        Activation function or name of activation function.
     """
     def __init__(self,
                  channels,
                  reduction=16,
-                 approx_sigmoid=False):
+                 approx_sigmoid=False,
+                 activation=(lambda: F.relu)):
         super(SEBlock, self).__init__()
         mid_cannels = channels // reduction
 
@@ -737,7 +735,7 @@ class SEBlock(Chain):
                 in_channels=channels,
                 out_channels=mid_cannels,
                 use_bias=True)
-            self.relu = F.relu
+            self.activ = get_activation_layer(activation)
             self.conv2 = conv1x1(
                 in_channels=mid_cannels,
                 out_channels=channels,
@@ -747,7 +745,7 @@ class SEBlock(Chain):
     def __call__(self, x):
         w = F.average_pooling_2d(x, ksize=x.shape[2:])
         w = self.conv1(w)
-        w = self.relu(w)
+        w = self.activ(w)
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = x * w

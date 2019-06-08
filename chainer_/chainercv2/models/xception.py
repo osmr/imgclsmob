@@ -168,7 +168,7 @@ class XceptionUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
-                    activate=False)
+                    activation=None)
 
             self.body = SimpleSequential()
             with self.body.init_scope():
@@ -223,14 +223,12 @@ class XceptionInitBlock(Chain):
                 in_channels=in_channels,
                 out_channels=32,
                 stride=2,
-                pad=0,
-                activate=True)
+                pad=0)
             self.conv2 = conv3x3_block(
                 in_channels=32,
                 out_channels=64,
                 stride=1,
-                pad=0,
-                activate=True)
+                pad=0)
 
     def __call__(self, x):
         x = self.conv1(x)

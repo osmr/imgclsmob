@@ -61,8 +61,7 @@ class ShuffleUnit(Chain):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 stride=(2 if self.downsample else 1),
-                activation=None,
-                activate=False)
+                activation=None)
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=y2_out_channels)
@@ -73,8 +72,7 @@ class ShuffleUnit(Chain):
                     in_channels=in_channels,
                     out_channels=in_channels,
                     stride=2,
-                    activation=None,
-                    activate=False)
+                    activation=None)
                 self.shortcut_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=in_channels)

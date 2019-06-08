@@ -82,7 +82,7 @@ class MnasUnit(Chain):
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                activate=False)
+                activation=None)
 
     def __call__(self, x):
         if self.residual:
@@ -189,7 +189,7 @@ class MnasNet(Chain):
                 setattr(self.features, 'final_block', conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
-                    activate=True))
+                    activation=None))
                 in_channels = final_block_channels
                 setattr(self.features, 'final_pool', partial(
                     F.average_pooling_2d,

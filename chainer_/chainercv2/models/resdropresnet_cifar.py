@@ -55,8 +55,7 @@ class ResDropResUnit(Chain):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
-                    activation=None,
-                    activate=False)
+                    activation=None)
             self.activ = F.relu
 
     def __call__(self, x):

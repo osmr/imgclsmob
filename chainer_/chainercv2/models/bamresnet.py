@@ -119,8 +119,7 @@ class SpatialGate(Chain):
                 in_channels=channels,
                 out_channels=mid_channels,
                 stride=1,
-                use_bias=True,
-                activate=True)
+                use_bias=True)
             self.dil_convs = SimpleSequential()
             with self.dil_convs.init_scope():
                 for i in range(num_dil_convs):
@@ -130,8 +129,7 @@ class SpatialGate(Chain):
                         stride=1,
                         pad=dilate,
                         dilate=dilate,
-                        use_bias=True,
-                        activate=True))
+                        use_bias=True))
             self.final_conv = conv1x1(
                 in_channels=mid_channels,
                 out_channels=1,

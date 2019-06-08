@@ -60,7 +60,7 @@ def get_activation_layer(activation):
 
     Returns
     -------
-    HybridBlock
+    nn.Module
         Activation layer.
     """
     assert (activation is not None)
@@ -732,7 +732,7 @@ class SEBlock(nn.Module):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
-    activation : function, or str, or HybridBlock
+    activation : function, or str, or nn.Module
         Activation function or name of activation function.
     """
     def __init__(self,

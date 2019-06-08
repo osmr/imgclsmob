@@ -800,7 +800,7 @@ class SEBlock(HybridBlock):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
-    activation : function or str, default nn.Activation('relu')
+    activation : function, or str, or HybridBlock
         Activation function or name of activation function.
     """
     def __init__(self,
@@ -817,7 +817,7 @@ class SEBlock(HybridBlock):
                 in_channels=channels,
                 out_channels=mid_cannels,
                 use_bias=True)
-            self.relu = get_activation_layer(activation)
+            self.activ = get_activation_layer(activation)
             self.conv2 = conv1x1(
                 in_channels=mid_cannels,
                 out_channels=channels,
@@ -827,7 +827,7 @@ class SEBlock(HybridBlock):
     def hybrid_forward(self, F, x):
         w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
         w = self.conv1(w)
-        w = self.relu(w)
+        w = self.activ(w)
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = F.broadcast_mul(x, w)

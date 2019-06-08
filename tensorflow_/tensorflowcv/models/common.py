@@ -12,6 +12,39 @@ import numpy as np
 import tensorflow as tf
 
 
+def get_activation_layer(x,
+                         activation,
+                         name="activ"):
+    """
+    Create activation layer from string/function.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    activation : function or str
+        Activation function or name of activation function.
+    name : str, default 'activ'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    assert (activation is not None)
+    if isinstance(activation, str):
+        if activation == "relu":
+            x = tf.nn.relu(x, name=name)
+        elif activation == "relu6":
+            x = tf.nn.relu6(x, name=name)
+        else:
+            raise NotImplementedError()
+    else:
+        x = activation(x)
+    return x
+
+
 def is_channels_first(data_format):
     """
     Is tested data format channels first.
@@ -510,7 +543,6 @@ def conv_block(x,
                groups=1,
                use_bias=False,
                activation="relu",
-               activate=True,
                training=False,
                data_format="channels_last",
                name="conv_block"):
@@ -539,8 +571,6 @@ def conv_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -570,17 +600,11 @@ def conv_block(x,
         training=training,
         data_format=data_format,
         name=name + "/bn")
-    if activate:
-        assert (activation is not None)
-        if isinstance(activation, str):
-            if activation == "relu":
-                x = tf.nn.relu(x, name=name + "/activ")
-            elif activation == "relu6":
-                x = tf.nn.relu6(x, name=name + "/activ")
-            else:
-                raise NotImplementedError()
-        else:
-            x = activation(x)
+    if activation is not None:
+        x = get_activation_layer(
+            x=x,
+            activation=activation,
+            name=name + "/activ")
     return x
 
 
@@ -591,7 +615,6 @@ def conv1x1_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   training=False,
                   data_format="channels_last",
                   name="conv1x1_block"):
@@ -614,8 +637,6 @@ def conv1x1_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -638,7 +659,6 @@ def conv1x1_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)
@@ -653,7 +673,6 @@ def conv3x3_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   training=False,
                   data_format="channels_last",
                   name="conv3x3_block"):
@@ -680,8 +699,6 @@ def conv3x3_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -705,7 +722,6 @@ def conv3x3_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)
@@ -720,7 +736,6 @@ def conv5x5_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   training=False,
                   data_format="channels_last",
                   name="conv3x3_block"):
@@ -747,8 +762,6 @@ def conv5x5_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -772,7 +785,6 @@ def conv5x5_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)
@@ -785,7 +797,6 @@ def conv7x7_block(x,
                   padding=3,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   training=False,
                   data_format="channels_last",
                   name="conv7x7_block"):
@@ -808,8 +819,6 @@ def conv7x7_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -831,7 +840,6 @@ def conv7x7_block(x,
         padding=padding,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)
@@ -845,7 +853,6 @@ def dwconv3x3_block(x,
                     dilation=1,
                     use_bias=False,
                     activation="relu",
-                    activate=True,
                     training=False,
                     data_format="channels_last",
                     name="dwconv3x3_block"):
@@ -870,8 +877,6 @@ def dwconv3x3_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -894,7 +899,6 @@ def dwconv3x3_block(x,
         groups=out_channels,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)
@@ -908,7 +912,6 @@ def dwconv5x5_block(x,
                     dilation=1,
                     use_bias=False,
                     activation="relu",
-                    activate=True,
                     training=False,
                     data_format="channels_last",
                     name="dwconv3x3_block"):
@@ -933,8 +936,6 @@ def dwconv5x5_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     training : bool, or a TensorFlow boolean scalar tensor, default False
       Whether to return the output in training mode or in inference mode.
     data_format : str, default 'channels_last'
@@ -957,7 +958,6 @@ def dwconv5x5_block(x,
         groups=out_channels,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         training=training,
         data_format=data_format,
         name=name)

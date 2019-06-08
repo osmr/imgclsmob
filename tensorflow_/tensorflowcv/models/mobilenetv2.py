@@ -73,7 +73,6 @@ def linear_bottleneck(x,
         in_channels=mid_channels,
         out_channels=out_channels,
         activation=None,
-        activate=False,
         training=training,
         data_format=data_format,
         name=name + "/conv3")

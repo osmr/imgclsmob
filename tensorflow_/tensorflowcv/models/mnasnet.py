@@ -120,7 +120,7 @@ def mnas_unit(x,
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
-        activate=False,
+        activation=None,
         training=training,
         data_format=data_format,
         name=name + "/conv3")
@@ -276,7 +276,7 @@ class MnasNet(object):
             x=x,
             in_channels=in_channels,
             out_channels=self.final_block_channels,
-            activate=True,
+            activation=None,
             training=training,
             data_format=self.data_format,
             name="features/final_block")

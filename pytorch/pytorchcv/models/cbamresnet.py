@@ -90,7 +90,7 @@ class SpatialGate(nn.Module):
         self.conv = conv7x7_block(
             in_channels=2,
             out_channels=1,
-            activate=False)
+            activation=None)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -168,7 +168,7 @@ class CbamResUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activate=False)
+                activation=None)
         self.cbam = CbamBlock(channels=out_channels)
         self.activ = nn.ReLU(inplace=True)
 

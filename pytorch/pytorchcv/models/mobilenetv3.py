@@ -71,8 +71,7 @@ class MobileNetV3Unit(nn.Module):
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activation=None,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         if self.residual:

@@ -270,7 +270,7 @@ class TwoWayABlock(nn.Module):
         self.conv = conv1x1_block(
             in_channels=128,
             out_channels=in_channels,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         x = self.branches(x)
@@ -299,7 +299,7 @@ class TwoWayBBlock(nn.Module):
         self.conv = conv1x1_block(
             in_channels=384,
             out_channels=in_channels,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         x = self.branches(x)
@@ -328,7 +328,7 @@ class TwoWayCBlock(nn.Module):
         self.conv = conv1x1_block(
             in_channels=448,
             out_channels=in_channels,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         x = self.branches(x)
@@ -416,7 +416,7 @@ def poly_res_b_block():
         in_channels=384,
         out_channels=1152,
         stride=1,
-        activate=False)
+        activation=None)
 
 
 def poly_res_c_block():
@@ -427,7 +427,7 @@ def poly_res_c_block():
         in_channels=448,
         out_channels=2048,
         stride=1,
-        activate=False)
+        activation=None)
 
 
 class MultiResidual(nn.Module):

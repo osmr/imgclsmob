@@ -39,8 +39,7 @@ class RoRBlock(nn.Module):
         self.conv2 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
-            activation=None,
-            activate=False)
+            activation=None)
         if self.use_dropout:
             self.dropout = nn.Dropout(p=dropout_rate)
 
@@ -84,8 +83,7 @@ class RoRResUnit(nn.Module):
             self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                activation=None,
-                activate=False)
+                activation=None)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):
@@ -126,8 +124,7 @@ class RoRResStage(nn.Module):
         self.shortcut = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels_list[-1],
-            activation=None,
-            activate=False)
+            activation=None)
         self.units = nn.Sequential()
         for i, out_channels in enumerate(out_channels_list):
             last_activate = (i != len(out_channels_list) - 1)
@@ -176,8 +173,7 @@ class RoRResBody(nn.Module):
             in_channels=in_channels,
             out_channels=out_channels_lists[-1][-1],
             stride=4,
-            activation=None,
-            activate=False)
+            activation=None)
         self.stages = nn.Sequential()
         for i, channels_per_stage in enumerate(out_channels_lists):
             downsample = (i != len(out_channels_lists) - 1)

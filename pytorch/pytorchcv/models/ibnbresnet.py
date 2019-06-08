@@ -143,7 +143,7 @@ class IBNbResUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activate=False)
+                activation=None)
         if self.use_inst_norm:
             self.inst_norm = nn.InstanceNorm2d(
                 num_features=out_channels,

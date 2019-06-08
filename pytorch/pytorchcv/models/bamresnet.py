@@ -111,8 +111,7 @@ class SpatialGate(nn.Module):
             in_channels=channels,
             out_channels=mid_channels,
             stride=1,
-            bias=True,
-            activate=True)
+            bias=True)
         self.dil_convs = nn.Sequential()
         for i in range(num_dil_convs):
             self.dil_convs.add_module("conv{}".format(i + 1), conv3x3_block(
@@ -121,8 +120,7 @@ class SpatialGate(nn.Module):
                 stride=1,
                 padding=dilation,
                 dilation=dilation,
-                bias=True,
-                activate=True))
+                bias=True))
         self.final_conv = conv1x1(
             in_channels=mid_channels,
             out_channels=1,

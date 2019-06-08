@@ -50,8 +50,7 @@ class ResDropResUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activation=None,
-                activate=False)
+                activation=None)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):

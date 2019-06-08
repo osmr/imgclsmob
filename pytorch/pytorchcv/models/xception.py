@@ -160,7 +160,7 @@ class XceptionUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activate=False)
+                activation=None)
 
         self.body = nn.Sequential()
         for i in range(reps):
@@ -211,14 +211,12 @@ class XceptionInitBlock(nn.Module):
             in_channels=in_channels,
             out_channels=32,
             stride=2,
-            padding=0,
-            activate=True)
+            padding=0)
         self.conv2 = conv3x3_block(
             in_channels=32,
             out_channels=64,
             stride=1,
-            padding=0,
-            activate=True)
+            padding=0)
 
     def forward(self, x):
         x = self.conv1(x)

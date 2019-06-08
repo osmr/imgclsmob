@@ -77,7 +77,7 @@ class MnasUnit(nn.Module):
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         if self.residual:
@@ -179,8 +179,7 @@ class MnasNet(nn.Module):
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module('final_block', conv1x1_block(
             in_channels=in_channels,
-            out_channels=final_block_channels,
-            activate=True))
+            out_channels=final_block_channels))
         in_channels = final_block_channels
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=7,

@@ -57,8 +57,7 @@ class ShortcutBlock(nn.Module):
         self.conv2 = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation=None,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -138,8 +137,7 @@ class ESPBlock(nn.Module):
             in_channels=out_channels,
             out_channels=out_channels,
             groups=num_branches,
-            activation=None,
-            activate=False)
+            activation=None)
         self.preactiv = PreActivation(in_channels=out_channels)
         self.activ = nn.PReLU(out_channels)
 

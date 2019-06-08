@@ -6,9 +6,9 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from oth_effi_helpers import load_pretrained
-from oth_effi_adaptive_avgmax_pool import SelectAdaptivePool2d
-from oth_effi_conv2d_same import sconv2d
+from .oth_effi_helpers import load_pretrained
+from .oth_effi_adaptive_avgmax_pool import SelectAdaptivePool2d
+from .oth_effi_conv2d_same import sconv2d
 
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)

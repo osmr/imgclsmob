@@ -64,8 +64,7 @@ class ProxylessBlock(nn.Module):
             in_channels=mid_channels,
             out_channels=out_channels,
             bn_eps=bn_eps,
-            activation=None,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         if self.use_bc:

@@ -192,8 +192,7 @@ class CIFARRiR(nn.Module):
         self.output.add_module('final_conv', conv1x1_block(
             in_channels=in_channels,
             out_channels=num_classes,
-            activation=None,
-            activate=False))
+            activation=None))
         self.output.add_module('final_pool', nn.AvgPool2d(
             kernel_size=8,
             stride=1))

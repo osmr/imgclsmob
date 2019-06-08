@@ -51,7 +51,7 @@ class AirBlock(nn.Module):
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activate=False)
+            activation=None)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -102,7 +102,7 @@ class AirBottleneck(nn.Module):
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activate=False)
+            activation=None)
         if self.use_air_block:
             self.air = AirBlock(
                 in_channels=in_channels,
@@ -153,7 +153,7 @@ class AirUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activate=False)
+                activation=None)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):

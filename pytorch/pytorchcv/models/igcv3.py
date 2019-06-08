@@ -41,8 +41,7 @@ class InvResUnit(nn.Module):
             in_channels=in_channels,
             out_channels=mid_channels,
             groups=groups,
-            activation=None,
-            activate=False)
+            activation=None)
         self.c_shuffle = ChannelShuffle(
             channels=mid_channels,
             groups=groups)
@@ -55,8 +54,7 @@ class InvResUnit(nn.Module):
             in_channels=mid_channels,
             out_channels=out_channels,
             groups=groups,
-            activation=None,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         if self.residual:

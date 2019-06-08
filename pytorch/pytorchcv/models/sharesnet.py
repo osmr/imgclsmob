@@ -224,8 +224,7 @@ class ShaResBottleneck(nn.Module):
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activation=None,
-            activate=False)
+            activation=None)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -281,7 +280,7 @@ class ShaResUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activate=False)
+                activation=None)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x):

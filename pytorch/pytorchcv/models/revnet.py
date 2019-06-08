@@ -283,8 +283,7 @@ class RevUnit(nn.Module):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def forward(self, x):
         if self.resize_identity:

@@ -113,8 +113,7 @@ class DLAResBlock(nn.Module):
             self.project_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def forward(self, x):
         down = self.downsample_pool(x) if self.downsample else x
@@ -153,8 +152,7 @@ class DLARoot(nn.Module):
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation=None,
-            activate=False)
+            activation=None)
         self.activ = nn.ReLU(inplace=True)
 
     def forward(self, x2, x1, extra):

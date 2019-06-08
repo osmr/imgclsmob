@@ -96,6 +96,8 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
+from .models.efficientnet import *
+
 __all__ = ['get_model']
 
 
@@ -744,6 +746,15 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'efficientnet_b0': efficientnet_b0,
+    'efficientnet_b1': efficientnet_b1,
+    'efficientnet_b2': efficientnet_b2,
+    'efficientnet_b3': efficientnet_b3,
+    'efficientnet_b4': efficientnet_b4,
+    'efficientnet_b5': efficientnet_b5,
+    'efficientnet_b6': efficientnet_b6,
+    'efficientnet_b7': efficientnet_b7,
 }
 
 

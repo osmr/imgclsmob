@@ -13,10 +13,13 @@ from oth_effi_conv2d_same import sconv2d
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
 
-_models = [
-    'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'tf_efficientnet_b0',
-    'tf_efficientnet_b1', 'tf_efficientnet_b2', 'tf_efficientnet_b3']
-__all__ = ['GenEfficientNet', 'gen_efficientnet_model_names'] + _models
+__all__ = ['oth_efficientnet_b0', 'oth_efficientnet_b1', 'oth_efficientnet_b2', 'oth_efficientnet_b3',
+           'oth_efficientnet_b4']
+
+# _models = [
+#     'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'tf_efficientnet_b0',
+#     'tf_efficientnet_b1', 'tf_efficientnet_b2', 'tf_efficientnet_b3']
+# __all__ = ['GenEfficientNet', 'gen_efficientnet_model_names'] + _models
 
 
 def _cfg(url='', **kwargs):
@@ -34,6 +37,7 @@ default_cfgs = {
     'efficientnet_b2': _cfg(url='', input_size=(3, 260, 260)),
     'efficientnet_b3': _cfg(url='', input_size=(3, 300, 300)),
     'efficientnet_b4': _cfg(url='', input_size=(3, 380, 380)),
+    'efficientnet_b7': _cfg(url='', input_size=(3, 600, 600)),
     'tf_efficientnet_b0': _cfg(
         url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_efficientnet_b0-0af12548.pth',
         input_size=(3, 224, 224), interpolation='bicubic'),
@@ -779,7 +783,7 @@ def _gen_efficientnet(channel_multiplier=1.0, depth_multiplier=1.0, num_classes=
     return model
 
 
-def efficientnet_b0(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b0(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     """ EfficientNet-B0 """
     default_cfg = default_cfgs['efficientnet_b0']
     # NOTE for train, drop_rate should be 0.2
@@ -792,7 +796,7 @@ def efficientnet_b0(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     return model
 
 
-def efficientnet_b1(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b1(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     """ EfficientNet-B1 """
     default_cfg = default_cfgs['efficientnet_b1']
     # NOTE for train, drop_rate should be 0.2
@@ -805,7 +809,7 @@ def efficientnet_b1(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     return model
 
 
-def efficientnet_b2(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b2(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     """ EfficientNet-B2 """
     default_cfg = default_cfgs['efficientnet_b2']
     # NOTE for train, drop_rate should be 0.3
@@ -818,7 +822,7 @@ def efficientnet_b2(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     return model
 
 
-def efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     """ EfficientNet-B3 """
     default_cfg = default_cfgs['efficientnet_b3']
     # NOTE for train, drop_rate should be 0.3
@@ -831,12 +835,25 @@ def efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     return model
 
 
-def efficientnet_b4(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b4(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
     """ EfficientNet-B4 """
     default_cfg = default_cfgs['efficientnet_b4']
     # NOTE for train, drop_rate should be 0.4
     model = _gen_efficientnet(
         channel_multiplier=1.4, depth_multiplier=1.8,
+        num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    if pretrained:
+        load_pretrained(model, default_cfg, num_classes, in_chans)
+    return model
+
+
+def oth_efficientnet_b7(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+    """ EfficientNet-B7 """
+    default_cfg = default_cfgs['efficientnet_b7']
+    # NOTE for train, drop_rate should be 0.5
+    model = _gen_efficientnet(
+        channel_multiplier=2.0, depth_multiplier=3.1,
         num_classes=num_classes, in_chans=in_chans, **kwargs)
     model.default_cfg = default_cfg
     if pretrained:
@@ -920,11 +937,12 @@ def _test():
     pretrained = False
 
     models = [
-        (efficientnet_b0, 224),
-        # (efficientnet_b1, 240),
-        # (efficientnet_b2, 260),
-        # (efficientnet_b3, 300),
-        # (efficientnet_b4, 380),
+        # (oth_efficientnet_b0, 224),
+        # (oth_efficientnet_b1, 240),
+        # (oth_efficientnet_b2, 260),
+        # (oth_efficientnet_b3, 300),
+        # (oth_efficientnet_b4, 380),
+        (oth_efficientnet_b7, 600),
     ]
 
     for model, in_size_x in models:
@@ -935,11 +953,12 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != efficientnet_b0 or weight_count == 5288548)
-        # assert (model != efficientnet_b1 or weight_count == 7794184)
-        # assert (model != efficientnet_b2 or weight_count == 9109994)
-        # assert (model != efficientnet_b3 or weight_count == 12233232)
-        # assert (model != efficientnet_b4 or weight_count == 19341616)
+        assert (model != oth_efficientnet_b0 or weight_count == 5288548)
+        assert (model != oth_efficientnet_b1 or weight_count == 7794184)
+        assert (model != oth_efficientnet_b2 or weight_count == 9109994)
+        assert (model != oth_efficientnet_b3 or weight_count == 12233232)
+        assert (model != oth_efficientnet_b4 or weight_count == 19341616)
+        assert (model != oth_efficientnet_b7 or weight_count == 66347960)
 
         x = Variable(torch.randn(1, 3, in_size_x, in_size_x))
         y = net(x)

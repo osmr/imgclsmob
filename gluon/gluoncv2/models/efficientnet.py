@@ -4,13 +4,14 @@
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0']
+__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
+           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7']
 
 import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
 
 def round_channels(channels,
@@ -40,9 +41,52 @@ def round_channels(channels,
     return new_channels
 
 
-class EffUnit(HybridBlock):
+class EffiDwsConvUnit(HybridBlock):
     """
-    EfficientNet unit.
+    EfficientNet specific depthwise separable convolution block/unit with BatchNorms and activations at each convolution
+    layers.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(EffiDwsConvUnit, self).__init__(**kwargs)
+        with self.name_scope():
+            self.dw_conv = dwconv3x3_block(
+                in_channels=in_channels,
+                out_channels=in_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                activation="swish")
+            self.se = SEBlock(
+                channels=in_channels,
+                reduction=4,
+                activation="swish")
+            self.pw_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                activation="swish")
+
+    def hybrid_forward(self, F, x):
+        x = self.dw_conv(x)
+        x = self.se(x)
+        x = self.pw_conv(x)
+        return x
+
+
+class EffiInvResUnit(HybridBlock):
+    """
+    EfficientNet inverted residual unit.
 
     Parameters:
     ----------
@@ -67,7 +111,7 @@ class EffUnit(HybridBlock):
                  expansion_factor,
                  bn_use_global_stats,
                  **kwargs):
-        super(EffUnit, self).__init__(**kwargs)
+        super(EffiInvResUnit, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
         mid_channels = in_channels * expansion_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
@@ -86,6 +130,7 @@ class EffUnit(HybridBlock):
                 activation="swish")
             self.se = SEBlock(
                 channels=mid_channels,
+                reduction=24,
                 activation="swish")
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
@@ -115,7 +160,7 @@ class EfficientNet(HybridBlock):
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : int
-        Number of output channels for the initial unit.
+        Number of output channels for initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
     kernel_sizes : list of list of int
@@ -124,10 +169,6 @@ class EfficientNet(HybridBlock):
         Stride value for the first unit of each stage.
     expansion_factors : list of list of int
         Number of expansion factors for each unit.
-    alpha : float, default 1.0
-        Depth factor.
-    beta : float, default 1.0
-        Width factor.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
     bn_use_global_stats : bool, default False
@@ -147,8 +188,6 @@ class EfficientNet(HybridBlock):
                  kernel_sizes,
                  strides_per_stage,
                  expansion_factors,
-                 alpha=1.0,
-                 beta=1.0,
                  dropout_rate=0.2,
                  bn_use_global_stats=False,
                  in_channels=3,
@@ -177,13 +216,19 @@ class EfficientNet(HybridBlock):
                         kernel_size = kernel_sizes_per_stage[j]
                         expansion_factor = expansion_factors_per_stage[j]
                         strides = strides_per_stage[i] if (j == 0) else 1
-                        stage.add(EffUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            kernel_size=kernel_size,
-                            strides=strides,
-                            expansion_factor=expansion_factor,
-                            bn_use_global_stats=bn_use_global_stats))
+                        if i == 0:
+                            stage.add(EffiDwsConvUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                bn_use_global_stats=bn_use_global_stats))
+                        else:
+                            stage.add(EffiInvResUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                kernel_size=kernel_size,
+                                strides=strides,
+                                expansion_factor=expansion_factor,
+                                bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(conv1x1_block(
@@ -287,7 +332,7 @@ def get_efficientnet(version,
     final_block_channels = 1280
 
     layers = [int(math.ceil(li * depth_factor)) for li in layers]
-    channels_per_layers = [int(ci * width_factor) for ci in channels_per_layers]
+    channels_per_layers = [round_channels(ci, width_factor) for ci in channels_per_layers]
 
     from functools import reduce
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
@@ -300,9 +345,7 @@ def get_efficientnet(version,
                                zip(strides_per_stage, layers, downsample), [])
     strides_per_stage = [si[0] for si in strides_per_stage]
 
-    # assert (int(init_block_channels * width_factor) == round_channels(init_block_channels, width_factor))
-    init_block_channels = int(init_block_channels * width_factor)
-    # init_block_channels = round_channels(init_block_channels, width_factor)
+    init_block_channels = round_channels(init_block_channels, width_factor)
 
     if width_factor > 1.0:
         assert (int(final_block_channels * width_factor) == round_channels(final_block_channels, width_factor))
@@ -315,8 +358,6 @@ def get_efficientnet(version,
         kernel_sizes=kernel_sizes,
         strides_per_stage=strides_per_stage,
         expansion_factors=expansion_factors,
-        alpha=depth_factor,
-        beta=width_factor,
         dropout_rate=dropout_rate,
         **kwargs)
 
@@ -517,14 +558,14 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        # assert (model != efficientnet_b0 or weight_count == 4653096)
-        # assert (model != efficientnet_b1 or weight_count == 6672920)
-        # assert (model != efficientnet_b2 or weight_count == 7888931)
-        # assert (model != efficientnet_b3 or weight_count == 10238047)
-        # assert (model != efficientnet_b4 or weight_count == 15888768)
-        # assert (model != efficientnet_b5 or weight_count == 25490872)
-        # assert (model != efficientnet_b6 or weight_count == 35662207)
-        # assert (model != efficientnet_b7 or weight_count == 54382344)
+        assert (model != efficientnet_b0 or weight_count == 5288548)
+        assert (model != efficientnet_b1 or weight_count == 7794184)
+        assert (model != efficientnet_b2 or weight_count == 9109994)
+        assert (model != efficientnet_b3 or weight_count == 12233232)
+        assert (model != efficientnet_b4 or weight_count == 19341616)
+        assert (model != efficientnet_b5 or weight_count == 30389784)
+        assert (model != efficientnet_b6 or weight_count == 43040704)
+        assert (model != efficientnet_b7 or weight_count == 66347960)
 
         x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
         y = net(x)

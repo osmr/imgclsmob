@@ -15,6 +15,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+class Swish(nn.Module):
+    """
+    Swish activation function from 'Searching for Activation Functions,' https://arxiv.org/abs/1710.05941.
+    """
+    def forward(self, x):
+        return x * torch.sigmoid(x)
+
+
 class HSigmoid(nn.Module):
     """
     Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
@@ -63,6 +71,8 @@ def get_activation_layer(activation):
             return nn.ReLU(inplace=True)
         elif activation == "relu6":
             return nn.ReLU6(inplace=True)
+        elif activation == "swish":
+            return Swish()
         elif activation == "hswish":
             return HSwish(inplace=True)
         else:
@@ -722,11 +732,14 @@ class SEBlock(nn.Module):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
+    activation : function, or str, or HybridBlock
+        Activation function or name of activation function.
     """
     def __init__(self,
                  channels,
                  reduction=16,
-                 approx_sigmoid=False):
+                 approx_sigmoid=False,
+                 activation=(lambda: nn.ReLU(inplace=True))):
         super(SEBlock, self).__init__()
         mid_cannels = channels // reduction
 
@@ -735,7 +748,7 @@ class SEBlock(nn.Module):
             in_channels=channels,
             out_channels=mid_cannels,
             bias=True)
-        self.relu = nn.ReLU(inplace=True)
+        self.activ = get_activation_layer(activation)
         self.conv2 = conv1x1(
             in_channels=mid_cannels,
             out_channels=channels,
@@ -745,7 +758,7 @@ class SEBlock(nn.Module):
     def forward(self, x):
         w = self.pool(x)
         w = self.conv1(w)
-        w = self.relu(w)
+        w = self.activ(w)
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = x * w

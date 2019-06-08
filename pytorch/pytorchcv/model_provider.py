@@ -93,6 +93,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.others.oth_efficientnet import *
+from .models.efficientnet import *
 
 __all__ = ['get_model']
 
@@ -699,6 +700,15 @@ _models = {
     'oth_efficientnet_b2': oth_efficientnet_b2,
     'oth_efficientnet_b3': oth_efficientnet_b3,
     'oth_efficientnet_b4': oth_efficientnet_b4,
+
+    'efficientnet_b0': efficientnet_b0,
+    'efficientnet_b1': efficientnet_b1,
+    'efficientnet_b2': efficientnet_b2,
+    'efficientnet_b3': efficientnet_b3,
+    'efficientnet_b4': efficientnet_b4,
+    'efficientnet_b5': efficientnet_b5,
+    'efficientnet_b6': efficientnet_b6,
+    'efficientnet_b7': efficientnet_b7,
 }
 
 

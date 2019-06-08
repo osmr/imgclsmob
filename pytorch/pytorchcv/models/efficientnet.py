@@ -344,12 +344,11 @@ def get_efficientnet(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -490,9 +489,17 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
-    import torch as mx
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
 
     pretrained = False
 
@@ -511,16 +518,9 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != efficientnet_b0 or weight_count == 5288548)
         assert (model != efficientnet_b1 or weight_count == 7794184)
@@ -531,9 +531,10 @@ def _test():
         assert (model != efficientnet_b6 or weight_count == 43040704)
         assert (model != efficientnet_b7 or weight_count == 66347960)
 
-        x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
+        x = torch.randn(1, 3, net.in_size[0], net.in_size[1])
         y = net(x)
-        assert (y.shape == (1, 1000))
+        y.sum().backward()
+        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

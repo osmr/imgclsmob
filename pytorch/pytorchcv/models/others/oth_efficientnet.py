@@ -917,8 +917,8 @@ def tf_efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs)
     return model
 
 
-def gen_efficientnet_model_names():
-    return set(_models)
+# def gen_efficientnet_model_names():
+#     return set(_models)
 
 
 def _calc_width(net):

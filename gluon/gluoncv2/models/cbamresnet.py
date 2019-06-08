@@ -102,7 +102,7 @@ class SpatialGate(HybridBlock):
                 in_channels=2,
                 out_channels=1,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
             self.sigmoid = nn.Activation("sigmoid")
 
     def hybrid_forward(self, F, x):
@@ -193,7 +193,7 @@ class CbamResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
+                    activation=None)
             self.cbam = CbamBlock(channels=out_channels)
             self.activ = nn.Activation("relu")
 

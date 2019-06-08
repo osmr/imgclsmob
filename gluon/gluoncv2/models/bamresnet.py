@@ -132,8 +132,7 @@ class SpatialGate(HybridBlock):
                 out_channels=mid_channels,
                 strides=1,
                 use_bias=True,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.dil_convs = nn.HybridSequential(prefix="")
             for i in range(num_dil_convs):
                 self.dil_convs.add(conv3x3_block(
@@ -143,8 +142,7 @@ class SpatialGate(HybridBlock):
                     padding=dilation,
                     dilation=dilation,
                     use_bias=True,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=True))
+                    bn_use_global_stats=bn_use_global_stats))
             self.final_conv = conv1x1(
                 in_channels=mid_channels,
                 out_channels=1,

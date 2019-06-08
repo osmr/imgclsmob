@@ -320,7 +320,7 @@ class TwoWayABlock(HybridBlock):
                 in_channels=128,
                 out_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -360,7 +360,7 @@ class TwoWayBBlock(HybridBlock):
                 in_channels=384,
                 out_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -400,7 +400,7 @@ class TwoWayCBlock(HybridBlock):
                 in_channels=448,
                 out_channels=in_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -508,7 +508,7 @@ def poly_res_b_block(bn_use_global_stats):
         out_channels=1152,
         strides=1,
         bn_use_global_stats=bn_use_global_stats,
-        activate=False)
+        activation=None)
 
 
 def poly_res_c_block(bn_use_global_stats):
@@ -525,7 +525,7 @@ def poly_res_c_block(bn_use_global_stats):
         out_channels=2048,
         strides=1,
         bn_use_global_stats=bn_use_global_stats,
-        activate=False)
+        activation=None)
 
 
 class MultiResidual(HybridBlock):

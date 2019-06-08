@@ -68,7 +68,7 @@ class AirNeXtBottleneck(HybridBlock):
                 in_channels=group_width,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
             if self.use_air_block:
                 self.air = AirBlock(
                     in_channels=in_channels,
@@ -141,7 +141,7 @@ class AirNeXtUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
+                    activation=None)
             self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):

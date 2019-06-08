@@ -10,7 +10,7 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block
+from common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
 
 def round_channels(channels,
@@ -84,17 +84,19 @@ class EffUnit(HybridBlock):
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 activation="swish")
+            self.se = SEBlock(channels=mid_channels)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         if self.residual:
             identity = x
         x = self.conv1(x)
         x = self.conv2(x)
+        x = self.se(x)
         x = self.conv3(x)
         if self.residual:
             x = x + identity
@@ -488,13 +490,13 @@ def _test():
     pretrained = False
 
     models = [
-        # efficientnet_b0,
-        # efficientnet_b1,
-        # efficientnet_b2,
-        # efficientnet_b3,
-        # efficientnet_b4,
-        # efficientnet_b5,
-        # efficientnet_b6,
+        efficientnet_b0,
+        efficientnet_b1,
+        efficientnet_b2,
+        efficientnet_b3,
+        efficientnet_b4,
+        efficientnet_b5,
+        efficientnet_b6,
         efficientnet_b7,
     ]
 

@@ -60,8 +60,7 @@ class CIFARPyramidNet(HybridBlock):
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False))
+                activation=None))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))

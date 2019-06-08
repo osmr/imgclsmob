@@ -131,8 +131,7 @@ class DLAResBlock(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     bn_use_global_stats=bn_use_global_stats,
-                    activation=None,
-                    activate=False)
+                    activation=None)
 
     def hybrid_forward(self, F, x):
         down = self.downsample_pool(x) if self.downsample else x
@@ -177,8 +176,7 @@ class DLARoot(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
             self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x2, x1, extra):

@@ -70,8 +70,7 @@ class ShortcutBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -160,8 +159,7 @@ class ESPBlock(HybridBlock):
                 out_channels=out_channels,
                 groups=num_branches,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
             self.preactiv = PreActivation(in_channels=out_channels)
             if not self.downsample:
                 self.activ = PReLU2(out_channels)

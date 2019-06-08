@@ -179,7 +179,7 @@ class XceptionUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
+                    activation=None)
 
             self.body = nn.HybridSequential(prefix="")
             for i in range(reps):
@@ -237,15 +237,13 @@ class XceptionInitBlock(HybridBlock):
                 out_channels=32,
                 strides=2,
                 padding=0,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=32,
                 out_channels=64,
                 strides=1,
                 padding=0,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
+                bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)

@@ -152,7 +152,7 @@ class IBNbResUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
+                    activation=None)
             if self.use_inst_norm:
                 self.inst_norm = nn.InstanceNorm(
                     in_channels=out_channels,

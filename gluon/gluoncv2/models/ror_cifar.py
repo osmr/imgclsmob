@@ -46,8 +46,7 @@ class RoRBlock(HybridBlock):
                 in_channels=out_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
             if self.use_dropout:
                 self.dropout = nn.Dropout(rate=dropout_rate)
 
@@ -98,8 +97,7 @@ class RoRResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     bn_use_global_stats=bn_use_global_stats,
-                    activation=None,
-                    activate=False)
+                    activation=None)
             self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
@@ -146,8 +144,7 @@ class RoRResStage(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels_list[-1],
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
             self.units = nn.HybridSequential(prefix="")
             with self.units.name_scope():
                 for i, out_channels in enumerate(out_channels_list):
@@ -204,8 +201,7 @@ class RoRResBody(HybridBlock):
                 out_channels=out_channels_lists[-1][-1],
                 strides=4,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
             self.stages = nn.HybridSequential(prefix="")
             with self.stages.name_scope():
                 for i, channels_per_stage in enumerate(out_channels_lists):

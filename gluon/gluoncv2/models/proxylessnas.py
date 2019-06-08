@@ -71,8 +71,7 @@ class ProxylessBlock(HybridBlock):
                 out_channels=out_channels,
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False)
+                activation=None)
 
     def hybrid_forward(self, F, x):
         if self.use_bc:

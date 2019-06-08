@@ -224,8 +224,7 @@ class CIFARRiR(HybridBlock):
                 in_channels=in_channels,
                 out_channels=classes,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=None,
-                activate=False))
+                activation=None))
             self.output.add(nn.AvgPool2D(
                 pool_size=8,
                 strides=1))

@@ -15,6 +15,41 @@ from keras import backend as K
 from keras import layers as nn
 
 
+def get_activation_layer(x,
+                         activation,
+                         name="activ"):
+    """
+    Create activation layer from string/function.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    activation : function or str
+        Activation function or name of activation function.
+    name : str, default 'activ'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    assert (activation is not None)
+    if isfunction(activation):
+        x = activation()(x)
+    elif isinstance(activation, str):
+        if activation == "relu":
+            x = nn.Activation("relu", name=name)(x)
+        elif activation == "relu6":
+            x = nn.ReLU(max_value=6.0, name=name)(x)
+        else:
+            raise NotImplementedError()
+    else:
+        x = activation(x)
+    return x
+
+
 def is_channels_first():
     """
     Is tested data format channels first.
@@ -533,7 +568,6 @@ def conv_block(x,
                groups=1,
                use_bias=False,
                activation="relu",
-               activate=True,
                name="conv_block"):
     """
     Standard convolution block with Batch normalization and activation.
@@ -560,8 +594,6 @@ def conv_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'conv_block'
         Block name.
 
@@ -584,19 +616,11 @@ def conv_block(x,
     x = batchnorm(
         x=x,
         name=name + "/bn")
-    if activate:
-        assert (activation is not None)
-        if isfunction(activation):
-            x = activation()(x)
-        elif isinstance(activation, str):
-            if activation == "relu":
-                x = nn.Activation("relu", name=name + "/activ")(x)
-            elif activation == "relu6":
-                x = nn.ReLU(max_value=6.0, name=name + "/activ")(x)
-            else:
-                raise NotImplementedError()
-        else:
-            x = activation(x)
+    if activation is not None:
+        x = get_activation_layer(
+            x=x,
+            activation=activation,
+            name=name + "/activ")
     return x
 
 
@@ -607,7 +631,6 @@ def conv1x1_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   name="conv1x1_block"):
     """
     1x1 version of the standard convolution block.
@@ -628,8 +651,6 @@ def conv1x1_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'conv1x1_block'
         Block name.
 
@@ -648,7 +669,6 @@ def conv1x1_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 
@@ -661,7 +681,6 @@ def conv3x3_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   name="conv3x3_block"):
     """
     3x3 version of the standard convolution block.
@@ -686,8 +705,6 @@ def conv3x3_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'conv3x3_block'
         Block name.
 
@@ -707,7 +724,6 @@ def conv3x3_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 
@@ -720,7 +736,6 @@ def conv5x5_block(x,
                   groups=1,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   name="conv3x3_block"):
     """
     5x5 version of the standard convolution block.
@@ -745,8 +760,6 @@ def conv5x5_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'conv3x3_block'
         Block name.
 
@@ -766,7 +779,6 @@ def conv5x5_block(x,
         groups=groups,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 
@@ -777,7 +789,6 @@ def conv7x7_block(x,
                   padding=3,
                   use_bias=False,
                   activation="relu",
-                  activate=True,
                   name="conv7x7_block"):
     """
     3x3 version of the standard convolution block.
@@ -798,8 +809,6 @@ def conv7x7_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'conv7x7_block'
         Block name.
 
@@ -817,7 +826,6 @@ def conv7x7_block(x,
         padding=padding,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 
@@ -829,7 +837,6 @@ def dwconv3x3_block(x,
                     dilation=1,
                     use_bias=False,
                     activation="relu",
-                    activate=True,
                     name="dwconv3x3_block"):
     """
     3x3 depthwise version of the standard convolution block.
@@ -852,8 +859,6 @@ def dwconv3x3_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'dwconv3x3_block'
         Block name.
 
@@ -872,7 +877,6 @@ def dwconv3x3_block(x,
         groups=out_channels,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 
@@ -884,7 +888,6 @@ def dwconv5x5_block(x,
                     dilation=1,
                     use_bias=False,
                     activation="relu",
-                    activate=True,
                     name="dwconv3x3_block"):
     """
     5x5 depthwise version of the standard convolution block.
@@ -907,8 +910,6 @@ def dwconv5x5_block(x,
         Whether the layer uses a bias vector.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     name : str, default 'dwconv3x3_block'
         Block name.
 
@@ -927,7 +928,6 @@ def dwconv5x5_block(x,
         groups=out_channels,
         use_bias=use_bias,
         activation=activation,
-        activate=activate,
         name=name)
 
 

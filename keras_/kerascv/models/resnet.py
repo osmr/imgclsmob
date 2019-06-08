@@ -51,7 +51,6 @@ def res_block(x,
         in_channels=in_channels,
         out_channels=out_channels,
         activation=None,
-        activate=False,
         name=name + "/conv2")
     return x
 
@@ -107,7 +106,6 @@ def res_bottleneck_block(x,
         in_channels=in_channels,
         out_channels=out_channels,
         activation=None,
-        activate=False,
         name=name + "/conv3")
     return x
 
@@ -152,7 +150,6 @@ def res_unit(x,
             out_channels=out_channels,
             strides=strides,
             activation=None,
-            activate=False,
             name=name + "/identity_conv")
     else:
         identity = x

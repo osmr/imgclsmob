@@ -64,7 +64,6 @@ def linear_bottleneck(x,
         in_channels=mid_channels,
         out_channels=out_channels,
         activation=None,
-        activate=False,
         name=name + "/conv3")
 
     if residual:

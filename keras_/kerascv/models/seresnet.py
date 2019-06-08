@@ -52,7 +52,7 @@ def seres_unit(x,
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            activate=False,
+            activation=None,
             name=name + "/identity_conv")
     else:
         identity = x

@@ -65,7 +65,7 @@ def senet_bottleneck(x,
         x=x,
         in_channels=group_width,
         out_channels=out_channels,
-        activate=False,
+        activation=None,
         name=name + "/conv3")
     return x
 
@@ -113,7 +113,7 @@ def senet_unit(x,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                activate=False,
+                activation=None,
                 name=name + "/identity_conv")
         else:
             identity = conv1x1_block(
@@ -121,7 +121,7 @@ def senet_unit(x,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                activate=False,
+                activation=None,
                 name=name + "/identity_conv")
     else:
         identity = x

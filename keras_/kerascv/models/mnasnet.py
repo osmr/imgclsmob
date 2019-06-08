@@ -101,7 +101,7 @@ def mnas_unit(x,
         x=x,
         in_channels=mid_channels,
         out_channels=out_channels,
-        activate=False,
+        activation=None,
         name=name + "/conv3")
 
     if residual:
@@ -208,7 +208,7 @@ def mnasnet_model(channels,
         x=x,
         in_channels=in_channels,
         out_channels=final_block_channels,
-        activate=True,
+        activation=None,
         name="features/final_block")
     in_channels = final_block_channels
     x = nn.AvgPool2D(

@@ -54,7 +54,6 @@ def inv_res_unit(x,
         out_channels=mid_channels,
         groups=groups,
         activation=None,
-        activate=False,
         name=name + "/conv1")
     x = channel_shuffle_lambda(
         channels=mid_channels,
@@ -73,7 +72,6 @@ def inv_res_unit(x,
         out_channels=out_channels,
         groups=groups,
         activation=None,
-        activate=False,
         name=name + "/conv3")
 
     if residual:

@@ -120,7 +120,7 @@ def test(net,
 
     backend_agnostic_compile(
         model=net,
-        loss='categorical_crossentropy',
+        loss="categorical_crossentropy",
         optimizer=keras.optimizers.SGD(
             lr=0.01,
             momentum=0.0,
@@ -140,14 +140,14 @@ def test(net,
 
     if calc_weight_count:
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
-        logging.info('Model: {} trainable parameters'.format(weight_count))
+        logging.info("Model: {} trainable parameters".format(weight_count))
     if extended_log:
-        logging.info('Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})'.format(
+        logging.info("Test: err-top1={top1:.4f} ({top1})\terr-top5={top5:.4f} ({top5})".format(
             top1=err_top1_val, top5=err_top5_val))
     else:
-        logging.info('Test: err-top1={top1:.4f}\terr-top5={top5:.4f}'.format(
+        logging.info("Test: err-top1={top1:.4f}\terr-top5={top5:.4f}".format(
             top1=err_top1_val, top5=err_top5_val))
-    logging.info('Time cost: {:.4f} sec'.format(
+    logging.info("Time cost: {:.4f} sec".format(
         time.time() - tic))
 
 
@@ -169,8 +169,8 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip())
-    num_classes = net.classes if hasattr(net, 'classes') else 1000
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
+    num_classes = net.classes if hasattr(net, "classes") else 1000
+    input_image_size = net.in_size if hasattr(net, "in_size") else (args.input_size, args.input_size)
 
     train_data, val_data = get_data_rec(
         rec_train=args.rec_train,

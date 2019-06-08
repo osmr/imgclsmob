@@ -86,7 +86,7 @@ def get_data_generator(data_iterator,
                        num_classes):
     def get_arrays(db):
         data = db.data[0].asnumpy()
-        if K.image_data_format() == 'channels_last':
+        if K.image_data_format() == "channels_last":
             data = data.transpose((0, 2, 3, 1))
         labels = to_categorical(
             y=db.label[0].asnumpy(),
@@ -109,13 +109,13 @@ def get_data_generator(data_iterator,
 def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path):
-    kwargs = {'pretrained': use_pretrained}
+    kwargs = {"pretrained": use_pretrained}
 
     net = get_model(model_name, **kwargs)
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        logging.info("Loading model: {}".format(pretrained_model_file_path))
         net.load_weights(filepath=pretrained_model_file_path)
 
     return net
@@ -131,7 +131,7 @@ def backend_agnostic_compile(model,
         K._backend
     except NameError:
         keras_backend_exist = False
-    if keras_backend_exist and (K._backend == 'mxnet'):
+    if keras_backend_exist and (K._backend == "mxnet"):
         mx_ctx = ["gpu(%d)" % i for i in range(num_gpus)] if num_gpus > 0 else ["cpu()"]
         model.compile(
             loss=loss,

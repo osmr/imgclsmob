@@ -56,7 +56,6 @@ def shuffle_unit(x,
             out_channels=in_channels,
             strides=2,
             activation=None,
-            activate=False,
             name=name + "/shortcut_dconv")
         y1 = conv1x1_block(
             x=y1,
@@ -86,7 +85,6 @@ def shuffle_unit(x,
         out_channels=mid_channels,
         strides=(2 if downsample else 1),
         activation=None,
-        activate=False,
         name=name + "/dconv")
     y2 = conv1x1_block(
         x=y2,

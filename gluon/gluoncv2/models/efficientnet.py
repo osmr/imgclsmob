@@ -84,7 +84,9 @@ class EffUnit(HybridBlock):
                 strides=strides,
                 bn_use_global_stats=bn_use_global_stats,
                 activation="swish")
-            self.se = SEBlock(channels=mid_channels)
+            self.se = SEBlock(
+                channels=mid_channels,
+                activation="swish")
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,

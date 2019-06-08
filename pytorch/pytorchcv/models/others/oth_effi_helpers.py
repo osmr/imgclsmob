@@ -22,7 +22,8 @@ def load_checkpoint(model, checkpoint_path):
         print("=> Loaded checkpoint '{}'".format(checkpoint_path))
     else:
         print("=> Error: No checkpoint found at '{}'".format(checkpoint_path))
-        raise FileNotFoundError()
+        # raise FileNotFoundError()
+        raise
 
 
 def resume_checkpoint(model, checkpoint_path, start_epoch=None):
@@ -49,7 +50,8 @@ def resume_checkpoint(model, checkpoint_path, start_epoch=None):
         return optimizer_state, start_epoch
     else:
         print("=> No checkpoint found at '{}'".format(checkpoint_path))
-        raise FileNotFoundError()
+        # raise FileNotFoundError()
+        raise
 
 
 def load_pretrained(model, default_cfg, num_classes=1000, in_chans=3, filter_fn=None):

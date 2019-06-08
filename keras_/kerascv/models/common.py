@@ -1133,6 +1133,7 @@ def channel_shuffle_lambda(channels,
 def se_block(x,
              channels,
              reduction=16,
+             activation="relu",
              name="se_block"):
     """
     Squeeze-and-Excitation block from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -1145,6 +1146,8 @@ def se_block(x,
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    activation : function or str, default 'relu'
+        Activation function or name of activation function.
     name : str, default 'se_block'
         Block name.
 
@@ -1166,7 +1169,10 @@ def se_block(x,
         out_channels=mid_cannels,
         use_bias=True,
         name=name + "/conv1")
-    w = nn.Activation("relu", name=name + "/relu")(w)
+    w = get_activation_layer(
+        x=w,
+        activation=activation,
+        name=name + "/activ")
     w = conv1x1(
         x=w,
         in_channels=mid_cannels,

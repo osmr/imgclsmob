@@ -303,8 +303,8 @@ class _BlockBuilder:
         blocks = []
         # each stack (stage) contains a list of block arguments
         for block_idx, ba in enumerate(stack_args):
-            if self.verbose:
-                print('block', block_idx, end=', ')
+            # if self.verbose:
+            #     print('block', block_idx, end=', ')
             if block_idx >= 1:
                 # only the first block in any stack/stage can have a stride > 1
                 ba['stride'] = 1

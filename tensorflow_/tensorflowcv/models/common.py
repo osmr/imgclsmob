@@ -1218,6 +1218,7 @@ def channel_shuffle2(x,
 def se_block(x,
              channels,
              reduction=16,
+             activation="relu",
              data_format="channels_last",
              name="se_block"):
     """
@@ -1231,6 +1232,8 @@ def se_block(x,
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    activation : function or str, default 'relu'
+        Activation function or name of activation function.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     name : str, default 'se_block'
@@ -1258,7 +1261,10 @@ def se_block(x,
         use_bias=True,
         data_format=data_format,
         name=name + "/conv1/conv")
-    w = tf.nn.relu(w, name=name + "/relu")
+    w = get_activation_layer(
+        x=w,
+        activation=activation,
+        name=name + "/activ")
     w = conv1x1(
         x=w,
         in_channels=mid_cannels,

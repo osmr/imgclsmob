@@ -73,7 +73,7 @@ Some remarks:
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | A | A | A | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
 | DIA-ResNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
-| DIA-PreResNet | ABCD | ABCD | ABCD | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
+| DIA-PreResNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | PyramidNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | - | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |
 | DiracNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
 | ShaResNet | A | A | A | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |
@@ -109,14 +109,14 @@ Some remarks:
 | ShuffleNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1707.01083) | - | 2017 |
 | ShuffleNetV2 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11164) | - | 2018 |
 | MENet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1803.09127) | [link](https://github.com/clavichord93/MENet) | 2018 |
-| MobileNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
+| MobileNet | A+E+ | A+E+ | A+E+ | A+ | A+ | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
 | FD-MobileNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1802.03750) | [link](https://github.com/clavichord93/FD-MobileNet) | 2018 |
 | MobileNetV2 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1801.04381) | [link](https://github.com/tensorflow/models) | 2018 |
 | MobileNetV3 | A | A | A | - | - | [link](https://arxiv.org/abs/1905.02244) | - | 2019 |
 | IGCV3 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1806.00178) | [link](https://github.com/homles11/IGCV3) | 2018 |
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
-| ProxylessNAS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
+| ProxylessNAS | A+E+ | A+E+ | A+E+ | - | - | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
 | Xception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |
 | InceptionV4 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |

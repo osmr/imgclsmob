@@ -1,5 +1,5 @@
 """
-    ChannelNet, implemented in Gluon.
+    ChannelNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'ChannelNets: Compact and Efficient Convolutional Neural Networks via Channel-Wise Convolutions,'
     https://arxiv.org/abs/1809.01330.
 """

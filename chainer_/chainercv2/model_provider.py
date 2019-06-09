@@ -16,6 +16,7 @@ from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.sknet import *
 from .models.diaresnet import *
+from .models.diapreresnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.sharesnet import *
@@ -55,6 +56,7 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
+from .models.diapreresnet_cifar import *
 
 from .models.nin_cifar import *
 from .models.resnet_cifar import *
@@ -240,6 +242,26 @@ _models = {
     'diaresnet152b': diaresnet152b,
     'diaresnet200': diaresnet200,
     'diaresnet200b': diaresnet200b,
+
+    'diapreresnet10': diapreresnet10,
+    'diapreresnet12': diapreresnet12,
+    'diapreresnet14': diapreresnet14,
+    'diapreresnetbc14b': diapreresnetbc14b,
+    'diapreresnet16': diapreresnet16,
+    'diapreresnet18': diapreresnet18,
+    'diapreresnet26': diapreresnet26,
+    'diapreresnetbc26b': diapreresnetbc26b,
+    'diapreresnet34': diapreresnet34,
+    'diapreresnetbc38b': diapreresnetbc38b,
+    'diapreresnet50': diapreresnet50,
+    'diapreresnet50b': diapreresnet50b,
+    'diapreresnet101': diapreresnet101,
+    'diapreresnet101b': diapreresnet101b,
+    'diapreresnet152': diapreresnet152,
+    'diapreresnet152b': diapreresnet152b,
+    'diapreresnet200': diapreresnet200,
+    'diapreresnet200b': diapreresnet200b,
+    'diapreresnet269b': diapreresnet269b,
 
     'pyramidnet101_a360': pyramidnet101_a360,
 
@@ -590,6 +612,25 @@ _models = {
     'diaresnet1202_cifar10': diaresnet1202_cifar10,
     'diaresnet1202_cifar100': diaresnet1202_cifar100,
     'diaresnet1202_svhn': diaresnet1202_svhn,
+
+    'diapreresnet20_cifar10': diapreresnet20_cifar10,
+    'diapreresnet20_cifar100': diapreresnet20_cifar100,
+    'diapreresnet20_svhn': diapreresnet20_svhn,
+    'diapreresnet56_cifar10': diapreresnet56_cifar10,
+    'diapreresnet56_cifar100': diapreresnet56_cifar100,
+    'diapreresnet56_svhn': diapreresnet56_svhn,
+    'diapreresnet110_cifar10': diapreresnet110_cifar10,
+    'diapreresnet110_cifar100': diapreresnet110_cifar100,
+    'diapreresnet110_svhn': diapreresnet110_svhn,
+    'diapreresnet164bn_cifar10': diapreresnet164bn_cifar10,
+    'diapreresnet164bn_cifar100': diapreresnet164bn_cifar100,
+    'diapreresnet164bn_svhn': diapreresnet164bn_svhn,
+    'diapreresnet1001_cifar10': diapreresnet1001_cifar10,
+    'diapreresnet1001_cifar100': diapreresnet1001_cifar100,
+    'diapreresnet1001_svhn': diapreresnet1001_svhn,
+    'diapreresnet1202_cifar10': diapreresnet1202_cifar10,
+    'diapreresnet1202_cifar100': diapreresnet1202_cifar100,
+    'diapreresnet1202_svhn': diapreresnet1202_svhn,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

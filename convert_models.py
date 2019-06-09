@@ -480,7 +480,7 @@ def convert_gl2ch(dst_net,
                   ext_src_param_keys2,
                   src_model):
 
-    if src_model.startswith("diares"):
+    if src_model.startswith("diares") or src_model.startswith("diapreres"):
         src1 = list(filter(re.compile("^features\.[0-9]*\.\d*[1-9]\d*\.attention").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n
@@ -1034,7 +1034,8 @@ def main():
     if ((args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys])) or\
             ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
-    elif (args.dst_fwk == "chainer") and args.src_model.startswith("diaresnet"):
+    elif (args.dst_fwk == "chainer") and (args.src_model.startswith("diaresnet") or
+                                          args.src_model.startswith("diapreresnet")):
         assert (len(src_param_keys) >= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

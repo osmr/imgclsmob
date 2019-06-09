@@ -1,10 +1,11 @@
 """
-    ProxylessNAS, implemented in Chainer.
+    ProxylessNAS for ImageNet-1K, implemented in Chainer.
     Original paper: 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 """
 
-__all__ = ['ProxylessNAS', 'proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14']
+__all__ = ['ProxylessNAS', 'proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14',
+           'get_proxylessnas']
 
 import os
 import chainer.functions as F

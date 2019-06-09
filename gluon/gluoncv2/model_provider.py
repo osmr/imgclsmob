@@ -90,6 +90,8 @@ from .models.octresnet_cifar import *
 from .models.res2net import *
 
 from .models.resnet_cub import *
+from .models.mobilenet_cub import *
+from .models.proxylessnas_cub import *
 from .models.ntsnet_cub import *
 
 from .models.fcn8sd import *
@@ -715,6 +717,21 @@ _models = {
     'resnet152b_cub': resnet152b_cub,
     'resnet200_cub': resnet200_cub,
     'resnet200b_cub': resnet200b_cub,
+
+    'mobilenet_w1_cub': mobilenet_w1_cub,
+    'mobilenet_w3d4_cub': mobilenet_w3d4_cub,
+    'mobilenet_wd2_cub': mobilenet_wd2_cub,
+    'mobilenet_wd4_cub': mobilenet_wd4_cub,
+
+    'fdmobilenet_w1_cub': fdmobilenet_w1_cub,
+    'fdmobilenet_w3d4_cub': fdmobilenet_w3d4_cub,
+    'fdmobilenet_wd2_cub': fdmobilenet_wd2_cub,
+    'fdmobilenet_wd4_cub': fdmobilenet_wd4_cub,
+
+    'proxylessnas_cpu_cub': proxylessnas_cpu_cub,
+    'proxylessnas_gpu_cub': proxylessnas_gpu_cub,
+    'proxylessnas_mobile_cub': proxylessnas_mobile_cub,
+    'proxylessnas_mobile14_cub': proxylessnas_mobile14_cub,
 
     'ntsnet_cub': ntsnet_cub,
 

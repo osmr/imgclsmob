@@ -36,7 +36,7 @@ class CIFARDIAPreResNet(nn.Module):
     in_size : tuple of two ints, default (32, 32)
         Spatial size of the expected input image.
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     """
     def __init__(self,
                  channels,
@@ -108,7 +108,7 @@ def get_diapreresnet_cifar(num_classes,
     Parameters:
     ----------
     num_classes : int
-        Number of classification num_classes.
+        Number of classification classes.
     blocks : int
         Number of blocks.
     bottleneck : bool
@@ -164,7 +164,7 @@ def diapreresnet20_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -182,7 +182,7 @@ def diapreresnet20_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -200,7 +200,7 @@ def diapreresnet20_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -218,7 +218,7 @@ def diapreresnet56_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -236,7 +236,7 @@ def diapreresnet56_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -254,7 +254,7 @@ def diapreresnet56_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -272,7 +272,7 @@ def diapreresnet110_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -290,7 +290,7 @@ def diapreresnet110_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -308,7 +308,7 @@ def diapreresnet110_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -326,7 +326,7 @@ def diapreresnet164bn_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -344,7 +344,7 @@ def diapreresnet164bn_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -362,7 +362,7 @@ def diapreresnet164bn_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -380,7 +380,7 @@ def diapreresnet1001_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -398,7 +398,7 @@ def diapreresnet1001_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -416,7 +416,7 @@ def diapreresnet1001_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -434,7 +434,7 @@ def diapreresnet1202_cifar10(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -451,7 +451,7 @@ def diapreresnet1202_cifar100(num_classes=100, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 100
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'
@@ -469,7 +469,7 @@ def diapreresnet1202_svhn(num_classes=10, **kwargs):
     Parameters:
     ----------
     num_classes : int, default 10
-        Number of classification num_classes.
+        Number of classification classes.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.torch/models'

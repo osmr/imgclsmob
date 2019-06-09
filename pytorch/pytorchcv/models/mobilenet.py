@@ -1,5 +1,5 @@
 """
-    MobileNet & FD-MobileNet, implemented in PyTorch.
+    MobileNet & FD-MobileNet for ImageNet-1K, implemented in PyTorch.
     Original papers:
     - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
        https://arxiv.org/abs/1704.04861.
@@ -238,7 +238,7 @@ def mobilenet_wd4(**kwargs):
 
 def fdmobilenet_w1(**kwargs):
     """
-    FD-MobileNet 1.0x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 1.0x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -253,7 +253,7 @@ def fdmobilenet_w1(**kwargs):
 
 def fdmobilenet_w3d4(**kwargs):
     """
-    FD-MobileNet 0.75x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.75x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -268,7 +268,7 @@ def fdmobilenet_w3d4(**kwargs):
 
 def fdmobilenet_wd2(**kwargs):
     """
-    FD-MobileNet 0.5x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.5x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -283,7 +283,7 @@ def fdmobilenet_wd2(**kwargs):
 
 def fdmobilenet_wd4(**kwargs):
     """
-    FD-MobileNet 0.25x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.25x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -307,7 +307,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -339,7 +338,7 @@ def _test():
         assert (model != fdmobilenet_wd2 or weight_count == 993928)
         assert (model != fdmobilenet_wd4 or weight_count == 383160)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

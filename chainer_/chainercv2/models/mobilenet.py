@@ -1,5 +1,5 @@
 """
-    MobileNet & FD-MobileNet, implemented in Chainer.
+    MobileNet & FD-MobileNet for ImageNet-1K, implemented in Chainer.
     Original papers:
     - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
        https://arxiv.org/abs/1704.04861.
@@ -7,7 +7,7 @@
 """
 
 __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'fdmobilenet_w1',
-           'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4']
+           'fdmobilenet_w3d4', 'fdmobilenet_wd2', 'fdmobilenet_wd4', 'get_mobilenet']
 
 import os
 import chainer.functions as F
@@ -236,7 +236,7 @@ def mobilenet_wd4(**kwargs):
 
 def fdmobilenet_w1(**kwargs):
     """
-    FD-MobileNet 1.0x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 1.0x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -251,7 +251,7 @@ def fdmobilenet_w1(**kwargs):
 
 def fdmobilenet_w3d4(**kwargs):
     """
-    FD-MobileNet 0.75x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.75x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -266,7 +266,7 @@ def fdmobilenet_w3d4(**kwargs):
 
 def fdmobilenet_wd2(**kwargs):
     """
-    FD-MobileNet 0.5x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.5x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:
@@ -281,7 +281,7 @@ def fdmobilenet_wd2(**kwargs):
 
 def fdmobilenet_wd4(**kwargs):
     """
-    FD-MobileNet 0.25x from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
+    FD-MobileNet 0.25x model from 'FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy,'
     https://arxiv.org/abs/1802.03750.
 
     Parameters:

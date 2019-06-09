@@ -1,11 +1,11 @@
 """
-    ProxylessNAS, implemented in Gluon.
+    ProxylessNAS for ImageNet-1K, implemented in Gluon.
     Original paper: 'ProxylessNAS: Direct Neural Architecture Search on Target Task and Hardware,'
     https://arxiv.org/abs/1812.00332.
 """
 
 __all__ = ['ProxylessNAS', 'proxylessnas_cpu', 'proxylessnas_gpu', 'proxylessnas_mobile', 'proxylessnas_mobile14',
-           'ProxylessUnit']
+           'ProxylessUnit', 'get_proxylessnas']
 
 import os
 from mxnet import cpu

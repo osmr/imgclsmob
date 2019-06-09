@@ -6,20 +6,56 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .oth_effi_helpers import load_pretrained
-from .oth_effi_adaptive_avgmax_pool import SelectAdaptivePool2d
-from .oth_effi_conv2d_same import sconv2d
+# from oth_effi_helpers import load_pretrained
+# from oth_effi_adaptive_avgmax_pool import SelectAdaptivePool2d
+# from oth_effi_conv2d_same import sconv2d
 
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
 
 __all__ = ['oth_efficientnet_b0', 'oth_efficientnet_b1', 'oth_efficientnet_b2', 'oth_efficientnet_b3',
-           'oth_efficientnet_b4']
+           'oth_efficientnet_b4', 'oth_efficientnet_b0_tf', 'oth_efficientnet_b1_tf', 'oth_efficientnet_b2_tf',
+           'oth_efficientnet_b3_tf']
 
 # _models = [
 #     'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'tf_efficientnet_b0',
 #     'tf_efficientnet_b1', 'tf_efficientnet_b2', 'tf_efficientnet_b3']
 # __all__ = ['GenEfficientNet', 'gen_efficientnet_model_names'] + _models
+
+
+class Conv2dSame(nn.Conv2d):
+    """ Tensorflow like 'SAME' convolution wrapper for 2D convolutions
+    """
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1,
+                 padding=0, dilation=1, groups=1, bias=True):
+        super(Conv2dSame, self).__init__(
+            in_channels, out_channels, kernel_size, stride, 0, dilation,
+            groups, bias)
+
+    def forward(self, x):
+        ih, iw = x.size()[-2:]
+        kh, kw = self.weight.size()[-2:]
+        oh = math.ceil(ih / self.stride[0])
+        ow = math.ceil(iw / self.stride[1])
+        pad_h = max((oh - 1) * self.stride[0] + (kh - 1) * self.dilation[0] + 1 - ih, 0)
+        pad_w = max((ow - 1) * self.stride[1] + (kw - 1) * self.dilation[1] + 1 - iw, 0)
+        if pad_h > 0 or pad_w > 0:
+            x = F.pad(x, [pad_w//2, pad_w - pad_w//2, pad_h//2, pad_h - pad_h//2])
+        return F.conv2d(x, self.weight, self.bias, self.stride,
+                        self.padding, self.dilation, self.groups)
+
+
+# helper method
+def sconv2d(in_chs, out_chs, kernel_size, **kwargs):
+    padding = kwargs.pop('padding', 0)
+    if isinstance(padding, str):
+        if padding.lower() == 'same':
+            return Conv2dSame(in_chs, out_chs, kernel_size, **kwargs)
+        else:
+            # 'valid'
+            return nn.Conv2d(in_chs, out_chs, kernel_size, padding=0, **kwargs)
+    else:
+        return nn.Conv2d(in_chs, out_chs, kernel_size, padding=padding, **kwargs)
 
 
 def _cfg(url='', **kwargs):
@@ -678,7 +714,9 @@ class GenEfficientNet(nn.Module):
             self.bn2 = None if (folded_bn or self.efficient_head) else \
                 nn.BatchNorm2d(self.num_features, momentum=bn_momentum, eps=bn_eps)
 
-        self.global_pool = SelectAdaptivePool2d(pool_type=global_pool)
+        assert (global_pool == 'avg')
+        # self.global_pool = SelectAdaptivePool2d(pool_type=global_pool)
+        self.global_pool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Linear(self.num_features, self.num_classes)
 
         for m in self.modules():
@@ -691,7 +729,9 @@ class GenEfficientNet(nn.Module):
         return self.classifier
 
     def reset_classifier(self, num_classes, global_pool='avg'):
-        self.global_pool = SelectAdaptivePool2d(pool_type=global_pool)
+        assert (global_pool == 'avg')
+        # self.global_pool = SelectAdaptivePool2d(pool_type=global_pool)
+        self.global_pool = nn.AdaptiveAvgPool2d(1)
         self.num_classes = num_classes
         del self.classifier
         if num_classes:
@@ -783,137 +823,137 @@ def _gen_efficientnet(channel_multiplier=1.0, depth_multiplier=1.0, num_classes=
     return model
 
 
-def oth_efficientnet_b0(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b0(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B0 """
     default_cfg = default_cfgs['efficientnet_b0']
     # NOTE for train, drop_rate should be 0.2
     model = _gen_efficientnet(
         channel_multiplier=1.0, depth_multiplier=1.0,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def oth_efficientnet_b1(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b1(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B1 """
     default_cfg = default_cfgs['efficientnet_b1']
     # NOTE for train, drop_rate should be 0.2
     model = _gen_efficientnet(
         channel_multiplier=1.0, depth_multiplier=1.1,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def oth_efficientnet_b2(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b2(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B2 """
     default_cfg = default_cfgs['efficientnet_b2']
     # NOTE for train, drop_rate should be 0.3
     model = _gen_efficientnet(
         channel_multiplier=1.1, depth_multiplier=1.2,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def oth_efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b3(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B3 """
     default_cfg = default_cfgs['efficientnet_b3']
     # NOTE for train, drop_rate should be 0.3
     model = _gen_efficientnet(
         channel_multiplier=1.2, depth_multiplier=1.4,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def oth_efficientnet_b4(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b4(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B4 """
     default_cfg = default_cfgs['efficientnet_b4']
     # NOTE for train, drop_rate should be 0.4
     model = _gen_efficientnet(
         channel_multiplier=1.4, depth_multiplier=1.8,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def oth_efficientnet_b7(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b7(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B7 """
     default_cfg = default_cfgs['efficientnet_b7']
     # NOTE for train, drop_rate should be 0.5
     model = _gen_efficientnet(
         channel_multiplier=2.0, depth_multiplier=3.1,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def tf_efficientnet_b0(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b0_tf(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B0. Tensorflow compatible variant  """
     default_cfg = default_cfgs['tf_efficientnet_b0']
     kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
     kwargs['padding_same'] = True
     model = _gen_efficientnet(
         channel_multiplier=1.0, depth_multiplier=1.0,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def tf_efficientnet_b1(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b1_tf(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B1. Tensorflow compatible variant  """
     default_cfg = default_cfgs['tf_efficientnet_b1']
     kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
     kwargs['padding_same'] = True
     model = _gen_efficientnet(
         channel_multiplier=1.0, depth_multiplier=1.1,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def tf_efficientnet_b2(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b2_tf(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B2. Tensorflow compatible variant  """
     default_cfg = default_cfgs['tf_efficientnet_b2']
     kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
     kwargs['padding_same'] = True
     model = _gen_efficientnet(
         channel_multiplier=1.1, depth_multiplier=1.2,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
-def tf_efficientnet_b3(num_classes=1000, in_chans=3, pretrained=False, **kwargs):
+def oth_efficientnet_b3_tf(num_classes=1000, in_channels=3, pretrained=False, **kwargs):
     """ EfficientNet-B3. Tensorflow compatible variant """
     default_cfg = default_cfgs['tf_efficientnet_b3']
     kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
     kwargs['padding_same'] = True
     model = _gen_efficientnet(
         channel_multiplier=1.2, depth_multiplier=1.4,
-        num_classes=num_classes, in_chans=in_chans, **kwargs)
+        num_classes=num_classes, in_chans=in_channels, **kwargs)
     model.default_cfg = default_cfg
-    if pretrained:
-        load_pretrained(model, default_cfg, num_classes, in_chans)
+    # if pretrained:
+    #     load_pretrained(model, default_cfg, num_classes, in_chans)
     return model
 
 
@@ -932,17 +972,20 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
     models = [
-        # (oth_efficientnet_b0, 224),
-        # (oth_efficientnet_b1, 240),
-        # (oth_efficientnet_b2, 260),
-        # (oth_efficientnet_b3, 300),
-        # (oth_efficientnet_b4, 380),
-        (oth_efficientnet_b7, 600),
+        (oth_efficientnet_b0, 224),
+        (oth_efficientnet_b1, 240),
+        (oth_efficientnet_b2, 260),
+        (oth_efficientnet_b3, 300),
+        (oth_efficientnet_b4, 380),
+        # (oth_efficientnet_b7, 600),
+        (oth_efficientnet_b0_tf, 224),
+        (oth_efficientnet_b1_tf, 240),
+        (oth_efficientnet_b2_tf, 260),
+        (oth_efficientnet_b3_tf, 300),
     ]
 
     for model, in_size_x in models:
@@ -959,8 +1002,12 @@ def _test():
         assert (model != oth_efficientnet_b3 or weight_count == 12233232)
         assert (model != oth_efficientnet_b4 or weight_count == 19341616)
         assert (model != oth_efficientnet_b7 or weight_count == 66347960)
+        assert (model != oth_efficientnet_b0_tf or weight_count == 5288548)
+        assert (model != oth_efficientnet_b1_tf or weight_count == 7794184)
+        assert (model != oth_efficientnet_b2_tf or weight_count == 9109994)
+        assert (model != oth_efficientnet_b3_tf or weight_count == 12233232)
 
-        x = Variable(torch.randn(1, 3, in_size_x, in_size_x))
+        x = torch.randn(1, 3, in_size_x, in_size_x)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

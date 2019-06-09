@@ -758,6 +758,10 @@ _models = {
     'oth_efficientnet_b2': oth_efficientnet_b2,
     'oth_efficientnet_b3': oth_efficientnet_b3,
     'oth_efficientnet_b4': oth_efficientnet_b4,
+    'oth_efficientnet_b0_tf': oth_efficientnet_b0_tf,
+    'oth_efficientnet_b1_tf': oth_efficientnet_b1_tf,
+    'oth_efficientnet_b2_tf': oth_efficientnet_b2_tf,
+    'oth_efficientnet_b3_tf': oth_efficientnet_b3_tf,
 
     'efficientnet_b0': efficientnet_b0,
     'efficientnet_b1': efficientnet_b1,

@@ -6,9 +6,6 @@ from copy import deepcopy
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from oth_effi_helpers import load_pretrained
-# from oth_effi_adaptive_avgmax_pool import SelectAdaptivePool2d
-# from oth_effi_conv2d_same import sconv2d
 
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
@@ -16,11 +13,6 @@ IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
 __all__ = ['oth_efficientnet_b0', 'oth_efficientnet_b1', 'oth_efficientnet_b2', 'oth_efficientnet_b3',
            'oth_efficientnet_b4', 'oth_efficientnet_b0_tf', 'oth_efficientnet_b1_tf', 'oth_efficientnet_b2_tf',
            'oth_efficientnet_b3_tf']
-
-# _models = [
-#     'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'tf_efficientnet_b0',
-#     'tf_efficientnet_b1', 'tf_efficientnet_b2', 'tf_efficientnet_b3']
-# __all__ = ['GenEfficientNet', 'gen_efficientnet_model_names'] + _models
 
 
 class Conv2dSame(nn.Conv2d):
@@ -529,6 +521,13 @@ class DepthwiseSeparableConv(nn.Module):
     def forward(self, x):
         residual = x
 
+        assert (self.bn1 is not None)
+        assert (self.act_fn == swish)
+        assert self.has_se
+        assert (self.bn2 is not None)
+        assert not self.has_pw_act
+        assert not self.has_residual
+
         x = self.conv_dw(x)
         if self.bn1 is not None:
             x = self.bn1(x)
@@ -592,6 +591,7 @@ class InvertedResidual(nn.Module):
         super(InvertedResidual, self).__init__()
         mid_chs = int(in_chs * exp_ratio)
         self.has_se = se_ratio is not None and se_ratio > 0.
+        assert (not noskip)
         self.has_residual = (in_chs == out_chs and stride == 1) and not noskip
         self.act_fn = act_fn
         self.drop_connect_rate = drop_connect_rate
@@ -623,6 +623,14 @@ class InvertedResidual(nn.Module):
 
     def forward(self, x):
         residual = x
+
+        assert (self.bn1 is not None)
+        assert (self.act_fn == swish)
+        assert (self.shuffle_type != "mid")
+        assert (self.bn2 is not None)
+        assert self.has_se
+        assert (self.bn3 is not None)
+        assert (self.drop_connect_rate <= 0.)
 
         # Point-wise expansion
         x = self.conv_pw(x)
@@ -656,6 +664,8 @@ class InvertedResidual(nn.Module):
             x += residual
 
         # NOTE maskrcnn_benchmark building blocks have an SE module defined here for some variants
+
+        # print(x.sum().detach().numpy())
 
         return x
 
@@ -957,8 +967,30 @@ def oth_efficientnet_b3_tf(num_classes=1000, in_channels=3, pretrained=False, **
     return model
 
 
-# def gen_efficientnet_model_names():
-#     return set(_models)
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
 
 
 def _calc_width(net):
@@ -977,15 +1009,15 @@ def _test():
 
     models = [
         (oth_efficientnet_b0, 224),
-        (oth_efficientnet_b1, 240),
-        (oth_efficientnet_b2, 260),
-        (oth_efficientnet_b3, 300),
-        (oth_efficientnet_b4, 380),
+        # (oth_efficientnet_b1, 240),
+        # (oth_efficientnet_b2, 260),
+        # (oth_efficientnet_b3, 300),
+        # (oth_efficientnet_b4, 380),
         # (oth_efficientnet_b7, 600),
-        (oth_efficientnet_b0_tf, 224),
-        (oth_efficientnet_b1_tf, 240),
-        (oth_efficientnet_b2_tf, 260),
-        (oth_efficientnet_b3_tf, 300),
+        # (oth_efficientnet_b0_tf, 224),
+        # (oth_efficientnet_b1_tf, 240),
+        # (oth_efficientnet_b2_tf, 260),
+        # (oth_efficientnet_b3_tf, 300),
     ]
 
     for model, in_size_x in models:

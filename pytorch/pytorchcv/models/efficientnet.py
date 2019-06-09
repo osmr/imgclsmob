@@ -68,7 +68,7 @@ class EffiDwsConvUnit(nn.Module):
         self.pw_conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            activation="swish")
+            activation=None)
 
     def forward(self, x):
         x = self.dw_conv(x)
@@ -304,11 +304,11 @@ def get_efficientnet(version,
 
     init_block_channels = 32
     layers = [1, 2, 2, 3, 3, 4, 1]
-    downsample = [1, 1, 1, 0, 1, 1, 0]
+    downsample = [1, 1, 1, 1, 0, 1, 0]
     channels_per_layers = [16, 24, 40, 80, 112, 192, 320]
     expansion_factors_per_layers = [1, 6, 6, 6, 6, 6, 6]
     kernel_sizes_per_layers = [3, 3, 5, 3, 5, 5, 3]
-    strides_per_stage = [1, 2, 2, 1, 2, 2, 1]
+    strides_per_stage = [1, 2, 2, 2, 1, 2, 1]
     final_block_channels = 1280
 
     layers = [int(math.ceil(li * depth_factor)) for li in layers]

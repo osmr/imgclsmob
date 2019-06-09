@@ -1,5 +1,5 @@
 """
-    CondenseNet, implemented in Gluon.
+    CondenseNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'CondenseNet: An Efficient DenseNet using Learned Group Convolutions,'
     https://arxiv.org/abs/1711.09224.
 """

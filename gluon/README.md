@@ -418,6 +418,10 @@ Some remarks:
 | RiR | 19.23 | 9,527,720 | 1,283.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_cifar100-1923-c4256383.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 29.22 | 546,932 | 81.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.247/shakeshakeresnet20_2x16d_cifar100-2922-e46e31a7.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 18.80 | 2,934,772 | 428.90M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.222/shakeshakeresnet26_2x32d_cifar100-1880-bd46a741.params.log)) |
+| DIA-ResNet-20 | 27.71 | 292,716 | 41.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.342/diaresnet20_cifar100-2771-3a58490e.params.log)) |
+| DIA-ResNet-56 | 24.35 | 876,012 | 127.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.342/diaresnet56_cifar100-2435-e45b7f28.params.log)) |
+| DIA-ResNet-110 | 22.11 | 1,750,956 | 255.95M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.342/diaresnet110_cifar100-2211-e99fad4e.params.log)) |
+| DIA-ResNet-164(BN) | 19.53 | 1,946,132 | 259.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.342/diaresnet164bn_cifar100-1953-43fa3821.params.log)) |
 
 ### SVHN
 
@@ -452,6 +456,10 @@ Some remarks:
 | RiR | 2.68 | 9,492,980 | 1,281.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.292/rir_svhn-0268-1c0718de.params.log)) |
 | Shake-Shake-ResNet-20-2x16d | 3.17 | 541,082 | 81.78M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet20_2x16d_svhn-0317-7a48fde5.params.log)) |
 | Shake-Shake-ResNet-26-2x32d | 2.62 | 2,923,162 | 428.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.295/shakeshakeresnet26_2x32d_svhn-0262-f1dbb8ef.params.log)) |
+| DIA-ResNet-20 | 3.23 | 286,866 | 41.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet20_svhn-0323-579535dd.params.log)) |
+| DIA-ResNet-56 | 2.68 | 870,162 | 127.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet56_svhn-0268-8f2c0574.params.log)) |
+| DIA-ResNet-110 | 2.47 | 1,745,106 | 255.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet110_svhn-0247-c587ac09.params.log)) |
+| DIA-ResNet-164(BN) | 2.44 | 1,923,002 | 259.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.340/diaresnet164bn_svhn-0244-eba062dc.params.log)) |
 
 ### CUB-200-2011
 

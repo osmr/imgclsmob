@@ -98,7 +98,6 @@ from .models.deeplabv3 import *
 
 from .models.others.oth_efficientnet import *
 from .models.efficientnet import *
-# from .models.efficientnetb import *
 
 __all__ = ['get_model']
 

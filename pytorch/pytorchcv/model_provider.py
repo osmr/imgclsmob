@@ -98,7 +98,7 @@ from .models.deeplabv3 import *
 
 from .models.others.oth_efficientnet import *
 from .models.efficientnet import *
-from .models.efficientnetb import *
+# from .models.efficientnetb import *
 
 __all__ = ['get_model']
 
@@ -772,7 +772,6 @@ _models = {
     'efficientnet_b5': efficientnet_b5,
     'efficientnet_b6': efficientnet_b6,
     'efficientnet_b7': efficientnet_b7,
-
     'efficientnet_b0b': efficientnet_b0b,
     'efficientnet_b1b': efficientnet_b1b,
     'efficientnet_b2b': efficientnet_b2b,

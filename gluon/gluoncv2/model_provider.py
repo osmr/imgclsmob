@@ -772,6 +772,10 @@ _models = {
     'efficientnet_b5': efficientnet_b5,
     'efficientnet_b6': efficientnet_b6,
     'efficientnet_b7': efficientnet_b7,
+    'efficientnet_b0b': efficientnet_b0b,
+    'efficientnet_b1b': efficientnet_b1b,
+    'efficientnet_b2b': efficientnet_b2b,
+    'efficientnet_b3b': efficientnet_b3b,
 }
 
 

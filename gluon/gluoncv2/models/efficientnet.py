@@ -5,13 +5,45 @@
 """
 
 __all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7']
+           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b0b',
+           'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b']
 
 import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+
+
+def calc_tf_padding(x,
+                    kernel_size,
+                    strides=1,
+                    dilation=1):
+    """
+    Calculate TF-same like padding size.
+
+    Parameters:
+    ----------
+    x : tensor
+        Input tensor.
+    kernel_size : int
+        Convolution window size.
+    strides : int, default 1
+        Strides of the convolution.
+    dilation : int, default 1
+        Dilation value for convolution layer.
+
+    Returns
+    -------
+    tuple of 4 int
+        The size of the padding.
+    """
+    height, width = x.shape[2:]
+    oh = math.ceil(height / strides)
+    ow = math.ceil(width / strides)
+    pad_h = max((oh - 1) * strides + (kernel_size - 1) * dilation + 1 - height, 0)
+    pad_w = max((ow - 1) * strides + (kernel_size - 1) * dilation + 1 - width, 0)
+    return 0, 0, 0, 0, pad_h // 2, pad_h - pad_h // 2, pad_w // 2, pad_w - pad_w // 2
 
 
 def round_channels(channels,
@@ -58,6 +90,8 @@ class EffiDwsConvUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : str
         Name of activation function.
+    tf_mode : bool
+        Whether to use TF-like mode.
     """
     def __init__(self,
                  in_channels,
@@ -65,12 +99,16 @@ class EffiDwsConvUnit(HybridBlock):
                  bn_epsilon,
                  bn_use_global_stats,
                  activation,
+                 tf_mode,
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
+        self.tf_mode = tf_mode
+
         with self.name_scope():
             self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
+                padding=(0 if tf_mode else 1),
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation)
@@ -86,6 +124,8 @@ class EffiDwsConvUnit(HybridBlock):
                 activation=None)
 
     def hybrid_forward(self, F, x):
+        if self.tf_mode:
+            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3), constant_value=0)
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
@@ -114,6 +154,8 @@ class EffiInvResUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : str
         Name of activation function.
+    tf_mode : bool
+        Whether to use TF-like mode.
     """
     def __init__(self,
                  in_channels,
@@ -124,8 +166,12 @@ class EffiInvResUnit(HybridBlock):
                  bn_epsilon,
                  bn_use_global_stats,
                  activation,
+                 tf_mode,
                  **kwargs):
         super(EffiInvResUnit, self).__init__(**kwargs)
+        self.kernel_size = kernel_size
+        self.strides = strides
+        self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (strides == 1)
         mid_channels = in_channels * expansion_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
@@ -141,6 +187,7 @@ class EffiInvResUnit(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=strides,
+                padding=(0 if tf_mode else (kernel_size // 2)),
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation)
@@ -159,11 +206,62 @@ class EffiInvResUnit(HybridBlock):
         if self.residual:
             identity = x
         x = self.conv1(x)
+        if self.tf_mode:
+            x = F.pad(x, mode="constant",
+                      pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides), constant_value=0)
         x = self.conv2(x)
         x = self.se(x)
         x = self.conv3(x)
         if self.residual:
             x = x + identity
+        return x
+
+
+class EffiInitBlock(HybridBlock):
+    """
+    EfficientNet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activation : str
+        Name of activation function.
+    tf_mode : bool
+        Whether to use TF-like mode.
+    """
+
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_epsilon,
+                 bn_use_global_stats,
+                 activation,
+                 tf_mode,
+                 **kwargs):
+        super(EffiInitBlock, self).__init__(**kwargs)
+        self.tf_mode = tf_mode
+
+        with self.name_scope():
+            self.conv = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=2,
+                padding=(0 if tf_mode else 1),
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                activation=activation)
+
+    def hybrid_forward(self, F, x):
+        if self.tf_mode:
+            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3, strides=2), constant_value=0)
+        x = self.conv(x)
         return x
 
 
@@ -188,6 +286,8 @@ class EfficientNet(HybridBlock):
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
+    tf_mode : bool, default False
+        Whether to use TF-like mode.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -208,6 +308,7 @@ class EfficientNet(HybridBlock):
                  strides_per_stage,
                  expansion_factors,
                  dropout_rate=0.2,
+                 tf_mode=False,
                  bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  in_channels=3,
@@ -221,13 +322,13 @@ class EfficientNet(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            self.features.add(conv3x3_block(
+            self.features.add(EffiInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                strides=2,
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation=activation))
+                activation=activation,
+                tf_mode=tf_mode))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 kernel_sizes_per_stage = kernel_sizes[i]
@@ -244,7 +345,8 @@ class EfficientNet(HybridBlock):
                                 out_channels=out_channels,
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
-                                activation=activation))
+                                activation=activation,
+                                tf_mode=tf_mode))
                         else:
                             stage.add(EffiInvResUnit(
                                 in_channels=in_channels,
@@ -254,7 +356,8 @@ class EfficientNet(HybridBlock):
                                 expansion_factor=expansion_factor,
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
-                                activation=activation))
+                                activation=activation,
+                                tf_mode=tf_mode))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(conv1x1_block(
@@ -282,6 +385,8 @@ class EfficientNet(HybridBlock):
 
 def get_efficientnet(version,
                      in_size,
+                     tf_mode=False,
+                     bn_epsilon=1e-5,
                      model_name=None,
                      pretrained=False,
                      ctx=cpu(),
@@ -296,6 +401,10 @@ def get_efficientnet(version,
         Version of EfficientNet ('b0'...'b7').
     in_size : tuple of two ints
         Spatial size of the expected input image.
+    tf_mode : bool, default False
+        Whether to use TF-like mode.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -386,6 +495,8 @@ def get_efficientnet(version,
         strides_per_stage=strides_per_stage,
         expansion_factors=expansion_factors,
         dropout_rate=dropout_rate,
+        tf_mode=tf_mode,
+        bn_epsilon=bn_epsilon,
         **kwargs)
 
     if pretrained:
@@ -553,6 +664,86 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
 
 
+def efficientnet_b0b(in_size=(224, 224), **kwargs):
+    """
+    EfficientNet-B0-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b0b",
+                            **kwargs)
+
+
+def efficientnet_b1b(in_size=(240, 240), **kwargs):
+    """
+    EfficientNet-B1-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (240, 240)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b1b",
+                            **kwargs)
+
+
+def efficientnet_b2b(in_size=(260, 260), **kwargs):
+    """
+    EfficientNet-B2-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (260, 260)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b2b",
+                            **kwargs)
+
+
+def efficientnet_b3b(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B3-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b3b",
+                            **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -568,6 +759,10 @@ def _test():
         efficientnet_b5,
         efficientnet_b6,
         efficientnet_b7,
+        efficientnet_b0b,
+        efficientnet_b1b,
+        efficientnet_b2b,
+        efficientnet_b3b,
     ]
 
     for model in models:
@@ -593,6 +788,10 @@ def _test():
         assert (model != efficientnet_b5 or weight_count == 30389784)
         assert (model != efficientnet_b6 or weight_count == 43040704)
         assert (model != efficientnet_b7 or weight_count == 66347960)
+        assert (model != efficientnet_b0b or weight_count == 5288548)
+        assert (model != efficientnet_b1b or weight_count == 7794184)
+        assert (model != efficientnet_b2b or weight_count == 9109994)
+        assert (model != efficientnet_b3b or weight_count == 12233232)
 
         x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
         y = net(x)

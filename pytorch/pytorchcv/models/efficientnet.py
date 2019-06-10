@@ -44,7 +44,7 @@ def calc_tf_padding(x,
     ow = math.ceil(width / stride)
     pad_h = max((oh - 1) * stride + (kernel_size - 1) * dilation + 1 - height, 0)
     pad_w = max((ow - 1) * stride + (kernel_size - 1) * dilation + 1 - width, 0)
-    return pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2
+    return pad_h // 2, pad_h - pad_h // 2, pad_w // 2, pad_w - pad_w // 2
 
 
 def round_channels(channels,

@@ -188,7 +188,7 @@ class EfficientNet(HybridBlock):
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
-    bn_epsilon : float, default 1e-3
+    bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
@@ -208,7 +208,7 @@ class EfficientNet(HybridBlock):
                  strides_per_stage,
                  expansion_factors,
                  dropout_rate=0.2,
-                 bn_epsilon=1e-3,
+                 bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),

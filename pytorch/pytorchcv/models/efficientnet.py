@@ -173,7 +173,7 @@ class EfficientNet(nn.Module):
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
-    bn_eps : float, default 1e-3
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
@@ -190,7 +190,7 @@ class EfficientNet(nn.Module):
                  strides_per_stage,
                  expansion_factors,
                  dropout_rate=0.2,
-                 bn_eps=1e-3,
+                 bn_eps=1e-5,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):

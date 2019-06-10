@@ -52,28 +52,36 @@ class EffiDwsConvUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activation : str
+        Name of activation function.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
+                 bn_epsilon,
                  bn_use_global_stats,
+                 activation,
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
         with self.name_scope():
             self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation="swish")
+                activation=activation)
             self.se = SEBlock(
                 channels=in_channels,
                 reduction=4,
-                activation="swish")
+                activation=activation)
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
 
@@ -100,8 +108,12 @@ class EffiInvResUnit(HybridBlock):
         Strides of the second convolution layer.
     expansion_factor : int
         Factor for expansion of channels.
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    activation : str
+        Name of activation function.
     """
     def __init__(self,
                  in_channels,
@@ -109,7 +121,9 @@ class EffiInvResUnit(HybridBlock):
                  kernel_size,
                  strides,
                  expansion_factor,
+                 bn_epsilon,
                  bn_use_global_stats,
+                 activation,
                  **kwargs):
         super(EffiInvResUnit, self).__init__(**kwargs)
         self.residual = (in_channels == out_channels) and (strides == 1)
@@ -120,21 +134,24 @@ class EffiInvResUnit(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation="swish")
+                activation=activation)
             self.conv2 = dwconv_block_fn(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=strides,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation="swish")
+                activation=activation)
             self.se = SEBlock(
                 channels=mid_channels,
                 reduction=24,
-                activation="swish")
+                activation=activation)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
 
@@ -171,6 +188,8 @@ class EfficientNet(HybridBlock):
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
+    bn_epsilon : float, default 1e-3
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -189,6 +208,7 @@ class EfficientNet(HybridBlock):
                  strides_per_stage,
                  expansion_factors,
                  dropout_rate=0.2,
+                 bn_epsilon=1e-3,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -197,6 +217,7 @@ class EfficientNet(HybridBlock):
         super(EfficientNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
+        activation = "swish"
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
@@ -204,8 +225,9 @@ class EfficientNet(HybridBlock):
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 strides=2,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation="swish"))
+                activation=activation))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 kernel_sizes_per_stage = kernel_sizes[i]
@@ -220,7 +242,9 @@ class EfficientNet(HybridBlock):
                             stage.add(EffiDwsConvUnit(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
-                                bn_use_global_stats=bn_use_global_stats))
+                                bn_epsilon=bn_epsilon,
+                                bn_use_global_stats=bn_use_global_stats,
+                                activation=activation))
                         else:
                             stage.add(EffiInvResUnit(
                                 in_channels=in_channels,
@@ -228,14 +252,17 @@ class EfficientNet(HybridBlock):
                                 kernel_size=kernel_size,
                                 strides=strides,
                                 expansion_factor=expansion_factor,
-                                bn_use_global_stats=bn_use_global_stats))
+                                bn_epsilon=bn_epsilon,
+                                bn_use_global_stats=bn_use_global_stats,
+                                activation=activation))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
-                activation="swish"))
+                activation=activation))
             in_channels = final_block_channels
             self.features.add(nn.GlobalAvgPool2D())
 

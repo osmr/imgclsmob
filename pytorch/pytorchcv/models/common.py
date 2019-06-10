@@ -2,8 +2,8 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
-           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
+__all__ = ['HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
            'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential',
            'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
            'MultiOutputSequential', 'Flatten']
@@ -410,6 +410,7 @@ def dwconv3x3_block(in_channels,
                     padding=1,
                     dilation=1,
                     bias=False,
+                    bn_eps=1e-5,
                     activation=(lambda: nn.ReLU(inplace=True))):
     """
     3x3 depthwise version of the standard convolution block.
@@ -428,6 +429,8 @@ def dwconv3x3_block(in_channels,
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
@@ -439,6 +442,7 @@ def dwconv3x3_block(in_channels,
         dilation=dilation,
         groups=out_channels,
         bias=bias,
+        bn_eps=bn_eps,
         activation=activation)
 
 
@@ -448,6 +452,7 @@ def dwconv5x5_block(in_channels,
                     padding=2,
                     dilation=1,
                     bias=False,
+                    bn_eps=1e-5,
                     activation=(lambda: nn.ReLU(inplace=True))):
     """
     5x5 depthwise version of the standard convolution block.
@@ -466,6 +471,8 @@ def dwconv5x5_block(in_channels,
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
@@ -477,6 +484,7 @@ def dwconv5x5_block(in_channels,
         dilation=dilation,
         groups=out_channels,
         bias=bias,
+        bn_eps=bn_eps,
         activation=activation)
 
 

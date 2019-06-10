@@ -1,44 +1,322 @@
 """
-    EfficientNet for ImageNet-1K, implemented in PyTorch.
+    EfficientNet-b (like TF-implementation) for ImageNet-1K, implemented in PyTorch.
     Original paper: 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'round_channels']
+__all__ = ['efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b']
 
 import os
 import math
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+from .common import SEBlock, conv1x1_block, get_activation_layer
+from .efficientnet import round_channels
 
 
-def round_channels(channels,
-                   factor,
-                   divisor=8):
+class Conv2dTFSame(nn.Conv2d):
     """
-    Round weighted channel number.
+    TF-like "same" convolution block.
 
     Parameters:
     ----------
-    channels : int
-        Original number of channels.
-    factor : float
-        Weight factor.
-    divisor : int
-        Alignment value.
-
-    Returns
-    -------
-    int
-        Weighted number of channels.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
     """
-    channels *= factor
-    new_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
-    if new_channels < 0.9 * channels:
-        new_channels += divisor
-    return new_channels
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding=1,
+                 dilation=1,
+                 groups=1,
+                 bias=False):
+        assert (padding == kernel_size // 2)
+        super(Conv2dTFSame, self).__init__(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=0,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+
+    def forward(self, x):
+        ih, iw = x.size()[-2:]
+        kh, kw = self.weight.size()[-2:]
+        oh = math.ceil(ih / self.stride[0])
+        ow = math.ceil(iw / self.stride[1])
+        pad_h = max((oh - 1) * self.stride[0] + (kh - 1) * self.dilation[0] + 1 - ih, 0)
+        pad_w = max((ow - 1) * self.stride[1] + (kw - 1) * self.dilation[1] + 1 - iw, 0)
+        if pad_h > 0 or pad_w > 0:
+            x = F.pad(x, [pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2])
+        return F.conv2d(
+            input=x,
+            weight=self.weight,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+            dilation=self.dilation,
+            groups=self.groups)
+
+
+class ConvBlockTFSame(nn.Module):
+    """
+    TF-like "same" convolution block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(ConvBlockTFSame, self).__init__()
+        self.activate = (activation is not None)
+
+        self.conv = Conv2dTFSame(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        self.bn = nn.BatchNorm2d(
+            num_features=out_channels,
+            eps=bn_eps)
+        if self.activate:
+            self.activ = get_activation_layer(activation)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def conv3x3tf_block(in_channels,
+                    out_channels,
+                    stride=1,
+                    padding=1,
+                    dilation=1,
+                    groups=1,
+                    bias=False,
+                    bn_eps=1e-5,
+                    activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    TF-like "same" 3x3 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return ConvBlockTFSame(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+def conv5x5tf_block(in_channels,
+                    out_channels,
+                    stride=1,
+                    padding=2,
+                    dilation=1,
+                    groups=1,
+                    bias=False,
+                    bn_eps=1e-5,
+                    activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    TF-like "same" 5x5 version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return ConvBlockTFSame(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=groups,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+def dwconv3x3tf_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      padding=1,
+                      dilation=1,
+                      bias=False,
+                      bn_eps=1e-5,
+                      activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    TF-like "same" 3x3 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return conv3x3tf_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+def dwconv5x5tf_block(in_channels,
+                      out_channels,
+                      stride=1,
+                      padding=2,
+                      dilation=1,
+                      bias=False,
+                      bn_eps=1e-5,
+                      activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    TF-like "same" 5x5 depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 2
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return conv5x5tf_block(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation)
 
 
 class EffiDwsConvUnit(nn.Module):
@@ -63,7 +341,7 @@ class EffiDwsConvUnit(nn.Module):
                  bn_eps,
                  activation):
         super(EffiDwsConvUnit, self).__init__()
-        self.dw_conv = dwconv3x3_block(
+        self.dw_conv = dwconv3x3tf_block(
             in_channels=in_channels,
             out_channels=in_channels,
             bn_eps=bn_eps,
@@ -117,7 +395,7 @@ class EffiInvResUnit(nn.Module):
         super(EffiInvResUnit, self).__init__()
         self.residual = (in_channels == out_channels) and (stride == 1)
         mid_channels = in_channels * expansion_factor
-        dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
+        dwconv_block_fn = dwconv3x3tf_block if kernel_size == 3 else (dwconv5x5tf_block if kernel_size == 5 else None)
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
@@ -152,10 +430,10 @@ class EffiInvResUnit(nn.Module):
         return x
 
 
-class EfficientNet(nn.Module):
+class EfficientNetb(nn.Module):
     """
-    EfficientNet(-B0) model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    EfficientNet(-B0)-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
@@ -194,13 +472,13 @@ class EfficientNet(nn.Module):
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
-        super(EfficientNet, self).__init__()
+        super(EfficientNetb, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
         activation = "swish"
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", conv3x3_block(
+        self.features.add_module("init_block", conv3x3tf_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
             stride=2,
@@ -263,14 +541,14 @@ class EfficientNet(nn.Module):
         return x
 
 
-def get_efficientnet(version,
-                     in_size,
-                     model_name=None,
-                     pretrained=False,
-                     root=os.path.join("~", ".torch", "models"),
-                     **kwargs):
+def get_efficientnetb(version,
+                      in_size,
+                      model_name=None,
+                      pretrained=False,
+                      root=os.path.join("~", ".torch", "models"),
+                      **kwargs):
     """
-    Create EfficientNet model with specific parameters.
+    Create EfficientNet-b model with specific parameters.
 
     Parameters:
     ----------
@@ -358,7 +636,7 @@ def get_efficientnet(version,
         assert (int(final_block_channels * width_factor) == round_channels(final_block_channels, width_factor))
         final_block_channels = round_channels(final_block_channels, width_factor)
 
-    net = EfficientNet(
+    net = EfficientNetb(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
@@ -380,10 +658,10 @@ def get_efficientnet(version,
     return net
 
 
-def efficientnet_b0(in_size=(224, 224), **kwargs):
+def efficientnet_b0b(in_size=(224, 224), **kwargs):
     """
-    EfficientNet-B0 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    EfficientNet-B0-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
@@ -394,13 +672,13 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b0", in_size=in_size, model_name="efficientnet_b0", **kwargs)
+    return get_efficientnetb(version="b0", in_size=in_size, model_name="efficientnet_b0b", **kwargs)
 
 
-def efficientnet_b1(in_size=(240, 240), **kwargs):
+def efficientnet_b1b(in_size=(240, 240), **kwargs):
     """
-    EfficientNet-B1 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    EfficientNet-B1-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
@@ -411,13 +689,13 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b1", in_size=in_size, model_name="efficientnet_b1", **kwargs)
+    return get_efficientnetb(version="b1", in_size=in_size, model_name="efficientnet_b1b", **kwargs)
 
 
-def efficientnet_b2(in_size=(260, 260), **kwargs):
+def efficientnet_b2b(in_size=(260, 260), **kwargs):
     """
-    EfficientNet-B2 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    EfficientNet-B2-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
@@ -428,13 +706,13 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b2", in_size=in_size, model_name="efficientnet_b2", **kwargs)
+    return get_efficientnetb(version="b2", in_size=in_size, model_name="efficientnet_b2b", **kwargs)
 
 
-def efficientnet_b3(in_size=(300, 300), **kwargs):
+def efficientnet_b3b(in_size=(300, 300), **kwargs):
     """
-    EfficientNet-B3 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    EfficientNet-B3-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
@@ -445,75 +723,7 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b3", in_size=in_size, model_name="efficientnet_b3", **kwargs)
-
-
-def efficientnet_b4(in_size=(380, 380), **kwargs):
-    """
-    EfficientNet-B4 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
-
-    Parameters:
-    ----------
-    in_size : tuple of two ints, default (380, 380)
-        Spatial size of the expected input image.
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_efficientnet(version="b4", in_size=in_size, model_name="efficientnet_b4", **kwargs)
-
-
-def efficientnet_b5(in_size=(456, 456), **kwargs):
-    """
-    EfficientNet-B5 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
-
-    Parameters:
-    ----------
-    in_size : tuple of two ints, default (456, 456)
-        Spatial size of the expected input image.
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_efficientnet(version="b5", in_size=in_size, model_name="efficientnet_b5", **kwargs)
-
-
-def efficientnet_b6(in_size=(528, 528), **kwargs):
-    """
-    EfficientNet-B6 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
-
-    Parameters:
-    ----------
-    in_size : tuple of two ints, default (528, 528)
-        Spatial size of the expected input image.
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_efficientnet(version="b6", in_size=in_size, model_name="efficientnet_b6", **kwargs)
-
-
-def efficientnet_b7(in_size=(600, 600), **kwargs):
-    """
-    EfficientNet-B7 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
-
-    Parameters:
-    ----------
-    in_size : tuple of two ints, default (600, 600)
-        Spatial size of the expected input image.
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
-        Location for keeping the model parameters.
-    """
-    return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
+    return get_efficientnetb(version="b3", in_size=in_size, model_name="efficientnet_b3b", **kwargs)
 
 
 def _calc_width(net):
@@ -531,14 +741,10 @@ def _test():
     pretrained = False
 
     models = [
-        efficientnet_b0,
-        efficientnet_b1,
-        efficientnet_b2,
-        efficientnet_b3,
-        efficientnet_b4,
-        efficientnet_b5,
-        efficientnet_b6,
-        efficientnet_b7,
+        efficientnet_b0b,
+        efficientnet_b1b,
+        efficientnet_b2b,
+        efficientnet_b3b,
     ]
 
     for model in models:
@@ -549,14 +755,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != efficientnet_b0 or weight_count == 5288548)
-        assert (model != efficientnet_b1 or weight_count == 7794184)
-        assert (model != efficientnet_b2 or weight_count == 9109994)
-        assert (model != efficientnet_b3 or weight_count == 12233232)
-        assert (model != efficientnet_b4 or weight_count == 19341616)
-        assert (model != efficientnet_b5 or weight_count == 30389784)
-        assert (model != efficientnet_b6 or weight_count == 43040704)
-        assert (model != efficientnet_b7 or weight_count == 66347960)
+        assert (model != efficientnet_b0b or weight_count == 5288548)
+        assert (model != efficientnet_b1b or weight_count == 7794184)
+        assert (model != efficientnet_b2b or weight_count == 9109994)
+        assert (model != efficientnet_b3b or weight_count == 12233232)
 
         x = torch.randn(1, 3, net.in_size[0], net.in_size[1])
         y = net(x)

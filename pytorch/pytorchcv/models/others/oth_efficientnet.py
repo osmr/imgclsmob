@@ -1008,13 +1008,13 @@ def _test():
     pretrained = False
 
     models = [
-        (oth_efficientnet_b0, 224),
+        # (oth_efficientnet_b0, 224),
         # (oth_efficientnet_b1, 240),
         # (oth_efficientnet_b2, 260),
         # (oth_efficientnet_b3, 300),
         # (oth_efficientnet_b4, 380),
         # (oth_efficientnet_b7, 600),
-        # (oth_efficientnet_b0_tf, 224),
+        (oth_efficientnet_b0_tf, 224),
         # (oth_efficientnet_b1_tf, 240),
         # (oth_efficientnet_b2_tf, 260),
         # (oth_efficientnet_b3_tf, 300),

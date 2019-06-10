@@ -457,6 +457,7 @@ def dwconv3x3_block(in_channels,
                     padding=1,
                     dilation=1,
                     use_bias=False,
+                    bn_epsilon=1e-5,
                     bn_use_global_stats=False,
                     activation=(lambda: nn.Activation("relu")),
                     **kwargs):
@@ -477,6 +478,8 @@ def dwconv3x3_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -490,6 +493,7 @@ def dwconv3x3_block(in_channels,
         dilation=dilation,
         groups=out_channels,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
         **kwargs)
@@ -501,6 +505,7 @@ def dwconv5x5_block(in_channels,
                     padding=2,
                     dilation=1,
                     use_bias=False,
+                    bn_epsilon=1e-5,
                     bn_use_global_stats=False,
                     activation=(lambda: nn.Activation("relu")),
                     **kwargs):
@@ -521,6 +526,8 @@ def dwconv5x5_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -534,6 +541,7 @@ def dwconv5x5_block(in_channels,
         dilation=dilation,
         groups=out_channels,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
         **kwargs)

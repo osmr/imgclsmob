@@ -92,6 +92,9 @@ def measure_model(model,
         elif isinstance(block, PReLU2):
             extra_num_flops = 3 * x[0].size
             extra_num_macs = 0
+        elif isinstance(block, nn.Swish):
+            extra_num_flops = 5 * x[0].size
+            extra_num_macs = 0
         elif isinstance(block, nn.Conv2D):
             batch = x[0].shape[0]
             x_h = x[0].shape[2]

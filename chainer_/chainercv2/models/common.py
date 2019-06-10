@@ -2,13 +2,12 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['ReLU6', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
-           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
+__all__ = ['ReLU6', 'HSwish', 'GlobalAvgPool2D', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
            'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
            'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
 
-from functools import partial
 from inspect import isfunction
 from chainer import Chain
 import chainer.functions as F
@@ -21,6 +20,14 @@ class ReLU6(Chain):
     """
     def __call__(self, x):
         return F.clip(x, 0.0, 6.0)
+
+
+class Swish(Chain):
+    """
+    Swish activation function from 'Searching for Activation Functions,' https://arxiv.org/abs/1710.05941.
+    """
+    def __call__(self, x):
+        return x * F.sigmoid(x)
 
 
 class HSigmoid(Chain):
@@ -63,15 +70,24 @@ def get_activation_layer(activation):
         elif activation == "relu6":
             return ReLU6()
         elif activation == "swish":
-            return partial(
-                F.swish,
-                beta=1.0)
+            return Swish()
+            # return partial(
+            #     F.swish,
+            #     beta=[1.0])
         elif activation == "hswish":
             return HSwish()
         else:
             raise NotImplementedError()
     else:
         return activation
+
+
+class GlobalAvgPool2D(Chain):
+    """
+    Global average pooling operation for spatial data.
+    """
+    def __call__(self, x):
+        return F.average_pooling_2d(x, ksize=x.shape[2:])
 
 
 def conv1x1(in_channels,
@@ -400,6 +416,7 @@ def dwconv3x3_block(in_channels,
                     pad=1,
                     dilate=1,
                     use_bias=False,
+                    bn_eps=1e-5,
                     activation=(lambda: F.relu)):
     """
     3x3 depthwise version of the standard convolution block.
@@ -418,6 +435,8 @@ def dwconv3x3_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
     """
@@ -429,6 +448,7 @@ def dwconv3x3_block(in_channels,
         dilate=dilate,
         groups=out_channels,
         use_bias=use_bias,
+        bn_eps=bn_eps,
         activation=activation)
 
 
@@ -438,6 +458,7 @@ def dwconv5x5_block(in_channels,
                     pad=2,
                     dilate=1,
                     use_bias=False,
+                    bn_eps=1e-5,
                     activation=(lambda: F.relu)):
     """
     5x5 depthwise version of the standard convolution block.
@@ -456,6 +477,8 @@ def dwconv5x5_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
         Activation function or name of activation function.
     """
@@ -467,6 +490,7 @@ def dwconv5x5_block(in_channels,
         dilate=dilate,
         groups=out_channels,
         use_bias=use_bias,
+        bn_eps=bn_eps,
         activation=activation)
 
 

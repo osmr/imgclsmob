@@ -1,17 +1,21 @@
 """
-    EfficientNet for ImageNet-1K, implemented in Gluon.
+    EfficientNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 """
 
 __all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7']
+           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'round_channels']
 
 import os
 import math
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock, GlobalAvgPool2D,\
+    SimpleSequential
 
 
 def round_channels(channels,
@@ -41,7 +45,7 @@ def round_channels(channels,
     return new_channels
 
 
-class EffiDwsConvUnit(HybridBlock):
+class EffiDwsConvUnit(Chain):
     """
     EfficientNet specific depthwise separable convolution block/unit with BatchNorms and activations at each convolution
     layers.
@@ -52,27 +56,22 @@ class EffiDwsConvUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_epsilon : float
+    bn_eps : float
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : str
         Name of activation function.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_epsilon,
-                 bn_use_global_stats,
-                 activation,
-                 **kwargs):
-        super(EffiDwsConvUnit, self).__init__(**kwargs)
-        with self.name_scope():
+                 bn_eps,
+                 activation):
+        super(EffiDwsConvUnit, self).__init__()
+        with self.init_scope():
             self.dw_conv = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
+                bn_eps=bn_eps,
                 activation=activation)
             self.se = SEBlock(
                 channels=in_channels,
@@ -81,18 +80,17 @@ class EffiDwsConvUnit(HybridBlock):
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
+                bn_eps=bn_eps,
                 activation=None)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
         return x
 
 
-class EffiInvResUnit(HybridBlock):
+class EffiInvResUnit(Chain):
     """
     EfficientNet inverted residual unit.
 
@@ -104,14 +102,12 @@ class EffiInvResUnit(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the second convolution layer.
+    stride : int or tuple/list of 2 int
+        Stride of the second convolution layer.
     expansion_factor : int
         Factor for expansion of channels.
-    bn_epsilon : float
+    bn_eps : float
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : str
         Name of activation function.
     """
@@ -119,30 +115,26 @@ class EffiInvResUnit(HybridBlock):
                  in_channels,
                  out_channels,
                  kernel_size,
-                 strides,
+                 stride,
                  expansion_factor,
-                 bn_epsilon,
-                 bn_use_global_stats,
-                 activation,
-                 **kwargs):
-        super(EffiInvResUnit, self).__init__(**kwargs)
-        self.residual = (in_channels == out_channels) and (strides == 1)
+                 bn_eps,
+                 activation):
+        super(EffiInvResUnit, self).__init__()
+        self.residual = (in_channels == out_channels) and (stride == 1)
         mid_channels = in_channels * expansion_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
-        with self.name_scope():
+        with self.init_scope():
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
+                bn_eps=bn_eps,
                 activation=activation)
             self.conv2 = dwconv_block_fn(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                strides=strides,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
+                stride=stride,
+                bn_eps=bn_eps,
                 activation=activation)
             self.se = SEBlock(
                 channels=mid_channels,
@@ -151,11 +143,10 @@ class EffiInvResUnit(HybridBlock):
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
+                bn_eps=bn_eps,
                 activation=None)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         if self.residual:
             identity = x
         x = self.conv1(x)
@@ -167,7 +158,7 @@ class EffiInvResUnit(HybridBlock):
         return x
 
 
-class EfficientNet(HybridBlock):
+class EfficientNet(Chain):
     """
     EfficientNet(-B0) model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -180,7 +171,7 @@ class EfficientNet(HybridBlock):
         Number of output channels for initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
-    kernel_sizes : list of list of int
+    ksizes : list of list of int
         Number of kernel sizes for each unit.
     strides_per_stage : list int
         Stride value for the first unit of each stage.
@@ -188,93 +179,90 @@ class EfficientNet(HybridBlock):
         Number of expansion factors for each unit.
     dropout_rate : float, default 0.2
         Fraction of the input units to drop. Must be a number between 0 and 1.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    classes : int, default 1000
+    num_classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
                  channels,
                  init_block_channels,
                  final_block_channels,
-                 kernel_sizes,
+                 ksizes,
                  strides_per_stage,
                  expansion_factors,
                  dropout_rate=0.2,
-                 bn_epsilon=1e-5,
-                 bn_use_global_stats=False,
+                 bn_eps=1e-5,
                  in_channels=3,
                  in_size=(224, 224),
-                 classes=1000,
-                 **kwargs):
-        super(EfficientNet, self).__init__(**kwargs)
+                 classes=1000):
+        super(EfficientNet, self).__init__()
         self.in_size = in_size
         self.classes = classes
         activation = "swish"
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix="")
-            self.features.add(conv3x3_block(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                strides=2,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=activation))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                kernel_sizes_per_stage = kernel_sizes[i]
-                expansion_factors_per_stage = expansion_factors[i]
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        kernel_size = kernel_sizes_per_stage[j]
-                        expansion_factor = expansion_factors_per_stage[j]
-                        strides = strides_per_stage[i] if (j == 0) else 1
-                        if i == 0:
-                            stage.add(EffiDwsConvUnit(
-                                in_channels=in_channels,
-                                out_channels=out_channels,
-                                bn_epsilon=bn_epsilon,
-                                bn_use_global_stats=bn_use_global_stats,
-                                activation=activation))
-                        else:
-                            stage.add(EffiInvResUnit(
-                                in_channels=in_channels,
-                                out_channels=out_channels,
-                                kernel_size=kernel_size,
-                                strides=strides,
-                                expansion_factor=expansion_factor,
-                                bn_epsilon=bn_epsilon,
-                                bn_use_global_stats=bn_use_global_stats,
-                                activation=activation))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(conv1x1_block(
-                in_channels=in_channels,
-                out_channels=final_block_channels,
-                bn_epsilon=bn_epsilon,
-                bn_use_global_stats=bn_use_global_stats,
-                activation=activation))
-            in_channels = final_block_channels
-            self.features.add(nn.GlobalAvgPool2D())
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", conv3x3_block(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
+                    stride=2,
+                    bn_eps=bn_eps,
+                    activation=activation))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    ksizes_per_stage = ksizes[i]
+                    expansion_factors_per_stage = expansion_factors[i]
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            ksize = ksizes_per_stage[j]
+                            expansion_factor = expansion_factors_per_stage[j]
+                            stride = strides_per_stage[i] if (j == 0) else 1
+                            if i == 0:
+                                setattr(stage, "unit{}".format(j + 1), EffiDwsConvUnit(
+                                    in_channels=in_channels,
+                                    out_channels=out_channels,
+                                    bn_eps=bn_eps,
+                                    activation=activation))
+                            else:
+                                setattr(stage, "unit{}".format(j + 1), EffiInvResUnit(
+                                    in_channels=in_channels,
+                                    out_channels=out_channels,
+                                    kernel_size=ksize,
+                                    stride=stride,
+                                    expansion_factor=expansion_factor,
+                                    bn_eps=bn_eps,
+                                    activation=activation))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, 'final_block', conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=final_block_channels,
+                    bn_eps=bn_eps,
+                    activation=activation))
+                in_channels = final_block_channels
+                setattr(self.features, 'final_pool', GlobalAvgPool2D())
 
-            self.output = nn.HybridSequential(prefix="")
-            self.output.add(nn.Flatten())
-            if dropout_rate > 0.0:
-                self.output.add(nn.Dropout(rate=dropout_rate))
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, 'flatten', partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                if dropout_rate > 0.0:
+                    setattr(self.output, 'dropout', partial(
+                        F.dropout,
+                        ratio=dropout_rate))
+                setattr(self.output, 'fc', L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x
@@ -284,8 +272,7 @@ def get_efficientnet(version,
                      in_size,
                      model_name=None,
                      pretrained=False,
-                     ctx=cpu(),
-                     root=os.path.join("~", ".mxnet", "models"),
+                     root=os.path.join("~", ".chainer", "models"),
                      **kwargs):
     """
     Create EfficientNet model with specific parameters.
@@ -300,9 +287,7 @@ def get_efficientnet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
 
@@ -364,7 +349,7 @@ def get_efficientnet(version,
     from functools import reduce
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                       zip(channels_per_layers, layers, downsample), [])
-    kernel_sizes = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
+    ksizes = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                           zip(kernel_sizes_per_layers, layers, downsample), [])
     expansion_factors = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
                                zip(expansion_factors_per_layers, layers, downsample), [])
@@ -382,7 +367,7 @@ def get_efficientnet(version,
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
-        kernel_sizes=kernel_sizes,
+        ksizes=ksizes,
         strides_per_stage=strides_per_stage,
         expansion_factors=expansion_factors,
         dropout_rate=dropout_rate,
@@ -392,11 +377,11 @@ def get_efficientnet(version,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        load_npz(
+            file=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            obj=net)
 
     return net
 
@@ -412,9 +397,7 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b0", in_size=in_size, model_name="efficientnet_b0", **kwargs)
@@ -431,9 +414,7 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b1", in_size=in_size, model_name="efficientnet_b1", **kwargs)
@@ -450,9 +431,7 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b2", in_size=in_size, model_name="efficientnet_b2", **kwargs)
@@ -469,9 +448,7 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b3", in_size=in_size, model_name="efficientnet_b3", **kwargs)
@@ -488,9 +465,7 @@ def efficientnet_b4(in_size=(380, 380), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b4", in_size=in_size, model_name="efficientnet_b4", **kwargs)
@@ -507,9 +482,7 @@ def efficientnet_b5(in_size=(456, 456), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b5", in_size=in_size, model_name="efficientnet_b5", **kwargs)
@@ -526,9 +499,7 @@ def efficientnet_b6(in_size=(528, 528), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b6", in_size=in_size, model_name="efficientnet_b6", **kwargs)
@@ -545,9 +516,7 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
@@ -555,7 +524,9 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -573,17 +544,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != efficientnet_b0 or weight_count == 5288548)
         assert (model != efficientnet_b1 or weight_count == 7794184)
@@ -594,7 +555,7 @@ def _test():
         assert (model != efficientnet_b6 or weight_count == 43040704)
         assert (model != efficientnet_b7 or weight_count == 66347960)
 
-        x = mx.nd.zeros((1, 3, net.in_size[0], net.in_size[1]), ctx=ctx)
+        x = np.zeros((1, 3, net.in_size[0], net.in_size[1]), np.float32)
         y = net(x)
         assert (y.shape == (1, 1000))
 

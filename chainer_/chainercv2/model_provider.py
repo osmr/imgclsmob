@@ -56,7 +56,7 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
-from .models.diapreresnet_cifar import *
+from .models.efficientnet import *
 
 from .models.nin_cifar import *
 from .models.resnet_cifar import *
@@ -73,10 +73,11 @@ from .models.resdropresnet_cifar import *
 from .models.shakeshakeresnet_cifar import *
 from .models.shakedropresnet_cifar import *
 from .models.diaresnet_cifar import *
-
-from .models.resnetd import *
+from .models.diapreresnet_cifar import *
 
 from .models.octresnet import *
+
+from .models.resnetd import *
 
 from .models.resnet_cub import *
 from .models.mobilenet_cub import *
@@ -86,8 +87,6 @@ from .models.ntsnet_cub import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
-
-from .models.efficientnet import *
 
 __all__ = ['get_model']
 
@@ -446,6 +445,19 @@ _models = {
 
     'pnasnet5large': pnasnet5large,
 
+    'efficientnet_b0': efficientnet_b0,
+    'efficientnet_b1': efficientnet_b1,
+    'efficientnet_b2': efficientnet_b2,
+    'efficientnet_b3': efficientnet_b3,
+    'efficientnet_b4': efficientnet_b4,
+    'efficientnet_b5': efficientnet_b5,
+    'efficientnet_b6': efficientnet_b6,
+    'efficientnet_b7': efficientnet_b7,
+    'efficientnet_b0b': efficientnet_b0b,
+    'efficientnet_b1b': efficientnet_b1b,
+    'efficientnet_b2b': efficientnet_b2b,
+    'efficientnet_b3b': efficientnet_b3b,
+
     'nin_cifar10': nin_cifar10,
     'nin_cifar100': nin_cifar100,
     'nin_svhn': nin_svhn,
@@ -707,19 +719,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'efficientnet_b0': efficientnet_b0,
-    'efficientnet_b1': efficientnet_b1,
-    'efficientnet_b2': efficientnet_b2,
-    'efficientnet_b3': efficientnet_b3,
-    'efficientnet_b4': efficientnet_b4,
-    'efficientnet_b5': efficientnet_b5,
-    'efficientnet_b6': efficientnet_b6,
-    'efficientnet_b7': efficientnet_b7,
-    'efficientnet_b0b': efficientnet_b0b,
-    'efficientnet_b1b': efficientnet_b1b,
-    'efficientnet_b2b': efficientnet_b2b,
-    'efficientnet_b3b': efficientnet_b3b,
 }
 
 

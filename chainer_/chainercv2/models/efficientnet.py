@@ -88,6 +88,8 @@ class EffiDwsConvUnit(Chain):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    stride : int or tuple/list of 2 int
+        Stride of the second convolution layer.
     bn_eps : float
         Small float added to variance in Batch norm.
     activation : str
@@ -98,11 +100,13 @@ class EffiDwsConvUnit(Chain):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 stride,
                  bn_eps,
                  activation,
                  tf_mode):
         super(EffiDwsConvUnit, self).__init__()
         self.tf_mode = tf_mode
+        self.residual = (in_channels == out_channels) and (stride == 1)
 
         with self.init_scope():
             self.dw_conv = dwconv3x3_block(
@@ -122,11 +126,15 @@ class EffiDwsConvUnit(Chain):
                 activation=None)
 
     def __call__(self, x):
+        if self.residual:
+            identity = x
         if self.tf_mode:
             x = F.pad(x, pad_width=calc_tf_padding(x, kernel_size=3), mode="constant", constant_values=0)
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
+        if self.residual:
+            x = x + identity
         return x
 
 
@@ -324,6 +332,7 @@ class EfficientNet(Chain):
                                 setattr(stage, "unit{}".format(j + 1), EffiDwsConvUnit(
                                     in_channels=in_channels,
                                     out_channels=out_channels,
+                                    stride=stride,
                                     bn_eps=bn_eps,
                                     activation=activation,
                                     tf_mode=tf_mode))

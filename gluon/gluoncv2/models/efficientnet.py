@@ -84,6 +84,8 @@ class EffiDwsConvUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the second convolution layer.
     bn_epsilon : float
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool
@@ -96,6 +98,7 @@ class EffiDwsConvUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 strides,
                  bn_epsilon,
                  bn_use_global_stats,
                  activation,
@@ -103,6 +106,7 @@ class EffiDwsConvUnit(HybridBlock):
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
         self.tf_mode = tf_mode
+        self.residual = (in_channels == out_channels) and (stride == 1)
 
         with self.name_scope():
             self.dw_conv = dwconv3x3_block(
@@ -124,11 +128,15 @@ class EffiDwsConvUnit(HybridBlock):
                 activation=None)
 
     def hybrid_forward(self, F, x):
+        if self.residual:
+            identity = x
         if self.tf_mode:
             x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3), constant_value=0)
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
+        if self.residual:
+            x = x + identity
         return x
 
 
@@ -343,6 +351,7 @@ class EfficientNet(HybridBlock):
                             stage.add(EffiDwsConvUnit(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
+                                strides=strides,
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,

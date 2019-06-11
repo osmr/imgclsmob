@@ -85,6 +85,8 @@ class EffiDwsConvUnit(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    stride : int or tuple/list of 2 int
+        Strides of the second convolution layer.
     bn_eps : float
         Small float added to variance in Batch norm.
     activation : str
@@ -95,11 +97,13 @@ class EffiDwsConvUnit(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
+                 stride,
                  bn_eps,
                  activation,
                  tf_mode):
         super(EffiDwsConvUnit, self).__init__()
         self.tf_mode = tf_mode
+        self.residual = (in_channels == out_channels) and (stride == 1)
 
         self.dw_conv = dwconv3x3_block(
             in_channels=in_channels,
@@ -118,11 +122,15 @@ class EffiDwsConvUnit(nn.Module):
             activation=None)
 
     def forward(self, x):
+        if self.residual:
+            identity = x
         if self.tf_mode:
             x = F.pad(x, pad=calc_tf_padding(x, kernel_size=3))
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
+        if self.residual:
+            x = x + identity
         return x
 
 
@@ -314,6 +322,7 @@ class EfficientNet(nn.Module):
                     stage.add_module("unit{}".format(j + 1), EffiDwsConvUnit(
                         in_channels=in_channels,
                         out_channels=out_channels,
+                        stride=stride,
                         bn_eps=bn_eps,
                         activation=activation,
                         tf_mode=tf_mode))
@@ -708,15 +717,15 @@ def _test():
     pretrained = False
 
     models = [
-        efficientnet_b0,
-        efficientnet_b1,
-        efficientnet_b2,
-        efficientnet_b3,
-        efficientnet_b4,
-        efficientnet_b5,
-        efficientnet_b6,
-        efficientnet_b7,
-        efficientnet_b0b,
+        # efficientnet_b0,
+        # efficientnet_b1,
+        # efficientnet_b2,
+        # efficientnet_b3,
+        # efficientnet_b4,
+        # efficientnet_b5,
+        # efficientnet_b6,
+        # efficientnet_b7,
+        # efficientnet_b0b,
         efficientnet_b1b,
         efficientnet_b2b,
         efficientnet_b3b,

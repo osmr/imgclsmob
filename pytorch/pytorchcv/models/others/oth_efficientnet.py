@@ -526,7 +526,7 @@ class DepthwiseSeparableConv(nn.Module):
         assert self.has_se
         assert (self.bn2 is not None)
         assert not self.has_pw_act
-        assert not self.has_residual
+        # assert not self.has_residual
 
         x = self.conv_dw(x)
         if self.bn1 is not None:
@@ -1014,10 +1014,10 @@ def _test():
         # (oth_efficientnet_b3, 300),
         # (oth_efficientnet_b4, 380),
         # (oth_efficientnet_b7, 600),
-        (oth_efficientnet_b0_tf, 224),
-        # (oth_efficientnet_b1_tf, 240),
-        # (oth_efficientnet_b2_tf, 260),
-        # (oth_efficientnet_b3_tf, 300),
+        # (oth_efficientnet_b0_tf, 224),
+        (oth_efficientnet_b1_tf, 240),
+        (oth_efficientnet_b2_tf, 260),
+        (oth_efficientnet_b3_tf, 300),
     ]
 
     for model, in_size_x in models:

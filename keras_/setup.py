@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='kerascv',
-    version='0.0.31',
+    version='0.0.32',
     description='Image classification models for Keras',
     license='MIT',
     long_description=long_description,

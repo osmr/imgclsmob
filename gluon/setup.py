@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='gluoncv2',
-    version='0.0.46',
+    version='0.0.47',
     description='Image classification and segmentation models for Gluon',
     license='MIT',
     long_description=long_description,
@@ -27,7 +27,7 @@ setup(
     keywords='machine-learning deep-learning neuralnetwork image-classification mxnet gluon imagenet cifar svhn vgg '
              'resnet pyramidnet diracnet densenet condensenet wrn drn dpn darknet fishnet espnetv2 xdensnet squeezenet '
              'squeezenext shufflenet menet mobilenet igcv3 mnasnet darts xception inception polynet nasnet pnasnet ror '
-             'proxylessnas image-segmentation voc ade20k cityscapes coco pspnet deeplabv3 fcn',
+             'proxylessnas dianet efficientnet image-segmentation voc ade20k cityscapes coco pspnet deeplabv3 fcn',
     packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
     install_requires=['numpy'],

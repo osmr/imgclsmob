@@ -106,7 +106,7 @@ class EffiDwsConvUnit(HybridBlock):
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
         self.tf_mode = tf_mode
-        self.residual = (in_channels == out_channels) and (stride == 1)
+        self.residual = (in_channels == out_channels) and (strides == 1)
 
         with self.name_scope():
             self.dw_conv = dwconv3x3_block(

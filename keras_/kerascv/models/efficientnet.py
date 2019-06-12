@@ -17,7 +17,7 @@ from .common import is_channels_first, conv1x1_block, conv3x3_block, dwconv3x3_b
 
 def calc_tf_padding(x,
                     kernel_size,
-                    stride=1,
+                    strides=1,
                     dilation=1):
     """
     Calculate TF-same like padding size.
@@ -28,7 +28,7 @@ def calc_tf_padding(x,
         Input tensor.
     kernel_size : int
         Convolution window size.
-    stride : int, default 1
+    strides : int, default 1
         Strides of the convolution.
     dilation : int, default 1
         Dilation value for convolution layer.
@@ -38,12 +38,12 @@ def calc_tf_padding(x,
     tuple of 4 int
         The size of the padding.
     """
-    height, width = x.size()[2:]
-    oh = math.ceil(height / stride)
-    ow = math.ceil(width / stride)
-    pad_h = max((oh - 1) * stride + (kernel_size - 1) * dilation + 1 - height, 0)
-    pad_w = max((ow - 1) * stride + (kernel_size - 1) * dilation + 1 - width, 0)
-    return pad_h // 2, pad_h - pad_h // 2, pad_w // 2, pad_w - pad_w // 2
+    height, width = x.shape[2:]
+    oh = math.ceil(height / strides)
+    ow = math.ceil(width / strides)
+    pad_h = max((oh - 1) * strides + (kernel_size - 1) * dilation + 1 - height, 0)
+    pad_w = max((ow - 1) * strides + (kernel_size - 1) * dilation + 1 - width, 0)
+    return (pad_h // 2, pad_h - pad_h // 2), (pad_w // 2, pad_w - pad_w // 2)
 
 
 def round_channels(channels,
@@ -109,21 +109,20 @@ def effi_dws_conv_unit(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert (tf_mode is not None)
     residual = (in_channels == out_channels) and (strides == 1)
 
     if residual:
         identity = x
 
-    # if tf_mode:
-    #     x = nn.ZeroPadding2D(
-    #         padding=calc_tf_padding(x, kernel_size=3),
-    #         name=name + "/dw_conv_pad")(x)
+    if tf_mode:
+        x = nn.ZeroPadding2D(
+            padding=calc_tf_padding(x, kernel_size=3),
+            name=name + "/dw_conv_pad")(x)
     x = dwconv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=in_channels,
-        # padding=(0 if tf_mode else 1),
+        padding=(0 if tf_mode else 1),
         bn_epsilon=bn_epsilon,
         activation=activation,
         name=name + "/dw_conv")
@@ -188,7 +187,6 @@ def effi_inv_res_unit(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert (tf_mode is not None)
     residual = (in_channels == out_channels) and (strides == 1)
     mid_channels = in_channels * expansion_factor
     dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
@@ -203,12 +201,16 @@ def effi_inv_res_unit(x,
         bn_epsilon=bn_epsilon,
         activation=activation,
         name=name + "/conv1")
+    if tf_mode:
+        x = nn.ZeroPadding2D(
+            padding=calc_tf_padding(x, kernel_size=kernel_size, strides=strides),
+            name=name + "/conv2_pad")(x)
     x = dwconv_block_fn(
         x=x,
         in_channels=mid_channels,
         out_channels=mid_channels,
         strides=strides,
-        # padding=(0 if tf_mode else (kernel_size // 2)),
+        padding=(0 if tf_mode else (kernel_size // 2)),
         bn_epsilon=bn_epsilon,
         activation=activation,
         name=name + "/conv2")
@@ -264,13 +266,16 @@ def effi_init_block(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert (tf_mode is not None)
+    if tf_mode:
+        x = nn.ZeroPadding2D(
+            padding=calc_tf_padding(x, kernel_size=3, strides=2),
+            name=name + "/conv_pad")(x)
     x = conv3x3_block(
         x=x,
         in_channels=in_channels,
         out_channels=out_channels,
         strides=2,
-        # padding=(0 if tf_mode else 1),
+        padding=(0 if tf_mode else 1),
         bn_epsilon=bn_epsilon,
         activation=activation,
         name=name + "/conv")

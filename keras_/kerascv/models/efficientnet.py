@@ -1,19 +1,18 @@
 """
-    EfficientNet for ImageNet-1K, implemented in PyTorch.
+    EfficientNet for ImageNet-1K, implemented in Keras.
     Original paper: 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
+__all__ = ['efficientnet_model', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
            'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b0b',
            'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b']
 
 import os
 import math
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+from keras import layers as nn
+from keras.models import Model
+from .common import is_channels_first, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, se_block
 
 
 def calc_tf_padding(x,
@@ -74,185 +73,222 @@ def round_channels(channels,
     return new_channels
 
 
-class EffiDwsConvUnit(nn.Module):
+def effi_dws_conv_unit(x,
+                       in_channels,
+                       out_channels,
+                       strides,
+                       bn_epsilon,
+                       activation,
+                       tf_mode,
+                       name="effi_dws_conv_unit"):
     """
     EfficientNet specific depthwise separable convolution block/unit with BatchNorms and activations at each convolution
     layers.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the second convolution layer.
-    bn_eps : float
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     activation : str
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    name : str, default 'effi_dws_conv_unit'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 bn_eps,
-                 activation,
-                 tf_mode):
-        super(EffiDwsConvUnit, self).__init__()
-        self.tf_mode = tf_mode
-        self.residual = (in_channels == out_channels) and (stride == 1)
+    assert (tf_mode is not None)
+    residual = (in_channels == out_channels) and (strides == 1)
 
-        self.dw_conv = dwconv3x3_block(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            padding=(0 if tf_mode else 1),
-            bn_eps=bn_eps,
-            activation=activation)
-        self.se = SEBlock(
-            channels=in_channels,
-            reduction=4,
-            activation=activation)
-        self.pw_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps,
-            activation=None)
+    if residual:
+        identity = x
 
-    def forward(self, x):
-        if self.residual:
-            identity = x
-        if self.tf_mode:
-            x = F.pad(x, pad=calc_tf_padding(x, kernel_size=3))
-        x = self.dw_conv(x)
-        x = self.se(x)
-        x = self.pw_conv(x)
-        if self.residual:
-            x = x + identity
-        return x
+    # if tf_mode:
+    #     x = nn.ZeroPadding2D(
+    #         padding=calc_tf_padding(x, kernel_size=3),
+    #         name=name + "/dw_conv_pad")(x)
+    x = dwconv3x3_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=in_channels,
+        # padding=(0 if tf_mode else 1),
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        name=name + "/dw_conv")
+    x = se_block(
+        x=x,
+        channels=in_channels,
+        reduction=4,
+        activation=activation,
+        name=name + "/se")
+    x = conv1x1_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        bn_epsilon=bn_epsilon,
+        activation=None,
+        name=name + "/pw_conv")
+
+    if residual:
+        x = nn.add([x, identity], name=name + "/add")
+
+    return x
 
 
-class EffiInvResUnit(nn.Module):
+def effi_inv_res_unit(x,
+                      in_channels,
+                      out_channels,
+                      kernel_size,
+                      strides,
+                      expansion_factor,
+                      bn_epsilon,
+                      activation,
+                      tf_mode,
+                      name="effi_inv_res_unit"):
     """
     EfficientNet inverted residual unit.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the second convolution layer.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
     expansion_factor : int
         Factor for expansion of channels.
-    bn_eps : float
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     activation : str
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    name : str, default 'effi_inv_res_unit'
+        Unit name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 expansion_factor,
-                 bn_eps,
-                 activation,
-                 tf_mode):
-        super(EffiInvResUnit, self).__init__()
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.tf_mode = tf_mode
-        self.residual = (in_channels == out_channels) and (stride == 1)
-        mid_channels = in_channels * expansion_factor
-        dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
+    assert (tf_mode is not None)
+    residual = (in_channels == out_channels) and (strides == 1)
+    mid_channels = in_channels * expansion_factor
+    dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            bn_eps=bn_eps,
-            activation=activation)
-        self.conv2 = dwconv_block_fn(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride,
-            padding=(0 if tf_mode else (kernel_size // 2)),
-            bn_eps=bn_eps,
-            activation=activation)
-        self.se = SEBlock(
-            channels=mid_channels,
-            reduction=24,
-            activation=activation)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bn_eps=bn_eps,
-            activation=None)
+    if residual:
+        identity = x
 
-    def forward(self, x):
-        if self.residual:
-            identity = x
-        x = self.conv1(x)
-        if self.tf_mode:
-            x = F.pad(x, pad=calc_tf_padding(x, kernel_size=self.kernel_size, stride=self.stride))
-        x = self.conv2(x)
-        x = self.se(x)
-        x = self.conv3(x)
-        if self.residual:
-            x = x + identity
-        return x
+    x = conv1x1_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=mid_channels,
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        name=name + "/conv1")
+    x = dwconv_block_fn(
+        x=x,
+        in_channels=mid_channels,
+        out_channels=mid_channels,
+        strides=strides,
+        # padding=(0 if tf_mode else (kernel_size // 2)),
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        name=name + "/conv2")
+    x = se_block(
+        x=x,
+        channels=mid_channels,
+        reduction=24,
+        activation=activation,
+        name=name + "/se")
+    x = conv1x1_block(
+        x=x,
+        in_channels=mid_channels,
+        out_channels=out_channels,
+        bn_epsilon=bn_epsilon,
+        activation=None,
+        name=name + "/conv3")
+
+    if residual:
+        x = nn.add([x, identity], name=name + "/add")
+
+    return x
 
 
-class EffiInitBlock(nn.Module):
+def effi_init_block(x,
+                    in_channels,
+                    out_channels,
+                    bn_epsilon,
+                    activation,
+                    tf_mode,
+                    name="effi_init_block"):
     """
     EfficientNet specific initial block.
 
     Parameters:
     ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
     in_channels : int
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_eps : float
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     activation : str
         Name of activation function.
     tf_mode : bool
         Whether to use TF-like mode.
+    name : str, default 'effi_init_block'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
     """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bn_eps,
-                 activation,
-                 tf_mode):
-        super(EffiInitBlock, self).__init__()
-        self.tf_mode = tf_mode
-
-        self.conv = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2,
-            padding=(0 if tf_mode else 1),
-            bn_eps=bn_eps,
-            activation=activation)
-
-    def forward(self, x):
-        if self.tf_mode:
-            x = F.pad(x, pad=calc_tf_padding(x, kernel_size=3, stride=2))
-        x = self.conv(x)
-        return x
+    assert (tf_mode is not None)
+    x = conv3x3_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        strides=2,
+        # padding=(0 if tf_mode else 1),
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        name=name + "/conv")
+    return x
 
 
-class EfficientNet(nn.Module):
+def efficientnet_model(channels,
+                       init_block_channels,
+                       final_block_channels,
+                       kernel_sizes,
+                       strides_per_stage,
+                       expansion_factors,
+                       dropout_rate=0.2,
+                       tf_mode=False,
+                       bn_epsilon=1e-5,
+                       in_channels=3,
+                       in_size=(224, 224),
+                       classes=1000):
     """
     EfficientNet(-B0) model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
@@ -261,8 +297,8 @@ class EfficientNet(nn.Module):
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    init_block_channels : int
-        Number of output channels for initial unit.
+    init_block_channels : list of 2 int
+        Numbers of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
     kernel_sizes : list of list of int
@@ -275,107 +311,92 @@ class EfficientNet(nn.Module):
         Fraction of the input units to drop. Must be a number between 0 and 1.
     tf_mode : bool, default False
         Whether to use TF-like mode.
-    bn_eps : float, default 1e-5
+    bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
-    def __init__(self,
-                 channels,
-                 init_block_channels,
-                 final_block_channels,
-                 kernel_sizes,
-                 strides_per_stage,
-                 expansion_factors,
-                 dropout_rate=0.2,
-                 tf_mode=False,
-                 bn_eps=1e-5,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
-        super(EfficientNet, self).__init__()
-        self.in_size = in_size
-        self.num_classes = num_classes
-        activation = "swish"
+    input_shape = (in_channels, in_size[0], in_size[1]) if is_channels_first() else\
+        (in_size[0], in_size[1], in_channels)
+    input = nn.Input(shape=input_shape)
+    activation = "swish"
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", EffiInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            bn_eps=bn_eps,
-            activation=activation,
-            tf_mode=tf_mode))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            kernel_sizes_per_stage = kernel_sizes[i]
-            expansion_factors_per_stage = expansion_factors[i]
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                kernel_size = kernel_sizes_per_stage[j]
-                expansion_factor = expansion_factors_per_stage[j]
-                stride = strides_per_stage[i] if (j == 0) else 1
-                if i == 0:
-                    stage.add_module("unit{}".format(j + 1), EffiDwsConvUnit(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        stride=stride,
-                        bn_eps=bn_eps,
-                        activation=activation,
-                        tf_mode=tf_mode))
-                else:
-                    stage.add_module("unit{}".format(j + 1), EffiInvResUnit(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        kernel_size=kernel_size,
-                        stride=stride,
-                        expansion_factor=expansion_factor,
-                        bn_eps=bn_eps,
-                        activation=activation,
-                        tf_mode=tf_mode))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', conv1x1_block(
-            in_channels=in_channels,
-            out_channels=final_block_channels,
-            bn_eps=bn_eps,
-            activation=activation))
-        in_channels = final_block_channels
-        self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
+    x = effi_init_block(
+        x=input,
+        in_channels=in_channels,
+        out_channels=init_block_channels,
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        tf_mode=tf_mode,
+        name="features/init_block")
+    in_channels = init_block_channels
+    for i, channels_per_stage in enumerate(channels):
+        kernel_sizes_per_stage = kernel_sizes[i]
+        expansion_factors_per_stage = expansion_factors[i]
+        for j, out_channels in enumerate(channels_per_stage):
+            kernel_size = kernel_sizes_per_stage[j]
+            expansion_factor = expansion_factors_per_stage[j]
+            strides = strides_per_stage[i] if (j == 0) else 1
+            if i == 0:
+                x = effi_dws_conv_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    bn_epsilon=bn_epsilon,
+                    activation=activation,
+                    tf_mode=tf_mode,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+            else:
+                x = effi_inv_res_unit(
+                    x=x,
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    kernel_size=kernel_size,
+                    strides=strides,
+                    expansion_factor=expansion_factor,
+                    bn_epsilon=bn_epsilon,
+                    activation=activation,
+                    tf_mode=tf_mode,
+                    name="features/stage{}/unit{}".format(i + 1, j + 1))
+            in_channels = out_channels
+    x = conv1x1_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=final_block_channels,
+        bn_epsilon=bn_epsilon,
+        activation=activation,
+        name="features/final_block")
+    in_channels = final_block_channels
+    x = nn.GlobalAveragePooling2D(
+        name="features/final_pool")(x)
 
-        self.output = nn.Sequential()
-        if dropout_rate > 0.0:
-            self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
-        self.output.add_module("fc", nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes))
+    if dropout_rate > 0.0:
+        x = nn.Dropout(
+            rate=dropout_rate,
+            name="output/dropout")(x)
+    x = nn.Dense(
+        units=classes,
+        input_dim=in_channels,
+        name="output/fc")(x)
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.size(0), -1)
-        x = self.output(x)
-        return x
+    model = Model(inputs=input, outputs=x)
+    model.in_size = in_size
+    model.classes = classes
+    return model
 
 
 def get_efficientnet(version,
                      in_size,
                      tf_mode=False,
-                     bn_eps=1e-5,
+                     bn_epsilon=1e-5,
                      model_name=None,
                      pretrained=False,
-                     root=os.path.join("~", ".torch", "models"),
+                     root=os.path.join("~", ".keras", "models"),
                      **kwargs):
     """
     Create EfficientNet model with specific parameters.
@@ -388,13 +409,13 @@ def get_efficientnet(version,
         Spatial size of the expected input image.
     tf_mode : bool, default False
         Whether to use TF-like mode.
-    bn_eps : float, default 1e-5
+    bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
 
@@ -470,7 +491,7 @@ def get_efficientnet(version,
         assert (int(final_block_channels * width_factor) == round_channels(final_block_channels, width_factor))
         final_block_channels = round_channels(final_block_channels, width_factor)
 
-    net = EfficientNet(
+    net = efficientnet_model(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
@@ -479,7 +500,7 @@ def get_efficientnet(version,
         expansion_factors=expansion_factors,
         dropout_rate=dropout_rate,
         tf_mode=tf_mode,
-        bn_eps=bn_eps,
+        bn_epsilon=bn_epsilon,
         **kwargs)
 
     if pretrained:
@@ -505,7 +526,7 @@ def efficientnet_b0(in_size=(224, 224), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b0", in_size=in_size, model_name="efficientnet_b0", **kwargs)
@@ -522,7 +543,7 @@ def efficientnet_b1(in_size=(240, 240), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b1", in_size=in_size, model_name="efficientnet_b1", **kwargs)
@@ -539,7 +560,7 @@ def efficientnet_b2(in_size=(260, 260), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b2", in_size=in_size, model_name="efficientnet_b2", **kwargs)
@@ -556,7 +577,7 @@ def efficientnet_b3(in_size=(300, 300), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b3", in_size=in_size, model_name="efficientnet_b3", **kwargs)
@@ -573,7 +594,7 @@ def efficientnet_b4(in_size=(380, 380), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b4", in_size=in_size, model_name="efficientnet_b4", **kwargs)
@@ -590,7 +611,7 @@ def efficientnet_b5(in_size=(456, 456), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b5", in_size=in_size, model_name="efficientnet_b5", **kwargs)
@@ -607,7 +628,7 @@ def efficientnet_b6(in_size=(528, 528), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b6", in_size=in_size, model_name="efficientnet_b6", **kwargs)
@@ -624,7 +645,7 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
@@ -641,10 +662,10 @@ def efficientnet_b0b(in_size=(224, 224), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0b",
+    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b0b",
                             **kwargs)
 
 
@@ -659,10 +680,10 @@ def efficientnet_b1b(in_size=(240, 240), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1b",
+    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b1b",
                             **kwargs)
 
 
@@ -677,10 +698,10 @@ def efficientnet_b2b(in_size=(260, 260), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2b",
+    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b2b",
                             **kwargs)
 
 
@@ -695,24 +716,16 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3b",
+    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b3b",
                             **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import keras
 
     pretrained = False
 
@@ -732,12 +745,9 @@ def _test():
     ]
 
     for model in models:
-
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        # net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != efficientnet_b0 or weight_count == 5288548)
         assert (model != efficientnet_b1 or weight_count == 7794184)
@@ -752,10 +762,12 @@ def _test():
         assert (model != efficientnet_b2b or weight_count == 9109994)
         assert (model != efficientnet_b3b or weight_count == 12233232)
 
-        x = torch.randn(1, 3, net.in_size[0], net.in_size[1])
-        y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        if is_channels_first():
+            x = np.zeros((1, 3, net.in_size[0], net.in_size[1]), np.float32)
+        else:
+            x = np.zeros((1, net.in_size[0], net.in_size[1], 3), np.float32)
+        y = net.predict(x)
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

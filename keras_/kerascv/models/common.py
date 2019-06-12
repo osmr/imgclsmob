@@ -15,6 +15,28 @@ from keras import backend as K
 from keras import layers as nn
 
 
+def swish(x,
+          name="swish"):
+    """
+    Swish activation function from 'Searching for Activation Functions,' https://arxiv.org/abs/1710.05941.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    name : str, default 'swish'
+        Block name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    w = nn.Activation("sigmoid", name=name + "/sigmoid")(x)
+    x = nn.multiply([x, w], name=name + "/mul")
+    return x
+
+
 def get_activation_layer(x,
                          activation,
                          name="activ"):
@@ -43,6 +65,8 @@ def get_activation_layer(x,
             x = nn.Activation("relu", name=name)(x)
         elif activation == "relu6":
             x = nn.ReLU(max_value=6.0, name=name)(x)
+        elif activation == "swish":
+            x = swish(x=x, name=name)
         else:
             raise NotImplementedError()
     else:
@@ -567,6 +591,7 @@ def conv_block(x,
                dilation=1,
                groups=1,
                use_bias=False,
+               bn_epsilon=1e-5,
                activation="relu",
                name="conv_block"):
     """
@@ -592,6 +617,8 @@ def conv_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'conv_block'
@@ -615,6 +642,7 @@ def conv_block(x,
         name=name + "/conv")
     x = batchnorm(
         x=x,
+        epsilon=bn_epsilon,
         name=name + "/bn")
     if activation is not None:
         x = get_activation_layer(
@@ -630,6 +658,7 @@ def conv1x1_block(x,
                   strides=1,
                   groups=1,
                   use_bias=False,
+                  bn_epsilon=1e-5,
                   activation="relu",
                   name="conv1x1_block"):
     """
@@ -649,6 +678,8 @@ def conv1x1_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'conv1x1_block'
@@ -668,6 +699,7 @@ def conv1x1_block(x,
         padding=0,
         groups=groups,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)
 
@@ -680,6 +712,7 @@ def conv3x3_block(x,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  bn_epsilon=1e-5,
                   activation="relu",
                   name="conv3x3_block"):
     """
@@ -703,6 +736,8 @@ def conv3x3_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'conv3x3_block'
@@ -723,6 +758,7 @@ def conv3x3_block(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)
 
@@ -735,6 +771,7 @@ def conv5x5_block(x,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  bn_epsilon=1e-5,
                   activation="relu",
                   name="conv3x3_block"):
     """
@@ -758,6 +795,8 @@ def conv5x5_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'conv3x3_block'
@@ -778,6 +817,7 @@ def conv5x5_block(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)
 
@@ -836,6 +876,7 @@ def dwconv3x3_block(x,
                     padding=1,
                     dilation=1,
                     use_bias=False,
+                    bn_epsilon=1e-5,
                     activation="relu",
                     name="dwconv3x3_block"):
     """
@@ -857,6 +898,8 @@ def dwconv3x3_block(x,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'dwconv3x3_block'
@@ -876,6 +919,7 @@ def dwconv3x3_block(x,
         dilation=dilation,
         groups=out_channels,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)
 
@@ -887,6 +931,7 @@ def dwconv5x5_block(x,
                     padding=2,
                     dilation=1,
                     use_bias=False,
+                    bn_epsilon=1e-5,
                     activation="relu",
                     name="dwconv3x3_block"):
     """
@@ -908,6 +953,8 @@ def dwconv5x5_block(x,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     name : str, default 'dwconv3x3_block'
@@ -927,6 +974,7 @@ def dwconv5x5_block(x,
         dilation=dilation,
         groups=out_channels,
         use_bias=use_bias,
+        bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)
 

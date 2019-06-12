@@ -20,6 +20,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.igcv3 import *
 from .models.mnasnet import *
+from .models.efficientnet import *
 
 __all__ = ['get_model']
 
@@ -199,6 +200,19 @@ _models = {
     'igcv3_wd4': igcv3_wd4,
 
     'mnasnet': mnasnet,
+
+    'efficientnet_b0': efficientnet_b0,
+    'efficientnet_b1': efficientnet_b1,
+    'efficientnet_b2': efficientnet_b2,
+    'efficientnet_b3': efficientnet_b3,
+    'efficientnet_b4': efficientnet_b4,
+    'efficientnet_b5': efficientnet_b5,
+    'efficientnet_b6': efficientnet_b6,
+    'efficientnet_b7': efficientnet_b7,
+    'efficientnet_b0b': efficientnet_b0b,
+    'efficientnet_b1b': efficientnet_b1b,
+    'efficientnet_b2b': efficientnet_b2b,
+    'efficientnet_b3b': efficientnet_b3b,
 }
 
 

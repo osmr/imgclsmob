@@ -136,7 +136,11 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_wd2', '1704', 'b8961ca335abd1d66eb2cf180eb14381ebdcc3ee', 'v0.0.132'),
     ('igcv3_w3d4', '1097', 'fb365b725beaf38429a98a52b88a36d3e423329b', 'v0.0.207'),
     ('igcv3_w1', '0899', '968237cbd0a55b43f8847b919fa3ba02a27bb595', 'v0.0.243'),
-    ('mnasnet', '1145', '11b6acf13ce516b7b28875c5a6d6932a1aa0b96a', 'v0.0.117')]}
+    ('mnasnet', '1145', '11b6acf13ce516b7b28875c5a6d6932a1aa0b96a', 'v0.0.117'),
+    ('efficientnet_b0b', '0697', '208e6435316608d55df46d2348f5c588ff1986ce', 'v0.0.350'),
+    ('efficientnet_b1b', '0590', 'aeeb9860cdcaa5df69dc9ce0977e5dd419070db8', 'v0.0.350'),
+    ('efficientnet_b2b', '0528', '1ea7882dd30d4692bc307d35ec658c3d1324821c', 'v0.0.350'),
+    ('efficientnet_b3b', '0486', '4e80d79b50561389addf0e71dab55b772edd41eb', 'v0.0.350')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

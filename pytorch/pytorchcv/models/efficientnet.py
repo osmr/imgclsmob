@@ -480,6 +480,7 @@ def get_efficientnet(version,
         dropout_rate=dropout_rate,
         tf_mode=tf_mode,
         bn_eps=bn_eps,
+        in_size=in_size,
         **kwargs)
 
     if pretrained:

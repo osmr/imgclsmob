@@ -1,5 +1,5 @@
 """
-    ShuffleNet V2, implemented in Chainer. The alternative version.
+    ShuffleNet V2 for ImageNet-1K, implemented in Chainer. The alternative version.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """

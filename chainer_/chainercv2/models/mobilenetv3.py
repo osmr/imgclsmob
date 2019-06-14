@@ -1,5 +1,5 @@
 """
-    MobileNetV2, implemented in Chainer.
+    MobileNetV3 for ImageNet-1K, implemented in Chainer.
     Original paper: 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 """
 
@@ -165,7 +165,7 @@ class MobileNetV3Classifier(Chain):
 
 class MobileNetV3(Chain):
     """
-    MobileNetV2 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+    MobileNetV3 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
     Parameters:
     ----------

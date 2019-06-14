@@ -1,5 +1,5 @@
 """
-    DLA, implemented in PyTorch.
+    DLA for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 """
 
@@ -601,7 +601,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -637,7 +636,7 @@ def _test():
         assert (model != dla102x2 or weight_count == 41282200)
         assert (model != dla169 or weight_count == 53389720)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

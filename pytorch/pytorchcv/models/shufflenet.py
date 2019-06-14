@@ -1,5 +1,5 @@
 """
-    ShuffleNet, implemented in PyTorch.
+    ShuffleNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 """
@@ -432,7 +432,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -470,7 +469,7 @@ def _test():
         assert (model != shufflenet_g1_wd4 or weight_count == 209746)
         assert (model != shufflenet_g3_wd4 or weight_count == 305902)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

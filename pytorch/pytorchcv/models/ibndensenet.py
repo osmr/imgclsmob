@@ -1,5 +1,5 @@
 """
-    IBN-DenseNet, implemented in PyTorch.
+    IBN-DenseNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 """
@@ -369,7 +369,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -393,7 +392,7 @@ def _test():
         assert (model != ibn_densenet169 or weight_count == 14149480)
         assert (model != ibn_densenet201 or weight_count == 20013928)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

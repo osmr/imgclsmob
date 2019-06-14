@@ -1,5 +1,5 @@
 """
-    MobileNetV2, implemented in Gluon.
+    MobileNetV2 for ImageNet-1K, implemented in Gluon.
     Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
 """
 

@@ -1,5 +1,5 @@
 """
-    DRN, implemented in Chainer.
+    DRN for ImageNet-1K, implemented in Chainer.
     Original paper: 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 """
 

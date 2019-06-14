@@ -1,5 +1,5 @@
 """
-    X-DenseNet, implemented in Chainer.
+    X-DenseNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Expander Networks: Efficient Deep Networks from Graph Theory,'
     https://arxiv.org/abs/1711.08757.
 """

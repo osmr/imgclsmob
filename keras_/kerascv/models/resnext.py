@@ -1,5 +1,5 @@
 """
-    ResNeXt, implemented in Keras.
+    ResNeXt for ImageNet-1K, implemented in Keras.
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 

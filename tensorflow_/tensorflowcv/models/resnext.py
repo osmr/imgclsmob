@@ -1,5 +1,5 @@
 """
-    ResNeXt, implemented in TensorFlow.
+    ResNeXt for ImageNet-1K, implemented in TensorFlow.
     Original papers: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 

@@ -1,5 +1,5 @@
 """
-    DiracNetV2, implemented in Chainer.
+    DiracNetV2 for ImageNet-1K, implemented in Chainer.
     Original paper: 'DiracNets: Training Very Deep Neural Networks Without Skip-Connections,'
     https://arxiv.org/abs/1706.00388.
 """

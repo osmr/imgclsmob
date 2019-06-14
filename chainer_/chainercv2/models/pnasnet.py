@@ -1,5 +1,5 @@
 """
-    PNASNet, implemented in Chainer.
+    PNASNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.
 """
 

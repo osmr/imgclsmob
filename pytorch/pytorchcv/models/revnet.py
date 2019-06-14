@@ -1,5 +1,5 @@
 """
-    RevNet, implemented in PyTorch.
+    RevNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'The Reversible Residual Network: Backpropagation Without Storing Activations,'
     https://arxiv.org/abs/1707.04585.
 """

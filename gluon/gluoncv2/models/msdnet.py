@@ -1,5 +1,5 @@
 """
-    MSDNet, implemented in Gluon.
+    MSDNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Multi-Scale Dense Networks for Resource Efficient Image Classification,'
     https://arxiv.org/abs/1703.09844.
 """

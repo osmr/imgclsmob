@@ -1,5 +1,5 @@
 """
-    SENet, implemented in TensorFlow.
+    SENet for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 

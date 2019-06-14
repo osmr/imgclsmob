@@ -1,5 +1,5 @@
 """
-    DarkNet, implemented in TensorFlow.
+    DarkNet for ImageNet-1K, implemented in TensorFlow.
     Original source: 'Darknet: Open source neural networks in c,' https://github.com/pjreddie/darknet.
 """
 

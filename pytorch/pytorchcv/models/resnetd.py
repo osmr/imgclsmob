@@ -247,7 +247,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     ordinary_init = False
     multi_output = False
@@ -279,7 +278,7 @@ def _test():
             assert (model != resnetd101b or weight_count == 44672936)
             assert (model != resnetd152b or weight_count == 60316584)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         if multi_output:
             y = y[0]

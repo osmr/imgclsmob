@@ -1,5 +1,5 @@
 """
-    MENet, implemented in Chainer.
+    MENet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
     https://arxiv.org/abs/1803.09127.
 """

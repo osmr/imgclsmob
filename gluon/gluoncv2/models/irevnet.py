@@ -1,5 +1,5 @@
 """
-    i-RevNet, implemented in Gluon.
+    i-RevNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 """
 

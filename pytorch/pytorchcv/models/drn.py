@@ -1,5 +1,5 @@
 """
-    DRN, implemented in PyTorch.
+    DRN for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 """
 
@@ -594,7 +594,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -624,7 +623,7 @@ def _test():
         assert (model != drnd54 or weight_count == 35809176)
         assert (model != drnd105 or weight_count == 54801304)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

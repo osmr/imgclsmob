@@ -1,5 +1,5 @@
 """
-    NASNet-A, implemented in Chainer.
+    NASNet-A for ImageNet-1K, implemented in Chainer.
     Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 """

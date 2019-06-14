@@ -1,5 +1,5 @@
 """
-    DPN, implemented in Chainer.
+    DPN for ImageNet-1K, implemented in Chainer.
     Original paper: 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 """
 

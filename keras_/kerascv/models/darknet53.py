@@ -1,5 +1,5 @@
 """
-    DarkNet-53, implemented in Keras.
+    DarkNet-53 for ImageNet-1K, implemented in Keras.
     Original source: 'YOLOv3: An Incremental Improvement,' https://arxiv.org/abs/1804.02767.
 """
 

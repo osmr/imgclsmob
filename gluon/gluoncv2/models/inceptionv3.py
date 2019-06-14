@@ -1,5 +1,5 @@
 """
-    InceptionV3, implemented in Gluon.
+    InceptionV3 for ImageNet-1K, implemented in Gluon.
     Original paper: 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 """

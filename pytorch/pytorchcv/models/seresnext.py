@@ -1,5 +1,5 @@
 """
-    SE-ResNeXt, implemented in PyTorch.
+    SE-ResNeXt for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
@@ -250,7 +250,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -272,7 +271,7 @@ def _test():
         assert (model != seresnext101_32x4d or weight_count == 48955416)
         assert (model != seresnext101_64x4d or weight_count == 88232984)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

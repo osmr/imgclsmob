@@ -1,5 +1,5 @@
 """
-    SqueezeNext, implemented in Gluon.
+    SqueezeNext for ImageNet-1K, implemented in Gluon.
     Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 """
 

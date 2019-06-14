@@ -1,5 +1,5 @@
 """
-    PNASNet, implemented in Gluon.
+    PNASNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.
 """
 

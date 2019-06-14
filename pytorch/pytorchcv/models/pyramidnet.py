@@ -1,5 +1,5 @@
 """
-    PyramidNet, implemented in PyTorch.
+    PyramidNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 
@@ -351,7 +351,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -369,7 +368,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != pyramidnet101_a360 or weight_count == 42455070)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

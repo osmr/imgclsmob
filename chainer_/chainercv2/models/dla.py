@@ -1,5 +1,5 @@
 """
-    DLA, implemented in Chainer.
+    DLA for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Layer Aggregation,' https://arxiv.org/abs/1707.06484.
 """
 

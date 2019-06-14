@@ -1,5 +1,5 @@
 """
-    ResNeXt, implemented in Chainer.
+    ResNeXt for ImageNet-1K, implemented in Chainer.
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 

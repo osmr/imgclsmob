@@ -1,5 +1,5 @@
 """
-    FishNet, implemented in Chainer.
+    FishNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction,'
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 """

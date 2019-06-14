@@ -291,7 +291,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -315,7 +314,7 @@ def _test():
         assert (model != densenet169 or weight_count == 14149480)
         assert (model != densenet201 or weight_count == 20013928)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

@@ -1,5 +1,5 @@
 """
-    MnasNet, implemented in PyTorch.
+    MnasNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,' https://arxiv.org/abs/1807.11626.
 """
 
@@ -285,7 +285,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -303,7 +302,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mnasnet or weight_count == 4308816)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

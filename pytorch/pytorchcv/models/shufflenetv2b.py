@@ -1,5 +1,5 @@
 """
-    ShuffleNet V2, implemented in PyTorch. The alternative version.
+    ShuffleNet V2 for ImageNet-1K, implemented in PyTorch. The alternative version.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """
@@ -360,7 +360,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -384,7 +383,7 @@ def _test():
         assert (model != shufflenetv2b_w3d2 or weight_count == 4410194)
         assert (model != shufflenetv2b_w2 or weight_count == 7611290)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

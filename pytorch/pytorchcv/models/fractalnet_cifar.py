@@ -468,7 +468,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -488,7 +487,7 @@ def _test():
         assert (model != fractalnet_cifar10 or weight_count == 33724618)
         assert (model != fractalnet_cifar100 or weight_count == 33770788)
 
-        x = Variable(torch.randn(1, 3, 32, 32))
+        x = torch.randn(1, 3, 32, 32)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, num_classes))

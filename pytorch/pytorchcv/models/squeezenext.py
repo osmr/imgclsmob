@@ -1,5 +1,5 @@
 """
-    SqueezeNext, implemented in PyTorch.
+    SqueezeNext for ImageNet-1K, implemented in PyTorch.
     Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 """
 
@@ -350,7 +350,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -378,7 +377,7 @@ def _test():
         assert (model != sqnxt23v5_w3d2 or weight_count == 1953616)
         assert (model != sqnxt23v5_w2 or weight_count == 3366344)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

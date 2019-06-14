@@ -1,5 +1,5 @@
 """
-    SparseNet, implemented in Chainer.
+    SparseNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 """
 

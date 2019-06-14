@@ -403,16 +403,15 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
     models = [
-        # cbam_resnet18,
-        # cbam_resnet34,
+        cbam_resnet18,
+        cbam_resnet34,
         cbam_resnet50,
-        # cbam_resnet101,
-        # cbam_resnet152,
+        cbam_resnet101,
+        cbam_resnet152,
     ]
 
     for model in models:
@@ -429,7 +428,7 @@ def _test():
         assert (model != cbam_resnet101 or weight_count == 49330172)
         assert (model != cbam_resnet152 or weight_count == 66826848)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

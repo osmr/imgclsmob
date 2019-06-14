@@ -1,5 +1,5 @@
 """
-    ResAttNet, implemented in Chainer.
+    ResAttNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 """
 

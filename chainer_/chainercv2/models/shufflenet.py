@@ -1,5 +1,5 @@
 """
-    ShuffleNet, implemented in Chainer.
+    ShuffleNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
     https://arxiv.org/abs/1707.01083.
 """

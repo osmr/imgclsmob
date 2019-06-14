@@ -1,5 +1,5 @@
 """
-    DARTS, implemented in Chainer.
+    DARTS for ImageNet-1K, implemented in Chainer.
     Original paper: 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 """
 

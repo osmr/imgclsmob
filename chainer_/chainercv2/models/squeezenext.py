@@ -1,5 +1,5 @@
 """
-    SqueezeNext, implemented in Chainer.
+    SqueezeNext for ImageNet-1K, implemented in Chainer.
     Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 """
 

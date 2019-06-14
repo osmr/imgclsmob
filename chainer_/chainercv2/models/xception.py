@@ -1,5 +1,5 @@
 """
-    Xception, implemented in Chainer.
+    Xception for ImageNet-1K, implemented in Chainer.
     Original paper: 'Xception: Deep Learning with Depthwise Separable Convolutions,' https://arxiv.org/abs/1610.02357.
 """
 

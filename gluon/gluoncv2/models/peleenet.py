@@ -1,5 +1,5 @@
 """
-    PeleeNet, implemented in Gluon.
+    PeleeNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Pelee: A Real-Time Object Detection System on Mobile Devices,' https://arxiv.org/abs/1804.06882.
 """
 

@@ -1,5 +1,5 @@
 """
-    DRN, implemented in Gluon.
+    DRN for ImageNet-1K, implemented in Gluon.
     Original paper: 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 """
 

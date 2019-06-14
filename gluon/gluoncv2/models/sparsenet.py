@@ -1,5 +1,5 @@
 """
-    SparseNet, implemented in Gluon.
+    SparseNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 """
 

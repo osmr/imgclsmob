@@ -1,5 +1,5 @@
 """
-    SqueezeNext, implemented in Keras.
+    SqueezeNext for ImageNet-1K, implemented in Keras.
     Original paper: 'SqueezeNext: Hardware-Aware Neural Network Design,' https://arxiv.org/abs/1803.10615.
 """
 

@@ -1,5 +1,5 @@
 """
-    NASNet-A, implemented in PyTorch.
+    NASNet-A for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 """
@@ -1278,7 +1278,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -1298,7 +1297,7 @@ def _test():
         assert (model != nasnet_4a1056 or weight_count == 5289978)
         assert (model != nasnet_6a4032 or weight_count == 88753150)
 
-        x = Variable(torch.randn(1, 3, net.in_size[0], net.in_size[1]))
+        x = torch.randn(1, 3, net.in_size[0], net.in_size[1])
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

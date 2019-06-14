@@ -1,5 +1,5 @@
 """
-    PolyNet, implemented in PyTorch.
+    PolyNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 """
@@ -917,7 +917,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -935,7 +934,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != polynet or weight_count == 95366600)
 
-        x = Variable(torch.randn(1, 3, 331, 331))
+        x = torch.randn(1, 3, 331, 331)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

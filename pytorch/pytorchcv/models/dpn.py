@@ -1,5 +1,5 @@
 """
-    DPN, implemented in PyTorch.
+    DPN for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Dual Path Networks,' https://arxiv.org/abs/1707.01629.
 """
 
@@ -624,7 +624,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
     for_training = False
@@ -651,7 +650,7 @@ def _test():
         assert (model != dpn107 or weight_count == 86917800)
         assert (model != dpn131 or weight_count == 79254504)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

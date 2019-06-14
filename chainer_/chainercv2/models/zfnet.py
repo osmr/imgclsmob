@@ -1,5 +1,5 @@
 """
-    ZFNet, implemented in Chainer.
+    ZFNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 """
 

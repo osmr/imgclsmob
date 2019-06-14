@@ -1,5 +1,5 @@
 """
-    IBN-ResNeXt, implemented in PyTorch.
+    IBN-ResNeXt for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 
@@ -311,7 +311,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -333,7 +332,7 @@ def _test():
         assert (model != ibn_resnext101_32x4d or weight_count == 44177704)
         assert (model != ibn_resnext101_64x4d or weight_count == 83455272)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

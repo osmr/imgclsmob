@@ -1,5 +1,5 @@
 """
-    iSQRT-COV-ResNet, implemented in Gluon.
+    iSQRT-COV-ResNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root
     Normalization,' https://arxiv.org/abs/1712.01034.
 """

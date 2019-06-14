@@ -1,5 +1,5 @@
 """
-    MobileNetV2, implemented in PyTorch.
+    MobileNetV3 for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 """
 
@@ -159,7 +159,7 @@ class MobileNetV3Classifier(nn.Module):
 
 class MobileNetV3(nn.Module):
     """
-    MobileNetV2 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+    MobileNetV3 model from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
 
     Parameters:
     ----------
@@ -493,7 +493,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -529,7 +528,7 @@ def _test():
         assert (model != mobilenetv3_large_w1 or weight_count == 5479206)
         assert (model != mobilenetv3_large_w5d4 or weight_count == 6171478)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

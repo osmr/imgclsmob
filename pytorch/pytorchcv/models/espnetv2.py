@@ -1,5 +1,5 @@
 """
-    ESPNetv2, implemented in PyTorch.
+    ESPNetv2 for ImageNet-1K, implemented in PyTorch.
     Original paper: 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network,'
     https://arxiv.org/abs/1811.11431.
 """
@@ -507,7 +507,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -533,7 +532,7 @@ def _test():
         assert (model != espnetv2_w3d2 or weight_count == 2314856)
         assert (model != espnetv2_w2 or weight_count == 3498136)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

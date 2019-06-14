@@ -385,7 +385,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
     aux = True
@@ -407,7 +406,7 @@ def _test():
         else:
             assert (model != ntsnet_cub or weight_count == 28623333)
 
-        x = Variable(torch.randn(5, 3, 448, 448))
+        x = torch.randn(5, 3, 448, 448)
         ys = net(x)
         y = ys[0] if aux else ys
         y.sum().backward()

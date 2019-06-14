@@ -1,5 +1,5 @@
 """
-    MobileNet & FD-MobileNet, implemented in TensorFlow.
+    MobileNet & FD-MobileNet for ImageNet-1K, implemented in TensorFlow.
     Original papers:
     - 'MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications,'
        https://arxiv.org/abs/1704.04861.

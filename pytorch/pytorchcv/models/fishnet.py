@@ -1,5 +1,5 @@
 """
-    FishNet, implemented in PyTorch.
+    FishNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction,'
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 """
@@ -623,7 +623,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -643,7 +642,7 @@ def _test():
         assert (model != fishnet99 or weight_count == 16628904)
         assert (model != fishnet150 or weight_count == 24959400)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

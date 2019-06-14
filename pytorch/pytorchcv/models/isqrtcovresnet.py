@@ -1,5 +1,5 @@
 """
-    iSQRT-COV-ResNet, implemented in PyTorch.
+    iSQRT-COV-ResNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Towards Faster Training of Global Covariance Pooling Networks by Iterative Matrix Square Root
     Normalization,' https://arxiv.org/abs/1712.01034.
 """
@@ -417,7 +417,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -445,7 +444,7 @@ def _test():
         assert (model != isqrtcovresnet101 or weight_count == 75921960)
         assert (model != isqrtcovresnet101b or weight_count == 75921960)
 
-        x = Variable(torch.randn(14, 3, 224, 224))
+        x = torch.randn(14, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (14, 1000))

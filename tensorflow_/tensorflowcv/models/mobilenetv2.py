@@ -1,5 +1,5 @@
 """
-    MobileNetV2, implemented in TensorFlow.
+    MobileNetV2 for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
 """
 

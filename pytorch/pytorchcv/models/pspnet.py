@@ -444,7 +444,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     in_size = (480, 480)
     aux = False
@@ -488,7 +487,7 @@ def _test():
             assert (model != pspnet_resnetd50b_cityscapes or weight_count == 46715347)
             assert (model != pspnet_resnetd101b_cityscapes or weight_count == 65707475)
 
-        x = Variable(torch.randn(1, 3, in_size[0], in_size[1]))
+        x = torch.randn(1, 3, in_size[0], in_size[1])
         ys = net(x)
         y = ys[0] if aux else ys
         y.sum().backward()

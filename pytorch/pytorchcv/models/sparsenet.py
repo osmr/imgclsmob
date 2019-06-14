@@ -1,5 +1,5 @@
 """
-    SparseNet, implemented in PyTorch.
+    SparseNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Sparsely Aggregated Convolutional Networks,' https://arxiv.org/abs/1801.05895.
 """
 
@@ -345,7 +345,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -371,7 +370,7 @@ def _test():
         assert (model != sparsenet201 or weight_count == 5703144)
         assert (model != sparsenet264 or weight_count == 7717224)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

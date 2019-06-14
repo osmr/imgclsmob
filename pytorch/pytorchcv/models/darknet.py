@@ -240,7 +240,6 @@ def _calc_width(net):
 
 
 def _test():
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -262,7 +261,7 @@ def _test():
         assert (model != darknet_tiny or weight_count == 1042104)
         assert (model != darknet19 or weight_count == 20842376)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

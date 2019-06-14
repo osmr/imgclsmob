@@ -1,5 +1,5 @@
 """
-    InceptionResNetV2, implemented in Chainer.
+    InceptionResNetV2 for ImageNet-1K, implemented in Chainer.
     Original paper: 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 """

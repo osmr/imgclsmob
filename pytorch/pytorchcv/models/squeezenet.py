@@ -1,5 +1,5 @@
 """
-    SqueezeNet, implemented in PyTorch.
+    SqueezeNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size,'
     https://arxiv.org/abs/1602.07360.
 """
@@ -347,15 +347,14 @@ def _calc_width(net):
 
 
 def _test():
-    from torch.autograd import Variable
 
     pretrained = False
 
     models = [
         squeezenet_v1_0,
         squeezenet_v1_1,
-        # squeezeresnet_v1_0,
-        # squeezeresnet_v1_1,
+        squeezeresnet_v1_0,
+        squeezeresnet_v1_1,
     ]
 
     for model in models:
@@ -371,7 +370,7 @@ def _test():
         assert (model != squeezeresnet_v1_0 or weight_count == 1248424)
         assert (model != squeezeresnet_v1_1 or weight_count == 1235496)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

@@ -1,5 +1,5 @@
 """
-    ShaResNet, implemented in Gluon.
+    ShaResNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'ShaResNet: reducing residual network parameter number by sharing weights,'
     https://arxiv.org/abs/1702.08782.
 """

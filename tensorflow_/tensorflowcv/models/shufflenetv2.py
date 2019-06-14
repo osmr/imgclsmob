@@ -1,5 +1,5 @@
 """
-    ShuffleNet V2, implemented in TensorFlow.
+    ShuffleNet V2 for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'ShuffleNet V2: Practical Guidelines for Efficient CNN Architecture Design,'
     https://arxiv.org/abs/1807.11164.
 """

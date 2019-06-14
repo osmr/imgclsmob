@@ -1,5 +1,5 @@
 """
-    ESPNetv2, implemented in Chainer.
+    ESPNetv2 for ImageNet-1K, implemented in Chainer.
     Original paper: 'ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network,'
     https://arxiv.org/abs/1811.11431.
 """

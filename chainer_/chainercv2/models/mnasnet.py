@@ -1,5 +1,5 @@
 """
-    MnasNet, implemented in Chainer.
+    MnasNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,' https://arxiv.org/abs/1807.11626.
 """
 

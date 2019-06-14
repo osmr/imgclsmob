@@ -1,5 +1,5 @@
 """
-    InceptionV3, implemented in PyTorch.
+    InceptionV3 for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Rethinking the Inception Architecture for Computer Vision,'
     https://arxiv.org/abs/1512.00567.
 """
@@ -672,7 +672,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -690,7 +689,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionv3 or weight_count == 23834568)
 
-        x = Variable(torch.randn(1, 3, 299, 299))
+        x = torch.randn(1, 3, 299, 299)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

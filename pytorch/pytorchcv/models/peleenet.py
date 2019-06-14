@@ -1,5 +1,5 @@
 """
-    PeleeNet, implemented in PyTorch.
+    PeleeNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Pelee: A Real-Time Object Detection System on Mobile Devices,' https://arxiv.org/abs/1804.06882.
 """
 
@@ -353,7 +353,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -371,7 +370,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != peleenet or weight_count == 2802248)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

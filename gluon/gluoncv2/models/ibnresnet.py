@@ -1,5 +1,5 @@
 """
-    IBN-ResNet, implemented in Gluon.
+    IBN-ResNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
     https://arxiv.org/abs/1807.09441.
 """

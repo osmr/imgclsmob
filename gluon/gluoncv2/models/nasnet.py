@@ -1,5 +1,5 @@
 """
-    NASNet-A, implemented in Gluon.
+    NASNet-A for ImageNet-1K, implemented in Gluon.
     Original paper: 'Learning Transferable Architectures for Scalable Image Recognition,'
     https://arxiv.org/abs/1707.07012.
 """

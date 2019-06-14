@@ -1,5 +1,5 @@
 """
-    PNASNet, implemented in PyTorch.
+    PNASNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Progressive Neural Architecture Search,' https://arxiv.org/abs/1712.00559.
 """
 
@@ -579,7 +579,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -597,7 +596,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != pnasnet5large or weight_count == 86057668)
 
-        x = Variable(torch.randn(1, 3, 331, 331))
+        x = torch.randn(1, 3, 331, 331)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

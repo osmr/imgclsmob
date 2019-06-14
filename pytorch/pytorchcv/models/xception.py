@@ -1,5 +1,5 @@
 """
-    Xception, implemented in PyTorch.
+    Xception for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Xception: Deep Learning with Depthwise Separable Convolutions,' https://arxiv.org/abs/1610.02357.
 """
 
@@ -375,7 +375,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -393,7 +392,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != xception or weight_count == 22855952)
 
-        x = Variable(torch.randn(1, 3, 299, 299))
+        x = torch.randn(1, 3, 299, 299)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

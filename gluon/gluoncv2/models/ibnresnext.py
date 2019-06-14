@@ -1,5 +1,5 @@
 """
-    IBN-ResNeXt, implemented in Gluon.
+    IBN-ResNeXt for ImageNet-1K, implemented in Gluon.
     Original paper: 'Aggregated Residual Transformations for Deep Neural Networks,' http://arxiv.org/abs/1611.05431.
 """
 

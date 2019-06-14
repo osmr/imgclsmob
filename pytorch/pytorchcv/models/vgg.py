@@ -1,5 +1,5 @@
 """
-    VGG, implemented in PyTorch.
+    VGG for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Very Deep Convolutional Networks for Large-Scale Image Recognition,'
     https://arxiv.org/abs/1409.1556.
 """
@@ -470,7 +470,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -510,7 +509,7 @@ def _test():
         assert (model != bn_vgg16b or weight_count == 138365992)
         assert (model != bn_vgg19b or weight_count == 143678248)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

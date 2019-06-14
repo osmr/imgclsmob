@@ -1,5 +1,5 @@
 """
-    MENet, implemented in Keras.
+    MENet for ImageNet-1K, implemented in Keras.
     Original paper: 'Merging and Evolution: Improving Convolutional Neural Networks for Mobile Applications,'
     https://arxiv.org/abs/1803.09127.
 """

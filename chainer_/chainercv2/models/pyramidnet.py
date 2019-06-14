@@ -1,5 +1,5 @@
 """
-    PyramidNet, implemented in Chainer.
+    PyramidNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
 """
 

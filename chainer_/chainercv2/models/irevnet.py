@@ -1,5 +1,5 @@
 """
-    i-RevNet, implemented in Chainer.
+    i-RevNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'i-RevNet: Deep Invertible Networks,' https://arxiv.org/abs/1802.07088.
 """
 

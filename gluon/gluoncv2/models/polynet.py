@@ -1,5 +1,5 @@
 """
-    PolyNet, implemented in Gluon.
+    PolyNet for ImageNet-1K, implemented in Gluon.
     Original paper: 'PolyNet: A Pursuit of Structural Diversity in Very Deep Networks,'
     https://arxiv.org/abs/1611.05725.
 """

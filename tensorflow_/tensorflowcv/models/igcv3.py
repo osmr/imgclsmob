@@ -1,5 +1,5 @@
 """
-    IGCV3, implemented in TensorFlow.
+    IGCV3 for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'IGCV3: Interleaved Low-Rank Group Convolutions for Efficient Deep Neural Networks,'
     https://arxiv.org/abs/1806.00178.
 """

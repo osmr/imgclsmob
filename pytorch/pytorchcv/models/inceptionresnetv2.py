@@ -1,5 +1,5 @@
 """
-    InceptionResNetV2, implemented in PyTorch.
+    InceptionResNetV2 for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 """
@@ -601,7 +601,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -619,7 +618,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionresnetv2 or weight_count == 55843464)
 
-        x = Variable(torch.randn(1, 3, 299, 299))
+        x = torch.randn(1, 3, 299, 299)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

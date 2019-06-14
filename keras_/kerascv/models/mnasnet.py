@@ -1,5 +1,5 @@
 """
-    MnasNet, implemented in Keras.
+    MnasNet for ImageNet-1K, implemented in Keras.
     Original paper: 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,' https://arxiv.org/abs/1807.11626.
 """
 

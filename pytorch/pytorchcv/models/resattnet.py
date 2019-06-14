@@ -1,5 +1,5 @@
 """
-    ResAttNet, implemented in PyTorch.
+    ResAttNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Residual Attention Network for Image Classification,' https://arxiv.org/abs/1704.06904.
 """
 
@@ -640,7 +640,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -670,7 +669,7 @@ def _test():
         assert (model != resattnet236 or weight_count == 103778984)
         assert (model != resattnet452 or weight_count == 182285224)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

@@ -1,5 +1,5 @@
 """
-    SE-PreResNet, implemented in PyTorch.
+    SE-PreResNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
@@ -365,7 +365,6 @@ def _calc_width(net):
 
 def _test():
     import torch
-    from torch.autograd import Variable
 
     pretrained = False
 
@@ -401,7 +400,7 @@ def _test():
         assert (model != sepreresnet200 or weight_count == 71828312)
         assert (model != sepreresnet200b or weight_count == 71828312)
 
-        x = Variable(torch.randn(1, 3, 224, 224))
+        x = torch.randn(1, 3, 224, 224)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

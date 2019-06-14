@@ -1,5 +1,5 @@
 """
-    DARTS, implemented in Gluon.
+    DARTS for ImageNet-1K, implemented in Gluon.
     Original paper: 'DARTS: Differentiable Architecture Search,' https://arxiv.org/abs/1806.09055.
 """
 

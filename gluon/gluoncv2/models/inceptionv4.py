@@ -1,5 +1,5 @@
 """
-    InceptionV4, implemented in Gluon.
+    InceptionV4 for ImageNet-1K, implemented in Gluon.
     Original paper: 'Inception-v4, Inception-ResNet and the Impact of Residual Connections on Learning,'
     https://arxiv.org/abs/1602.07261.
 """

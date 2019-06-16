@@ -3,8 +3,8 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SEResNet', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b',
-           'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+__all__ = ['SEResNet', 'seresnet10', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
+           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
 
 import os
 from mxnet import cpu
@@ -155,6 +155,7 @@ class SEResNet(HybridBlock):
 
 
 def get_seresnet(blocks,
+                 bottleneck=None,
                  conv1_stride=True,
                  model_name=None,
                  pretrained=False,
@@ -168,6 +169,8 @@ def get_seresnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     model_name : str or None, default None
@@ -179,11 +182,29 @@ def get_seresnet(blocks,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
 
-    if blocks == 18:
+    if blocks == 10:
+        layers = [1, 1, 1, 1]
+    elif blocks == 12:
+        layers = [2, 1, 1, 1]
+    elif blocks == 14 and not bottleneck:
+        layers = [2, 2, 1, 1]
+    elif (blocks == 14) and bottleneck:
+        layers = [1, 1, 1, 1]
+    elif blocks == 16:
+        layers = [2, 2, 2, 1]
+    elif blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
+    elif (blocks == 38) and bottleneck:
+        layers = [3, 3, 3, 3]
     elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
@@ -195,14 +216,17 @@ def get_seresnet(blocks,
     else:
         raise ValueError("Unsupported SE-ResNet with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
@@ -224,6 +248,23 @@ def get_seresnet(blocks,
             ctx=ctx)
 
     return net
+
+
+def seresnet10(**kwargs):
+    """
+    SE-ResNet-10 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet(blocks=10, model_name="seresnet10", **kwargs)
 
 
 def seresnet18(**kwargs):
@@ -398,6 +439,7 @@ def _test():
     pretrained = False
 
     models = [
+        seresnet10,
         seresnet18,
         seresnet34,
         seresnet50,
@@ -426,6 +468,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != seresnet10 or weight_count == 5463332)
         assert (model != seresnet18 or weight_count == 11778592)
         assert (model != seresnet34 or weight_count == 21958868)
         assert (model != seresnet50 or weight_count == 28088024)

@@ -173,6 +173,7 @@ _models = {
     'resnext101_32x4d': resnext101_32x4d,
     'resnext101_64x4d': resnext101_64x4d,
 
+    'seresnet10': seresnet10,
     'seresnet18': seresnet18,
     'seresnet34': seresnet34,
     'seresnet50': seresnet50,

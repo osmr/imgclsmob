@@ -70,6 +70,7 @@ from .models.nin_cifar import *
 from .models.resnet_cifar import *
 from .models.preresnet_cifar import *
 from .models.resnext_cifar import *
+from .models.seresnet_cifar import *
 from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.xdensenet_cifar import *
@@ -546,6 +547,25 @@ _models = {
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
     'resnext29_16x64d_cifar100': resnext29_16x64d_cifar100,
     'resnext29_16x64d_svhn': resnext29_16x64d_svhn,
+
+    'seresnet20_cifar10': seresnet20_cifar10,
+    'seresnet20_cifar100': seresnet20_cifar100,
+    'seresnet20_svhn': seresnet20_svhn,
+    'seresnet56_cifar10': seresnet56_cifar10,
+    'seresnet56_cifar100': seresnet56_cifar100,
+    'seresnet56_svhn': seresnet56_svhn,
+    'seresnet110_cifar10': seresnet110_cifar10,
+    'seresnet110_cifar100': seresnet110_cifar100,
+    'seresnet110_svhn': seresnet110_svhn,
+    'seresnet164bn_cifar10': seresnet164bn_cifar10,
+    'seresnet164bn_cifar100': seresnet164bn_cifar100,
+    'seresnet164bn_svhn': seresnet164bn_svhn,
+    'seresnet1001_cifar10': seresnet1001_cifar10,
+    'seresnet1001_cifar100': seresnet1001_cifar100,
+    'seresnet1001_svhn': seresnet1001_svhn,
+    'seresnet1202_cifar10': seresnet1202_cifar10,
+    'seresnet1202_cifar100': seresnet1202_cifar100,
+    'seresnet1202_svhn': seresnet1202_svhn,
 
     'pyramidnet110_a48_cifar10': pyramidnet110_a48_cifar10,
     'pyramidnet110_a48_cifar100': pyramidnet110_a48_cifar100,

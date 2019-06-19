@@ -175,7 +175,10 @@ _models = {
 
     'seresnet10': seresnet10,
     'seresnet18': seresnet18,
+    'seresnet26': seresnet26,
+    'seresnetbc26b': seresnetbc26b,
     'seresnet34': seresnet34,
+    'seresnetbc38b': seresnetbc38b,
     'seresnet50': seresnet50,
     'seresnet50b': seresnet50b,
     'seresnet101': seresnet101,

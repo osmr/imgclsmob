@@ -3,8 +3,9 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['SEResNet', 'seresnet10', 'seresnet18', 'seresnet34', 'seresnet50', 'seresnet50b', 'seresnet101',
-           'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b']
+__all__ = ['SEResNet', 'seresnet10', 'seresnet18', 'seresnet26', 'seresnetbc26b', 'seresnet34', 'seresnetbc38b',
+           'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b', 'seresnet152', 'seresnet152b', 'seresnet200',
+           'seresnet200b']
 
 import os
 from mxnet import cpu
@@ -283,6 +284,40 @@ def seresnet18(**kwargs):
     return get_seresnet(blocks=18, model_name="seresnet18", **kwargs)
 
 
+def seresnet26(**kwargs):
+    """
+    SE-ResNet-26 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    It's an experimental model.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet(blocks=26, bottleneck=False, model_name="seresnet26", **kwargs)
+
+
+def seresnetbc26b(**kwargs):
+    """
+    SE-ResNet-BC-26 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="seresnetbc26b", **kwargs)
+
+
 def seresnet34(**kwargs):
     """
     SE-ResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -297,6 +332,23 @@ def seresnet34(**kwargs):
         Location for keeping the model parameters.
     """
     return get_seresnet(blocks=34, model_name="seresnet34", **kwargs)
+
+
+def seresnetbc38b(**kwargs):
+    """
+    SE-ResNet-BC-38 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+    It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="seresnetbc38b", **kwargs)
 
 
 def seresnet50(**kwargs):
@@ -441,7 +493,10 @@ def _test():
     models = [
         seresnet10,
         seresnet18,
+        seresnet26,
+        seresnetbc26b,
         seresnet34,
+        seresnetbc38b,
         seresnet50,
         seresnet50b,
         seresnet101,
@@ -470,7 +525,10 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != seresnet10 or weight_count == 5463332)
         assert (model != seresnet18 or weight_count == 11778592)
+        assert (model != seresnet26 or weight_count == 18093852)
+        assert (model != seresnetbc26b or weight_count == 17395976)
         assert (model != seresnet34 or weight_count == 21958868)
+        assert (model != seresnetbc38b or weight_count == 24026616)
         assert (model != seresnet50 or weight_count == 28088024)
         assert (model != seresnet50b or weight_count == 28088024)
         assert (model != seresnet101 or weight_count == 49326872)

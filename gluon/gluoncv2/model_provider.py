@@ -92,6 +92,7 @@ from .models.res2net import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
+from .models.seresnet_cub import *
 from .models.mobilenet_cub import *
 from .models.proxylessnas_cub import *
 from .models.ntsnet_cub import *
@@ -175,6 +176,9 @@ _models = {
     'resnext101_64x4d': resnext101_64x4d,
 
     'seresnet10': seresnet10,
+    'seresnet12': seresnet12,
+    'seresnet14': seresnet14,
+    'seresnet16': seresnet16,
     'seresnet18': seresnet18,
     'seresnet26': seresnet26,
     'seresnetbc26b': seresnetbc26b,
@@ -753,6 +757,25 @@ _models = {
     'resnet152b_cub': resnet152b_cub,
     'resnet200_cub': resnet200_cub,
     'resnet200b_cub': resnet200b_cub,
+
+    'seresnet10_cub': seresnet10_cub,
+    'seresnet12_cub': seresnet12_cub,
+    'seresnet14_cub': seresnet14_cub,
+    'seresnetbc14b_cub': seresnetbc14b_cub,
+    'seresnet16_cub': seresnet16_cub,
+    'seresnet18_cub': seresnet18_cub,
+    'seresnet26_cub': seresnet26_cub,
+    'seresnetbc26b_cub': seresnetbc26b_cub,
+    'seresnet34_cub': seresnet34_cub,
+    'seresnetbc38b_cub': seresnetbc38b_cub,
+    'seresnet50_cub': seresnet50_cub,
+    'seresnet50b_cub': seresnet50b_cub,
+    'seresnet101_cub': seresnet101_cub,
+    'seresnet101b_cub': seresnet101b_cub,
+    'seresnet152_cub': seresnet152_cub,
+    'seresnet152b_cub': seresnet152b_cub,
+    'seresnet200_cub': seresnet200_cub,
+    'seresnet200b_cub': seresnet200b_cub,
 
     'mobilenet_w1_cub': mobilenet_w1_cub,
     'mobilenet_w3d4_cub': mobilenet_w3d4_cub,

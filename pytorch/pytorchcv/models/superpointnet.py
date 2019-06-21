@@ -1,6 +1,37 @@
+"""
+    SuperPointNet for HPatches (image matching), implemented in PyTorch.
+    Original paper: 'SuperPoint: Self-Supervised Interest Point Detection and Description,'
+    https://arxiv.org/abs/1712.07629.
+"""
+
+__all__ = ['SuperPointNet', 'superpointnet']
+
+import os
 import torch
 import torch.nn as nn
+import torch.nn.init as init
 import torch.nn.functional as F
+
+
+def sp_conv1x1(in_channels,
+               out_channels):
+    """
+    1x1 version of the SuperPointNet specific convolution layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    """
+    return nn.Conv2d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=1,
+        padding=0,
+        bias=True)
 
 
 class SPConvBlock(nn.Module):
@@ -28,7 +59,6 @@ class SPConvBlock(nn.Module):
                  stride,
                  padding):
         super(SPConvBlock, self).__init__()
-
         self.conv = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -42,27 +72,6 @@ class SPConvBlock(nn.Module):
         x = self.conv(x)
         x = self.activ(x)
         return x
-
-
-def sp_conv1x1(in_channels,
-               out_channels):
-    """
-    1x1 version of the SuperPointNet specific convolution layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return nn.Conv2d(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=1,
-        stride=1,
-        padding=0,
-        bias=True)
 
 
 def sp_conv3x3_block(in_channels,
@@ -251,16 +260,28 @@ class SPDescriptor(nn.Module):
 
 
 class SuperPointNet(nn.Module):
-    """ Pytorch definition of SuperPoint Network. """
+    """
+    SuperPointNet model from 'SuperPoint: Self-Supervised Interest Point Detection and Description,'
+    https://arxiv.org/abs/1712.07629.
 
-    def __init__(self):
+    Parameters:
+    ----------
+    channels : list of list of int
+        Number of output channels for each unit.
+    final_block_channels : int
+        Number of output channels for the final units.
+    in_channels : int, default 1
+        Number of input channels.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    """
+    def __init__(self,
+                 channels,
+                 final_block_channels,
+                 in_channels=1,
+                 in_size=(224, 224)):
         super(SuperPointNet, self).__init__()
-
-        in_channels = 1
-        channels_per_layers = [64, 64, 128, 128]
-        layers = [2, 2, 2, 2]
-        channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
-        final_block_channels = 256
+        self.in_size = in_size
 
         self.features = nn.Sequential()
         for i, channels_per_stage in enumerate(channels):
@@ -284,6 +305,15 @@ class SuperPointNet(nn.Module):
             in_channels=in_channels,
             mid_channels=final_block_channels)
 
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    init.constant_(module.bias, 0)
+
     def forward(self, x):
         x = self.features(x)
         pts_list, confs_list = self.detector(x)
@@ -291,34 +321,57 @@ class SuperPointNet(nn.Module):
         return pts_list, confs_list, descriptors_list
 
 
-def oth_superpointnet(pretrained=False, **kwargs):
-    return SuperPointNet(**kwargs)
-
-
-def load_model(net,
-               file_path,
-               ignore_extra=True):
+def get_superpointnet(model_name=None,
+                      pretrained=False,
+                      root=os.path.join("~", ".torch", "models"),
+                      **kwargs):
     """
-    Load model state dictionary from a file.
+    Create SuperPointNet model with specific parameters.
 
-    Parameters
+    Parameters:
     ----------
-    net : Module
-        Network in which weights are loaded.
-    file_path : str
-        Path to the file.
-    ignore_extra : bool, default True
-        Whether to silently ignore parameters from the file that are not present in this Module.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
     """
-    import torch
+    channels_per_layers = [64, 64, 128, 128]
+    layers = [2, 2, 2, 2]
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+    final_block_channels = 256
 
-    if ignore_extra:
-        pretrained_state = torch.load(file_path)
-        model_dict = net.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
-    else:
-        net.load_state_dict(torch.load(file_path))
+    net = SuperPointNet(
+        channels=channels,
+        final_block_channels=final_block_channels,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
+
+
+def superpointnet(**kwargs):
+    """
+    SuperPointNet model from 'SuperPoint: Self-Supervised Interest Point Detection and Description,'
+    https://arxiv.org/abs/1712.07629.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_superpointnet(model_name="superpointnet", **kwargs)
 
 
 def _calc_width(net):
@@ -336,7 +389,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_superpointnet,
+        superpointnet,
     ]
 
     for model in models:
@@ -347,15 +400,12 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_superpointnet or weight_count == 1300865)
+        assert (model != superpointnet or weight_count == 1300865)
 
         x = torch.randn(1, 1, 224, 224)
         y = net(x)
-        # y[0][0].sum().backward()
+        # y.sum().backward()
         assert (len(y) == 3)
-        # assert (len(y) == 2) and (y[0].shape[0] == y[1].shape[0] == 1) and (y[0].shape[2] == y[1].shape[2] == 28) and\
-        #        (y[0].shape[3] == y[1].shape[3] == 28)
-        # assert (y[0].shape[1] == 65) and (y[1].shape[1] == 256)
 
 
 if __name__ == "__main__":

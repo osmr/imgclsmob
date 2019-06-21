@@ -4,6 +4,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+__all__ = ['oth_superpointnet']
+
 
 class SuperPointNet(nn.Module):
     """ Pytorch definition of SuperPoint Network. """
@@ -66,10 +68,10 @@ class SuperPointFrontend(object):
     """ Wrapper around pytorch net to help with pre and post image processing. """
 
     def __init__(self,
-                 weights_path,
-                 nms_dist,
-                 conf_thresh,
-                 nn_thresh,
+                 # weights_path,
+                 nms_dist=4,
+                 conf_thresh=0.015,
+                 nn_thresh=0.7,
                  cuda=False):
         self.name = 'SuperPoint'
         self.cuda = cuda
@@ -79,17 +81,17 @@ class SuperPointFrontend(object):
         self.cell = 8  # Size of each output cell. Keep this fixed.
         self.border_remove = 4  # Remove points this close to the border.
 
-        # Load the network in inference mode.
-        self.net = SuperPointNet()
-        if cuda:
-            # Train on GPU, deploy on GPU.
-            self.net.load_state_dict(torch.load(weights_path))
-            self.net = self.net.cuda()
-        else:
-            # Train on GPU, deploy on CPU.
-            self.net.load_state_dict(torch.load(weights_path,
-                                                map_location=lambda storage, loc: storage))
-        self.net.eval()
+        # # Load the network in inference mode.
+        # self.net = SuperPointNet()
+        # if cuda:
+        #     # Train on GPU, deploy on GPU.
+        #     self.net.load_state_dict(torch.load(weights_path))
+        #     self.net = self.net.cuda()
+        # else:
+        #     # Train on GPU, deploy on CPU.
+        #     self.net.load_state_dict(torch.load(weights_path,
+        #                                         map_location=lambda storage, loc: storage))
+        # self.net.eval()
 
     def nms_fast(self, in_corners, H, W, dist_thresh):
         """
@@ -156,7 +158,7 @@ class SuperPointFrontend(object):
         out_inds = inds1[inds_keep[inds2]]
         return out, out_inds
 
-    def run(self, img):
+    def run(self, H, W, outs):
         """ Process a numpy image to extract points and descriptors.
         Input
           img - HxW numpy float32 input image in range [0,1].
@@ -165,17 +167,17 @@ class SuperPointFrontend(object):
           desc - 256xN numpy array of corresponding unit normalized descriptors.
           heatmap - HxW numpy heatmap in range [0,1] of point confidences.
           """
-        assert img.ndim == 2, 'Image must be grayscale.'
-        assert img.dtype == np.float32, 'Image must be float32.'
-        H, W = img.shape[0], img.shape[1]
-        inp = img.copy()
-        inp = (inp.reshape(1, H, W))
-        inp = torch.from_numpy(inp)
-        inp = torch.autograd.Variable(inp).view(1, 1, H, W)
-        if self.cuda:
-            inp = inp.cuda()
+        # assert img.ndim == 2, 'Image must be grayscale.'
+        # assert img.dtype == np.float32, 'Image must be float32.'
+        # H, W = img.shape[0], img.shape[1]
+        # inp = img.copy()
+        # inp = (inp.reshape(1, H, W))
+        # inp = torch.from_numpy(inp)
+        # inp = torch.autograd.Variable(inp).view(1, 1, H, W)
+        # if self.cuda:
+        #     inp = inp.cuda()
         # Forward pass of network.
-        outs = self.net.forward(inp)
+        # outs = self.net.forward(inp)
         semi, coarse_desc = outs[0], outs[1]
         # Convert pytorch -> numpy.
         semi = semi.data.cpu().numpy().squeeze()
@@ -227,53 +229,79 @@ class SuperPointFrontend(object):
         return pts, desc, heatmap
 
 
-class SuperPointLocalFeature(object):
-
-    def __init__(self,
-                 image_size,
-                 keypoint_image_border_size,
-                 max_keypoint_count,
-                 ldescriptor_length,
-                 weights_path,
-                 nms_dist=4,
-                 conf_thresh=0.015,
-                 nn_thresh=0.7,
-                 cuda=True):
-        super(SuperPointLocalFeature, self).__init__()
-        self.image_size = image_size
-        self.keypoint_image_border_size = keypoint_image_border_size
-        self.max_keypoint_count = max_keypoint_count
-        self.ldescriptor_length = ldescriptor_length
-
-        self.fe = SuperPointFrontend(
-            weights_path=weights_path,
-            nms_dist=nms_dist,
-            conf_thresh=conf_thresh,
-            nn_thresh=nn_thresh,
-            cuda=cuda)
-
-    def calc_descriptors(self, image):
-        image = image.astype(np.float32) / 255.0
-        pts, ldescriptors, heatmap = self.fe.run(image)
-        ldescriptors = ldescriptors.T
-        assert (ldescriptors.shape[1] == self.ldescriptor_length)
-        return ldescriptors
-
-    def calc_descriptors_list(self, image_file_paths):
-        ldescriptors_list = []
-        for image_file_path in image_file_paths:
-            assert os.path.exists(image_file_path)
-            image = cv2.imread(filename=image_file_path, flags=0)
-            image = cv2.resize(image, self.image_size)
-            ldescriptors = self.calc_descriptors(image=image)
-            if ldescriptors is None:
-                continue
-            ldescriptors_list += [ldescriptors]
-        return ldescriptors_list
+# class SuperPointLocalFeature(object):
+#
+#     def __init__(self,
+#                  image_size,
+#                  keypoint_image_border_size,
+#                  max_keypoint_count,
+#                  ldescriptor_length,
+#                  weights_path,
+#                  nms_dist=4,
+#                  conf_thresh=0.015,
+#                  nn_thresh=0.7,
+#                  cuda=True):
+#         super(SuperPointLocalFeature, self).__init__()
+#         self.image_size = image_size
+#         self.keypoint_image_border_size = keypoint_image_border_size
+#         self.max_keypoint_count = max_keypoint_count
+#         self.ldescriptor_length = ldescriptor_length
+#
+#         self.fe = SuperPointFrontend(
+#             weights_path=weights_path,
+#             nms_dist=nms_dist,
+#             conf_thresh=conf_thresh,
+#             nn_thresh=nn_thresh,
+#             cuda=cuda)
+#
+#     def calc_descriptors(self, image):
+#         image = image.astype(np.float32) / 255.0
+#         pts, ldescriptors, heatmap = self.fe.run(image)
+#         ldescriptors = ldescriptors.T
+#         assert (ldescriptors.shape[1] == self.ldescriptor_length)
+#         return ldescriptors
+#
+#     def calc_descriptors_list(self, image_file_paths):
+#         ldescriptors_list = []
+#         for image_file_path in image_file_paths:
+#             assert os.path.exists(image_file_path)
+#             image = cv2.imread(filename=image_file_path, flags=0)
+#             image = cv2.resize(image, self.image_size)
+#             ldescriptors = self.calc_descriptors(image=image)
+#             if ldescriptors is None:
+#                 continue
+#             ldescriptors_list += [ldescriptors]
+#         return ldescriptors_list
 
 
 def oth_superpointnet(pretrained=False, **kwargs):
     return SuperPointNet(**kwargs)
+
+
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
 
 
 def _calc_width(net):
@@ -310,6 +338,10 @@ def _test():
         assert (len(y) == 2) and (y[0].shape[0] == y[1].shape[0] == 1) and (y[0].shape[2] == y[1].shape[2] == 28) and\
                (y[0].shape[3] == y[1].shape[3] == 28)
         assert (y[0].shape[1] == 65) and (y[1].shape[1] == 256)
+
+        spfe = SuperPointFrontend()
+        res = spfe.run(H=224, W=224, outs=y)
+        assert (res is not None)
 
 
 if __name__ == "__main__":

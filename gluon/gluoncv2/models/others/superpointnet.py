@@ -256,24 +256,24 @@ class SPDescriptor(HybridBlock):
                 out_channels=descriptor_length)
 
     def forward(self, x, pts_list):
-        x_height, x_width = x.size()[-2:]
+        # x_height, x_width = x.size()[-2:]
 
-        coarse_desc_map = self.head(x)
-        coarse_desc_map = F.normalize(coarse_desc_map)
+        # coarse_desc_map = self.head(x)
+        # coarse_desc_map = F.normalize(coarse_desc_map)
 
         descriptors_list = []
-        for i, pts in enumerate(pts_list):
-            pts = pts.float()
-            pts[:, 0] = pts[:, 0] / (0.5 * x_height * self.reduction) - 1.0
-            pts[:, 1] = pts[:, 1] / (0.5 * x_width * self.reduction) - 1.0
-            if self.transpose_descriptors:
-                pts = mxnet.index_select(pts, dim=1, index=mxnet.LongTensor([1, 0]))
-            pts = pts.unsqueeze(0).unsqueeze(0)
-            descriptors = F.grid_sample(coarse_desc_map[i:(i + 1)], pts)
-            descriptors = descriptors.squeeze(0).squeeze(1)
-            descriptors = descriptors.transpose(0, 1)
-            descriptors = F.normalize(descriptors)
-            descriptors_list.append(descriptors)
+        # for i, pts in enumerate(pts_list):
+        #     pts = pts.float()
+        #     pts[:, 0] = pts[:, 0] / (0.5 * x_height * self.reduction) - 1.0
+        #     pts[:, 1] = pts[:, 1] / (0.5 * x_width * self.reduction) - 1.0
+        #     if self.transpose_descriptors:
+        #         pts = mxnet.index_select(pts, dim=1, index=mxnet.LongTensor([1, 0]))
+        #     pts = pts.unsqueeze(0).unsqueeze(0)
+        #     descriptors = F.grid_sample(coarse_desc_map[i:(i + 1)], pts)
+        #     descriptors = descriptors.squeeze(0).squeeze(1)
+        #     descriptors = descriptors.transpose(0, 1)
+        #     descriptors = F.normalize(descriptors)
+        #     descriptors_list.append(descriptors)
 
         return descriptors_list
 

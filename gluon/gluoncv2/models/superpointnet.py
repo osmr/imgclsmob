@@ -252,7 +252,7 @@ class SPDescriptor(HybridBlock):
 
         desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=self.in_size[0], width=self.in_size[1])
         desc_map = F.L2Normalization(desc_map, mode="channel")
-        if self.transpose_descriptors:
+        if not self.transpose_descriptors:
             desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
         desc_map = desc_map.reshape(shape=(0, 0, -1))
         desc_map = desc_map.transpose(axes=(0, 2, 1))
@@ -295,6 +295,8 @@ class SuperPointNet(HybridBlock):
         Number of output channels for the final units.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    postprocess : bool, default True
+        Whether fo postprocessing.
     batch_size : int, default 1
         Batch size.
     in_size : tuple of two ints, default (224, 224)
@@ -305,12 +307,15 @@ class SuperPointNet(HybridBlock):
     def __init__(self,
                  channels,
                  final_block_channels,
+                 transpose_descriptors=True,
+                 postprocess=True,
                  batch_size=1,
                  in_size=(224, 224),
                  in_channels=1,
                  **kwargs):
         super(SuperPointNet, self).__init__(**kwargs)
         self.in_size = in_size
+        self.postprocess = postprocess
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
@@ -336,12 +341,35 @@ class SuperPointNet(HybridBlock):
             self.descriptor = SPDescriptor(
                 in_channels=in_channels,
                 mid_channels=final_block_channels,
+                transpose_descriptors=transpose_descriptors,
                 in_size=in_size)
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
         pts, confs = self.detector(x)
         desc_map = self.descriptor(x, pts)
+
+        if self.postprocess:
+            counts = (confs > 0).sum(axis=1)
+
+            pts_list = []
+            confs_list = []
+            desc_map_list = []
+
+            def slice_array(data, state):
+                data_list = state[0]
+                ii = state[1]
+                count_i = counts[int(ii.asscalar())]
+                data_i = data.slice_axis(axis=0, begin=0, end=int(count_i.asscalar()))
+                data_list.append(data_i)
+                return data, [data_list, ii + 1]
+
+            F.contrib.foreach(slice_array, pts, [pts_list, F.zeros(1)])
+            F.contrib.foreach(slice_array, confs, [confs_list, F.zeros(1)])
+            F.contrib.foreach(slice_array, desc_map, [desc_map_list, F.zeros(1)])
+
+            return pts_list, confs_list, desc_map_list
+
         return pts, confs, desc_map
 
 
@@ -409,8 +437,9 @@ def _test():
     import mxnet as mx
 
     pretrained = False
-    batch_size = 2
-    in_size = (200, 400)
+    batch_size = 1
+    in_size = (224, 224)
+    postprocess = False
 
     models = [
         superpointnet,
@@ -418,7 +447,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size)
+        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size, postprocess=postprocess)
 
         ctx = mx.cpu()
         if not pretrained:

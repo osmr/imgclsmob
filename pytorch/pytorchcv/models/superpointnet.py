@@ -288,6 +288,7 @@ class SuperPointNet(nn.Module):
     def __init__(self,
                  channels,
                  final_block_channels,
+                 transpose_descriptors=True,
                  in_channels=1):
         super(SuperPointNet, self).__init__()
         self.features = nn.Sequential()
@@ -310,7 +311,8 @@ class SuperPointNet(nn.Module):
 
         self.descriptor = SPDescriptor(
             in_channels=in_channels,
-            mid_channels=final_block_channels)
+            mid_channels=final_block_channels,
+            transpose_descriptors=transpose_descriptors)
 
         self._init_params()
 

@@ -229,51 +229,6 @@ class SuperPointFrontend(object):
         return pts, desc, heatmap
 
 
-# class SuperPointLocalFeature(object):
-#
-#     def __init__(self,
-#                  image_size,
-#                  keypoint_image_border_size,
-#                  max_keypoint_count,
-#                  ldescriptor_length,
-#                  weights_path,
-#                  nms_dist=4,
-#                  conf_thresh=0.015,
-#                  nn_thresh=0.7,
-#                  cuda=True):
-#         super(SuperPointLocalFeature, self).__init__()
-#         self.image_size = image_size
-#         self.keypoint_image_border_size = keypoint_image_border_size
-#         self.max_keypoint_count = max_keypoint_count
-#         self.ldescriptor_length = ldescriptor_length
-#
-#         self.fe = SuperPointFrontend(
-#             weights_path=weights_path,
-#             nms_dist=nms_dist,
-#             conf_thresh=conf_thresh,
-#             nn_thresh=nn_thresh,
-#             cuda=cuda)
-#
-#     def calc_descriptors(self, image):
-#         image = image.astype(np.float32) / 255.0
-#         pts, ldescriptors, heatmap = self.fe.run(image)
-#         ldescriptors = ldescriptors.T
-#         assert (ldescriptors.shape[1] == self.ldescriptor_length)
-#         return ldescriptors
-#
-#     def calc_descriptors_list(self, image_file_paths):
-#         ldescriptors_list = []
-#         for image_file_path in image_file_paths:
-#             assert os.path.exists(image_file_path)
-#             image = cv2.imread(filename=image_file_path, flags=0)
-#             image = cv2.resize(image, self.image_size)
-#             ldescriptors = self.calc_descriptors(image=image)
-#             if ldescriptors is None:
-#                 continue
-#             ldescriptors_list += [ldescriptors]
-#         return ldescriptors_list
-
-
 def oth_superpointnet(pretrained=False, **kwargs):
     return SuperPointNet(**kwargs)
 

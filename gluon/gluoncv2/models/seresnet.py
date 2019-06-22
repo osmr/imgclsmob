@@ -5,7 +5,7 @@
 
 __all__ = ['SEResNet', 'seresnet10', 'seresnet12', 'seresnet14', 'seresnet16', 'seresnet18', 'seresnet26',
            'seresnetbc26b', 'seresnet34', 'seresnetbc38b', 'seresnet50', 'seresnet50b', 'seresnet101', 'seresnet101b',
-           'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b', 'get_seresnet']
+           'seresnet152', 'seresnet152b', 'seresnet200', 'seresnet200b', 'SEResUnit', 'get_seresnet']
 
 import os
 from mxnet import cpu

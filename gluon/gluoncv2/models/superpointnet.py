@@ -141,8 +141,10 @@ class SPDetector(HybridBlock):
         Confidence threshold.
     nms_dist : int, default 4
         NMS distance.
-    border_size : int, default 4
-        Image border size to remove points.
+    batch_size : int, default 1
+        Batch size.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     reduction : int, default 8
         Feature reduction factor.
     """
@@ -151,13 +153,15 @@ class SPDetector(HybridBlock):
                  mid_channels,
                  conf_thresh=0.015,
                  nms_dist=4,
-                 border_size=4,
+                 batch_size=1,
+                 in_size=(224, 224),
                  reduction=8,
                  **kwargs):
         super(SPDetector, self).__init__(**kwargs)
         self.conf_thresh = conf_thresh
         self.nms_dist = nms_dist
-        self.border_size = border_size
+        self.batch_size = batch_size
+        self.in_size = in_size
         self.reduction = reduction
         num_classes = reduction * reduction + 1
 
@@ -168,11 +172,6 @@ class SPDetector(HybridBlock):
                 out_channels=num_classes)
 
     def hybrid_forward(self, F, x):
-        # batch = x.shape[0]
-        # x_height, x_width = x.shape[-2:]
-        # img_height = x_height * self.reduction
-        # img_width = x_width * self.reduction
-
         semi = self.detector(x)
 
         dense = semi.softmax(axis=1)
@@ -181,43 +180,31 @@ class SPDetector(HybridBlock):
         heatmap = nodust.transpose(axes=(0, 2, 3, 1))
         heatmap = heatmap.reshape(shape=(0, 0, 0, self.reduction, self.reduction))
         heatmap = heatmap.transpose(axes=(0, 1, 3, 2, 4))
-        heatmap = heatmap.reshape(shape=(0, -3, -3)).expand_dims(axis=1)
-        heatmap = F.where(heatmap >= self.conf_thresh, heatmap, F.zeros_like(heatmap))
-        pad = self.nms_dist
-        bord = self.border_size + pad
-        heatmap_padded = heatmap.pad(mode="constant", pad_width=(0, 0, 0, 0, pad, pad, pad, pad), constant_value=0.0)
+        heatmap = heatmap.reshape(shape=(0, -1))
 
-        heatmap_mask = (heatmap >= self.conf_thresh)
-        heatmap_mask2 = heatmap_mask.pad(mode="constant", pad_width=(0, 0, 0, 0, pad, pad, pad, pad), constant_value=0)
-        pts_list = []
-        confs_list = []
-        # for i in range(batch):
-        #     heatmap_i = heatmap[i, 0]
-        #     heatmap_mask_i = heatmap_mask[i, 0]
-        #     heatmap_mask2_i = heatmap_mask2[i, 0]
-        #     src_pts = mxnet.nonzero(heatmap_mask_i)
-        #     src_confs = mxnet.masked_select(heatmap_i, heatmap_mask_i)
-        #     src_inds = mxnet.argsort(src_confs, descending=True)
-        #     dst_inds = mxnet.zeros_like(src_inds)
-        #     dst_pts_count = 0
-        #     for ind_j in src_inds:
-        #         pt = src_pts[ind_j] + pad
-        #         assert (pad <= pt[0] < heatmap_mask2_i.shape[0] - pad)
-        #         assert (pad <= pt[1] < heatmap_mask2_i.shape[1] - pad)
-        #         assert (0 <= pt[0] - pad < img_height)
-        #         assert (0 <= pt[1] - pad < img_width)
-        #         if heatmap_mask2_i[pt[0], pt[1]] == 1:
-        #             heatmap_mask2_i[(pt[0] - pad):(pt[0] + pad + 1), (pt[1] - pad):(pt[1] + pad + 1)] = 0
-        #             if (bord < pt[0] - pad <= img_height - bord) and (bord < pt[1] - pad <= img_width - bord):
-        #                 dst_inds[dst_pts_count] = ind_j
-        #                 dst_pts_count += 1
-        #     dst_inds = dst_inds[:dst_pts_count]
-        #     dst_pts = mxnet.index_select(src_pts, dim=0, index=dst_inds)
-        #     dst_confs = mxnet.index_select(src_confs, dim=0, index=dst_inds)
-        #     pts_list.append(dst_pts)
-        #     confs_list.append(dst_confs)
+        in_nms = F.stack(
+            heatmap,
+            F.arange(self.in_size[0], repeat=self.in_size[1]).tile((self.batch_size, 1)),
+            F.arange(self.in_size[0]).tile((self.batch_size, self.in_size[1])),
+            F.zeros_like(heatmap) + self.nms_dist,
+            F.zeros_like(heatmap) + self.nms_dist,
+            axis=2)
+        out_nms = F.contrib.box_nms(
+            data=in_nms,
+            overlap_thresh=1e-3,
+            valid_thresh=self.conf_thresh,
+            coord_start=1,
+            score_index=0,
+            id_index=-1,
+            force_suppress=False,
+            in_format="center",
+            out_format="center")
+        out_nms = out_nms.slice_axis(axis=2, begin=0, end=3)
 
-        return pts_list, confs_list
+        confs = out_nms.slice_axis(axis=2, begin=0, end=1)
+        pts = out_nms.slice_axis(axis=2, begin=1, end=3)
+
+        return pts, confs
 
 
 class SPDescriptor(HybridBlock):
@@ -234,6 +221,8 @@ class SPDescriptor(HybridBlock):
         Descriptor length.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     reduction : int, default 8
         Feature reduction factor.
     """
@@ -242,11 +231,13 @@ class SPDescriptor(HybridBlock):
                  mid_channels,
                  descriptor_length=256,
                  transpose_descriptors=True,
+                 in_size=(224, 224),
                  reduction=8,
                  **kwargs):
         super(SPDescriptor, self).__init__(**kwargs)
         self.desc_length = descriptor_length
         self.transpose_descriptors = transpose_descriptors
+        self.in_size = in_size
         self.reduction = reduction
 
         with self.name_scope():
@@ -255,27 +246,40 @@ class SPDescriptor(HybridBlock):
                 mid_channels=mid_channels,
                 out_channels=descriptor_length)
 
-    def forward(self, x, pts_list):
-        # x_height, x_width = x.size()[-2:]
+    def hybrid_forward(self, F, x, pts):
+        coarse_desc_map = self.head(x)
+        coarse_desc_map = F.L2Normalization(coarse_desc_map, mode="channel")
 
-        # coarse_desc_map = self.head(x)
-        # coarse_desc_map = F.normalize(coarse_desc_map)
+        desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=self.in_size[0], width=self.in_size[1])
+        desc_map = F.L2Normalization(desc_map, mode="channel")
+        if self.transpose_descriptors:
+            desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
+        desc_map = desc_map.reshape(shape=(0, 0, -1))
+        desc_map = desc_map.transpose(axes=(0, 2, 1))
 
-        descriptors_list = []
-        # for i, pts in enumerate(pts_list):
-        #     pts = pts.float()
-        #     pts[:, 0] = pts[:, 0] / (0.5 * x_height * self.reduction) - 1.0
-        #     pts[:, 1] = pts[:, 1] / (0.5 * x_width * self.reduction) - 1.0
-        #     if self.transpose_descriptors:
-        #         pts = mxnet.index_select(pts, dim=1, index=mxnet.LongTensor([1, 0]))
-        #     pts = pts.unsqueeze(0).unsqueeze(0)
-        #     descriptors = F.grid_sample(coarse_desc_map[i:(i + 1)], pts)
-        #     descriptors = descriptors.squeeze(0).squeeze(1)
-        #     descriptors = descriptors.transpose(0, 1)
-        #     descriptors = F.normalize(descriptors)
-        #     descriptors_list.append(descriptors)
+        desc_map_list = []
 
-        return descriptors_list
+        def slice_desc_map(data, _):
+            desc_map_list.append(data)
+            return data, []
+        F.contrib.foreach(slice_desc_map, desc_map, [])
+
+        pts_ravel_list = []
+
+        def ravel_pts(data, _):
+            pts_ravel_list.append(F.ravel_multi_index(data, shape=(self.in_size[0], self.in_size[1])))
+            return data, []
+        pts_tr = pts.transpose(axes=(0, 2, 1))
+        F.contrib.foreach(ravel_pts, pts_tr, [])
+
+        desc_map_sorted_list = []
+        for desc_map_i, pts_coord_ravel_i in zip(desc_map_list, pts_ravel_list):
+            desc_map_sorted_i = F.take(desc_map_i, pts_coord_ravel_i)
+            desc_map_sorted_list.append(desc_map_sorted_i)
+
+        desc_map_sorted = F.stack(*desc_map_sorted_list)
+
+        return desc_map_sorted
 
 
 class SuperPointNet(HybridBlock):
@@ -291,15 +295,23 @@ class SuperPointNet(HybridBlock):
         Number of output channels for the final units.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    batch_size : int, default 1
+        Batch size.
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
     in_channels : int, default 1
         Number of input channels.
     """
     def __init__(self,
                  channels,
                  final_block_channels,
+                 batch_size=1,
+                 in_size=(224, 224),
                  in_channels=1,
                  **kwargs):
         super(SuperPointNet, self).__init__(**kwargs)
+        self.in_size = in_size
+
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
@@ -317,18 +329,20 @@ class SuperPointNet(HybridBlock):
 
             self.detector = SPDetector(
                 in_channels=in_channels,
-                mid_channels=final_block_channels)
+                mid_channels=final_block_channels,
+                batch_size=batch_size,
+                in_size=in_size)
 
             self.descriptor = SPDescriptor(
                 in_channels=in_channels,
-                mid_channels=final_block_channels)
+                mid_channels=final_block_channels,
+                in_size=in_size)
 
     def hybrid_forward(self, F, x):
-        # assert (x.shape[1] == 1)
         x = self.features(x)
-        pts_list, confs_list = self.detector(x)
-        descriptors_list = self.descriptor(x, pts_list)
-        return pts_list, confs_list, descriptors_list
+        pts, confs = self.detector(x)
+        desc_map = self.descriptor(x, pts)
+        return pts, confs, desc_map
 
 
 def get_superpointnet(model_name=None,
@@ -395,6 +409,8 @@ def _test():
     import mxnet as mx
 
     pretrained = False
+    batch_size = 2
+    in_size = (200, 400)
 
     models = [
         superpointnet,
@@ -402,7 +418,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size)
 
         ctx = mx.cpu()
         if not pretrained:
@@ -418,7 +434,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != superpointnet or weight_count == 1300865)
 
-        x = mx.nd.zeros((1, 1, 224, 224), ctx=ctx)
+        x = mx.nd.random.normal(shape=(batch_size, 1, in_size[0], in_size[1]), ctx=ctx)
         y = net(x)
         assert (len(y) == 3)
 

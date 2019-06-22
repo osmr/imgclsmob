@@ -221,6 +221,8 @@ class SPDescriptor(HybridBlock):
         Descriptor length.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    batch_size : int, default 1
+        Batch size.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
     reduction : int, default 8
@@ -231,12 +233,14 @@ class SPDescriptor(HybridBlock):
                  mid_channels,
                  descriptor_length=256,
                  transpose_descriptors=True,
+                 batch_size=1,
                  in_size=(224, 224),
                  reduction=8,
                  **kwargs):
         super(SPDescriptor, self).__init__(**kwargs)
         self.desc_length = descriptor_length
         self.transpose_descriptors = transpose_descriptors
+        self.batch_size = batch_size
         self.in_size = in_size
         self.reduction = reduction
 
@@ -257,26 +261,14 @@ class SPDescriptor(HybridBlock):
         desc_map = desc_map.reshape(shape=(0, 0, -1))
         desc_map = desc_map.transpose(axes=(0, 2, 1))
 
-        desc_map_list = []
-
-        def slice_desc_map(data, _):
-            desc_map_list.append(data)
-            return data, []
-        F.contrib.foreach(slice_desc_map, desc_map, [])
-
-        pts_ravel_list = []
-
-        def ravel_pts(data, _):
-            pts_ravel_list.append(F.ravel_multi_index(data, shape=(self.in_size[0], self.in_size[1])))
-            return data, []
-        pts_tr = pts.transpose(axes=(0, 2, 1))
-        F.contrib.foreach(ravel_pts, pts_tr, [])
-
         desc_map_sorted_list = []
-        for desc_map_i, pts_coord_ravel_i in zip(desc_map_list, pts_ravel_list):
-            desc_map_sorted_i = F.take(desc_map_i, pts_coord_ravel_i)
+        pts_tr = pts.transpose(axes=(0, 2, 1))
+        for i in range(self.batch_size):
+            desc_map_i = desc_map[i]
+            pts_tr_i = pts_tr[i].reshape(shape=(2, -1))
+            pts_ravel_i = F.ravel_multi_index(pts_tr_i, shape=(self.in_size[0], self.in_size[1]))
+            desc_map_sorted_i = F.take(desc_map_i, pts_ravel_i)
             desc_map_sorted_list.append(desc_map_sorted_i)
-
         desc_map_sorted = F.stack(*desc_map_sorted_list)
 
         return desc_map_sorted
@@ -314,6 +306,7 @@ class SuperPointNet(HybridBlock):
                  in_channels=1,
                  **kwargs):
         super(SuperPointNet, self).__init__(**kwargs)
+        self.batch_size = batch_size
         self.in_size = in_size
         self.postprocess = postprocess
 
@@ -342,6 +335,7 @@ class SuperPointNet(HybridBlock):
                 in_channels=in_channels,
                 mid_channels=final_block_channels,
                 transpose_descriptors=transpose_descriptors,
+                batch_size=batch_size,
                 in_size=in_size)
 
     def hybrid_forward(self, F, x):
@@ -439,7 +433,7 @@ def _test():
     pretrained = False
     batch_size = 1
     in_size = (224, 224)
-    postprocess = False
+    postprocess = True
 
     models = [
         superpointnet,

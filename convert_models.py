@@ -102,7 +102,7 @@ def prepare_src_model(src_fwk,
             pretrained_model_file_path=src_params_file_path,
             dtype=np.float32,
             tune_layers="",
-            classes=num_classes,
+            classes=(num_classes if num_classes > 0 else None),
             in_channels=in_channels,
             ctx=ctx)
         src_params = src_net._collect_params_with_prefix()
@@ -211,7 +211,7 @@ def prepare_dst_model(dst_fwk,
             pretrained_model_file_path="",
             dtype=np.float32,
             tune_layers="",
-            classes=num_classes,
+            classes=(num_classes if num_classes > 0 else None),
             in_channels=in_channels,
             ctx=ctx)
         dst_params = dst_net._collect_params_with_prefix()

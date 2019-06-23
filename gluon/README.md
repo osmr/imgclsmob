@@ -131,6 +131,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | VGG-16 | 26.78 | 8.69 | 138,357,544 | 15,480.10M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.109/vgg16-0869-57a2556f.params.log)) |
 | VGG-19 | 25.88 | 8.23 | 143,667,240 | 19,642.55M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.109/vgg19-0823-0e2a1e0a.params.log)) |
 | BN-VGG-11 | 28.56 | 9.34 | 132,866,088 | 7,630.21M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.339/bn_vgg11-0934-3f79cab1.params.log)) |
+| BN-VGG-13 | 27.68 | 8.87 | 133,050,792 | 11,341.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.353/bn_vgg13-0887-540243b0.params.log)) |
 | BN-VGG-11b | 30.34 | 10.57 | 132,868,840 | 7,630.72M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.110/bn_vgg11b-1057-b2d8f382.params.log)) |
 | BN-VGG-13b | 29.48 | 10.16 | 133,053,736 | 11,342.14M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.110/bn_vgg13b-1016-f384ff52.params.log)) |
 | BN-VGG-16b | 26.89 | 8.65 | 138,365,992 | 15,507.20M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.110/bn_vgg16b-0865-b5e33db8.params.log)) |

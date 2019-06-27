@@ -5,12 +5,12 @@
 """
 
 __all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'bn_vgg16', 'bn_vgg19', 'bn_vgg11b',
-           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b']
+           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b', 'vgg_conv3x3']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from mxnet.initializer import Xavier
+# from mxnet.initializer import Xavier
 
 
 class VGGConv(HybridBlock):
@@ -57,10 +57,10 @@ class VGGConv(HybridBlock):
                 strides=strides,
                 padding=padding,
                 use_bias=use_bias,
-                weight_initializer=Xavier(
-                    rnd_type='gaussian',
-                    factor_type='out',
-                    magnitude=2),
+                # weight_initializer=Xavier(
+                #     rnd_type="gaussian",
+                #     factor_type="out",
+                #     magnitude=2),
                 in_channels=in_channels)
             if self.use_bn:
                 self.bn = nn.BatchNorm(
@@ -80,7 +80,7 @@ def vgg_conv3x3(in_channels,
                 out_channels,
                 use_bias,
                 use_bn,
-                bn_use_global_stats):
+                bn_use_global_stats=False):
     """
     3x3 version of the VGG specific convolution block.
 
@@ -94,7 +94,7 @@ def vgg_conv3x3(in_channels,
         Whether the convolution layer uses a bias vector.
     use_bn : bool
         Whether to use BatchNorm layers.
-    bn_use_global_stats : bool
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     return VGGConv(

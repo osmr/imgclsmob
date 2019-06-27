@@ -9,89 +9,8 @@ __all__ = ['SuperPointNet', 'superpointnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-def sp_conv1x1(in_channels,
-               out_channels):
-    """
-    1x1 version of the SuperPointNet specific convolution layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return nn.Conv2D(
-        channels=out_channels,
-        kernel_size=1,
-        strides=1,
-        padding=0,
-        use_bias=True,
-        in_channels=in_channels)
-
-
-class SPConvBlock(HybridBlock):
-    """
-    SuperPointNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 **kwargs):
-        super(SPConvBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=True,
-                in_channels=in_channels)
-            self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        x = self.activ(x)
-        return x
-
-
-def sp_conv3x3_block(in_channels,
-                     out_channels):
-    """
-    3x3 version of the SuperPointNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    return SPConvBlock(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1)
+from .common import conv1x1
+from .vgg import vgg_conv3x3
 
 
 class SPHead(HybridBlock):
@@ -114,12 +33,15 @@ class SPHead(HybridBlock):
                  **kwargs):
         super(SPHead, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = sp_conv3x3_block(
+            self.conv1 = vgg_conv3x3(
                 in_channels=in_channels,
-                out_channels=mid_channels)
-            self.conv2 = sp_conv1x1(
+                out_channels=mid_channels,
+                use_bias=True,
+                use_bn=False)
+            self.conv2 = conv1x1(
                 in_channels=mid_channels,
-                out_channels=out_channels)
+                out_channels=out_channels,
+                use_bias=True)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -221,6 +143,8 @@ class SPDescriptor(HybridBlock):
         Descriptor length.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    select_descriptors : bool, default True
+        Whether select descriptors from map.
     batch_size : int, default 1
         Batch size.
     in_size : tuple of two ints, default (224, 224)
@@ -233,6 +157,7 @@ class SPDescriptor(HybridBlock):
                  mid_channels,
                  descriptor_length=256,
                  transpose_descriptors=True,
+                 select_descriptors=True,
                  batch_size=1,
                  in_size=(224, 224),
                  reduction=8,
@@ -240,6 +165,7 @@ class SPDescriptor(HybridBlock):
         super(SPDescriptor, self).__init__(**kwargs)
         self.desc_length = descriptor_length
         self.transpose_descriptors = transpose_descriptors
+        self.select_descriptors = select_descriptors
         self.batch_size = batch_size
         self.in_size = in_size
         self.reduction = reduction
@@ -260,6 +186,9 @@ class SPDescriptor(HybridBlock):
             desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
         desc_map = desc_map.reshape(shape=(0, 0, -1))
         desc_map = desc_map.transpose(axes=(0, 2, 1))
+
+        if not self.select_descriptors:
+            return desc_map
 
         desc_map_sorted_list = []
         pts_tr = pts.transpose(axes=(0, 2, 1))
@@ -287,6 +216,8 @@ class SuperPointNet(HybridBlock):
         Number of output channels for the final units.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    select_descriptors : bool, default True
+        Whether select descriptors from map.
     postprocess : bool, default True
         Whether fo postprocessing.
     batch_size : int, default 1
@@ -300,6 +231,7 @@ class SuperPointNet(HybridBlock):
                  channels,
                  final_block_channels,
                  transpose_descriptors=True,
+                 select_descriptors=True,
                  postprocess=True,
                  batch_size=1,
                  in_size=(224, 224),
@@ -319,9 +251,11 @@ class SuperPointNet(HybridBlock):
                         stage.add(nn.MaxPool2D(
                             pool_size=2,
                             strides=2))
-                    stage.add(sp_conv3x3_block(
+                    stage.add(vgg_conv3x3(
                         in_channels=in_channels,
-                        out_channels=out_channels))
+                        out_channels=out_channels,
+                        use_bias=True,
+                        use_bn=False))
                     in_channels = out_channels
                 self.features.add(stage)
 
@@ -335,6 +269,7 @@ class SuperPointNet(HybridBlock):
                 in_channels=in_channels,
                 mid_channels=final_block_channels,
                 transpose_descriptors=transpose_descriptors,
+                select_descriptors=select_descriptors,
                 batch_size=batch_size,
                 in_size=in_size)
 

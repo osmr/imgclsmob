@@ -107,7 +107,7 @@ class SPDetector(HybridBlock):
         in_nms = F.stack(
             heatmap,
             F.arange(self.in_size[0], repeat=self.in_size[1]).tile((self.batch_size, 1)),
-            F.arange(self.in_size[0]).tile((self.batch_size, self.in_size[1])),
+            F.arange(self.in_size[1]).tile((self.batch_size, self.in_size[0])),
             F.zeros_like(heatmap) + self.nms_dist,
             F.zeros_like(heatmap) + self.nms_dist,
             axis=2)
@@ -184,12 +184,13 @@ class SPDescriptor(HybridBlock):
         desc_map = F.L2Normalization(desc_map, mode="channel")
         if not self.transpose_descriptors:
             desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
-        desc_map = desc_map.reshape(shape=(0, 0, -1))
-        desc_map = desc_map.transpose(axes=(0, 2, 1))
+
+        desc_map = desc_map.transpose(axes=(0, 2, 3, 1))
 
         if not self.select_descriptors:
             return desc_map
 
+        desc_map = desc_map.reshape(shape=(0, -1, 0))
         desc_map_sorted_list = []
         pts_tr = pts.transpose(axes=(0, 2, 1))
         for i in range(self.batch_size):
@@ -367,7 +368,9 @@ def _test():
 
     pretrained = False
     batch_size = 1
-    in_size = (224, 224)
+    # in_size = (224, 224)
+    in_size = (200, 400)
+    select_descriptors = True
     postprocess = True
 
     models = [
@@ -376,7 +379,8 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size, postprocess=postprocess)
+        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size,
+                    select_descriptors=select_descriptors, postprocess=postprocess)
 
         ctx = mx.cpu()
         if not pretrained:

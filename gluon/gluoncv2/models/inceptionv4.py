@@ -846,7 +846,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != inceptionv4 or weight_count == 42679816)
 
-        x = mx.nd.zeros((1, 3, 299, 299), ctx=ctx)
+        x = mx.nd.random.normal(shape=(1, 3, 299, 299), ctx=ctx)
         y = net(x)
         assert (y.shape == (1, 1000))
 

@@ -482,6 +482,12 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ResNet-16 | 23.65 | 6,558,472 | 1,588.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.338/resnet16_cub-2365-b831356c.pth.log)) |
 | ResNet-18 | 23.33 | 11,279,112 | 1,820.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.344/resnet18_cub-2333-200d8b9c.pth.log)) |
 | ResNet-26 | 23.16 | 17,549,832 | 2,746.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.345/resnet26_cub-2316-599ab467.pth.log)) |
+| SE-ResNet-10 | 27.72 | 5,052,932 | 893.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet10_cub-2772-f52526ec.pth.log)) |
+| SE-ResNet-12 | 26.51 | 5,127,496 | 1,126.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet12_cub-2651-5c0e7f83.pth.log)) |
+| SE-ResNet-14 | 24.16 | 5,425,104 | 1,357.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet14_cub-2416-a4cda901.pth.log)) |
+| SE-ResNet-16 | 23.32 | 6,614,240 | 1,589.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet16_cub-2332-43a819b7.pth.log)) |
+| SE-ResNet-18 | 23.52 | 11,368,192 | 1,820.47M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet18_cub-2352-414fa277.pth.log)) |
+| SE-ResNet-26 | 22.99 | 17,683,452 | 2,747.08M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet26_cub-2299-5aa0a7d1.pth.log)) |
 | MobileNet x1.0 | 23.77 | 3,411,976 | 578.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.346/mobilenet_w1_cub-2377-8428471f.pth.log)) |
 | ProxylessNAS Mobile | 22.66 | 3,055,712 | 331.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.347/proxylessnas_mobile_cub-2266-e4b5098a.pth.log)) |
 | NTS-Net | 12.77 | 28,623,333 | 33,361.79M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1277-f6f330ab.pth.log)) |

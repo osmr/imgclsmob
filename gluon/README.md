@@ -495,6 +495,12 @@ Some remarks:
 | ResNet-16 | 23.21 | 6,558,472 | 1,588.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.338/resnet16_cub-2321-031374ad.params.log)) |
 | ResNet-18 | 23.30 | 11,279,112 | 1,820.00M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.344/resnet18_cub-2330-e7271200.params.log)) |
 | ResNet-26 | 22.52 | 17,549,832 | 2,746.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.345/resnet26_cub-2252-61cce1ea.params.log)) |
+| SE-ResNet-10 | 27.39 | 5,052,932 | 893.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet10_cub-2739-7060c03f.params.log)) |
+| SE-ResNet-12 | 26.04 | 5,127,496 | 1,125.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet12_cub-2604-ee095118.params.log)) |
+| SE-ResNet-14 | 23.63 | 5,425,104 | 1,357.58M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet14_cub-2363-5d2049d5.params.log)) |
+| SE-ResNet-16 | 23.21 | 6,614,240 | 1,588.99M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet16_cub-2321-576e58ef.params.log)) |
+| SE-ResNet-18 | 23.08 | 11,368,192 | 1,820.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet18_cub-2308-3d2496d6.params.log)) |
+| SE-ResNet-26 | 22.51 | 17,683,452 | 2,746.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet26_cub-2251-8d54edb2.params.log)) |
 | MobileNet x1.0 | 23.46 | 3,411,976 | 578.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.346/mobilenet_w1_cub-2346-efcad3dc.params.log)) |
 | ProxylessNAS Mobile | 21.88 | 3,055,712 | 331.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.347/proxylessnas_mobile_cub-2188-36d33231.params.log)) |
 | NTS-Net | 13.26 | 28,623,333 | 33,361.39M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1326-75ae8cdc.params.log)) |

@@ -467,6 +467,12 @@ Some remarks:
 | ResNet-16 | 23.21 | 6,558,472 | 1,588.93M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.338/resnet16_cub-2321-5e48b19f.npz.log)) |
 | ResNet-18 | 23.33 | 11,279,112 | 1,820.00M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.344/resnet18_cub-2333-c32998b4.npz.log)) |
 | ResNet-26 | 22.61 | 17,549,832 | 2,746.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.345/resnet26_cub-2261-56c8fcc1.npz.log)) |
+| SE-ResNet-10 | 27.42 | 5,052,932 | 893.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet10_cub-2742-b8e56acf.npz.log)) |
+| SE-ResNet-12 | 25.99 | 5,127,496 | 1,126.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet12_cub-2599-9c0ee8cf.npz.log)) |
+| SE-ResNet-14 | 23.68 | 5,425,104 | 1,357.92M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet14_cub-2368-b58cddb7.npz.log)) |
+| SE-ResNet-16 | 23.18 | 6,614,240 | 1,589.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet16_cub-2318-1d8b187c.npz.log)) |
+| SE-ResNet-18 | 23.21 | 11,368,192 | 1,820.47M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet18_cub-2321-7b1d02a7.npz.log)) |
+| SE-ResNet-26 | 22.54 | 17,683,452 | 2,747.08M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.361/seresnet26_cub-2254-5cbf65d2.npz.log)) |
 | MobileNet x1.0 | 23.56 | 3,411,976 | 578.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.346/mobilenet_w1_cub-2356-02c2accf.npz.log)) |
 | ProxylessNAS Mobile | 21.90 | 3,055,712 | 331.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.347/proxylessnas_mobile_cub-2190-a9c66b1b.npz.log)) |
 | NTS-Net | 12.86 | 28,623,333 | 33,361.79M | From [yangze0930/NTS-Net] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.334/ntsnet_cub-1286-4d759524.npz.log)) |

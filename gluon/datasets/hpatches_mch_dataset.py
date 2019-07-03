@@ -5,8 +5,10 @@
 import os
 import cv2
 import numpy as np
-# import mxnet as mx
+import mxnet as mx
 from mxnet.gluon.data import dataset
+from mxnet.gluon.data.vision import transforms
+from .dataset_metainfo import DatasetMetaInfo
 
 
 class HPatches(dataset.Dataset):
@@ -55,13 +57,34 @@ class HPatches(dataset.Dataset):
         self._transform = transform
 
     def __getitem__(self, index):
-        image = cv2.imread(self.image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
-        warped_image = cv2.imread(self.warped_image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
-        homography = self.homographies[index]
+        # image = cv2.imread(self.image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
+        # warped_image = cv2.imread(self.warped_image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
+        image = mx.image.imread(self.image_paths[index], flag=0)
+        warped_image = mx.image.imread(self.warped_image_paths[index], flag=0)
+        homography = mx.nd.array(self.homographies[index])
         return image, warped_image, homography
 
     def __len__(self):
         return len(self.image_paths)
+
+
+class HPatchesMetaInfo(DatasetMetaInfo):
+    def __init__(self):
+        super(HPatchesMetaInfo, self).__init__()
+        self.label = "hpatches"
+        self.short_label = "hpatches"
+        self.root_dir_name = "hpatches"
+        self.dataset_class = HPatches
+        self.ml_type = "imgmch"
+        self.val_transform = hpatches_val_transform
+        self.test_transform = hpatches_val_transform
+
+
+def hpatches_val_transform(ds_metainfo):
+    assert (ds_metainfo is not None)
+    return transforms.Compose([
+        transforms.ToTensor()
+    ])
 
 
 def _test():

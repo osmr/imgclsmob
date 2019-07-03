@@ -9,8 +9,8 @@ __all__ = ['SuperPointNet', 'superpointnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1
-from .vgg import vgg_conv3x3
+from common import conv1x1
+from vgg import vgg_conv3x3
 
 
 class SPHead(HybridBlock):
@@ -104,10 +104,12 @@ class SPDetector(HybridBlock):
         heatmap = heatmap.transpose(axes=(0, 1, 3, 2, 4))
         heatmap = heatmap.reshape(shape=(0, -1))
 
+        in_size = self.in_size if self.in_size is not None else (x.shape[2] * self.reduction,
+                                                                 x.shape[3] * self.reduction)
         in_nms = F.stack(
             heatmap,
-            F.arange(self.in_size[0], repeat=self.in_size[1]).tile((self.batch_size, 1)),
-            F.arange(self.in_size[1]).tile((self.batch_size, self.in_size[0])),
+            F.arange(in_size[0], repeat=in_size[1]).tile((self.batch_size, 1)),
+            F.arange(in_size[1]).tile((self.batch_size, in_size[0])),
             F.zeros_like(heatmap) + self.nms_dist,
             F.zeros_like(heatmap) + self.nms_dist,
             axis=2)
@@ -180,7 +182,9 @@ class SPDescriptor(HybridBlock):
         coarse_desc_map = self.head(x)
         coarse_desc_map = F.L2Normalization(coarse_desc_map, mode="channel")
 
-        desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=self.in_size[0], width=self.in_size[1])
+        in_size = self.in_size if self.in_size is not None else (x.shape[2] * self.reduction,
+                                                                 x.shape[3] * self.reduction)
+        desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=in_size[0], width=in_size[1])
         desc_map = F.L2Normalization(desc_map, mode="channel")
         if not self.transpose_descriptors:
             desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
@@ -196,7 +200,7 @@ class SPDescriptor(HybridBlock):
         for i in range(self.batch_size):
             desc_map_i = desc_map[i]
             pts_tr_i = pts_tr[i].reshape(shape=(2, -1))
-            pts_ravel_i = F.ravel_multi_index(pts_tr_i, shape=(self.in_size[0], self.in_size[1]))
+            pts_ravel_i = F.ravel_multi_index(pts_tr_i, shape=in_size)
             desc_map_sorted_i = F.take(desc_map_i, pts_ravel_i)
             desc_map_sorted_list.append(desc_map_sorted_i)
         desc_map_sorted = F.stack(*desc_map_sorted_list)

@@ -9,8 +9,8 @@ __all__ = ['SuperPointNet', 'superpointnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1
-from .vgg import vgg_conv3x3
+from common import conv1x1
+from vgg import vgg_conv3x3
 
 
 class SPHead(HybridBlock):
@@ -63,6 +63,8 @@ class SPDetector(HybridBlock):
         Confidence threshold.
     nms_dist : int, default 4
         NMS distance.
+    hybridizable : bool, default True
+        Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
     in_size : tuple of two ints, default (224, 224)
@@ -75,13 +77,17 @@ class SPDetector(HybridBlock):
                  mid_channels,
                  conf_thresh=0.015,
                  nms_dist=4,
+                 hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
                  reduction=8,
                  **kwargs):
         super(SPDetector, self).__init__(**kwargs)
+        assert ((batch_size is not None) or not hybridizable)
+        assert ((in_size is not None) or not hybridizable)
         self.conf_thresh = conf_thresh
         self.nms_dist = nms_dist
+        self.hybridizable = hybridizable
         self.batch_size = batch_size
         self.in_size = in_size
         self.reduction = reduction
@@ -106,10 +112,12 @@ class SPDetector(HybridBlock):
 
         in_size = self.in_size if self.in_size is not None else (x.shape[2] * self.reduction,
                                                                  x.shape[3] * self.reduction)
+        batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
+
         in_nms = F.stack(
             heatmap,
-            F.arange(in_size[0], repeat=in_size[1]).tile((self.batch_size, 1)),
-            F.arange(in_size[1]).tile((self.batch_size, in_size[0])),
+            F.arange(in_size[0], repeat=in_size[1]).tile((batch_size, 1)),
+            F.arange(in_size[1]).tile((batch_size, in_size[0])),
             F.zeros_like(heatmap) + self.nms_dist,
             F.zeros_like(heatmap) + self.nms_dist,
             axis=2)
@@ -123,12 +131,23 @@ class SPDetector(HybridBlock):
             force_suppress=False,
             in_format="center",
             out_format="center")
-        out_nms = out_nms.slice_axis(axis=2, begin=0, end=3)
 
-        confs = out_nms.slice_axis(axis=2, begin=0, end=1)
+        confs = out_nms.slice_axis(axis=2, begin=0, end=1).reshape(shape=(0, -1))
         pts = out_nms.slice_axis(axis=2, begin=1, end=3)
 
-        return pts, confs
+        if self.hybridizable:
+            return pts, confs
+
+        counts = (confs > 0).sum(axis=1)
+        confs_list = []
+        pts_list = []
+        for i in range(batch_size):
+            count_i = int(counts[i].asscalar())
+            confs_i = confs[i].slice_axis(axis=0, begin=0, end=count_i)
+            pts_i = pts[i].slice_axis(axis=0, begin=0, end=count_i)
+            confs_list.append(confs_i)
+            pts_list.append(pts_i)
+        return pts_list, confs_list
 
 
 class SPDescriptor(HybridBlock):
@@ -145,8 +164,8 @@ class SPDescriptor(HybridBlock):
         Descriptor length.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
-    select_descriptors : bool, default True
-        Whether select descriptors from map.
+    hybridizable : bool, default True
+        Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
     in_size : tuple of two ints, default (224, 224)
@@ -159,15 +178,17 @@ class SPDescriptor(HybridBlock):
                  mid_channels,
                  descriptor_length=256,
                  transpose_descriptors=True,
-                 select_descriptors=True,
+                 hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
                  reduction=8,
                  **kwargs):
         super(SPDescriptor, self).__init__(**kwargs)
+        assert ((batch_size is not None) or not hybridizable)
+        assert ((in_size is not None) or not hybridizable)
         self.desc_length = descriptor_length
         self.transpose_descriptors = transpose_descriptors
-        self.select_descriptors = select_descriptors
+        self.hybridizable = hybridizable
         self.batch_size = batch_size
         self.in_size = in_size
         self.reduction = reduction
@@ -184,6 +205,7 @@ class SPDescriptor(HybridBlock):
 
         in_size = self.in_size if self.in_size is not None else (x.shape[2] * self.reduction,
                                                                  x.shape[3] * self.reduction)
+
         desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=in_size[0], width=in_size[1])
         desc_map = F.L2Normalization(desc_map, mode="channel")
         if not self.transpose_descriptors:
@@ -191,13 +213,15 @@ class SPDescriptor(HybridBlock):
 
         desc_map = desc_map.transpose(axes=(0, 2, 3, 1))
 
-        if not self.select_descriptors:
+        if self.hybridizable:
             return desc_map
+
+        batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
 
         desc_map = desc_map.reshape(shape=(0, -1, 0))
         desc_map_sorted_list = []
         pts_tr = pts.transpose(axes=(0, 2, 1))
-        for i in range(self.batch_size):
+        for i in range(batch_size):
             desc_map_i = desc_map[i]
             pts_tr_i = pts_tr[i].reshape(shape=(2, -1))
             pts_ravel_i = F.ravel_multi_index(pts_tr_i, shape=in_size)
@@ -221,10 +245,10 @@ class SuperPointNet(HybridBlock):
         Number of output channels for the final units.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
-    select_descriptors : bool, default True
-        Whether select descriptors from map.
     postprocess : bool, default True
         Whether fo postprocessing.
+    hybridizable : bool, default True
+        Whether allow to hybridize this block.
     batch_size : int, default 1
         Batch size.
     in_size : tuple of two ints, default (224, 224)
@@ -236,13 +260,15 @@ class SuperPointNet(HybridBlock):
                  channels,
                  final_block_channels,
                  transpose_descriptors=True,
-                 select_descriptors=True,
                  postprocess=True,
+                 hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
                  in_channels=1,
                  **kwargs):
         super(SuperPointNet, self).__init__(**kwargs)
+        assert ((batch_size is not None) or not hybridizable)
+        assert ((in_size is not None) or not hybridizable)
         self.batch_size = batch_size
         self.in_size = in_size
         self.postprocess = postprocess
@@ -267,6 +293,7 @@ class SuperPointNet(HybridBlock):
             self.detector = SPDetector(
                 in_channels=in_channels,
                 mid_channels=final_block_channels,
+                hybridizable=hybridizable,
                 batch_size=batch_size,
                 in_size=in_size)
 
@@ -274,7 +301,7 @@ class SuperPointNet(HybridBlock):
                 in_channels=in_channels,
                 mid_channels=final_block_channels,
                 transpose_descriptors=transpose_descriptors,
-                select_descriptors=select_descriptors,
+                hybridizable=hybridizable,
                 batch_size=batch_size,
                 in_size=in_size)
 
@@ -371,11 +398,11 @@ def _test():
     import mxnet as mx
 
     pretrained = False
+    hybridizable = False
     batch_size = 1
     # in_size = (224, 224)
     in_size = (200, 400)
-    select_descriptors = True
-    postprocess = True
+    postprocess = False
 
     models = [
         superpointnet,
@@ -383,8 +410,8 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, batch_size=batch_size, in_size=in_size,
-                    select_descriptors=select_descriptors, postprocess=postprocess)
+        net = model(pretrained=pretrained, hybridizable=hybridizable, batch_size=batch_size, in_size=in_size,
+                    postprocess=postprocess)
 
         ctx = mx.cpu()
         if not pretrained:

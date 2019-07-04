@@ -61,8 +61,8 @@ class HPatches(dataset.Dataset):
         # warped_image = cv2.imread(self.warped_image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
         # image = mx.image.imread(self.image_paths[index], flag=0)
         # warped_image = mx.image.imread(self.warped_image_paths[index], flag=0)
-        image = mx.nd.array(cv2.imread(self.image_paths[index], flags=0))
-        warped_image = mx.nd.array(cv2.imread(self.warped_image_paths[index], flags=0))
+        image = mx.nd.array(np.expand_dims(cv2.imread(self.image_paths[index], flags=0), axis=2))
+        warped_image = mx.nd.array(np.expand_dims(cv2.imread(self.warped_image_paths[index], flags=0), axis=2))
         homography = mx.nd.array(self.homographies[index])
 
         if self.transform is not None:

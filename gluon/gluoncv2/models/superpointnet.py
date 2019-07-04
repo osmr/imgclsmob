@@ -9,8 +9,8 @@ __all__ = ['SuperPointNet', 'superpointnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1
-from vgg import vgg_conv3x3
+from .common import conv1x1
+from .vgg import vgg_conv3x3
 
 
 class SPHead(HybridBlock):

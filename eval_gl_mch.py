@@ -128,7 +128,7 @@ def parse_args():
 def warp_keypoints(keypoints, H):
     num_points = keypoints.shape[0]
     homogeneous_points = np.concatenate([keypoints, np.ones((num_points, 1))], axis=1)
-    warped_points = np.dot(homogeneous_points, np.transpose(H))
+    warped_points = np.dot(homogeneous_points, np.transpose(H)).squeeze(axis=2)
     return warped_points[:, :2] / warped_points[:, 2:]
 
 
@@ -140,11 +140,82 @@ def keep_true_keypoints(points, H, shape):
     return points[mask, :]
 
 
+def filter_keypoints(points, shape):
+    mask = (points[:, 0] >= 0) & (points[:, 0] < shape[0]) &\
+           (points[:, 1] >= 0) & (points[:, 1] < shape[1])
+    return points[mask, :]
+
+
+def select_k_best(points, k):
+    sorted_prob = points[points[:, 2].argsort(), :2]
+    start = min(k, points.shape[0])
+    return sorted_prob[-start:, :]
+
+
 def batch_fn(batch, ctx):
     data_src = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
     data_dst = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
     label = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
     return data_src, data_dst, label
+
+
+def calc_detector_repeatability(test_data,
+                                net,
+                                ctx):
+    tic = time.time()
+    keep_k_points = 300
+    distance_thresh = 3
+    repeatability = []
+    N1s = []
+    N2s = []
+    for batch in test_data:
+        data_src_list, data_dst_list, labels_list = batch_fn(batch, ctx)
+        outputs_src_list = [net(X) for X in data_src_list]
+        outputs_dst_list = [net(X) for X in data_dst_list]
+        for i in range(len(data_src_list)):
+            data_src_i = data_src_list[i]
+            data_dst_i = data_dst_list[i]
+            H = labels_list[i].asnumpy()
+
+            shape = data_dst_i.shape[2:]
+
+            src_pts, src_confs, src_desc_map = outputs_src_list[i]
+            dst_pts, dst_confs, dst_desc_map = outputs_dst_list[i]
+
+            keypoints = src_pts[0].asnumpy()
+            prob = src_confs[0].asnumpy()
+            warped_keypoints0 = mx.nd.concat(dst_pts[0], dst_confs[0].reshape(shape=(-1, 1)), dim=1).asnumpy()
+            warped_keypoints = keep_true_keypoints(warped_keypoints0, np.linalg.inv(H), data_src_i.shape[2:])
+
+            true_warped_keypoints = warp_keypoints(keypoints[:, [1, 0]], H)
+            true_warped_keypoints = np.stack([true_warped_keypoints[:, 1], true_warped_keypoints[:, 0], prob], axis=-1)
+            true_warped_keypoints = filter_keypoints(true_warped_keypoints, shape)
+
+            warped_keypoints = select_k_best(warped_keypoints, keep_k_points)
+            true_warped_keypoints = select_k_best(true_warped_keypoints, keep_k_points)
+
+            N1 = true_warped_keypoints.shape[0]
+            N2 = warped_keypoints.shape[0]
+            N1s.append(N1)
+            N2s.append(N2)
+            true_warped_keypoints = np.expand_dims(true_warped_keypoints, 1)
+            warped_keypoints = np.expand_dims(warped_keypoints, 0)
+            norm = np.linalg.norm(true_warped_keypoints - warped_keypoints, ord=None, axis=2)
+            count1 = 0
+            count2 = 0
+            if N2 != 0:
+                min1 = np.min(norm, axis=1)
+                count1 = np.sum(min1 <= distance_thresh)
+            if N1 != 0:
+                min2 = np.min(norm, axis=0)
+                count2 = np.sum(min2 <= distance_thresh)
+            if N1 + N2 > 0:
+                repeatability.append((count1 + count2) / (N1 + N2))
+
+    logging.info("Average number of points in the first image: {}".format(np.mean(N1s)))
+    logging.info("Average number of points in the second image: {}".format(np.mean(N2s)))
+    logging.info("The repeatability: {:.4f}".format(np.mean(repeatability)))
+    logging.info("Time cost: {:.4f} sec".format(time.time() - tic))
 
 
 def main():
@@ -184,28 +255,10 @@ def main():
         batch_size=args.batch_size,
         num_workers=args.num_workers)
 
-    tic = time.time()
-    # repeatability = []
-    # N1s = []
-    # N2s = []
-    for batch in test_data:
-        data_src_list, data_dst_list, labels_list = batch_fn(batch, ctx)
-        outputs_src_list = [net(X) for X in data_src_list]
-        outputs_dst_list = [net(X) for X in data_dst_list]
-        for i in range(len(data_src_list)):
-            data_src_i = data_src_list[i]
-            H = labels_list[i].asnumpy()
-            src_pts, src_confs, src_desc_map = outputs_src_list[i]
-            dst_pts, dst_confs, dst_desc_map = outputs_dst_list[i]
-            keypoints = src_pts[0].asnumpy()
-            warped_keypoints0 = mx.nd.concat(dst_pts[0], dst_confs[0].reshape(shape=(-1, 1)), dim=1).asnumpy()
-            warped_keypoints = keep_true_keypoints(warped_keypoints0, np.linalg.inv(H), data_src_i.shape)
-            assert (keypoints is not None) and (warped_keypoints is not None)
-
-        assert (outputs_src_list is not None)
-        pass
-    logging.info("Time cost: {:.4f} sec".format(
-        time.time() - tic))
+    calc_detector_repeatability(
+        test_data=test_data,
+        net=net,
+        ctx=ctx)
 
 
 if __name__ == "__main__":

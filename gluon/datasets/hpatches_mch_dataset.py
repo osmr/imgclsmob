@@ -54,7 +54,7 @@ class HPatches(dataset.Dataset):
                 self.warped_image_paths.append(os.path.join(subdir_path, str(k) + image_file_ext))
                 self.homographies.append(np.loadtxt(os.path.join(subdir_path, "H_1_" + str(k))))
 
-        self._transform = transform
+        self.transform = transform
 
     def __getitem__(self, index):
         # image = cv2.imread(self.image_paths[index], flags=cv2.IMREAD_GRAYSCALE)
@@ -62,6 +62,11 @@ class HPatches(dataset.Dataset):
         image = mx.image.imread(self.image_paths[index], flag=0)
         warped_image = mx.image.imread(self.warped_image_paths[index], flag=0)
         homography = mx.nd.array(self.homographies[index])
+
+        if self.transform is not None:
+            image = self.transform(image)
+            warped_image = self.transform(warped_image)
+
         return image, warped_image, homography
 
     def __len__(self):
@@ -76,8 +81,11 @@ class HPatchesMetaInfo(DatasetMetaInfo):
         self.root_dir_name = "hpatches"
         self.dataset_class = HPatches
         self.ml_type = "imgmch"
+        self.do_transform = True
         self.val_transform = hpatches_val_transform
         self.test_transform = hpatches_val_transform
+        self.allow_hybridize = False
+        self.net_extra_kwargs = {"hybridizable": False, "in_size": None}
 
 
 def hpatches_val_transform(ds_metainfo):

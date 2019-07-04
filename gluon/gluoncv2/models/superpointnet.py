@@ -218,18 +218,16 @@ class SPDescriptor(HybridBlock):
 
         batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
 
-        desc_map = desc_map.reshape(shape=(0, -1, 0))
-        desc_map_sorted_list = []
-        pts_tr = pts.transpose(axes=(0, 2, 1))
+        desc_map = desc_map.reshape(shape=(0, -3, 0))
+        desc_list = []
         for i in range(batch_size):
             desc_map_i = desc_map[i]
-            pts_tr_i = pts_tr[i].reshape(shape=(2, -1))
-            pts_ravel_i = F.ravel_multi_index(pts_tr_i, shape=in_size)
+            pts_i_tr = pts[i].transpose()
+            pts_ravel_i = F.ravel_multi_index(pts_i_tr, shape=in_size)
             desc_map_sorted_i = F.take(desc_map_i, pts_ravel_i)
-            desc_map_sorted_list.append(desc_map_sorted_i)
-        desc_map_sorted = F.stack(*desc_map_sorted_list)
+            desc_list.append(desc_map_sorted_i)
 
-        return desc_map_sorted
+        return desc_list
 
 
 class SuperPointNet(HybridBlock):
@@ -245,8 +243,6 @@ class SuperPointNet(HybridBlock):
         Number of output channels for the final units.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
-    postprocess : bool, default True
-        Whether fo postprocessing.
     hybridizable : bool, default True
         Whether allow to hybridize this block.
     batch_size : int, default 1
@@ -260,7 +256,6 @@ class SuperPointNet(HybridBlock):
                  channels,
                  final_block_channels,
                  transpose_descriptors=True,
-                 postprocess=True,
                  hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
@@ -271,7 +266,6 @@ class SuperPointNet(HybridBlock):
         assert ((in_size is not None) or not hybridizable)
         self.batch_size = batch_size
         self.in_size = in_size
-        self.postprocess = postprocess
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
@@ -309,28 +303,6 @@ class SuperPointNet(HybridBlock):
         x = self.features(x)
         pts, confs = self.detector(x)
         desc_map = self.descriptor(x, pts)
-
-        if self.postprocess:
-            counts = (confs > 0).sum(axis=1)
-
-            pts_list = []
-            confs_list = []
-            desc_map_list = []
-
-            def slice_array(data, state):
-                data_list = state[0]
-                ii = state[1]
-                count_i = counts[int(ii.asscalar())]
-                data_i = data.slice_axis(axis=0, begin=0, end=int(count_i.asscalar()))
-                data_list.append(data_i)
-                return data, [data_list, ii + 1]
-
-            F.contrib.foreach(slice_array, pts, [pts_list, F.zeros(1)])
-            F.contrib.foreach(slice_array, confs, [confs_list, F.zeros(1)])
-            F.contrib.foreach(slice_array, desc_map, [desc_map_list, F.zeros(1)])
-
-            return pts_list, confs_list, desc_map_list
-
         return pts, confs, desc_map
 
 
@@ -402,7 +374,6 @@ def _test():
     batch_size = 1
     # in_size = (224, 224)
     in_size = (200, 400)
-    postprocess = False
 
     models = [
         superpointnet,
@@ -410,8 +381,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, hybridizable=hybridizable, batch_size=batch_size, in_size=in_size,
-                    postprocess=postprocess)
+        net = model(pretrained=pretrained, hybridizable=hybridizable, batch_size=batch_size, in_size=in_size)
 
         ctx = mx.cpu()
         if not pretrained:

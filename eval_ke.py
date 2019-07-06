@@ -102,7 +102,7 @@ def parse_args():
     parser.add_argument(
         '--log-pip-packages',
         type=str,
-        default='keras, keras-mxnet, keras-applications, keras-preprocessing',
+        default='keras, keras-mxnet, mxnet',
         help='list of pip packages for logging')
     args = parser.parse_args()
     return args

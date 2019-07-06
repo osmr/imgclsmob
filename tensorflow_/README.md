@@ -126,6 +126,7 @@ Some remarks:
 | ResNeXt-101 (64x4d) | 20.59 | 5.43 | 83,455,272 | 15,500.27M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.74/resnext101_64x4d-0543-f51ffdb0.tf.npz.log)) |
 | SE-ResNet-10 | 33.56 | 13.36 | 5,463,332 | 894.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.354/seresnet10-1336-d4a0a9d3.tf.npz.log)) |
 | SE-ResNet-18 | 27.89 | 9.23 | 11,778,592 | 1,820.88M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.355/seresnet18-0923-7aa519d2.tf.npz.log)) |
+| SE-ResNet-26 | 25.44 | 8.09 | 18,093,852 | 2,747.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.363/seresnet26-0809-b2a8b74f.tf.npz.log)) |
 | SE-ResNet-50 | 22.53 | 6.43 | 28,088,024 | 3,880.49M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.75/seresnet50-0643-e022e5b9.tf.npz.log)) |
 | SE-ResNet-101 | 21.92 | 5.89 | 49,326,872 | 7,602.76M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.75/seresnet101-0589-305d2301.tf.npz.log)) |
 | SE-ResNet-152 | 21.48 | 5.78 | 66,821,848 | 11,328.52M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.75/seresnet152-0578-d06ab6d9.tf.npz.log)) |

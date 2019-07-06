@@ -74,6 +74,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('resnext101_64x4d', '0541', '7b58eaae7e86f487d3cb9bdf484bcfae52b8ca74', 'v0.0.51'),
     ('seresnet10', '1329', 'f70cf6c73471f3878641414d95dc979a7acbb221', 'v0.0.354'),
     ('seresnet18', '0920', 'bb27e27345afaee959e42eada2e79f91ffa2fb22', 'v0.0.355'),
+    ('seresnet26', '0803', 'd689714732e408238ee85de95e06aeb56aed4002', 'v0.0.363'),
     ('seresnet50', '0643', 'fabfa4062a7724ea31752434a687e1837eb30932', 'v0.0.52'),
     ('seresnet101', '0588', '933d34159345f5cf9a663504f03cd423b527aeac', 'v0.0.52'),
     ('seresnet152', '0577', 'd25ced7d6369f3d14ed2cfe54fb70bc4be9c68e0', 'v0.0.52'),

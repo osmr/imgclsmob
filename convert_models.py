@@ -996,10 +996,10 @@ def main():
         pip_packages += ["cupy-cuda92", "cupy-cuda100", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
-        pip_packages += ["keras", "keras-mxnet", "keras-applications", "keras-preprocessing"]
+        pip_packages += ["keras", "keras-mxnet", "mxnet-cu100"]
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
-        pip_packages += ["tensorflow-gpu", "tensorpack", "mxnet-cu100"]
+        pip_packages += ["tensorflow-gpu", "tensorpack"]
 
     _, log_file_exist = initialize_logging(
         logging_dir_path=args.save_dir,

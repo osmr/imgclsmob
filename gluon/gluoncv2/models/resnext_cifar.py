@@ -16,6 +16,13 @@ __all__ = ['CIFARResNeXt', 'resnext20_1x64d_cifar10', 'resnext20_1x64d_cifar100'
            'resnext20_32x4d_cifar10', 'resnext20_32x4d_cifar100', 'resnext20_32x4d_svhn',
            'resnext20_64x1d_cifar10', 'resnext20_64x1d_cifar100', 'resnext20_64x1d_svhn',
            'resnext20_64x2d_cifar10', 'resnext20_64x2d_cifar100', 'resnext20_64x2d_svhn',
+           'resnext56_1x64d_cifar10', 'resnext56_1x64d_cifar100', 'resnext56_1x64d_svhn',
+           'resnext56_2x32d_cifar10', 'resnext56_2x32d_cifar100', 'resnext56_2x32d_svhn',
+           'resnext56_4x16d_cifar10', 'resnext56_4x16d_cifar100', 'resnext56_4x16d_svhn',
+           'resnext56_8x8d_cifar10', 'resnext56_8x8d_cifar100', 'resnext56_8x8d_svhn',
+           'resnext56_16x4d_cifar10', 'resnext56_16x4d_cifar100', 'resnext56_16x4d_svhn',
+           'resnext56_32x2d_cifar10', 'resnext56_32x2d_cifar100', 'resnext56_32x2d_svhn',
+           'resnext56_64x1d_cifar10', 'resnext56_64x1d_cifar100', 'resnext56_64x1d_svhn',
            'resnext29_32x4d_cifar10', 'resnext29_32x4d_cifar100', 'resnext29_32x4d_svhn',
            'resnext29_16x64d_cifar10', 'resnext29_16x64d_cifar100', 'resnext29_16x64d_svhn']
 
@@ -942,6 +949,426 @@ def resnext20_64x2d_svhn(classes=10, **kwargs):
                              model_name="resnext20_64x2d_svhn", **kwargs)
 
 
+def resnext56_1x64d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (1x64d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=1, bottleneck_width=64,
+                             model_name="resnext56_1x64d_cifar10", **kwargs)
+
+
+def resnext56_1x64d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (1x64d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=1, bottleneck_width=64,
+                             model_name="resnext56_1x64d_cifar100", **kwargs)
+
+
+def resnext56_1x64d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (1x64d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=1, bottleneck_width=64,
+                             model_name="resnext56_1x64d_svhn", **kwargs)
+
+
+def resnext56_2x32d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (2x32d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=2, bottleneck_width=32,
+                             model_name="resnext56_2x32d_cifar10", **kwargs)
+
+
+def resnext56_2x32d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (2x32d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=2, bottleneck_width=32,
+                             model_name="resnext56_2x32d_cifar100", **kwargs)
+
+
+def resnext56_2x32d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (2x32d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=2, bottleneck_width=32,
+                             model_name="resnext56_2x32d_svhn", **kwargs)
+
+
+def resnext56_4x16d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (4x16d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=4, bottleneck_width=16,
+                             model_name="resnext56_4x16d_cifar10", **kwargs)
+
+
+def resnext56_4x16d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (4x16d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=4, bottleneck_width=16,
+                             model_name="resnext56_4x16d_cifar100", **kwargs)
+
+
+def resnext56_4x16d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (4x16d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=4, bottleneck_width=16,
+                             model_name="resnext56_4x16d_svhn", **kwargs)
+
+
+def resnext56_8x8d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (8x8d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=8, bottleneck_width=8,
+                             model_name="resnext56_8x8d_cifar10", **kwargs)
+
+
+def resnext56_8x8d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (8x8d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=8, bottleneck_width=8,
+                             model_name="resnext56_8x8d_cifar100", **kwargs)
+
+
+def resnext56_8x8d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (8x8d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=8, bottleneck_width=8,
+                             model_name="resnext56_8x8d_svhn", **kwargs)
+
+
+def resnext56_16x4d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (16x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=16, bottleneck_width=4,
+                             model_name="resnext56_16x4d_cifar10", **kwargs)
+
+
+def resnext56_16x4d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (16x4d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=16, bottleneck_width=4,
+                             model_name="resnext56_16x4d_cifar100", **kwargs)
+
+
+def resnext56_16x4d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (16x4d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=16, bottleneck_width=4,
+                             model_name="resnext56_16x4d_svhn", **kwargs)
+
+
+def resnext56_32x2d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (32x2d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=32, bottleneck_width=2,
+                             model_name="resnext56_32x2d_cifar10", **kwargs)
+
+
+def resnext56_32x2d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (32x2d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=32, bottleneck_width=2,
+                             model_name="resnext56_32x2d_cifar100", **kwargs)
+
+
+def resnext56_32x2d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (32x2d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=32, bottleneck_width=2,
+                             model_name="resnext56_32x2d_svhn", **kwargs)
+
+
+def resnext56_64x1d_cifar10(classes=10, **kwargs):
+    """
+    ResNeXt-56 (64x1d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=64, bottleneck_width=1,
+                             model_name="resnext56_64x1d_cifar10", **kwargs)
+
+
+def resnext56_64x1d_cifar100(classes=100, **kwargs):
+    """
+    ResNeXt-56 (64x1d) model for CIFAR-100 from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=64, bottleneck_width=1,
+                             model_name="resnext56_64x1d_cifar100", **kwargs)
+
+
+def resnext56_64x1d_svhn(classes=10, **kwargs):
+    """
+    ResNeXt-56 (64x1d) model for SVHN from 'Aggregated Residual Transformations for Deep Neural Networks,'
+    http://arxiv.org/abs/1611.05431.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnext_cifar(classes=classes, blocks=56, cardinality=64, bottleneck_width=1,
+                             model_name="resnext56_64x1d_svhn", **kwargs)
+
+
 def resnext29_32x4d_cifar10(classes=10, **kwargs):
     """
     ResNeXt-29 (32x4d) model for CIFAR-10 from 'Aggregated Residual Transformations for Deep Neural Networks,'
@@ -1108,6 +1535,27 @@ def _test():
         (resnext20_64x2d_cifar10, 10),
         (resnext20_64x2d_cifar100, 100),
         (resnext20_64x2d_svhn, 10),
+        (resnext56_1x64d_cifar10, 10),
+        (resnext56_1x64d_cifar100, 100),
+        (resnext56_1x64d_svhn, 10),
+        (resnext56_2x32d_cifar10, 10),
+        (resnext56_2x32d_cifar100, 100),
+        (resnext56_2x32d_svhn, 10),
+        (resnext56_4x16d_cifar10, 10),
+        (resnext56_4x16d_cifar100, 100),
+        (resnext56_4x16d_svhn, 10),
+        (resnext56_8x8d_cifar10, 10),
+        (resnext56_8x8d_cifar100, 100),
+        (resnext56_8x8d_svhn, 10),
+        (resnext56_16x4d_cifar10, 10),
+        (resnext56_16x4d_cifar100, 100),
+        (resnext56_16x4d_svhn, 10),
+        (resnext56_32x2d_cifar10, 10),
+        (resnext56_32x2d_cifar100, 100),
+        (resnext56_32x2d_svhn, 10),
+        (resnext56_64x1d_cifar10, 10),
+        (resnext56_64x1d_cifar100, 100),
+        (resnext56_64x1d_svhn, 10),
         (resnext29_32x4d_cifar10, 10),
         (resnext29_32x4d_cifar100, 100),
         (resnext29_32x4d_svhn, 10),
@@ -1170,6 +1618,27 @@ def _test():
         assert (model != resnext20_64x2d_cifar10 or weight_count == 3198794)
         assert (model != resnext20_64x2d_cifar100 or weight_count == 3291044)
         assert (model != resnext20_64x2d_svhn or weight_count == 3198794)
+        assert (model != resnext56_1x64d_cifar10 or weight_count == 9317194)
+        assert (model != resnext56_1x64d_cifar100 or weight_count == 9409444)
+        assert (model != resnext56_1x64d_svhn or weight_count == 9317194)
+        assert (model != resnext56_2x32d_cifar10 or weight_count == 6994762)
+        assert (model != resnext56_2x32d_cifar100 or weight_count == 7087012)
+        assert (model != resnext56_2x32d_svhn or weight_count == 6994762)
+        assert (model != resnext56_4x16d_cifar10 or weight_count == 5833546)
+        assert (model != resnext56_4x16d_cifar100 or weight_count == 5925796)
+        assert (model != resnext56_4x16d_svhn or weight_count == 5833546)
+        assert (model != resnext56_8x8d_cifar10 or weight_count == 5252938)
+        assert (model != resnext56_8x8d_cifar100 or weight_count == 5345188)
+        assert (model != resnext56_8x8d_svhn or weight_count == 5252938)
+        assert (model != resnext56_16x4d_cifar10 or weight_count == 4962634)
+        assert (model != resnext56_16x4d_cifar100 or weight_count == 5054884)
+        assert (model != resnext56_16x4d_svhn or weight_count == 4962634)
+        assert (model != resnext56_32x2d_cifar10 or weight_count == 4817482)
+        assert (model != resnext56_32x2d_cifar100 or weight_count == 4909732)
+        assert (model != resnext56_32x2d_svhn or weight_count == 4817482)
+        assert (model != resnext56_64x1d_cifar10 or weight_count == 4744906)
+        assert (model != resnext56_64x1d_cifar100 or weight_count == 4837156)
+        assert (model != resnext56_64x1d_svhn or weight_count == 4744906)
         assert (model != resnext29_32x4d_cifar10 or weight_count == 4775754)
         assert (model != resnext29_32x4d_cifar100 or weight_count == 4868004)
         assert (model != resnext29_32x4d_svhn or weight_count == 4775754)

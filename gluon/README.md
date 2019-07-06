@@ -347,6 +347,19 @@ Some remarks:
 | PreResNet-164(BN) | 3.64 | 256 | 1,703,258 | 255.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.196/preresnet164bn_cifar10-0364-7ecf30cb.params.log)) |
 | PreResNet-1001 | 2.65 | 256 | 10,327,706 | 1,536.18M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.209/preresnet1001_cifar10-0265-50507ff7.params.log)) |
 | PreResNet-1202 | 3.39 | 64 | 19,423,834 | 2,857.14M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.246/preresnet1202_cifar10-0339-942cf6f2.params.log)) |
+| ResNeXt-20 (1x64d) | 4.33 | 1024 | 3,446,602 | 538.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_1x64d_cifar10-0433-0661d12e.params.log)) |
+| ResNeXt-20 (2x32d) | 4.53 | 1024 | 2,672,458 | 425.15M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x32d_cifar10-0453-afb48ca4.params.log)) |
+| ResNeXt-20 (4x16d) | 4.70 | 1024 | 2,285,386 | 368.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x16d_cifar10-0470-ae1ba869.params.log)) |
+| ResNeXt-20 (8x8d) | 4.66 | 1024 | 2,091,850 | 340.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x8d_cifar10-0466-280e5f89.params.log)) |
+| ResNeXt-20 (16x4d) | 4.04 | 1024 | 1,995,082 | 326.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x4d_cifar10-0404-426b5b2f.params.log)) |
+| ResNeXt-20 (32x2d) | 4.61 | 1024 | 1,946,698 | 319.03M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x2d_cifar10-0461-2d6ee836.params.log)) |
+| ResNeXt-20 (64x1d) | 4.93 | 1024 | 1,922,506 | 315.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x1d_cifar10-0493-6618e9ac.params.log)) |
+| ResNeXt-20 (2x64d) | 4.03 | 1024 | 6,198,602 | 987.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x64d_cifar10-0403-6f0c138f.params.log)) |
+| ResNeXt-20 (4x32d) | 3.73 | 1024 | 4,650,314 | 761.57M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x32d_cifar10-0373-cf696060.params.log)) |
+| ResNeXt-20 (8x16d) | 4.04 | 1024 | 3,876,170 | 648.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x16d_cifar10-0404-4d7f7281.params.log)) |
+| ResNeXt-20 (16x8d) | 3.94 | 1024 | 3,489,098 | 591.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x8d_cifar10-0394-f81d0566.params.log)) |
+| ResNeXt-20 (32x4d) | 4.20 | 1024 | 3,295,562 | 563.47M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x4d_cifar10-0420-a3658939.params.log)) |
+| ResNeXt-20 (64x2d) | 4.38 | 1024 | 3,198,794 | 549.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x2d_cifar10-0438-32fe188b.params.log)) |
 | ResNeXt-29 (32x4d) | 3.15 | 1024 | 4,775,754 | 780.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.169/resnext29_32x4d_cifar10-0315-c8a1beda.params.log)) |
 | ResNeXt-29 (16x64d) | 2.41 | 1024 | 68,155,210 | 10,709.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.176/resnext29_16x64d_cifar10-0241-76b97a4d.params.log)) |
 | SE-ResNet-20 | 6.01 | 64 | 274,847 | 41.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.362/seresnet20_cifar10-0601-3411e5ad.params.log)) |
@@ -409,6 +422,19 @@ Some remarks:
 | PreResNet-110 | 22.67 | 1,736,372 | 255.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.191/preresnet110_cifar100-2267-18cf4161.params.log)) |
 | PreResNet-164(BN) | 20.18 | 1,726,388 | 255.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.192/preresnet164bn_cifar100-2018-a20557c8.params.log)) |
 | PreResNet-1001 | 18.41 | 10,350,836 | 1,536.20M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.283/preresnet1001_cifar100-1841-185e033d.params.log)) |
+| ResNeXt-20 (1x64d) | 21.97 | 3,538,852 | 538.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_1x64d_cifar100-2197-e7073542.params.log)) |
+| ResNeXt-20 (2x32d) | 22.55 | 2,764,708 | 425.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x32d_cifar100-2255-995281ee.params.log)) |
+| ResNeXt-20 (4x16d) | 23.04 | 2,377,636 | 368.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x16d_cifar100-2304-2c9d578a.params.log)) |
+| ResNeXt-20 (8x8d) | 22.82 | 2,184,100 | 340.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x8d_cifar100-2282-363f03e8.params.log)) |
+| ResNeXt-20 (16x4d) | 22.82 | 2,087,332 | 326.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x4d_cifar100-2282-508d3227.params.log)) |
+| ResNeXt-20 (32x2d) | 21.73 | 2,038,948 | 319.12M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x2d_cifar100-2322-ce652014.params.log)) |
+| ResNeXt-20 (64x1d) | 23.53 | 2,014,756 | 315.58M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x1d_cifar100-2353-9c789af4.params.log)) |
+| ResNeXt-20 (2x64d) | 20.60 | 6,290,852 | 988.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x64d_cifar100-2060-5f6dfa3f.params.log)) |
+| ResNeXt-20 (4x32d) | 21.31 | 4,742,564 | 761.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x32d_cifar100-2131-2c558efc.params.log)) |
+| ResNeXt-20 (8x16d) | 21.72 | 3,968,420 | 648.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x16d_cifar100-2172-3fc47c70.params.log)) |
+| ResNeXt-20 (16x8d) | 21.73 | 3,581,348 | 591.86M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x8d_cifar100-2173-a246aea5.params.log)) |
+| ResNeXt-20 (32x4d) | 22.13 | 3,387,812 | 563.56M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x4d_cifar100-2213-5b2ffba8.params.log)) |
+| ResNeXt-20 (64x2d) | 22.35 | 3,291,044 | 549.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x2d_cifar100-2235-62fcc38a.params.log)) |
 | ResNeXt-29 (32x4d) | 19.50 | 4,868,004 | 780.64M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.200/resnext29_32x4d_cifar100-1950-5f2eedcd.params.log)) |
 | ResNeXt-29 (16x64d) | 16.93 | 68,247,460 | 10,709.43M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.322/resnext29_16x64d_cifar100-1693-1fcec90d.params.log)) |
 | SE-ResNet-20 | 28.54 | 280,697 | 41.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.362/seresnet20_cifar100-2854-184ad148.params.log)) |
@@ -465,6 +491,19 @@ Some remarks:
 | PreResNet-56 | 2.80 | 855,578 | 127.03M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet56_svhn-0280-b974c2c9.params.log)) |
 | PreResNet-110 | 2.79 | 1,730,522 | 255.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet110_svhn-0279-6804450b.params.log)) |
 | PreResNet-164(BN) | 2.58 | 1,703,258 | 255.08M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.269/preresnet164bn_svhn-0258-4aeee06a.params.log)) |
+| ResNeXt-20 (1x64d) | 2.98 | 3,446,602 | 538.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_1x64d_svhn-0298-3c7febc8.params.log)) |
+| ResNeXt-20 (2x32d) | 2.96 | 2,672,458 | 425.15M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x32d_svhn-0296-54189677.params.log)) |
+| ResNeXt-20 (4x16d) | 3.17 | 2,285,386 | 368.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x16d_svhn-0317-6691c8f5.params.log)) |
+| ResNeXt-20 (8x8d) | 3.18 | 2,091,850 | 340.25M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x8d_svhn-0318-c1536efb.params.log)) |
+| ResNeXt-20 (16x4d) | 3.21 | 1,995,082 | 326.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x4d_svhn-0321-854df3b7.params.log)) |
+| ResNeXt-20 (32x2d) | 3.27 | 1,946,698 | 319.03M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x2d_svhn-0327-2499ff6d.params.log)) |
+| ResNeXt-20 (64x1d) | 3.42 | 1,922,506 | 315.49M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x1d_svhn-0342-2591ea44.params.log)) |
+| ResNeXt-20 (2x64d) | 2.83 | 6,198,602 | 987.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_2x64d_svhn-0283-9c77f074.params.log)) |
+| ResNeXt-20 (4x32d) | 2.98 | 4,650,314 | 761.57M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_4x32d_svhn-0298-1da9a7bf.params.log)) |
+| ResNeXt-20 (8x16d) | 3.01 | 3,876,170 | 648.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_8x16d_svhn-0301-41b28fd3.params.log)) |
+| ResNeXt-20 (16x8d) | 2.93 | 3,489,098 | 591.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_16x8d_svhn-0293-31f4b14e.params.log)) |
+| ResNeXt-20 (32x4d) | 3.09 | 3,295,562 | 563.47M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_32x4d_svhn-0309-ddbef9ac.params.log)) |
+| ResNeXt-20 (64x2d) | 3.14 | 3,198,794 | 549.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.365/resnext20_64x2d_svhn-0314-4c01490b.params.log)) |
 | ResNeXt-29 (32x4d) | 2.80 | 4,775,754 | 780.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.275/resnext29_32x4d_svhn-0280-dcb6aef9.params.log)) |
 | ResNeXt-29 (16x64d) | 2.68 | 68,155,210 | 10,709.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.358/resnext29_16x64d_svhn-0268-c57307f3.params.log)) |
 | SE-ResNet-20 | 3.23 | 274,847 | 41.30M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.362/seresnet20_svhn-0323-a3a3c677.params.log)) |

@@ -202,6 +202,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('nasnet_4a1056', '0795', '5c78908e38c531283d86f9cbe7e14c2afd85a7ce', 'v0.0.97'),
     ('nasnet_6a4032', '0424', '73cca5fee009db77412c5fca7c826b3563752757', 'v0.0.101'),
     ('pnasnet5large', '0428', '998a548f44ac1b1ac6c4959a721f2675ab5c48b9', 'v0.0.114'),
+    ('efficientnet_b0', '0722', '041a8346ad6a13dbb66384d9a41ed20d959d3e77', 'v0.0.364'),
     ('efficientnet_b0b', '0697', '7d0580eb7106c3a91a8d92d430fb703b4401c8f6', 'v0.0.349'),
     ('efficientnet_b1b', '0591', '500ec57fe9cff7d9e84317e908827d4487fd9c1c', 'v0.0.349'),
     ('efficientnet_b2b', '0528', 'bcbcaccabb973e1d35174e4e8f377dc2bb091c07', 'v0.0.349'),

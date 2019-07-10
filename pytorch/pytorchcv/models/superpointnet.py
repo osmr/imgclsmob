@@ -338,7 +338,8 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != superpointnet or weight_count == 1300865)
 
-        x = torch.randn(1, 1, 224, 224)
+        # x = torch.randn(1, 1, 224, 224)
+        x = torch.randn(1, 1, 1000, 2000)
         y = net(x)
         # y.sum().backward()
         assert (len(y) == 3)

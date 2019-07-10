@@ -79,7 +79,7 @@ class SPDetector(HybridBlock):
                  mid_channels,
                  conf_thresh=0.015,
                  nms_dist=4,
-                 use_batch_box_nms=True,
+                 use_batch_box_nms=False,
                  hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
@@ -156,41 +156,54 @@ class SPDetector(HybridBlock):
             return pts_list, confs_list
 
         else:
-            heatmap = heatmap.reshape(shape=(0, -3, -3))
+            img_height = in_size[0]
+            img_width = in_size[1]
 
-            in_nms = F.stack(
-                heatmap,
-                F.arange(in_size[0], repeat=in_size[1]).tile((batch_size, 1)),
-                F.arange(in_size[1]).tile((batch_size, in_size[0])),
-                F.zeros_like(heatmap) + self.nms_dist,
-                F.zeros_like(heatmap) + self.nms_dist,
-                axis=2)
-            out_nms = F.contrib.box_nms(
-                data=in_nms,
-                overlap_thresh=1e-3,
-                valid_thresh=self.conf_thresh,
-                coord_start=1,
-                score_index=0,
-                id_index=-1,
-                force_suppress=False,
-                in_format="center",
-                out_format="center")
-
-            confs = out_nms.slice_axis(axis=2, begin=0, end=1).reshape(shape=(0, -1))
-            pts = out_nms.slice_axis(axis=2, begin=1, end=3)
-
-            if self.hybridizable:
-                return pts, confs
+            heatmap = heatmap.reshape(shape=(0, -3, -3)).expand_dims(axis=1)
+            heatmap = F.where(heatmap >= self.conf_thresh, heatmap, F.zeros_like(heatmap))
+            heatmap_mask = (heatmap >= 0)
+            pad = self.nms_dist
+            pad_width = (0, 0, 0, 0, pad, pad, pad, pad)
+            heatmap_mask2 = heatmap_mask.pad(mode="constant", pad_width=pad_width, constant_value=0)
 
             confs_list = []
             pts_list = []
-            counts = (confs > 0).sum(axis=1)
             for i in range(batch_size):
-                count_i = int(counts[i].asscalar())
-                confs_i = confs[i].slice_axis(axis=0, begin=0, end=count_i)
-                pts_i = pts[i].slice_axis(axis=0, begin=0, end=count_i)
-                confs_list.append(confs_i)
-                pts_list.append(pts_i)
+                heatmap_i = heatmap[i, 0]
+                heatmap_i_csr = heatmap_i.tostype("csr")
+                row_sizes = heatmap_i_csr.indptr[1:] - heatmap_i_csr.indptr[:-1]
+                row_inds = heatmap_i_csr.data.zeros_like()
+                row_size_count = 0
+                for j, row_size in enumerate(row_sizes):
+                    row_size_j = row_size.asscalar()
+                    row_inds[row_size_count:(row_size_count + row_size_j)] = j
+                    row_size_count += row_size_j
+                src_inds = heatmap_i_csr.data.argsort(is_ascend=False)
+                dst_inds = heatmap_i_csr.data.zeros_like()
+                dst_pts_count = 0
+                heatmap_mask2_i = heatmap_mask2[i, 0]
+                dst_confs = heatmap_i_csr.data.zeros_like()
+                dst_pts = F.stack(dst_confs, dst_confs, axis=1)
+                for src_ind in src_inds:
+                    src_ind_j = int(src_ind.asscalar())
+                    col_j = int(heatmap_i_csr.indices[src_ind_j].asscalar())
+                    row_j = int(row_inds[src_ind_j].asscalar())
+                    pt = (row_j + pad, col_j + pad)
+                    assert (pad <= pt[0] < heatmap_mask2_i.shape[0] - pad)
+                    assert (pad <= pt[1] < heatmap_mask2_i.shape[1] - pad)
+                    assert (0 <= pt[0] - pad < img_height)
+                    assert (0 <= pt[1] - pad < img_width)
+                    if heatmap_mask2_i[pt[0], pt[1]] == 1:
+                        heatmap_mask2_i[(pt[0] - pad):(pt[0] + pad + 1), (pt[1] - pad):(pt[1] + pad + 1)] = 0
+                        if (0 <= pt[0] - pad < img_height) and (0 <= pt[1] - pad < img_width):
+                            dst_inds[dst_pts_count] = src_ind_j
+                            dst_pts_count += 1
+                            dst_confs[dst_pts_count] = heatmap_i_csr.data[src_ind_j].asscalar()
+                dst_inds = dst_inds[:dst_pts_count]
+                dst_confs = dst_confs[:dst_pts_count]
+                # dst_pts = torch.index_select(src_pts, dim=0, index=dst_inds)
+                pts_list.append(dst_pts)
+                confs_list.append(dst_confs)
             return pts_list, confs_list
 
 
@@ -417,7 +430,7 @@ def _test():
     hybridizable = False
     batch_size = 1
     # in_size = (224, 224)
-    in_size = (2000, 4000)
+    in_size = (1000, 2000)
 
     models = [
         superpointnet,

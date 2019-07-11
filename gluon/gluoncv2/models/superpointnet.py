@@ -88,6 +88,7 @@ class SPDetector(HybridBlock):
         super(SPDetector, self).__init__(**kwargs)
         assert ((batch_size is not None) or not hybridizable)
         assert ((in_size is not None) or not hybridizable)
+        assert (use_batch_box_nms or not hybridizable)
         self.conf_thresh = conf_thresh
         self.nms_dist = nms_dist
         self.use_batch_box_nms = use_batch_box_nms
@@ -169,8 +170,20 @@ class SPDetector(HybridBlock):
             confs_list = []
             pts_list = []
             for i in range(batch_size):
-                heatmap_i = heatmap[i, 0]
-                heatmap_i_csr = heatmap_i.tostype("csr")
+                heatmap_i = heatmap[i].squeeze(axis=0)
+                heatmap_i_ = heatmap_i.reshape((-1,))
+                confs = heatmap_i_.zeros_like()
+                confs_ids = heatmap_i_.zeros_like()
+                ind_j = 0
+                for j in range(img_height * img_width):
+                    if heatmap_i_[j] >= self.conf_thresh:
+                        confs[ind_j] = heatmap_i_[j]
+                        confs_ids[ind_j] = j
+                        ind_j += 1
+                confs = confs[:ind_j]
+                confs_ids = confs_ids[:ind_j]
+
+                heatmap_i_csr = F.cast_storage(heatmap_i, "csr")
                 row_sizes = heatmap_i_csr.indptr[1:] - heatmap_i_csr.indptr[:-1]
                 row_inds = heatmap_i_csr.data.zeros_like()
                 row_size_count = 0
@@ -179,7 +192,6 @@ class SPDetector(HybridBlock):
                     row_inds[row_size_count:(row_size_count + row_size_j)] = j
                     row_size_count += row_size_j
                 src_inds = heatmap_i_csr.data.argsort(is_ascend=False)
-                dst_inds = heatmap_i_csr.data.zeros_like()
                 dst_pts_count = 0
                 heatmap_mask2_i = heatmap_mask2[i, 0]
                 dst_confs = heatmap_i_csr.data.zeros_like()
@@ -196,14 +208,14 @@ class SPDetector(HybridBlock):
                     if heatmap_mask2_i[pt[0], pt[1]] == 1:
                         heatmap_mask2_i[(pt[0] - pad):(pt[0] + pad + 1), (pt[1] - pad):(pt[1] + pad + 1)] = 0
                         if (0 <= pt[0] - pad < img_height) and (0 <= pt[1] - pad < img_width):
-                            dst_inds[dst_pts_count] = src_ind_j
-                            dst_pts_count += 1
                             dst_confs[dst_pts_count] = heatmap_i_csr.data[src_ind_j].asscalar()
-                dst_inds = dst_inds[:dst_pts_count]
+                            dst_pts[dst_pts_count, 0] = row_j
+                            dst_pts[dst_pts_count, 1] = col_j
+                            dst_pts_count += 1
                 dst_confs = dst_confs[:dst_pts_count]
-                # dst_pts = torch.index_select(src_pts, dim=0, index=dst_inds)
-                pts_list.append(dst_pts)
+                dst_pts = dst_pts[:dst_pts_count]
                 confs_list.append(dst_confs)
+                pts_list.append(dst_pts)
             return pts_list, confs_list
 
 
@@ -430,7 +442,8 @@ def _test():
     hybridizable = False
     batch_size = 1
     # in_size = (224, 224)
-    in_size = (1000, 2000)
+    in_size = (200, 400)
+    # in_size = (1000, 2000)
 
     models = [
         superpointnet,

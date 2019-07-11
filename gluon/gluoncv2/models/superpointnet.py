@@ -79,7 +79,7 @@ class SPDetector(HybridBlock):
                  mid_channels,
                  conf_thresh=0.015,
                  nms_dist=4,
-                 use_batch_box_nms=False,
+                 use_batch_box_nms=True,
                  hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
@@ -171,19 +171,7 @@ class SPDetector(HybridBlock):
             pts_list = []
             for i in range(batch_size):
                 heatmap_i = heatmap[i].squeeze(axis=0)
-                heatmap_i_ = heatmap_i.reshape((-1,))
-                confs = heatmap_i_.zeros_like()
-                confs_ids = heatmap_i_.zeros_like()
-                ind_j = 0
-                for j in range(img_height * img_width):
-                    if heatmap_i_[j] >= self.conf_thresh:
-                        confs[ind_j] = heatmap_i_[j]
-                        confs_ids[ind_j] = j
-                        ind_j += 1
-                confs = confs[:ind_j]
-                confs_ids = confs_ids[:ind_j]
-
-                heatmap_i_csr = F.cast_storage(heatmap_i, "csr")
+                heatmap_i_csr = heatmap_i.tostype("csr")
                 row_sizes = heatmap_i_csr.indptr[1:] - heatmap_i_csr.indptr[:-1]
                 row_inds = heatmap_i_csr.data.zeros_like()
                 row_size_count = 0
@@ -442,8 +430,8 @@ def _test():
     hybridizable = False
     batch_size = 1
     # in_size = (224, 224)
-    in_size = (200, 400)
-    # in_size = (1000, 2000)
+    # in_size = (200, 400)
+    in_size = (1000, 2000)
 
     models = [
         superpointnet,

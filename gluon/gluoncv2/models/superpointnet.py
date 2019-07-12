@@ -13,6 +13,67 @@ from .common import conv1x1
 from .vgg import vgg_conv3x3
 
 
+def interpolate_bilinear(p,
+                         img,
+                         img_size,
+                         transpose=True):
+    """
+    Bilinear interpolation.
+
+    Parameters:
+    ----------
+    p : NDArray
+        Float coordinates.
+    img : NDArray
+        original image.
+    img_size : tuple of two inst
+        Image size.
+    transpose : bool, default True
+        Whether do transpose of the output against input.
+
+    Returns
+    -------
+    zz : NDArray
+       Interpolated values.
+    """
+    p0 = p.floor().astype(int)
+    p1 = p0 + 1
+
+    x = p.slice_axis(axis=1, begin=0, end=1).squeeze(axis=1)
+    y = p.slice_axis(axis=1, begin=1, end=2).squeeze(axis=1)
+    x0 = p0.slice_axis(axis=1, begin=0, end=1).squeeze(axis=1)
+    x1 = p1.slice_axis(axis=1, begin=0, end=1).squeeze(axis=1)
+    y0 = p0.slice_axis(axis=1, begin=1, end=2).squeeze(axis=1)
+    y1 = p1.slice_axis(axis=1, begin=1, end=2).squeeze(axis=1)
+
+    x0 = x0.clip(0, img_size[0] - 1)
+    x1 = x1.clip(0, img_size[0] - 1)
+    y0 = y0.clip(0, img_size[1] - 1)
+    y1 = y1.clip(0, img_size[1] - 1)
+
+    z00 = img[:, x0, y0].T
+    z01 = img[:, x0, y1].T
+    z10 = img[:, x1, y0].T
+    z11 = img[:, x1, y1].T
+
+    x0 = x0.astype(p.dtype)
+    x1 = x1.astype(p.dtype)
+    y0 = y0.astype(p.dtype)
+    y1 = y1.astype(p.dtype)
+
+    w00 = ((x - x0) * (y - y0)).expand_dims(axis=1)
+    w01 = ((x - x0) * (y1 - y)).expand_dims(axis=1)
+    w10 = ((x1 - x) * (y - y0)).expand_dims(axis=1)
+    w11 = ((x1 - x) * (y1 - y)).expand_dims(axis=1)
+
+    zz = (z00 * w11) + (z10 * w10) + (z01 * w01) + (z11 * w00)
+
+    if not transpose:
+        zz = zz.T
+
+    return zz
+
+
 class SPHead(HybridBlock):
     """
     SuperPointNet head block.
@@ -221,6 +282,8 @@ class SPDescriptor(HybridBlock):
         Descriptor length.
     transpose_descriptors : bool, default True
         Whether transpose descriptors with respect to points.
+    use_map_resize : bool, default True
+        Whether allow to resize descriptor map.
     hybridizable : bool, default True
         Whether allow to hybridize this block.
     batch_size : int, default 1
@@ -235,6 +298,7 @@ class SPDescriptor(HybridBlock):
                  mid_channels,
                  descriptor_length=256,
                  transpose_descriptors=True,
+                 use_map_resize=True,
                  hybridizable=True,
                  batch_size=1,
                  in_size=(224, 224),
@@ -243,8 +307,10 @@ class SPDescriptor(HybridBlock):
         super(SPDescriptor, self).__init__(**kwargs)
         assert ((batch_size is not None) or not hybridizable)
         assert ((in_size is not None) or not hybridizable)
+        assert (use_map_resize or not hybridizable)
         self.desc_length = descriptor_length
         self.transpose_descriptors = transpose_descriptors
+        self.use_map_resize = use_map_resize
         self.hybridizable = hybridizable
         self.batch_size = batch_size
         self.in_size = in_size
@@ -263,28 +329,45 @@ class SPDescriptor(HybridBlock):
         in_size = self.in_size if self.in_size is not None else (x.shape[2] * self.reduction,
                                                                  x.shape[3] * self.reduction)
 
-        desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=in_size[0], width=in_size[1])
-        desc_map = F.L2Normalization(desc_map, mode="channel")
-        if not self.transpose_descriptors:
-            desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
+        if self.use_map_resize:
+            desc_map = F.contrib.BilinearResize2D(coarse_desc_map, height=in_size[0], width=in_size[1])
+            desc_map = F.L2Normalization(desc_map, mode="channel")
+            if not self.transpose_descriptors:
+                desc_map = desc_map.transpose(axes=(0, 1, 3, 2))
 
-        desc_map = desc_map.transpose(axes=(0, 2, 3, 1))
+            desc_map = desc_map.transpose(axes=(0, 2, 3, 1))
 
-        if self.hybridizable:
-            return desc_map
+            if self.hybridizable:
+                return desc_map
 
-        batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
+            batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
 
-        desc_map = desc_map.reshape(shape=(0, -3, 0))
-        desc_list = []
-        for i in range(batch_size):
-            desc_map_i = desc_map[i]
-            pts_i_tr = pts[i].transpose()
-            pts_ravel_i = F.ravel_multi_index(pts_i_tr, shape=in_size)
-            desc_map_sorted_i = F.take(desc_map_i, pts_ravel_i)
-            desc_list.append(desc_map_sorted_i)
+            desc_map = desc_map.reshape(shape=(0, -3, 0))
+            desc_list = []
+            for i in range(batch_size):
+                desc_map_i = desc_map[i]
+                pts_i_tr = pts[i].transpose()
+                pts_ravel_i = F.ravel_multi_index(pts_i_tr, shape=in_size)
+                desc_map_sorted_i = F.take(desc_map_i, pts_ravel_i)
+                desc_list.append(desc_map_sorted_i)
 
-        return desc_list
+            return desc_list
+
+        else:
+            pts0 = (1.0 / self.reduction) * pts
+
+            batch_size = self.batch_size if self.batch_size is not None else x.shape[0]
+            desc_list = []
+            for i in range(batch_size):
+                src_desc_map_i = coarse_desc_map[i]
+                pts0_i = pts0[i]
+                dst_desc_map_i = interpolate_bilinear(
+                    p=pts0_i,
+                    img=src_desc_map_i,
+                    img_size=(in_size[0] // self.reduction, in_size[1] // self.reduction))
+                desc_list.append(dst_desc_map_i)
+
+            return desc_list
 
 
 class SuperPointNet(HybridBlock):
@@ -427,11 +510,11 @@ def _test():
     import mxnet as mx
 
     pretrained = False
-    hybridizable = False
+    hybridizable = True
     batch_size = 1
     # in_size = (224, 224)
-    # in_size = (200, 400)
-    in_size = (1000, 2000)
+    in_size = (200, 400)
+    # in_size = (1000, 2000)
 
     models = [
         superpointnet,

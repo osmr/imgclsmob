@@ -62,9 +62,27 @@ class HPatches(dataset.Dataset):
         # image = mx.image.imread(self.image_paths[index], flag=0)
         # warped_image = mx.image.imread(self.warped_image_paths[index], flag=0)
         print("Image file name: {}, index: {}".format(self.image_paths[index], index))
-        image = mx.nd.array(np.expand_dims(cv2.imread(self.image_paths[index], flags=0), axis=2))
+
+        image = cv2.imread(self.image_paths[index], flags=0)
+        if image.shape[0] > 1500:
+            image = cv2.resize(
+                src=image,
+                dsize=None,
+                fx=0.5,
+                fy=0.5,
+                interpolation=cv2.INTER_AREA)
+        image = mx.nd.array(np.expand_dims(image, axis=2))
         print("Image shape: {}".format(image.shape))
-        warped_image = mx.nd.array(np.expand_dims(cv2.imread(self.warped_image_paths[index], flags=0), axis=2))
+
+        warped_image = cv2.imread(self.warped_image_paths[index], flags=0)
+        if warped_image.shape[0] > 1500:
+            warped_image = cv2.resize(
+                src=warped_image,
+                dsize=None,
+                fx=0.5,
+                fy=0.5,
+                interpolation=cv2.INTER_AREA)
+        warped_image = mx.nd.array(np.expand_dims(warped_image, axis=2))
         print("W-Image shape: {}".format(warped_image.shape))
         homography = mx.nd.array(self.homographies[index])
 

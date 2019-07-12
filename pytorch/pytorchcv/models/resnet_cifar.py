@@ -5,8 +5,10 @@
 
 __all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn', 'resnet56_cifar10',
            'resnet56_cifar100', 'resnet56_svhn', 'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
-           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn', 'resnet1001_cifar10',
-           'resnet1001_cifar100', 'resnet1001_svhn', 'resnet1202_cifar10', 'resnet1202_cifar100', 'resnet1202_svhn']
+           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn', 'resnet272bn_cifar10',
+           'resnet272bn_cifar100', 'resnet272bn_svhn', 'resnet542bn_cifar10', 'resnet542bn_cifar100',
+           'resnet542bn_svhn', 'resnet1001_cifar10', 'resnet1001_cifar100', 'resnet1001_svhn', 'resnet1202_cifar10',
+           'resnet1202_cifar100', 'resnet1202_svhn']
 
 import os
 import torch.nn as nn
@@ -356,6 +358,114 @@ def resnet164bn_svhn(num_classes=10, **kwargs):
                             **kwargs)
 
 
+def resnet272bn_cifar10(num_classes=10, **kwargs):
+    """
+    ResNet-272(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar10",
+                            **kwargs)
+
+
+def resnet272bn_cifar100(num_classes=100, **kwargs):
+    """
+    ResNet-272(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar100",
+                            **kwargs)
+
+
+def resnet272bn_svhn(num_classes=10, **kwargs):
+    """
+    ResNet-272(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True, model_name="resnet272bn_svhn",
+                            **kwargs)
+
+
+def resnet542bn_cifar10(num_classes=10, **kwargs):
+    """
+    ResNet-542(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar10",
+                            **kwargs)
+
+
+def resnet542bn_cifar100(num_classes=100, **kwargs):
+    """
+    ResNet-542(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar100",
+                            **kwargs)
+
+
+def resnet542bn_svhn(num_classes=10, **kwargs):
+    """
+    ResNet-542(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True, model_name="resnet542bn_svhn",
+                            **kwargs)
+
+
 def resnet1001_cifar10(num_classes=10, **kwargs):
     """
     ResNet-1001 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
@@ -491,6 +601,12 @@ def _test():
         (resnet164bn_cifar10, 10),
         (resnet164bn_cifar100, 100),
         (resnet164bn_svhn, 10),
+        (resnet272bn_cifar10, 10),
+        (resnet272bn_cifar100, 100),
+        (resnet272bn_svhn, 10),
+        (resnet542bn_cifar10, 10),
+        (resnet542bn_cifar100, 100),
+        (resnet542bn_svhn, 10),
         (resnet1001_cifar10, 10),
         (resnet1001_cifar100, 100),
         (resnet1001_svhn, 10),
@@ -519,6 +635,12 @@ def _test():
         assert (model != resnet164bn_cifar10 or weight_count == 1704154)
         assert (model != resnet164bn_cifar100 or weight_count == 1727284)
         assert (model != resnet164bn_svhn or weight_count == 1704154)
+        assert (model != resnet272bn_cifar10 or weight_count == 2816986)
+        assert (model != resnet272bn_cifar100 or weight_count == 2840116)
+        assert (model != resnet272bn_svhn or weight_count == 2816986)
+        assert (model != resnet542bn_cifar10 or weight_count == 5599066)
+        assert (model != resnet542bn_cifar100 or weight_count == 5622196)
+        assert (model != resnet542bn_svhn or weight_count == 5599066)
         assert (model != resnet1001_cifar10 or weight_count == 10328602)
         assert (model != resnet1001_cifar100 or weight_count == 10351732)
         assert (model != resnet1001_svhn or weight_count == 10328602)

@@ -120,6 +120,8 @@ Some remarks:
 | PreResNet-152b | 20.95 | 5.76 | 60,185,256 | 11,551.87M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet152b-0576-c036165c.tf.npz.log)) |
 | PreResNet-200b | 21.12 | 5.60 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet200b-0560-881e0e28.tf.npz.log)) |
 | PreResNet-269b | 20.73 | 5.55 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0555-c799eaf2.tf.npz.log)) |
+| ResNeXt-14 (16x4d) | 31.65 | 12.24 | 7,127,336 | 1,045.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.370/resnext14_16x4d-1224-3f603dde.tf.npz.log)) |
+| ResNeXt-14 (32x2d) | 32.11 | 12.46 | 7,029,416 | 1,031.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.371/resnext14_32x2d-1246-df7d6b8a.tf.npz.log)) |
 | ResNeXt-14 (32x4d) | 29.95 | 11.13 | 9,411,880 | 1,603.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.327/resnext14_32x4d-1113-cac0dad5.tf.npz.log)) |
 | ResNeXt-26 (32x4d) | 23.94 | 7.17 | 15,389,480 | 2,488.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.332/resnext26_32x4d-0717-594567d2.tf.npz.log)) |
 | ResNeXt-101 (32x4d) | 21.33 | 5.80 | 44,177,704 | 8,003.45M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.74/resnext101_32x4d-0580-bf746cb6.tf.npz.log)) |

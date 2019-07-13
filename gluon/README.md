@@ -179,6 +179,8 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | PreResNet-152b | 21.00 | 5.75 | 60,185,256 | 11,551.87M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.2/preresnet152b-0575-dc303191.params.log)) |
 | PreResNet-200b | 21.10 | 5.64 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.45/preresnet200b-0564-38f849a6.params.log)) |
 | PreResNet-269b | 20.71 | 5.56 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0556-f386e3e7.params.log)) |
+| ResNeXt-14 (16x4d) | 31.66 | 12.23 | 7,127,336 | 1,045.77M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.370/resnext14_16x4d-1223-1f8072e8.params.log)) |
+| ResNeXt-14 (32x2d) | 32.16 | 12.47 | 7,029,416 | 1,031.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.371/resnext14_32x2d-1247-2ca8cc25.params.log)) |
 | ResNeXt-14 (32x4d) | 29.95 | 11.10 | 9,411,880 | 1,603.46M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.327/resnext14_32x4d-1110-9be6190e.params.log)) |
 | ResNeXt-26 (32x4d) | 23.93 | 7.21 | 15,389,480 | 2,488.07M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.332/resnext26_32x4d-0721-5264d7ef.params.log)) |
 | ResNeXt-101 (32x4d) | 21.32 | 5.79 | 44,177,704 | 8,003.45M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.10/resnext101_32x4d-0579-9afbfdbc.params.log)) |

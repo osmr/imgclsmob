@@ -406,13 +406,13 @@ imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 
 def get_model_name_suffix_data(model_name):
     if model_name not in _model_sha1:
-        raise ValueError('Pretrained model for {name} is not available.'.format(name=model_name))
+        raise ValueError("Pretrained model for {name} is not available.".format(name=model_name))
     error, sha1_hash, repo_release_tag = _model_sha1[model_name]
     return error, sha1_hash, repo_release_tag
 
 
 def get_model_file(model_name,
-                   local_model_store_dir_path=os.path.join('~', '.torch', 'models')):
+                   local_model_store_dir_path=os.path.join("~", ".torch", "models")):
     """
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
@@ -431,7 +431,7 @@ def get_model_file(model_name,
     """
     error, sha1_hash, repo_release_tag = get_model_name_suffix_data(model_name)
     short_sha1 = sha1_hash[:8]
-    file_name = '{name}-{error}-{short_sha1}.pth'.format(
+    file_name = "{name}-{error}-{short_sha1}.pth".format(
         name=model_name,
         error=error,
         short_sha1=short_sha1)
@@ -441,16 +441,16 @@ def get_model_file(model_name,
         if _check_sha1(file_path, sha1_hash):
             return file_path
         else:
-            logging.warning('Mismatch in the content of model file detected. Downloading again.')
+            logging.warning("Mismatch in the content of model file detected. Downloading again.")
     else:
-        logging.info('Model file not found. Downloading to {}.'.format(file_path))
+        logging.info("Model file not found. Downloading to {}.".format(file_path))
 
     if not os.path.exists(local_model_store_dir_path):
         os.makedirs(local_model_store_dir_path)
 
-    zip_file_path = file_path + '.zip'
+    zip_file_path = file_path + ".zip"
     _download(
-        url='{repo_url}/releases/download/{repo_release_tag}/{file_name}.zip'.format(
+        url="{repo_url}/releases/download/{repo_release_tag}/{file_name}.zip".format(
             repo_url=imgclsmob_repo_url,
             repo_release_tag=repo_release_tag,
             file_name=file_name),
@@ -463,7 +463,7 @@ def get_model_file(model_name,
     if _check_sha1(file_path, sha1_hash):
         return file_path
     else:
-        raise ValueError('Downloaded file has different hash. Please try again.')
+        raise ValueError("Downloaded file has different hash. Please try again.")
 
 
 def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify_ssl=True):
@@ -501,10 +501,10 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
         requests = requests_failed_to_import
 
     if path is None:
-        fname = url.split('/')[-1]
+        fname = url.split("/")[-1]
         # Empty filenames are invalid
-        assert fname, 'Can\'t construct file-name from this URL. ' \
-            'Please set the `path` option manually.'
+        assert fname, "Can't construct file-name from this URL. " \
+            "Please set the `path` option manually."
     else:
         path = os.path.expanduser(path)
         if os.path.isdir(path):
@@ -515,8 +515,8 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
 
     if not verify_ssl:
         warnings.warn(
-            'Unverified HTTPS request is being made (verify_ssl=False). '
-            'Adding certificate verification is strongly advised.')
+            "Unverified HTTPS request is being made (verify_ssl=False). "
+            "Adding certificate verification is strongly advised.")
 
     if overwrite or not os.path.exists(fname) or (sha1_hash and not _check_sha1(fname, sha1_hash)):
         dirname = os.path.dirname(os.path.abspath(os.path.expanduser(fname)))
@@ -526,19 +526,19 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
             # Disable pyling too broad Exception
             # pylint: disable=W0703
             try:
-                print('Downloading {} from {}...'.format(fname, url))
+                print("Downloading {} from {}...".format(fname, url))
                 r = requests.get(url, stream=True, verify=verify_ssl)
                 if r.status_code != 200:
                     raise RuntimeError("Failed downloading url {}".format(url))
-                with open(fname, 'wb') as f:
+                with open(fname, "wb") as f:
                     for chunk in r.iter_content(chunk_size=1024):
                         if chunk:  # filter out keep-alive new chunks
                             f.write(chunk)
                 if sha1_hash and not _check_sha1(fname, sha1_hash):
-                    raise UserWarning('File {} is downloaded but the content hash does not match.'
-                                      ' The repo may be outdated or download may be incomplete. '
-                                      'If the "repo_url" is overridden, consider switching to '
-                                      'the default repo.'.format(fname))
+                    raise UserWarning("File {} is downloaded but the content hash does not match."
+                                      " The repo may be outdated or download may be incomplete. "
+                                      "If the `repo_url` is overridden, consider switching to "
+                                      "the default repo.".format(fname))
                 break
             except Exception as e:
                 retries -= 1
@@ -546,7 +546,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
                     raise e
                 else:
                     print("download failed, retrying, {} attempt{} left"
-                          .format(retries, 's' if retries > 1 else ''))
+                          .format(retries, "s" if retries > 1 else ""))
 
     return fname
 
@@ -568,7 +568,7 @@ def _check_sha1(file_name, sha1_hash):
         Whether the file content matches the expected hash.
     """
     sha1 = hashlib.sha1()
-    with open(file_name, 'rb') as f:
+    with open(file_name, "rb") as f:
         while True:
             data = f.read(1048576)
             if not data:
@@ -606,7 +606,7 @@ def load_model(net,
 
 def download_model(net,
                    model_name,
-                   local_model_store_dir_path=os.path.join('~', '.torch', 'models'),
+                   local_model_store_dir_path=os.path.join("~", ".torch", "models"),
                    ignore_extra=True):
     """
     Load model state dictionary from a file with downloading it if necessary.

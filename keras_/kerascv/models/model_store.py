@@ -164,7 +164,7 @@ def get_model_name_suffix_data(model_name):
 
 
 def get_model_file(model_name,
-                   local_model_store_dir_path=os.path.join('~', '.keras', 'models')):
+                   local_model_store_dir_path=os.path.join("~", ".keras", "models")):
     """
     Return location for the pretrained on local file system. This function will download from online model zoo when
     model cannot be found or has mismatch. The root directory will be created if it doesn't exist.
@@ -252,9 +252,9 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
         requests = requests_failed_to_import
 
     if path is None:
-        fname = url.split('/')[-1]
+        fname = url.split("/")[-1]
         # Empty filenames are invalid
-        assert fname, "Can\'t construct file-name from this URL. Please set the `path` option manually."
+        assert fname, "Can't construct file-name from this URL. Please set the `path` option manually."
     else:
         path = os.path.expanduser(path)
         if os.path.isdir(path):
@@ -295,7 +295,7 @@ def _download(url, path=None, overwrite=False, sha1_hash=None, retries=5, verify
                     raise e
                 else:
                     print("download failed, retrying, {} attempt{} left"
-                          .format(retries, 's' if retries > 1 else ''))
+                          .format(retries, "s" if retries > 1 else ""))
 
     return fname
 
@@ -316,7 +316,7 @@ def _check_sha1(filename, sha1_hash):
         Whether the file content matches the expected hash.
     """
     sha1 = hashlib.sha1()
-    with open(filename, 'rb') as f:
+    with open(filename, "rb") as f:
         while True:
             data = f.read(1048576)
             if not data:
@@ -372,24 +372,24 @@ def _load_weights_from_hdf5_group(f,
         if weights:
             filtered_layers.append(layer)
 
-    layer_names = load_attributes_from_hdf5_group(f, 'layer_names')
+    layer_names = load_attributes_from_hdf5_group(f, "layer_names")
     filtered_layer_names = []
     for name in layer_names:
         g = f[name]
-        weight_names = load_attributes_from_hdf5_group(g, 'weight_names')
+        weight_names = load_attributes_from_hdf5_group(g, "weight_names")
         if weight_names:
             filtered_layer_names.append(name)
     layer_names = filtered_layer_names
     if len(layer_names) != len(filtered_layers):
-        raise ValueError('You are trying to load a weight file '
-                         'containing ' + str(len(layer_names)) +
-                         ' layers into a model with ' +
-                         str(len(filtered_layers)) + ' layers.')
+        raise ValueError("You are trying to load a weight file "
+                         "containing " + str(len(layer_names)) +
+                         " layers into a model with " +
+                         str(len(filtered_layers)) + " layers.")
 
     weight_value_tuples = []
     for k, name in enumerate(layer_names):
         g = f[name]
-        weight_names = load_attributes_from_hdf5_group(g, 'weight_names')
+        weight_names = load_attributes_from_hdf5_group(g, "weight_names")
         weight_values = [np.asarray(g[weight_name]) for weight_name in weight_names]
         layer = filtered_layers[k]
         symbolic_weights = layer.weights
@@ -397,16 +397,16 @@ def _load_weights_from_hdf5_group(f,
             layer=layer,
             weights=weight_values)
         if len(weight_values) != len(symbolic_weights):
-            raise ValueError('Layer #' + str(k) +
-                             ' (named "' + layer.name +
-                             '" in the current model) was found to '
-                             'correspond to layer ' + name +
-                             ' in the save file. '
-                             'However the new layer ' + layer.name +
-                             ' expects ' + str(len(symbolic_weights)) +
-                             ' weights, but the saved weights have ' +
+            raise ValueError("Layer #" + str(k) +
+                             " (named `" + layer.name +
+                             "` in the current model) was found to "
+                             "correspond to layer " + name +
+                             " in the save file. "
+                             "However the new layer " + layer.name +
+                             " expects " + str(len(symbolic_weights)) +
+                             " weights, but the saved weights have " +
                              str(len(weight_values)) +
-                             ' elements.')
+                             " elements.")
         weight_value_tuples += zip(symbolic_weights, weight_values)
     K.batch_set_value(weight_value_tuples)
 
@@ -424,7 +424,7 @@ def _load_weights_from_hdf5_group_by_name(f,
         List of target layers.
     """
     # New file format.
-    layer_names = load_attributes_from_hdf5_group(f, 'layer_names')
+    layer_names = load_attributes_from_hdf5_group(f, "layer_names")
 
     # Reverse index of layer name to list of layers with name.
     index = {}
@@ -435,7 +435,7 @@ def _load_weights_from_hdf5_group_by_name(f,
     weight_value_tuples = []
     for k, name in enumerate(layer_names):
         g = f[name]
-        weight_names = load_attributes_from_hdf5_group(g, 'weight_names')
+        weight_names = load_attributes_from_hdf5_group(g, "weight_names")
         weight_values = [np.asarray(g[weight_name]) for weight_name in weight_names]
 
         for layer in index.get(name, []):
@@ -444,15 +444,15 @@ def _load_weights_from_hdf5_group_by_name(f,
                 layer=layer,
                 weights=weight_values)
             if len(weight_values) != len(symbolic_weights):
-                warnings.warn('Skipping loading of weights for layer {} due to mismatch in number of weights ({} vs'
-                              ' {}).'.format(layer, len(symbolic_weights), len(weight_values)))
+                warnings.warn("Skipping loading of weights for layer {} due to mismatch in number of weights ({} vs"
+                              " {}).".format(layer, len(symbolic_weights), len(weight_values)))
                 continue
             # Set values.
             for i in range(len(weight_values)):
                 symbolic_shape = K.int_shape(symbolic_weights[i])
                 if symbolic_shape != weight_values[i].shape:
-                    warnings.warn('Skipping loading of weights for layer {} due to mismatch in shape ({} vs'
-                                  ' {}).'.format(layer, symbolic_weights[i].shape, weight_values[i].shape))
+                    warnings.warn("Skipping loading of weights for layer {} due to mismatch in shape ({} vs"
+                                  " {}).".format(layer, symbolic_weights[i].shape, weight_values[i].shape))
                     continue
                 else:
                     weight_value_tuples.append((symbolic_weights[i],
@@ -498,7 +498,7 @@ def load_model(net,
 
 def download_model(net,
                    model_name,
-                   local_model_store_dir_path=os.path.join('~', '.keras', 'models')):
+                   local_model_store_dir_path=os.path.join("~", ".keras", "models")):
     """
     Load model state dictionary from a file with downloading it if necessary.
 

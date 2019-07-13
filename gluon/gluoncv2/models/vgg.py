@@ -128,7 +128,7 @@ class VGGDense(HybridBlock):
         with self.name_scope():
             self.fc = nn.Dense(
                 units=out_channels,
-                weight_initializer="normal",
+                # weight_initializer="normal",
                 in_units=in_channels)
             self.activ = nn.Activation("relu")
             self.dropout = nn.Dropout(rate=0.5)
@@ -167,7 +167,7 @@ class VGGOutputBlock(HybridBlock):
                 out_channels=mid_channels)
             self.fc3 = nn.Dense(
                 units=classes,
-                weight_initializer="normal",
+                # weight_initializer="normal",
                 in_units=mid_channels)
 
     def hybrid_forward(self, F, x):

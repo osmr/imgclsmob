@@ -3,12 +3,11 @@ import time
 import logging
 import argparse
 import numpy as np
-import mxnet as mx
-from mxnet.gluon.utils import split_and_load
+import torch
 from common.logger_utils import initialize_logging
-from gluon.utils import prepare_mx_context, prepare_model
-from gluon.dataset_utils import get_dataset_metainfo
-from gluon.dataset_utils import get_val_data_source
+from pytorch.utils import prepare_pt_context, prepare_model
+from pytorch.dataset_utils import get_dataset_metainfo
+from pytorch.dataset_utils import get_val_data_source
 
 
 def add_eval_parser_arguments(parser):
@@ -100,7 +99,7 @@ def add_eval_parser_arguments(parser):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Evaluate a model for image matching (Gluon/HPatches)",
+        description="Evaluate a model for image matching (PyTorch/HPatches)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",
@@ -125,117 +124,107 @@ def parse_args():
     return args
 
 
-def warp_keypoints(keypoints, H):
-    num_points = keypoints.shape[0]
-    homogeneous_points = np.concatenate([keypoints, np.ones((num_points, 1))], axis=1)
-    warped_points = np.dot(homogeneous_points, np.transpose(H)).squeeze(axis=2)
-    return warped_points[:, :2] / warped_points[:, 2:]
+def warp_keypoints(src_pts, homography):
+    src_hmg_pts = np.concatenate([src_pts, np.ones((src_pts.shape[0], 1))], axis=1)
+    dst_hmg_pts = np.dot(src_hmg_pts, np.transpose(homography)).squeeze(axis=2)
+    dst_pts = dst_hmg_pts[:, :2] / dst_hmg_pts[:, 2:]
+    return dst_pts
 
 
-def keep_true_keypoints(points, H, shape):
-    warped_points = warp_keypoints(points[:, [1, 0]], H)
-    warped_points[:, [0, 1]] = warped_points[:, [1, 0]]
-    mask = (warped_points[:, 0] >= 0) & (warped_points[:, 0] < shape[0]) &\
-           (warped_points[:, 1] >= 0) & (warped_points[:, 1] < shape[1])
-    return points[mask, :]
+def calc_filter_mask(pts, shape):
+    mask = (pts[:, 0] >= 0) & (pts[:, 0] < shape[0]) & (pts[:, 1] >= 0) & (pts[:, 1] < shape[1])
+    return mask
 
 
-def filter_keypoints(points, shape):
-    mask = (points[:, 0] >= 0) & (points[:, 0] < shape[0]) &\
-           (points[:, 1] >= 0) & (points[:, 1] < shape[1])
-    return points[mask, :]
-
-
-def select_k_best(conf_pts,
+def select_k_best(pts,
+                  confs,
                   max_count=300):
-    sorted_pts = conf_pts[conf_pts[:, 2].argsort(), :2]
-    start = min(max_count, conf_pts.shape[0])
-    return sorted_pts[-start:, :]
+    inds = confs.argsort()[::-1][:max_count]
+    return pts[inds, :], confs[inds]
 
 
 def calc_repeatability_np(src_pts,
                           src_confs,
-                          dst_conf_pts,
+                          dst_pts,
+                          dst_confs,
                           homography,
                           src_shape,
-                          dst_shape):
-    distance_thresh = 3
+                          dst_shape,
+                          distance_thresh=3):
 
-    filtered_warped_keypoints = keep_true_keypoints(dst_conf_pts, np.linalg.inv(homography), src_shape)
+    pred_src_pts = warp_keypoints(dst_pts, np.linalg.inv(homography))
+    pred_src_mask = calc_filter_mask(pred_src_pts, src_shape)
+    label_dst_pts, label_dst_confs = dst_pts[pred_src_mask, :], dst_confs[pred_src_mask]
 
-    true_warped_keypoints = warp_keypoints(src_pts[:, [1, 0]], homography)
-    true_warped_keypoints = np.stack([true_warped_keypoints[:, 1], true_warped_keypoints[:, 0], src_confs], axis=-1)
-    true_warped_keypoints = filter_keypoints(true_warped_keypoints, dst_shape)
+    pred_dst_pts = warp_keypoints(src_pts, homography)
+    pred_dst_mask = calc_filter_mask(pred_dst_pts, dst_shape)
+    pred_dst_pts, pred_dst_confs = pred_dst_pts[pred_dst_mask, :], src_confs[pred_dst_mask]
 
-    filtered_warped_keypoints = select_k_best(filtered_warped_keypoints)
-    true_warped_keypoints = select_k_best(true_warped_keypoints)
+    label_dst_pts, label_dst_confs = select_k_best(label_dst_pts, label_dst_confs)
+    pred_dst_pts, pred_dst_confs = select_k_best(pred_dst_pts, pred_dst_confs)
 
-    n1 = true_warped_keypoints.shape[0]
-    n2 = filtered_warped_keypoints.shape[0]
-    true_warped_keypoints = np.expand_dims(true_warped_keypoints, 1)
-    filtered_warped_keypoints = np.expand_dims(filtered_warped_keypoints, 0)
-    norm = np.linalg.norm(true_warped_keypoints - filtered_warped_keypoints, ord=None, axis=2)
+    n_pred = pred_dst_pts.shape[0]
+    n_label = label_dst_pts.shape[0]
+
+    label_dst_pts = np.stack([label_dst_pts[:, 0], label_dst_pts[:, 1], label_dst_confs], axis=1)
+    pred_dst_pts = np.stack([pred_dst_pts[:, 0], pred_dst_pts[:, 1], pred_dst_confs], axis=1)
+
+    pred_dst_pts = np.expand_dims(pred_dst_pts, 1)
+    label_dst_pts = np.expand_dims(label_dst_pts, 0)
+    norm = np.linalg.norm(pred_dst_pts - label_dst_pts, ord=None, axis=2)
+
     count1 = 0
     count2 = 0
-    if n2 != 0:
+    if n_label != 0:
         min1 = np.min(norm, axis=1)
         count1 = np.sum(min1 <= distance_thresh)
-    if n1 != 0:
+    if n_pred != 0:
         min2 = np.min(norm, axis=0)
         count2 = np.sum(min2 <= distance_thresh)
-    if n1 + n2 > 0:
-        repeatability = (count1 + count2) / (n1 + n2)
+    if n_pred + n_label > 0:
+        repeatability = (count1 + count2) / (n_pred + n_label)
     else:
         repeatability = 0
 
-    return n1, n2, repeatability
-
-
-def batch_fn(batch, ctx):
-    data_src = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-    data_dst = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-    label = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
-    return data_src, data_dst, label
+    return n_pred, n_label, repeatability
 
 
 def calc_detector_repeatability(test_data,
                                 net,
-                                ctx):
+                                use_cuda):
     tic = time.time()
     repeatabilities = []
     n1s = []
     n2s = []
-    for batch in test_data:
-        data_src_list, data_dst_list, labels_list = batch_fn(batch, ctx)
-        outputs_src_list = [net(X) for X in data_src_list]
-        outputs_dst_list = [net(X) for X in data_dst_list]
-        for i in range(len(data_src_list)):
-            homography = labels_list[i].asnumpy()
+    with torch.no_grad():
+        for data_src, data_dst, target in test_data:
+            if use_cuda:
+                data_src = data_src.cuda(non_blocking=True)
+                data_dst = data_dst.cuda(non_blocking=True)
+            src_pts, src_confs, src_desc_map = net(data_src)
+            dst_pts, dst_confs, dst_desc_map = net(data_dst)
+            src_shape = data_src.cpu().detach().numpy().shape[2:]
+            dst_shape = data_dst.cpu().detach().numpy().shape[2:]
+            for i in range(len(src_pts)):
+                homography = target.cpu().detach().numpy()
 
-            data_src_i = data_src_list[i]
-            data_dst_i = data_dst_list[i]
+                src_pts_np = src_pts[i].cpu().detach().numpy()
+                src_confs_np = src_confs[i].cpu().detach().numpy()
 
-            src_shape = data_src_i.shape[2:]
-            dst_shape = data_dst_i.shape[2:]
+                dst_pts_np = dst_pts[i].cpu().detach().numpy()
+                dst_confs_np = dst_confs[i].cpu().detach().numpy()
 
-            src_pts, src_confs, src_desc_map = outputs_src_list[i]
-            dst_pts, dst_confs, dst_desc_map = outputs_dst_list[i]
-
-            # src_conf_pts = mx.nd.concat(src_pts[0], src_confs[0].reshape(shape=(-1, 1)), dim=1).asnumpy()
-            src_pts_np = src_pts[0].asnumpy()
-            src_confs_np = src_confs[0].asnumpy()
-            dst_conf_pts = mx.nd.concat(dst_pts[0], dst_confs[0].reshape(shape=(-1, 1)), dim=1).asnumpy()
-
-            n1, n2, repeatability = calc_repeatability_np(
-                src_pts_np,
-                src_confs_np,
-                dst_conf_pts,
-                homography,
-                src_shape,
-                dst_shape)
-            n1s.append(n1)
-            n2s.append(n2)
-            repeatabilities.append(repeatability)
+                n1, n2, repeatability = calc_repeatability_np(
+                    src_pts_np,
+                    src_confs_np,
+                    dst_pts_np,
+                    dst_confs_np,
+                    homography,
+                    src_shape,
+                    dst_shape)
+                n1s.append(n1)
+                n2s.append(n2)
+                repeatabilities.append(repeatability)
 
     logging.info("Average number of points in the first image: {}".format(np.mean(n1s)))
     logging.info("Average number of points in the second image: {}".format(np.mean(n2s)))
@@ -259,7 +248,7 @@ def main():
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)
 
-    ctx, batch_size = prepare_mx_context(
+    use_cuda, batch_size = prepare_pt_context(
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
@@ -267,13 +256,12 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        dtype=args.dtype,
+        use_cuda=use_cuda,
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
         load_ignore_extra=False,
-        classes=args.num_classes,
+        num_classes=args.num_classes,
         in_channels=args.in_channels,
-        do_hybridize=False,
-        ctx=ctx)
+        remove_module=False)
 
     test_data = get_val_data_source(
         ds_metainfo=ds_metainfo,
@@ -283,7 +271,7 @@ def main():
     calc_detector_repeatability(
         test_data=test_data,
         net=net,
-        ctx=ctx)
+        use_cuda=use_cuda)
 
 
 if __name__ == "__main__":

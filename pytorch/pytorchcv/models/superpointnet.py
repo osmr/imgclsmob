@@ -182,7 +182,7 @@ class SPDescriptor(nn.Module):
             pts[:, 0] = pts[:, 0] / (0.5 * x_height * self.reduction) - 1.0
             pts[:, 1] = pts[:, 1] / (0.5 * x_width * self.reduction) - 1.0
             if self.transpose_descriptors:
-                pts = torch.index_select(pts, dim=1, index=torch.LongTensor([1, 0]))
+                pts = torch.index_select(pts, dim=1, index=torch.tensor([1, 0], device=pts.device))
             pts = pts.unsqueeze(0).unsqueeze(0)
             descriptors = F.grid_sample(coarse_desc_map[i:(i + 1)], pts)
             descriptors = descriptors.squeeze(0).squeeze(1)

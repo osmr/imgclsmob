@@ -13,6 +13,7 @@ from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import COCOMetaInfo
+from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
 from torch.utils.data import DataLoader
 
 
@@ -27,6 +28,7 @@ def get_dataset_metainfo(dataset_name):
         "ADE20K": ADE20KMetaInfo,
         "Cityscapes": CityscapesMetaInfo,
         "COCO": COCOMetaInfo,
+        "HPatches": HPatchesMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -38,10 +40,12 @@ def get_train_data_source(ds_metainfo,
                           batch_size,
                           num_workers):
     transform_train = ds_metainfo.train_transform(ds_metainfo=ds_metainfo)
+    kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="train",
-        transform=transform_train)
+        transform=transform_train,
+        **kwargs)
     return DataLoader(
         dataset=dataset,
         batch_size=batch_size,
@@ -54,10 +58,12 @@ def get_val_data_source(ds_metainfo,
                         batch_size,
                         num_workers):
     transform_val = ds_metainfo.val_transform(ds_metainfo=ds_metainfo)
+    kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="val",
-        transform=transform_val)
+        transform=transform_val,
+        **kwargs)
     return DataLoader(
         dataset=dataset,
         batch_size=batch_size,
@@ -70,10 +76,12 @@ def get_test_data_source(ds_metainfo,
                          batch_size,
                          num_workers):
     transform_test = ds_metainfo.test_transform(ds_metainfo=ds_metainfo)
+    kwargs = ds_metainfo.dataset_class_extra_kwargs if ds_metainfo.dataset_class_extra_kwargs is not None else {}
     dataset = ds_metainfo.dataset_class(
         root=ds_metainfo.root_dir_path,
         mode="test",
-        transform=transform_test)
+        transform=transform_test,
+        **kwargs)
     return DataLoader(
         dataset=dataset,
         batch_size=batch_size,

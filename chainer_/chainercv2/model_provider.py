@@ -535,6 +535,12 @@ _models = {
     'resnext29_16x64d_cifar10': resnext29_16x64d_cifar10,
     'resnext29_16x64d_cifar100': resnext29_16x64d_cifar100,
     'resnext29_16x64d_svhn': resnext29_16x64d_svhn,
+    'resnext272_1x64d_cifar10': resnext272_1x64d_cifar10,
+    'resnext272_1x64d_cifar100': resnext272_1x64d_cifar100,
+    'resnext272_1x64d_svhn': resnext272_1x64d_svhn,
+    'resnext272_2x32d_cifar10': resnext272_2x32d_cifar10,
+    'resnext272_2x32d_cifar100': resnext272_2x32d_cifar100,
+    'resnext272_2x32d_svhn': resnext272_2x32d_svhn,
 
     'seresnet20_cifar10': seresnet20_cifar10,
     'seresnet20_cifar100': seresnet20_cifar100,

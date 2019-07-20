@@ -1,27 +1,27 @@
 """
-    PreResNet for CIFAR/SVHN, implemented in Gluon.
-    Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    SE-PreResNet for CIFAR/SVHN, implemented in Gluon.
+    Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['CIFARPreResNet', 'preresnet20_cifar10', 'preresnet20_cifar100', 'preresnet20_svhn',
-           'preresnet56_cifar10', 'preresnet56_cifar100', 'preresnet56_svhn',
-           'preresnet110_cifar10', 'preresnet110_cifar100', 'preresnet110_svhn',
-           'preresnet164bn_cifar10', 'preresnet164bn_cifar100', 'preresnet164bn_svhn',
-           'preresnet272bn_cifar10', 'preresnet272bn_cifar100', 'preresnet272bn_svhn',
-           'preresnet542bn_cifar10', 'preresnet542bn_cifar100', 'preresnet542bn_svhn',
-           'preresnet1001_cifar10', 'preresnet1001_cifar100', 'preresnet1001_svhn',
-           'preresnet1202_cifar10', 'preresnet1202_cifar100', 'preresnet1202_svhn']
+__all__ = ['CIFARSEPreResNet', 'sepreresnet20_cifar10', 'sepreresnet20_cifar100', 'sepreresnet20_svhn',
+           'sepreresnet56_cifar10', 'sepreresnet56_cifar100', 'sepreresnet56_svhn',
+           'sepreresnet110_cifar10', 'sepreresnet110_cifar100', 'sepreresnet110_svhn',
+           'sepreresnet164bn_cifar10', 'sepreresnet164bn_cifar100', 'sepreresnet164bn_svhn',
+           'sepreresnet272bn_cifar10', 'sepreresnet272bn_cifar100', 'sepreresnet272bn_svhn',
+           'sepreresnet542bn_cifar10', 'sepreresnet542bn_cifar100', 'sepreresnet542bn_svhn',
+           'sepreresnet1001_cifar10', 'sepreresnet1001_cifar100', 'sepreresnet1001_svhn',
+           'sepreresnet1202_cifar10', 'sepreresnet1202_cifar100', 'sepreresnet1202_svhn']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv3x3
-from .preresnet import PreResUnit, PreResActivation
+from .common import conv3x3_block
+from .sepreresnet import SEPreResUnit
 
 
-class CIFARPreResNet(HybridBlock):
+class CIFARSEPreResNet(HybridBlock):
     """
-    PreResNet model for CIFAR from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
+    SE-PreResNet model for CIFAR from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -50,22 +50,23 @@ class CIFARPreResNet(HybridBlock):
                  in_size=(32, 32),
                  classes=10,
                  **kwargs):
-        super(CIFARPreResNet, self).__init__(**kwargs)
+        super(CIFARSEPreResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            self.features.add(conv3x3(
+            self.features.add(conv3x3_block(
                 in_channels=in_channels,
-                out_channels=init_block_channels))
+                out_channels=init_block_channels,
+                bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(PreResUnit(
+                        stage.add(SEPreResUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
@@ -74,9 +75,6 @@ class CIFARPreResNet(HybridBlock):
                             conv1_stride=False))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(PreResActivation(
-                in_channels=in_channels,
-                bn_use_global_stats=bn_use_global_stats))
             self.features.add(nn.AvgPool2D(
                 pool_size=8,
                 strides=1))
@@ -93,16 +91,16 @@ class CIFARPreResNet(HybridBlock):
         return x
 
 
-def get_preresnet_cifar(classes,
-                        blocks,
-                        bottleneck,
-                        model_name=None,
-                        pretrained=False,
-                        ctx=cpu(),
-                        root=os.path.join("~", ".mxnet", "models"),
-                        **kwargs):
+def get_sepreresnet_cifar(classes,
+                          blocks,
+                          bottleneck,
+                          model_name=None,
+                          pretrained=False,
+                          ctx=cpu(),
+                          root=os.path.join("~", ".mxnet", "models"),
+                          **kwargs):
     """
-    Create PreResNet model for CIFAR with specific parameters.
+    Create SE-PreResNet model for CIFAR with specific parameters.
 
     Parameters:
     ----------
@@ -138,7 +136,7 @@ def get_preresnet_cifar(classes,
     if bottleneck:
         channels = [[cij * 4 for cij in ci] for ci in channels]
 
-    net = CIFARPreResNet(
+    net = CIFARSEPreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -158,10 +156,9 @@ def get_preresnet_cifar(classes,
     return net
 
 
-def preresnet20_cifar10(classes=10, **kwargs):
+def sepreresnet20_cifar10(classes=10, **kwargs):
     """
-    PreResNet-20 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-20 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -174,13 +171,13 @@ def preresnet20_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="preresnet20_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_cifar10",
+                                 **kwargs)
 
 
-def preresnet20_cifar100(classes=100, **kwargs):
+def sepreresnet20_cifar100(classes=100, **kwargs):
     """
-    PreResNet-20 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-20 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -193,14 +190,13 @@ def preresnet20_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="preresnet20_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_cifar100",
+                                 **kwargs)
 
 
-def preresnet20_svhn(classes=10, **kwargs):
+def sepreresnet20_svhn(classes=10, **kwargs):
     """
-    PreResNet-20 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-20 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -213,13 +209,13 @@ def preresnet20_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="preresnet20_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_svhn",
+                                 **kwargs)
 
 
-def preresnet56_cifar10(classes=10, **kwargs):
+def sepreresnet56_cifar10(classes=10, **kwargs):
     """
-    PreResNet-56 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-56 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -232,13 +228,13 @@ def preresnet56_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="preresnet56_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_cifar10",
+                                 **kwargs)
 
 
-def preresnet56_cifar100(classes=100, **kwargs):
+def sepreresnet56_cifar100(classes=100, **kwargs):
     """
-    PreResNet-56 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-56 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -251,14 +247,13 @@ def preresnet56_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="preresnet56_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_cifar100",
+                                 **kwargs)
 
 
-def preresnet56_svhn(classes=10, **kwargs):
+def sepreresnet56_svhn(classes=10, **kwargs):
     """
-    PreResNet-56 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-56 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -271,13 +266,13 @@ def preresnet56_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="preresnet56_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_svhn",
+                                 **kwargs)
 
 
-def preresnet110_cifar10(classes=10, **kwargs):
+def sepreresnet110_cifar10(classes=10, **kwargs):
     """
-    PreResNet-110 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-110 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -290,14 +285,13 @@ def preresnet110_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="preresnet110_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_cifar10",
+                                 **kwargs)
 
 
-def preresnet110_cifar100(classes=100, **kwargs):
+def sepreresnet110_cifar100(classes=100, **kwargs):
     """
-    PreResNet-110 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-110 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -310,14 +304,13 @@ def preresnet110_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="preresnet110_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_cifar100",
+                                 **kwargs)
 
 
-def preresnet110_svhn(classes=10, **kwargs):
+def sepreresnet110_svhn(classes=10, **kwargs):
     """
-    PreResNet-110 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-110 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -330,14 +323,13 @@ def preresnet110_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="preresnet110_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_svhn",
+                                 **kwargs)
 
 
-def preresnet164bn_cifar10(classes=10, **kwargs):
+def sepreresnet164bn_cifar10(classes=10, **kwargs):
     """
-    PreResNet-164(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-164(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -350,14 +342,13 @@ def preresnet164bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="preresnet164bn_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_cifar10",
+                                 **kwargs)
 
 
-def preresnet164bn_cifar100(classes=100, **kwargs):
+def sepreresnet164bn_cifar100(classes=100, **kwargs):
     """
-    PreResNet-164(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-164(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -370,14 +361,13 @@ def preresnet164bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="preresnet164bn_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_cifar100",
+                                 **kwargs)
 
 
-def preresnet164bn_svhn(classes=10, **kwargs):
+def sepreresnet164bn_svhn(classes=10, **kwargs):
     """
-    PreResNet-164(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-164(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -390,14 +380,13 @@ def preresnet164bn_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="preresnet164bn_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_svhn",
+                                 **kwargs)
 
 
-def preresnet272bn_cifar10(classes=10, **kwargs):
+def sepreresnet272bn_cifar10(classes=10, **kwargs):
     """
-    PreResNet-272(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-272(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -410,14 +399,13 @@ def preresnet272bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="preresnet272bn_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_cifar10",
+                                 **kwargs)
 
 
-def preresnet272bn_cifar100(classes=100, **kwargs):
+def sepreresnet272bn_cifar100(classes=100, **kwargs):
     """
-    PreResNet-272(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-272(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -430,14 +418,13 @@ def preresnet272bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="preresnet272bn_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_cifar100",
+                                 **kwargs)
 
 
-def preresnet272bn_svhn(classes=10, **kwargs):
+def sepreresnet272bn_svhn(classes=10, **kwargs):
     """
-    PreResNet-272(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-272(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -450,14 +437,13 @@ def preresnet272bn_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="preresnet272bn_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_svhn",
+                                 **kwargs)
 
 
-def preresnet542bn_cifar10(classes=10, **kwargs):
+def sepreresnet542bn_cifar10(classes=10, **kwargs):
     """
-    PreResNet-542(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-542(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -470,14 +456,13 @@ def preresnet542bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="preresnet542bn_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_cifar10",
+                                 **kwargs)
 
 
-def preresnet542bn_cifar100(classes=100, **kwargs):
+def sepreresnet542bn_cifar100(classes=100, **kwargs):
     """
-    PreResNet-542(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-542(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -490,14 +475,13 @@ def preresnet542bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="preresnet542bn_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_cifar100",
+                                 **kwargs)
 
 
-def preresnet542bn_svhn(classes=10, **kwargs):
+def sepreresnet542bn_svhn(classes=10, **kwargs):
     """
-    PreResNet-542(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-542(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -510,14 +494,13 @@ def preresnet542bn_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="preresnet542bn_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_svhn",
+                                 **kwargs)
 
 
-def preresnet1001_cifar10(classes=10, **kwargs):
+def sepreresnet1001_cifar10(classes=10, **kwargs):
     """
-    PreResNet-1001 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1001 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -530,14 +513,13 @@ def preresnet1001_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="preresnet1001_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_cifar10",
+                                 **kwargs)
 
 
-def preresnet1001_cifar100(classes=100, **kwargs):
+def sepreresnet1001_cifar100(classes=100, **kwargs):
     """
-    PreResNet-1001 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1001 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -550,14 +532,13 @@ def preresnet1001_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="preresnet1001_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_cifar100",
+                                 **kwargs)
 
 
-def preresnet1001_svhn(classes=10, **kwargs):
+def sepreresnet1001_svhn(classes=10, **kwargs):
     """
-    PreResNet-1001 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1001 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -570,14 +551,13 @@ def preresnet1001_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="preresnet1001_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_svhn",
+                                 **kwargs)
 
 
-def preresnet1202_cifar10(classes=10, **kwargs):
+def sepreresnet1202_cifar10(classes=10, **kwargs):
     """
-    PreResNet-1202 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1202 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -590,14 +570,13 @@ def preresnet1202_cifar10(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="preresnet1202_cifar10",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_cifar10",
+                                 **kwargs)
 
 
-def preresnet1202_cifar100(classes=100, **kwargs):
+def sepreresnet1202_cifar100(classes=100, **kwargs):
     """
-    PreResNet-1202 model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1202 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -610,14 +589,13 @@ def preresnet1202_cifar100(classes=100, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="preresnet1202_cifar100",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_cifar100",
+                                 **kwargs)
 
 
-def preresnet1202_svhn(classes=10, **kwargs):
+def sepreresnet1202_svhn(classes=10, **kwargs):
     """
-    PreResNet-1202 model for SVHN from 'Identity Mappings in Deep Residual Networks,'
-    https://arxiv.org/abs/1603.05027.
+    SE-PreResNet-1202 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -630,8 +608,8 @@ def preresnet1202_svhn(classes=10, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_preresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="preresnet1202_svhn",
-                               **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_svhn",
+                                 **kwargs)
 
 
 def _test():
@@ -641,30 +619,30 @@ def _test():
     pretrained = False
 
     models = [
-        (preresnet20_cifar10, 10),
-        (preresnet20_cifar100, 100),
-        (preresnet20_svhn, 10),
-        (preresnet56_cifar10, 10),
-        (preresnet56_cifar100, 100),
-        (preresnet56_svhn, 10),
-        (preresnet110_cifar10, 10),
-        (preresnet110_cifar100, 100),
-        (preresnet110_svhn, 10),
-        (preresnet164bn_cifar10, 10),
-        (preresnet164bn_cifar100, 100),
-        (preresnet164bn_svhn, 10),
-        (preresnet272bn_cifar10, 10),
-        (preresnet272bn_cifar100, 100),
-        (preresnet272bn_svhn, 10),
-        (preresnet542bn_cifar10, 10),
-        (preresnet542bn_cifar100, 100),
-        (preresnet542bn_svhn, 10),
-        (preresnet1001_cifar10, 10),
-        (preresnet1001_cifar100, 100),
-        (preresnet1001_svhn, 10),
-        (preresnet1202_cifar10, 10),
-        (preresnet1202_cifar100, 100),
-        (preresnet1202_svhn, 10),
+        (sepreresnet20_cifar10, 10),
+        (sepreresnet20_cifar100, 100),
+        (sepreresnet20_svhn, 10),
+        (sepreresnet56_cifar10, 10),
+        (sepreresnet56_cifar100, 100),
+        (sepreresnet56_svhn, 10),
+        (sepreresnet110_cifar10, 10),
+        (sepreresnet110_cifar100, 100),
+        (sepreresnet110_svhn, 10),
+        (sepreresnet164bn_cifar10, 10),
+        (sepreresnet164bn_cifar100, 100),
+        (sepreresnet164bn_svhn, 10),
+        (sepreresnet272bn_cifar10, 10),
+        (sepreresnet272bn_cifar100, 100),
+        (sepreresnet272bn_svhn, 10),
+        (sepreresnet542bn_cifar10, 10),
+        (sepreresnet542bn_cifar100, 100),
+        (sepreresnet542bn_svhn, 10),
+        (sepreresnet1001_cifar10, 10),
+        (sepreresnet1001_cifar100, 100),
+        (sepreresnet1001_svhn, 10),
+        (sepreresnet1202_cifar10, 10),
+        (sepreresnet1202_cifar100, 100),
+        (sepreresnet1202_svhn, 10),
     ]
 
     for model, classes in models:
@@ -683,30 +661,30 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != preresnet20_cifar10 or weight_count == 272282)
-        assert (model != preresnet20_cifar100 or weight_count == 278132)
-        assert (model != preresnet20_svhn or weight_count == 272282)
-        assert (model != preresnet56_cifar10 or weight_count == 855578)
-        assert (model != preresnet56_cifar100 or weight_count == 861428)
-        assert (model != preresnet56_svhn or weight_count == 855578)
-        assert (model != preresnet110_cifar10 or weight_count == 1730522)
-        assert (model != preresnet110_cifar100 or weight_count == 1736372)
-        assert (model != preresnet110_svhn or weight_count == 1730522)
-        assert (model != preresnet164bn_cifar10 or weight_count == 1703258)
-        assert (model != preresnet164bn_cifar100 or weight_count == 1726388)
-        assert (model != preresnet164bn_svhn or weight_count == 1703258)
-        assert (model != preresnet272bn_cifar10 or weight_count == 2816090)
-        assert (model != preresnet272bn_cifar100 or weight_count == 2839220)
-        assert (model != preresnet272bn_svhn or weight_count == 2816090)
-        assert (model != preresnet542bn_cifar10 or weight_count == 5598170)
-        assert (model != preresnet542bn_cifar100 or weight_count == 5621300)
-        assert (model != preresnet542bn_svhn or weight_count == 5598170)
-        assert (model != preresnet1001_cifar10 or weight_count == 10327706)
-        assert (model != preresnet1001_cifar100 or weight_count == 10350836)
-        assert (model != preresnet1001_svhn or weight_count == 10327706)
-        assert (model != preresnet1202_cifar10 or weight_count == 19423834)
-        assert (model != preresnet1202_cifar100 or weight_count == 19429684)
-        assert (model != preresnet1202_svhn or weight_count == 19423834)
+        assert (model != sepreresnet20_cifar10 or weight_count == 274559)
+        assert (model != sepreresnet20_cifar100 or weight_count == 280409)
+        assert (model != sepreresnet20_svhn or weight_count == 274559)
+        assert (model != sepreresnet56_cifar10 or weight_count == 862601)
+        assert (model != sepreresnet56_cifar100 or weight_count == 868451)
+        assert (model != sepreresnet56_svhn or weight_count == 862601)
+        assert (model != sepreresnet110_cifar10 or weight_count == 1744664)
+        assert (model != sepreresnet110_cifar100 or weight_count == 1750514)
+        assert (model != sepreresnet110_svhn or weight_count == 1744664)
+        assert (model != sepreresnet164bn_cifar10 or weight_count == 1904882)
+        assert (model != sepreresnet164bn_cifar100 or weight_count == 1928012)
+        assert (model != sepreresnet164bn_svhn or weight_count == 1904882)
+        assert (model != sepreresnet272bn_cifar10 or weight_count == 3152450)
+        assert (model != sepreresnet272bn_cifar100 or weight_count == 3175580)
+        assert (model != sepreresnet272bn_svhn or weight_count == 3152450)
+        assert (model != sepreresnet542bn_cifar10 or weight_count == 6271370)
+        assert (model != sepreresnet542bn_cifar100 or weight_count == 6294500)
+        assert (model != sepreresnet542bn_svhn or weight_count == 6271370)
+        assert (model != sepreresnet1001_cifar10 or weight_count == 11573534)
+        assert (model != sepreresnet1001_cifar100 or weight_count == 11596664)
+        assert (model != sepreresnet1001_svhn or weight_count == 11573534)
+        assert (model != sepreresnet1202_cifar10 or weight_count == 19581938)
+        assert (model != sepreresnet1202_cifar100 or weight_count == 19587788)
+        assert (model != sepreresnet1202_svhn or weight_count == 19581938)
 
         x = mx.nd.zeros((1, 3, 32, 32), ctx=ctx)
         y = net(x)

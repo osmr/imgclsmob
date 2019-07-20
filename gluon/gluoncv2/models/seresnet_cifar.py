@@ -3,11 +3,14 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['CIFARSEResNet', 'seresnet20_cifar10', 'seresnet20_cifar100', 'seresnet20_svhn', 'seresnet56_cifar10',
-           'seresnet56_cifar100', 'seresnet56_svhn', 'seresnet110_cifar10', 'seresnet110_cifar100', 'seresnet110_svhn',
-           'seresnet164bn_cifar10', 'seresnet164bn_cifar100', 'seresnet164bn_svhn', 'seresnet1001_cifar10',
-           'seresnet1001_cifar100', 'seresnet1001_svhn', 'seresnet1202_cifar10', 'seresnet1202_cifar100',
-           'seresnet1202_svhn']
+__all__ = ['CIFARSEResNet', 'seresnet20_cifar10', 'seresnet20_cifar100', 'seresnet20_svhn',
+           'seresnet56_cifar10', 'seresnet56_cifar100', 'seresnet56_svhn',
+           'seresnet110_cifar10', 'seresnet110_cifar100', 'seresnet110_svhn',
+           'seresnet164bn_cifar10', 'seresnet164bn_cifar100', 'seresnet164bn_svhn',
+           'seresnet272bn_cifar10', 'seresnet272bn_cifar100', 'seresnet272bn_svhn',
+           'seresnet542bn_cifar10', 'seresnet542bn_cifar100', 'seresnet542bn_svhn',
+           'seresnet1001_cifar10', 'seresnet1001_cifar100', 'seresnet1001_svhn',
+           'seresnet1202_cifar10', 'seresnet1202_cifar100', 'seresnet1202_svhn']
 
 import os
 from mxnet import cpu
@@ -372,6 +375,118 @@ def seresnet164bn_svhn(classes=10, **kwargs):
     return get_seresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="seresnet164bn_svhn", **kwargs)
 
 
+def seresnet272bn_cifar10(classes=10, **kwargs):
+    """
+    SE-ResNet-272(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="seresnet272bn_cifar10",
+                              **kwargs)
+
+
+def seresnet272bn_cifar100(classes=100, **kwargs):
+    """
+    SE-ResNet-272(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="seresnet272bn_cifar100",
+                              **kwargs)
+
+
+def seresnet272bn_svhn(classes=10, **kwargs):
+    """
+    SE-ResNet-272(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="seresnet272bn_svhn", **kwargs)
+
+
+def seresnet542bn_cifar10(classes=10, **kwargs):
+    """
+    SE-ResNet-542(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="seresnet542bn_cifar10",
+                              **kwargs)
+
+
+def seresnet542bn_cifar100(classes=100, **kwargs):
+    """
+    SE-ResNet-542(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="seresnet542bn_cifar100",
+                              **kwargs)
+
+
+def seresnet542bn_svhn(classes=10, **kwargs):
+    """
+    SE-ResNet-542(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_seresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="seresnet542bn_svhn", **kwargs)
+
+
 def seresnet1001_cifar10(classes=10, **kwargs):
     """
     SE-ResNet-1001 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -503,6 +618,12 @@ def _test():
         (seresnet164bn_cifar10, 10),
         (seresnet164bn_cifar100, 100),
         (seresnet164bn_svhn, 10),
+        (seresnet272bn_cifar10, 10),
+        (seresnet272bn_cifar100, 100),
+        (seresnet272bn_svhn, 10),
+        (seresnet542bn_cifar10, 10),
+        (seresnet542bn_cifar100, 100),
+        (seresnet542bn_svhn, 10),
         (seresnet1001_cifar10, 10),
         (seresnet1001_cifar100, 100),
         (seresnet1001_svhn, 10),
@@ -539,6 +660,12 @@ def _test():
         assert (model != seresnet164bn_cifar10 or weight_count == 1906258)
         assert (model != seresnet164bn_cifar100 or weight_count == 1929388)
         assert (model != seresnet164bn_svhn or weight_count == 1906258)
+        assert (model != seresnet272bn_cifar10 or weight_count == 3153826)
+        assert (model != seresnet272bn_cifar100 or weight_count == 3176956)
+        assert (model != seresnet272bn_svhn or weight_count == 3153826)
+        assert (model != seresnet542bn_cifar10 or weight_count == 6272746)
+        assert (model != seresnet542bn_cifar100 or weight_count == 6295876)
+        assert (model != seresnet542bn_svhn or weight_count == 6272746)
         assert (model != seresnet1001_cifar10 or weight_count == 11574910)
         assert (model != seresnet1001_cifar100 or weight_count == 11598040)
         assert (model != seresnet1001_svhn or weight_count == 11574910)

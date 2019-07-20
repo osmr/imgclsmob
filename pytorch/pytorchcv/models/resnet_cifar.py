@@ -3,12 +3,14 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn', 'resnet56_cifar10',
-           'resnet56_cifar100', 'resnet56_svhn', 'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
-           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn', 'resnet272bn_cifar10',
-           'resnet272bn_cifar100', 'resnet272bn_svhn', 'resnet542bn_cifar10', 'resnet542bn_cifar100',
-           'resnet542bn_svhn', 'resnet1001_cifar10', 'resnet1001_cifar100', 'resnet1001_svhn', 'resnet1202_cifar10',
-           'resnet1202_cifar100', 'resnet1202_svhn']
+__all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn',
+           'resnet56_cifar10', 'resnet56_cifar100', 'resnet56_svhn',
+           'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
+           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn',
+           'resnet272bn_cifar10', 'resnet272bn_cifar100', 'resnet272bn_svhn',
+           'resnet542bn_cifar10', 'resnet542bn_cifar100', 'resnet542bn_svhn',
+           'resnet1001_cifar10', 'resnet1001_cifar100', 'resnet1001_svhn',
+           'resnet1202_cifar10', 'resnet1202_cifar100', 'resnet1202_svhn']
 
 import os
 import torch.nn as nn

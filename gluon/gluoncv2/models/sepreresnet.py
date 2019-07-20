@@ -6,7 +6,7 @@
 __all__ = ['SEPreResNet', 'sepreresnet10', 'sepreresnet12', 'sepreresnet14', 'sepreresnet16', 'sepreresnet18',
            'sepreresnet26', 'sepreresnetbc26b', 'sepreresnet34', 'sepreresnetbc38b', 'sepreresnet50', 'sepreresnet50b',
            'sepreresnet101', 'sepreresnet101b', 'sepreresnet152', 'sepreresnet152b', 'sepreresnet200',
-           'sepreresnet200b']
+           'sepreresnet200b', 'SEPreResUnit']
 
 import os
 from mxnet import cpu

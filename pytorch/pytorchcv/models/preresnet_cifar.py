@@ -3,11 +3,14 @@
     Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
-__all__ = ['CIFARPreResNet', 'preresnet20_cifar10', 'preresnet20_cifar100', 'preresnet20_svhn', 'preresnet56_cifar10',
-           'preresnet56_cifar100', 'preresnet56_svhn', 'preresnet110_cifar10', 'preresnet110_cifar100',
-           'preresnet110_svhn', 'preresnet164bn_cifar10', 'preresnet164bn_cifar100', 'preresnet164bn_svhn',
-           'preresnet1001_cifar10', 'preresnet1001_cifar100', 'preresnet1001_svhn', 'preresnet1202_cifar10',
-           'preresnet1202_cifar100', 'preresnet1202_svhn']
+__all__ = ['CIFARPreResNet', 'preresnet20_cifar10', 'preresnet20_cifar100', 'preresnet20_svhn',
+           'preresnet56_cifar10', 'preresnet56_cifar100', 'preresnet56_svhn',
+           'preresnet110_cifar10', 'preresnet110_cifar100', 'preresnet110_svhn',
+           'preresnet164bn_cifar10', 'preresnet164bn_cifar100', 'preresnet164bn_svhn',
+           'preresnet272bn_cifar10', 'preresnet272bn_cifar100', 'preresnet272bn_svhn',
+           'preresnet542bn_cifar10', 'preresnet542bn_cifar100', 'preresnet542bn_svhn',
+           'preresnet1001_cifar10', 'preresnet1001_cifar100', 'preresnet1001_svhn',
+           'preresnet1202_cifar10', 'preresnet1202_cifar100', 'preresnet1202_svhn']
 
 import os
 import torch.nn as nn
@@ -365,6 +368,114 @@ def preresnet164bn_svhn(num_classes=10, **kwargs):
                                model_name="preresnet164bn_svhn", **kwargs)
 
 
+def preresnet272bn_cifar10(num_classes=10, **kwargs):
+    """
+    PreResNet-272(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True,
+                               model_name="preresnet272bn_cifar10", **kwargs)
+
+
+def preresnet272bn_cifar100(num_classes=100, **kwargs):
+    """
+    PreResNet-272(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True,
+                               model_name="preresnet272bn_cifar100", **kwargs)
+
+
+def preresnet272bn_svhn(num_classes=10, **kwargs):
+    """
+    PreResNet-272(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=272, bottleneck=True,
+                               model_name="preresnet272bn_svhn", **kwargs)
+
+
+def preresnet542bn_cifar10(num_classes=10, **kwargs):
+    """
+    PreResNet-542(BN) model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True,
+                               model_name="preresnet542bn_cifar10", **kwargs)
+
+
+def preresnet542bn_cifar100(num_classes=100, **kwargs):
+    """
+    PreResNet-542(BN) model for CIFAR-100 from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 100
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True,
+                               model_name="preresnet542bn_cifar100", **kwargs)
+
+
+def preresnet542bn_svhn(num_classes=10, **kwargs):
+    """
+    PreResNet-542(BN) model for SVHN from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    num_classes : int, default 10
+        Number of classification classes.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet_cifar(num_classes=num_classes, blocks=542, bottleneck=True,
+                               model_name="preresnet542bn_svhn", **kwargs)
+
+
 def preresnet1001_cifar10(num_classes=10, **kwargs):
     """
     PreResNet-1001 model for CIFAR-10 from 'Identity Mappings in Deep Residual Networks,'
@@ -500,6 +611,12 @@ def _test():
         (preresnet164bn_cifar10, 10),
         (preresnet164bn_cifar100, 100),
         (preresnet164bn_svhn, 10),
+        (preresnet272bn_cifar10, 10),
+        (preresnet272bn_cifar100, 100),
+        (preresnet272bn_svhn, 10),
+        (preresnet542bn_cifar10, 10),
+        (preresnet542bn_cifar100, 100),
+        (preresnet542bn_svhn, 10),
         (preresnet1001_cifar10, 10),
         (preresnet1001_cifar100, 100),
         (preresnet1001_svhn, 10),
@@ -528,6 +645,12 @@ def _test():
         assert (model != preresnet164bn_cifar10 or weight_count == 1703258)
         assert (model != preresnet164bn_cifar100 or weight_count == 1726388)
         assert (model != preresnet164bn_svhn or weight_count == 1703258)
+        assert (model != preresnet272bn_cifar10 or weight_count == 2816090)
+        assert (model != preresnet272bn_cifar100 or weight_count == 2839220)
+        assert (model != preresnet272bn_svhn or weight_count == 2816090)
+        assert (model != preresnet542bn_cifar10 or weight_count == 5598170)
+        assert (model != preresnet542bn_cifar100 or weight_count == 5621300)
+        assert (model != preresnet542bn_svhn or weight_count == 5598170)
         assert (model != preresnet1001_cifar10 or weight_count == 10327706)
         assert (model != preresnet1001_cifar100 or weight_count == 10350836)
         assert (model != preresnet1001_svhn or weight_count == 10327706)

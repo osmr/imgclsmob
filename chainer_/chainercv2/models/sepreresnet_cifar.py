@@ -1,16 +1,16 @@
 """
-    ResNet for CIFAR/SVHN, implemented in Chainer.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet for CIFAR/SVHN, implemented in Chainer.
+    Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['CIFARResNet', 'resnet20_cifar10', 'resnet20_cifar100', 'resnet20_svhn',
-           'resnet56_cifar10', 'resnet56_cifar100', 'resnet56_svhn',
-           'resnet110_cifar10', 'resnet110_cifar100', 'resnet110_svhn',
-           'resnet164bn_cifar10', 'resnet164bn_cifar100', 'resnet164bn_svhn',
-           'resnet272bn_cifar10', 'resnet272bn_cifar100', 'resnet272bn_svhn',
-           'resnet542bn_cifar10', 'resnet542bn_cifar100', 'resnet542bn_svhn',
-           'resnet1001_cifar10', 'resnet1001_cifar100', 'resnet1001_svhn',
-           'resnet1202_cifar10', 'resnet1202_cifar100', 'resnet1202_svhn']
+__all__ = ['CIFARSEPreResNet', 'sepreresnet20_cifar10', 'sepreresnet20_cifar100', 'sepreresnet20_svhn',
+           'sepreresnet56_cifar10', 'sepreresnet56_cifar100', 'sepreresnet56_svhn',
+           'sepreresnet110_cifar10', 'sepreresnet110_cifar100', 'sepreresnet110_svhn',
+           'sepreresnet164bn_cifar10', 'sepreresnet164bn_cifar100', 'sepreresnet164bn_svhn',
+           'sepreresnet272bn_cifar10', 'sepreresnet272bn_cifar100', 'sepreresnet272bn_svhn',
+           'sepreresnet542bn_cifar10', 'sepreresnet542bn_cifar100', 'sepreresnet542bn_svhn',
+           'sepreresnet1001_cifar10', 'sepreresnet1001_cifar100', 'sepreresnet1001_svhn',
+           'sepreresnet1202_cifar10', 'sepreresnet1202_cifar100', 'sepreresnet1202_svhn']
 
 import os
 import chainer.functions as F
@@ -19,12 +19,12 @@ from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
 from .common import conv3x3_block, SimpleSequential
-from .resnet import ResUnit
+from .sepreresnet import SEPreResUnit
 
 
-class CIFARResNet(Chain):
+class CIFARSEPreResNet(Chain):
     """
-    ResNet model for CIFAR from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet model for CIFAR from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -48,7 +48,7 @@ class CIFARResNet(Chain):
                  in_channels=3,
                  in_size=(32, 32),
                  classes=10):
-        super(CIFARResNet, self).__init__()
+        super(CIFARSEPreResNet, self).__init__()
         self.in_size = in_size
         self.classes = classes
 
@@ -64,7 +64,7 @@ class CIFARResNet(Chain):
                     with stage.init_scope():
                         for j, out_channels in enumerate(channels_per_stage):
                             stride = 2 if (j == 0) and (i != 0) else 1
-                            setattr(stage, "unit{}".format(j + 1), ResUnit(
+                            setattr(stage, "unit{}".format(j + 1), SEPreResUnit(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 stride=stride,
@@ -92,15 +92,15 @@ class CIFARResNet(Chain):
         return x
 
 
-def get_resnet_cifar(classes,
-                     blocks,
-                     bottleneck,
-                     model_name=None,
-                     pretrained=False,
-                     root=os.path.join("~", ".chainer", "models"),
-                     **kwargs):
+def get_sepreresnet_cifar(classes,
+                          blocks,
+                          bottleneck,
+                          model_name=None,
+                          pretrained=False,
+                          root=os.path.join("~", ".chainer", "models"),
+                          **kwargs):
     """
-    Create ResNet model for CIFAR with specific parameters.
+    Create SE-PreResNet model for CIFAR with specific parameters.
 
     Parameters:
     ----------
@@ -117,7 +117,6 @@ def get_resnet_cifar(classes,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-
     assert (classes in [10, 100])
 
     if bottleneck:
@@ -135,7 +134,7 @@ def get_resnet_cifar(classes,
     if bottleneck:
         channels = [[cij * 4 for cij in ci] for ci in channels]
 
-    net = CIFARResNet(
+    net = CIFARSEPreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -155,9 +154,9 @@ def get_resnet_cifar(classes,
     return net
 
 
-def resnet20_cifar10(classes=10, **kwargs):
+def sepreresnet20_cifar10(classes=10, **kwargs):
     """
-    ResNet-20 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-20 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -168,12 +167,13 @@ def resnet20_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resnet20_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_cifar10",
+                                 **kwargs)
 
 
-def resnet20_cifar100(classes=100, **kwargs):
+def sepreresnet20_cifar100(classes=100, **kwargs):
     """
-    ResNet-20 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-20 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -184,12 +184,13 @@ def resnet20_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resnet20_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_cifar100",
+                                 **kwargs)
 
 
-def resnet20_svhn(classes=10, **kwargs):
+def sepreresnet20_svhn(classes=10, **kwargs):
     """
-    ResNet-20 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-20 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -200,12 +201,13 @@ def resnet20_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="resnet20_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=20, bottleneck=False, model_name="sepreresnet20_svhn",
+                                 **kwargs)
 
 
-def resnet56_cifar10(classes=10, **kwargs):
+def sepreresnet56_cifar10(classes=10, **kwargs):
     """
-    ResNet-56 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-56 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -216,12 +218,13 @@ def resnet56_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="resnet56_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_cifar10",
+                                 **kwargs)
 
 
-def resnet56_cifar100(classes=100, **kwargs):
+def sepreresnet56_cifar100(classes=100, **kwargs):
     """
-    ResNet-56 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-56 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -232,12 +235,13 @@ def resnet56_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="resnet56_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_cifar100",
+                                 **kwargs)
 
 
-def resnet56_svhn(classes=10, **kwargs):
+def sepreresnet56_svhn(classes=10, **kwargs):
     """
-    ResNet-56 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-56 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -248,12 +252,13 @@ def resnet56_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="resnet56_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=56, bottleneck=False, model_name="sepreresnet56_svhn",
+                                 **kwargs)
 
 
-def resnet110_cifar10(classes=10, **kwargs):
+def sepreresnet110_cifar10(classes=10, **kwargs):
     """
-    ResNet-110 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-110 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -264,13 +269,13 @@ def resnet110_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="resnet110_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_cifar10",
+                                 **kwargs)
 
 
-def resnet110_cifar100(classes=100, **kwargs):
+def sepreresnet110_cifar100(classes=100, **kwargs):
     """
-    ResNet-110 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-110 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -281,12 +286,13 @@ def resnet110_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="resnet110_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_cifar100",
+                                 **kwargs)
 
 
-def resnet110_svhn(classes=10, **kwargs):
+def sepreresnet110_svhn(classes=10, **kwargs):
     """
-    ResNet-110 model for SVHN from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-110 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -297,13 +303,13 @@ def resnet110_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="resnet110_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=110, bottleneck=False, model_name="sepreresnet110_svhn",
+                                 **kwargs)
 
 
-def resnet164bn_cifar10(classes=10, **kwargs):
+def sepreresnet164bn_cifar10(classes=10, **kwargs):
     """
-    ResNet-164(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-164(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -314,13 +320,13 @@ def resnet164bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="resnet164bn_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_cifar10",
+                                 **kwargs)
 
 
-def resnet164bn_cifar100(classes=100, **kwargs):
+def sepreresnet164bn_cifar100(classes=100, **kwargs):
     """
-    ResNet-164(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-164(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -331,13 +337,13 @@ def resnet164bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="resnet164bn_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_cifar100",
+                                 **kwargs)
 
 
-def resnet164bn_svhn(classes=10, **kwargs):
+def sepreresnet164bn_svhn(classes=10, **kwargs):
     """
-    ResNet-164(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-164(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -348,13 +354,13 @@ def resnet164bn_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="resnet164bn_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=164, bottleneck=True, model_name="sepreresnet164bn_svhn",
+                                 **kwargs)
 
 
-def resnet272bn_cifar10(classes=10, **kwargs):
+def sepreresnet272bn_cifar10(classes=10, **kwargs):
     """
-    ResNet-272(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-272(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -365,13 +371,13 @@ def resnet272bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_cifar10",
+                                 **kwargs)
 
 
-def resnet272bn_cifar100(classes=100, **kwargs):
+def sepreresnet272bn_cifar100(classes=100, **kwargs):
     """
-    ResNet-272(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-272(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -382,13 +388,13 @@ def resnet272bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="resnet272bn_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_cifar100",
+                                 **kwargs)
 
 
-def resnet272bn_svhn(classes=10, **kwargs):
+def sepreresnet272bn_svhn(classes=10, **kwargs):
     """
-    ResNet-272(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-272(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -399,13 +405,13 @@ def resnet272bn_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="resnet272bn_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=272, bottleneck=True, model_name="sepreresnet272bn_svhn",
+                                 **kwargs)
 
 
-def resnet542bn_cifar10(classes=10, **kwargs):
+def sepreresnet542bn_cifar10(classes=10, **kwargs):
     """
-    ResNet-542(BN) model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-542(BN) model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -416,13 +422,13 @@ def resnet542bn_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_cifar10",
+                                 **kwargs)
 
 
-def resnet542bn_cifar100(classes=100, **kwargs):
+def sepreresnet542bn_cifar100(classes=100, **kwargs):
     """
-    ResNet-542(BN) model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-542(BN) model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -433,13 +439,13 @@ def resnet542bn_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="resnet542bn_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_cifar100",
+                                 **kwargs)
 
 
-def resnet542bn_svhn(classes=10, **kwargs):
+def sepreresnet542bn_svhn(classes=10, **kwargs):
     """
-    ResNet-542(BN) model for SVHN from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-542(BN) model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -450,13 +456,13 @@ def resnet542bn_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="resnet542bn_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=542, bottleneck=True, model_name="sepreresnet542bn_svhn",
+                                 **kwargs)
 
 
-def resnet1001_cifar10(classes=10, **kwargs):
+def sepreresnet1001_cifar10(classes=10, **kwargs):
     """
-    ResNet-1001 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1001 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -467,13 +473,13 @@ def resnet1001_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_cifar10",
+                                 **kwargs)
 
 
-def resnet1001_cifar100(classes=100, **kwargs):
+def sepreresnet1001_cifar100(classes=100, **kwargs):
     """
-    ResNet-1001 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1001 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -484,13 +490,13 @@ def resnet1001_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_cifar100",
+                                 **kwargs)
 
 
-def resnet1001_svhn(classes=10, **kwargs):
+def sepreresnet1001_svhn(classes=10, **kwargs):
     """
-    ResNet-1001 model for SVHN from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1001 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -501,13 +507,13 @@ def resnet1001_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="resnet1001_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1001, bottleneck=True, model_name="sepreresnet1001_svhn",
+                                 **kwargs)
 
 
-def resnet1202_cifar10(classes=10, **kwargs):
+def sepreresnet1202_cifar10(classes=10, **kwargs):
     """
-    ResNet-1202 model for CIFAR-10 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1202 model for CIFAR-10 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -518,13 +524,13 @@ def resnet1202_cifar10(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar10", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_cifar10",
+                                 **kwargs)
 
 
-def resnet1202_cifar100(classes=100, **kwargs):
+def sepreresnet1202_cifar100(classes=100, **kwargs):
     """
-    ResNet-1202 model for CIFAR-100 from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1202 model for CIFAR-100 from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -535,13 +541,13 @@ def resnet1202_cifar100(classes=100, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_cifar100", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_cifar100",
+                                 **kwargs)
 
 
-def resnet1202_svhn(classes=10, **kwargs):
+def sepreresnet1202_svhn(classes=10, **kwargs):
     """
-    ResNet-1202 model for SVHN from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385.
+    SE-PreResNet-1202 model for SVHN from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 
     Parameters:
     ----------
@@ -552,7 +558,8 @@ def resnet1202_svhn(classes=10, **kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_resnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="resnet1202_svhn", **kwargs)
+    return get_sepreresnet_cifar(classes=classes, blocks=1202, bottleneck=False, model_name="sepreresnet1202_svhn",
+                                 **kwargs)
 
 
 def _test():
@@ -564,30 +571,30 @@ def _test():
     pretrained = False
 
     models = [
-        (resnet20_cifar10, 10),
-        (resnet20_cifar100, 100),
-        (resnet20_svhn, 10),
-        (resnet56_cifar10, 10),
-        (resnet56_cifar100, 100),
-        (resnet56_svhn, 10),
-        (resnet110_cifar10, 10),
-        (resnet110_cifar100, 100),
-        (resnet110_svhn, 10),
-        (resnet164bn_cifar10, 10),
-        (resnet164bn_cifar100, 100),
-        (resnet164bn_svhn, 10),
-        (resnet272bn_cifar10, 10),
-        (resnet272bn_cifar100, 100),
-        (resnet272bn_svhn, 10),
-        (resnet542bn_cifar10, 10),
-        (resnet542bn_cifar100, 100),
-        (resnet542bn_svhn, 10),
-        (resnet1001_cifar10, 10),
-        (resnet1001_cifar100, 100),
-        (resnet1001_svhn, 10),
-        (resnet1202_cifar10, 10),
-        (resnet1202_cifar100, 100),
-        (resnet1202_svhn, 10),
+        (sepreresnet20_cifar10, 10),
+        (sepreresnet20_cifar100, 100),
+        (sepreresnet20_svhn, 10),
+        (sepreresnet56_cifar10, 10),
+        (sepreresnet56_cifar100, 100),
+        (sepreresnet56_svhn, 10),
+        (sepreresnet110_cifar10, 10),
+        (sepreresnet110_cifar100, 100),
+        (sepreresnet110_svhn, 10),
+        (sepreresnet164bn_cifar10, 10),
+        (sepreresnet164bn_cifar100, 100),
+        (sepreresnet164bn_svhn, 10),
+        (sepreresnet272bn_cifar10, 10),
+        (sepreresnet272bn_cifar100, 100),
+        (sepreresnet272bn_svhn, 10),
+        (sepreresnet542bn_cifar10, 10),
+        (sepreresnet542bn_cifar100, 100),
+        (sepreresnet542bn_svhn, 10),
+        (sepreresnet1001_cifar10, 10),
+        (sepreresnet1001_cifar100, 100),
+        (sepreresnet1001_svhn, 10),
+        (sepreresnet1202_cifar10, 10),
+        (sepreresnet1202_cifar100, 100),
+        (sepreresnet1202_svhn, 10),
     ]
 
     for model, classes in models:
@@ -595,30 +602,30 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet20_cifar10 or weight_count == 272474)
-        assert (model != resnet20_cifar100 or weight_count == 278324)
-        assert (model != resnet20_svhn or weight_count == 272474)
-        assert (model != resnet56_cifar10 or weight_count == 855770)
-        assert (model != resnet56_cifar100 or weight_count == 861620)
-        assert (model != resnet56_svhn or weight_count == 855770)
-        assert (model != resnet110_cifar10 or weight_count == 1730714)
-        assert (model != resnet110_cifar100 or weight_count == 1736564)
-        assert (model != resnet110_svhn or weight_count == 1730714)
-        assert (model != resnet164bn_cifar10 or weight_count == 1704154)
-        assert (model != resnet164bn_cifar100 or weight_count == 1727284)
-        assert (model != resnet164bn_svhn or weight_count == 1704154)
-        assert (model != resnet272bn_cifar10 or weight_count == 2816986)
-        assert (model != resnet272bn_cifar100 or weight_count == 2840116)
-        assert (model != resnet272bn_svhn or weight_count == 2816986)
-        assert (model != resnet542bn_cifar10 or weight_count == 5599066)
-        assert (model != resnet542bn_cifar100 or weight_count == 5622196)
-        assert (model != resnet542bn_svhn or weight_count == 5599066)
-        assert (model != resnet1001_cifar10 or weight_count == 10328602)
-        assert (model != resnet1001_cifar100 or weight_count == 10351732)
-        assert (model != resnet1001_svhn or weight_count == 10328602)
-        assert (model != resnet1202_cifar10 or weight_count == 19424026)
-        assert (model != resnet1202_cifar100 or weight_count == 19429876)
-        assert (model != resnet1202_svhn or weight_count == 19424026)
+        assert (model != sepreresnet20_cifar10 or weight_count == 274559)
+        assert (model != sepreresnet20_cifar100 or weight_count == 280409)
+        assert (model != sepreresnet20_svhn or weight_count == 274559)
+        assert (model != sepreresnet56_cifar10 or weight_count == 862601)
+        assert (model != sepreresnet56_cifar100 or weight_count == 868451)
+        assert (model != sepreresnet56_svhn or weight_count == 862601)
+        assert (model != sepreresnet110_cifar10 or weight_count == 1744664)
+        assert (model != sepreresnet110_cifar100 or weight_count == 1750514)
+        assert (model != sepreresnet110_svhn or weight_count == 1744664)
+        assert (model != sepreresnet164bn_cifar10 or weight_count == 1904882)
+        assert (model != sepreresnet164bn_cifar100 or weight_count == 1928012)
+        assert (model != sepreresnet164bn_svhn or weight_count == 1904882)
+        assert (model != sepreresnet272bn_cifar10 or weight_count == 3152450)
+        assert (model != sepreresnet272bn_cifar100 or weight_count == 3175580)
+        assert (model != sepreresnet272bn_svhn or weight_count == 3152450)
+        assert (model != sepreresnet542bn_cifar10 or weight_count == 6271370)
+        assert (model != sepreresnet542bn_cifar100 or weight_count == 6294500)
+        assert (model != sepreresnet542bn_svhn or weight_count == 6271370)
+        assert (model != sepreresnet1001_cifar10 or weight_count == 11573534)
+        assert (model != sepreresnet1001_cifar100 or weight_count == 11596664)
+        assert (model != sepreresnet1001_svhn or weight_count == 11573534)
+        assert (model != sepreresnet1202_cifar10 or weight_count == 19581938)
+        assert (model != sepreresnet1202_cifar100 or weight_count == 19587788)
+        assert (model != sepreresnet1202_svhn or weight_count == 19581938)
 
         x = np.zeros((1, 3, 32, 32), np.float32)
         y = net(x)

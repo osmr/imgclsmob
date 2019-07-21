@@ -3,8 +3,10 @@
     Original paper: 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 """
 
-__all__ = ['sepreresnet', 'sepreresnet18', 'sepreresnet34', 'sepreresnet50', 'sepreresnet50b', 'sepreresnet101',
-           'sepreresnet101b', 'sepreresnet152', 'sepreresnet152b', 'sepreresnet200', 'sepreresnet200b']
+__all__ = ['sepreresnet', 'sepreresnet10', 'sepreresnet12', 'sepreresnet14', 'sepreresnet16', 'sepreresnet18',
+           'sepreresnet26', 'sepreresnetbc26b', 'sepreresnet34', 'sepreresnetbc38b', 'sepreresnet50', 'sepreresnet50b',
+           'sepreresnet101', 'sepreresnet101b', 'sepreresnet152', 'sepreresnet152b', 'sepreresnet200',
+           'sepreresnet200b']
 
 import os
 from keras import layers as nn
@@ -152,6 +154,7 @@ def sepreresnet(channels,
 
 
 def get_sepreresnet(blocks,
+                    bottleneck=None,
                     conv1_stride=True,
                     model_name=None,
                     pretrained=False,
@@ -164,6 +167,8 @@ def get_sepreresnet(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     model_name : str or None, default None
@@ -173,10 +178,29 @@ def get_sepreresnet(blocks,
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    if blocks == 18:
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
+
+    if blocks == 10:
+        layers = [1, 1, 1, 1]
+    elif blocks == 12:
+        layers = [2, 1, 1, 1]
+    elif blocks == 14 and not bottleneck:
+        layers = [2, 2, 1, 1]
+    elif (blocks == 14) and bottleneck:
+        layers = [1, 1, 1, 1]
+    elif blocks == 16:
+        layers = [2, 2, 2, 1]
+    elif blocks == 18:
+        layers = [2, 2, 2, 2]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
         layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
+    elif (blocks == 38) and bottleneck:
+        layers = [3, 3, 3, 3]
     elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
@@ -185,17 +209,22 @@ def get_sepreresnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
+    elif blocks == 269:
+        layers = [3, 30, 48, 8]
     else:
         raise ValueError("Unsupported SE-PreResNet with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
@@ -218,6 +247,62 @@ def get_sepreresnet(blocks,
     return net
 
 
+def sepreresnet10(**kwargs):
+    """
+    SE-PreResNet-10 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=10, model_name="sepreresnet10", **kwargs)
+
+
+def sepreresnet12(**kwargs):
+    """
+    SE-PreResNet-12 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=12, model_name="sepreresnet12", **kwargs)
+
+
+def sepreresnet14(**kwargs):
+    """
+    SE-PreResNet-14 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=14, model_name="sepreresnet14", **kwargs)
+
+
+def sepreresnet16(**kwargs):
+    """
+    SE-PreResNet-16 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=16, model_name="sepreresnet16", **kwargs)
+
+
 def sepreresnet18(**kwargs):
     """
     SE-PreResNet-18 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -232,6 +317,34 @@ def sepreresnet18(**kwargs):
     return get_sepreresnet(blocks=18, model_name="sepreresnet18", **kwargs)
 
 
+def sepreresnet26(**kwargs):
+    """
+    SE-PreResNet-26 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=26, model_name="sepreresnet26", **kwargs)
+
+
+def sepreresnetbc26b(**kwargs):
+    """
+    SE-PreResNet-BC-26b model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="sepreresnetbc26b", **kwargs)
+
+
 def sepreresnet34(**kwargs):
     """
     SE-PreResNet-34 model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
@@ -244,6 +357,20 @@ def sepreresnet34(**kwargs):
         Location for keeping the model parameters.
     """
     return get_sepreresnet(blocks=34, model_name="sepreresnet34", **kwargs)
+
+
+def sepreresnetbc38b(**kwargs):
+    """
+    SE-PreResNet-BC-38b model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.keras/models'
+        Location for keeping the model parameters.
+    """
+    return get_sepreresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="sepreresnetbc38b", **kwargs)
 
 
 def sepreresnet50(**kwargs):
@@ -370,8 +497,15 @@ def _test():
     pretrained = False
 
     models = [
+        sepreresnet10,
+        sepreresnet12,
+        sepreresnet14,
+        sepreresnet16,
         sepreresnet18,
+        sepreresnet26,
+        sepreresnetbc26b,
         sepreresnet34,
+        sepreresnetbc38b,
         sepreresnet50,
         sepreresnet50b,
         sepreresnet101,
@@ -388,8 +522,15 @@ def _test():
         # net.summary()
         weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != sepreresnet10 or weight_count == 5461668)
+        assert (model != sepreresnet12 or weight_count == 5536232)
+        assert (model != sepreresnet14 or weight_count == 5833840)
+        assert (model != sepreresnet16 or weight_count == 7022976)
         assert (model != sepreresnet18 or weight_count == 11776928)
+        assert (model != sepreresnet26 or weight_count == 18092188)
+        assert (model != sepreresnetbc26b or weight_count == 17388424)
         assert (model != sepreresnet34 or weight_count == 21957204)
+        assert (model != sepreresnetbc38b or weight_count == 24019064)
         assert (model != sepreresnet50 or weight_count == 28080472)
         assert (model != sepreresnet50b or weight_count == 28080472)
         assert (model != sepreresnet101 or weight_count == 49319320)

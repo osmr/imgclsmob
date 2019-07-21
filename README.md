@@ -61,7 +61,7 @@ Some remarks:
 | ResNeXt | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNet | A+B+C+D+E+ | A+B+C+D+E+ | A+B+C+D+E+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
-| SE-PreResNet | ABCD | ABCD | ABCD | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
+| SE-PreResNet | A+BCD | A+BCD | A+BCD | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNeXt | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | IBN-ResNet | A+ | A+ | - | - | - | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
 | IBN-ResNeXt | A+ | A+ | - | - | - | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |

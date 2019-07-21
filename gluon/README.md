@@ -323,6 +323,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | NASNet-A 6@4032 | 18.17 | 4.24 | 88,753,150 | 23,976.44M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.101/nasnet_6a4032-0424-73cca5fe.params.log)) |
 | PNASNet-5-Large | 17.90 | 4.28 | 86,057,668 | 25,140.77M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.114/pnasnet5large-0428-998a548f.params.log)) |
 | EfficientNet-B0 | 24.50 | 7.22 | 5,288,548 | 413.13M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.364/efficientnet_b0-0722-041a8346.params.log)) |
+| EfficientNet-B1 | 22.89 | 6.26 | 7,794,184 | 730.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.376/efficientnet_b1-0626-455dcb2a.params.log)) |
 | EfficientNet-B0b | 23.41 | 6.97 | 5,288,548 | 413.13M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.349/efficientnet_b0b-0697-7d0580eb.params.log)) |
 | EfficientNet-B1b | 21.57 | 5.91 | 7,794,184 | 606.80M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.349/efficientnet_b1b-0591-500ec57f.params.log)) |
 | EfficientNet-B2b | 20.67 | 5.28 | 9,109,994 | 697.57M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.349/efficientnet_b2b-0528-bcbcacca.params.log)) |

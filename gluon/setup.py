@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='gluoncv2',
-    version='0.0.48',
+    version='0.0.49',
     description='Image classification and segmentation models for Gluon',
     license='MIT',
     long_description=long_description,

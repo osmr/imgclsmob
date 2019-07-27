@@ -41,7 +41,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('resnet101', '0601', '3fc260bc67ab133b39f087862f5bc70cf6aa9442', 'v0.0.72'),
     ('resnet101b', '0507', '527dca370eb8a2a4a25025993f8ccce35b00c9ef', 'v0.0.357'),
     ('resnet152', '0535', 'b21844fcaea4e14a91fa17bfa870a3d056d258ea', 'v0.0.144'),
-    ('resnet152b', '0523', 'da1f46f37d414f5411d5758f37e842a9facdf919', 'v0.0.143'),
+    ('resnet152b', '0485', '36964f4867125dd08fa722d4d639273d7d1874e1', 'v0.0.378'),
     ('preresnet10', '1401', '3a2eed3b9254d35ba546c9894cf9cc3c6d88aa5c', 'v0.0.249'),
     ('preresnet12', '1321', '0c424c407bd91c5135ec74660b5f001f07cec0df', 'v0.0.257'),
     ('preresnet14', '1216', 'fda0747fd40cad58e46dad53e68d3d06b8829829', 'v0.0.260'),

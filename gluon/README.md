@@ -157,7 +157,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-101 | 21.66 | 5.99 | 44,549,160 | 7,597.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.1/resnet101-0599-a6d3a5f4.params.log)) |
 | ResNet-101b | 20.26 | 5.12 | 44,549,160 | 7,830.48M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.357/resnet101b-0512-af5c4233.params.log)) |
 | ResNet-152 | 20.76 | 5.35 | 60,192,808 | 11,321.85M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.144/resnet152-0535-bbdd7ed1.params.log)) |
-| ResNet-152b | 20.31 | 5.25 | 60,192,808 | 11,554.38M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.143/resnet152b-0525-6f30d0d9.params.log)) |
+| ResNet-152b | 19.63 | 4.80 | 60,192,808 | 11,554.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.378/resnet152b-0480-7277968c.params.log)) |
 | PreResNet-10 | 34.65 | 14.01 | 5,417,128 | 894.19M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.249/preresnet10-1401-2b96c081.params.log)) |
 | PreResNet-12 | 33.57 | 13.21 | 5,491,112 | 1,126.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.257/preresnet12-1321-b628efb5.params.log)) |
 | PreResNet-14 | 32.29 | 12.18 | 5,786,536 | 1,358.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.260/preresnet14-1218-d65fa628.params.log)) |

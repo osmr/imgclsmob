@@ -16,7 +16,7 @@ from keras.engine.saving import load_attributes_from_hdf5_group
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('alexnet', '2126', '56fb1c54f3fd3b95ac6b25b441372770e7f9e0c9', 'v0.0.121'),
-    ('vgg11', '1175', 'daa3c646109c9ade6f5d68ebc1d120c382d7e847', 'v0.0.122'),
+    ('vgg11', '1016', 'c6bc31d0f1f1575081107f4ea8e2ecec3132bfb4', 'v0.0.381'),
     ('vgg13', '1112', '90b447ec7667cef7493e0213e34451e09f8a4ffb', 'v0.0.122'),
     ('vgg16', '0869', '13d19be6eea8e6b5905e2e10e8c2815adeb4764f', 'v0.0.122'),
     ('vgg19', '0823', 'cab851b8de19912ac056a4ef424b4260760b3026', 'v0.0.122'),

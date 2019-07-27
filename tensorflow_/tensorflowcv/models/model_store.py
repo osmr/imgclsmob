@@ -11,7 +11,7 @@ import hashlib
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
     ('alexnet', '2132', 'e3d8a2498a625a65ea616079e382e902e0a89d82', 'v0.0.121'),
-    ('vgg11', '1173', 'ea0bf3a5733af08a14f294e692c50c10803971ea', 'v0.0.122'),
+    ('vgg11', '1015', 'b87e9dbcbab308f671a69ef3ed67067e62c5429f', 'v0.0.381'),
     ('vgg13', '1115', 'f01687c1c2691446602e6a8f769c837b1dfd4bfa', 'v0.0.122'),
     ('vgg16', '0868', 'f6cadf2cf6c3b5f66efe6a80fb26893d89ed4765', 'v0.0.122'),
     ('vgg19', '0823', '99580f953300f445d7e664afe2a913d16725fdd6', 'v0.0.122'),

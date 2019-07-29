@@ -13,7 +13,7 @@ from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
-from gluon.utils import report_accuracy, get_composite_metric, get_metric_name
+from gluon.utils import report_accuracy, get_composite_metric, get_metric_name, get_initializer
 
 from gluon.dataset_utils import get_dataset_metainfo
 from gluon.dataset_utils import get_train_data_source, get_val_data_source
@@ -49,6 +49,11 @@ def add_train_cls_parser_arguments(parser):
         type=str,
         default="",
         help="resume from previously saved optimizer state if not None")
+    parser.add_argument(
+        "--initializer",
+        type=str,
+        default="MSRAPrelu",
+        help="initializer name. options are MSRAPrelu, Xavier and Xavier-gaussian-out-2")
 
     parser.add_argument(
         "--num-gpus",
@@ -578,6 +583,7 @@ def main():
         classes=args.num_classes,
         in_channels=args.in_channels,
         do_hybridize=(not args.not_hybridize),
+        initializer=get_initializer(initializer_name=args.initializer),
         ctx=ctx)
     assert (hasattr(net, "classes"))
     num_classes = net.classes

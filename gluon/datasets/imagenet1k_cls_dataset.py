@@ -4,8 +4,11 @@
 
 import os
 import math
+from mxnet.gluon import HybridBlock
 from mxnet.gluon.data.vision import ImageFolderDataset
 from mxnet.gluon.data.vision import transforms
+from imgaug import augmenters as iaa
+from imgaug import parameters as iap
 from .dataset_metainfo import DatasetMetaInfo
 
 
@@ -45,6 +48,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.num_classes = 1000
         self.input_image_size = (224, 224)
         self.resize_inv_factor = 0.875
+        self.aug_type = "default"
         self.train_metric_capts = ["Train.Top1"]
         self.train_metric_names = ["Top1Error"]
         self.train_metric_extra_kwargs = [{"name": "err-top1"}]
@@ -71,12 +75,132 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
             type=float,
             default=self.resize_inv_factor,
             help="inverted ratio for input image crop")
+        parser.add_argument(
+            "--aug-type",
+            type=str,
+            default="default",
+            help="augmentation type. options are default, ext1, ext2")
 
     def update(self,
                args):
         super(ImageNet1KMetaInfo, self).update(args)
         self.input_image_size = (args.input_size, args.input_size)
         self.resize_inv_factor = args.resize_inv_factor
+        self.aug_type = args.aug_type
+
+
+class ImgAugTransform(HybridBlock):
+    """
+    ImgAug-like transform (perspective and noise/blur).
+    """
+    def __init__(self):
+        super(ImgAugTransform, self).__init__()
+        self.seq = iaa.Sequential(
+            children=[
+                iaa.Sequential(
+                    children=[
+                        iaa.Fliplr(
+                            p=0.5,
+                            name="Fliplr"),
+                        iaa.Flipud(
+                            p=0.5,
+                            name="Flipud"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Affine(
+                                    scale={"x": (0.9, 1.1), "y": (0.9, 1.1)},
+                                    translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
+                                    rotate=(-45, 45),
+                                    shear=(-16, 16),
+                                    order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
+                                    mode="reflect",
+                                    name="Affine"),
+                                iaa.Sometimes(
+                                    p=0.01,
+                                    then_list=iaa.PiecewiseAffine(
+                                        scale=(0.0, 0.01),
+                                        nb_rows=(4, 20),
+                                        nb_cols=(4, 20),
+                                        order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
+                                        mode="reflect",
+                                        name="PiecewiseAffine"))],
+                            random_order=True,
+                            name="GeomTransform"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.75,
+                                    then_list=iaa.Add(
+                                        value=(-10, 10),
+                                        per_channel=0.5,
+                                        name="Brightness")),
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.Emboss(
+                                        alpha=(0.0, 0.5),
+                                        strength=(0.5, 1.2),
+                                        name="Emboss")),
+                                iaa.Sometimes(
+                                    p=0.1,
+                                    then_list=iaa.Sharpen(
+                                        alpha=(0.0, 0.5),
+                                        lightness=(0.5, 1.2),
+                                        name="Sharpen")),
+                                iaa.Sometimes(
+                                    p=0.25,
+                                    then_list=iaa.ContrastNormalization(
+                                        alpha=(0.5, 1.5),
+                                        per_channel=0.5,
+                                        name="ContrastNormalization"))
+                            ],
+                            random_order=True,
+                            name="ColorTransform"),
+                        iaa.Sequential(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.5,
+                                    then_list=iaa.AdditiveGaussianNoise(
+                                        loc=0,
+                                        scale=(0.0, 10.0),
+                                        per_channel=0.5,
+                                        name="AdditiveGaussianNoise")),
+                                iaa.Sometimes(
+                                    p=0.1,
+                                    then_list=iaa.SaltAndPepper(
+                                        p=(0, 0.001),
+                                        per_channel=0.5,
+                                        name="SaltAndPepper"))],
+                            random_order=True,
+                            name="Noise"),
+                        iaa.OneOf(
+                            children=[
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.MedianBlur(
+                                        k=3,
+                                        name="MedianBlur")),
+                                iaa.Sometimes(
+                                    p=0.05,
+                                    then_list=iaa.AverageBlur(
+                                        k=(2, 4),
+                                        name="AverageBlur")),
+                                iaa.Sometimes(
+                                    p=0.5,
+                                    then_list=iaa.GaussianBlur(
+                                        sigma=(0.0, 2.0),
+                                        name="GaussianBlur"))],
+                            name="Blur"),
+                    ],
+                    random_order=True,
+                    name="MainProcess")])
+
+    def hybrid_forward(self, F, x):
+        # import cv2
+        # cv2.imshow(winname="src_img", mat=x)
+
+        seq_det = self.seq.to_deterministic()
+        x = seq_det.augment_image(x)
+        return x
 
 
 def imagenet_train_transform(ds_metainfo,
@@ -85,8 +209,19 @@ def imagenet_train_transform(ds_metainfo,
                              jitter_param=0.4,
                              lighting_param=0.1):
     input_image_size = ds_metainfo.input_image_size
+    if ds_metainfo.aug_type == "default":
+        interpolation = 1
+    elif ds_metainfo.aug_type == "ext1":
+        interpolation = 10
+    elif ds_metainfo.aug_type == "ext2":
+        interpolation = 10
+    else:
+        raise RuntimeError("Unknown augmentation type: {}\n".format(ds_metainfo.aug_type))
+
     return transforms.Compose([
-        transforms.RandomResizedCrop(input_image_size),
+        transforms.RandomResizedCrop(
+            size=input_image_size,
+            interpolation=interpolation),
         transforms.RandomFlipLeftRight(),
         transforms.RandomColorJitter(
             brightness=jitter_param,

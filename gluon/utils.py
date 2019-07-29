@@ -15,6 +15,20 @@ def prepare_mx_context(num_gpus,
     return ctx, batch_size
 
 
+def get_initializer(initializer_name):
+    if initializer_name == "MSRAPrelu":
+        return mx.init.MSRAPrelu()
+    elif initializer_name == "Xavier":
+        return mx.init.Xavier()
+    elif initializer_name == "Xavier-gaussian-out-2":
+        return mx.init.Xavier(
+            rnd_type="gaussian",
+            factor_type="out",
+            magnitude=2)
+    else:
+        return None
+
+
 def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
@@ -25,9 +39,10 @@ def prepare_model(model_name,
                   classes=None,
                   in_channels=None,
                   do_hybridize=True,
+                  initializer=mx.init.MSRAPrelu(),
                   ctx=mx.cpu()):
-    kwargs = {'ctx': ctx,
-              'pretrained': use_pretrained}
+    kwargs = {"ctx": ctx,
+              "pretrained": use_pretrained}
     if classes is not None:
         kwargs["classes"] = classes
     if in_channels is not None:
@@ -39,7 +54,7 @@ def prepare_model(model_name,
 
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        logging.info("Loading model: {}".format(pretrained_model_file_path))
         net.load_parameters(
             filename=pretrained_model_file_path,
             ctx=ctx,
@@ -56,21 +71,21 @@ def prepare_model(model_name,
         for param in net.collect_params().values():
             if param._data is not None:
                 continue
-            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+            param.initialize(initializer, ctx=ctx)
     else:
-        net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+        net.initialize(initializer, ctx=ctx)
 
     if (tune_layers is not None) and tune_layers:
         tune_layers_pattern = re.compile(tune_layers)
         for k, v in net._collect_params_with_prefix().items():
             if tune_layers_pattern.match(k):
-                logging.info('Fine-tune parameter: {}'.format(k))
+                logging.info("Fine-tune parameter: {}".format(k))
             else:
-                v.grad_req = 'null'
+                v.grad_req = "null"
         for param in net.collect_params().values():
             if param._data is not None:
                 continue
-            param.initialize(mx.init.MSRAPrelu(), ctx=ctx)
+            param.initialize(initializer, ctx=ctx)
 
     return net
 

@@ -10,7 +10,6 @@ __all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'b
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-# from mxnet.initializer import Xavier
 
 
 class VGGConv(HybridBlock):
@@ -57,10 +56,6 @@ class VGGConv(HybridBlock):
                 strides=strides,
                 padding=padding,
                 use_bias=use_bias,
-                # weight_initializer=Xavier(
-                #     rnd_type="gaussian",
-                #     factor_type="out",
-                #     magnitude=2),
                 in_channels=in_channels)
             if self.use_bn:
                 self.bn = nn.BatchNorm(
@@ -128,7 +123,6 @@ class VGGDense(HybridBlock):
         with self.name_scope():
             self.fc = nn.Dense(
                 units=out_channels,
-                # weight_initializer="normal",
                 in_units=in_channels)
             self.activ = nn.Activation("relu")
             self.dropout = nn.Dropout(rate=0.5)
@@ -167,7 +161,6 @@ class VGGOutputBlock(HybridBlock):
                 out_channels=mid_channels)
             self.fc3 = nn.Dense(
                 units=classes,
-                # weight_initializer="normal",
                 in_units=mid_channels)
 
     def hybrid_forward(self, F, x):

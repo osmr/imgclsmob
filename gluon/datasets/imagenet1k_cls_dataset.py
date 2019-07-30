@@ -4,11 +4,10 @@
 
 import os
 import math
+import mxnet as mx
 from mxnet.gluon import HybridBlock
 from mxnet.gluon.data.vision import ImageFolderDataset
 from mxnet.gluon.data.vision import transforms
-from imgaug import augmenters as iaa
-from imgaug import parameters as iap
 from .dataset_metainfo import DatasetMetaInfo
 
 
@@ -48,7 +47,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.num_classes = 1000
         self.input_image_size = (224, 224)
         self.resize_inv_factor = 0.875
-        self.aug_type = "default"
+        self.aug_type = "aug0"
         self.train_metric_capts = ["Train.Top1"]
         self.train_metric_names = ["Top1Error"]
         self.train_metric_extra_kwargs = [{"name": "err-top1"}]
@@ -79,7 +78,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
             "--aug-type",
             type=str,
             default="default",
-            help="augmentation type. options are default, ext1, ext2")
+            help="augmentation type. options are aug0, aug1, aug2")
 
     def update(self,
                args):
@@ -91,30 +90,35 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
 
 class ImgAugTransform(HybridBlock):
     """
-    ImgAug-like transform (perspective and noise/blur).
+    ImgAug-like transform (geometric, noise, and blur).
     """
     def __init__(self):
         super(ImgAugTransform, self).__init__()
+        from imgaug import augmenters as iaa
+        from imgaug import parameters as iap
         self.seq = iaa.Sequential(
             children=[
                 iaa.Sequential(
                     children=[
-                        iaa.Fliplr(
-                            p=0.5,
-                            name="Fliplr"),
-                        iaa.Flipud(
-                            p=0.5,
-                            name="Flipud"),
                         iaa.Sequential(
                             children=[
-                                iaa.Affine(
-                                    scale={"x": (0.9, 1.1), "y": (0.9, 1.1)},
-                                    translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
-                                    rotate=(-45, 45),
-                                    shear=(-16, 16),
-                                    order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
-                                    mode="reflect",
-                                    name="Affine"),
+                                iaa.OneOf(
+                                    children=[
+                                        iaa.Sometimes(
+                                            p=0.95,
+                                            then_list=iaa.Affine(
+                                                scale={"x": (0.9, 1.1), "y": (0.9, 1.1)},
+                                                translate_percent={"x": (-0.05, 0.05), "y": (-0.05, 0.05)},
+                                                rotate=(-30, 30),
+                                                shear=(-15, 15),
+                                                order=iap.Choice([0, 1, 3], p=[0.15, 0.80, 0.05]),
+                                                mode="reflect",
+                                                name="Affine")),
+                                        iaa.Sometimes(
+                                            p=0.05,
+                                            then_list=iaa.PerspectiveTransform(
+                                                scale=(0.01, 0.1)))],
+                                    name="Blur"),
                                 iaa.Sometimes(
                                     p=0.01,
                                     then_list=iaa.PiecewiseAffine(
@@ -195,11 +199,17 @@ class ImgAugTransform(HybridBlock):
                     name="MainProcess")])
 
     def hybrid_forward(self, F, x):
-        # import cv2
-        # cv2.imshow(winname="src_img", mat=x)
+        img = x.asnumpy().copy()
 
-        seq_det = self.seq.to_deterministic()
-        x = seq_det.augment_image(x)
+        # import cv2
+        # cv2.imshow(winname="img", mat=img)
+
+        img_aug = self.seq.augment_image(img)
+
+        # cv2.imshow(winname="img_aug", mat=img_aug)
+        # cv2.waitKey()
+
+        x = mx.nd.array(img_aug, ctx=x.context)
         return x
 
 
@@ -209,16 +219,21 @@ def imagenet_train_transform(ds_metainfo,
                              jitter_param=0.4,
                              lighting_param=0.1):
     input_image_size = ds_metainfo.input_image_size
-    if ds_metainfo.aug_type == "default":
+    if ds_metainfo.aug_type == "aug0":
         interpolation = 1
-    elif ds_metainfo.aug_type == "ext1":
+        transform_list = []
+    elif ds_metainfo.aug_type == "aug1":
         interpolation = 10
-    elif ds_metainfo.aug_type == "ext2":
+        transform_list = []
+    elif ds_metainfo.aug_type == "aug2":
         interpolation = 10
+        transform_list = [
+            ImgAugTransform()
+        ]
     else:
         raise RuntimeError("Unknown augmentation type: {}\n".format(ds_metainfo.aug_type))
 
-    return transforms.Compose([
+    transform_list += [
         transforms.RandomResizedCrop(
             size=input_image_size,
             interpolation=interpolation),
@@ -232,7 +247,9 @@ def imagenet_train_transform(ds_metainfo,
         transforms.Normalize(
             mean=mean_rgb,
             std=std_rgb)
-    ])
+    ]
+
+    return transforms.Compose(transform_list)
 
 
 def imagenet_val_transform(ds_metainfo,

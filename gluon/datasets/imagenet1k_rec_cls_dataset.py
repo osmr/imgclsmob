@@ -58,11 +58,11 @@ def imagenet_train_imgrec_iter(ds_metainfo,
         "contrast": jitter_param,
         "pca_noise": lighting_param
     }
-    if ds_metainfo.aug_type == "default":
+    if ds_metainfo.aug_type == "aug0":
         pass
-    elif ds_metainfo.aug_type == "ext1":
+    elif ds_metainfo.aug_type == "aug1":
         kwargs["inter_method"] = 10
-    elif ds_metainfo.aug_type == "ext2":
+    elif ds_metainfo.aug_type == "aug2":
         kwargs["inter_method"] = 10
         kwargs["max_rotate_angle"] = 30
         kwargs["max_shear_ratio"] = 0.05

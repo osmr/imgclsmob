@@ -77,7 +77,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         parser.add_argument(
             "--aug-type",
             type=str,
-            default="default",
+            default="aug0",
             help="augmentation type. options are aug0, aug1, aug2")
 
     def update(self,

@@ -191,7 +191,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--mixup-epoch-tail",
         type=int,
-        default=15,
+        default=12,
         help="number of epochs without mixup at the end of training")
 
     parser.add_argument(

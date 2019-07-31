@@ -4,7 +4,7 @@
     https://arxiv.org/abs/1404.5997.
 """
 
-__all__ = ['AlexNet', 'alexnet']
+__all__ = ['AlexNet', 'alexnet', 'alexnetb']
 
 import os
 import chainer.functions as F
@@ -13,6 +13,49 @@ from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
 from .common import ConvBlock, SimpleSequential
+
+
+class AlexConv(ConvBlock):
+    """
+    AlexNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    ksize : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    use_lrn : bool
+        Whether to use LRN layer.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 ksize,
+                 stride,
+                 pad,
+                 use_lrn):
+        super(AlexConv, self).__init__(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            ksize=ksize,
+            stride=stride,
+            pad=pad,
+            use_bias=True,
+            use_bn=False)
+        self.use_lrn = use_lrn
+
+    def __call__(self, x):
+        x = super(AlexConv, self).__call__(x)
+        if self.use_lrn:
+            x = F.local_response_normalization(x)
+        return x
 
 
 class AlexDense(Chain):
@@ -26,7 +69,6 @@ class AlexDense(Chain):
     out_channels : int
         Number of output channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -97,6 +139,10 @@ class AlexNet(Chain):
         Strides of the convolution for each unit.
     pads : list of list of int or tuple/list of 2 int
         Padding value for convolution layer for each unit.
+    use_lrn : bool
+        Whether to use LRN layer.
+    features_output_size : int
+        Window size of features output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -109,6 +155,8 @@ class AlexNet(Chain):
                  ksizes,
                  strides,
                  pads,
+                 use_lrn,
+                 features_output_size,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -120,17 +168,17 @@ class AlexNet(Chain):
             self.features = SimpleSequential()
             with self.features.init_scope():
                 for i, channels_per_stage in enumerate(channels):
+                    use_lrn_i = use_lrn and (i in [0, 1])
                     stage = SimpleSequential()
                     with stage.init_scope():
                         for j, out_channels in enumerate(channels_per_stage):
-                            setattr(stage, "unit{}".format(j + 1), ConvBlock(
+                            setattr(stage, "unit{}".format(j + 1), AlexConv(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 ksize=ksizes[i][j],
                                 stride=strides[i][j],
                                 pad=pads[i][j],
-                                use_bias=True,
-                                use_bn=False))
+                                use_lrn=use_lrn_i))
                             in_channels = out_channels
                         setattr(stage, "pool{}".format(i + 1), partial(
                             F.max_pooling_2d,
@@ -139,13 +187,13 @@ class AlexNet(Chain):
                             pad=0))
                     setattr(self.features, "stage{}".format(i + 1), stage)
 
-            in_channels = in_channels * 6 * 6
+            in_channels = in_channels * features_output_size * features_output_size
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'classifier', AlexOutputBlock(
+                setattr(self.output, "classifier", AlexOutputBlock(
                     in_channels=in_channels,
                     classes=classes))
 
@@ -155,7 +203,8 @@ class AlexNet(Chain):
         return x
 
 
-def get_alexnet(model_name=None,
+def get_alexnet(version="a",
+                model_name=None,
                 pretrained=False,
                 root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
@@ -164,6 +213,8 @@ def get_alexnet(model_name=None,
 
     Parameters:
     ----------
+    version : str, default 'a'
+        Version of AlexNet ('a' or 'b').
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -171,16 +222,30 @@ def get_alexnet(model_name=None,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    channels = [[64], [192], [384, 256, 256]]
-    ksizes = [[11], [5], [3, 3, 3]]
-    strides = [[4], [1], [1, 1, 1]]
-    pads = [[2], [2], [1, 1, 1]]
+    if version == "a":
+        channels = [[96], [256], [384, 384, 256]]
+        ksizes = [[11], [5], [3, 3, 3]]
+        strides = [[4], [1], [1, 1, 1]]
+        pads = [[0], [2], [1, 1, 1]]
+        use_lrn = True
+        features_output_size = 5
+    elif version == "b":
+        channels = [[64], [192], [384, 256, 256]]
+        ksizes = [[11], [5], [3, 3, 3]]
+        strides = [[4], [1], [1, 1, 1]]
+        pads = [[2], [2], [1, 1, 1]]
+        use_lrn = False
+        features_output_size = 6
+    else:
+        raise ValueError("Unsupported AlexNet version {}".format(version))
 
     net = AlexNet(
         channels=channels,
         ksizes=ksizes,
         strides=strides,
         pads=pads,
+        use_lrn=use_lrn,
+        features_output_size=features_output_size,
         **kwargs)
 
     if pretrained:
@@ -211,6 +276,21 @@ def alexnet(**kwargs):
     return get_alexnet(model_name="alexnet", **kwargs)
 
 
+def alexnetb(**kwargs):
+    """
+    AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
+    https://arxiv.org/abs/1404.5997. Non-standard version.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_alexnet(version="b", model_name="alexnet", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -221,13 +301,15 @@ def _test():
 
     models = [
         alexnet,
+        alexnetb,
     ]
 
     for model in models:
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 61100840)
+        assert (model != alexnet or weight_count == 50844008)
+        assert (model != alexnetb or weight_count == 61100840)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

@@ -31,7 +31,6 @@ class AlexConv(ConvBlock):
     use_lrn : bool
         Whether to use LRN layer.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -69,7 +68,6 @@ class AlexDense(HybridBlock):
     out_channels : int
         Number of output channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -169,8 +167,8 @@ class AlexNet(HybridBlock):
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 use_lrn_i = use_lrn and (i in [0, 1])
+                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         stage.add(AlexConv(
@@ -222,7 +220,7 @@ def get_alexnet(version="a",
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    if version == 'a':
+    if version == "a":
         channels = [[96], [256], [384, 384, 256]]
         kernel_sizes = [[11], [5], [3, 3, 3]]
         strides = [[4], [1], [1, 1, 1]]

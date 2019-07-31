@@ -11,8 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
-from .common import conv1x1
-from .vgg import vgg_conv3x3
+from .common import conv1x1, conv3x3_block
 
 
 class SPHead(nn.Module):
@@ -33,10 +32,10 @@ class SPHead(nn.Module):
                  mid_channels,
                  out_channels):
         super(SPHead, self).__init__()
-        self.conv1 = vgg_conv3x3(
+        self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            use_bias=True,
+            bias=True,
             use_bn=False)
         self.conv2 = conv1x1(
             in_channels=mid_channels,
@@ -223,10 +222,10 @@ class SuperPointNet(nn.Module):
                     stage.add_module("reduce{}".format(i + 1), nn.MaxPool2d(
                         kernel_size=2,
                         stride=2))
-                stage.add_module("unit{}".format(j + 1), vgg_conv3x3(
+                stage.add_module("unit{}".format(j + 1), conv3x3_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    use_bias=True,
+                    bias=True,
                     use_bn=False))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)

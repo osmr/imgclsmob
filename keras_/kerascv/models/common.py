@@ -591,6 +591,7 @@ def conv_block(x,
                dilation=1,
                groups=1,
                use_bias=False,
+               use_bn=True,
                bn_epsilon=1e-5,
                activation="relu",
                name="conv_block"):
@@ -617,6 +618,8 @@ def conv_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
@@ -640,10 +643,11 @@ def conv_block(x,
         groups=groups,
         use_bias=use_bias,
         name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        epsilon=bn_epsilon,
-        name=name + "/bn")
+    if use_bn:
+        x = batchnorm(
+            x=x,
+            epsilon=bn_epsilon,
+            name=name + "/bn")
     if activation is not None:
         x = get_activation_layer(
             x=x,
@@ -712,6 +716,7 @@ def conv3x3_block(x,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  use_bn=True,
                   bn_epsilon=1e-5,
                   activation="relu",
                   name="conv3x3_block"):
@@ -736,6 +741,8 @@ def conv3x3_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default 'relu'
@@ -758,6 +765,7 @@ def conv3x3_block(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_epsilon=bn_epsilon,
         activation=activation,
         name=name)

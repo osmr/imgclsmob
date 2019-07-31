@@ -542,6 +542,7 @@ def conv_block(x,
                dilation=1,
                groups=1,
                use_bias=False,
+               use_bn=True,
                activation="relu",
                training=False,
                data_format="channels_last",
@@ -569,6 +570,8 @@ def conv_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -595,11 +598,12 @@ def conv_block(x,
         use_bias=use_bias,
         data_format=data_format,
         name=name + "/conv")
-    x = batchnorm(
-        x=x,
-        training=training,
-        data_format=data_format,
-        name=name + "/bn")
+    if use_bn:
+        x = batchnorm(
+            x=x,
+            training=training,
+            data_format=data_format,
+            name=name + "/bn")
     if activation is not None:
         x = get_activation_layer(
             x=x,
@@ -672,6 +676,7 @@ def conv3x3_block(x,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  use_bn=True,
                   activation="relu",
                   training=False,
                   data_format="channels_last",
@@ -697,6 +702,8 @@ def conv3x3_block(x,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     activation : function or str or None, default 'relu'
         Activation function or name of activation function.
     training : bool, or a TensorFlow boolean scalar tensor, default False
@@ -721,6 +728,7 @@ def conv3x3_block(x,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        use_bn=use_bn,
         activation=activation,
         training=training,
         data_format=data_format,

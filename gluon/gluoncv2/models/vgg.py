@@ -5,102 +5,12 @@
 """
 
 __all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'bn_vgg16', 'bn_vgg19', 'bn_vgg11b',
-           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b', 'vgg_conv3x3']
+           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-
-
-class VGGConv(HybridBlock):
-    """
-    VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 strides,
-                 padding,
-                 use_bias,
-                 use_bn,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(VGGConv, self).__init__(**kwargs)
-        self.use_bn = use_bn
-
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                use_bias=use_bias,
-                in_channels=in_channels)
-            if self.use_bn:
-                self.bn = nn.BatchNorm(
-                    in_channels=out_channels,
-                    use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def vgg_conv3x3(in_channels,
-                out_channels,
-                use_bias,
-                use_bn,
-                bn_use_global_stats=False):
-    """
-    3x3 version of the VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    return VGGConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1,
-        use_bias=use_bias,
-        use_bn=use_bn,
-        bn_use_global_stats=bn_use_global_stats)
+from .common import conv3x3_block
 
 
 class VGGDense(HybridBlock):
@@ -211,7 +121,7 @@ class VGG(HybridBlock):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        stage.add(vgg_conv3x3(
+                        stage.add(conv3x3_block(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             use_bias=use_bias,

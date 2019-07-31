@@ -9,52 +9,7 @@ __all__ = ['alexnet_model', 'alexnet']
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, is_channels_first, flatten
-
-
-def alex_conv(x,
-              in_channels,
-              out_channels,
-              kernel_size,
-              strides,
-              padding,
-              name="alex_conv"):
-    """
-    AlexNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    name : str, default 'alex_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=True,
-        name=name + "/conv")
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    return x
+from .common import conv_block, is_channels_first, flatten
 
 
 def alex_dense(x,
@@ -168,13 +123,15 @@ def alexnet_model(channels,
     x = input
     for i, channels_per_stage in enumerate(channels):
         for j, out_channels in enumerate(channels_per_stage):
-            x = alex_conv(
+            x = conv_block(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_sizes[i][j],
                 strides=strides[i][j],
                 padding=paddings[i][j],
+                use_bias=True,
+                use_bn=False,
                 name="features/stage{}/unit{}".format(i + 1, j + 1))
             in_channels = out_channels
         x = nn.MaxPool2D(

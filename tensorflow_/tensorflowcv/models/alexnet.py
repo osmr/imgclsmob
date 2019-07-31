@@ -8,56 +8,7 @@ __all__ = ['AlexNet', 'alexnet']
 
 import os
 import tensorflow as tf
-from .common import conv2d, maxpool2d, is_channels_first, flatten
-
-
-def alex_conv(x,
-              in_channels,
-              out_channels,
-              kernel_size,
-              strides,
-              padding,
-              data_format,
-              name="alex_conv"):
-    """
-    AlexNet specific convolution block.
-
-    Parameters:
-    ----------
-    x : Tensor
-        Input tensor.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    data_format : str
-        The ordering of the dimensions in tensors.
-    name : str, default 'alex_conv'
-        Block name.
-
-    Returns
-    -------
-    Tensor
-        Resulted tensor.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=True,
-        data_format=data_format,
-        name=name + "/conv")
-    x = tf.nn.relu(x, name=name + "/activ")
-    return x
+from .common import maxpool2d, conv_block, is_channels_first, flatten
 
 
 def alex_dense(x,
@@ -213,13 +164,15 @@ class AlexNet(object):
         in_channels = self.in_channels
         for i, channels_per_stage in enumerate(self.channels):
             for j, out_channels in enumerate(channels_per_stage):
-                x = alex_conv(
+                x = conv_block(
                     x=x,
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=self.kernel_sizes[i][j],
                     strides=self.strides[i][j],
                     padding=self.paddings[i][j],
+                    use_bias=True,
+                    use_bn=False,
                     data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels

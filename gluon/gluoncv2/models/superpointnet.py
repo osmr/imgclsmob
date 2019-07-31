@@ -9,8 +9,7 @@ __all__ = ['SuperPointNet', 'superpointnet']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1
-from .vgg import vgg_conv3x3
+from .common import conv1x1, conv3x3_block
 
 
 def interpolate_bilinear(p,
@@ -94,7 +93,7 @@ class SPHead(HybridBlock):
                  **kwargs):
         super(SPHead, self).__init__(**kwargs)
         with self.name_scope():
-            self.conv1 = vgg_conv3x3(
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 use_bias=True,
@@ -416,7 +415,7 @@ class SuperPointNet(HybridBlock):
                         stage.add(nn.MaxPool2D(
                             pool_size=2,
                             strides=2))
-                    stage.add(vgg_conv3x3(
+                    stage.add(conv3x3_block(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         use_bias=True,

@@ -5,91 +5,12 @@
 """
 
 __all__ = ['VGG', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'bn_vgg16', 'bn_vgg19', 'bn_vgg11b',
-           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b', 'vgg_conv3x3']
+           'bn_vgg13b', 'bn_vgg16b', 'bn_vgg19b']
 
 import os
 import torch.nn as nn
 import torch.nn.init as init
-
-
-class VGGConv(nn.Module):
-    """
-    VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 use_bias,
-                 use_bn):
-        super(VGGConv, self).__init__()
-        self.use_bn = use_bn
-
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=use_bias)
-        if self.use_bn:
-            self.bn = nn.BatchNorm2d(num_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def vgg_conv3x3(in_channels,
-                out_channels,
-                use_bias,
-                use_bn):
-    """
-    3x3 version of the VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    """
-    return VGGConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        stride=1,
-        padding=1,
-        use_bias=use_bias,
-        use_bn=use_bn)
+from .common import conv3x3_block
 
 
 class VGGDense(nn.Module):
@@ -190,10 +111,10 @@ class VGG(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                stage.add_module("unit{}".format(j + 1), vgg_conv3x3(
+                stage.add_module("unit{}".format(j + 1), conv3x3_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    use_bias=use_bias,
+                    bias=use_bias,
                     use_bn=use_bn))
                 in_channels = out_channels
             stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(

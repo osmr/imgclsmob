@@ -9,46 +9,7 @@ __all__ = ['AlexNet', 'alexnet']
 import os
 import torch.nn as nn
 import torch.nn.init as init
-
-
-class AlexConv(nn.Module):
-    """
-    AlexNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(AlexConv, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=True)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.activ(x)
-        return x
+from .common import ConvBlock
 
 
 class AlexDense(nn.Module):
@@ -152,12 +113,14 @@ class AlexNet(nn.Module):
         for i, channels_per_stage in enumerate(channels):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                stage.add_module("unit{}".format(j + 1), AlexConv(
+                stage.add_module("unit{}".format(j + 1), ConvBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=kernel_sizes[i][j],
                     stride=strides[i][j],
-                    padding=paddings[i][j]))
+                    padding=paddings[i][j],
+                    bias=True,
+                    use_bn=False))
                 in_channels = out_channels
             stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
                 kernel_size=3,

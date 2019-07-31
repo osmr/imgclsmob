@@ -12,48 +12,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class AlexConv(Chain):
-    """
-    AlexNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad):
-        super(AlexConv, self).__init__()
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=False)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.activ(x)
-        return x
+from .common import ConvBlock, SimpleSequential
 
 
 class AlexDense(Chain):
@@ -164,12 +123,14 @@ class AlexNet(Chain):
                     stage = SimpleSequential()
                     with stage.init_scope():
                         for j, out_channels in enumerate(channels_per_stage):
-                            setattr(stage, "unit{}".format(j + 1), AlexConv(
+                            setattr(stage, "unit{}".format(j + 1), ConvBlock(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 ksize=ksizes[i][j],
                                 stride=strides[i][j],
-                                pad=pads[i][j]))
+                                pad=pads[i][j],
+                                use_bias=True,
+                                use_bn=False))
                             in_channels = out_channels
                         setattr(stage, "pool{}".format(i + 1), partial(
                             F.max_pooling_2d,

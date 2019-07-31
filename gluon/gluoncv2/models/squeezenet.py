@@ -241,12 +241,12 @@ def get_squeezenet(version,
         Location for keeping the model parameters.
     """
 
-    if version == '1.0':
+    if version == "1.0":
         channels = [[128, 128, 256], [256, 384, 384, 512], [512]]
         residuals = [[0, 1, 0], [1, 0, 1, 0], [1]]
         init_block_kernel_size = 7
         init_block_channels = 96
-    elif version == '1.1':
+    elif version == "1.1":
         channels = [[128, 128], [256, 256], [384, 384, 512, 512]]
         residuals = [[0, 1], [0, 1], [0, 1, 0, 1]]
         init_block_kernel_size = 3

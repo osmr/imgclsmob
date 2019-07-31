@@ -56,27 +56,27 @@ class HPatches(data.Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
-        print("Image file name: {}, index: {}".format(self.image_paths[index], index))
+        # print("Image file name: {}, index: {}".format(self.image_paths[index], index))
 
         image = cv2.imread(self.image_paths[index], flags=0)
-        if image.shape[0] > 1500:
-            image = cv2.resize(
-                src=image,
-                dsize=None,
-                fx=0.5,
-                fy=0.5,
-                interpolation=cv2.INTER_AREA)
-        print("Image shape: {}".format(image.shape))
+        # if image.shape[0] > 1500:
+        #     image = cv2.resize(
+        #         src=image,
+        #         dsize=None,
+        #         fx=0.5,
+        #         fy=0.5,
+        #         interpolation=cv2.INTER_AREA)
+        # print("Image shape: {}".format(image.shape))
 
         warped_image = cv2.imread(self.warped_image_paths[index], flags=0)
-        if warped_image.shape[0] > 1500:
-            warped_image = cv2.resize(
-                src=warped_image,
-                dsize=None,
-                fx=0.5,
-                fy=0.5,
-                interpolation=cv2.INTER_AREA)
-        print("W-Image shape: {}".format(warped_image.shape))
+        # if warped_image.shape[0] > 1500:
+        #     warped_image = cv2.resize(
+        #         src=warped_image,
+        #         dsize=None,
+        #         fx=0.5,
+        #         fy=0.5,
+        #         interpolation=cv2.INTER_AREA)
+        # print("W-Image shape: {}".format(warped_image.shape))
         homography = self.homographies[index]
 
         if self.transform is not None:

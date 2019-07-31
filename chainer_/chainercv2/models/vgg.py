@@ -13,90 +13,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import SimpleSequential
-
-
-class VGGConv(Chain):
-    """
-    VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    pad : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 use_bias,
-                 use_bn):
-        super(VGGConv, self).__init__()
-        self.use_bn = use_bn
-
-        with self.init_scope():
-            self.conv = L.Convolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=(not use_bias))
-            if self.use_bn:
-                self.bn = L.BatchNormalization(
-                    size=out_channels,
-                    eps=1e-5)
-            self.activ = F.relu
-
-    def __call__(self, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        x = self.activ(x)
-        return x
-
-
-def vgg_conv3x3(in_channels,
-                out_channels,
-                use_bias,
-                use_bn):
-    """
-    3x3 version of the VGG specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    """
-    return VGGConv(
-        in_channels=in_channels,
-        out_channels=out_channels,
-        ksize=3,
-        stride=1,
-        pad=1,
-        use_bias=use_bias,
-        use_bn=use_bn)
+from .common import conv3x3_block, SimpleSequential
 
 
 class VGGDense(Chain):
@@ -204,7 +121,7 @@ class VGG(Chain):
                     stage = SimpleSequential()
                     with stage.init_scope():
                         for j, out_channels in enumerate(channels_per_stage):
-                            setattr(stage, "unit{}".format(j + 1), vgg_conv3x3(
+                            setattr(stage, "unit{}".format(j + 1), conv3x3_block(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 use_bias=use_bias,

@@ -214,6 +214,8 @@ class ConvBlock(HybridBlock):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -230,12 +232,14 @@ class ConvBlock(HybridBlock):
                  dilation=1,
                  groups=1,
                  use_bias=False,
+                 use_bn=True,
                  bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  activation=(lambda: nn.Activation("relu")),
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
         self.activate = (activation is not None)
+        self.use_bn = use_bn
 
         with self.name_scope():
             self.conv = nn.Conv2D(
@@ -247,16 +251,18 @@ class ConvBlock(HybridBlock):
                 groups=groups,
                 use_bias=use_bias,
                 in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                epsilon=bn_epsilon,
-                use_global_stats=bn_use_global_stats)
+            if self.use_bn:
+                self.bn = nn.BatchNorm(
+                    in_channels=out_channels,
+                    epsilon=bn_epsilon,
+                    use_global_stats=bn_use_global_stats)
             if self.activate:
                 self.activ = get_activation_layer(activation)
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)
-        x = self.bn(x)
+        if self.use_bn:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         return x
@@ -314,6 +320,7 @@ def conv3x3_block(in_channels,
                   dilation=1,
                   groups=1,
                   use_bias=False,
+                  use_bn=True,
                   bn_epsilon=1e-5,
                   bn_use_global_stats=False,
                   activation=(lambda: nn.Activation("relu")),
@@ -337,6 +344,8 @@ def conv3x3_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -353,6 +362,7 @@ def conv3x3_block(in_channels,
         dilation=dilation,
         groups=groups,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,

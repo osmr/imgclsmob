@@ -10,103 +10,7 @@ __all__ = ['vgg', 'vgg11', 'vgg13', 'vgg16', 'vgg19', 'bn_vgg11', 'bn_vgg13', 'b
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv2d, batchnorm, is_channels_first, flatten
-
-
-def vgg_conv(x,
-             in_channels,
-             out_channels,
-             kernel_size,
-             strides,
-             padding,
-             use_bias,
-             use_bn,
-             name="vgg_conv"):
-    """
-    VGG specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    name : str, default 'vgg_conv'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    x = conv2d(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=kernel_size,
-        strides=strides,
-        padding=padding,
-        use_bias=use_bias,
-        name=name + "/conv")
-    if use_bn:
-        x = batchnorm(
-            x=x,
-            name=name + "/bn")
-    x = nn.Activation("relu", name=name + "/activ")(x)
-    return x
-
-
-def vgg_conv3x3(x,
-                in_channels,
-                out_channels,
-                use_bias,
-                use_bn,
-                name="vgg_conv3x3"):
-    """
-    3x3 version of the VGG specific convolution block.
-
-    Parameters:
-    ----------
-    x : keras.backend tensor/variable/symbol
-        Input tensor/variable/symbol.
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    use_bias : bool
-        Whether the convolution layer uses a bias vector.
-    use_bn : bool
-        Whether to use BatchNorm layers.
-    name : str, default 'vgg_conv3x3'
-        Block name.
-
-    Returns
-    -------
-    keras.backend tensor/variable/symbol
-        Resulted tensor/variable/symbol.
-    """
-    return vgg_conv(
-        x=x,
-        in_channels=in_channels,
-        out_channels=out_channels,
-        kernel_size=3,
-        strides=1,
-        padding=1,
-        use_bias=use_bias,
-        use_bn=use_bn,
-        name=name)
+from .common import conv3x3_block, is_channels_first, flatten
 
 
 def vgg_dense(x,
@@ -217,7 +121,7 @@ def vgg(channels,
     x = input
     for i, channels_per_stage in enumerate(channels):
         for j, out_channels in enumerate(channels_per_stage):
-            x = vgg_conv3x3(
+            x = conv3x3_block(
                 x=x,
                 in_channels=in_channels,
                 out_channels=out_channels,

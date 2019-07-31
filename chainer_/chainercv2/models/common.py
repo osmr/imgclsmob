@@ -202,6 +202,8 @@ class ConvBlock(Chain):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
@@ -216,10 +218,12 @@ class ConvBlock(Chain):
                  dilate=1,
                  groups=1,
                  use_bias=False,
+                 use_bn=True,
                  bn_eps=1e-5,
                  activation=(lambda: F.relu)):
         super(ConvBlock, self).__init__()
         self.activate = (activation is not None)
+        self.use_bn = use_bn
 
         with self.init_scope():
             self.conv = L.Convolution2D(
@@ -231,15 +235,17 @@ class ConvBlock(Chain):
                 nobias=(not use_bias),
                 dilate=dilate,
                 groups=groups)
-            self.bn = L.BatchNormalization(
-                size=out_channels,
-                eps=bn_eps)
+            if self.use_bn:
+                self.bn = L.BatchNormalization(
+                    size=out_channels,
+                    eps=bn_eps)
             if self.activate:
                 self.activ = get_activation_layer(activation)
 
     def __call__(self, x):
         x = self.conv(x)
-        x = self.bn(x)
+        if self.use_bn:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         return x
@@ -291,6 +297,7 @@ def conv3x3_block(in_channels,
                   dilate=1,
                   groups=1,
                   use_bias=False,
+                  use_bn=True,
                   bn_eps=1e-5,
                   activation=(lambda: F.relu)):
     """
@@ -312,6 +319,8 @@ def conv3x3_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default F.relu
@@ -326,6 +335,7 @@ def conv3x3_block(in_channels,
         dilate=dilate,
         groups=groups,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation)
 

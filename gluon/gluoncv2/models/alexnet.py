@@ -9,7 +9,7 @@ __all__ = ['AlexNet', 'alexnet', 'alexnetb']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import ConvBlock
+from .common import ConvBlock
 
 
 class AlexConv(ConvBlock):
@@ -54,7 +54,7 @@ class AlexConv(ConvBlock):
     def hybrid_forward(self, F, x):
         x = super(AlexConv, self).hybrid_forward(F, x)
         if self.use_lrn:
-            x = x.LRN(nsize=5)
+            x = F.LRN(x, nsize=5)
         return x
 
 
@@ -142,6 +142,8 @@ class AlexNet(HybridBlock):
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
+    features_output_size : int
+        Window size of features output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -155,6 +157,7 @@ class AlexNet(HybridBlock):
                  strides,
                  paddings,
                  use_lrn,
+                 features_output_size,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -167,7 +170,7 @@ class AlexNet(HybridBlock):
             self.features = nn.HybridSequential(prefix="")
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                # use_lrn = use_lrn and
+                use_lrn_i = use_lrn and (i in [0, 1])
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         stage.add(AlexConv(
@@ -176,7 +179,7 @@ class AlexNet(HybridBlock):
                             kernel_size=kernel_sizes[i][j],
                             strides=strides[i][j],
                             padding=paddings[i][j],
-                            use_lrn=use_lrn))
+                            use_lrn=use_lrn_i))
                         in_channels = out_channels
                     stage.add(nn.MaxPool2D(
                         pool_size=3,
@@ -186,7 +189,7 @@ class AlexNet(HybridBlock):
 
             self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
-            in_channels = in_channels * 6 * 6
+            in_channels = in_channels * features_output_size * features_output_size
             self.output.add(AlexOutputBlock(
                 in_channels=in_channels,
                 classes=classes))
@@ -208,7 +211,7 @@ def get_alexnet(version="a",
 
     Parameters:
     ----------
-    version : str, default `a`
+    version : str, default 'a'
         Version of AlexNet ('a' or 'b').
     model_name : str or None, default None
         Model name for loading pretrained model.
@@ -220,17 +223,19 @@ def get_alexnet(version="a",
         Location for keeping the model parameters.
     """
     if version == 'a':
-        channels = [[96], [256], [384, 256, 256]]
+        channels = [[96], [256], [384, 384, 256]]
         kernel_sizes = [[11], [5], [3, 3, 3]]
         strides = [[4], [1], [1, 1, 1]]
         paddings = [[0], [2], [1, 1, 1]]
         use_lrn = True
+        features_output_size = 5
     elif version == "b":
         channels = [[64], [192], [384, 256, 256]]
         kernel_sizes = [[11], [5], [3, 3, 3]]
         strides = [[4], [1], [1, 1, 1]]
         paddings = [[2], [2], [1, 1, 1]]
         use_lrn = False
+        features_output_size = 6
     else:
         raise ValueError("Unsupported AlexNet version {}".format(version))
 
@@ -240,6 +245,7 @@ def get_alexnet(version="a",
         strides=strides,
         paddings=paddings,
         use_lrn=use_lrn,
+        features_output_size=features_output_size,
         **kwargs)
 
     if pretrained:
@@ -286,7 +292,7 @@ def alexnetb(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_alexnet(version="b", model_name="alexnetb", **kwargs)
+    return get_alexnet(version="b", model_name="alexnet", **kwargs)
 
 
 def _test():
@@ -315,7 +321,8 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 61100840)
+        assert (model != alexnet or weight_count == 50844008)
+        assert (model != alexnetb or weight_count == 61100840)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

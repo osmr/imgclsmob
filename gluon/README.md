@@ -390,6 +390,7 @@ Some remarks:
 | SE-PreResNet-110 | 4.54 | 64 | 1,744,664 | 255.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet110_cifar10-0454-67eea1cc.params.log)) |
 | SE-PreResNet-164(BN) | 3.73 | 256 | 1,904,882 | 255.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet164bn_cifar10-0373-ac72ac7f.params.log)) |
 | SE-PreResNet-272(BN) | 3.39 | 256 | 3,152,450 | 420.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet272bn_cifar10-0339-3e47d575.params.log)) |
+| SE-PreResNet-542(BN) | 3.08 | 256 | 6,271,370 | 834.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.382/sepreresnet542bn_cifar10-0308-05f7d4a6.params.log)) |
 | PyramidNet-110 (a=48) | 3.72 | 64 | 1,772,706 | 408.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.184/pyramidnet110_a48_cifar10-0372-35b94d05.params.log)) |
 | PyramidNet-110 (a=84) | 2.98 | 100 | 3,904,446 | 778.15M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.185/pyramidnet110_a84_cifar10-0298-81710d7a.params.log)) |
 | PyramidNet-110 (a=270) | 2.51 | 286 | 28,485,477 | 4,730.60M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.194/pyramidnet110_a270_cifar10-0251-1e769ce5.params.log)) |
@@ -481,6 +482,7 @@ Some remarks:
 | SE-PreResNet-110 | 22.61 | 1,750,514 | 255.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet110_cifar100-2261-3291a56b.params.log)) |
 | SE-PreResNet-164(BN) | 20.05 | 1,928,012 | 255.31M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet164bn_cifar100-2005-d9399367.params.log)) |
 | SE-PreResNet-272(BN) | 19.13 | 3,175,580 | 420.75M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet272bn_cifar100-1913-d243b058.params.log)) |
+| SE-PreResNet-542(BN) | 19.45 | 6,294,500 | 834.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.382/sepreresnet542bn_cifar100-1945-4dd0e21d.params.log)) |
 | PyramidNet-110 (a=48) | 20.95 | 1,778,556 | 408.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.186/pyramidnet110_a48_cifar100-2095-00fd42a0.params.log)) |
 | PyramidNet-110 (a=84) | 18.87 | 3,913,536 | 778.16M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.199/pyramidnet110_a84_cifar100-1887-6712d5dc.params.log)) |
 | PyramidNet-110 (a=270) | 17.10 | 28,511,307 | 4,730.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.319/pyramidnet110_a270_cifar100-1710-2732fc64.params.log)) |
@@ -566,6 +568,7 @@ Some remarks:
 | SE-PreResNet-110 | 2.59 | 1,744,664 | 255.72M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet110_svhn-0259-5c09cacb.params.log)) |
 | SE-PreResNet-164(BN) | 2.56 | 1,904,882 | 255.29M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet164bn_svhn-0256-a45d1a65.params.log)) |
 | SE-PreResNet-272(BN) | 2.49 | 3,152,450 | 420.73M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.379/sepreresnet272bn_svhn-0249-34b910cd.params.log)) |
+| SE-PreResNet-542(BN) | 2.47 | 6,271,370 | 834.34M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.382/sepreresnet542bn_svhn-0247-456035da.params.log)) |
 | PyramidNet-110 (a=48) | 2.47 | 1,772,706 | 408.37M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.281/pyramidnet110_a48_svhn-0247-d8a5c6e2.params.log)) |
 | DenseNet-40 (k=12) | 3.05 | 599,050 | 210.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.278/densenet40_k12_svhn-0305-645564c1.params.log)) |
 | DenseNet-BC-40 (k=12) | 3.20 | 176,122 | 74.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.279/densenet40_k12_bc_svhn-0320-6f2f9824.params.log)) |

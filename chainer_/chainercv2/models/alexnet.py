@@ -282,7 +282,7 @@ def alexnetb(**kwargs):
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_alexnet(version="b", model_name="alexnet", **kwargs)
+    return get_alexnet(version="b", model_name="alexnetb", **kwargs)
 
 
 def _test():

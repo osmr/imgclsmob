@@ -125,7 +125,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
-| AlexNet | 44.12 | 21.26 | 61,100,840 | 714.83M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.108/alexnet-2126-9cb87ebd.params.log)) |
+| AlexNet-b | 41.08 | 18.53 | 61,100,840 | 714.83M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.384/alexnetb-1853-9762fd33.params.log)) |
 | VGG-11 | 29.59 | 10.16 | 132,863,336 | 7,615.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.381/vgg11-1016-3d78e0ec.params.log)) |
 | VGG-13 | 31.06 | 11.12 | 133,047,848 | 11,317.65M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.109/vgg13-1112-a0db3c6c.params.log)) |
 | VGG-16 | 26.78 | 8.69 | 138,357,544 | 15,480.10M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.109/vgg16-0869-57a2556f.params.log)) |

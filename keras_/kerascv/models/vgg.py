@@ -132,7 +132,7 @@ def vgg(channels,
         x = nn.MaxPool2D(
             pool_size=2,
             strides=2,
-            padding='valid',
+            padding="valid",
             name="features/stage{}/pool".format(i + 1))(x)
 
     x = flatten(x, reshape=True)

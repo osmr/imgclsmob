@@ -4,11 +4,65 @@
     https://arxiv.org/abs/1404.5997.
 """
 
-__all__ = ['AlexNet', 'alexnet']
+__all__ = ['AlexNet', 'alexnet', 'alexnetb']
 
 import os
 import tensorflow as tf
 from .common import maxpool2d, conv_block, is_channels_first, flatten
+
+
+def alex_conv(x,
+              in_channels,
+              out_channels,
+              kernel_size,
+              strides,
+              padding,
+              use_lrn,
+              data_format,
+              name="alex_conv"):
+    """
+    AlexNet specific convolution block.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    use_lrn : bool
+        Whether to use LRN layer.
+    data_format : str
+        The ordering of the dimensions in tensors.
+    name : str, default 'alex_conv'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    x = conv_block(
+        x=x,
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        strides=strides,
+        padding=padding,
+        use_bias=True,
+        use_bn=False,
+        data_format=data_format,
+        name=name + "/conv")
+    if use_lrn:
+        x = tf.nn.lrn(x)
+    return x
 
 
 def alex_dense(x,
@@ -113,6 +167,8 @@ class AlexNet(object):
         Strides of the convolution for each unit.
     paddings : list of list of int or tuple/list of 2 int
         Padding value for convolution layer for each unit.
+    use_lrn : bool
+        Whether to use LRN layer.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -127,6 +183,7 @@ class AlexNet(object):
                  kernel_sizes,
                  strides,
                  paddings,
+                 use_lrn,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -138,6 +195,7 @@ class AlexNet(object):
         self.kernel_sizes = kernel_sizes
         self.strides = strides
         self.paddings = paddings
+        self.use_lrn = use_lrn
         self.in_channels = in_channels
         self.in_size = in_size
         self.classes = classes
@@ -163,16 +221,16 @@ class AlexNet(object):
         """
         in_channels = self.in_channels
         for i, channels_per_stage in enumerate(self.channels):
+            use_lrn_i = self.use_lrn and (i in [0, 1])
             for j, out_channels in enumerate(channels_per_stage):
-                x = conv_block(
+                x = alex_conv(
                     x=x,
                     in_channels=in_channels,
                     out_channels=out_channels,
                     kernel_size=self.kernel_sizes[i][j],
                     strides=self.strides[i][j],
                     padding=self.paddings[i][j],
-                    use_bias=True,
-                    use_bn=False,
+                    use_lrn=use_lrn_i,
                     data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
@@ -181,6 +239,7 @@ class AlexNet(object):
                 pool_size=3,
                 strides=2,
                 padding=0,
+                ceil_mode=True,
                 data_format=self.data_format,
                 name="features/stage{}/pool".format(i + 1))
 
@@ -198,7 +257,8 @@ class AlexNet(object):
         return x
 
 
-def get_alexnet(model_name=None,
+def get_alexnet(version="a",
+                model_name=None,
                 pretrained=False,
                 root=os.path.join("~", ".tensorflow", "models"),
                 **kwargs):
@@ -207,6 +267,8 @@ def get_alexnet(model_name=None,
 
     Parameters:
     ----------
+    version : str, default 'a'
+        Version of AlexNet ('a' or 'b').
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -214,16 +276,27 @@ def get_alexnet(model_name=None,
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    channels = [[64], [192], [384, 256, 256]]
-    kernel_sizes = [[11], [5], [3, 3, 3]]
-    strides = [[4], [1], [1, 1, 1]]
-    paddings = [[2], [2], [1, 1, 1]]
+    if version == "a":
+        channels = [[96], [256], [384, 384, 256]]
+        kernel_sizes = [[11], [5], [3, 3, 3]]
+        strides = [[4], [1], [1, 1, 1]]
+        paddings = [[0], [2], [1, 1, 1]]
+        use_lrn = True
+    elif version == "b":
+        channels = [[64], [192], [384, 256, 256]]
+        kernel_sizes = [[11], [5], [3, 3, 3]]
+        strides = [[4], [1], [1, 1, 1]]
+        paddings = [[2], [2], [1, 1, 1]]
+        use_lrn = False
+    else:
+        raise ValueError("Unsupported AlexNet version {}".format(version))
 
     net = AlexNet(
         channels=channels,
         kernel_sizes=kernel_sizes,
         strides=strides,
         paddings=paddings,
+        use_lrn=use_lrn,
         **kwargs)
 
     if pretrained:
@@ -255,6 +328,21 @@ def alexnet(**kwargs):
     return get_alexnet(model_name="alexnet", **kwargs)
 
 
+def alexnetb(**kwargs):
+    """
+    AlexNet-b model from 'One weird trick for parallelizing convolutional neural networks,'
+    https://arxiv.org/abs/1404.5997. Non-standard version.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_alexnet(version="b", model_name="alexnet", **kwargs)
+
+
 def _test():
     import numpy as np
 
@@ -263,6 +351,7 @@ def _test():
 
     models = [
         alexnet,
+        alexnetb,
     ]
 
     for model in models:
@@ -276,7 +365,8 @@ def _test():
 
         weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 61100840)
+        assert (model != alexnet or weight_count == 62378344)
+        assert (model != alexnetb or weight_count == 61100840)
 
         with tf.Session() as sess:
             if pretrained:

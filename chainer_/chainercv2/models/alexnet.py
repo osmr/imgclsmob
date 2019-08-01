@@ -141,8 +141,6 @@ class AlexNet(Chain):
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
-    features_output_size : int
-        Window size of features output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -156,7 +154,6 @@ class AlexNet(Chain):
                  strides,
                  pads,
                  use_lrn,
-                 features_output_size,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -187,7 +184,7 @@ class AlexNet(Chain):
                             pad=0))
                     setattr(self.features, "stage{}".format(i + 1), stage)
 
-            in_channels = in_channels * features_output_size * features_output_size
+            in_channels = in_channels * 6 * 6
             self.output = SimpleSequential()
             with self.output.init_scope():
                 setattr(self.output, "flatten", partial(
@@ -228,14 +225,12 @@ def get_alexnet(version="a",
         strides = [[4], [1], [1, 1, 1]]
         pads = [[0], [2], [1, 1, 1]]
         use_lrn = True
-        features_output_size = 5
     elif version == "b":
         channels = [[64], [192], [384, 256, 256]]
         ksizes = [[11], [5], [3, 3, 3]]
         strides = [[4], [1], [1, 1, 1]]
         pads = [[2], [2], [1, 1, 1]]
         use_lrn = False
-        features_output_size = 6
     else:
         raise ValueError("Unsupported AlexNet version {}".format(version))
 
@@ -245,7 +240,6 @@ def get_alexnet(version="a",
         strides=strides,
         pads=pads,
         use_lrn=use_lrn,
-        features_output_size=features_output_size,
         **kwargs)
 
     if pretrained:
@@ -278,7 +272,7 @@ def alexnet(**kwargs):
 
 def alexnetb(**kwargs):
     """
-    AlexNet model from 'One weird trick for parallelizing convolutional neural networks,'
+    AlexNet-b model from 'One weird trick for parallelizing convolutional neural networks,'
     https://arxiv.org/abs/1404.5997. Non-standard version.
 
     Parameters:
@@ -308,7 +302,7 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 50844008)
+        assert (model != alexnet or weight_count == 62378344)
         assert (model != alexnetb or weight_count == 61100840)
 
         x = np.zeros((1, 3, 224, 224), np.float32)

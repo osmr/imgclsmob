@@ -108,6 +108,7 @@ __all__ = ['get_model']
 
 _models = {
     'alexnet': alexnet,
+    'alexnetb': alexnetb,
 
     'zfnet': zfnet,
 

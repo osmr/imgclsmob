@@ -140,8 +140,6 @@ class AlexNet(HybridBlock):
         Padding value for convolution layer for each unit.
     use_lrn : bool
         Whether to use LRN layer.
-    features_output_size : int
-        Window size of features output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -155,7 +153,6 @@ class AlexNet(HybridBlock):
                  strides,
                  paddings,
                  use_lrn,
-                 features_output_size,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -182,12 +179,13 @@ class AlexNet(HybridBlock):
                     stage.add(nn.MaxPool2D(
                         pool_size=3,
                         strides=2,
-                        padding=0))
+                        padding=0,
+                        ceil_mode=True))
                 self.features.add(stage)
 
             self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
-            in_channels = in_channels * features_output_size * features_output_size
+            in_channels = in_channels * 6 * 6
             self.output.add(AlexOutputBlock(
                 in_channels=in_channels,
                 classes=classes))
@@ -226,14 +224,12 @@ def get_alexnet(version="a",
         strides = [[4], [1], [1, 1, 1]]
         paddings = [[0], [2], [1, 1, 1]]
         use_lrn = True
-        features_output_size = 5
     elif version == "b":
         channels = [[64], [192], [384, 256, 256]]
         kernel_sizes = [[11], [5], [3, 3, 3]]
         strides = [[4], [1], [1, 1, 1]]
         paddings = [[2], [2], [1, 1, 1]]
         use_lrn = False
-        features_output_size = 6
     else:
         raise ValueError("Unsupported AlexNet version {}".format(version))
 
@@ -243,7 +239,6 @@ def get_alexnet(version="a",
         strides=strides,
         paddings=paddings,
         use_lrn=use_lrn,
-        features_output_size=features_output_size,
         **kwargs)
 
     if pretrained:
@@ -319,7 +314,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != alexnet or weight_count == 50844008)
+        assert (model != alexnet or weight_count == 62378344)
         assert (model != alexnetb or weight_count == 61100840)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)

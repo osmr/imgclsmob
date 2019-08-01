@@ -27,6 +27,7 @@ __all__ = ['get_model', 'init_variables_from_state_dict']
 
 _models = {
     'alexnet': alexnet,
+    'alexnetb': alexnetb,
 
     'vgg11': vgg11,
     'vgg13': vgg13,

@@ -117,7 +117,7 @@ Some remarks:
 | PreResNet-101 | 21.49 | 5.72 | 44,541,608 | 7,595.44M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet101-0572-cd61594e.tf.npz.log)) |
 | PreResNet-101b | 20.80 | 5.39 | 44,541,608 | 7,827.97M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.351/preresnet101b-0539-c0b9e129.tf.npz.log)) |
 | PreResNet-152 | 20.63 | 5.29 | 60,185,256 | 11,319.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet152-0529-b761f286.tf.npz.log)) |
-| PreResNet-152b | 20.95 | 5.76 | 60,185,256 | 11,551.87M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet152b-0576-c036165c.tf.npz.log)) |
+| PreResNet-152b | 20.03 | 5.08 | 60,185,256 | 11,551.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.383/preresnet152b-0508-eccbdd1b.tf.npz.log)) |
 | PreResNet-200b | 21.12 | 5.60 | 64,666,280 | 15,068.63M | From [tornadomeet/ResNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.73/preresnet200b-0560-881e0e28.tf.npz.log)) |
 | PreResNet-269b | 20.73 | 5.55 | 102,065,832 | 20,101.11M | From [soeaver/mxnet-model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.239/preresnet269b-0555-c799eaf2.tf.npz.log)) |
 | ResNeXt-14 (16x4d) | 31.65 | 12.24 | 7,127,336 | 1,045.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.370/resnext14_16x4d-1224-3f603dde.tf.npz.log)) |

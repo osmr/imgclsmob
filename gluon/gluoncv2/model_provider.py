@@ -112,6 +112,7 @@ _models = {
     'alexnetb': alexnetb,
 
     'zfnet': zfnet,
+    'zfnetb': zfnetb,
 
     'vgg11': vgg11,
     'vgg13': vgg13,

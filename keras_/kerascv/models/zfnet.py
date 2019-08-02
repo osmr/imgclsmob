@@ -1,19 +1,19 @@
 """
-    ZFNet for ImageNet-1K, implemented in Chainer.
+    ZFNet for ImageNet-1K, implemented in Keras.
     Original paper: 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 """
 
 __all__ = ['zfnet', 'zfnetb']
 
 import os
-from chainer.serializers import load_npz
-from .alexnet import AlexNet
+from .common import is_channels_first
+from .alexnet import alexnet_model
 
 
 def get_zfnet(version="a",
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".chainer", "models"),
+              root=os.path.join("~", ".keras", "models"),
               **kwargs):
     """
     Create ZFNet model with specific parameters.
@@ -26,41 +26,40 @@ def get_zfnet(version="a",
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     if version == "a":
         channels = [[96], [256], [384, 384, 256]]
-        ksizes = [[7], [5], [3, 3, 3]]
+        kernel_sizes = [[7], [5], [3, 3, 3]]
         strides = [[2], [2], [1, 1, 1]]
-        pads = [[1], [0], [1, 1, 1]]
+        paddings = [[1], [0], [1, 1, 1]]
         use_lrn = True
     elif version == "b":
         channels = [[96], [256], [512, 1024, 512]]
-        ksizes = [[7], [5], [3, 3, 3]]
+        kernel_sizes = [[7], [5], [3, 3, 3]]
         strides = [[2], [2], [1, 1, 1]]
-        pads = [[1], [0], [1, 1, 1]]
+        paddings = [[1], [0], [1, 1, 1]]
         use_lrn = True
     else:
         raise ValueError("Unsupported ZFNet version {}".format(version))
 
-    net = AlexNet(
+    net = alexnet_model(
         channels=channels,
-        ksizes=ksizes,
+        kernel_sizes=kernel_sizes,
         strides=strides,
-        pads=pads,
+        paddings=paddings,
         use_lrn=use_lrn,
         **kwargs)
 
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        load_npz(
-            file=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            obj=net)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
@@ -73,7 +72,7 @@ def zfnet(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_zfnet(model_name="zfnet", **kwargs)
@@ -87,7 +86,7 @@ def zfnetb(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
+    root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
     return get_zfnet(version="b", model_name="zfnetb", **kwargs)
@@ -95,9 +94,7 @@ def zfnetb(**kwargs):
 
 def _test():
     import numpy as np
-    import chainer
-
-    chainer.global_config.train = False
+    import keras
 
     pretrained = False
 
@@ -107,14 +104,19 @@ def _test():
     ]
 
     for model in models:
+
         net = model(pretrained=pretrained)
-        weight_count = net.count_params()
+        # net.summary()
+        weight_count = keras.utils.layer_utils.count_params(net.trainable_weights)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != zfnet or weight_count == 62357608)
         assert (model != zfnetb or weight_count == 107627624)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
-        y = net(x)
+        if is_channels_first():
+            x = np.zeros((1, 3, 224, 224), np.float32)
+        else:
+            x = np.zeros((1, 224, 224, 3), np.float32)
+        y = net.predict(x)
         assert (y.shape == (1, 1000))
 
 

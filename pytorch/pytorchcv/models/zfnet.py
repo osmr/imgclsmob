@@ -3,222 +3,24 @@
     Original paper: 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
 """
 
-__all__ = ['ZFNet', 'zfnet']
+__all__ = ['zfnet', 'zfnetb']
 
 import os
-import torch.nn as nn
-import torch.nn.init as init
+from .alexnet import AlexNet
 
 
-class ZFNetConv(nn.Module):
-    """
-    ZFNet specific convolution block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
-        Padding value for convolution layer.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding):
-        super(ZFNetConv, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=True)
-        self.activ = nn.ReLU(inplace=True)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.activ(x)
-        return x
-
-
-class ZFNetReduceBlock(nn.Module):
-    """
-    ZFNet reduce block.
-
-    Parameters:
-    ----------
-    nsize : int, default 5
-        Amount of neighbouring channels used for normalization.
-    """
-    def __init__(self,
-                 nsize=5):
-        super(ZFNetReduceBlock, self).__init__()
-        self.nsize = nsize
-
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-        self.norm = nn.LocalResponseNorm(size=nsize, k=2.0)
-
-    def forward(self, x):
-        x = self.pool(x)
-        x = self.norm(x)
-        return x
-
-
-class ZFNetDense(nn.Module):
-    """
-    ZFNet specific dense block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(ZFNetDense, self).__init__()
-        self.fc = nn.Linear(
-            in_features=in_channels,
-            out_features=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout(p=0.5)
-
-    def forward(self, x):
-        x = self.fc(x)
-        x = self.activ(x)
-        x = self.dropout(x)
-        return x
-
-
-class ZFNetOutputBlock(nn.Module):
-    """
-    ZFNet specific output block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    classes : int
-        Number of classification classes.
-    """
-    def __init__(self,
-                 in_channels,
-                 classes):
-        super(ZFNetOutputBlock, self).__init__()
-        mid_channels = 4096
-
-        self.fc1 = ZFNetDense(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.fc2 = ZFNetDense(
-            in_channels=mid_channels,
-            out_channels=mid_channels)
-        self.fc3 = nn.Linear(
-            in_features=mid_channels,
-            out_features=classes)
-
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
-        return x
-
-
-class ZFNet(nn.Module):
-    """
-    ZFNet model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
-
-    Parameters:
-    ----------
-    channels : list of list of int
-        Number of output channels for each unit.
-    kernel_sizes : list of list of int
-        Convolution window sizes for each unit.
-    strides : list of list of int or tuple/list of 2 int
-        Strides of the convolution for each unit.
-    paddings : list of list of int or tuple/list of 2 int
-        Padding value for convolution layer for each unit.
-    in_channels : int, default 3
-        Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
-        Spatial size of the expected input image.
-    num_classes : int, default 1000
-        Number of classification classes.
-    """
-    def __init__(self,
-                 channels,
-                 kernel_sizes,
-                 strides,
-                 paddings,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
-        super(ZFNet, self).__init__()
-        self.in_size = in_size
-        self.num_classes = num_classes
-
-        self.features = nn.Sequential()
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                if i != 0:
-                    stage.add_module("reduce{}".format(i + 1), ZFNetReduceBlock())
-                stage.add_module("unit{}".format(j + 1), ZFNetConv(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=kernel_sizes[i][j],
-                    stride=strides[i][j],
-                    padding=paddings[i][j]))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.MaxPool2d(
-            kernel_size=3,
-            stride=2))
-
-        self.output = ZFNetOutputBlock(
-            in_channels=(in_channels * 6 * 6),
-            classes=num_classes)
-
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.size(0), -1)
-        x = self.output(x)
-        return x
-
-
-def get_alexnet(model_name=None,
-                pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
-                **kwargs):
+def get_zfnet(version="a",
+              model_name=None,
+              pretrained=False,
+              root=os.path.join("~", ".torch", "models"),
+              **kwargs):
     """
     Create ZFNet model with specific parameters.
 
     Parameters:
     ----------
+    version : str, default 'a'
+        Version of ZFNet ('a' or 'b').
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -226,16 +28,27 @@ def get_alexnet(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    channels = [[96], [256], [384, 384, 256]]
-    kernel_sizes = [[7], [5], [3, 3, 3]]
-    strides = [[2], [2], [1, 1, 1]]
-    paddings = [[1], [0], [1, 1, 1]]
+    if version == "a":
+        channels = [[96], [256], [384, 384, 256]]
+        kernel_sizes = [[7], [5], [3, 3, 3]]
+        strides = [[2], [2], [1, 1, 1]]
+        paddings = [[1], [0], [1, 1, 1]]
+        use_lrn = True
+    elif version == "b":
+        channels = [[96], [256], [512, 1024, 512]]
+        kernel_sizes = [[7], [5], [3, 3, 3]]
+        strides = [[2], [2], [1, 1, 1]]
+        paddings = [[1], [0], [1, 1, 1]]
+        use_lrn = True
+    else:
+        raise ValueError("Unsupported ZFNet version {}".format(version))
 
-    net = ZFNet(
+    net = AlexNet(
         channels=channels,
         kernel_sizes=kernel_sizes,
         strides=strides,
         paddings=paddings,
+        use_lrn=use_lrn,
         **kwargs)
 
     if pretrained:
@@ -261,7 +74,21 @@ def zfnet(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_alexnet(model_name="zfnet", **kwargs)
+    return get_zfnet(model_name="zfnet", **kwargs)
+
+
+def zfnetb(**kwargs):
+    """
+    ZFNet-b model from 'Visualizing and Understanding Convolutional Networks,' https://arxiv.org/abs/1311.2901.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_zfnet(version="b", model_name="zfnetb", **kwargs)
 
 
 def _calc_width(net):
@@ -280,6 +107,7 @@ def _test():
 
     models = [
         zfnet,
+        zfnetb,
     ]
 
     for model in models:
@@ -291,6 +119,7 @@ def _test():
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != zfnet or weight_count == 62357608)
+        assert (model != zfnetb or weight_count == 107627624)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)

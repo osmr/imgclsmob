@@ -37,8 +37,8 @@ def initialize_logging(logging_dir_path,
         logging_file_name=logging_file_name)
     logging.info("Script command line:\n{}".format(" ".join(sys.argv)))
     logging.info("Script arguments:\n{}".format(script_args))
-    packages = log_packages.replace(' ', '').split(',') if type(log_packages) == str else log_packages
-    pip_packages = log_pip_packages.replace(' ', '').split(',') if type(log_pip_packages) == str else log_pip_packages
+    packages = log_packages.replace(' ', "").split(',') if type(log_packages) == str else log_packages
+    pip_packages = log_pip_packages.replace(' ', "").split(',') if type(log_pip_packages) == str else log_pip_packages
     if (log_packages is not None) and (log_pip_packages is not None):
         logging.info("Env_stats:\n{}".format(get_env_stats(
             packages=packages,

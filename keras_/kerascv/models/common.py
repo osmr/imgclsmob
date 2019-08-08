@@ -2,7 +2,7 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'maxpool2d',
+__all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'lrn', 'maxpool2d',
            'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block', 'conv1x1_block',
            'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
@@ -177,6 +177,81 @@ def batchnorm(x,
             momentum=momentum,
             epsilon=epsilon,
             name=name)(x)
+    return x
+
+
+def lrn(x,
+        alpha=1e-4,
+        beta=0.75,
+        k=2,
+        n=5,
+        name=None):
+    """
+    Local response normalization layer.
+
+    Parameters:
+    ----------
+    x : keras.backend tensor/variable/symbol
+        Input tensor/variable/symbol.
+    alpha : float, 1e-4
+        Variance scaling parameter alpha in the LRN expression.
+    beta : float, 0.75
+        Power parameter beta in the LRN expression.
+    k : float, 2
+        Parameter k in the LRN expression.
+    n : int, 5
+        Normalization window width in elements.
+    name : str, default None
+        Layer name.
+
+    Returns
+    -------
+    keras.backend tensor/variable/symbol
+        Resulted tensor/variable/symbol.
+    """
+    if K.backend() == "mxnet":
+        from keras.backend.mxnet_backend import keras_mxnet_symbol, KerasSymbol
+        import mxnet as mx
+
+        @keras_mxnet_symbol
+        def gluon_lrn(x,
+                      alpha,
+                      beta,
+                      k,
+                      n):
+            if isinstance(x, KerasSymbol):
+                x = x.symbol
+            if isinstance(alpha, KerasSymbol):
+                alpha = alpha.symbol
+            if isinstance(beta, KerasSymbol):
+                beta = beta.symbol
+            if isinstance(k, KerasSymbol):
+                k = k.symbol
+            if isinstance(n, KerasSymbol):
+                n = n.symbol
+            return KerasSymbol(mx.sym.LRN(
+                data=x,
+                alpha=alpha,
+                beta=beta,
+                knorm=k,
+                nsize=n))
+        x = nn.Lambda(
+            lambda z: gluon_lrn(
+                x=z,
+                alpha=alpha,
+                beta=beta,
+                k=k,
+                n=n))(x)
+    else:
+        import tensorflow as tf
+        x = nn.Lambda(
+            lambda z: tf.nn.lrn(
+                input=z,
+                depth_radius=n,
+                bias=k,
+                alpha=alpha,
+                beta=beta,
+                name=name))(x)
     return x
 
 

@@ -18,6 +18,7 @@ def alex_conv(x,
               strides,
               padding,
               use_lrn,
+              training,
               data_format,
               name="alex_conv"):
     """
@@ -39,6 +40,8 @@ def alex_conv(x,
         Padding value for convolution layer.
     use_lrn : bool
         Whether to use LRN layer.
+    training : bool
+      Whether to return the output in training mode or in inference mode.
     data_format : str
         The ordering of the dimensions in tensors.
     name : str, default 'alex_conv'
@@ -58,10 +61,11 @@ def alex_conv(x,
         padding=padding,
         use_bias=True,
         use_bn=False,
+        training=training,
         data_format=data_format,
         name=name + "/conv")
     if use_lrn:
-        x = tf.nn.lrn(x)
+        x = tf.nn.lrn(x, bias=2, alpha=1e-4, beta=0.75)
     return x
 
 
@@ -231,6 +235,7 @@ class AlexNet(object):
                     strides=self.strides[i][j],
                     padding=self.paddings[i][j],
                     use_lrn=use_lrn_i,
+                    training=training,
                     data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels

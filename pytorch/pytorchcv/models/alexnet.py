@@ -52,7 +52,7 @@ class AlexConv(ConvBlock):
     def forward(self, x):
         x = super(AlexConv, self).forward(x)
         if self.use_lrn:
-            x = F.local_response_norm(x, size=5)
+            x = F.local_response_norm(x, size=5, k=2.0)
         return x
 
 
@@ -311,7 +311,7 @@ def _test():
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)
-        y.sum().backward()
+        # y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))
 
 

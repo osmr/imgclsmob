@@ -9,7 +9,7 @@ __all__ = ['alexnet_model', 'alexnet', 'alexnetb']
 import os
 from keras import layers as nn
 from keras.models import Model
-from .common import conv_block, maxpool2d, is_channels_first, flatten
+from .common import conv_block, maxpool2d, is_channels_first, flatten, lrn
 
 
 def alex_conv(x,
@@ -47,7 +47,6 @@ def alex_conv(x,
     keras.backend tensor/variable/symbol
         Resulted tensor/variable/symbol.
     """
-    assert (use_lrn is not None)
     x = conv_block(
         x=x,
         in_channels=in_channels,
@@ -58,8 +57,8 @@ def alex_conv(x,
         use_bias=True,
         use_bn=False,
         name=name + "/conv")
-    # if use_lrn:
-    #     x = nn.LRN2D()
+    if use_lrn:
+        x = lrn(x)
     return x
 
 

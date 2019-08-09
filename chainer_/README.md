@@ -111,6 +111,7 @@ Some remarks:
 
 | Model | Top1 | Top5 | Params | FLOPs/2 | Remarks |
 | --- | ---: | ---: | ---: | ---: | --- |
+| AlexNet | 40.46 | 17.70 | 62,378,344 | 1,132.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.394/alexnet-1770-409d189a.npz.log)) |
 | AlexNet-b | 41.04 | 18.58 | 61,100,840 | 714.83M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.384/alexnetb-1858-fc907758.npz.log)) |
 | VGG-11 | 29.60 | 10.17 | 132,863,336 | 7,615.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.381/vgg11-1017-7934dcf0.npz.log)) |
 | VGG-13 | 28.47 | 9.52 | 133,047,848 | 11,317.65M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.388/vgg13-0952-f6af5a26.npz.log)) |

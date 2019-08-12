@@ -66,11 +66,11 @@ def dense_unit(x,
 
     use_dropout = (dropout_rate != 0.0)
     if use_dropout:
-        x = tf.layers.dropout(
-            inputs=x,
+        x = tf.keras.layers.Dropout(
             rate=dropout_rate,
-            training=training,
-            name=name + "dropout")
+            name=name + "dropout")(
+            inputs=x,
+            training=training)
 
     x = tf.concat([identity, x], axis=get_channel_axis(data_format), name=name + "/concat")
     return x
@@ -113,12 +113,11 @@ def transition_block(x,
         training=training,
         data_format=data_format,
         name=name + "/conv")
-    x = tf.layers.average_pooling2d(
-        inputs=x,
+    x = tf.keras.layers.AveragePooling2D(
         pool_size=2,
         strides=2,
         data_format=data_format,
-        name=name + "/pool")
+        name=name + "/pool")(x)
     return x
 
 
@@ -214,21 +213,19 @@ class DenseNet(object):
             training=training,
             data_format=self.data_format,
             name="features/post_activ")
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=7,
             strides=1,
             data_format=self.data_format,
-            name="features/final_pool")
+            name="features/final_pool")(x)
 
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,
             data_format=self.data_format)
-        x = tf.layers.dense(
-            inputs=x,
+        x = tf.keras.layers.Dense(
             units=self.classes,
-            name="output")
+            name="output")(x)
 
         return x
 

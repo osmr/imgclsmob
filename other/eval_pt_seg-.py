@@ -6,7 +6,7 @@ from common.logger_utils import initialize_logging
 from pytorch.model_stats import measure_model
 from pytorch.seg_utils import add_dataset_parser_arguments, get_test_data_loader, get_metainfo, validate1
 from pytorch.utils import prepare_pt_context, prepare_model, calc_net_weight_count
-from pytorch.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from pytorch.metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def parse_args():

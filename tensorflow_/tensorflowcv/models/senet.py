@@ -320,26 +320,24 @@ class SENet(object):
                     data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=7,
             strides=1,
             data_format=self.data_format,
-            name="features/final_pool")
+            name="features/final_pool")(x)
 
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,
             data_format=self.data_format)
-        x = tf.layers.dropout(
-            inputs=x,
+        x = tf.keras.layers.Dropout(
             rate=0.2,
-            training=training,
-            name="output/dropout")
-        x = tf.layers.dense(
+            name="output/dropout")(
             inputs=x,
+            training=training)
+        x = tf.keras.layers.Dense(
             units=self.classes,
-            name="output/fc")
+            name="output/fc")(x)
 
         return x
 

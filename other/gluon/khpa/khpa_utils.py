@@ -183,7 +183,7 @@ def validate(metric_calc,
         labels_list_ = [Y.reshape(-1,) for Y in labels_list]
         onehot_outputs_list_ = [Y.reshape(-1, 2) for Y in onehot_outputs_list]
         metric_calc.update(
-            labels=labels_list_,
-            preds=onehot_outputs_list_)
+            src_pts=labels_list_,
+            dst_pts=onehot_outputs_list_)
     metric_name_value = metric_calc.get()
     return metric_name_value

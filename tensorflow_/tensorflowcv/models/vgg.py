@@ -39,16 +39,15 @@ def vgg_dense(x,
         Resulted tensor.
     """
     assert (in_channels > 0)
-    x = tf.layers.dense(
-        inputs=x,
+    x = tf.keras.layers.Dense(
         units=out_channels,
-        name=name + "/fc")
+        name=name + "/fc")(x)
     x = tf.nn.relu(x, name=name + "/activ")
-    x = tf.layers.dropout(
-        inputs=x,
+    x = tf.keras.layers.Dropout(
         rate=0.5,
-        training=training,
-        name=name + "/dropout")
+        name=name + "/dropout")(
+        inputs=x,
+        training=training)
     return x
 
 
@@ -92,10 +91,9 @@ def vgg_output_block(x,
         out_channels=mid_channels,
         training=training,
         name=name + "/fc2")
-    x = tf.layers.dense(
-        inputs=x,
+    x = tf.keras.layers.Dense(
         units=classes,
-        name=name + "/fc3")
+        name=name + "/fc3")(x)
     return x
 
 

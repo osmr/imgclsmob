@@ -421,8 +421,8 @@ def train_epoch(epoch,
         train_loss += sum([loss.mean().asscalar() for loss in loss_list]) / len(loss_list)
 
         train_metric.update(
-            labels=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
-            preds=outputs_list)
+            src_pts=(labels_list if not (mixup or label_smoothing) else labels_list_inds),
+            dst_pts=outputs_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)

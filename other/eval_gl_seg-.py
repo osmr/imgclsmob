@@ -10,7 +10,7 @@ from gluon.seg_utils1 import add_dataset_parser_arguments, get_metainfo
 from gluon.seg_utils1 import batch_fn
 from gluon.seg_utils1 import get_test_data_source
 from gluon.seg_utils1 import validate1
-from gluon.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from gluon.metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def add_eval_seg_parser_arguments(parser):

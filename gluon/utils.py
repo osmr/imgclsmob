@@ -4,8 +4,8 @@ import logging
 import numpy as np
 import mxnet as mx
 from .gluoncv2.model_provider import get_model
-from .cls_metrics import Top1Error, TopKError
-from .seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.cls_metrics import Top1Error, TopKError
+from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def prepare_mx_context(num_gpus,

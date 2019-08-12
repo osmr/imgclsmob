@@ -8,6 +8,7 @@ from common.logger_utils import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_val_data_source
+from pytorch.metrics.ret_metrics import PointDetectionMeanResidual
 
 
 def add_eval_parser_arguments(parser):
@@ -196,6 +197,8 @@ def calc_detector_repeatability(test_data,
     repeatabilities = []
     n1s = []
     n2s = []
+    metric = PointDetectionMeanResidual()
+    metric.reset()
     with torch.no_grad():
         for data_src, data_dst, target in test_data:
             if use_cuda:
@@ -205,26 +208,34 @@ def calc_detector_repeatability(test_data,
             dst_pts, dst_confs, dst_desc_map = net(data_dst)
             src_shape = data_src.cpu().detach().numpy().shape[2:]
             dst_shape = data_dst.cpu().detach().numpy().shape[2:]
-            for i in range(len(src_pts)):
-                homography = target.cpu().detach().numpy()
-
-                src_pts_np = src_pts[i].cpu().detach().numpy()
-                src_confs_np = src_confs[i].cpu().detach().numpy()
-
-                dst_pts_np = dst_pts[i].cpu().detach().numpy()
-                dst_confs_np = dst_confs[i].cpu().detach().numpy()
-
-                n1, n2, repeatability = calc_repeatability_np(
-                    src_pts_np,
-                    src_confs_np,
-                    dst_pts_np,
-                    dst_confs_np,
-                    homography,
-                    src_shape,
-                    dst_shape)
-                n1s.append(n1)
-                n2s.append(n2)
-                repeatabilities.append(repeatability)
+            # for i in range(len(src_pts)):
+            #     homography = target.cpu().detach().numpy()
+            #
+            #     src_pts_np = src_pts[i].cpu().detach().numpy()
+            #     src_confs_np = src_confs[i].cpu().detach().numpy()
+            #
+            #     dst_pts_np = dst_pts[i].cpu().detach().numpy()
+            #     dst_confs_np = dst_confs[i].cpu().detach().numpy()
+            #
+            #     n1, n2, repeatability = calc_repeatability_np(
+            #         src_pts_np,
+            #         src_confs_np,
+            #         dst_pts_np,
+            #         dst_confs_np,
+            #         homography,
+            #         src_shape,
+            #         dst_shape)
+            #     n1s.append(n1)
+            #     n2s.append(n2)
+            #     repeatabilities.append(repeatability)
+            metric.update(
+                homography=target,
+                src_pts=src_pts,
+                dst_pts=dst_pts,
+                src_confs=src_confs,
+                dst_confs=dst_confs,
+                src_img_size=src_shape,
+                dst_img_size=dst_shape)
 
     logging.info("Average number of points in the first image: {}".format(np.mean(n1s)))
     logging.info("Average number of points in the second image: {}".format(np.mean(n2s)))

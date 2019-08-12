@@ -3,9 +3,9 @@ import os
 import numpy as np
 import torch.utils.data
 from .pytorchcv.model_provider import get_model
-from .metric import EvalMetric, CompositeEvalMetric
-from .cls_metrics import Top1Error, TopKError
-from .seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.metric import EvalMetric, CompositeEvalMetric
+from .metrics.cls_metrics import Top1Error, TopKError
+from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def prepare_pt_context(num_gpus,

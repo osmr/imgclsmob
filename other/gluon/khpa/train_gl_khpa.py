@@ -387,8 +387,8 @@ def train_epoch(epoch,
         labels_list_ = [Y.reshape(-1,) for Y in labels_list]
         onehot_outputs_list_ = [Y.reshape(-1, 2) for Y in onehot_outputs_list]
         metric_calc.update(
-            labels=labels_list_,
-            preds=onehot_outputs_list_)
+            src_pts=labels_list_,
+            dst_pts=onehot_outputs_list_)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)

@@ -161,12 +161,11 @@ class DarkNet(object):
             name="output/final_conv")
         if self.cls_activ:
             x = tf.nn.leaky_relu(x, alpha=self.alpha, name="output/final_activ")
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=self.avg_pool_size,
             strides=1,
             data_format=self.data_format,
-            name="output/final_pool")
+            name="output/final_pool")(x)
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,

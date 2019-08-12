@@ -122,11 +122,11 @@ def channet_conv(x,
         data_format=data_format,
         name=name + "/conv")
     if dropout_rate > 0.0:
-        x = tf.layers.dropout(
-            inputs=x,
+        x = tf.keras.layers.Dropout(
             rate=dropout_rate,
-            training=training,
-            name=name + "/dropout")
+            name=name + "/dropout")(
+            inputs=x,
+            training=training)
     x = batchnorm(
         x=x,
         training=training,
@@ -403,21 +403,20 @@ def channelwise_conv2d(x,
     filters = groups
     kernel_size = [4 * groups, 1, 1]
     strides = [groups, 1, 1]
-    x = tf.layers.conv3d(
-        inputs=x,
+    x = tf.keras.layers.Conv3D(
         filters=filters,
         kernel_size=kernel_size,
         strides=strides,
         padding="same",
         data_format=data_format,
         use_bias=False,
-        name=name + '/conv')
+        name=name + '/conv')(x)
     if dropout_rate > 0.0:
-        x = tf.layers.dropout(
-            inputs=x,
+        x = tf.keras.layers.Dropout(
             rate=dropout_rate,
-            training=training,
-            name=name + "/dropout")
+            name=name + "/dropout")(
+            inputs=x,
+            training=training)
     if filters == 1:
         x = tf.squeeze(x, axis=[get_channel_axis(data_format)], name=name + '/squeeze')
     x = tf.unstack(x, axis=get_channel_axis(data_format), name=name + '/unstack')
@@ -685,21 +684,19 @@ class ChannelNet(object):
                 else:
                     in_channels = out_channels[-1]
 
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=7,
             strides=1,
             data_format=self.data_format,
-            name="features/final_pool")
+            name="features/final_pool")(x)
 
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,
             data_format=self.data_format)
-        x = tf.layers.dense(
-            inputs=x,
+        x = tf.keras.layers.Dense(
             units=self.classes,
-            name="output")
+            name="output")(x)
 
         return x
 
@@ -766,7 +763,7 @@ def channelnet(**kwargs):
 def _test():
     import numpy as np
 
-    data_format = "channels_last"
+    data_format = "channels_first"
     pretrained = False
 
     models = [

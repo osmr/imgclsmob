@@ -14,7 +14,7 @@ from chainer_.seg_utils1 import add_dataset_parser_arguments
 from chainer_.seg_utils1 import get_test_dataset
 from chainer_.seg_utils1 import SegPredictor
 from chainer_.seg_utils1 import get_metainfo
-from chainer_.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from chainer_.metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def parse_args():

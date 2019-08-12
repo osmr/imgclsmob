@@ -175,12 +175,11 @@ class MobileNetV2(object):
             data_format=self.data_format,
             name="features/final_block")
         in_channels = self.final_block_channels
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=7,
             strides=1,
             data_format=self.data_format,
-            name="features/final_pool")
+            name="features/final_pool")(x)
 
         x = conv1x1(
             x=x,

@@ -262,11 +262,11 @@ class SqueezeNet(object):
                     data_format=self.data_format,
                     name="features/stage{}/unit{}".format(i + 1, j + 1))
                 in_channels = out_channels
-        x = tf.layers.dropout(
-            inputs=x,
+        x = tf.keras.layers.Dropout(
             rate=0.5,
-            training=training,
-            name="features/dropout")
+            name="features/dropout")(
+            inputs=x,
+            training=training)
 
         x = conv2d(
             x=x,
@@ -276,12 +276,11 @@ class SqueezeNet(object):
             data_format=self.data_format,
             name="output/final_conv")
         x = tf.nn.relu(x, name="output/final_activ")
-        x = tf.layers.average_pooling2d(
-            inputs=x,
+        x = tf.keras.layers.AveragePooling2D(
             pool_size=13,
             strides=1,
             data_format=self.data_format,
-            name="output/final_pool")
+            name="output/final_pool")(x)
         # x = tf.layers.flatten(x)
         x = flatten(
             x=x,

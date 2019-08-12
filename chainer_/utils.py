@@ -6,9 +6,9 @@ from chainer.function import no_backprop_mode
 from chainer.backends.cuda import to_cpu
 from chainer.serializers import load_npz
 from .chainercv2.model_provider import get_model
-from .metric import EvalMetric, CompositeEvalMetric
-from .cls_metrics import Top1Error, TopKError
-from .seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.metric import EvalMetric, CompositeEvalMetric
+from .metrics.cls_metrics import Top1Error, TopKError
+from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def prepare_ch_context(num_gpus):

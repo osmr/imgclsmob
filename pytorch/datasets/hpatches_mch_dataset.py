@@ -77,7 +77,7 @@ class HPatches(data.Dataset):
         #         fy=0.5,
         #         interpolation=cv2.INTER_AREA)
         # print("W-Image shape: {}".format(warped_image.shape))
-        homography = self.homographies[index]
+        homography = self.homographies[index].astype(np.float32)
 
         if self.transform is not None:
             image = self.transform(image)

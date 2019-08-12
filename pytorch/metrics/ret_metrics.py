@@ -63,10 +63,10 @@ class PointDetectionMeanResidual(EvalMetric):
             Confidences for detected points on the source image.
         dst_confs : torch.Tensor
             Confidences for detected points on the destination image.
-        src_img_size : torch.Tensor
-            Size (H,W) of the source image.
-        dst_img_size : torch.Tensor
-            Size (H,W) of the destination image.
+        src_img_size : tuple of 2 int
+            Size (H, W) of the source image.
+        dst_img_size : tuple of 2 int
+            Size (H, W) of the destination image.
         """
         from scipy.optimize import linear_sum_assignment
 
@@ -85,7 +85,7 @@ class PointDetectionMeanResidual(EvalMetric):
                 src_img_size)
             src_pts_count = src_hmg_pts.shape[1]
             dst_pts_count = dst_hmg_pts.shape[1]
-            pts_count = min(src_pts_count, dst_pts_count, 300)
+            pts_count = min(src_pts_count, dst_pts_count, 100)
             assert (pts_count > 0)
             self.filter_best_points(
                 src_hmg_pts,
@@ -112,7 +112,7 @@ class PointDetectionMeanResidual(EvalMetric):
 
     @staticmethod
     def calc_homogeneous_coords(pts):
-        hmg_pts = np.concatenate([pts, np.ones((pts.shape[0], 1))], axis=1)
+        hmg_pts = torch.cat((pts, torch.ones((pts.shape[0], 1), dtype=pts.dtype, device=pts.device)), dim=1)
         return hmg_pts
 
     @staticmethod

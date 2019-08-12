@@ -230,10 +230,10 @@ def calc_detector_repeatability(test_data,
             #     repeatabilities.append(repeatability)
             metric.update(
                 homography=target,
-                src_pts=src_pts,
-                dst_pts=dst_pts,
-                src_confs=src_confs,
-                dst_confs=dst_confs,
+                src_pts=src_pts[0],
+                dst_pts=dst_pts[0],
+                src_confs=src_confs[0],
+                dst_confs=dst_confs[0],
                 src_img_size=src_shape,
                 dst_img_size=dst_shape)
 

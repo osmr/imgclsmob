@@ -371,8 +371,8 @@ def train_epoch(epoch,
         train_loss += loss.item()
 
         train_metric.update(
-            src_pts=target,
-            dst_pts=output)
+            labels=target,
+            preds=output)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)

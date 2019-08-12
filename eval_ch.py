@@ -144,8 +144,8 @@ def test(net,
     else:
         import numpy as np
         metric.update(
-            src_pts=np.array(list(rest_values[0])),
-            dst_pts=np.array(list(out_values[0])))
+            labels=np.array(list(rest_values[0])),
+            preds=np.array(list(out_values[0])))
 
     accuracy_msg = report_accuracy(
         metric=metric,

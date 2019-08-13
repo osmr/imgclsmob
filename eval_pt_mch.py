@@ -228,7 +228,7 @@ def calc_detector_repeatability(test_data,
             #     n1s.append(n1)
             #     n2s.append(n2)
             #     repeatabilities.append(repeatability)
-            metric.update(
+            metric.update_alt(
                 homography=target,
                 src_pts=src_pts[0],
                 dst_pts=dst_pts[0],

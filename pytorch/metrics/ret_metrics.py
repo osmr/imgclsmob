@@ -39,14 +39,14 @@ class PointDetectionMeanResidual(EvalMetric):
             has_global_stats=True)
         self.axis = axis
 
-    def update(self,
-               homography,
-               src_pts,
-               dst_pts,
-               src_confs,
-               dst_confs,
-               src_img_size,
-               dst_img_size):
+    def update_alt(self,
+                   homography,
+                   src_pts,
+                   dst_pts,
+                   src_confs,
+                   dst_confs,
+                   src_img_size,
+                   dst_img_size):
         """
         Updates the internal evaluation result.
 
@@ -70,45 +70,45 @@ class PointDetectionMeanResidual(EvalMetric):
         # from scipy.spatial.distance import pdist
         from scipy.optimize import linear_sum_assignment
 
-        with torch.no_grad():
-            src_hmg_pts = self.calc_homogeneous_coords(src_pts.float())
-            dst_hmg_pts = self.calc_homogeneous_coords(dst_pts.float())
-            self.filter_inside_points(
-                src_hmg_pts,
-                src_confs,
-                homography,
-                dst_img_size)
-            self.filter_inside_points(
-                dst_hmg_pts,
-                dst_confs,
-                homography.inverse(),
-                src_img_size)
-            src_pts_count = src_hmg_pts.shape[0]
-            dst_pts_count = dst_hmg_pts.shape[0]
-            pts_count = min(src_pts_count, dst_pts_count, 100)
-            assert (pts_count > 0)
-            src_hmg_pts = self.filter_best_points(
-                src_hmg_pts,
-                src_confs,
-                pts_count)
-            dst_hmg_pts = self.filter_best_points(
-                dst_hmg_pts,
-                dst_confs,
-                pts_count)
+        # with torch.no_grad():
+        src_hmg_pts = self.calc_homogeneous_coords(src_pts.float())
+        dst_hmg_pts = self.calc_homogeneous_coords(dst_pts.float())
+        self.filter_inside_points(
+            src_hmg_pts,
+            src_confs,
+            homography,
+            dst_img_size)
+        self.filter_inside_points(
+            dst_hmg_pts,
+            dst_confs,
+            homography.inverse(),
+            src_img_size)
+        src_pts_count = src_hmg_pts.shape[0]
+        dst_pts_count = dst_hmg_pts.shape[0]
+        pts_count = min(src_pts_count, dst_pts_count, 100)
+        assert (pts_count > 0)
+        src_hmg_pts = self.filter_best_points(
+            src_hmg_pts,
+            src_confs,
+            pts_count)
+        dst_hmg_pts = self.filter_best_points(
+            dst_hmg_pts,
+            dst_confs,
+            pts_count)
 
-            preds_dst_hmg_pts = self.transform_points(
-                src_hmg_pts,
-                homography)
+        preds_dst_hmg_pts = self.transform_points(
+            src_hmg_pts,
+            homography)
 
-            cost = torch.pairwise_distance(x1=preds_dst_hmg_pts, x2=dst_hmg_pts).cpu().detach().numpy()
-            row_ind, col_ind = linear_sum_assignment(cost)
-            mean_resudual = cost[row_ind, col_ind].sum()
-            mean_resudual *= (100.0 / dst_img_size[0])
+        cost = torch.pairwise_distance(x1=preds_dst_hmg_pts, x2=dst_hmg_pts).cpu().detach().numpy()
+        row_ind, col_ind = linear_sum_assignment(cost)
+        mean_resudual = cost[row_ind, col_ind].sum()
+        mean_resudual *= (100.0 / dst_img_size[0])
 
-            self.sum_metric += mean_resudual
-            self.global_sum_metric += mean_resudual
-            self.num_inst += 1
-            self.global_num_inst += 1
+        self.sum_metric += mean_resudual
+        self.global_sum_metric += mean_resudual
+        self.num_inst += 1
+        self.global_num_inst += 1
 
     @staticmethod
     def calc_homogeneous_coords(pts):

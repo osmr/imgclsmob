@@ -2,9 +2,8 @@
 Evaluation Metrics for Image Retrieval.
 """
 
-import numpy as np
+# import numpy as np
 import torch
-from torch import functional as F
 from .metric import EvalMetric
 
 __all__ = ['PointDetectionMeanResidual']
@@ -68,11 +67,12 @@ class PointDetectionMeanResidual(EvalMetric):
         dst_img_size : tuple of 2 int
             Size (H, W) of the destination image.
         """
+        # from scipy.spatial.distance import pdist
         from scipy.optimize import linear_sum_assignment
 
         with torch.no_grad():
-            src_hmg_pts = self.calc_homogeneous_coords(src_pts)
-            dst_hmg_pts = self.calc_homogeneous_coords(dst_pts)
+            src_hmg_pts = self.calc_homogeneous_coords(src_pts.float())
+            dst_hmg_pts = self.calc_homogeneous_coords(dst_pts.float())
             self.filter_inside_points(
                 src_hmg_pts,
                 src_confs,
@@ -83,15 +83,15 @@ class PointDetectionMeanResidual(EvalMetric):
                 dst_confs,
                 homography.inverse(),
                 src_img_size)
-            src_pts_count = src_hmg_pts.shape[1]
-            dst_pts_count = dst_hmg_pts.shape[1]
+            src_pts_count = src_hmg_pts.shape[0]
+            dst_pts_count = dst_hmg_pts.shape[0]
             pts_count = min(src_pts_count, dst_pts_count, 100)
             assert (pts_count > 0)
-            self.filter_best_points(
+            src_hmg_pts = self.filter_best_points(
                 src_hmg_pts,
                 src_confs,
                 pts_count)
-            self.filter_best_points(
+            dst_hmg_pts = self.filter_best_points(
                 dst_hmg_pts,
                 dst_confs,
                 pts_count)
@@ -100,7 +100,7 @@ class PointDetectionMeanResidual(EvalMetric):
                 src_hmg_pts,
                 homography)
 
-            cost = F.pairwise_distance(preds_dst_hmg_pts, dst_hmg_pts, 2, 1e-6, False).cpu().detach().numpy()
+            cost = torch.pairwise_distance(x1=preds_dst_hmg_pts, x2=dst_hmg_pts).cpu().detach().numpy()
             row_ind, col_ind = linear_sum_assignment(cost)
             mean_resudual = cost[row_ind, col_ind].sum()
             mean_resudual *= (100.0 / dst_img_size[0])
@@ -123,7 +123,7 @@ class PointDetectionMeanResidual(EvalMetric):
     @staticmethod
     def transform_points(src_hmg_pts,
                          homography):
-        dst_hmg_pts = np.dot(src_hmg_pts, homography).squeeze(axis=2)
+        dst_hmg_pts = torch.matmul(src_hmg_pts, homography).squeeze(dim=0)
         dst_hmg_pts /= dst_hmg_pts[:, 2:]
         return dst_hmg_pts
 
@@ -140,13 +140,12 @@ class PointDetectionMeanResidual(EvalMetric):
                              dst_img_size):
         dst_hmg_pts = PointDetectionMeanResidual.transform_points(src_hmg_pts, homography)
         mask = PointDetectionMeanResidual.calc_outside_pts_mask(dst_hmg_pts, dst_img_size)
-        src_hmg_pts[:] = src_hmg_pts[mask, :]
-        src_confs[:] = src_confs[mask, :]
+        src_hmg_pts[:] = src_hmg_pts[mask]
+        src_confs[:] = src_confs[mask]
 
     @staticmethod
     def filter_best_points(hmg_pts,
                            confs,
                            max_count):
-        inds = confs.argsort()[::-1][:max_count]
-        hmg_pts[:] = hmg_pts[inds, :]
-        confs[:] = confs[inds]
+        inds = confs.argsort(descending=True)[:max_count]
+        return hmg_pts[inds]

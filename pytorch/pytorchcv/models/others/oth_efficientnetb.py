@@ -103,8 +103,7 @@ def _cfg(url='', **kwargs):
         'crop_pct': 0.875, 'interpolation': 'bicubic',
         'mean': IMAGENET_DEFAULT_MEAN, 'std': IMAGENET_DEFAULT_STD,
         'first_conv': 'conv_stem', 'classifier': 'classifier',
-        **kwargs
-    }
+    }.update(**kwargs)
 
 
 default_cfgs = {
@@ -373,17 +372,17 @@ class _BlockBuilder:
             ba['drop_connect_rate'] = self.drop_connect_rate * self.block_idx / self.block_count
             ba['se_gate_fn'] = self.se_gate_fn
             ba['se_reduce_mid'] = self.se_reduce_mid
-            if self.verbose:
-                logging.info('  InvertedResidual {}, Args: {}'.format(self.block_idx, str(ba)))
+            # if self.verbose:
+            #     logging.info('  InvertedResidual {}, Args: {}'.format(self.block_idx, str(ba)))
             block = InvertedResidual(**ba)
         elif bt == 'ds' or bt == 'dsa':
             ba['drop_connect_rate'] = self.drop_connect_rate * self.block_idx / self.block_count
-            if self.verbose:
-                logging.info('  DepthwiseSeparable {}, Args: {}'.format(self.block_idx, str(ba)))
+            # if self.verbose:
+            #     logging.info('  DepthwiseSeparable {}, Args: {}'.format(self.block_idx, str(ba)))
             block = DepthwiseSeparableConv(**ba)
         elif bt == 'cn':
-            if self.verbose:
-                logging.info('  ConvBnAct {}, Args: {}'.format(self.block_idx, str(ba)))
+            # if self.verbose:
+            #     logging.info('  ConvBnAct {}, Args: {}'.format(self.block_idx, str(ba)))
             block = ConvBnAct(**ba)
         else:
             assert False, 'Uknkown block type (%s) while building model.' % bt
@@ -395,8 +394,8 @@ class _BlockBuilder:
         blocks = []
         # each stack (stage) contains a list of block arguments
         for i, ba in enumerate(stack_args):
-            if self.verbose:
-                logging.info(' Block: {}'.format(i))
+            # if self.verbose:
+            #     logging.info(' Block: {}'.format(i))
             if i >= 1:
                 # only the first block in any stack can have a stride > 1
                 ba['stride'] = 1
@@ -414,16 +413,16 @@ class _BlockBuilder:
         Return:
              List of block stacks (each stack wrapped in nn.Sequential)
         """
-        if self.verbose:
-            logging.info('Building model trunk with %d stages...' % len(block_args))
+        # if self.verbose:
+        #     logging.info('Building model trunk with %d stages...' % len(block_args))
         self.in_chs = in_chs
         self.block_count = sum([len(x) for x in block_args])
         self.block_idx = 0
         blocks = []
         # outer list of block_args defines the stacks ('stages' by some conventions)
         for stack_idx, stack in enumerate(block_args):
-            if self.verbose:
-                logging.info('Stack: {}'.format(stack_idx))
+            # if self.verbose:
+            #     logging.info('Stack: {}'.format(stack_idx))
             assert isinstance(stack, list)
             stack = self._make_stack(stack)
             blocks.append(stack)
@@ -754,7 +753,6 @@ class GenEfficientNet(nn.Module):
         if self.drop_rate > 0.:
             x = F.dropout(x, p=self.drop_rate, training=self.training)
         return self.classifier(x)
-
 
 
 def _gen_efficientnet(channel_multiplier=1.0, depth_multiplier=1.0, num_classes=1000, **kwargs):

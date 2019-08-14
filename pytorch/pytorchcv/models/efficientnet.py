@@ -703,14 +703,14 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
                             **kwargs)
 
 
-def efficientnet_b4b(in_size=(300, 300), **kwargs):
+def efficientnet_b4b(in_size=(380, 380), **kwargs):
     """
     EfficientNet-B4-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple of two ints, default (380, 380)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -721,14 +721,14 @@ def efficientnet_b4b(in_size=(300, 300), **kwargs):
                             **kwargs)
 
 
-def efficientnet_b5b(in_size=(300, 300), **kwargs):
+def efficientnet_b5b(in_size=(456, 456), **kwargs):
     """
     EfficientNet-B5-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple of two ints, default (456, 456)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -739,14 +739,14 @@ def efficientnet_b5b(in_size=(300, 300), **kwargs):
                             **kwargs)
 
 
-def efficientnet_b6b(in_size=(300, 300), **kwargs):
+def efficientnet_b6b(in_size=(528, 528), **kwargs):
     """
     EfficientNet-B6-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple of two ints, default (528, 528)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
@@ -757,14 +757,14 @@ def efficientnet_b6b(in_size=(300, 300), **kwargs):
                             **kwargs)
 
 
-def efficientnet_b7b(in_size=(300, 300), **kwargs):
+def efficientnet_b7b(in_size=(600, 600), **kwargs):
     """
     EfficientNet-B7-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
     Neural Networks,' https://arxiv.org/abs/1905.11946.
 
     Parameters:
     ----------
-    in_size : tuple of two ints, default (300, 300)
+    in_size : tuple of two ints, default (600, 600)
         Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.

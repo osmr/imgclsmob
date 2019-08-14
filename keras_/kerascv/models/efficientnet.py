@@ -744,7 +744,7 @@ def efficientnet_b4b(in_size=(380, 380), **kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4b",
+    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b4b",
                             **kwargs)
 
 
@@ -762,7 +762,7 @@ def efficientnet_b5b(in_size=(456, 456), **kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5b",
+    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b5b",
                             **kwargs)
 
 
@@ -780,7 +780,7 @@ def efficientnet_b6b(in_size=(528, 528), **kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6b",
+    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b6b",
                             **kwargs)
 
 
@@ -798,7 +798,7 @@ def efficientnet_b7b(in_size=(600, 600), **kwargs):
     root : str, default '~/.keras/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7b",
+    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b7b",
                             **kwargs)
 
 

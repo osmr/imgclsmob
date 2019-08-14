@@ -6,7 +6,8 @@
 
 __all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
            'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b0b',
-           'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b']
+           'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b', 'efficientnet_b5b',
+           'efficientnet_b6b', 'efficientnet_b7b']
 
 import os
 import math
@@ -397,7 +398,6 @@ def get_efficientnet(version,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     if version == "b0":
         assert (in_size == (224, 224))
         depth_factor = 1.0
@@ -703,6 +703,78 @@ def efficientnet_b3b(in_size=(300, 300), **kwargs):
                             **kwargs)
 
 
+def efficientnet_b4b(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B4-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4b",
+                            **kwargs)
+
+
+def efficientnet_b5b(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B5-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5b",
+                            **kwargs)
+
+
+def efficientnet_b6b(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B6-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6b",
+                            **kwargs)
+
+
+def efficientnet_b7b(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B7-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
+    Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7b",
+                            **kwargs)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -730,6 +802,10 @@ def _test():
         efficientnet_b1b,
         efficientnet_b2b,
         efficientnet_b3b,
+        efficientnet_b4b,
+        efficientnet_b5b,
+        efficientnet_b6b,
+        efficientnet_b7b,
     ]
 
     for model in models:
@@ -752,6 +828,10 @@ def _test():
         assert (model != efficientnet_b1b or weight_count == 7794184)
         assert (model != efficientnet_b2b or weight_count == 9109994)
         assert (model != efficientnet_b3b or weight_count == 12233232)
+        assert (model != efficientnet_b4b or weight_count == 19341616)
+        assert (model != efficientnet_b5b or weight_count == 30389784)
+        assert (model != efficientnet_b6b or weight_count == 43040704)
+        assert (model != efficientnet_b7b or weight_count == 66347960)
 
         x = torch.randn(1, 3, net.in_size[0], net.in_size[1])
         y = net(x)

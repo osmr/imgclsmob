@@ -102,6 +102,8 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 # from .models.others.oth_superpointnet import *
+from .models.others.oth_efficientnetb import *
+
 
 __all__ = ['get_model']
 
@@ -516,6 +518,10 @@ _models = {
     'efficientnet_b1b': efficientnet_b1b,
     'efficientnet_b2b': efficientnet_b2b,
     'efficientnet_b3b': efficientnet_b3b,
+    'efficientnet_b4b': efficientnet_b4b,
+    'efficientnet_b5b': efficientnet_b5b,
+    'efficientnet_b6b': efficientnet_b6b,
+    'efficientnet_b7b': efficientnet_b7b,
 
     'nin_cifar10': nin_cifar10,
     'nin_cifar100': nin_cifar100,
@@ -889,6 +895,15 @@ _models = {
 
     'superpointnet': superpointnet,
     # 'oth_superpointnet': oth_superpointnet,
+
+    'oth_efficientnet_b0_tf': oth_efficientnet_b0_tf,
+    'oth_efficientnet_b1_tf': oth_efficientnet_b1_tf,
+    'oth_efficientnet_b2_tf': oth_efficientnet_b2_tf,
+    'oth_efficientnet_b3_tf': oth_efficientnet_b3_tf,
+    'oth_efficientnet_b4_tf': oth_efficientnet_b4_tf,
+    'oth_efficientnet_b5_tf': oth_efficientnet_b5_tf,
+    'oth_efficientnet_b6_tf': oth_efficientnet_b6_tf,
+    'oth_efficientnet_b7_tf': oth_efficientnet_b7_tf,
 }
 
 

@@ -70,6 +70,7 @@ Some remarks:
 | AlexNet | 40.44 | 17.88 | 62,378,344 | 1,132.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.394/alexnet-1788-d3cd2a5a.tf.npz.log)) |
 | AlexNet-b | 41.05 | 18.53 | 61,100,840 | 714.83M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.384/alexnetb-1853-58a51cd1.tf.npz.log)) |
 | ZFNet | 39.51 | 17.15 | 62,357,608 | 1,170.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.395/zfnet-1715-a18747ef.tf.npz.log)) |
+| ZFNet-b | 36.30 | 14.82 | 107,627,624 | 2,479.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.400/zfnetb-1482-2624da31.tf.npz.log)) |
 | VGG-11 | 29.58 | 10.15 | 132,863,336 | 7,615.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.381/vgg11-1015-b87e9dbc.tf.npz.log)) |
 | VGG-13 | 28.34 | 9.46 | 133,047,848 | 11,317.65M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.388/vgg13-0946-f1411e1f.tf.npz.log)) |
 | VGG-16 | 26.77 | 8.68 | 138,357,544 | 15,480.10M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.122/vgg16-0868-f6cadf2c.tf.npz.log)) |

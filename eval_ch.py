@@ -129,18 +129,23 @@ def test(net,
         weight_count = net.count_params()
         logging.info("Model: {} trainable parameters".format(weight_count))
 
-    _, out_values, rest_values = apply_to_iterator(
+    in_values, out_values, rest_values = apply_to_iterator(
         func=predictor,
         iterator=test_data["iterator"],
         hook=ProgressHook(test_data["ds_len"]))
     assert (len(rest_values) == 1)
     assert (len(out_values) == 1)
+    assert (len(in_values) == 1)
 
-    if False:
+    if True:
         labels = iter(rest_values[0])
         preds = iter(out_values[0])
-        for label, pred in zip(labels, preds):
+        inputs = iter(in_values[0])
+        for label, pred, inputi in zip(labels, preds, inputs):
             metric.update(label, pred)
+            del label
+            del pred
+            del inputi
     else:
         import numpy as np
         metric.update(

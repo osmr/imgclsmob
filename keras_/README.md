@@ -211,10 +211,14 @@ Some remarks:
 | MnasNet | 31.30 | 11.45 | 4,308,816 | 317.67M | From [zeusees/Mnasnet...Model] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.117/mnasnet-1145-11b6acf1.h5.log)) |
 | EfficientNet-B0 | 24.50 | 7.22 | 5,288,548 | 414.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.364/efficientnet_b0-0722-2bea741f.h5.log)) |
 | EfficientNet-B1 | 22.89 | 6.26 | 7,794,184 | 732.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.376/efficientnet_b1-0626-d7a4bf8b.h5.log)) |
-| EfficientNet-B0b | 23.41 | 6.97 | 5,288,548 | 414.31M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.350/efficientnet_b0b-0697-208e6435.h5.log)) |
-| EfficientNet-B1b | 21.56 | 5.90 | 7,794,184 | 608.59M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.350/efficientnet_b1b-0590-aeeb9860.h5.log)) |
-| EfficientNet-B2b | 20.66 | 5.28 | 9,109,994 | 699.46M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.350/efficientnet_b2b-0528-1ea7882d.h5.log)) |
-| EfficientNet-B3b | 19.45 | 4.86 | 12,233,232 | 1,016.10M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.350/efficientnet_b3b-0486-4e80d79b.h5.log)) |
+| EfficientNet-B0b | 22.95 | 6.69 | 5,288,548 | 414.31M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b0b-0669-436cc024.h5.log)) |
+| EfficientNet-B1b | 20.97 | 5.64 | 7,794,184 | 732.54M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b1b-0564-f2eb3cd8.h5.log)) |
+| EfficientNet-B2b | 19.93 | 5.16 | 9,109,994 | 1,051.98M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b2b-0516-9c08b839.h5.log)) |
+| EfficientNet-B3b | 18.59 | 4.31 | 12,233,232 | 1,928.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b3b-0431-d1545ea0.h5.log)) |
+| EfficientNet-B4b | 17.24 | 3.76 | 19,341,616 | 4,607.46M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b4b-0376-c7e29f57.h5.log)) |
+| EfficientNet-B5b | 16.39 | 3.34 | 30,389,784 | 10,695.20M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b5b-0334-4365cf12.h5.log)) |
+| EfficientNet-B6b | 15.96 | 3.12 | 43,040,704 | 19,796.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b6b-0312-7f3f3465.h5.log)) |
+| EfficientNet-B7b | 15.70 | 3.11 | 66,347,960 | 39,010.98M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.403/efficientnet_b7b-0311-b4aac2ce.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

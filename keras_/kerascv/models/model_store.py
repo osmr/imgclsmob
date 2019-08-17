@@ -158,10 +158,14 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mnasnet', '1145', '11b6acf13ce516b7b28875c5a6d6932a1aa0b96a', 'v0.0.117'),
     ('efficientnet_b0', '0722', '2bea741f87b9e0d85570bb3753597a11654f2f78', 'v0.0.364'),
     ('efficientnet_b1', '0626', 'd7a4bf8be529396c2375c93f50f355ee7968ab3f', 'v0.0.376'),
-    ('efficientnet_b0b', '0697', '208e6435316608d55df46d2348f5c588ff1986ce', 'v0.0.350'),
-    ('efficientnet_b1b', '0590', 'aeeb9860cdcaa5df69dc9ce0977e5dd419070db8', 'v0.0.350'),
-    ('efficientnet_b2b', '0528', '1ea7882dd30d4692bc307d35ec658c3d1324821c', 'v0.0.350'),
-    ('efficientnet_b3b', '0486', '4e80d79b50561389addf0e71dab55b772edd41eb', 'v0.0.350')]}
+    ('efficientnet_b0b', '0669', '436cc024344cb2f4160bfbc4b5fb6c23d9f96987', 'v0.0.403'),
+    ('efficientnet_b1b', '0564', 'f2eb3cd8d915f9eacc90cccf10ee02c5be7475b4', 'v0.0.403'),
+    ('efficientnet_b2b', '0516', '9c08b8392236ca0654c195bb0020b412d23340b7', 'v0.0.403'),
+    ('efficientnet_b3b', '0431', 'd1545ea07602b3e661c10b3ee246819ea80cf0b7', 'v0.0.403'),
+    ('efficientnet_b4b', '0376', 'c7e29f57ea62639cebe936bff55335caca23bf42', 'v0.0.403'),
+    ('efficientnet_b5b', '0334', '4365cf122b0a5b514347220898118b43e4d0e271', 'v0.0.403'),
+    ('efficientnet_b6b', '0312', '7f3f3465e9c2538c36c7d97997a5fea5f1883719', 'v0.0.403'),
+    ('efficientnet_b7b', '0311', 'b4aac2ceee6e22d67b5e61c46be3e34a9aedd06f', 'v0.0.403')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

@@ -596,6 +596,7 @@ Some remarks:
 | PyramidNet-164 (a=270, BN) | 2.33 | 27,216,021 | 4,608.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.396/pyramidnet164_a270_bn_svhn-0233-27b67f14.params.log)) |
 | PyramidNet-200 (a=240, BN) | 2.32 | 26,752,702 | 4,563.40M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.397/pyramidnet200_a240_bn_svhn-0232-02bf262e.params.log)) |
 | PyramidNet-236 (a=220, BN) | 2.35 | 26,969,046 | 4,631.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.398/pyramidnet236_a220_bn_svhn-0235-1a0c0711.params.log)) |
+| PyramidNet-272 (a=200, BN) | 2.40 | 26,210,842 | 4,541.36M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.404/pyramidnet272_a200_bn_svhn-0240-dcd9af34.params.log)) |
 | DenseNet-40 (k=12) | 3.05 | 599,050 | 210.80M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.278/densenet40_k12_svhn-0305-645564c1.params.log)) |
 | DenseNet-BC-40 (k=12) | 3.20 | 176,122 | 74.89M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.279/densenet40_k12_bc_svhn-0320-6f2f9824.params.log)) |
 | DenseNet-BC-40 (k=24) | 2.90 | 690,346 | 293.09M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.280/densenet40_k24_bc_svhn-0290-03e136dd.params.log)) |

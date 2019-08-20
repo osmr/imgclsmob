@@ -27,15 +27,20 @@ class Inception3x3Branch(HybridBlock):
         Number of intermediate channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the second convolution.
+    use_bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
                  mid_channels,
                  strides=1,
+                 use_bias=True,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  **kwargs):
         super(Inception3x3Branch, self).__init__(**kwargs)
@@ -43,13 +48,15 @@ class Inception3x3Branch(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 strides=strides,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -72,15 +79,20 @@ class InceptionDouble3x3Branch(HybridBlock):
         Number of intermediate channels.
     strides : int or tuple/list of 2 int, default 1
         Strides of the second convolution.
+    use_bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
                  mid_channels,
                  strides=1,
+                 use_bias=True,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  **kwargs):
         super(InceptionDouble3x3Branch, self).__init__(**kwargs)
@@ -88,18 +100,21 @@ class InceptionDouble3x3Branch(HybridBlock):
             self.conv1 = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
             self.conv3 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 strides=strides,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -119,17 +134,22 @@ class InceptionPoolBranch(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     avg_pool : bool
         Whether use average pooling or max pooling.
+    use_bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bn_use_global_stats,
                  avg_pool,
+                 use_bias,
+                 use_bn,
+                 bn_use_global_stats,
                  **kwargs):
         super(InceptionPoolBranch, self).__init__(**kwargs)
         with self.name_scope():
@@ -149,7 +169,8 @@ class InceptionPoolBranch(HybridBlock):
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -170,6 +191,10 @@ class StemBlock(HybridBlock):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
+    use_bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
@@ -177,6 +202,8 @@ class StemBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  mid_channels,
+                 use_bias,
+                 use_bn,
                  bn_use_global_stats,
                  **kwargs):
         super(StemBlock, self).__init__(**kwargs)
@@ -185,7 +212,8 @@ class StemBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=2,
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
             self.pool1 = nn.MaxPool2D(
                 pool_size=3,
@@ -196,6 +224,8 @@ class StemBlock(HybridBlock):
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 mid_channels=mid_channels,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
             self.pool2 = nn.MaxPool2D(
                 pool_size=3,
@@ -223,17 +253,23 @@ class InceptionBlock(HybridBlock):
         Number of pre-middle channels for branches.
     mid2_channels_list : list of int
         Number of middle channels for branches.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     avg_pool : bool
         Whether use average pooling or max pooling.
+    use_bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  mid1_channels_list,
                  mid2_channels_list,
-                 bn_use_global_stats,
                  avg_pool,
+                 use_bias,
+                 use_bn,
+                 bn_use_global_stats,
                  **kwargs):
         super(InceptionBlock, self).__init__(**kwargs)
         assert (len(mid1_channels_list) == 2)
@@ -244,23 +280,30 @@ class InceptionBlock(HybridBlock):
             self.branches.add(conv1x1_block(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[0],
-                use_bias=True,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(Inception3x3Branch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[1],
                 mid_channels=mid1_channels_list[0],
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(InceptionDouble3x3Branch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[2],
                 mid_channels=mid1_channels_list[1],
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(InceptionPoolBranch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[3],
-                bn_use_global_stats=bn_use_global_stats,
-                avg_pool=avg_pool))
+                avg_pool=avg_pool,
+                use_bias=use_bias,
+                use_bn=use_bn,
+                bn_use_global_stats=bn_use_global_stats))
 
     def hybrid_forward(self, F, x):
         x = self.branches(x)
@@ -279,6 +322,10 @@ class ReductionBlock(HybridBlock):
         Number of pre-middle channels for branches.
     mid2_channels_list : list of int
         Number of middle channels for branches.
+    use_bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
@@ -286,6 +333,8 @@ class ReductionBlock(HybridBlock):
                  in_channels,
                  mid1_channels_list,
                  mid2_channels_list,
+                 use_bias,
+                 use_bn,
                  bn_use_global_stats,
                  **kwargs):
         super(ReductionBlock, self).__init__(**kwargs)
@@ -299,12 +348,16 @@ class ReductionBlock(HybridBlock):
                 out_channels=mid2_channels_list[1],
                 mid_channels=mid1_channels_list[0],
                 strides=2,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(InceptionDouble3x3Branch(
                 in_channels=in_channels,
                 out_channels=mid2_channels_list[2],
                 mid_channels=mid1_channels_list[1],
                 strides=2,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             self.branches.add(nn.MaxPool2D(
                 pool_size=3,
@@ -332,6 +385,10 @@ class BNInception(HybridBlock):
         Number of pre-middle channels for each unit.
     mid2_channels_list : list of list of list of int
         Number of middle channels for each unit.
+    use_bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -347,6 +404,8 @@ class BNInception(HybridBlock):
                  init_block_channels_list,
                  mid1_channels_list,
                  mid2_channels_list,
+                 use_bias=True,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -362,6 +421,8 @@ class BNInception(HybridBlock):
                 in_channels=in_channels,
                 out_channels=init_block_channels_list[1],
                 mid_channels=init_block_channels_list[0],
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats))
             in_channels = init_block_channels_list[-1]
             for i, channels_per_stage in enumerate(channels):
@@ -375,6 +436,8 @@ class BNInception(HybridBlock):
                                 in_channels=in_channels,
                                 mid1_channels_list=mid1_channels_list_i[j],
                                 mid2_channels_list=mid2_channels_list_i[j],
+                                use_bias=use_bias,
+                                use_bn=use_bn,
                                 bn_use_global_stats=bn_use_global_stats))
                         else:
                             avg_pool = (i != len(channels) - 1) or (j != len(channels_per_stage) - 1)
@@ -382,8 +445,10 @@ class BNInception(HybridBlock):
                                 in_channels=in_channels,
                                 mid1_channels_list=mid1_channels_list_i[j],
                                 mid2_channels_list=mid2_channels_list_i[j],
-                                bn_use_global_stats=bn_use_global_stats,
-                                avg_pool=avg_pool))
+                                avg_pool=avg_pool,
+                                use_bias=use_bias,
+                                use_bn=use_bn,
+                                bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(

@@ -26,23 +26,30 @@ class Inception3x3Branch(nn.Module):
         Number of intermediate channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the second convolution.
+    bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
                  mid_channels,
-                 stride=1):
+                 stride=1,
+                 bias=True,
+                 use_bn=True):
         super(Inception3x3Branch, self).__init__()
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             stride=stride,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -64,27 +71,35 @@ class InceptionDouble3x3Branch(nn.Module):
         Number of intermediate channels.
     stride : int or tuple/list of 2 int, default 1
         Strides of the second convolution.
+    bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
                  mid_channels,
-                 stride=1):
+                 stride=1,
+                 bias=True,
+                 use_bn=True):
         super(InceptionDouble3x3Branch, self).__init__()
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
         self.conv3 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
             stride=stride,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -105,12 +120,17 @@ class InceptionPoolBranch(nn.Module):
         Number of output channels.
     avg_pool : bool
         Whether use average pooling or max pooling.
+    bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
-                 avg_pool):
+                 avg_pool,
+                 bias,
+                 use_bn):
         super(InceptionPoolBranch, self).__init__()
         if avg_pool:
             self.pool = nn.AvgPool2d(
@@ -128,7 +148,8 @@ class InceptionPoolBranch(nn.Module):
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
 
     def forward(self, x):
         x = self.pool(x)
@@ -148,17 +169,24 @@ class StemBlock(nn.Module):
         Number of output channels.
     mid_channels : int
         Number of intermediate channels.
+    bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 mid_channels):
+                 mid_channels,
+                 bias,
+                 use_bn):
         super(StemBlock, self).__init__()
         self.conv1 = conv7x7_block(
             in_channels=in_channels,
             out_channels=mid_channels,
             stride=2,
-            bias=True)
+            bias=bias,
+            use_bn=use_bn)
         self.pool1 = nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -196,12 +224,18 @@ class InceptionBlock(nn.Module):
         Number of middle channels for branches.
     avg_pool : bool
         Whether use average pooling or max pooling.
+    bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  mid1_channels_list,
                  mid2_channels_list,
-                 avg_pool):
+                 avg_pool,
+                 bias,
+                 use_bn):
         super(InceptionBlock, self).__init__()
         assert (len(mid1_channels_list) == 2)
         assert (len(mid2_channels_list) == 4)
@@ -210,19 +244,26 @@ class InceptionBlock(nn.Module):
         self.branches.add_module("branch1", conv1x1_block(
             in_channels=in_channels,
             out_channels=mid2_channels_list[0],
-            bias=True))
+            bias=bias,
+            use_bn=use_bn))
         self.branches.add_module("branch2", Inception3x3Branch(
             in_channels=in_channels,
             out_channels=mid2_channels_list[1],
-            mid_channels=mid1_channels_list[0]))
+            mid_channels=mid1_channels_list[0],
+            bias=bias,
+            use_bn=use_bn))
         self.branches.add_module("branch3", InceptionDouble3x3Branch(
             in_channels=in_channels,
             out_channels=mid2_channels_list[2],
-            mid_channels=mid1_channels_list[1]))
+            mid_channels=mid1_channels_list[1],
+            bias=bias,
+            use_bn=use_bn))
         self.branches.add_module("branch4", InceptionPoolBranch(
             in_channels=in_channels,
             out_channels=mid2_channels_list[3],
-            avg_pool=avg_pool))
+            avg_pool=avg_pool,
+            bias=bias,
+            use_bn=use_bn))
 
     def forward(self, x):
         x = self.branches(x)
@@ -241,11 +282,17 @@ class ReductionBlock(nn.Module):
         Number of pre-middle channels for branches.
     mid2_channels_list : list of int
         Number of middle channels for branches.
+    bias : bool
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool
+        Whether to use BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  mid1_channels_list,
-                 mid2_channels_list):
+                 mid2_channels_list,
+                 bias,
+                 use_bn):
         super(ReductionBlock, self).__init__()
         assert (len(mid1_channels_list) == 2)
         assert (len(mid2_channels_list) == 4)
@@ -255,12 +302,16 @@ class ReductionBlock(nn.Module):
             in_channels=in_channels,
             out_channels=mid2_channels_list[1],
             mid_channels=mid1_channels_list[0],
-            stride=2))
+            stride=2,
+            bias=bias,
+            use_bn=use_bn))
         self.branches.add_module("branch2", InceptionDouble3x3Branch(
             in_channels=in_channels,
             out_channels=mid2_channels_list[2],
             mid_channels=mid1_channels_list[1],
-            stride=2))
+            stride=2,
+            bias=bias,
+            use_bn=use_bn))
         self.branches.add_module("branch3", nn.MaxPool2d(
             kernel_size=3,
             stride=2,
@@ -287,6 +338,10 @@ class BNInception(nn.Module):
         Number of pre-middle channels for each unit.
     mid2_channels_list : list of list of list of int
         Number of middle channels for each unit.
+    bias : bool, default True
+        Whether the convolution layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layers.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -299,6 +354,8 @@ class BNInception(nn.Module):
                  init_block_channels_list,
                  mid1_channels_list,
                  mid2_channels_list,
+                 bias=True,
+                 use_bn=True,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -310,7 +367,9 @@ class BNInception(nn.Module):
         self.features.add_module("init_block", StemBlock(
             in_channels=in_channels,
             out_channels=init_block_channels_list[1],
-            mid_channels=init_block_channels_list[0]))
+            mid_channels=init_block_channels_list[0],
+            bias=bias,
+            use_bn=use_bn))
         in_channels = init_block_channels_list[-1]
         for i, channels_per_stage in enumerate(channels):
             mid1_channels_list_i = mid1_channels_list[i]
@@ -321,14 +380,18 @@ class BNInception(nn.Module):
                     stage.add_module("unit{}".format(j + 1), ReductionBlock(
                         in_channels=in_channels,
                         mid1_channels_list=mid1_channels_list_i[j],
-                        mid2_channels_list=mid2_channels_list_i[j]))
+                        mid2_channels_list=mid2_channels_list_i[j],
+                        bias=bias,
+                        use_bn=use_bn))
                 else:
                     avg_pool = (i != len(channels) - 1) or (j != len(channels_per_stage) - 1)
                     stage.add_module("unit{}".format(j + 1), InceptionBlock(
                         in_channels=in_channels,
                         mid1_channels_list=mid1_channels_list_i[j],
                         mid2_channels_list=mid2_channels_list_i[j],
-                        avg_pool=avg_pool))
+                        avg_pool=avg_pool,
+                        bias=bias,
+                        use_bn=use_bn))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("final_pool", nn.AvgPool2d(

@@ -85,7 +85,7 @@ class VGG(nn.Module):
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    use_bias : bool, default True
+    bias : bool, default True
         Whether the convolution layer uses a bias vector.
     use_bn : bool, default False
         Whether to use BatchNorm layers.
@@ -98,7 +98,7 @@ class VGG(nn.Module):
     """
     def __init__(self,
                  channels,
-                 use_bias=True,
+                 bias=True,
                  use_bn=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -114,7 +114,7 @@ class VGG(nn.Module):
                 stage.add_module("unit{}".format(j + 1), conv3x3_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    bias=use_bias,
+                    bias=bias,
                     use_bn=use_bn))
                 in_channels = out_channels
             stage.add_module("pool{}".format(i + 1), nn.MaxPool2d(
@@ -144,7 +144,7 @@ class VGG(nn.Module):
 
 
 def get_vgg(blocks,
-            use_bias=True,
+            bias=True,
             use_bn=False,
             model_name=None,
             pretrained=False,
@@ -157,7 +157,7 @@ def get_vgg(blocks,
     ----------
     blocks : int
         Number of blocks.
-    use_bias : bool, default True
+    bias : bool, default True
         Whether the convolution layer uses a bias vector.
     use_bn : bool, default False
         Whether to use BatchNorm layers.
@@ -184,7 +184,7 @@ def get_vgg(blocks,
 
     net = VGG(
         channels=channels,
-        use_bias=use_bias,
+        bias=bias,
         use_bn=use_bn,
         **kwargs)
 
@@ -272,7 +272,7 @@ def bn_vgg11(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=11, use_bias=False, use_bn=True, model_name="bn_vgg11", **kwargs)
+    return get_vgg(blocks=11, bias=False, use_bn=True, model_name="bn_vgg11", **kwargs)
 
 
 def bn_vgg13(**kwargs):
@@ -287,7 +287,7 @@ def bn_vgg13(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=13, use_bias=False, use_bn=True, model_name="bn_vgg13", **kwargs)
+    return get_vgg(blocks=13, bias=False, use_bn=True, model_name="bn_vgg13", **kwargs)
 
 
 def bn_vgg16(**kwargs):
@@ -302,7 +302,7 @@ def bn_vgg16(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=16, use_bias=False, use_bn=True, model_name="bn_vgg16", **kwargs)
+    return get_vgg(blocks=16, bias=False, use_bn=True, model_name="bn_vgg16", **kwargs)
 
 
 def bn_vgg19(**kwargs):
@@ -317,7 +317,7 @@ def bn_vgg19(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=19, use_bias=False, use_bn=True, model_name="bn_vgg19", **kwargs)
+    return get_vgg(blocks=19, bias=False, use_bn=True, model_name="bn_vgg19", **kwargs)
 
 
 def bn_vgg11b(**kwargs):
@@ -332,7 +332,7 @@ def bn_vgg11b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=11, use_bias=True, use_bn=True, model_name="bn_vgg11b", **kwargs)
+    return get_vgg(blocks=11, bias=True, use_bn=True, model_name="bn_vgg11b", **kwargs)
 
 
 def bn_vgg13b(**kwargs):
@@ -347,7 +347,7 @@ def bn_vgg13b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=13, use_bias=True, use_bn=True, model_name="bn_vgg13b", **kwargs)
+    return get_vgg(blocks=13, bias=True, use_bn=True, model_name="bn_vgg13b", **kwargs)
 
 
 def bn_vgg16b(**kwargs):
@@ -362,7 +362,7 @@ def bn_vgg16b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=16, use_bias=True, use_bn=True, model_name="bn_vgg16b", **kwargs)
+    return get_vgg(blocks=16, bias=True, use_bn=True, model_name="bn_vgg16b", **kwargs)
 
 
 def bn_vgg19b(**kwargs):
@@ -377,7 +377,7 @@ def bn_vgg19b(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_vgg(blocks=19, use_bias=True, use_bn=True, model_name="bn_vgg19b", **kwargs)
+    return get_vgg(blocks=19, bias=True, use_bn=True, model_name="bn_vgg19b", **kwargs)
 
 
 def _calc_width(net):

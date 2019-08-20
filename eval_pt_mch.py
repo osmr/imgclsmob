@@ -208,6 +208,9 @@ def calc_detector_repeatability(test_data,
             dst_pts, dst_confs, dst_desc_map = net(data_dst)
             src_shape = data_src.cpu().detach().numpy().shape[2:]
             dst_shape = data_dst.cpu().detach().numpy().shape[2:]
+            # print("data_src.shape={}".format(data_src.shape))
+            # print("data_dst.shape={}".format(data_dst.shape))
+
             # for i in range(len(src_pts)):
             #     homography = target.cpu().detach().numpy()
             #
@@ -228,8 +231,9 @@ def calc_detector_repeatability(test_data,
             #     n1s.append(n1)
             #     n2s.append(n2)
             #     repeatabilities.append(repeatability)
+
             metric.update_alt(
-                homography=target,
+                homography=target[0],
                 src_pts=src_pts[0],
                 dst_pts=dst_pts[0],
                 src_confs=src_confs[0],

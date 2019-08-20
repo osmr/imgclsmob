@@ -248,6 +248,7 @@ def conv1x1_block(in_channels,
                   padding=0,
                   groups=1,
                   bias=False,
+                  use_bn=True,
                   bn_eps=1e-5,
                   activation=(lambda: nn.ReLU(inplace=True))):
     """
@@ -267,6 +268,8 @@ def conv1x1_block(in_channels,
         Number of groups.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
@@ -280,6 +283,7 @@ def conv1x1_block(in_channels,
         padding=padding,
         groups=groups,
         bias=bias,
+        use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation)
 
@@ -385,6 +389,7 @@ def conv7x7_block(in_channels,
                   stride=1,
                   padding=3,
                   bias=False,
+                  use_bn=True,
                   activation=(lambda: nn.ReLU(inplace=True))):
     """
     7x7 version of the standard convolution block.
@@ -401,6 +406,8 @@ def conv7x7_block(in_channels,
         Padding value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
@@ -411,6 +418,7 @@ def conv7x7_block(in_channels,
         stride=stride,
         padding=padding,
         bias=bias,
+        use_bn=use_bn,
         activation=activation)
 
 

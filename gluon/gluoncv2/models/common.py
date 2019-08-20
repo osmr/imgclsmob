@@ -273,6 +273,7 @@ def conv1x1_block(in_channels,
                   strides=1,
                   groups=1,
                   use_bias=False,
+                  use_bn=True,
                   bn_epsilon=1e-5,
                   bn_use_global_stats=False,
                   activation=(lambda: nn.Activation("relu")),
@@ -292,6 +293,8 @@ def conv1x1_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -307,6 +310,7 @@ def conv1x1_block(in_channels,
         padding=0,
         groups=groups,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
@@ -426,6 +430,7 @@ def conv7x7_block(in_channels,
                   strides=1,
                   padding=3,
                   use_bias=False,
+                  use_bn=True,
                   bn_use_global_stats=False,
                   activation=(lambda: nn.Activation("relu")),
                   **kwargs):
@@ -444,6 +449,8 @@ def conv7x7_block(in_channels,
         Padding value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : function or str or None, default nn.Activation('relu')
@@ -456,6 +463,7 @@ def conv7x7_block(in_channels,
         strides=strides,
         padding=padding,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_use_global_stats=bn_use_global_stats,
         activation=activation,
         **kwargs)

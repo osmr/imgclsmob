@@ -43,6 +43,7 @@ class HPatches(data.Dataset):
         self.homographies = []
 
         subdir_names = [name for name in os.listdir(root) if os.path.isdir(os.path.join(root, name))]
+        # subdir_names.sort()
         if alteration != "all":
             subdir_names = [name for name in subdir_names if name[0] == alteration]
         for subdir_name in subdir_names:

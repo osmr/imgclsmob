@@ -101,7 +101,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.superpointnet import *
-# from .models.others.oth_superpointnet import *
+from .models.others.oth_superpointnet import *
 
 
 __all__ = ['get_model']
@@ -893,7 +893,7 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-    # 'oth_superpointnet': oth_superpointnet,
+    'oth_superpointnet': oth_superpointnet,
 }
 
 

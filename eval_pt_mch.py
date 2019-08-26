@@ -8,7 +8,8 @@ from common.logger_utils import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_val_data_source
-from pytorch.metrics.ret_metrics import PointDetectionMeanResidual
+# from pytorch.metrics.ret_metrics import PointDescriptionMatchRatio
+from pytorch.metrics.ret_metrics import PointDescriptionMatchRatio
 
 
 def add_eval_parser_arguments(parser):
@@ -352,8 +353,10 @@ def calc_detector_repeatability(test_data,
     repeatabilities = []
     n1s = []
     n2s = []
-    metric = PointDetectionMeanResidual()
-    metric.reset()
+    # det_metric = PointDetectionMatchRatio(pts_max_count=100)
+    # det_metric.reset()
+    desc_metric = PointDescriptionMatchRatio(pts_max_count=10)
+    desc_metric.reset()
     with torch.no_grad():
         for data_src, data_dst, target in test_data:
             if use_cuda:
@@ -442,12 +445,20 @@ def calc_detector_repeatability(test_data,
             #     n2s.append(n2)
             #     repeatabilities.append(repeatability)
 
-            metric.update_alt(
+            # det_metric.update_alt(
+            #     homography=target[0],
+            #     src_pts=src_pts[0],
+            #     dst_pts=dst_pts[0],
+            #     src_confs=src_confs[0],
+            #     dst_confs=dst_confs[0],
+            #     src_img_size=src_shape,
+            #     dst_img_size=dst_shape)
+            desc_metric.update_alt(
                 homography=target[0],
                 src_pts=src_pts[0],
                 dst_pts=dst_pts[0],
-                src_confs=src_confs[0],
-                dst_confs=dst_confs[0],
+                src_descs=src_desc_map[0],
+                dst_descs=dst_desc_map[0],
                 src_img_size=src_shape,
                 dst_img_size=dst_shape)
 

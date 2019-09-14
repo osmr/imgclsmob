@@ -12,6 +12,14 @@ from gluon.dataset_utils import get_val_data_source
 
 
 def add_eval_parser_arguments(parser):
+    """
+    Create python script parameters (for eval specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -99,6 +107,14 @@ def add_eval_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Evaluate a model for image matching (Gluon/HPatches)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -244,6 +260,9 @@ def calc_detector_repeatability(test_data,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
 
     os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"

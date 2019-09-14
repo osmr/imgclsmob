@@ -19,6 +19,14 @@ from pytorch.dataset_utils import get_train_data_source, get_val_data_source
 
 
 def add_train_cls_parser_arguments(parser):
+    """
+    Create python script parameters (for training/classification specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -223,6 +231,14 @@ def add_train_cls_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Train a model for image classification (PyTorch)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -272,10 +288,7 @@ def prepare_trainer(net,
                     lr_decay_period,
                     lr_decay_epoch,
                     lr_decay,
-                    # warmup_epochs,
-                    # batch_size,
                     num_epochs,
-                    # num_training_samples,
                     state_file_path):
 
     optimizer_name = optimizer_name.lower()
@@ -473,6 +486,9 @@ def train_net(batch_size,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
@@ -518,10 +534,7 @@ def main():
         lr_decay_period=args.lr_decay_period,
         lr_decay_epoch=args.lr_decay_epoch,
         lr_decay=args.lr_decay,
-        # warmup_epochs=args.warmup_epochs,
-        # batch_size=batch_size,
         num_epochs=args.num_epochs,
-        # num_training_samples=num_training_samples,
         state_file_path=args.resume_state)
 
     if args.save_dir and args.save_interval:

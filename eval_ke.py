@@ -1,109 +1,115 @@
 import argparse
 import time
 import logging
-
 import keras
-
 from common.logger_utils import initialize_logging
 from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
 def parse_args():
+    """
+    Parse python script parameters.
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
-        description='Evaluate a model for image classification (Keras)',
+        description="Evaluate a model for image classification (Keras)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--rec-train',
+        "--rec-train",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/train.rec',
-        help='the training data')
+        default="../imgclsmob_data/imagenet_rec/train.rec",
+        help="the training data")
     parser.add_argument(
-        '--rec-train-idx',
+        "--rec-train-idx",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/train.idx',
-        help='the index of training data')
+        default="../imgclsmob_data/imagenet_rec/train.idx",
+        help="the index of training data")
     parser.add_argument(
-        '--rec-val',
+        "--rec-val",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/val.rec',
-        help='the validation data')
+        default="../imgclsmob_data/imagenet_rec/val.rec",
+        help="the validation data")
     parser.add_argument(
-        '--rec-val-idx',
+        "--rec-val-idx",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/val.idx',
-        help='the index of validation data')
+        default="../imgclsmob_data/imagenet_rec/val.idx",
+        help="the index of validation data")
 
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options.')
+        help="type of model to use. see model_provider for options")
     parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model from gluon.')
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from github repo")
     parser.add_argument(
-        '--dtype',
+        "--dtype",
         type=str,
-        default='float32',
-        help='data type for training. default is float32')
+        default="float32",
+        help="data type for training")
     parser.add_argument(
-        '--resume',
+        "--resume",
         type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
+        default="",
+        help="resume from previously saved parameters if not None")
 
     parser.add_argument(
-        '--input-size',
+        "--input-size",
         type=int,
         default=224,
-        help='size of the input for model. default is 224')
+        help="size of the input for model")
     parser.add_argument(
-        '--resize-inv-factor',
+        "--resize-inv-factor",
         type=float,
         default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
+        help="inverted ratio for input image crop")
 
     parser.add_argument(
-        '--num-gpus',
+        "--num-gpus",
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help="number of gpus to use")
     parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
         default=4,
         type=int,
-        help='number of preprocessing workers')
+        help="number of preprocessing workers")
 
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=512,
-        help='training batch size per device (CPU/GPU).')
+        help="training batch size per device (CPU/GPU)")
 
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
 
     parser.add_argument(
-        '--log-packages',
+        "--log-packages",
         type=str,
-        default='keras, mxnet',
-        help='list of python packages for logging')
+        default="keras, mxnet, tensorflow-gpu",
+        help="list of python packages for logging")
     parser.add_argument(
-        '--log-pip-packages',
+        "--log-pip-packages",
         type=str,
-        default='keras, keras-mxnet, mxnet-cu100',
-        help='list of pip packages for logging')
+        default="keras, keras-mxnet, mxnet-cu100",
+        help="list of pip packages for logging")
     args = parser.parse_args()
     return args
 
@@ -152,6 +158,9 @@ def test(net,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
 
     _, log_file_exist = initialize_logging(
@@ -197,5 +206,5 @@ def main():
         extended_log=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

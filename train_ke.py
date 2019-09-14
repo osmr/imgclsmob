@@ -4,170 +4,174 @@ import logging
 import os
 import numpy as np
 import random
-
 import keras
 from keras.models import load_model
-# from keras.models import save_model
 from keras.callbacks import ModelCheckpoint
 import mxnet as mx
-
 from common.logger_utils import initialize_logging
-# from common.train_log_param_saver import TrainLogParamSaver
 from keras_.utils import prepare_ke_context, prepare_model, get_data_rec, get_data_generator, backend_agnostic_compile
 
 
 def parse_args():
+    """
+    Parse python script parameters.
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (Keras)',
+        description="Train a model for image classification (Keras)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--rec-train',
+        "--rec-train",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/train.rec',
-        help='the training data')
+        default="../imgclsmob_data/imagenet_rec/train.rec",
+        help="the training data")
     parser.add_argument(
-        '--rec-train-idx',
+        "--rec-train-idx",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/train.idx',
+        default="../imgclsmob_data/imagenet_rec/train.idx",
         help='the index of training data')
     parser.add_argument(
-        '--rec-val',
+        "--rec-val",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/val.rec',
-        help='the validation data')
+        default="../imgclsmob_data/imagenet_rec/val.rec",
+        help="the validation data")
     parser.add_argument(
-        '--rec-val-idx',
+        "--rec-val-idx",
         type=str,
-        default='../imgclsmob_data/imagenet_rec/val.idx',
-        help='the index of validation data')
+        default="../imgclsmob_data/imagenet_rec/val.idx",
+        help="the index of validation data")
 
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options.')
+        help="type of model to use. see model_provider for options")
     parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model from gluon.')
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from github repo")
     parser.add_argument(
-        '--dtype',
+        "--dtype",
         type=str,
-        default='float32',
-        help='data type for training. default is float32')
+        default="float32",
+        help="data type for training")
     parser.add_argument(
-        '--resume',
+        "--resume",
         type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
+        default="",
+        help="resume from previously saved parameters if not None")
     parser.add_argument(
-        '--resume-state',
+        "--resume-state",
         type=str,
-        default='',
-        help='resume from previously saved optimizer state if not None')
+        default="",
+        help="resume from previously saved optimizer state if not None")
 
     parser.add_argument(
-        '--input-size',
+        "--input-size",
         type=int,
         default=224,
-        help='size of the input for model. default is 224')
+        help="size of the input for model")
     parser.add_argument(
-        '--resize-inv-factor',
+        "--resize-inv-factor",
         type=float,
         default=0.875,
-        help='inverted ratio for input image crop. default is 0.875')
+        help="inverted ratio for input image crop")
 
     parser.add_argument(
-        '--num-gpus',
+        "--num-gpus",
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help="number of gpus to use")
     parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
         default=4,
         type=int,
-        help='number of preprocessing workers')
+        help="number of preprocessing workers")
 
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=512,
-        help='training batch size per device (CPU/GPU).')
+        help="training batch size per device (CPU/GPU)")
     parser.add_argument(
-        '--num-epochs',
+        "--num-epochs",
         type=int,
         default=120,
-        help='number of training epochs.')
+        help="number of training epochs")
     parser.add_argument(
-        '--start-epoch',
+        "--start-epoch",
         type=int,
         default=1,
-        help='starting epoch for resuming, default is 1 for new training')
+        help="starting epoch for resuming, default is 1 for new training")
     parser.add_argument(
-        '--attempt',
+        "--attempt",
         type=int,
         default=1,
-        help='current number of training')
+        help="current number of training")
 
     parser.add_argument(
-        '--optimizer-name',
+        "--optimizer-name",
         type=str,
-        default='nag',
-        help='optimizer name')
+        default="nag",
+        help="optimizer name")
     parser.add_argument(
-        '--lr',
+        "--lr",
         type=float,
         default=0.1,
-        help='learning rate. default is 0.1')
+        help="learning rate")
     parser.add_argument(
-        '--momentum',
+        "--momentum",
         type=float,
         default=0.9,
-        help='momentum value for optimizer; default is 0.9')
+        help="momentum value for optimizer")
     parser.add_argument(
-        '--wd',
+        "--wd",
         type=float,
         default=0.0001,
-        help='weight decay rate. default is 0.0001.')
+        help="weight decay rate")
 
     parser.add_argument(
-        '--log-interval',
+        "--log-interval",
         type=int,
         default=50,
-        help='number of batches to wait before logging.')
+        help="number of batches to wait before logging")
     parser.add_argument(
-        '--save-interval',
+        "--save-interval",
         type=int,
         default=4,
-        help='saving parameters epoch interval, best model will always be saved')
+        help="saving parameters epoch interval, best model will always be saved")
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
 
     parser.add_argument(
-        '--seed',
+        "--seed",
         type=int,
         default=-1,
-        help='Random seed to be fixed')
+        help="Random seed to be fixed")
     parser.add_argument(
-        '--log-packages',
+        "--log-packages",
         type=str,
-        default='keras',
-        help='list of python packages for logging')
+        default="keras",
+        help="list of python packages for logging")
     parser.add_argument(
-        '--log-pip-packages',
+        "--log-pip-packages",
         type=str,
-        default='keras, keras-mxnet, keras-applications, keras-preprocessing',
-        help='list of pip packages for logging')
+        default="keras, keras-mxnet, keras-applications, keras-preprocessing",
+        help="list of pip packages for logging")
     args = parser.parse_args()
     return args
 
@@ -189,17 +193,17 @@ def prepare_trainer(net,
                     state_file_path=None):
 
     optimizer_name = optimizer_name.lower()
-    if (optimizer_name == 'sgd') or (optimizer_name == 'nag'):
+    if (optimizer_name == "sgd") or (optimizer_name == "nag"):
         optimizer = keras.optimizers.SGD(
             lr=lr,
             momentum=momentum,
-            nesterov=(optimizer_name == 'nag'))
+            nesterov=(optimizer_name == "nag"))
     else:
         raise ValueError("Usupported optimizer: {}".format(optimizer_name))
 
     backend_agnostic_compile(
         model=net,
-        loss='categorical_crossentropy',
+        loss="categorical_crossentropy",
         optimizer=optimizer,
         metrics=[keras.metrics.categorical_accuracy, keras.metrics.top_k_categorical_accuracy],
         num_gpus=num_gpus)
@@ -207,12 +211,6 @@ def prepare_trainer(net,
     if (state_file_path is not None) and state_file_path and os.path.exists(state_file_path):
         net = load_model(filepath=state_file_path)
     return net
-
-
-# def save_params(file_stem,
-#                 net):
-#     net.save_weights(file_stem + '.h5')
-#     save_model(net, filepath=(file_stem + '.h5states'))
 
 
 def train_net(net,
@@ -223,7 +221,6 @@ def train_net(net,
               num_epochs,
               checkpoint_filepath,
               start_epoch1):
-
     checkpointer = ModelCheckpoint(
         filepath=checkpoint_filepath,
         verbose=1,
@@ -246,11 +243,14 @@ def train_net(net,
         shuffle=True,
         initial_epoch=(start_epoch1 - 1))
 
-    logging.info('Time cost: {:.4f} sec'.format(
+    logging.info("Time cost: {:.4f} sec".format(
         time.time() - tic))
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
@@ -269,8 +269,8 @@ def main():
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip())
-    num_classes = net.classes if hasattr(net, 'classes') else 1000
-    input_image_size = net.in_size if hasattr(net, 'in_size') else (args.input_size, args.input_size)
+    num_classes = net.classes if hasattr(net, "classes") else 1000
+    input_image_size = net.in_size if hasattr(net, "in_size") else (args.input_size, args.input_size)
 
     train_data, val_data = get_data_rec(
         rec_train=args.rec_train,
@@ -296,29 +296,6 @@ def main():
         num_gpus=args.num_gpus,
         state_file_path=args.resume_state)
 
-    # if args.save_dir and args.save_interval:
-    #     lp_saver = TrainLogParamSaver(
-    #         checkpoint_file_name_prefix='imagenet_{}'.format(args.model),
-    #         last_checkpoint_file_name_suffix="last",
-    #         best_checkpoint_file_name_suffix=None,
-    #         last_checkpoint_dir_path=args.save_dir,
-    #         best_checkpoint_dir_path=None,
-    #         last_checkpoint_file_count=2,
-    #         best_checkpoint_file_count=2,
-    #         checkpoint_file_save_callback=save_params,
-    #         checkpoint_file_exts=('.h5', '.h5states'),
-    #         save_interval=args.save_interval,
-    #         num_epochs=args.num_epochs,
-    #         param_names=['Val.Top1', 'Train.Top1', 'Val.Top5', 'Train.Loss', 'LR'],
-    #         acc_ind=2,
-    #         # bigger=[True],
-    #         # mask=None,
-    #         score_log_file_path=os.path.join(args.save_dir, 'score.log'),
-    #         score_log_attempt_value=args.attempt,
-    #         best_map_log_file_path=os.path.join(args.save_dir, 'best_map.log'))
-    # else:
-    #     lp_saver = None
-
     train_net(
         net=net,
         train_gen=train_gen,
@@ -326,9 +303,9 @@ def main():
         train_num_examples=1281167,
         val_num_examples=50048,
         num_epochs=args.num_epochs,
-        checkpoint_filepath=os.path.join(args.save_dir, 'imagenet_{}.h5'.format(args.model)),
+        checkpoint_filepath=os.path.join(args.save_dir, "imagenet_{}.h5".format(args.model)),
         start_epoch1=args.start_epoch)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

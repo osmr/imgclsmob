@@ -1,154 +1,155 @@
 import argparse
 import numpy as np
 import random
-
 from tensorpack.input_source import QueueInput
 from tensorpack.utils import logger
 from tensorpack.utils.gpu import get_num_gpu
 from tensorpack import ModelSaver, ScheduledHyperParamSetter, EstimatedTimeLeft, ClassificationError, InferenceRunner,\
     DataParallelInferenceRunner, TrainConfig, SyncMultiGPUTrainerParameterServer, launch_train_with_config
-
 from common.logger_utils import initialize_logging
 from tensorflow_.utils_tp import prepare_tf_context, prepare_model, get_data
 
 
 def parse_args():
+    """
+    Parse python script parameters.
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
-        description='Train a model for image classification (TensorFlow/TensorPack)',
+        description="Train a model for image classification (TensorFlow/TensorPack)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--data-dir',
+        "--data-dir",
         type=str,
-        default='../imgclsmob_data/imagenet',
-        help='training and validation pictures to use.')
+        default="../imgclsmob_data/imagenet",
+        help="training and validation pictures to use")
 
     parser.add_argument(
-        '--data-format',
+        "--data-format",
         type=str,
-        default='channels_last',
-        help='ordering of the dimensions in tensors. options are channels_last and channels_first')
+        default="channels_last",
+        help="ordering of the dimensions in tensors. options are channels_last and channels_first")
     parser.add_argument(
-        '--model',
+        "--model",
         type=str,
         required=True,
-        help='type of model to use. see model_provider for options')
+        help="type of model to use. see model_provider for options")
     parser.add_argument(
-        '--use-pretrained',
-        action='store_true',
-        help='enable using pretrained model')
+        "--use-pretrained",
+        action="store_true",
+        help="enable using pretrained model from github repo")
     parser.add_argument(
-        '--resume',
+        "--resume",
         type=str,
-        default='',
-        help='resume from previously saved parameters if not None')
-    # parser.add_argument(
-    #     '--resume-state',
-    #     type=str,
-    #     default='',
-    #     help='resume from previously saved optimizer state if not None')
+        default="",
+        help="resume from previously saved parameters if not None")
 
     parser.add_argument(
-        '--input-size',
+        "--input-size",
         type=int,
         default=224,
-        help='size of the input for model')
+        help="size of the input for model")
     parser.add_argument(
-        '--resize-inv-factor',
+        "--resize-inv-factor",
         type=float,
         default=0.875,
-        help='inverted ratio for input image crop')
+        help="inverted ratio for input image crop")
 
     parser.add_argument(
-        '--num-gpus',
+        "--num-gpus",
         type=int,
         default=0,
-        help='number of gpus to use.')
+        help="number of gpus to use")
     parser.add_argument(
-        '-j',
-        '--num-data-workers',
-        dest='num_workers',
+        "-j",
+        "--num-data-workers",
+        dest="num_workers",
         default=4,
         type=int,
-        help='number of preprocessing workers')
+        help="number of preprocessing workers")
 
     parser.add_argument(
-        '--batch-size',
+        "--batch-size",
         type=int,
         default=512,
-        help='training batch size per device (CPU/GPU)')
+        help="training batch size per device (CPU/GPU)")
     parser.add_argument(
-        '--num-epochs',
+        "--num-epochs",
         type=int,
         default=120,
-        help='number of training epochs.')
+        help="number of training epochs")
     parser.add_argument(
-        '--start-epoch',
+        "--start-epoch",
         type=int,
         default=1,
-        help='starting epoch for resuming, default is 1 for new training')
+        help="starting epoch for resuming, default is 1 for new training")
     parser.add_argument(
-        '--attempt',
+        "--attempt",
         type=int,
         default=1,
-        help='current number of training')
+        help="current number of training")
 
     parser.add_argument(
-        '--optimizer-name',
+        "--optimizer-name",
         type=str,
-        default='nag',
-        help='optimizer name')
+        default="nag",
+        help="optimizer name")
     parser.add_argument(
-        '--lr',
+        "--lr",
         type=float,
         default=0.1,
-        help='learning rate')
+        help="learning rate")
     parser.add_argument(
-        '--momentum',
+        "--momentum",
         type=float,
         default=0.9,
-        help='momentum value for optimizer')
+        help="momentum value for optimizer")
     parser.add_argument(
-        '--wd',
+        "--wd",
         type=float,
         default=0.0001,
-        help='weight decay rate')
+        help="weight decay rate")
 
     parser.add_argument(
-        '--log-interval',
+        "--log-interval",
         type=int,
         default=50,
-        help='number of batches to wait before logging')
+        help="number of batches to wait before logging")
     parser.add_argument(
-        '--save-interval',
+        "--save-interval",
         type=int,
         default=4,
-        help='saving parameters epoch interval, best model will always be saved')
+        help="saving parameters epoch interval, best model will always be saved")
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
 
     parser.add_argument(
-        '--seed',
+        "--seed",
         type=int,
         default=-1,
-        help='Random seed to be fixed')
+        help="Random seed to be fixed")
     parser.add_argument(
-        '--log-packages',
+        "--log-packages",
         type=str,
-        default='tensorflow-gpu',
-        help='list of python packages for logging')
+        default="tensorflow-gpu",
+        help="list of python packages for logging")
     parser.add_argument(
-        '--log-pip-packages',
+        "--log-pip-packages",
         type=str,
-        default='tensorflow-gpu, tensorpack',
-        help='list of pip packages for logging')
+        default="tensorflow-gpu, tensorpack",
+        help="list of pip packages for logging")
     args = parser.parse_args()
     return args
 
@@ -178,14 +179,14 @@ def train_net(net,
     callbacks = [
         ModelSaver(),
         ScheduledHyperParamSetter(
-            'learning_rate',
+            "learning_rate",
             [(0, 0.5), (max_iter, 0)],
-            interp='linear',
+            interp="linear",
             step_based=True),
         EstimatedTimeLeft()]
 
-    infs = [ClassificationError('wrong-top1', 'val-error-top1'),
-            ClassificationError('wrong-top5', 'val-error-top5')]
+    infs = [ClassificationError("wrong-top1", "val-error-top1"),
+            ClassificationError("wrong-top5", "val-error-top5")]
     if num_towers == 1:
         # single-GPU inference with queue prefetch
         callbacks.append(InferenceRunner(
@@ -212,6 +213,9 @@ def train_net(net,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
@@ -255,5 +259,5 @@ def main():
         val_dataflow=val_dataflow)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

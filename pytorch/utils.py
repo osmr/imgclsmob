@@ -130,27 +130,6 @@ def validate(metric,
     return metric
 
 
-def validate0(acc_top1,
-              acc_top5,
-              net,
-              val_data,
-              use_cuda):
-    net.eval()
-    acc_top1.reset()
-    acc_top5.reset()
-    with torch.no_grad():
-        for data, target in val_data:
-            if use_cuda:
-                target = target.cuda(non_blocking=True)
-            output = net(data)
-            prec1, prec5 = accuracy(output, target, topk=(1, 5))
-            acc_top1.update(prec1[0], data.size(0))
-            acc_top5.update(prec5[0], data.size(0))
-    top1 = acc_top1.avg.item()
-    top5 = acc_top5.avg.item()
-    return 1.0 - top1, 1.0 - top5
-
-
 def validate1(accuracy_metric,
               net,
               val_data,

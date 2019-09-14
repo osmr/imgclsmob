@@ -74,9 +74,9 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
             default=self.resize_inv_factor,
             help="inverted ratio for input image crop")
         parser.add_argument(
-            '--use-cv-resize',
-            action='store_true',
-            help='use OpenCV resize preprocessing')
+            "--use-cv-resize",
+            action="store_true",
+            help="use OpenCV resize preprocessing")
 
     def update(self,
                args):

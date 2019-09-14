@@ -1,12 +1,34 @@
+"""
+    Routines for logging subsystem initialization.
+"""
+
+__all__ = ['initialize_logging']
+
 import os
 import sys
 import logging
-
 from .env_stats import get_env_stats
 
 
 def prepare_logger(logging_dir_path,
                    logging_file_name):
+    """
+    Prepare logger.
+
+    Parameters:
+    ----------
+    logging_dir_path : str
+        Path to logging directory.
+    logging_file_name : str
+        Name of logging file.
+
+    Returns
+    -------
+    Logger
+        Logger instance.
+    bool
+        If the logging file exist.
+    """
     logging.basicConfig()
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
@@ -32,6 +54,29 @@ def initialize_logging(logging_dir_path,
                        script_args,
                        log_packages,
                        log_pip_packages):
+    """
+    Initialize logging subsystem.
+
+    Parameters:
+    ----------
+    logging_dir_path : str
+        Path to logging directory.
+    logging_file_name : str
+        Name of logging file.
+    script_args : argparse.ArgumentParser
+        Main script arguments.
+    log_packages : bool
+        Whether to log packages info.
+    log_pip_packages : bool
+        Whether to log pip-packages info.
+
+    Returns
+    -------
+    Logger
+        Logger instance.
+    bool
+        If the logging file exist.
+    """
     logger, log_file_exist = prepare_logger(
         logging_dir_path=logging_dir_path,
         logging_file_name=logging_file_name)

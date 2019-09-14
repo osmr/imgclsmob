@@ -1,3 +1,9 @@
+"""
+    Routines for logging environment setting.
+"""
+
+__all__ = ['get_env_stats']
+
 import os
 import sys
 import subprocess
@@ -14,13 +20,13 @@ def get_pip_versions(package_list,
     ----------
     package_list : list of str
         List of package names.
-    python_version : str
+    python_version : str, default ''
         Python version ('2', '3', '') appended to 'pip' command.
 
     Returns
     -------
-    dict of module
-        Version_info pairs.
+    dict
+        Dictionary with module descriptions.
     """
     module_versions = {}
     for module in package_list:
@@ -46,8 +52,8 @@ def get_package_versions(package_list):
 
     Returns
     -------
-    dict of module
-        Version_info pairs.
+    dict
+        Dictionary with module descriptions.
     """
     module_versions = {}
     for module in package_list:
@@ -76,8 +82,8 @@ def get_pyenv_info(packages,
         list of package names to inspect only __version__.
     pip_packages : list of str
         List of package names to inspect by 'pip show'.
-    python_version : str
-        Python version ('2', '3', '') appended to 'pip' command.
+    python_ver : bool
+        Whether to show python version.
     pwd : bool
         Whether to show pwd.
     git : bool
@@ -87,10 +93,9 @@ def get_pyenv_info(packages,
 
     Returns
     -------
-    dictionary attribute
-        Version_info.
+    dict
+        Dictionary with module descriptions.
     """
-
     pyenv_info = {}
 
     python_version = sys.version_info[0]
@@ -137,6 +142,16 @@ def get_pyenv_info(packages,
 def pretty_print_dict2str(d):
     """
     Pretty print of dictionary d to json-formated string.
+
+    Parameters:
+    ----------
+    d : dict
+        Dictionary with module descriptions.
+
+    Returns
+    -------
+    str
+        Resulted string.
     """
     out_text = json.dumps(d, indent=4)
     return out_text
@@ -149,7 +164,27 @@ def get_env_stats(packages,
                   git=True,
                   sys_info=True):
     """
-    Get env statistics.
+    Get environment statistics.
+
+    Parameters:
+    ----------
+    packages : list of str
+        list of package names to inspect only __version__.
+    pip_packages : list of str
+        List of package names to inspect by 'pip show'.
+    python_ver : bool
+        Whether to show python version.
+    pwd : bool, default True
+        Whether to show pwd.
+    git : bool, default True
+        Whether to show git info.
+    sys_info : bool, default True
+        Whether to show platform info.
+
+    Returns
+    -------
+    str
+        Resulted string with information.
     """
     package_versions = get_pyenv_info(packages, pip_packages, python_ver, pwd, git, sys_info)
     return pretty_print_dict2str(package_versions)

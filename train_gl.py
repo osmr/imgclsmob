@@ -21,6 +21,14 @@ from gluon.dataset_utils import get_batch_fn
 
 
 def add_train_cls_parser_arguments(parser):
+    """
+    Create python script parameters (for training/classification specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -239,6 +247,14 @@ def add_train_cls_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Train a model for image classification (Gluon)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -560,6 +576,9 @@ def train_net(batch_size,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 

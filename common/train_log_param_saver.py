@@ -46,7 +46,6 @@ class TrainLogParamSaver(object):
     best_map_log_file_path : str or None
         file path to best map log file
     """
-
     def __init__(self,
                  checkpoint_file_name_prefix="model",
                  last_checkpoint_file_name_suffix="last",
@@ -56,7 +55,7 @@ class TrainLogParamSaver(object):
                  last_checkpoint_file_count=2,
                  best_checkpoint_file_count=2,
                  checkpoint_file_save_callback=None,
-                 checkpoint_file_exts=('.params',),
+                 checkpoint_file_exts=(".params",),
                  save_interval=1,
                  num_epochs=-1,
                  param_names=None,

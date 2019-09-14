@@ -2,11 +2,9 @@ import os
 import time
 import logging
 import argparse
-
 from chainer import global_config
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
-
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_ch_context, prepare_model, Predictor
 from chainer_.utils import get_composite_metric, report_accuracy
@@ -15,6 +13,14 @@ from chainer_.dataset_utils import get_val_data_source, get_test_data_source
 
 
 def add_eval_parser_arguments(parser):
+    """
+    Create python script parameters (for eval specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -87,6 +93,14 @@ def add_eval_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Create python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Evaluate a model for image classification/segmentation (Chainer)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -161,6 +175,9 @@ def test(net,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
 
     if args.disable_cudnn_autotune:

@@ -1,12 +1,10 @@
 import os
 import argparse
 import numpy as np
-
 import chainer
 from chainer import training
 from chainer.training import extensions
 from chainer.serializers import save_npz
-
 from common.logger_utils import initialize_logging
 from chainer_.utils import prepare_ch_context, prepare_model
 from chainer_.dataset_utils import get_dataset_metainfo
@@ -14,6 +12,14 @@ from chainer_.dataset_utils import get_train_data_source, get_val_data_source
 
 
 def add_train_cls_parser_arguments(parser):
+    """
+    Create python script parameters (for training/classification specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -153,6 +159,14 @@ def add_train_cls_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Train a model for image classification/segmentation (Chainer)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -255,6 +269,9 @@ def save_params(file_stem,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
     args.seed = init_rand(seed=args.seed)
 
@@ -304,5 +321,5 @@ def main():
     trainer.run()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -8,11 +8,18 @@ from common.logger_utils import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
 from pytorch.dataset_utils import get_dataset_metainfo
 from pytorch.dataset_utils import get_val_data_source
-# from pytorch.metrics.ret_metrics import PointDescriptionMatchRatio
 from pytorch.metrics.ret_metrics import PointDescriptionMatchRatio
 
 
 def add_eval_parser_arguments(parser):
+    """
+    Create python script parameters (for eval specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -100,6 +107,14 @@ def add_eval_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Evaluate a model for image matching (PyTorch/HPatches)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -469,6 +484,9 @@ def calc_detector_repeatability(test_data,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
 
     os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"

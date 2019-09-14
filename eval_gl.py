@@ -14,6 +14,14 @@ from gluon.model_stats import measure_model
 
 
 def add_eval_parser_arguments(parser):
+    """
+    Create python script parameters (for eval specific subpart).
+
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
+    """
     parser.add_argument(
         "--model",
         type=str,
@@ -101,6 +109,14 @@ def add_eval_parser_arguments(parser):
 
 
 def parse_args():
+    """
+    Create python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
     parser = argparse.ArgumentParser(
         description="Evaluate a model for image classification/segmentation (Gluon)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -141,6 +157,38 @@ def test(net,
          calc_flops=False,
          calc_flops_only=True,
          extended_log=False):
+    """
+    Main test routine.
+
+    Parameters:
+    ----------
+    net : HybridBlock
+        Model.
+    test_data : DataLoader or ImageRecordIter
+        Data loader or ImRec-iterator.
+    batch_fn : func
+        Function for splitting data after extraction from data loader.
+    data_source_needs_reset : bool
+        Whether to reset data (if test_data is ImageRecordIter).
+    metric : EvalMetric
+        Metric object instance.
+    dtype : str
+        Base data type for tensors.
+    ctx : Context
+        MXNet context.
+    input_image_size : tuple of 2 ints
+        Spatial size of the expected input image.
+    in_channels : int
+        Number of input channels.
+    calc_weight_count : bool, default False
+        Whether to calculate count of weights.
+    calc_flops : bool, default False
+        Whether to calculate FLOPs.
+    calc_flops_only : bool, default True
+        Whether to only calculate FLOPs without testing.
+    extended_log : bool, default False
+        Whether to log more precise accuracy values.
+    """
     if not calc_flops_only:
         tic = time.time()
         validate(
@@ -175,6 +223,9 @@ def test(net,
 
 
 def main():
+    """
+    Main body of script.
+    """
     args = parse_args()
 
     if args.disable_cudnn_autotune:

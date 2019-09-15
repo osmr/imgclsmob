@@ -146,6 +146,8 @@ def prepare_src_model(src_fwk,
             pretrained_model_file_path=src_params_file_path,
             use_cuda=use_cuda,
             use_data_parallel=False,
+            num_classes=(num_classes if num_classes > 0 else None),
+            in_channels=in_channels,
             remove_module=remove_module)
         src_params = src_net.state_dict()
         src_param_keys = list(src_params.keys())
@@ -223,7 +225,9 @@ def prepare_dst_model(dst_fwk,
             use_pretrained=False,
             pretrained_model_file_path="",
             use_cuda=use_cuda,
-            use_data_parallel=False)
+            use_data_parallel=False,
+            num_classes=(num_classes if num_classes > 0 else None),
+            in_channels=in_channels)
         dst_params = dst_net.state_dict()
         dst_param_keys = list(dst_params.keys())
         if src_fwk != "pytorch":

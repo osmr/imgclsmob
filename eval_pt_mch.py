@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained image matching model on PyTorch (under development).
+"""
+
 import os
 import time
 import logging

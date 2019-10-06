@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained model on MXNet/Gluon (validate/test).
+"""
+
 import os
 import time
 import logging

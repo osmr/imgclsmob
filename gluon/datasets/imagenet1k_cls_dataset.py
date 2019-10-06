@@ -36,6 +36,10 @@ class ImageNet1K(ImageFolderDataset):
 
 
 class ImageNet1KMetaInfo(DatasetMetaInfo):
+    """
+    Descriptor of ImageNet-1K dataset.
+    """
+
     def __init__(self):
         super(ImageNet1KMetaInfo, self).__init__()
         self.label = "ImageNet1K"
@@ -63,6 +67,16 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
     def add_dataset_parser_arguments(self,
                                      parser,
                                      work_dir_path):
+        """
+        Create python script parameters (for ImageNet-1K dataset metainfo).
+
+        Parameters:
+        ----------
+        parser : ArgumentParser
+            ArgumentParser instance.
+        work_dir_path : str
+            Path to working directory.
+        """
         super(ImageNet1KMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
         parser.add_argument(
             "--input-size",
@@ -82,6 +96,14 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
 
     def update(self,
                args):
+        """
+        Update ImageNet-1K dataset metainfo after user customizing.
+
+        Parameters:
+        ----------
+        args : ArgumentParser
+            Main script arguments.
+        """
         super(ImageNet1KMetaInfo, self).update(args)
         self.input_image_size = (args.input_size, args.input_size)
         self.resize_inv_factor = args.resize_inv_factor
@@ -200,16 +222,11 @@ class ImgAugTransform(HybridBlock):
 
     def hybrid_forward(self, F, x):
         img = x.asnumpy().copy()
-
-        # import cv2
-        # cv2.imshow(winname="img", mat=img)
-
+        # cv2.imshow(winname="imgA", mat=img)
         img_aug = self.seq.augment_image(img)
-
-        # cv2.imshow(winname="img_aug", mat=img_aug)
+        # cv2.imshow(winname="img_augA", mat=img_aug)
         # cv2.waitKey()
-
-        x = mx.nd.array(img_aug, ctx=x.context)
+        x = mx.nd.array(img_aug, dtype=x.dtype, ctx=x.context)
         return x
 
 
@@ -218,6 +235,27 @@ def imagenet_train_transform(ds_metainfo,
                              std_rgb=(0.229, 0.224, 0.225),
                              jitter_param=0.4,
                              lighting_param=0.1):
+    """
+    Create image transform sequence for training subset.
+
+    Parameters:
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        ImageNet-1K dataset metainfo.
+    mean_rgb : tuple of 3 float
+        Mean of RGB channels in the dataset.
+    std_rgb : tuple of 3 float
+        STD of RGB channels in the dataset.
+    jitter_param : float
+        How much to jitter values.
+    lighting_param : float
+        How much to noise intensity of the image.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
     input_image_size = ds_metainfo.input_image_size
     if ds_metainfo.aug_type == "aug0":
         interpolation = 1
@@ -255,6 +293,23 @@ def imagenet_train_transform(ds_metainfo,
 def imagenet_val_transform(ds_metainfo,
                            mean_rgb=(0.485, 0.456, 0.406),
                            std_rgb=(0.229, 0.224, 0.225)):
+    """
+    Create image transform sequence for validation subset.
+
+    Parameters:
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        ImageNet-1K dataset metainfo.
+    mean_rgb : tuple of 3 float
+        Mean of RGB channels in the dataset.
+    std_rgb : tuple of 3 float
+        STD of RGB channels in the dataset.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
     input_image_size = ds_metainfo.input_image_size
     resize_value = calc_val_resize_value(
         input_image_size=ds_metainfo.input_image_size,
@@ -273,6 +328,21 @@ def imagenet_val_transform(ds_metainfo,
 
 def calc_val_resize_value(input_image_size=(224, 224),
                           resize_inv_factor=0.875):
+    """
+    Calculate image resize value for validation subset.
+
+    Parameters:
+    ----------
+    input_image_size : tuple of 2 int
+        Main script arguments.
+    resize_inv_factor : float
+        Resize inverted factor.
+
+    Returns
+    -------
+    int
+        Resize value.
+    """
     if isinstance(input_image_size, int):
         input_image_size = (input_image_size, input_image_size)
     resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))

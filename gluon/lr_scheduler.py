@@ -3,7 +3,8 @@ from mxnet import lr_scheduler
 
 
 class LRScheduler(lr_scheduler.LRScheduler):
-    r"""Learning Rate Scheduler
+    """
+    Learning Rate Scheduler
 
     For mode='step', we multiply lr with `step_factor` at each epoch in `step`.
 
@@ -28,8 +29,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
     Parameters
     ----------
     mode : str
-        Modes for learning rate scheduler.
-        Currently it supports 'step', 'poly' and 'cosine'.
+        Modes for learning rate scheduler. Currently it supports 'step', 'poly' and 'cosine'.
     base_lr : float
         Base learning rate, i.e. the starting learning rate.
     n_iters : int
@@ -49,8 +49,7 @@ class LRScheduler(lr_scheduler.LRScheduler):
     warmup_lr : float
         The base learning rate for the warmup stage.
     warmup_mode : str
-        Modes for the warmup stage.
-        Currently it supports 'linear' and 'constant'.
+        Modes for the warmup stage. Currently it supports 'linear' and 'constant'.
     """
     def __init__(self,
                  mode,
@@ -63,10 +62,10 @@ class LRScheduler(lr_scheduler.LRScheduler):
                  power=0.9,
                  warmup_epochs=0,
                  warmup_lr=0,
-                 warmup_mode='linear'):
+                 warmup_mode="linear"):
         super(LRScheduler, self).__init__(base_lr=base_lr)
-        assert(mode in ['step', 'poly', 'cosine'])
-        assert(warmup_mode in ['constant', 'linear', 'poly', 'cosine'])
+        assert(mode in ["step", "poly", "cosine"])
+        assert(warmup_mode in ["constant", "linear", "poly", "cosine"])
 
         self.mode = mode
         self.learning_rate = self.base_lr
@@ -95,29 +94,29 @@ class LRScheduler(lr_scheduler.LRScheduler):
 
         if epoch < self.warmup_epochs:
             # Warm-up Stage
-            if self.warmup_mode == 'constant':
+            if self.warmup_mode == "constant":
                 self.learning_rate = self.warmup_lr
             else:
                 base_lr_real = self.base_lr - self.warmup_lr
                 t_rel = t / self.warmup_N
-                if self.warmup_mode == 'linear':
+                if self.warmup_mode == "linear":
                     self.learning_rate = self.warmup_lr + base_lr_real * t_rel
-                elif self.warmup_mode == 'poly':
+                elif self.warmup_mode == "poly":
                     self.learning_rate = self.warmup_lr + base_lr_real * pow(t_rel, self.power)
-                elif self.warmup_mode == 'cosine':
+                elif self.warmup_mode == "cosine":
                     self.learning_rate = self.warmup_lr + base_lr_real * 0.5 * (1.0 + cos(pi + pi * t_rel))
                 else:
                     raise NotImplementedError
         else:
-            if self.mode == 'step':
+            if self.mode == "step":
                 count = sum([1 for s in self.step if s <= epoch])
                 self.learning_rate = self.base_lr * pow(self.step_factor, count)
             else:
                 base_lr_real = self.base_lr - self.target_lr
                 t_rel = (t - self.warmup_N) / (self.N - self.warmup_N)
-                if self.mode == 'poly':
+                if self.mode == "poly":
                     self.learning_rate = self.target_lr + base_lr_real * pow(1 - t_rel, self.power)
-                elif self.mode == 'cosine':
+                elif self.mode == "cosine":
                     self.learning_rate = self.target_lr + base_lr_real * (1 + cos(pi * t_rel)) / 2
                 else:
                     raise NotImplementedError

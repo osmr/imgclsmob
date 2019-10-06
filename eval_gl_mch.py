@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained image matching model on MXNet/Gluon (under development).
+"""
+
 import os
 import time
 import logging

@@ -1,3 +1,7 @@
+"""
+    Script for training model on Keras.
+"""
+
 import argparse
 import time
 import logging

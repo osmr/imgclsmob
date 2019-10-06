@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained model on TensorFlow (validate/test).
+"""
+
 import argparse
 import tqdm
 import time
@@ -112,7 +116,20 @@ def test(net,
          val_dataflow,
          do_calc_flops=False,
          extended_log=False):
+    """
+    Main test routine.
 
+    Parameters:
+    ----------
+    net : obj
+        Model.
+    session_init : SessionInit
+        Session initializer.
+    do_calc_flops : bool, default False
+        Whether to calculate count of weights.
+    extended_log : bool, default False
+        Whether to log more precise accuracy values.
+    """
     pred_config = PredictConfig(
         model=net,
         session_init=session_init,

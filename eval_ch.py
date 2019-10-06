@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained model on Chainer (validate/test).
+"""
+
 import os
 import time
 import logging
@@ -133,6 +137,22 @@ def test(net,
          metric,
          calc_weight_count=False,
          extended_log=False):
+    """
+    Main test routine.
+
+    Parameters:
+    ----------
+    net : Chain
+        Model.
+    test_data : dict
+        Data loader.
+    metric : EvalMetric
+        Metric object instance.
+    calc_weight_count : bool, default False
+        Whether to calculate count of weights.
+    extended_log : bool, default False
+        Whether to log more precise accuracy values.
+    """
     tic = time.time()
 
     predictor = Predictor(

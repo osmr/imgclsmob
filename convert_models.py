@@ -1,3 +1,7 @@
+"""
+    Script for converting models between frameworks (MXNet, Gluon, PyTroch, Chainer, Keras, TensorFlow).
+"""
+
 import argparse
 import logging
 import re

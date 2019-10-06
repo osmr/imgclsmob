@@ -63,7 +63,7 @@ def initialize_logging(logging_dir_path,
         Path to logging directory.
     logging_file_name : str
         Name of logging file.
-    script_args : argparse.ArgumentParser
+    script_args : ArgumentParser
         Main script arguments.
     log_packages : bool
         Whether to log packages info.

@@ -26,7 +26,7 @@ class CachedChiefSessionCreator(tf.train.ChiefSessionCreator):
 
     def __init__(self,
                  scaffold=None,
-                 master='',
+                 master="",
                  config=None,
                  checkpoint_dir=None,
                  checkpoint_filename_with_path=None):
@@ -52,7 +52,7 @@ class ImageNetModel(ModelDesc):
                  data_format="channels_last",
                  **kwargs):
         super(ImageNetModel, self).__init__(**kwargs)
-        assert (data_format in ['channels_last', 'channels_first'])
+        assert (data_format in ["channels_last", "channels_first"])
 
         self.model_lambda = model_lambda
         self.image_size = image_size
@@ -70,11 +70,11 @@ class ImageNetModel(ModelDesc):
         """
         To apply on normalization parameters, use '.*/W|.*/gamma|.*/beta'
         """
-        self.weight_decay_pattern = '.*/kernel'
+        self.weight_decay_pattern = ".*/kernel"
 
     def inputs(self):
-        return [tf.placeholder(self.image_dtype, (None, self.image_size, self.image_size, 3), 'input'),
-                tf.placeholder(tf.int32, (None,), 'label')]
+        return [tf.placeholder(self.image_dtype, (None, self.image_size, self.image_size, 3), "input"),
+                tf.placeholder(tf.int32, (None,), "label")]
 
     def build_graph(self,
                     image,
@@ -102,11 +102,11 @@ class ImageNetModel(ModelDesc):
             wd_loss = regularize_cost(
                 regex=self.weight_decay_pattern,
                 func=tf.contrib.layers.l2_regularizer(self.weight_decay),
-                name='l2_regularize_loss')
+                name="l2_regularize_loss")
             add_moving_summary(loss, wd_loss)
-            total_cost = tf.add_n([loss, wd_loss], name='cost')
+            total_cost = tf.add_n([loss, wd_loss], name="cost")
         else:
-            total_cost = tf.identity(loss, name='cost')
+            total_cost = tf.identity(loss, name="cost")
             add_moving_summary(total_cost)
 
         if self.loss_scale != 1.0:
@@ -116,8 +116,8 @@ class ImageNetModel(ModelDesc):
             return total_cost
 
     def optimizer(self):
-        lr = tf.get_variable('learning_rate', initializer=0.1, trainable=False)
-        tf.summary.scalar('learning_rate-summary', lr)
+        lr = tf.get_variable("learning_rate", initializer=0.1, trainable=False)
+        tf.summary.scalar("learning_rate-summary", lr)
         return tf.train.MomentumOptimizer(
             learning_rate=lr,
             momentum=0.9,
@@ -125,7 +125,7 @@ class ImageNetModel(ModelDesc):
 
     def image_preprocess(self,
                          image):
-        with tf.name_scope('image_preprocess'):
+        with tf.name_scope("image_preprocess"):
             if image.dtype.base_dtype != tf.float32:
                 image = tf.cast(image, tf.float32)
             mean = np.array([0.485, 0.456, 0.406], np.float32) * 255.0  # rgb
@@ -153,18 +153,18 @@ class ImageNetModel(ModelDesc):
                 onehot_labels=tf.one_hot(label, num_classes),
                 logits=logits,
                 label_smoothing=label_smoothing)
-        loss = tf.reduce_mean(loss, name='xentropy-loss')
+        loss = tf.reduce_mean(loss, name="xentropy-loss")
 
-        def prediction_incorrect(logits, label, topk=1, name='incorrect_vector'):
-            with tf.name_scope('prediction_incorrect'):
+        def prediction_incorrect(logits, label, topk=1, name="incorrect_vector"):
+            with tf.name_scope("prediction_incorrect"):
                 x = tf.logical_not(tf.nn.in_top_k(predictions=logits, targets=label, k=topk))
             return tf.cast(x, tf.float32, name=name)
 
-        error_top1 = prediction_incorrect(logits, label, topk=1, name='wrong-top1')
-        add_moving_summary(tf.reduce_mean(error_top1, name='train-error-top1'))
+        error_top1 = prediction_incorrect(logits, label, topk=1, name="wrong-top1")
+        add_moving_summary(tf.reduce_mean(error_top1, name="train-error-top1"))
 
-        error_top5 = prediction_incorrect(logits, label, topk=5, name='wrong-top5')
-        add_moving_summary(tf.reduce_mean(error_top5, name='train-error-top5'))
+        error_top5 = prediction_incorrect(logits, label, topk=5, name="wrong-top5")
+        add_moving_summary(tf.reduce_mean(error_top5, name="train-error-top5"))
         return loss
 
 
@@ -215,14 +215,14 @@ def get_imagenet_dataflow(datadir,
     if parallel is None:
         parallel = min(40, multiprocessing.cpu_count() // 2)  # assuming hyperthreading
     if is_train:
-        ds = dataset.ILSVRC12(datadir, 'train', shuffle=True)
+        ds = dataset.ILSVRC12(datadir, "train", shuffle=True)
         ds = AugmentImageComponent(ds, augmentors, copy=False)
         if parallel < 16:
             logging.warning("DataFlow may become the bottleneck when too few processes are used.")
         ds = PrefetchDataZMQ(ds, parallel)
         ds = BatchData(ds, batch_size, remainder=False)
     else:
-        ds = dataset.ILSVRC12Files(datadir, 'val', shuffle=False)
+        ds = dataset.ILSVRC12Files(datadir, "val", shuffle=False)
         aug = imgaug.AugmentorList(augmentors)
 
         def mapf(dp):
@@ -249,13 +249,13 @@ def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
                   data_format="channels_last"):
-    kwargs = {'pretrained': use_pretrained}
+    kwargs = {"pretrained": use_pretrained}
 
     raw_net = get_model(
         name=model_name,
         data_format=data_format,
         **kwargs)
-    input_image_size = raw_net.in_size[0] if hasattr(raw_net, 'in_size') else 224
+    input_image_size = raw_net.in_size[0] if hasattr(raw_net, "in_size") else 224
 
     net = ImageNetModel(
         model_lambda=raw_net,
@@ -268,7 +268,7 @@ def prepare_model(model_name,
     inputs_desc = None
     if pretrained_model_file_path:
         assert (os.path.isfile(pretrained_model_file_path))
-        logging.info('Loading model: {}'.format(pretrained_model_file_path))
+        logging.info("Loading model: {}".format(pretrained_model_file_path))
         inputs_desc = get_model_loader(pretrained_model_file_path)
 
     return net, inputs_desc
@@ -298,7 +298,7 @@ def get_data(is_train,
                     eigvec=np.array([
                         [-0.5675, 0.7192, 0.4009],
                         [-0.5808, -0.0045, -0.8140],
-                        [-0.5836, -0.6948, 0.4203]], dtype='float32')[::-1, ::-1])]),
+                        [-0.5836, -0.6948, 0.4203]], dtype="float32")[::-1, ::-1])]),
             imgaug.Flip(horiz=True)]
     else:
         augmentors = [
@@ -317,18 +317,18 @@ def get_data(is_train,
 def calc_flops(model):
     # manually build the graph with batch=1
     input_desc = [
-        InputDesc(tf.float32, [1, model.image_size, model.image_size, 3], 'input'),
-        InputDesc(tf.int32, [1], 'label')
+        InputDesc(tf.float32, [1, model.image_size, model.image_size, 3], "input"),
+        InputDesc(tf.int32, [1], "label")
     ]
     input = PlaceholderInput()
     input.setup(input_desc)
-    with TowerContext('', is_training=False):
+    with TowerContext("", is_training=False):
         model.build_graph(*input.get_input_tensors())
     model_utils.describe_trainable_vars()
 
     tf.profiler.profile(
         tf.get_default_graph(),
-        cmd='op',
+        cmd="op",
         options=tf.profiler.ProfileOptionBuilder.float_operation())
     logger.info("Note that TensorFlow counts flops in a different way from the paper.")
     logger.info("TensorFlow counts multiply+add as two flops, however the paper counts them "

@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained model on PyTorch (validate/test).
+"""
+
 import os
 import time
 import logging

@@ -1,3 +1,7 @@
+"""
+    Routines for model statistics calculation.
+"""
+
 import logging
 import numpy as np
 import mxnet as mx
@@ -13,6 +17,19 @@ __all__ = ['measure_model']
 
 
 def calc_block_num_params2(net):
+    """
+    Calculate number of trainable parameters in the block (not iterative).
+
+    Parameters
+    ----------
+    net : Block
+        Model/block.
+
+    Returns
+    -------
+    int
+        Number of parameters.
+    """
     net_params = net.collect_params()
     weight_count = 0
     for param in net_params.values():
@@ -23,6 +40,19 @@ def calc_block_num_params2(net):
 
 
 def calc_block_num_params(block):
+    """
+    Calculate number of trainable parameters in the block (iterative).
+
+    Parameters
+    ----------
+    block : Block
+        Model/block.
+
+    Returns
+    -------
+    int
+        Number of parameters.
+    """
     weight_count = 0
     for param in block.params.values():
         if (param.shape is None) or (not param._differentiable):

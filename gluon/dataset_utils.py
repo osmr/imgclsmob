@@ -16,11 +16,25 @@ from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import COCOMetaInfo
 from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
+from .weighted_random_sampler import WeightedRandomSampler
 from mxnet.gluon.data import DataLoader
 from mxnet.gluon.utils import split_and_load
 
 
 def get_dataset_metainfo(dataset_name):
+    """
+    Get dataset metainfo by name of dataset.
+
+    Parameters
+    ----------
+    dataset_name : str
+        Dataset name.
+
+    Returns
+    -------
+    DatasetMetaInfo
+        Dataset metainfo.
+    """
     dataset_metainfo_map = {
         "ImageNet1K": ImageNet1KMetaInfo,
         "ImageNet1K_rec": ImageNet1KRecMetaInfo,
@@ -43,6 +57,23 @@ def get_dataset_metainfo(dataset_name):
 def get_train_data_source(ds_metainfo,
                           batch_size,
                           num_workers):
+    """
+    Get data source for training subset.
+
+    Parameters
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        Dataset metainfo.
+    batch_size : int
+        Batch size.
+    num_workers : int
+        Number of background workers.
+
+    Returns
+    -------
+    DataLoader or ImageRecordIter
+        Data source.
+    """
     if ds_metainfo.use_imgrec:
         return ds_metainfo.train_imgrec_iter(
             ds_metainfo=ds_metainfo,
@@ -56,17 +87,46 @@ def get_train_data_source(ds_metainfo,
             transform=(transform_train if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_train)
-        return DataLoader(
-            dataset=dataset,
-            batch_size=batch_size,
-            shuffle=True,
-            last_batch="discard",
-            num_workers=num_workers)
+        if not ds_metainfo.train_use_weighted_sampler:
+            return DataLoader(
+                dataset=dataset,
+                batch_size=batch_size,
+                shuffle=True,
+                last_batch="discard",
+                num_workers=num_workers)
+        else:
+            sampler = WeightedRandomSampler(
+                length=len(dataset),
+                weights=dataset._data.sample_weights)
+            return DataLoader(
+                dataset=dataset,
+                batch_size=batch_size,
+                # shuffle=True,
+                sampler=sampler,
+                last_batch="discard",
+                num_workers=num_workers)
 
 
 def get_val_data_source(ds_metainfo,
                         batch_size,
                         num_workers):
+    """
+    Get data source for validation subset.
+
+    Parameters
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        Dataset metainfo.
+    batch_size : int
+        Batch size.
+    num_workers : int
+        Number of background workers.
+
+    Returns
+    -------
+    DataLoader or ImageRecordIter
+        Data source.
+    """
     if ds_metainfo.use_imgrec:
         return ds_metainfo.val_imgrec_iter(
             ds_metainfo=ds_metainfo,
@@ -90,6 +150,23 @@ def get_val_data_source(ds_metainfo,
 def get_test_data_source(ds_metainfo,
                          batch_size,
                          num_workers):
+    """
+    Get data source for testing subset.
+
+    Parameters
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        Dataset metainfo.
+    batch_size : int
+        Batch size.
+    num_workers : int
+        Number of background workers.
+
+    Returns
+    -------
+    DataLoader or ImageRecordIter
+        Data source.
+    """
     if ds_metainfo.use_imgrec:
         return ds_metainfo.val_imgrec_iter(
             ds_metainfo=ds_metainfo,
@@ -111,6 +188,19 @@ def get_test_data_source(ds_metainfo,
 
 
 def get_batch_fn(use_imgrec):
+    """
+    Get function for splitting data after extraction from data loader.
+
+    Parameters
+    ----------
+    use_imgrec : bool
+        Whether to use ImageRecordIter.
+
+    Returns
+    -------
+    func
+        Desired function.
+    """
     if use_imgrec:
         def batch_fn(batch, ctx):
             data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)

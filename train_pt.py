@@ -1,3 +1,7 @@
+"""
+    Script for training model on PyTorch.
+"""
+
 import os
 import time
 import logging
@@ -266,6 +270,19 @@ def parse_args():
 
 
 def init_rand(seed):
+    """
+    Initialize all random generators by seed.
+
+    Parameters:
+    ----------
+    seed : int
+        Seed value.
+
+    Returns
+    -------
+    int
+        Generated seed value.
+    """
     if seed <= 0:
         seed = np.random.randint(10000)
     else:
@@ -290,7 +307,43 @@ def prepare_trainer(net,
                     lr_decay,
                     num_epochs,
                     state_file_path):
+    """
+    Prepare trainer.
 
+    Parameters:
+    ----------
+    net : Module
+        Model.
+    optimizer_name : str
+        Name of optimizer.
+    wd : float
+        Weight decay rate.
+    momentum : float
+        Momentum value.
+    lr_mode : str
+        Learning rate scheduler mode.
+    lr : float
+        Learning rate.
+    lr_decay_period : int
+        Interval for periodic learning rate decays.
+    lr_decay_epoch : str
+        Epoches at which learning rate decays.
+    lr_decay : float
+        Decay rate of learning rate.
+    num_epochs : int
+        Number of training epochs.
+    state_file_path : str
+        Path for file with trainer state.
+
+    Returns
+    -------
+    Optimizer
+        Optimizer.
+    LRScheduler
+        Learning rate scheduler.
+    int
+        Start epoch.
+    """
     optimizer_name = optimizer_name.lower()
     if (optimizer_name == "sgd") or (optimizer_name == "nag"):
         optimizer = torch.optim.SGD(
@@ -346,6 +399,18 @@ def prepare_trainer(net,
 
 def save_params(file_stem,
                 state):
+    """
+    Save current model/trainer parameters.
+
+    Parameters:
+    ----------
+    file_stem : str
+        File stem (with path).
+    state : dict
+        Whole state of model & trainer.
+    trainer : Trainer
+        Trainer.
+    """
     torch.save(
         obj=state["state_dict"],
         f=(file_stem + ".pth"))
@@ -364,7 +429,35 @@ def train_epoch(epoch,
                 # lr_scheduler,
                 batch_size,
                 log_interval):
+    """
+    Train model on particular epoch.
 
+    Parameters:
+    ----------
+    epoch : int
+        Epoch number.
+    net : Module
+        Model.
+    train_metric : EvalMetric
+        Metric object instance.
+    train_data : DataLoader
+        Data loader.
+    use_cuda : bool
+        Whether to use CUDA.
+    L : Loss
+        Loss function.
+    optimizer : Optimizer
+        Optimizer.
+    batch_size : int
+        Training batch size.
+    log_interval : int
+        Batch count period for logging.
+
+    Returns
+    -------
+    float
+        Loss value.
+    """
     tic = time.time()
     net.train()
     train_metric.reset()
@@ -420,6 +513,40 @@ def train_net(batch_size,
               val_metric,
               train_metric,
               use_cuda):
+    """
+    Main procedure for training model.
+
+    Parameters:
+    ----------
+    batch_size : int
+        Training batch size.
+    num_epochs : int
+        Number of training epochs.
+    start_epoch1 : int
+        Number of starting epoch (1-based).
+    train_data : DataLoader
+        Data loader (training subset).
+    val_data : DataLoader
+        Data loader (validation subset).
+    net : Module
+        Model.
+    optimizer : Optimizer
+        Optimizer.
+    lr_scheduler : LRScheduler
+        Learning rate scheduler.
+    lp_saver : TrainLogParamSaver
+        Model/trainer state saver.
+    log_interval : int
+        Batch count period for logging.
+    num_classes : int
+        Number of model classes.
+    val_metric : EvalMetric
+        Metric object instance (validation subset).
+    train_metric : EvalMetric
+        Metric object instance (training subset).
+    use_cuda : bool
+        Whether to use CUDA.
+    """
     assert (num_classes > 0)
 
     L = nn.CrossEntropyLoss()

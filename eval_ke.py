@@ -1,3 +1,7 @@
+"""
+    Script for evaluating trained model on Keras (validate/test).
+"""
+
 import argparse
 import time
 import logging
@@ -121,7 +125,26 @@ def test(net,
          num_gpus,
          calc_weight_count=False,
          extended_log=False):
+    """
+    Main test routine.
 
+    Parameters:
+    ----------
+    net : Model
+        Model.
+    val_gen : generator
+        Data loader.
+    val_size : int
+        Size of validation subset.
+    batch_size : int
+        Batch size.
+    num_gpus : int
+        Number of used GPUs.
+    calc_weight_count : bool, default False
+        Whether to calculate count of weights.
+    extended_log : bool, default False
+        Whether to log more precise accuracy values.
+    """
     keras.backend.set_learning_phase(0)
 
     backend_agnostic_compile(

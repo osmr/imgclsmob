@@ -1,3 +1,7 @@
+"""
+    Routines for model statistics calculation.
+"""
+
 import logging
 import numpy as np
 import torch
@@ -13,6 +17,19 @@ __all__ = ['measure_model']
 
 
 def calc_block_num_params2(net):
+    """
+    Calculate number of trainable parameters in the block (not iterative).
+
+    Parameters
+    ----------
+    net : Module
+        Model/block.
+
+    Returns
+    -------
+    int
+        Number of parameters.
+    """
     net_params = filter(lambda p: p.requires_grad, net.parameters())
     weight_count = 0
     for param in net_params:
@@ -21,6 +38,19 @@ def calc_block_num_params2(net):
 
 
 def calc_block_num_params(module):
+    """
+    Calculate number of trainable parameters in the block (iterative).
+
+    Parameters
+    ----------
+    module : Module
+        Model/block.
+
+    Returns
+    -------
+    int
+        Number of parameters.
+    """
     assert isinstance(module, nn.Module)
     net_params = filter(lambda p: isinstance(p[1], nn.parameter.Parameter) and p[1].requires_grad,
                         module._parameters.items())

@@ -1,3 +1,7 @@
+"""
+    Script for training model on Chainer.
+"""
+
 import os
 import argparse
 import numpy as np

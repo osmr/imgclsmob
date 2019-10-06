@@ -10,7 +10,8 @@ from mxnet.gluon.data import Sampler
 
 
 class WeightedRandomSampler(Sampler):
-    """Samples elements from [0, length) randomly without replacement.
+    """
+    Samples elements from [0, length) randomly without replacement.
 
     Parameters
     ----------

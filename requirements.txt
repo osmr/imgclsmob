@@ -15,5 +15,3 @@ imgaug
 scipy
 tqdm
 Cython
-numpy
-pycocotools

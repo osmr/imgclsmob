@@ -22,7 +22,8 @@ def get_data_rec(rec_train,
                  batch_size,
                  num_workers,
                  input_image_size=(224, 224),
-                 resize_inv_factor=0.875):
+                 resize_inv_factor=0.875,
+                 only_val=False):
     assert (resize_inv_factor > 0.0)
     if isinstance(input_image_size, int):
         input_image_size = (input_image_size, input_image_size)
@@ -38,31 +39,34 @@ def get_data_rec(rec_train,
     data_shape = (3,) + input_image_size
     resize_value = int(math.ceil(float(input_image_size[0]) / resize_inv_factor))
 
-    train_data = mx.io.ImageRecordIter(
-        path_imgrec=rec_train,
-        path_imgidx=rec_train_idx,
-        preprocess_threads=num_workers,
-        shuffle=True,
-        batch_size=batch_size,
+    if not only_val:
+        train_data = mx.io.ImageRecordIter(
+            path_imgrec=rec_train,
+            path_imgidx=rec_train_idx,
+            preprocess_threads=num_workers,
+            shuffle=True,
+            batch_size=batch_size,
 
-        data_shape=data_shape,
-        mean_r=mean_rgb[0],
-        mean_g=mean_rgb[1],
-        mean_b=mean_rgb[2],
-        std_r=std_rgb[0],
-        std_g=std_rgb[1],
-        std_b=std_rgb[2],
-        rand_mirror=True,
-        random_resized_crop=True,
-        max_aspect_ratio=(4. / 3.),
-        min_aspect_ratio=(3. / 4.),
-        max_random_area=1,
-        min_random_area=0.08,
-        brightness=jitter_param,
-        saturation=jitter_param,
-        contrast=jitter_param,
-        pca_noise=lighting_param,
-    )
+            data_shape=data_shape,
+            mean_r=mean_rgb[0],
+            mean_g=mean_rgb[1],
+            mean_b=mean_rgb[2],
+            std_r=std_rgb[0],
+            std_g=std_rgb[1],
+            std_b=std_rgb[2],
+            rand_mirror=True,
+            random_resized_crop=True,
+            max_aspect_ratio=(4. / 3.),
+            min_aspect_ratio=(3. / 4.),
+            max_random_area=1,
+            min_random_area=0.08,
+            brightness=jitter_param,
+            saturation=jitter_param,
+            contrast=jitter_param,
+            pca_noise=lighting_param,
+        )
+    else:
+        train_data = None
     val_data = mx.io.ImageRecordIter(
         path_imgrec=rec_val,
         path_imgidx=rec_val_idx,

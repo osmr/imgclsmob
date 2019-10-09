@@ -10,7 +10,7 @@ RUN pip3 install --upgrade mxnet-cu100
 RUN pip3 install --upgrade torch torchvision
 RUN pip3 install --upgrade chainer cupy-cuda100 chainercv
 #RUN pip3 install --upgrade keras-mxnet
-RUN pip3 install --upgrade tensorflow
+RUN pip3 install --upgrade tensorflow-gpu tensorpack
 RUN pip3 install --upgrade keras
 RUN pip3 install --upgrade pandas Pillow tqdm opencv-python
 #RUN pip3 install --upgrade gluoncv2 pytorchcv

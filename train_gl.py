@@ -538,6 +538,7 @@ def train_epoch(epoch,
     train_metric.reset()
     train_loss = 0.0
 
+    i = 0
     btic = time.time()
     for i, batch in enumerate(train_data):
         data_list, labels_list = batch_fn(batch, ctx)

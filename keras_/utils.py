@@ -133,7 +133,7 @@ def backend_agnostic_compile(model,
     keras_backend_exist = True
     try:
         K._backend
-    except NameError:
+    except (NameError, AttributeError):
         keras_backend_exist = False
     if keras_backend_exist and (K._backend == "mxnet"):
         mx_ctx = ["gpu(%d)" % i for i in range(num_gpus)] if num_gpus > 0 else ["cpu()"]

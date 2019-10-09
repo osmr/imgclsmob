@@ -212,7 +212,8 @@ def main():
         batch_size=batch_size,
         num_workers=args.num_workers,
         input_image_size=input_image_size,
-        resize_inv_factor=args.resize_inv_factor)
+        resize_inv_factor=args.resize_inv_factor,
+        only_val=True)
     val_gen = get_data_generator(
         data_iterator=val_data,
         num_classes=num_classes)

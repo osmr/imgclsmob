@@ -108,7 +108,7 @@ def update_keras_shape(x):
         Input tensor/variable/symbol.
     """
     if not hasattr(x, "_keras_shape"):
-        x._keras_shape = tuple([int(d) if d != 0 else None for d in x.shape])
+        x._keras_shape = tuple([int(d) if (d is not None) and (d != 0) else None for d in x.shape])
 
 
 def flatten(x,

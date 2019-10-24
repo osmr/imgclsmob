@@ -7,7 +7,7 @@ import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
 from mxnet.gluon.contrib.nn import Identity
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSwish
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish
 from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock
@@ -124,6 +124,9 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(block, nn.Swish):
             extra_num_flops = 5 * x[0].size
+            extra_num_macs = 0
+        elif isinstance(block, HSigmoid):
+            extra_num_flops = x[0].size
             extra_num_macs = 0
         elif isinstance(block, HSwish):
             extra_num_flops = 2 * x[0].size

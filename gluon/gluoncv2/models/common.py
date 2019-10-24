@@ -2,10 +2,10 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['round_channels', 'ReLU6', 'PReLU2', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
-           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN',
-           'DualPathSequential', 'ParametricSequential', 'Concurrent', 'ParametricConcurrent', 'Hourglass',
+__all__ = ['round_channels', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
+           'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block',
+           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent', 'ParametricConcurrent', 'Hourglass',
            'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math

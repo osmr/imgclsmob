@@ -2,11 +2,11 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['round_channels', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
-           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity',
-           'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
-           'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
+__all__ = ['round_channels', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
+           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
+           'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
 
 import math
 from inspect import isfunction

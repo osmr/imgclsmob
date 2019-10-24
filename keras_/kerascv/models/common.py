@@ -2,10 +2,10 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['round_channels', 'is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm',
-           'lrn', 'maxpool2d', 'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block',
-           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
+__all__ = ['round_channels', 'HSwish', 'is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten',
+           'batchnorm', 'lrn', 'maxpool2d', 'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
+           'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block',
+           'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
 import numpy as np
@@ -13,6 +13,7 @@ from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+from keras.engine.base_layer import Layer
 
 
 def round_channels(channels,
@@ -36,6 +37,61 @@ def round_channels(channels,
     if float(rounded_channels) < 0.9 * channels:
         rounded_channels += divisor
     return rounded_channels
+
+
+class ReLU6(Layer):
+    """
+    ReLU6 activation layer.
+
+    Parameters:
+    ----------
+    name : str, default 'ReLU6'
+        Layer name.
+    """
+    def __init__(self,
+                 name="ReLU6",
+                 **kwargs):
+        super(ReLU6, self).__init__(name=name, **kwargs)
+
+    def call(self, x):
+        return nn.ReLU(max_value=6.0)(x)
+
+
+class HSigmoid(Layer):
+    """
+    Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
+    https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    name : str, default 'HSigmoid'
+        Layer name.
+    """
+    def __init__(self,
+                 name="HSigmoid",
+                 **kwargs):
+        super(HSigmoid, self).__init__(name=name, **kwargs)
+
+    def call(self, x):
+        return nn.ReLU(max_value=6.0)(x + 3.0) / 6.0
+
+
+class HSwish(Layer):
+    """
+    H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    name : str, default 'HSwish'
+        Layer name.
+    """
+    def __init__(self,
+                 name="HSwish",
+                 **kwargs):
+        super(HSwish, self).__init__(name=name, **kwargs)
+
+    def call(self, x):
+        return x * nn.ReLU(max_value=6.0)(x + 3.0) / 6.0
 
 
 def swish(x,
@@ -90,6 +146,8 @@ def get_activation_layer(x,
             x = nn.ReLU(max_value=6.0, name=name)(x)
         elif activation == "swish":
             x = swish(x=x, name=name)
+        elif activation == "hswish":
+            x = HSwish(name=name)(x)
         else:
             raise NotImplementedError()
     else:
@@ -1287,6 +1345,7 @@ def channel_shuffle_lambda(channels,
 def se_block(x,
              channels,
              reduction=16,
+             approx_sigmoid=False,
              round_mid=False,
              activation="relu",
              name="se_block"):
@@ -1301,6 +1360,8 @@ def se_block(x,
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    approx_sigmoid : bool, default False
+        Whether to use approximated sigmoid function.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
     activation : function or str, default 'relu'
@@ -1336,7 +1397,7 @@ def se_block(x,
         out_channels=channels,
         use_bias=True,
         name=name + "/conv2")
-    w = nn.Activation("sigmoid", name=name + "/sigmoid")(w)
+    w = HSigmoid(name=name + "/hsigmoid")(w) if approx_sigmoid else nn.Activation("sigmoid", name=name + "/sigmoid")(w)
     x = nn.multiply([x, w], name=name + "/mul")
     return x
 

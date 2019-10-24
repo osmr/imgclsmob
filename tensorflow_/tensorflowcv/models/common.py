@@ -2,14 +2,80 @@
     Common routines for models in TensorFlow.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'flatten', 'batchnorm', 'maxpool2d', 'avgpool2d', 'conv2d',
-           'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
-           'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block', 'pre_conv1x1_block', 'pre_conv3x3_block', 'se_block',
-           'channel_shuffle', 'channel_shuffle2']
+__all__ = ['round_channels', 'hswish', 'is_channels_first', 'get_channel_axis', 'flatten', 'batchnorm', 'maxpool2d',
+           'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'se_block', 'channel_shuffle', 'channel_shuffle2']
 
 import math
 import numpy as np
 import tensorflow as tf
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
+
+
+def round_channels(channels,
+                   divisor=8):
+    """
+    Round weighted channel number (make divisible operation).
+
+    Parameters:
+    ----------
+    channels : int or float
+        Original number of channels.
+    divisor : int, default 8
+        Alignment value.
+
+    Returns
+    -------
+    int
+        Weighted number of channels.
+    """
+    rounded_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
+    if float(rounded_channels) < 0.9 * channels:
+        rounded_channels += divisor
+    return rounded_channels
+
+
+def hsigmoid(x,
+             name="hsigmoid"):
+    """
+    Approximated sigmoid function, so-called hard-version of sigmoid from 'Searching for MobileNetV3,'
+    https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    name : str, default 'hsigmoid'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return tf.nn.relu6(x + 3.0, name=name) / 6.0
+
+
+def hswish(x,
+           name="hswish"):
+    """
+    H-Swish activation function from 'Searching for MobileNetV3,' https://arxiv.org/abs/1905.02244.
+
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    name : str, default 'hswish'
+        Block name.
+
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    return x * tf.nn.relu6(x + 3.0, name=name) / 6.0
 
 
 def get_activation_layer(x,
@@ -38,6 +104,8 @@ def get_activation_layer(x,
             x = tf.nn.relu(x, name=name)
         elif activation == "relu6":
             x = tf.nn.relu6(x, name=name)
+        elif activation == "hswish":
+            x = hswish(x, name=name)
         else:
             raise NotImplementedError()
     else:
@@ -346,14 +414,14 @@ def conv2d(x,
             data_format=data_format,
             dilation_rate=dilation,
             use_bias=use_bias,
-            kernel_initializer=tf.contrib.layers.variance_scaling_initializer(2.0),
+            kernel_initializer=tf.keras.initializers.VarianceScaling(2.0),
             name=name)(x)
     elif (groups == out_channels) and (out_channels == in_channels):
         assert (dilation[0] == 1) and (dilation[1] == 1)
         kernel = tf.get_variable(
             name=name + "/dw_kernel",
             shape=kernel_size + (in_channels, 1),
-            initializer=tf.variance_scaling_initializer(2.0))
+            initializer=tf.keras.initializers.VarianceScaling(2.0))
         x = tf.nn.depthwise_conv2d(
             input=x,
             filter=kernel,
@@ -1221,6 +1289,8 @@ def channel_shuffle2(x,
 def se_block(x,
              channels,
              reduction=16,
+             approx_sigmoid=False,
+             round_mid=False,
              activation="relu",
              data_format="channels_last",
              name="se_block"):
@@ -1235,6 +1305,10 @@ def se_block(x,
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    approx_sigmoid : bool, default False
+        Whether to use approximated sigmoid function.
+    round_mid : bool, default False
+        Whether to round middle channel number (make divisible by 8).
     activation : function or str, default 'relu'
         Activation function or name of activation function.
     data_format : str, default 'channels_last'
@@ -1248,7 +1322,7 @@ def se_block(x,
         Resulted tensor.
     """
     assert(len(x.shape) == 4)
-    mid_channels = channels // reduction
+    mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
     pool_size = x.shape[2:4] if is_channels_first(data_format) else x.shape[1:3]
 
     w = tf.keras.layers.AveragePooling2D(
@@ -1274,6 +1348,6 @@ def se_block(x,
         use_bias=True,
         data_format=data_format,
         name=name + "/conv2/conv")
-    w = tf.nn.sigmoid(w, name=name + "/sigmoid")
+    w = hsigmoid(w, name=name + "/hsigmoid") if approx_sigmoid else tf.nn.sigmoid(w, name=name + "/sigmoid")
     x = x * w
     return x

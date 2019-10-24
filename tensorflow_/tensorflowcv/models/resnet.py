@@ -11,6 +11,8 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet1
 import os
 import tensorflow as tf
 from .common import conv1x1_block, conv3x3_block, conv7x7_block, maxpool2d, is_channels_first, flatten
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior()
 
 
 def res_block(x,

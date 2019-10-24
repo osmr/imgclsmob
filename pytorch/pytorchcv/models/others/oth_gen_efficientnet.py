@@ -223,8 +223,7 @@ def _cfg(url='', **kwargs):
         'crop_pct': 0.875, 'interpolation': 'bicubic',
         'mean': IMAGENET_DEFAULT_MEAN, 'std': IMAGENET_DEFAULT_STD,
         'first_conv': 'conv_stem', 'classifier': 'classifier',
-        **kwargs
-    }
+    }.update(**kwargs)
 
 
 default_cfgs = {

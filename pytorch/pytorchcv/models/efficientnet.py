@@ -14,7 +14,7 @@ import math
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
+from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
 
 def calc_tf_padding(x,
@@ -46,33 +46,6 @@ def calc_tf_padding(x,
     pad_h = max((oh - 1) * stride + (kernel_size - 1) * dilation + 1 - height, 0)
     pad_w = max((ow - 1) * stride + (kernel_size - 1) * dilation + 1 - width, 0)
     return pad_h // 2, pad_h - pad_h // 2, pad_w // 2, pad_w - pad_w // 2
-
-
-def round_channels(channels,
-                   factor,
-                   divisor=8):
-    """
-    Round weighted channel number.
-
-    Parameters:
-    ----------
-    channels : int
-        Original number of channels.
-    factor : float
-        Weight factor.
-    divisor : int
-        Alignment value.
-
-    Returns
-    -------
-    int
-        Weighted number of channels.
-    """
-    channels *= factor
-    new_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
-    if new_channels < 0.9 * channels:
-        new_channels += divisor
-    return new_channels
 
 
 class EffiDwsConvUnit(nn.Module):
@@ -451,7 +424,7 @@ def get_efficientnet(version,
     final_block_channels = 1280
 
     layers = [int(math.ceil(li * depth_factor)) for li in layers]
-    channels_per_layers = [round_channels(ci, width_factor) for ci in channels_per_layers]
+    channels_per_layers = [round_channels(ci * width_factor) for ci in channels_per_layers]
 
     from functools import reduce
     channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
@@ -464,11 +437,11 @@ def get_efficientnet(version,
                                zip(strides_per_stage, layers, downsample), [])
     strides_per_stage = [si[0] for si in strides_per_stage]
 
-    init_block_channels = round_channels(init_block_channels, width_factor)
+    init_block_channels = round_channels(init_block_channels * width_factor)
 
     if width_factor > 1.0:
-        assert (int(final_block_channels * width_factor) == round_channels(final_block_channels, width_factor))
-        final_block_channels = round_channels(final_block_channels, width_factor)
+        assert (int(final_block_channels * width_factor) == round_channels(final_block_channels * width_factor))
+        final_block_channels = round_channels(final_block_channels * width_factor)
 
     net = EfficientNet(
         channels=channels,

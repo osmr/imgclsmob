@@ -2,17 +2,40 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential',
-           'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten']
+__all__ = ['round_channels', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity',
+           'DualPathSequential', 'Concurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
 
 import math
 from inspect import isfunction
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+def round_channels(channels,
+                   divisor=8):
+    """
+    Round weighted channel number (make divisible operation).
+
+    Parameters:
+    ----------
+    channels : int or float
+        Original number of channels.
+    divisor : int, default 8
+        Alignment value.
+
+    Returns
+    -------
+    int
+        Weighted number of channels.
+    """
+    rounded_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
+    if float(rounded_channels) < 0.9 * channels:
+        rounded_channels += divisor
+    return rounded_channels
 
 
 class Swish(nn.Module):
@@ -758,6 +781,8 @@ class SEBlock(nn.Module):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
+    round_mid : bool, default False
+        Whether to round middle channel number (make divisible by 8).
     activation : function, or str, or nn.Module
         Activation function or name of activation function.
     """
@@ -765,18 +790,19 @@ class SEBlock(nn.Module):
                  channels,
                  reduction=16,
                  approx_sigmoid=False,
+                 round_mid=False,
                  activation=(lambda: nn.ReLU(inplace=True))):
         super(SEBlock, self).__init__()
-        mid_cannels = channels // reduction
+        mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
         self.conv1 = conv1x1(
             in_channels=channels,
-            out_channels=mid_cannels,
+            out_channels=mid_channels,
             bias=True)
         self.activ = get_activation_layer(activation)
         self.conv2 = conv1x1(
-            in_channels=mid_cannels,
+            in_channels=mid_channels,
             out_channels=channels,
             bias=True)
         self.sigmoid = HSigmoid() if approx_sigmoid else nn.Sigmoid()

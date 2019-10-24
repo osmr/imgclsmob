@@ -2,9 +2,9 @@
     Common routines for models in Keras.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm', 'lrn', 'maxpool2d',
-           'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block',
+__all__ = ['round_channels', 'is_channels_first', 'get_channel_axis', 'update_keras_shape', 'flatten', 'batchnorm',
+           'lrn', 'maxpool2d', 'avgpool2d', 'conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'conv_block',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'pre_conv_block',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'channel_shuffle_lambda', 'se_block']
 
 import math
@@ -13,6 +13,29 @@ from inspect import isfunction
 from keras.layers import BatchNormalization
 from keras import backend as K
 from keras import layers as nn
+
+
+def round_channels(channels,
+                   divisor=8):
+    """
+    Round weighted channel number (make divisible operation).
+
+    Parameters:
+    ----------
+    channels : int or float
+        Original number of channels.
+    divisor : int, default 8
+        Alignment value.
+
+    Returns
+    -------
+    int
+        Weighted number of channels.
+    """
+    rounded_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
+    if float(rounded_channels) < 0.9 * channels:
+        rounded_channels += divisor
+    return rounded_channels
 
 
 def swish(x,
@@ -1264,6 +1287,7 @@ def channel_shuffle_lambda(channels,
 def se_block(x,
              channels,
              reduction=16,
+             round_mid=False,
              activation="relu",
              name="se_block"):
     """
@@ -1277,6 +1301,8 @@ def se_block(x,
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    round_mid : bool, default False
+        Whether to round middle channel number (make divisible by 8).
     activation : function or str, default 'relu'
         Activation function or name of activation function.
     name : str, default 'se_block'
@@ -1288,7 +1314,7 @@ def se_block(x,
         Resulted tensor/variable/symbol.
     """
     assert(len(x._keras_shape) == 4)
-    mid_cannels = channels // reduction
+    mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
     pool_size = x._keras_shape[2:4] if is_channels_first() else x._keras_shape[1:3]
 
     w = nn.AvgPool2D(
@@ -1297,7 +1323,7 @@ def se_block(x,
     w = conv1x1(
         x=w,
         in_channels=channels,
-        out_channels=mid_cannels,
+        out_channels=mid_channels,
         use_bias=True,
         name=name + "/conv1")
     w = get_activation_layer(
@@ -1306,7 +1332,7 @@ def se_block(x,
         name=name + "/activ")
     w = conv1x1(
         x=w,
-        in_channels=mid_cannels,
+        in_channels=mid_channels,
         out_channels=channels,
         use_bias=True,
         name=name + "/conv2")

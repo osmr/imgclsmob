@@ -1248,7 +1248,7 @@ def se_block(x,
         Resulted tensor.
     """
     assert(len(x.shape) == 4)
-    mid_cannels = channels // reduction
+    mid_channels = channels // reduction
     pool_size = x.shape[2:4] if is_channels_first(data_format) else x.shape[1:3]
 
     w = tf.keras.layers.AveragePooling2D(
@@ -1259,7 +1259,7 @@ def se_block(x,
     w = conv1x1(
         x=w,
         in_channels=channels,
-        out_channels=mid_cannels,
+        out_channels=mid_channels,
         use_bias=True,
         data_format=data_format,
         name=name + "/conv1/conv")
@@ -1269,7 +1269,7 @@ def se_block(x,
         name=name + "/activ")
     w = conv1x1(
         x=w,
-        in_channels=mid_cannels,
+        in_channels=mid_channels,
         out_channels=channels,
         use_bias=True,
         data_format=data_format,

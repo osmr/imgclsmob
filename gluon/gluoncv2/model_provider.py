@@ -103,6 +103,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.superpointnet import *
+from .models.others.oth_mobilenetv3 import *
 
 __all__ = ['get_model']
 
@@ -954,6 +955,9 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'oth_mobilenet_v3_small': oth_mobilenet_v3_small,
+    'oth_mobilenet_v3_large': oth_mobilenet_v3_large,
 }
 
 

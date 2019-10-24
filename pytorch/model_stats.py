@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish
+from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSwish
 from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
@@ -117,6 +117,9 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(module, Swish):
             extra_num_flops = 5 * x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, HSwish):
+            extra_num_flops = 2 * x[0].numel()
             extra_num_macs = 0
         elif isinstance(module, nn.Conv2d):
             batch = x[0].shape[0]

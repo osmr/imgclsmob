@@ -2,16 +2,39 @@
     Common routines for models in Gluon.
 """
 
-__all__ = ['ReLU6', 'PReLU2', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
-           'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential',
-           'ParametricSequential', 'Concurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential']
+__all__ = ['round_channels', 'ReLU6', 'PReLU2', 'HSwish', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN',
+           'DualPathSequential', 'ParametricSequential', 'Concurrent', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction
 import mxnet as mx
 from mxnet.gluon import nn, HybridBlock
+
+
+def round_channels(channels,
+                   divisor=8):
+    """
+    Round weighted channel number (make divisible operation).
+
+    Parameters:
+    ----------
+    channels : int or float
+        Original number of channels.
+    divisor : int, default 8
+        Alignment value.
+
+    Returns
+    -------
+    int
+        Weighted number of channels.
+    """
+    rounded_channels = max(int(channels + divisor / 2.0) // divisor * divisor, divisor)
+    if float(rounded_channels) < 0.9 * channels:
+        rounded_channels += divisor
+    return rounded_channels
 
 
 class ReLU6(HybridBlock):
@@ -826,6 +849,8 @@ class SEBlock(HybridBlock):
         Squeeze reduction value.
     approx_sigmoid : bool, default False
         Whether to use approximated sigmoid function.
+    round_mid : bool, default False
+        Whether to round middle channel number (make divisible by 8).
     activation : function, or str, or HybridBlock
         Activation function or name of activation function.
     """
@@ -833,19 +858,20 @@ class SEBlock(HybridBlock):
                  channels,
                  reduction=16,
                  approx_sigmoid=False,
+                 round_mid=False,
                  activation=(lambda: nn.Activation("relu")),
                  **kwargs):
         super(SEBlock, self).__init__(**kwargs)
-        mid_cannels = channels // reduction
+        mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         with self.name_scope():
             self.conv1 = conv1x1(
                 in_channels=channels,
-                out_channels=mid_cannels,
+                out_channels=mid_channels,
                 use_bias=True)
             self.activ = get_activation_layer(activation)
             self.conv2 = conv1x1(
-                in_channels=mid_cannels,
+                in_channels=mid_channels,
                 out_channels=channels,
                 use_bias=True)
             self.sigmoid = HSigmoid() if approx_sigmoid else nn.Activation("sigmoid")

@@ -250,7 +250,8 @@ def prepare_dst_model(dst_fwk,
             model_name=dst_model,
             use_pretrained=False,
             pretrained_model_file_path="")
-        dst_param_keys = list(dst_net._arg_names) + list(dst_net._aux_names)
+        # dst_param_keys = list(dst_net._arg_names) + list(dst_net._aux_names)
+        dst_param_keys = [v.name for v in dst_net.weights]
         dst_params = {}
         for layer in dst_net.layers:
             if layer.name:
@@ -676,9 +677,9 @@ def convert_gl2ke(dst_net,
             src_weight = np.transpose(src_weight, (2, 3, 0, 1))
         if (dst_layer.__class__.__name__ in ['Dense']) and dst_key.endswith("kernel1"):
             src_weight = np.transpose(src_weight, (1, 0))
-        assert (dst_weight._get_shape() == src_weight.shape), \
+        assert (dst_weight._keras_shape == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
-                src_key, dst_key, src_weight.shape, dst_weight._get_shape())
+                src_key, dst_key, src_weight.shape, dst_weight._keras_shape)
         dst_weight.bind(mx.nd.array(src_weight))
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):

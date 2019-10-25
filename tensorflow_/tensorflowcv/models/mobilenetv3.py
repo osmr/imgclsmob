@@ -623,13 +623,13 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained, data_format=data_format)
-        x = tf.placeholder(
+        x = tf.compat.v1.placeholder(
             dtype=tf.float32,
             shape=(None, 3, 224, 224) if is_channels_first(data_format) else (None, 224, 224, 3),
             name="xx")
         y_net = net(x)
 
-        weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.trainable_variables()])
+        weight_count = np.sum([np.prod(v.get_shape().as_list()) for v in tf.compat.v1.trainable_variables()])
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != mobilenetv3_small_w7d20 or weight_count == 2159600)
         assert (model != mobilenetv3_small_wd2 or weight_count == 2288976)
@@ -642,16 +642,16 @@ def _test():
         assert (model != mobilenetv3_large_w1 or weight_count == 5481752)
         assert (model != mobilenetv3_large_w5d4 or weight_count == 7459144)
 
-        with tf.Session() as sess:
+        with tf.compat.v1.Session() as sess:
             if pretrained:
                 from .model_store import init_variables_from_state_dict
                 init_variables_from_state_dict(sess=sess, state_dict=net.state_dict)
             else:
-                sess.run(tf.global_variables_initializer())
+                sess.run(tf.compat.v1.global_variables_initializer())
             x_value = np.zeros((1, 3, 224, 224) if is_channels_first(data_format) else (1, 224, 224, 3), np.float32)
             y = sess.run(y_net, feed_dict={x: x_value})
             assert (y.shape == (1, 1000))
-        tf.reset_default_graph()
+        tf.compat.v1.reset_default_graph()
 
 
 if __name__ == "__main__":

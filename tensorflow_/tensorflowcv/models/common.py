@@ -418,7 +418,7 @@ def conv2d(x,
             name=name)(x)
     elif (groups == out_channels) and (out_channels == in_channels):
         assert (dilation[0] == 1) and (dilation[1] == 1)
-        kernel = tf.get_variable(
+        kernel = tf.compat.v1.get_variable(
             name=name + "/dw_kernel",
             shape=kernel_size + (in_channels, 1),
             initializer=tf.keras.initializers.VarianceScaling(2.0))

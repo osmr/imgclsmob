@@ -14,6 +14,7 @@ from tensorpack import InputDesc, PlaceholderInput, TowerContext
 from tensorpack.tfutils import get_model_loader, model_utils
 # from tensorpack.tfutils import get_default_sess_config
 from tensorpack.dataflow import imgaug, dataset, AugmentImageComponent, PrefetchDataZMQ, BatchData
+# from tensorpack.dataflow import PrefetchData
 from tensorpack.dataflow import MultiThreadMapData
 # from tensorpack.dataflow import MapData
 from tensorpack.utils import logger
@@ -236,6 +237,7 @@ def get_imagenet_dataflow(datadir,
         # ds = MapData(ds, mapf)
         ds = BatchData(ds, batch_size, remainder=True)
         ds = PrefetchDataZMQ(ds, 1)
+        # ds = PrefetchData(ds, 1)
     return ds
 
 

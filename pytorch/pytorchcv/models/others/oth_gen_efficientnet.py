@@ -1,4 +1,3 @@
-
 import math
 import re
 import logging
@@ -227,10 +226,47 @@ def _cfg(url='', **kwargs):
 
 
 default_cfgs = {
-    'mobilenetv3_050': _cfg(url=''),
-    'mobilenetv3_075': _cfg(url=''),
-    'mobilenetv3_100': _cfg(
-        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mobilenetv3_100-35495452.pth'),
+    'mnasnet_050': _cfg(url=''),
+    'mnasnet_075': _cfg(url=''),
+    'mnasnet_100': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mnasnet_b1-74cb7081.pth'),
+    'mnasnet_140': _cfg(url=''),
+
+    'semnasnet_050': _cfg(url=''),
+    'semnasnet_075': _cfg(url=''),
+    'semnasnet_100': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mnasnet_a1-d9418771.pth'),
+    'semnasnet_140': _cfg(url=''),
+
+    'mnasnet_small': _cfg(url=''),
+
+    'chamnetv1_100': _cfg(url=''),
+    'chamnetv2_100': _cfg(url=''),
+
+    'fbnetc_100': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/fbnetc_100-c345b898.pth',
+        interpolation='bilinear'),
+
+    'spnasnet_100': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/spnasnet_100-048bc3f4.pth',
+        interpolation='bilinear'),
+
+    'mixnet_s': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mixnet_s-a907afbc.pth'),
+    'mixnet_m': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mixnet_m-4647fc68.pth'),
+    'mixnet_l': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mixnet_l-5a9a2ed8.pth'),
+    'mixnet_xl': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/mixnet_xl-ac5fbe8d.pth'),
+    'mixnet_xxl': _cfg(),
+
+    'tf_mixnet_s': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_mixnet_s-89d3354b.pth'),
+    'tf_mixnet_m': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_mixnet_m-0f4d8805.pth'),
+    'tf_mixnet_l': _cfg(
+        url='https://github.com/rwightman/pytorch-image-models/releases/download/v0.1-weights/tf_mixnet_l-6c92e0c8.pth'),
 }
 
 
@@ -985,44 +1021,29 @@ class GenEfficientNet(nn.Module):
         return self.classifier(x)
 
 
-def _gen_mobilenet_v1(channel_multiplier, num_classes=1000, **kwargs):
-    """ Generate MobileNet-V1 network
-    Ref impl: https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py
-    Paper: https://arxiv.org/abs/1801.04381
+def _gen_mnasnet_a1(channel_multiplier, num_classes=1000, **kwargs):
+    """Creates a mnasnet-a1 model.
+
+    Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet
+    Paper: https://arxiv.org/pdf/1807.11626.pdf.
+
+    Args:
+      channel_multiplier: multiplier to number of channels per layer.
     """
     arch_def = [
-        ['dsa_r1_k3_s1_c64'],
-        ['dsa_r2_k3_s2_c128'],
-        ['dsa_r2_k3_s2_c256'],
-        ['dsa_r6_k3_s2_c512'],
-        ['dsa_r2_k3_s2_c1024'],
-    ]
-    model = GenEfficientNet(
-        _decode_arch_def(arch_def),
-        num_classes=num_classes,
-        stem_size=32,
-        num_features=1024,
-        channel_multiplier=channel_multiplier,
-        bn_args=_resolve_bn_args(kwargs),
-        act_fn=F.relu6,
-        head_conv='none',
-        **kwargs
-        )
-    return model
-
-
-def _gen_mobilenet_v2(channel_multiplier, num_classes=1000, **kwargs):
-    """ Generate MobileNet-V2 network
-    Ref impl: https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet_v2.py
-    Paper: https://arxiv.org/abs/1801.04381
-    """
-    arch_def = [
-        ['ds_r1_k3_s1_c16'],
+        # stage 0, 112x112 in
+        ['ds_r1_k3_s1_e1_c16_noskip'],
+        # stage 1, 112x112 in
         ['ir_r2_k3_s2_e6_c24'],
-        ['ir_r3_k3_s2_e6_c32'],
-        ['ir_r4_k3_s2_e6_c64'],
-        ['ir_r3_k3_s1_e6_c96'],
-        ['ir_r3_k3_s2_e6_c160'],
+        # stage 2, 56x56 in
+        ['ir_r3_k5_s2_e3_c40_se0.25'],
+        # stage 3, 28x28 in
+        ['ir_r4_k3_s2_e6_c80'],
+        # stage 4, 14x14in
+        ['ir_r2_k3_s1_e6_c112_se0.25'],
+        # stage 5, 14x14in
+        ['ir_r3_k5_s2_e6_c160_se0.25'],
+        # stage 6, 7x7 in
         ['ir_r1_k3_s1_e6_c320'],
     ]
     model = GenEfficientNet(
@@ -1031,113 +1052,469 @@ def _gen_mobilenet_v2(channel_multiplier, num_classes=1000, **kwargs):
         stem_size=32,
         channel_multiplier=channel_multiplier,
         bn_args=_resolve_bn_args(kwargs),
-        act_fn=F.relu6,
         **kwargs
     )
     return model
 
 
-def _gen_mobilenet_v3(channel_multiplier, num_classes=1000, **kwargs):
-    """Creates a MobileNet-V3 model.
+def _gen_mnasnet_b1(channel_multiplier, num_classes=1000, **kwargs):
+    """Creates a mnasnet-b1 model.
 
-    Ref impl: ?
-    Paper: https://arxiv.org/abs/1905.02244
+    Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet
+    Paper: https://arxiv.org/pdf/1807.11626.pdf.
 
     Args:
       channel_multiplier: multiplier to number of channels per layer.
     """
     arch_def = [
         # stage 0, 112x112 in
-        ['ds_r1_k3_s1_e1_c16_nre_noskip'],  # relu
+        ['ds_r1_k3_s1_c16_noskip'],
         # stage 1, 112x112 in
-        ['ir_r1_k3_s2_e4_c24_nre', 'ir_r1_k3_s1_e3_c24_nre'],  # relu
+        ['ir_r3_k3_s2_e3_c24'],
         # stage 2, 56x56 in
-        ['ir_r3_k5_s2_e3_c40_se0.25_nre'],  # relu
+        ['ir_r3_k5_s2_e3_c40'],
         # stage 3, 28x28 in
-        ['ir_r1_k3_s2_e6_c80', 'ir_r1_k3_s1_e2.5_c80', 'ir_r2_k3_s1_e2.3_c80'],  # hard-swish
+        ['ir_r3_k5_s2_e6_c80'],
         # stage 4, 14x14in
-        ['ir_r2_k3_s1_e6_c112_se0.25'],  # hard-swish
+        ['ir_r2_k3_s1_e6_c96'],
         # stage 5, 14x14in
-        ['ir_r3_k5_s2_e6_c160_se0.25'],  # hard-swish
+        ['ir_r4_k5_s2_e6_c192'],
         # stage 6, 7x7 in
-        ['cn_r1_k1_s1_c960'],  # hard-swish
+        ['ir_r1_k3_s1_e6_c320_noskip']
     ]
     model = GenEfficientNet(
         _decode_arch_def(arch_def),
         num_classes=num_classes,
-        stem_size=16,
+        stem_size=32,
         channel_multiplier=channel_multiplier,
         bn_args=_resolve_bn_args(kwargs),
-        act_fn=hard_swish,
-        se_gate_fn=hard_sigmoid,
-        se_reduce_mid=True,
-        head_conv='efficient',
         **kwargs
     )
     return model
 
 
-def mobilenetv3_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
-    """ MobileNet V3 """
-    default_cfg = default_cfgs['mobilenetv3_050']
-    model = _gen_mobilenet_v3(0.5, num_classes=num_classes, in_chans=in_chans, **kwargs)
+def _gen_mnasnet_small(channel_multiplier, num_classes=1000, **kwargs):
+    """Creates a mnasnet-b1 model.
+
+    Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet
+    Paper: https://arxiv.org/pdf/1807.11626.pdf.
+
+    Args:
+      channel_multiplier: multiplier to number of channels per layer.
+    """
+    arch_def = [
+        ['ds_r1_k3_s1_c8'],
+        ['ir_r1_k3_s2_e3_c16'],
+        ['ir_r2_k3_s2_e6_c16'],
+        ['ir_r4_k5_s2_e6_c32_se0.25'],
+        ['ir_r3_k3_s1_e6_c32_se0.25'],
+        ['ir_r3_k5_s2_e6_c88_se0.25'],
+        ['ir_r1_k3_s1_e6_c144']
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=8,
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        **kwargs
+    )
+    return model
+
+
+def _gen_chamnet_v1(channel_multiplier, num_classes=1000, **kwargs):
+    """ Generate Chameleon Network (ChamNet)
+
+    Paper: https://arxiv.org/abs/1812.08934
+    Ref Impl: https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/maskrcnn_benchmark/modeling/backbone/fbnet_modeldef.py
+
+    FIXME: this a bit of an educated guess based on trunkd def in maskrcnn_benchmark
+    """
+    arch_def = [
+        ['ir_r1_k3_s1_e1_c24'],
+        ['ir_r2_k7_s2_e4_c48'],
+        ['ir_r5_k3_s2_e7_c64'],
+        ['ir_r7_k5_s2_e12_c56'],
+        ['ir_r5_k3_s1_e8_c88'],
+        ['ir_r4_k3_s2_e7_c152'],
+        ['ir_r1_k3_s1_e10_c104'],
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=32,
+        num_features=1280,  # no idea what this is? try mobile/mnasnet default?
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        **kwargs
+    )
+    return model
+
+
+def _gen_chamnet_v2(channel_multiplier, num_classes=1000, **kwargs):
+    """ Generate Chameleon Network (ChamNet)
+
+    Paper: https://arxiv.org/abs/1812.08934
+    Ref Impl: https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/maskrcnn_benchmark/modeling/backbone/fbnet_modeldef.py
+
+    FIXME: this a bit of an educated guess based on trunk def in maskrcnn_benchmark
+    """
+    arch_def = [
+        ['ir_r1_k3_s1_e1_c24'],
+        ['ir_r4_k5_s2_e8_c32'],
+        ['ir_r6_k7_s2_e5_c48'],
+        ['ir_r3_k5_s2_e9_c56'],
+        ['ir_r6_k3_s1_e6_c56'],
+        ['ir_r6_k3_s2_e2_c152'],
+        ['ir_r1_k3_s1_e6_c112'],
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=32,
+        num_features=1280,  # no idea what this is? try mobile/mnasnet default?
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        **kwargs
+    )
+    return model
+
+
+def _gen_fbnetc(channel_multiplier, num_classes=1000, **kwargs):
+    """ FBNet-C
+
+        Paper: https://arxiv.org/abs/1812.03443
+        Ref Impl: https://github.com/facebookresearch/maskrcnn-benchmark/blob/master/maskrcnn_benchmark/modeling/backbone/fbnet_modeldef.py
+
+        NOTE: the impl above does not relate to the 'C' variant here, that was derived from paper,
+        it was used to confirm some building block details
+    """
+    arch_def = [
+        ['ir_r1_k3_s1_e1_c16'],
+        ['ir_r1_k3_s2_e6_c24', 'ir_r2_k3_s1_e1_c24'],
+        ['ir_r1_k5_s2_e6_c32', 'ir_r1_k5_s1_e3_c32', 'ir_r1_k5_s1_e6_c32', 'ir_r1_k3_s1_e6_c32'],
+        ['ir_r1_k5_s2_e6_c64', 'ir_r1_k5_s1_e3_c64', 'ir_r2_k5_s1_e6_c64'],
+        ['ir_r3_k5_s1_e6_c112', 'ir_r1_k5_s1_e3_c112'],
+        ['ir_r4_k5_s2_e6_c184'],
+        ['ir_r1_k3_s1_e6_c352'],
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=16,
+        num_features=1984,  # paper suggests this, but is not 100% clear
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        **kwargs
+    )
+    return model
+
+
+def _gen_spnasnet(channel_multiplier, num_classes=1000, **kwargs):
+    """Creates the Single-Path NAS model from search targeted for Pixel1 phone.
+
+    Paper: https://arxiv.org/abs/1904.02877
+
+    Args:
+      channel_multiplier: multiplier to number of channels per layer.
+    """
+    arch_def = [
+        # stage 0, 112x112 in
+        ['ds_r1_k3_s1_c16_noskip'],
+        # stage 1, 112x112 in
+        ['ir_r3_k3_s2_e3_c24'],
+        # stage 2, 56x56 in
+        ['ir_r1_k5_s2_e6_c40', 'ir_r3_k3_s1_e3_c40'],
+        # stage 3, 28x28 in
+        ['ir_r1_k5_s2_e6_c80', 'ir_r3_k3_s1_e3_c80'],
+        # stage 4, 14x14in
+        ['ir_r1_k5_s1_e6_c96', 'ir_r3_k5_s1_e3_c96'],
+        # stage 5, 14x14in
+        ['ir_r4_k5_s2_e6_c192'],
+        # stage 6, 7x7 in
+        ['ir_r1_k3_s1_e6_c320_noskip']
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=32,
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        **kwargs
+    )
+    return model
+
+
+def _gen_mixnet_s(channel_multiplier=1.0, num_classes=1000, **kwargs):
+    """Creates a MixNet Small model.
+
+    Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet
+    Paper: https://arxiv.org/abs/1907.09595
+    """
+    arch_def = [
+        # stage 0, 112x112 in
+        ['ds_r1_k3_s1_e1_c16'],  # relu
+        # stage 1, 112x112 in
+        ['ir_r1_k3_a1.1_p1.1_s2_e6_c24', 'ir_r1_k3_a1.1_p1.1_s1_e3_c24'],  # relu
+        # stage 2, 56x56 in
+        ['ir_r1_k3.5.7_s2_e6_c40_se0.5_nsw', 'ir_r3_k3.5_a1.1_p1.1_s1_e6_c40_se0.5_nsw'],  # swish
+        # stage 3, 28x28 in
+        ['ir_r1_k3.5.7_p1.1_s2_e6_c80_se0.25_nsw', 'ir_r2_k3.5_p1.1_s1_e6_c80_se0.25_nsw'],  # swish
+        # stage 4, 14x14in
+        ['ir_r1_k3.5.7_a1.1_p1.1_s1_e6_c120_se0.5_nsw', 'ir_r2_k3.5.7.9_a1.1_p1.1_s1_e3_c120_se0.5_nsw'],  # swish
+        # stage 5, 14x14in
+        ['ir_r1_k3.5.7.9.11_s2_e6_c200_se0.5_nsw', 'ir_r2_k3.5.7.9_p1.1_s1_e6_c200_se0.5_nsw'],  # swish
+        # 7x7
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def),
+        num_classes=num_classes,
+        stem_size=16,
+        num_features=1536,
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        act_fn=F.relu,
+        **kwargs
+    )
+    return model
+
+
+def _gen_mixnet_m(channel_multiplier=1.0, depth_multiplier=1.0, num_classes=1000, **kwargs):
+    """Creates a MixNet Medium-Large model.
+
+    Ref impl: https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet
+    Paper: https://arxiv.org/abs/1907.09595
+    """
+    arch_def = [
+        # stage 0, 112x112 in
+        ['ds_r1_k3_s1_e1_c24'],  # relu
+        # stage 1, 112x112 in
+        ['ir_r1_k3.5.7_a1.1_p1.1_s2_e6_c32', 'ir_r1_k3_a1.1_p1.1_s1_e3_c32'],  # relu
+        # stage 2, 56x56 in
+        ['ir_r1_k3.5.7.9_s2_e6_c40_se0.5_nsw', 'ir_r3_k3.5_a1.1_p1.1_s1_e6_c40_se0.5_nsw'],  # swish
+        # stage 3, 28x28 in
+        ['ir_r1_k3.5.7_s2_e6_c80_se0.25_nsw', 'ir_r3_k3.5.7.9_a1.1_p1.1_s1_e6_c80_se0.25_nsw'],  # swish
+        # stage 4, 14x14in
+        ['ir_r1_k3_s1_e6_c120_se0.5_nsw', 'ir_r3_k3.5.7.9_a1.1_p1.1_s1_e3_c120_se0.5_nsw'],  # swish
+        # stage 5, 14x14in
+        ['ir_r1_k3.5.7.9_s2_e6_c200_se0.5_nsw', 'ir_r3_k3.5.7.9_p1.1_s1_e6_c200_se0.5_nsw'],  # swish
+        # 7x7
+    ]
+    model = GenEfficientNet(
+        _decode_arch_def(arch_def, depth_multiplier=depth_multiplier, depth_trunc='round'),
+        num_classes=num_classes,
+        stem_size=24,
+        num_features=1536,
+        channel_multiplier=channel_multiplier,
+        bn_args=_resolve_bn_args(kwargs),
+        act_fn=F.relu,
+        **kwargs
+    )
+    return model
+
+
+def mnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet B1, depth multiplier of 0.5. """
+    default_cfg = default_cfgs['mnasnet_050']
+    model = _gen_mnasnet_b1(0.5, num_classes=num_classes, in_chans=in_chans, **kwargs)
     model.default_cfg = default_cfg
     return model
 
 
-def mobilenetv3_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
-    """ MobileNet V3 """
-    default_cfg = default_cfgs['mobilenetv3_075']
-    model = _gen_mobilenet_v3(0.75, num_classes=num_classes, in_chans=in_chans, **kwargs)
+def mnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet B1, depth multiplier of 0.75. """
+    default_cfg = default_cfgs['mnasnet_075']
+    model = _gen_mnasnet_b1(0.75, num_classes=num_classes, in_chans=in_chans, **kwargs)
     model.default_cfg = default_cfg
     return model
 
 
-def mobilenetv3_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
-    """ MobileNet V3 """
-    default_cfg = default_cfgs['mobilenetv3_100']
+def mnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet B1, depth multiplier of 1.0. """
+    default_cfg = default_cfgs['mnasnet_100']
+    model = _gen_mnasnet_b1(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mnasnet_b1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet B1, depth multiplier of 1.0. """
+    return mnasnet_100(pretrained, num_classes, in_chans, **kwargs)
+
+
+def mnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet B1,  depth multiplier of 1.4 """
+    default_cfg = default_cfgs['mnasnet_140']
+    model = _gen_mnasnet_b1(1.4, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def semnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet A1 (w/ SE), depth multiplier of 0.5 """
+    default_cfg = default_cfgs['semnasnet_050']
+    model = _gen_mnasnet_a1(0.5, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def semnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet A1 (w/ SE),  depth multiplier of 0.75. """
+    default_cfg = default_cfgs['semnasnet_075']
+    model = _gen_mnasnet_a1(0.75, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def semnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet A1 (w/ SE), depth multiplier of 1.0. """
+    default_cfg = default_cfgs['semnasnet_100']
+    model = _gen_mnasnet_a1(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mnasnet_a1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet A1 (w/ SE), depth multiplier of 1.0. """
+    return semnasnet_100(pretrained, num_classes, in_chans, **kwargs)
+
+
+def semnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet A1 (w/ SE), depth multiplier of 1.4. """
+    default_cfg = default_cfgs['semnasnet_140']
+    model = _gen_mnasnet_a1(1.4, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mnasnet_small(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ MNASNet Small,  depth multiplier of 1.0. """
+    default_cfg = default_cfgs['mnasnet_small']
+    model = _gen_mnasnet_small(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def fbnetc_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ FBNet-C """
+    default_cfg = default_cfgs['fbnetc_100']
     if pretrained:
         # pretrained model trained with non-default BN epsilon
         kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
-    model = _gen_mobilenet_v3(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model = _gen_fbnetc(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
     model.default_cfg = default_cfg
     return model
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
+def chamnetv1_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ ChamNet """
+    default_cfg = default_cfgs['chamnetv1_100']
+    model = _gen_chamnet_v1(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
 
 
-def _test():
-    import torch
-
-    pretrained = False
-
-    models = [
-        # mobilenetv3_050,
-        # mobilenetv3_075,
-        mobilenetv3_100,
-    ]
-
-    for model in models:
-
-        net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
-        print("m={}, {}".format(model.__name__, weight_count))
-
-        x = torch.randn(1, 3, 224, 224)
-        y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+def chamnetv2_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ ChamNet """
+    default_cfg = default_cfgs['chamnetv2_100']
+    model = _gen_chamnet_v2(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
 
 
-if __name__ == "__main__":
-    _test()
+def spnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """ Single-Path NAS Pixel1"""
+    default_cfg = default_cfgs['spnasnet_100']
+    model = _gen_spnasnet(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mixnet_s(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Small model.
+    """
+    default_cfg = default_cfgs['mixnet_s']
+    model = _gen_mixnet_s(
+        channel_multiplier=1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mixnet_m(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Medium model.
+    """
+    default_cfg = default_cfgs['mixnet_m']
+    model = _gen_mixnet_m(
+        channel_multiplier=1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mixnet_l(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Large model.
+    """
+    default_cfg = default_cfgs['mixnet_l']
+    model = _gen_mixnet_m(
+        channel_multiplier=1.3, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mixnet_xl(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Extra-Large model.
+    Not a paper spec, experimental def by RW w/ depth scaling.
+    """
+    default_cfg = default_cfgs['mixnet_xl']
+    #kwargs['drop_connect_rate'] = 0.2
+    model = _gen_mixnet_m(
+        channel_multiplier=1.6, depth_multiplier=1.2, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def mixnet_xxl(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Double Extra Large model.
+    Not a paper spec, experimental def by RW w/ depth scaling.
+    """
+    default_cfg = default_cfgs['mixnet_xxl']
+    # kwargs['drop_connect_rate'] = 0.2
+    model = _gen_mixnet_m(
+        channel_multiplier=2.4, depth_multiplier=1.3, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def tf_mixnet_s(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Small model. Tensorflow compatible variant
+    """
+    default_cfg = default_cfgs['tf_mixnet_s']
+    kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
+    kwargs['pad_type'] = 'same'
+    model = _gen_mixnet_s(
+        channel_multiplier=1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def tf_mixnet_m(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Medium model. Tensorflow compatible variant
+    """
+    default_cfg = default_cfgs['tf_mixnet_m']
+    kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
+    kwargs['pad_type'] = 'same'
+    model = _gen_mixnet_m(
+        channel_multiplier=1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model
+
+
+def tf_mixnet_l(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+    """Creates a MixNet Large model. Tensorflow compatible variant
+    """
+    default_cfg = default_cfgs['tf_mixnet_l']
+    kwargs['bn_eps'] = _BN_EPS_TF_DEFAULT
+    kwargs['pad_type'] = 'same'
+    model = _gen_mixnet_m(
+        channel_multiplier=1.3, num_classes=num_classes, in_chans=in_chans, **kwargs)
+    model.default_cfg = default_cfg
+    return model

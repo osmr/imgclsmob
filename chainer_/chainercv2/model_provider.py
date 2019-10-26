@@ -91,6 +91,8 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 
+from .models.mixnet import *
+
 __all__ = ['get_model']
 
 
@@ -843,6 +845,10 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'mixnet_s': mixnet_s,
+    'mixnet_m': mixnet_m,
+    'mixnet_l': mixnet_l,
 }
 
 

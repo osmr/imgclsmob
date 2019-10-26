@@ -105,7 +105,6 @@ from .models.superpointnet import *
 from .models.mixnet import *
 from .models.others.oth_gen_efficientnet import *
 
-
 __all__ = ['get_model']
 
 

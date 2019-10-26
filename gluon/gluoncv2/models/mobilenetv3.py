@@ -34,6 +34,9 @@ class MobileNetV3Unit(HybridBlock):
         Activation function or name of activation function.
     use_se : bool
         Whether to use SE-module.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     """
     def __init__(self,
                  in_channels,
@@ -43,6 +46,7 @@ class MobileNetV3Unit(HybridBlock):
                  use_kernel3,
                  activation,
                  use_se,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(MobileNetV3Unit, self).__init__(**kwargs)
         assert (exp_channels >= out_channels)
@@ -56,18 +60,21 @@ class MobileNetV3Unit(HybridBlock):
                 self.exp_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=mid_channels,
+                    bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             if use_kernel3:
                 self.conv1 = dwconv3x3_block(
                     in_channels=mid_channels,
                     out_channels=mid_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             else:
                 self.conv1 = dwconv5x5_block(
                     in_channels=mid_channels,
                     out_channels=mid_channels,
                     strides=strides,
+                    bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             if self.use_se:
                 self.se = SEBlock(
@@ -78,6 +85,7 @@ class MobileNetV3Unit(HybridBlock):
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
                 activation=None)
 
     def hybrid_forward(self, F, x):
@@ -106,11 +114,15 @@ class MobileNetV3FinalBlock(HybridBlock):
         Number of output channels.
     use_se : bool
         Whether to use SE-module.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  use_se,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(MobileNetV3FinalBlock, self).__init__(**kwargs)
         self.use_se = use_se
@@ -119,6 +131,7 @@ class MobileNetV3FinalBlock(HybridBlock):
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
                 activation="hswish")
             if self.use_se:
                 self.se = SEBlock(
@@ -205,6 +218,9 @@ class MobileNetV3(HybridBlock):
         Whether to use stride for the first stage.
     final_use_se : bool
         Whether to use SE-module in the final block.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -223,6 +239,7 @@ class MobileNetV3(HybridBlock):
                  use_se,
                  first_stride,
                  final_use_se,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -237,6 +254,7 @@ class MobileNetV3(HybridBlock):
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 strides=2,
+                bn_use_global_stats=bn_use_global_stats,
                 activation="hswish"))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
@@ -255,13 +273,15 @@ class MobileNetV3(HybridBlock):
                             use_kernel3=use_kernel3,
                             strides=strides,
                             activation=activation,
-                            use_se=use_se_flag))
+                            use_se=use_se_flag,
+                            bn_use_global_stats=bn_use_global_stats))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(MobileNetV3FinalBlock(
                 in_channels=in_channels,
                 out_channels=final_block_channels,
-                use_se=final_use_se))
+                use_se=final_use_se,
+                bn_use_global_stats=bn_use_global_stats))
             in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,

@@ -222,8 +222,6 @@ class ConvBlock(nn.Module):
         Small float added to variance in Batch norm.
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
     """
     def __init__(self,
                  in_channels,

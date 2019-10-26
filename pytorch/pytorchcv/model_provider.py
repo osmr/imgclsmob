@@ -102,6 +102,9 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
+from .models.mixnet import *
+from .models.others.oth_gen_efficientnet import *
+
 
 __all__ = ['get_model']
 
@@ -892,6 +895,14 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'mixnet_s': mixnet_s,
+    'mixnet_m': mixnet_m,
+    'mixnet_l': mixnet_l,
+    'oth_mixnet_s': oth_mixnet_s,
+    'oth_mixnet_m': oth_mixnet_m,
+    'oth_mixnet_l': oth_mixnet_l,
+
 }
 
 

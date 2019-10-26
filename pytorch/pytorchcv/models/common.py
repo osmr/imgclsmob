@@ -4,9 +4,10 @@
 
 __all__ = ['round_channels', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'dwconv5x5_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
+           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent',
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'Flatten']
 
 import math
 from inspect import isfunction
@@ -445,6 +446,56 @@ def conv7x7_block(in_channels,
         activation=activation)
 
 
+def dwconv_block(in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride=1,
+                 padding=1,
+                 dilation=1,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    Depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return ConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        groups=out_channels,
+        bias=bias,
+        use_bn=use_bn,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
 def dwconv3x3_block(in_channels,
                     out_channels,
                     stride=1,
@@ -475,13 +526,13 @@ def dwconv3x3_block(in_channels,
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
-    return conv3x3_block(
+    return dwconv_block(
         in_channels=in_channels,
         out_channels=out_channels,
+        kernel_size=3,
         stride=stride,
         padding=padding,
         dilation=dilation,
-        groups=out_channels,
         bias=bias,
         bn_eps=bn_eps,
         activation=activation)
@@ -517,13 +568,121 @@ def dwconv5x5_block(in_channels,
     activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
-    return conv5x5_block(
+    return dwconv_block(
         in_channels=in_channels,
         out_channels=out_channels,
+        kernel_size=5,
         stride=stride,
         padding=padding,
         dilation=dilation,
-        groups=out_channels,
+        bias=bias,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+class DwsConvBlock(nn.Module):
+    """
+    Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    activate : bool, default True
+        Whether activate the convolution block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(DwsConvBlock, self).__init__()
+        self.dw_conv = dwconv_block(
+            in_channels=in_channels,
+            out_channels=in_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            bias=bias,
+            use_bn=use_bn,
+            bn_eps=bn_eps,
+            activation=activation)
+        self.pw_conv = conv1x1_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            bias=bias,
+            use_bn=use_bn,
+            bn_eps=bn_eps,
+            activation=activation)
+
+    def forward(self, x):
+        x = self.dw_conv(x)
+        x = self.pw_conv(x)
+        return x
+
+
+def dwsconv3x3_block(in_channels,
+                     out_channels,
+                     stride=1,
+                     padding=1,
+                     dilation=1,
+                     bias=False,
+                     bn_eps=1e-5,
+                     activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    3x3 depthwise separable version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return DwsConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
         bias=bias,
         bn_eps=bn_eps,
         activation=activation)

@@ -940,7 +940,7 @@ class GenEfficientNet(nn.Module):
                  channel_multiplier=1.0, channel_divisor=8, channel_min=None,
                  pad_type='', act_fn=F.relu, drop_rate=0., drop_connect_rate=0.,
                  se_gate_fn=sigmoid, se_reduce_mid=False, bn_args=_BN_ARGS_PT,
-                 global_pool='avg', head_conv='default', weight_init='goog'):
+                 global_pool='avg', head_conv='default', weight_init='goog', in_channels=3):
         super(GenEfficientNet, self).__init__()
         self.num_classes = num_classes
         self.drop_rate = drop_rate
@@ -1430,7 +1430,7 @@ def spnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mixnet_s(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mixnet_s(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """Creates a MixNet Small model.
     """
     default_cfg = default_cfgs['mixnet_s']
@@ -1440,7 +1440,7 @@ def mixnet_s(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mixnet_m(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mixnet_m(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """Creates a MixNet Medium model.
     """
     default_cfg = default_cfgs['mixnet_m']
@@ -1450,7 +1450,7 @@ def mixnet_m(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mixnet_l(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mixnet_l(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """Creates a MixNet Large model.
     """
     default_cfg = default_cfgs['mixnet_l']
@@ -1518,3 +1518,74 @@ def tf_mixnet_l(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
         channel_multiplier=1.3, num_classes=num_classes, in_chans=in_chans, **kwargs)
     model.default_cfg = default_cfg
     return model
+
+
+def load_model(net,
+               file_path,
+               ignore_extra=True):
+    """
+    Load model state dictionary from a file.
+
+    Parameters
+    ----------
+    net : Module
+        Network in which weights are loaded.
+    file_path : str
+        Path to the file.
+    ignore_extra : bool, default True
+        Whether to silently ignore parameters from the file that are not present in this Module.
+    """
+    import torch
+
+    if ignore_extra:
+        pretrained_state = torch.load(file_path)
+        model_dict = net.state_dict()
+        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
+        net.load_state_dict(pretrained_state)
+    else:
+        net.load_state_dict(torch.load(file_path))
+
+
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
+
+    pretrained = False
+
+    models = [
+        oth_mixnet_s,
+        oth_mixnet_m,
+        oth_mixnet_l,
+        # tf_mixnet_s,
+        # tf_mixnet_m,
+        # tf_mixnet_l,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_mixnet_s or weight_count == 4134606)
+        assert (model != oth_mixnet_m or weight_count == 5014382)
+        assert (model != oth_mixnet_l or weight_count == 7329252)
+
+        x = torch.randn(1, 3, 224, 224)
+        y = net(x)
+        y.sum().backward()
+        assert (tuple(y.size()) == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

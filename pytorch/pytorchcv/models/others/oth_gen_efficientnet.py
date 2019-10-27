@@ -1422,7 +1422,7 @@ def chamnetv2_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def spnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_spnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ Single-Path NAS Pixel1"""
     default_cfg = default_cfgs['spnasnet_100']
     model = _gen_spnasnet(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1561,12 +1561,13 @@ def _test():
     pretrained = False
 
     models = [
-        oth_mixnet_s,
-        oth_mixnet_m,
-        oth_mixnet_l,
+        # oth_mixnet_s,
+        # oth_mixnet_m,
+        # oth_mixnet_l,
         # tf_mixnet_s,
         # tf_mixnet_m,
         # tf_mixnet_l,
+        oth_spnasnet_100,
     ]
 
     for model in models:

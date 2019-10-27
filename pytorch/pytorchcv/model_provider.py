@@ -103,6 +103,7 @@ from .models.deeplabv3 import *
 from .models.superpointnet import *
 
 from .models.mixnet import *
+from .models.spnasnet import *
 from .models.others.oth_gen_efficientnet import *
 
 __all__ = ['get_model']
@@ -898,9 +899,13 @@ _models = {
     'mixnet_s': mixnet_s,
     'mixnet_m': mixnet_m,
     'mixnet_l': mixnet_l,
+
+    'spnasnet': spnasnet,
+
     'oth_mixnet_s': oth_mixnet_s,
     'oth_mixnet_m': oth_mixnet_m,
     'oth_mixnet_l': oth_mixnet_l,
+    'oth_spnasnet_100': oth_spnasnet_100,
 
 }
 

@@ -1395,7 +1395,7 @@ def mnasnet_small(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def fbnetc_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_fbnetc(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ FBNet-C """
     default_cfg = default_cfgs['fbnetc_100']
     if pretrained:
@@ -1568,7 +1568,7 @@ def _test():
         # tf_mixnet_m,
         # tf_mixnet_l,
         # oth_spnasnet_100,
-        fbnetc_100,
+        oth_fbnetc,
     ]
 
     for model in models:
@@ -1582,7 +1582,7 @@ def _test():
         assert (model != oth_mixnet_s or weight_count == 4134606)
         assert (model != oth_mixnet_m or weight_count == 5014382)
         assert (model != oth_mixnet_l or weight_count == 7329252)
-        assert (model != fbnetc_100 or weight_count == 5572200)
+        assert (model != oth_fbnetc or weight_count == 5572200)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)

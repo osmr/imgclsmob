@@ -104,6 +104,7 @@ from .models.superpointnet import *
 
 from .models.mixnet import *
 from .models.spnasnet import *
+from .models.fbnet import *
 from .models.others.oth_gen_efficientnet import *
 
 __all__ = ['get_model']
@@ -902,11 +903,13 @@ _models = {
 
     'spnasnet': spnasnet,
 
+    'fbnet_cb': fbnet_cb,
+
     'oth_mixnet_s': oth_mixnet_s,
     'oth_mixnet_m': oth_mixnet_m,
     'oth_mixnet_l': oth_mixnet_l,
     'oth_spnasnet_100': oth_spnasnet_100,
-
+    'oth_fbnetc': oth_fbnetc,
 }
 
 

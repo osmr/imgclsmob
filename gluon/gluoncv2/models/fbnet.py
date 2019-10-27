@@ -1,10 +1,10 @@
 """
-    Single-Path NASNet for ImageNet-1K, implemented in Gluon.
-    Original paper: 'Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours,'
-    https://arxiv.org/abs/1904.02877.
+    FBNet for ImageNet-1K, implemented in Gluon.
+    Original paper: 'FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural Architecture Search,'
+    https://arxiv.org/abs/1812.03443.
 """
 
-__all__ = ['SPNASNet', 'spnasnet']
+__all__ = ['FBNet', 'fbnet_cb']
 
 import os
 from mxnet import cpu
@@ -12,9 +12,9 @@ from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block
 
 
-class SPNASUnit(HybridBlock):
+class FBNetUnit(HybridBlock):
     """
-    Single-Path NASNet unit.
+    FBNet unit.
 
     Parameters:
     ----------
@@ -24,15 +24,14 @@ class SPNASUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the second convolution layer.
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     use_kernel3 : bool
         Whether to use 3x3 (instead of 5x5) kernel.
     exp_factor : int
         Expansion factor for each unit.
-    use_skip : bool, default True
-        Whether to use skip connection.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     activation : str, default 'relu'
         Activation function or name of activation function.
     """
@@ -40,16 +39,16 @@ class SPNASUnit(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 bn_epsilon,
+                 bn_use_global_stats,
                  use_kernel3,
                  exp_factor,
-                 use_skip=True,
-                 bn_use_global_stats=False,
                  activation="relu",
                  **kwargs):
-        super(SPNASUnit, self).__init__(**kwargs)
+        super(FBNetUnit, self).__init__(**kwargs)
         assert (exp_factor >= 1)
-        self.residual = (in_channels == out_channels) and (strides == 1) and use_skip
-        self.use_exp_conv = exp_factor > 1
+        self.residual = (in_channels == out_channels) and (strides == 1)
+        self.use_exp_conv = True
         mid_channels = exp_factor * in_channels
 
         with self.name_scope():
@@ -57,6 +56,7 @@ class SPNASUnit(HybridBlock):
                 self.exp_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=mid_channels,
+                    bn_epsilon=bn_epsilon,
                     bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             if use_kernel3:
@@ -64,6 +64,7 @@ class SPNASUnit(HybridBlock):
                     in_channels=mid_channels,
                     out_channels=mid_channels,
                     strides=strides,
+                    bn_epsilon=bn_epsilon,
                     bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             else:
@@ -71,11 +72,13 @@ class SPNASUnit(HybridBlock):
                     in_channels=mid_channels,
                     out_channels=mid_channels,
                     strides=strides,
+                    bn_epsilon=bn_epsilon,
                     bn_use_global_stats=bn_use_global_stats,
                     activation=activation)
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
 
@@ -91,9 +94,9 @@ class SPNASUnit(HybridBlock):
         return x
 
 
-class SPNASInitBlock(HybridBlock):
+class FBNetInitBlock(HybridBlock):
     """
-    Single-Path NASNet specific initial block.
+    FBNet specific initial block.
 
     Parameters:
     ----------
@@ -101,33 +104,33 @@ class SPNASInitBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    mid_channels : int
-        Number of middle channels.
-    bn_use_global_stats : bool, default False
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 mid_channels,
-                 bn_use_global_stats=False,
+                 bn_epsilon,
+                 bn_use_global_stats,
                  **kwargs):
-        super(SPNASInitBlock, self).__init__(**kwargs)
+        super(FBNetInitBlock, self).__init__(**kwargs)
         with self.name_scope():
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
-                out_channels=mid_channels,
+                out_channels=out_channels,
                 strides=2,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = SPNASUnit(
-                in_channels=mid_channels,
+            self.conv2 = FBNetUnit(
+                in_channels=out_channels,
                 out_channels=out_channels,
                 strides=1,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
                 use_kernel3=True,
-                exp_factor=1,
-                use_skip=False,
-                bn_use_global_stats=bn_use_global_stats)
+                exp_factor=1)
 
     def hybrid_forward(self, F, x):
         x = self.conv1(x)
@@ -135,66 +138,25 @@ class SPNASInitBlock(HybridBlock):
         return x
 
 
-class SPNASFinalBlock(HybridBlock):
+class FBNet(HybridBlock):
     """
-    Single-Path NASNet specific final block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    mid_channels : int
-        Number of middle channels.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 mid_channels,
-                 bn_use_global_stats=False,
-                 **kwargs):
-        super(SPNASFinalBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv1 = SPNASUnit(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                strides=1,
-                use_kernel3=True,
-                exp_factor=6,
-                use_skip=False,
-                bn_use_global_stats=bn_use_global_stats)
-            self.conv2 = conv1x1_block(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        return x
-
-
-class SPNASNet(HybridBlock):
-    """
-    Single-Path NASNet model from 'Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours,'
-    https://arxiv.org/abs/1904.02877.
+    FBNet model from 'FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural Architecture Search,'
+    https://arxiv.org/abs/1812.03443.
 
     Parameters:
     ----------
     channels : list of list of int
         Number of output channels for each unit.
-    init_block_channels : list of 2 int
+    init_block_channels : int
         Number of output channels for the initial unit.
-    final_block_channels : list of 2 int
+    final_block_channels : int
         Number of output channels for the final block of the feature extractor.
     kernels3 : list of list of int/bool
         Using 3x3 (instead of 5x5) kernel for each unit.
     exp_factors : list of list of int
         Expansion factor for each unit.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -211,46 +173,47 @@ class SPNASNet(HybridBlock):
                  final_block_channels,
                  kernels3,
                  exp_factors,
+                 bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
                  **kwargs):
-        super(SPNASNet, self).__init__(**kwargs)
+        super(FBNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            self.features.add(SPNASInitBlock(
+            self.features.add(FBNetInitBlock(
                 in_channels=in_channels,
-                out_channels=init_block_channels[1],
-                mid_channels=init_block_channels[0],
+                out_channels=init_block_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats))
-            in_channels = init_block_channels[1]
+            in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if ((j == 0) and (i != 3)) or\
-                                      ((j == len(channels_per_stage) // 2) and (i == 3)) else 1
+                        strides = 2 if (j == 0) else 1
                         use_kernel3 = kernels3[i][j] == 1
                         exp_factor = exp_factors[i][j]
-                        stage.add(SPNASUnit(
+                        stage.add(FBNetUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
+                            bn_epsilon=bn_epsilon,
+                            bn_use_global_stats=bn_use_global_stats,
                             use_kernel3=use_kernel3,
-                            exp_factor=exp_factor,
-                            bn_use_global_stats=bn_use_global_stats))
+                            exp_factor=exp_factor))
                         in_channels = out_channels
                 self.features.add(stage)
-            self.features.add(SPNASFinalBlock(
+            self.features.add(conv1x1_block(
                 in_channels=in_channels,
-                out_channels=final_block_channels[1],
-                mid_channels=final_block_channels[0],
+                out_channels=final_block_channels,
+                bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats))
-            in_channels = final_block_channels[1]
+            in_channels = final_block_channels
             self.features.add(nn.AvgPool2D(
                 pool_size=7,
                 strides=1))
@@ -267,16 +230,22 @@ class SPNASNet(HybridBlock):
         return x
 
 
-def get_spnasnet(model_name=None,
-                 pretrained=False,
-                 ctx=cpu(),
-                 root=os.path.join("~", ".mxnet", "models"),
-                 **kwargs):
+def get_fbnet(version,
+              bn_epsilon=1e-5,
+              model_name=None,
+              pretrained=False,
+              ctx=cpu(),
+              root=os.path.join("~", ".mxnet", "models"),
+              **kwargs):
     """
-    Create Single-Path NASNet model with specific parameters.
+    Create FBNet model with specific parameters.
 
     Parameters:
     ----------
+    version : str
+        Version of MobileNetV3 ('a', 'b' or 'c').
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -286,18 +255,22 @@ def get_spnasnet(model_name=None,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    init_block_channels = [32, 16]
-    final_block_channels = [320, 1280]
-    channels = [[24, 24, 24], [40, 40, 40, 40], [80, 80, 80, 80], [96, 96, 96, 96, 192, 192, 192, 192]]
-    kernels3 = [[1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0]]
-    exp_factors = [[3, 3, 3], [6, 3, 3, 3], [6, 3, 3, 3], [6, 3, 3, 3, 6, 6, 6, 6]]
+    if version == "c":
+        init_block_channels = 16
+        final_block_channels = 1984
+        channels = [[24, 24, 24], [32, 32, 32, 32], [64, 64, 64, 64, 112, 112, 112, 112], [184, 184, 184, 184, 352]]
+        kernels3 = [[1, 1, 1], [0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1]]
+        exp_factors = [[6, 1, 1], [6, 3, 6, 6], [6, 3, 6, 6, 6, 6, 6, 3], [6, 6, 6, 6, 6]]
+    else:
+        raise ValueError("Unsupported FBNet version {}".format(version))
 
-    net = SPNASNet(
+    net = FBNet(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
         kernels3=kernels3,
         exp_factors=exp_factors,
+        bn_epsilon=bn_epsilon,
         **kwargs)
 
     if pretrained:
@@ -313,10 +286,10 @@ def get_spnasnet(model_name=None,
     return net
 
 
-def spnasnet(**kwargs):
+def fbnet_cb(**kwargs):
     """
-    Single-Path NASNet model from 'Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours,'
-    https://arxiv.org/abs/1904.02877.
+    FBNet-Cb model (bn_epsilon=1e-3) from 'FBNet: Hardware-Aware Efficient ConvNet Design via Differentiable Neural
+    Architecture Search,' https://arxiv.org/abs/1812.03443.
 
     Parameters:
     ----------
@@ -327,7 +300,7 @@ def spnasnet(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_spnasnet(model_name="spnasnet", **kwargs)
+    return get_fbnet(version="c", bn_epsilon=1e-3, model_name="fbnet_cb", **kwargs)
 
 
 def _test():
@@ -337,7 +310,7 @@ def _test():
     pretrained = False
 
     models = [
-        spnasnet,
+        fbnet_cb,
     ]
 
     for model in models:
@@ -355,7 +328,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != spnasnet or weight_count == 4421616)
+        assert (model != fbnet_cb or weight_count == 5572200)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

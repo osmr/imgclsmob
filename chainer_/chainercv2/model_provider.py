@@ -93,6 +93,7 @@ from .models.deeplabv3 import *
 
 from .models.mixnet import *
 from .models.spnasnet import *
+from .models.fbnet import *
 
 __all__ = ['get_model']
 
@@ -852,6 +853,8 @@ _models = {
     'mixnet_l': mixnet_l,
 
     'spnasnet': spnasnet,
+
+    'fbnet_cb': fbnet_cb,
 }
 
 

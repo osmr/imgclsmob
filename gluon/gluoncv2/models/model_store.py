@@ -226,6 +226,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('efficientnet_b5b', '0334', 'cd70ae717ddca72430efe91cf7a3c4e28bcd61ac', 'v0.0.403'),
     ('efficientnet_b6b', '0312', 'f581d9f046032e28e532082fa49bfd373952db4f', 'v0.0.403'),
     ('efficientnet_b7b', '0311', '2b8a6040588aea44b57df89e2d9239d906737508', 'v0.0.403'),
+    ('mixnet_s', '0739', '54434771161c33256d67748ad3460556dc4a14d5', 'v0.0.412'),
     ('resnetd50b', '0549', '17d6004b5c6c1b97cfb47377ae5076810c5d88be', 'v0.0.296'),
     ('resnetd101b', '0461', 'fead1bcb86bba2be4ed7f0033fa972dc613e3280', 'v0.0.296'),
     ('resnetd152b', '0467', 'd0fe2fe09c6462de17aca4a72bbcb08b76a66e02', 'v0.0.296'),

@@ -107,7 +107,7 @@ from .models.spnasnet import *
 from .models.fbnet import *
 from .models.others.oth_gen_efficientnet import *
 
-__all__ = ['get_model']
+__all__ = ['get_model', 'trained_model_metainfo_list']
 
 
 _models = {
@@ -911,6 +911,27 @@ _models = {
     'oth_spnasnet_100': oth_spnasnet_100,
     'oth_fbnetc': oth_fbnetc,
 }
+
+trained_model_metainfo_list = (
+    ('alexnet', 'AlexNet', '1404.5997', 'pytorch'),
+    ('alexnetb', 'AlexNet-b', '1404.5997', 'pytorch'),
+    ('zfnet', 'ZFNet', '1311.2901', 'pytorch'),
+    ('zfnetb', 'ZFNet-b', '1311.2901', 'pytorch'),
+    ('vgg11', 'VGG-11', '1409.1556', 'pytorch'),
+    ('vgg13', 'VGG-13', '1409.1556', 'pytorch'),
+    ('vgg16', 'VGG-16', '1409.1556', 'pytorch'),
+    ('vgg19', 'VGG-19', '1409.1556', 'pytorch'),
+    ('bn_vgg11', 'BN-VGG-11', '1409.1556', 'pytorch'),
+    ('bn_vgg13', 'BN-VGG-13', '1409.1556', 'pytorch'),
+    ('bn_vgg16', 'BN-VGG-16', '1409.1556', 'pytorch'),
+    ('bn_vgg19', 'BN-VGG-19', '1409.1556', 'pytorch'),
+    ('bn_vgg11b', 'BN-VGG-11b', '1409.1556', 'pytorch'),
+    ('bn_vgg13b', 'BN-VGG-13b', '1409.1556', 'pytorch'),
+    ('bn_vgg16b', 'BN-VGG-16b', '1409.1556', 'pytorch'),
+    ('bn_vgg19b', 'BN-VGG-19b', '1409.1556', 'pytorch'),
+    ('bninception', 'BN-Inception', '1502.03167', 'pytorch'),
+    ('resnet18', 'ResNet-18', '1512.03385', 'pytorch'),
+)
 
 
 def get_model(name, **kwargs):

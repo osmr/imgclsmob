@@ -2,6 +2,7 @@ from torchbench.image_classification import ImageNet
 from pytorch.pytorchcv.model_provider import trained_model_metainfo_list
 from pytorch.pytorchcv.model_provider import get_model as ptcv_get_model
 import torchvision.transforms as transforms
+import torch
 # import os
 
 input_transform = transforms.Compose([
@@ -22,3 +23,4 @@ for model_metainfo in trained_model_metainfo_list:
         num_gpu=1,
         # data_root=os.path.join("..", "imgclsmob_data", "imagenet")
     )
+    torch.cuda.empty_cache()

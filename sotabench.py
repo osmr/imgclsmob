@@ -10,10 +10,12 @@ for model_metainfo in trained_model_metainfo_list:
     net = ptcv_get_model(model_metainfo[0], pretrained=True)
     input_image_size = model_metainfo[3]
     resize_inv_factor = model_metainfo[4]
+    batch_size = model_metainfo[5]
+    model_description = model_metainfo[6]
     assert (not hasattr(net, "in_size")) or (input_image_size == net.in_size[0])
     ImageNet.benchmark(
         model=net,
-        model_description=model_metainfo[5],
+        model_description=model_description,
         paper_model_name=model_metainfo[1],
         paper_arxiv_id=model_metainfo[2],
         input_transform=transforms.Compose([
@@ -24,7 +26,7 @@ for model_metainfo in trained_model_metainfo_list:
                 mean=[0.485, 0.456, 0.406],
                 std=[0.229, 0.224, 0.225]),
         ]),
-        batch_size=50,
+        batch_size=batch_size,
         num_gpu=1,
         # data_root=os.path.join("..", "imgclsmob_data", "imagenet")
     )

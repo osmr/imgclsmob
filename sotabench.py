@@ -7,10 +7,12 @@ import math
 # import os
 
 for model_metainfo in trained_model_metainfo_list:
+    net = ptcv_get_model(model_metainfo[0], pretrained=True)
     input_image_size = model_metainfo[3]
     resize_inv_factor = model_metainfo[4]
+    assert (not hasattr(net, "in_size")) or (input_image_size == net.in_size[0])
     ImageNet.benchmark(
-        model=ptcv_get_model(model_metainfo[0], pretrained=True),
+        model=net,
         model_description=model_metainfo[5],
         paper_model_name=model_metainfo[1],
         paper_arxiv_id=model_metainfo[2],

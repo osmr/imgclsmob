@@ -24,7 +24,7 @@ for model_metainfo in trained_model_metainfo_list:
                 mean=[0.485, 0.456, 0.406],
                 std=[0.229, 0.224, 0.225]),
         ]),
-        batch_size=200,
+        batch_size=50,
         num_gpu=1,
         # data_root=os.path.join("..", "imgclsmob_data", "imagenet")
     )

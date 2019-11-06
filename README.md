@@ -117,7 +117,7 @@ Some remarks:
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
 | ProxylessNAS | A+E+ | A+E+ | A+E+ | - | - | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
-| FBNet | A | A | A | - | - | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
+| FBNet | A | A+ | A+ | - | - | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
 | Xception | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |
 | InceptionV4 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
@@ -126,7 +126,7 @@ Some remarks:
 | NASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
 | NASNet-Mobile | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
 | PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
-| SPNASNet | A | A | A | - | - | [link](https://arxiv.org/abs/1904.02877) | [link](https://github.com/dstamoulis/single-path-nas) | 2019 |
+| SPNASNet | A | A+ | A+ | - | - | [link](https://arxiv.org/abs/1904.02877) | [link](https://github.com/dstamoulis/single-path-nas) | 2019 |
 | EfficientNet | A+ | A+ | A+ | A+ | - | [link](https://arxiv.org/abs/1905.11946) | [link](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet) | 2019 |
 | MixNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1907.09595) | [link](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet) | 2019 |
 | NIN | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1312.4400) | [link](https://gist.github.com/mavenlin/e56253735ef32c3c296d) | 2013 |

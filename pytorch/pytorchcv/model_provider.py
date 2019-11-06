@@ -1132,6 +1132,7 @@ trained_model_metainfo_list = (
     ('efficientnet_b7b', 'EfficientNet-B7b', '1905.11946', 600, 0.949, 50, 'pytorch, from [rwightman/pyt...models]'),
     ('mixnet_s', 'MixNet-S', '1907.09595', 224, 0.875, 200, 'pytorch, from [rwightman/pyt...models]'),
     ('mixnet_m', 'MixNet-M', '1907.09595', 224, 0.875, 200, 'pytorch, from [rwightman/pyt...models]'),
+    ('mixnet_l', 'MixNet-L', '1907.09595', 224, 0.875, 200, 'pytorch, from [rwightman/pyt...models]'),
 )
 
 

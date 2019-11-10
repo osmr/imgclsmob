@@ -56,6 +56,7 @@ from .models.igcv3 import *
 from .models.mnasnet import *
 from .models.darts import *
 from .models.proxylessnas import *
+from .models.fbnet import *
 from .models.xception import *
 from .models.inceptionv3 import *
 from .models.inceptionv4 import *
@@ -63,7 +64,9 @@ from .models.inceptionresnetv2 import *
 from .models.polynet import *
 from .models.nasnet import *
 from .models.pnasnet import *
+from .models.spnasnet import *
 from .models.efficientnet import *
+from .models.mixnet import *
 
 from .models.nin_cifar import *
 from .models.resnet_cifar import *
@@ -102,10 +105,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.mixnet import *
-from .models.spnasnet import *
-from .models.fbnet import *
-from .models.others.oth_gen_efficientnet import *
+# from .models.others.oth_gen_efficientnet import *
 
 __all__ = ['get_model', 'trained_model_metainfo_list']
 
@@ -497,6 +497,8 @@ _models = {
     'proxylessnas_mobile': proxylessnas_mobile,
     'proxylessnas_mobile14': proxylessnas_mobile14,
 
+    'fbnet_cb': fbnet_cb,
+
     'xception': xception,
     'inceptionv3': inceptionv3,
     'inceptionv4': inceptionv4,
@@ -507,6 +509,8 @@ _models = {
     'nasnet_6a4032': nasnet_6a4032,
 
     'pnasnet5large': pnasnet5large,
+
+    'spnasnet': spnasnet,
 
     'efficientnet_b0': efficientnet_b0,
     'efficientnet_b1': efficientnet_b1,
@@ -524,6 +528,10 @@ _models = {
     'efficientnet_b5b': efficientnet_b5b,
     'efficientnet_b6b': efficientnet_b6b,
     'efficientnet_b7b': efficientnet_b7b,
+
+    'mixnet_s': mixnet_s,
+    'mixnet_m': mixnet_m,
+    'mixnet_l': mixnet_l,
 
     'nin_cifar10': nin_cifar10,
     'nin_cifar100': nin_cifar100,
@@ -896,20 +904,6 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-
-    'mixnet_s': mixnet_s,
-    'mixnet_m': mixnet_m,
-    'mixnet_l': mixnet_l,
-
-    'spnasnet': spnasnet,
-
-    'fbnet_cb': fbnet_cb,
-
-    'oth_mixnet_s': oth_mixnet_s,
-    'oth_mixnet_m': oth_mixnet_m,
-    'oth_mixnet_l': oth_mixnet_l,
-    'oth_spnasnet_100': oth_spnasnet_100,
-    'oth_fbnetc': oth_fbnetc,
 }
 
 trained_model_metainfo_list = (

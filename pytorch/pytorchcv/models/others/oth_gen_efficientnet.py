@@ -1313,7 +1313,7 @@ def _gen_mixnet_m(channel_multiplier=1.0, depth_multiplier=1.0, num_classes=1000
     return model
 
 
-def mnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet B1, depth multiplier of 0.5. """
     default_cfg = default_cfgs['mnasnet_050']
     model = _gen_mnasnet_b1(0.5, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1321,7 +1321,7 @@ def mnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet B1, depth multiplier of 0.75. """
     default_cfg = default_cfgs['mnasnet_075']
     model = _gen_mnasnet_b1(0.75, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1329,7 +1329,7 @@ def mnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet B1, depth multiplier of 1.0. """
     default_cfg = default_cfgs['mnasnet_100']
     model = _gen_mnasnet_b1(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1337,12 +1337,12 @@ def mnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mnasnet_b1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_b1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet B1, depth multiplier of 1.0. """
-    return mnasnet_100(pretrained, num_classes, in_chans, **kwargs)
+    return oth_mnasnet_100(pretrained, num_classes, in_chans, **kwargs)
 
 
-def mnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet B1,  depth multiplier of 1.4 """
     default_cfg = default_cfgs['mnasnet_140']
     model = _gen_mnasnet_b1(1.4, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1350,7 +1350,7 @@ def mnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def semnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_semnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet A1 (w/ SE), depth multiplier of 0.5 """
     default_cfg = default_cfgs['semnasnet_050']
     model = _gen_mnasnet_a1(0.5, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1358,7 +1358,7 @@ def semnasnet_050(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def semnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_semnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet A1 (w/ SE),  depth multiplier of 0.75. """
     default_cfg = default_cfgs['semnasnet_075']
     model = _gen_mnasnet_a1(0.75, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1366,7 +1366,7 @@ def semnasnet_075(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def semnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_semnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet A1 (w/ SE), depth multiplier of 1.0. """
     default_cfg = default_cfgs['semnasnet_100']
     model = _gen_mnasnet_a1(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1374,12 +1374,12 @@ def semnasnet_100(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mnasnet_a1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_a1(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet A1 (w/ SE), depth multiplier of 1.0. """
-    return semnasnet_100(pretrained, num_classes, in_chans, **kwargs)
+    return oth_semnasnet_100(pretrained, num_classes, in_chans, **kwargs)
 
 
-def semnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_semnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet A1 (w/ SE), depth multiplier of 1.4. """
     default_cfg = default_cfgs['semnasnet_140']
     model = _gen_mnasnet_a1(1.4, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1387,7 +1387,7 @@ def semnasnet_140(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     return model
 
 
-def mnasnet_small(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
+def oth_mnasnet_small(pretrained=False, num_classes=1000, in_chans=3, **kwargs):
     """ MNASNet Small,  depth multiplier of 1.0. """
     default_cfg = default_cfgs['mnasnet_small']
     model = _gen_mnasnet_small(1.0, num_classes=num_classes, in_chans=in_chans, **kwargs)
@@ -1568,7 +1568,20 @@ def _test():
         # tf_mixnet_m,
         # tf_mixnet_l,
         # oth_spnasnet_100,
-        oth_fbnetc,
+        # oth_fbnetc,
+        oth_mnasnet_b1,
+        oth_mnasnet_a1,
+        oth_mnasnet_small,
+
+        oth_mnasnet_050,
+        oth_mnasnet_075,
+        oth_mnasnet_100,
+        oth_mnasnet_140,
+
+        oth_semnasnet_050,
+        oth_semnasnet_075,
+        oth_semnasnet_100,
+        oth_semnasnet_140,
     ]
 
     for model in models:
@@ -1579,10 +1592,13 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_mixnet_s or weight_count == 4134606)
-        assert (model != oth_mixnet_m or weight_count == 5014382)
-        assert (model != oth_mixnet_l or weight_count == 7329252)
-        assert (model != oth_fbnetc or weight_count == 5572200)
+        # assert (model != oth_mixnet_s or weight_count == 4134606)
+        # assert (model != oth_mixnet_m or weight_count == 5014382)
+        # assert (model != oth_mixnet_l or weight_count == 7329252)
+        # assert (model != oth_fbnetc or weight_count == 5572200)
+        assert (model != oth_mnasnet_b1 or weight_count == 4383312)
+        assert (model != oth_mnasnet_a1 or weight_count == 3887038)
+        assert (model != oth_mnasnet_small or weight_count == 2030264)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)

@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='chainercv2',
-    version='0.0.49',
+    version='0.0.50',
     description='Image classification and segmentation models for Chainer',
     license='MIT',
     long_description=long_description,
@@ -27,8 +27,9 @@ setup(
     keywords='machine-learning deep-learning neuralnetwork image-classification chainer imagenet cifar svhn vgg resnet '
              'pyramidnet diracnet densenet condensenet wrn drn dpn darknet fishnet espnetv2 xdensnet squeezenet '
              'squeezenext shufflenet menet mobilenet igcv3 mnasnet darts xception inception polynet nasnet pnasnet ror '
-             'proxylessnas dianet efficientnet image-segmentation voc ade20k cityscapes coco pspnet deeplabv3 fcn',
-    packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
+             'proxylessnas dianet efficientnet mixnet image-segmentation voc ade20k cityscapes coco pspnet deeplabv3 '
+             'fcn',
+    packages=find_packages(exclude=['datasets', 'metrics', 'others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
     install_requires=['requests', 'chainer>=5.0.0'],
 )

@@ -41,8 +41,8 @@ def calc_tf_padding(x,
         The size of the padding.
     """
     height, width = x.shape[2:]
-    oh = math.ceil(height / strides)
-    ow = math.ceil(width / strides)
+    oh = math.ceil(int(height) / strides)
+    ow = math.ceil(int(width) / strides)
     pad_h = max((oh - 1) * strides + (kernel_size - 1) * dilation + 1 - height, 0)
     pad_w = max((ow - 1) * strides + (kernel_size - 1) * dilation + 1 - width, 0)
     return (pad_h // 2, pad_h - pad_h // 2), (pad_w // 2, pad_w - pad_w // 2)

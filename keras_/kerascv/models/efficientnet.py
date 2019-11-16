@@ -40,7 +40,7 @@ def calc_tf_padding(x,
     tuple of 4 int
         The size of the padding.
     """
-    height, width = x.shape[2:]
+    height, width = x._keras_shape[2:]
     oh = math.ceil(height / strides)
     ow = math.ceil(width / strides)
     pad_h = max((oh - 1) * strides + (kernel_size - 1) * dilation + 1 - height, 0)

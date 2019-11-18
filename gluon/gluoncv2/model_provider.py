@@ -107,6 +107,8 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
+from .models.others.oth_resnext import *
+
 __all__ = ['get_model']
 
 
@@ -965,6 +967,13 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'oth_resnext50_32x4d': oth_resnext50_32x4d,
+    'oth_resnext101_32x4d': oth_resnext101_32x4d,
+    'oth_resnext101_64x4d': oth_resnext101_64x4d,
+    'oth_se_resnext50_32x4d': oth_se_resnext50_32x4d,
+    'oth_se_resnext101_32x4d': oth_se_resnext101_32x4d,
+    'oth_se_resnext101_64x4d': oth_se_resnext101_64x4d,
 }
 
 

@@ -83,7 +83,7 @@ def add_eval_parser_arguments(parser):
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="cupy-cuda100, chainer, chainercv",
+        default="cupy-cuda100, cupy-cuda101, chainer, chainercv",
         help="list of pip packages for logging")
 
     parser.add_argument(

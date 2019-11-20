@@ -107,7 +107,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.others.oth_mobilenetv3 import *
+# from .models.others.oth_mobilenetv3 import *
 
 __all__ = ['get_model']
 
@@ -968,7 +968,7 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    'oth_mobilenetv3_small': oth_mobilenet_v3_small,
+    # 'oth_mobilenetv3_small': oth_mobilenet_v3_small,
 }
 
 

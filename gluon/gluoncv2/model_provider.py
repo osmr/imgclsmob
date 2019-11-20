@@ -107,7 +107,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.others.oth_resnext import *
+from .models.others.oth_mobilenetv3 import *
 
 __all__ = ['get_model']
 
@@ -968,12 +968,7 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    'oth_resnext50_32x4d': oth_resnext50_32x4d,
-    'oth_resnext101_32x4d': oth_resnext101_32x4d,
-    'oth_resnext101_64x4d': oth_resnext101_64x4d,
-    'oth_se_resnext50_32x4d': oth_se_resnext50_32x4d,
-    'oth_se_resnext101_32x4d': oth_se_resnext101_32x4d,
-    'oth_se_resnext101_64x4d': oth_se_resnext101_64x4d,
+    'oth_mobilenetv3_small': oth_mobilenet_v3_small,
 }
 
 

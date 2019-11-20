@@ -177,8 +177,11 @@ def main():
         log_packages=args.log_packages,
         log_pip_packages=args.log_pip_packages)
 
+    data_format = "channels_last"
+    tf.keras.backend.set_image_data_format(data_format)
+
     model = args.model
-    net = get_model(model, data_format="channels_first")
+    net = get_model(model, data_format=data_format)
 
     loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
     optimizer = tf.keras.optimizers.Adam()
@@ -219,7 +222,8 @@ def main():
         train_dir,
         target_size=(224, 224),
         batch_size=batch_size,
-        class_mode="binary")
+        class_mode="binary",
+        shuffle=True)
     val_generator = val_datagen.flow_from_directory(
         val_dir,
         target_size=(224, 224),
@@ -230,9 +234,11 @@ def main():
     for epoch in range(num_epochs):
         for images, labels in train_generator:
             train_step(images, labels)
+            # break
 
         for test_images, test_labels in val_generator:
             test_step(test_images, test_labels)
+            # break
 
         template = 'Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
         print(template.format(

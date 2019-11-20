@@ -730,9 +730,10 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        x = tf.random.normal((1, 224, 224, 3))
+        batch_saze = 20
+        x = tf.random.normal((batch_saze, 224, 224, 3))
         y = net(x)
-        assert (tuple(y.shape.as_list()) == (1, 1000))
+        assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))

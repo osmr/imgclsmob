@@ -3,17 +3,17 @@
     Original paper: 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,' https://arxiv.org/abs/1807.11626.
 """
 
-__all__ = ['MnasNet', 'mnasnet']
+__all__ = ['MnasNet', 'mnasnet_b1', 'mnasnet_a1', 'mnasnet_small']
 
 import os
 import torch.nn as nn
 import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block
+from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
 
-class DwsConvBlock(nn.Module):
+class DwsExpSEResUnit(nn.Module):
     """
-    Depthwise separable convolution block with BatchNorms and activations at each convolution layers.
+    Depthwise separable expanded residual unit with SE-block. Here it used as MnasNet unit.
 
     Parameters:
     ----------
@@ -21,60 +21,54 @@ class DwsConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(DwsConvBlock, self).__init__()
-        self.dw_conv = dwconv3x3_block(
-            in_channels=in_channels,
-            out_channels=in_channels)
-        self.pw_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
-
-    def forward(self, x):
-        x = self.dw_conv(x)
-        x = self.pw_conv(x)
-        return x
-
-
-class MnasUnit(nn.Module):
-    """
-    MnasNet unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the second convolution layer.
-    expansion_factor : int
-        Factor for expansion of channels.
+    use_kernel3 : bool, default True
+        Whether to use 3x3 (instead of 5x5) kernel.
+    exp_factor : int, default 1
+        Expansion factor for each unit.
+    se_factor : int, default 0
+        SE reduction factor for each unit.
+    use_skip : bool, default True
+        Whether to use skip connection.
+    activation : str, default 'relu'
+        Activation function or name of activation function.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
-                 stride,
-                 expansion_factor):
-        super(MnasUnit, self).__init__()
-        self.residual = (in_channels == out_channels) and (stride == 1)
-        mid_channels = in_channels * expansion_factor
-        dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
+                 stride=1,
+                 use_kernel3=True,
+                 exp_factor=1,
+                 se_factor=0,
+                 use_skip=True,
+                 activation="relu"):
+        super(DwsExpSEResUnit, self).__init__()
+        assert (exp_factor >= 1)
+        self.residual = (in_channels == out_channels) and (stride == 1) and use_skip
+        self.use_exp_conv = exp_factor > 1
+        self.use_se = se_factor > 0
+        mid_channels = exp_factor * in_channels
+        dwconv_block_fn = dwconv3x3_block if use_kernel3 else dwconv5x5_block
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.conv2 = dwconv_block_fn(
+        if self.use_exp_conv:
+            self.exp_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                activation=activation)
+        self.dw_conv = dwconv_block_fn(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=stride)
-        self.conv3 = conv1x1_block(
+            stride=stride,
+            activation=activation)
+        if self.use_se:
+            self.se = SEBlock(
+                channels=mid_channels,
+                reduction=(exp_factor * se_factor),
+                approx_sigmoid=False,
+                round_mid=False,
+                activation=activation)
+        self.pw_conv = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             activation=None)
@@ -82,9 +76,12 @@ class MnasUnit(nn.Module):
     def forward(self, x):
         if self.residual:
             identity = x
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+        if self.use_exp_conv:
+            x = self.exp_conv(x)
+        x = self.dw_conv(x)
+        if self.use_se:
+            x = self.se(x)
+        x = self.pw_conv(x)
         if self.residual:
             x = x + identity
         return x
@@ -98,20 +95,63 @@ class MnasInitBlock(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    out_channels_list : list of 2 int
-        Numbers of output channels.
+    out_channels : int
+        Number of output channels.
+    mid_channels : int
+        Number of middle channels.
+    use_skip : bool
+        Whether to use skip connection in the second block.
     """
     def __init__(self,
                  in_channels,
-                 out_channels_list):
+                 out_channels,
+                 mid_channels,
+                 use_skip):
         super(MnasInitBlock, self).__init__()
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
-            out_channels=out_channels_list[0],
+            out_channels=mid_channels,
             stride=2)
-        self.conv2 = DwsConvBlock(
-            in_channels=out_channels_list[0],
-            out_channels=out_channels_list[1])
+        self.conv2 = DwsExpSEResUnit(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            use_skip=use_skip)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        return x
+
+
+class MnasFinalBlock(nn.Module):
+    """
+    MnasNet specific final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    mid_channels : int
+        Number of middle channels.
+    use_skip : bool
+        Whether to use skip connection in the second block.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 mid_channels,
+                 use_skip):
+        super(MnasFinalBlock, self).__init__()
+        self.conv1 = DwsExpSEResUnit(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            exp_factor=6,
+            use_skip=use_skip)
+        self.conv2 = conv1x1_block(
+            in_channels=mid_channels,
+            out_channels=out_channels)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -129,13 +169,19 @@ class MnasNet(nn.Module):
     channels : list of list of int
         Number of output channels for each unit.
     init_block_channels : list of 2 int
-        Numbers of output channels for the initial unit.
-    final_block_channels : int
+        Number of output channels for the initial unit.
+    final_block_channels : list of 2 int
         Number of output channels for the final block of the feature extractor.
-    kernel_sizes : list of list of int
-        Number of kernel sizes for each unit.
-    expansion_factors : list of list of int
-        Number of expansion factors for each unit.
+    kernels3 : list of list of int/bool
+        Using 3x3 (instead of 5x5) kernel for each unit.
+    exp_factors : list of list of int
+        Expansion factor for each unit.
+    se_factors : list of list of int
+        SE reduction factor for each unit.
+    init_block_use_skip : bool
+        Whether to use skip connection in the initial unit.
+    final_block_use_skip : bool
+        Whether to use skip connection in the final block of the feature extractor.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -147,8 +193,11 @@ class MnasNet(nn.Module):
                  channels,
                  init_block_channels,
                  final_block_channels,
-                 kernel_sizes,
-                 expansion_factors,
+                 kernels3,
+                 exp_factors,
+                 se_factors,
+                 init_block_use_skip,
+                 final_block_use_skip,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -159,28 +208,32 @@ class MnasNet(nn.Module):
         self.features = nn.Sequential()
         self.features.add_module("init_block", MnasInitBlock(
             in_channels=in_channels,
-            out_channels_list=init_block_channels))
-        in_channels = init_block_channels[-1]
+            out_channels=init_block_channels[1],
+            mid_channels=init_block_channels[0],
+            use_skip=init_block_use_skip))
+        in_channels = init_block_channels[1]
         for i, channels_per_stage in enumerate(channels):
-            kernel_sizes_per_stage = kernel_sizes[i]
-            expansion_factors_per_stage = expansion_factors[i]
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
-                kernel_size = kernel_sizes_per_stage[j]
-                expansion_factor = expansion_factors_per_stage[j]
                 stride = 2 if (j == 0) else 1
-                stage.add_module("unit{}".format(j + 1), MnasUnit(
+                use_kernel3 = kernels3[i][j] == 1
+                exp_factor = exp_factors[i][j]
+                se_factor = se_factors[i][j]
+                stage.add_module("unit{}".format(j + 1), DwsExpSEResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    kernel_size=kernel_size,
                     stride=stride,
-                    expansion_factor=expansion_factor))
+                    use_kernel3=use_kernel3,
+                    exp_factor=exp_factor,
+                    se_factor=se_factor))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', conv1x1_block(
+        self.features.add_module('final_block', MnasFinalBlock(
             in_channels=in_channels,
-            out_channels=final_block_channels))
-        in_channels = final_block_channels
+            out_channels=final_block_channels[1],
+            mid_channels=final_block_channels[0],
+            use_skip=final_block_use_skip))
+        in_channels = final_block_channels[1]
         self.features.add_module('final_pool', nn.AvgPool2d(
             kernel_size=7,
             stride=1))
@@ -205,7 +258,9 @@ class MnasNet(nn.Module):
         return x
 
 
-def get_mnasnet(model_name=None,
+def get_mnasnet(version,
+                width_scale,
+                model_name=None,
                 pretrained=False,
                 root=os.path.join("~", ".torch", "models"),
                 **kwargs):
@@ -214,6 +269,10 @@ def get_mnasnet(model_name=None,
 
     Parameters:
     ----------
+    version : str
+        Version of MobileNetV3 ('b1', 'a1' or 'small').
+    width_scale : float
+        Scale factor for width of layers.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -221,30 +280,49 @@ def get_mnasnet(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
+    if version == "b1":
+        init_block_channels = [32, 16]
+        final_block_channels = [320, 1280]
+        channels = [[24, 24, 24], [40, 40, 40], [80, 80, 80, 96, 96], [192, 192, 192, 192]]
+        kernels3 = [[1, 1, 1], [0, 0, 0], [0, 0, 0, 1, 1], [0, 0, 0, 0]]
+        exp_factors = [[3, 3, 3], [3, 3, 3], [6, 6, 6, 6, 6], [6, 6, 6, 6]]
+        se_factors = [[0, 0, 0], [0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0]]
+        init_block_use_skip = False
+        final_block_use_skip = False
+    elif version == "a1":
+        init_block_channels = [32, 16]
+        final_block_channels = [320, 1280]
+        channels = [[24, 24], [40, 40, 40], [80, 80, 80, 80, 112, 112], [160, 160, 160]]
+        kernels3 = [[1, 1], [0, 0, 0], [1, 1, 1, 1, 1, 1], [0, 0, 0]]
+        exp_factors = [[6, 6], [3, 3, 3], [6, 6, 6, 6, 6, 6], [6, 6, 6]]
+        se_factors = [[0, 0], [4, 4, 4], [0, 0, 0, 0, 4, 4], [4, 4, 4]]
+        init_block_use_skip = False
+        final_block_use_skip = True
+    elif version == "small":
+        init_block_channels = [8, 8]
+        final_block_channels = [144, 1280]
+        channels = [[16], [16, 16], [32, 32, 32, 32, 32, 32, 32], [88, 88, 88]]
+        kernels3 = [[1], [1, 1], [0, 0, 0, 0, 1, 1, 1], [0, 0, 0]]
+        exp_factors = [[3], [6, 6], [6, 6, 6, 6, 6, 6, 6], [6, 6, 6]]
+        se_factors = [[0], [0, 0], [4, 4, 4, 4, 4, 4, 4], [4, 4, 4]]
+        init_block_use_skip = True
+        final_block_use_skip = True
+    else:
+        raise ValueError("Unsupported MnasNet version {}".format(version))
 
-    init_block_channels = [32, 16]
-    final_block_channels = 1280
-    layers = [3, 3, 3, 2, 4, 1]
-    downsample = [1, 1, 1, 0, 1, 0]
-    channels_per_layers = [24, 40, 80, 96, 192, 320]
-    expansion_factors_per_layers = [3, 3, 6, 6, 6, 6]
-    kernel_sizes_per_layers = [3, 5, 5, 3, 5, 3]
-    default_kernel_size = 3
-
-    from functools import reduce
-    channels = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                      zip(channels_per_layers, layers, downsample), [])
-    kernel_sizes = reduce(lambda x, y: x + [[y[0]] + [default_kernel_size] * (y[1] - 1)] if y[2] != 0 else x[:-1] + [
-        x[-1] + [y[0]] + [default_kernel_size] * (y[1] - 1)], zip(kernel_sizes_per_layers, layers, downsample), [])
-    expansion_factors = reduce(lambda x, y: x + [[y[0]] * y[1]] if y[2] != 0 else x[:-1] + [x[-1] + [y[0]] * y[1]],
-                               zip(expansion_factors_per_layers, layers, downsample), [])
+    if width_scale != 1.0:
+        channels = [[round_channels(cij * width_scale) for cij in ci] for ci in channels]
+        init_block_channels = round_channels(init_block_channels * width_scale)
 
     net = MnasNet(
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
-        kernel_sizes=kernel_sizes,
-        expansion_factors=expansion_factors,
+        kernels3=kernels3,
+        exp_factors=exp_factors,
+        se_factors=se_factors,
+        init_block_use_skip=init_block_use_skip,
+        final_block_use_skip=final_block_use_skip,
         **kwargs)
 
     if pretrained:
@@ -259,9 +337,9 @@ def get_mnasnet(model_name=None,
     return net
 
 
-def mnasnet(**kwargs):
+def mnasnet_b1(**kwargs):
     """
-    MnasNet model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
+    MnasNet-B1 model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
     https://arxiv.org/abs/1807.11626.
 
     Parameters:
@@ -271,7 +349,37 @@ def mnasnet(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mnasnet(model_name="mnasnet", **kwargs)
+    return get_mnasnet(version="b1", width_scale=1.0, model_name="mnasnet_b1", **kwargs)
+
+
+def mnasnet_a1(**kwargs):
+    """
+    MnasNet-A1 model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
+    https://arxiv.org/abs/1807.11626.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_mnasnet(version="a1", width_scale=1.0, model_name="mnasnet_a1", **kwargs)
+
+
+def mnasnet_small(**kwargs):
+    """
+    MnasNet-Small model from 'MnasNet: Platform-Aware Neural Architecture Search for Mobile,'
+    https://arxiv.org/abs/1807.11626.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_mnasnet(version="small", width_scale=1.0, model_name="mnasnet_small", **kwargs)
 
 
 def _calc_width(net):
@@ -289,7 +397,9 @@ def _test():
     pretrained = False
 
     models = [
-        mnasnet,
+        mnasnet_b1,
+        mnasnet_a1,
+        mnasnet_small,
     ]
 
     for model in models:
@@ -300,10 +410,13 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != mnasnet or weight_count == 4308816)
+        assert (model != mnasnet_b1 or weight_count == 4383312)
+        assert (model != mnasnet_a1 or weight_count == 3887038)
+        assert (model != mnasnet_small or weight_count == 2030264)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)
+
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))
 

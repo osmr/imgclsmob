@@ -1602,6 +1602,7 @@ def _test():
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)
+
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))
 

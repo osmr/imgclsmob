@@ -53,6 +53,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.mobilenetv3 import *
 from .models.igcv3 import *
+# from .models.mnasnet_old import *
 from .models.mnasnet import *
 from .models.darts import *
 from .models.proxylessnas import *
@@ -105,7 +106,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-# from .models.others.oth_gen_efficientnet import *
+from .models.others.oth_gen_efficientnet import *
 
 __all__ = ['get_model', 'trained_model_metainfo_list']
 
@@ -488,7 +489,10 @@ _models = {
     'igcv3_wd2': igcv3_wd2,
     'igcv3_wd4': igcv3_wd4,
 
-    'mnasnet': mnasnet,
+    # 'mnasnet': mnasnet,
+    'mnasnet_b1': mnasnet_b1,
+    'mnasnet_a1': mnasnet_a1,
+    'mnasnet_small': mnasnet_small,
 
     'darts': darts,
 
@@ -904,6 +908,10 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'oth_mnasnet_b1': oth_mnasnet_b1,
+    'oth_mnasnet_a1': oth_mnasnet_a1,
+    'oth_mnasnet_small': oth_mnasnet_small,
 }
 
 trained_model_metainfo_list = (

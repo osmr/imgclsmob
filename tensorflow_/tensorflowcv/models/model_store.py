@@ -153,7 +153,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_wd2', '1705', 'de0b98d950a3892b6d15d1c3ea248d41a34adf00', 'v0.0.132'),
     ('igcv3_w3d4', '1096', 'b8650159ab15b118c0655002d9ce613b3a36dea1', 'v0.0.207'),
     ('igcv3_w1', '0903', 'a69c216fa5838dba316b01d347846812835650fe', 'v0.0.243'),
-    ('mnasnet', '1144', 'f2b84fc44eabe0722c84bdcb7748fa390c3c1162', 'v0.0.117')]}
+    ('mnasnet_b1', '0800', 'a21e7b11537a81d57be61b27761efa69b0b44728', 'v0.0.419'),
+    ('mnasnet_a1', '0756', '2903749fb1ac67254487ccf1668cae064170ffd1', 'v0.0.419')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

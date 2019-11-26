@@ -142,8 +142,9 @@ class MaxPool2d(nn.Layer):
                  strides,
                  padding=0,
                  ceil_mode=False,
-                 data_format="channels_last"):
-        super(MaxPool2d, self).__init__()
+                 data_format="channels_last",
+                  **kwargs):
+        super(MaxPool2d, self).__init__(**kwargs)
         if isinstance(pool_size, int):
             pool_size = (pool_size, pool_size)
         if isinstance(strides, int):
@@ -238,8 +239,9 @@ class ConvBlock(nn.Layer):
                  use_bn=True,
                  bn_eps=1e-5,
                  activation="relu",
-                 data_format="channels_last"):
-        super(ConvBlock, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ConvBlock, self).__init__(**kwargs)
         assert (in_channels is not None)
         self.activate = (activation is not None)
         self.use_bn = use_bn
@@ -268,9 +270,12 @@ class ConvBlock(nn.Layer):
             padding="valid",
             data_format=data_format,
             dilation_rate=dilation,
-            use_bias=use_bias)
+            use_bias=use_bias,
+            name="conv")
         if self.use_bn:
-            self.bn = GluonBatchNormalization(epsilon=bn_eps)
+            self.bn = GluonBatchNormalization(
+                epsilon=bn_eps,
+                name="bn")
         if self.activate:
             self.activ = get_activation_layer(activation)
 
@@ -293,7 +298,8 @@ def conv1x1_block(in_channels,
                   use_bn=True,
                   bn_eps=1e-5,
                   activation="relu",
-                  data_format="channels_last"):
+                  data_format="channels_last",
+                  **kwargs):
     """
     1x1 version of the standard convolution block.
 
@@ -329,7 +335,8 @@ def conv1x1_block(in_channels,
         use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation,
-        data_format=data_format)
+        data_format=data_format,
+        **kwargs)
 
 
 def conv3x3_block(in_channels,
@@ -342,7 +349,8 @@ def conv3x3_block(in_channels,
                   use_bn=True,
                   bn_eps=1e-5,
                   activation="relu",
-                  data_format="channels_last"):
+                  data_format="channels_last",
+                  **kwargs):
     """
     3x3 version of the standard convolution block.
 
@@ -383,7 +391,8 @@ def conv3x3_block(in_channels,
         use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation,
-        data_format=data_format)
+        data_format=data_format,
+        **kwargs)
 
 
 def conv7x7_block(in_channels,
@@ -394,7 +403,8 @@ def conv7x7_block(in_channels,
                   use_bn=True,
                   bn_eps=1e-5,
                   activation="relu",
-                  data_format="channels_last"):
+                  data_format="channels_last",
+                  **kwargs):
     """
     7x7 version of the standard convolution block.
 
@@ -429,4 +439,5 @@ def conv7x7_block(in_channels,
         use_bn=use_bn,
         bn_eps=bn_eps,
         activation=activation,
-        data_format=data_format)
+        data_format=data_format,
+        **kwargs)

@@ -33,18 +33,21 @@ class ResBlock(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
-                 data_format="channels_last"):
-        super(ResBlock, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ResBlock, self).__init__(**kwargs)
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv1")
         self.conv2 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
             activation=None,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv2")
 
     def call(self, x, training=None):
         x = self.conv1(x, training=training)
@@ -83,27 +86,31 @@ class ResBottleneck(nn.Layer):
                  dilation=1,
                  conv1_stride=False,
                  bottleneck_factor=4,
-                 data_format="channels_last"):
-        super(ResBottleneck, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ResBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // bottleneck_factor
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
             strides=(strides if conv1_stride else 1),
-            data_format=data_format)
+            data_format=data_format,
+            name="conv1")
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
             strides=(1 if conv1_stride else strides),
             padding=padding,
             dilation=dilation,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv2")
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
             activation=None,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv3")
 
     def call(self, x, training=None):
         x = self.conv1(x, training=training)
@@ -143,8 +150,9 @@ class ResUnit(nn.Layer):
                  dilation=1,
                  bottleneck=True,
                  conv1_stride=False,
-                 data_format="channels_last"):
-        super(ResUnit, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         if bottleneck:
@@ -155,20 +163,23 @@ class ResUnit(nn.Layer):
                 padding=padding,
                 dilation=dilation,
                 conv1_stride=conv1_stride,
-                data_format=data_format)
+                data_format=data_format,
+                name="body")
         else:
             self.body = ResBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                data_format=data_format)
+                data_format=data_format,
+                name="body")
         if self.resize_identity:
             self.identity_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
                 activation=None,
-                data_format=data_format)
+                data_format=data_format,
+                name="identity_conv")
         self.activ = nn.ReLU()
 
     def call(self, x, training=None):
@@ -198,17 +209,20 @@ class ResInitBlock(nn.Layer):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 data_format="channels_last"):
-        super(ResInitBlock, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ResInitBlock, self).__init__(**kwargs)
         self.conv = conv7x7_block(
             in_channels=in_channels,
             out_channels=out_channels,
             strides=2,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv")
         self.pool = MaxPool2d(
             pool_size=3,
             strides=2,
-            padding=1)
+            padding=1,
+            name="pool")
 
     def call(self, x, training=None):
         x = self.conv(x, training=training)
@@ -247,19 +261,21 @@ class ResNet(tf.keras.Model):
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
-                 data_format="channels_last"):
-        super(ResNet, self).__init__()
+                 data_format="channels_last",
+                 **kwargs):
+        super(ResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential()
+        self.features = tf.keras.Sequential(name="features")
         self.features.add(ResInitBlock(
             in_channels=in_channels,
-            out_channels=init_block_channels))
+            out_channels=init_block_channels,
+            name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential()
+            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
                 stage.add(ResUnit(
@@ -267,17 +283,20 @@ class ResNet(tf.keras.Model):
                     out_channels=out_channels,
                     strides=strides,
                     bottleneck=bottleneck,
-                    conv1_stride=conv1_stride))
+                    conv1_stride=conv1_stride,
+                    name="unit{}".format(j + 1)))
                 in_channels = out_channels
             self.features.add(stage)
         self.features.add(nn.AveragePooling2D(
             pool_size=7,
             strides=1,
-            data_format=self.data_format))
+            data_format=self.data_format,
+            name="final_pool"))
 
         self.output1 = nn.Dense(
             units=classes,
-            input_dim=in_channels)
+            input_dim=in_channels,
+            name="output")
 
     def call(self, x):
         x = self.features(x)
@@ -374,14 +393,14 @@ def get_resnet(blocks,
         conv1_stride=conv1_stride,
         **kwargs)
 
-    # if pretrained:
-    #     if (model_name is None) or (not model_name):
-    #         raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-    #     from .model_store import download_model
-    #     download_model(
-    #         net=net,
-    #         model_name=model_name,
-    #         local_model_store_dir_path=root)
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import get_model_file
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 
@@ -730,7 +749,7 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        batch_saze = 20
+        batch_saze = 14
         x = tf.random.normal((batch_saze, 224, 224, 3))
         y = net(x)
         assert (tuple(y.shape.as_list()) == (batch_saze, 1000))

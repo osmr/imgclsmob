@@ -1,4 +1,4 @@
-from .models.resnet import *
+from tensorflow2.tensorflowcv2.models.resnet import *
 
 __all__ = ['get_model']
 

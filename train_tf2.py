@@ -3,6 +3,7 @@
 """
 
 import os
+import logging
 import argparse
 import numpy as np
 import random
@@ -213,11 +214,11 @@ def main():
 
     batch_size = args.batch_size
     train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1. / 255,
+        rescale=(1.0 / 255),
         shear_range=0.2,
         zoom_range=0.2,
         horizontal_flip=True)
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=1. / 255)
+    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=(1.0 / 255))
     train_generator = train_datagen.flow_from_directory(
         train_dir,
         target_size=(224, 224),
@@ -240,8 +241,8 @@ def main():
             test_step(test_images, test_labels)
             # break
 
-        template = 'Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}'
-        print(template.format(
+        template = "Epoch {}, Loss: {}, Accuracy: {}, Test Loss: {}, Test Accuracy: {}"
+        logging.info(template.format(
             epoch + 1,
             train_loss.result(),
             train_accuracy.result() * 100,

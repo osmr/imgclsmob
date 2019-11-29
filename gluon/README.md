@@ -135,7 +135,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | VGG-11 | 29.59 | 10.16 | 132,863,336 | 7,615.87M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.381/vgg11-1016-3d78e0ec.params.log)) |
 | VGG-13 | 28.37 | 9.50 | 133,047,848 | 11,317.65M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.388/vgg13-0950-d2bcaaf3.params.log)) |
 | VGG-16 | 26.61 | 8.32 | 138,357,544 | 15,480.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.401/vgg16-0832-22fe503a.params.log)) |
-| VGG-19 | 25.88 | 8.23 | 143,667,240 | 19,642.55M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.109/vgg19-0823-0e2a1e0a.params.log)) |
+| VGG-19 | 25.58 | 7.67 | 143,667,240 | 19,642.55M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.420/vgg19-0767-e198aa1f.params.log)) |
 | BN-VGG-11 | 28.56 | 9.34 | 132,866,088 | 7,630.21M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.339/bn_vgg11-0934-3f79cab1.params.log)) |
 | BN-VGG-13 | 27.68 | 8.87 | 133,050,792 | 11,341.62M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.353/bn_vgg13-0887-540243b0.params.log)) |
 | BN-VGG-16 | 25.50 | 7.57 | 138,361,768 | 15,506.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.359/bn_vgg16-0757-90441925.params.log)) |

@@ -17,7 +17,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('vgg11', '1016', '3d78e0ec95d358577acf8b2e2f768a72ec319ee3', 'v0.0.381'),
     ('vgg13', '0950', 'd2bcaaf3704afb47b2818066255b3de65d0c03e1', 'v0.0.388'),
     ('vgg16', '0832', '22fe503aa438ebfd1f3128b676db21a06de3cd59', 'v0.0.401'),
-    ('vgg19', '0823', '0e2a1e0a9fdeb74dfef9aedd37712ad306627e35', 'v0.0.109'),
+    ('vgg19', '0767', 'e198aa1f6519b3331e5ebbe782ca35fd2aca6213', 'v0.0.420'),
     ('bn_vgg11', '0934', '3f79cab1e9e0bab0d57c0f80a6c9782e5cdc765d', 'v0.0.339'),
     ('bn_vgg13', '0887', '540243b0a3eb2ae3974c2d75cf82e655fa4f0dda', 'v0.0.353'),
     ('bn_vgg16', '0757', '90441925c7c19c9db6bf96824c2440774c0e54df', 'v0.0.359'),

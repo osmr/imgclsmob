@@ -105,6 +105,8 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
+from .models.others.oth_cls_hrnet import *
+
 __all__ = ['get_model', 'trained_model_metainfo_list']
 
 
@@ -904,6 +906,15 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'oth_hrnet_w18_small_model_v1': oth_hrnet_w18_small_model_v1,
+    'oth_hrnet_w18_small_model_v2': oth_hrnet_w18_small_model_v2,
+    'oth_hrnetv2_w18': oth_hrnetv2_w18,
+    'oth_hrnetv2_w30': oth_hrnetv2_w30,
+    'oth_hrnetv2_w32': oth_hrnetv2_w32,
+    'oth_hrnetv2_w40': oth_hrnetv2_w40,
+    'oth_hrnetv2_w44': oth_hrnetv2_w44,
+    'oth_hrnetv2_w48': oth_hrnetv2_w48,
 }
 
 trained_model_metainfo_list = (

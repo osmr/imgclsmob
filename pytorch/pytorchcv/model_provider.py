@@ -105,6 +105,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
+from .models.hrnet import *
 from .models.others.oth_cls_hrnet import *
 
 __all__ = ['get_model', 'trained_model_metainfo_list']
@@ -907,6 +908,16 @@ _models = {
 
     'superpointnet': superpointnet,
 
+    'hrnet_w18_small_v1': hrnet_w18_small_v1,
+    'hrnet_w18_small_v2': hrnet_w18_small_v2,
+    'hrnetv2_w18': hrnetv2_w18,
+    'hrnetv2_w30': hrnetv2_w30,
+    'hrnetv2_w32': hrnetv2_w32,
+    'hrnetv2_w40': hrnetv2_w40,
+    'hrnetv2_w44': hrnetv2_w44,
+    'hrnetv2_w48': hrnetv2_w48,
+    'hrnetv2_w64': hrnetv2_w64,
+
     'oth_hrnet_w18_small_model_v1': oth_hrnet_w18_small_model_v1,
     'oth_hrnet_w18_small_model_v2': oth_hrnet_w18_small_model_v2,
     'oth_hrnetv2_w18': oth_hrnetv2_w18,
@@ -915,6 +926,7 @@ _models = {
     'oth_hrnetv2_w40': oth_hrnetv2_w40,
     'oth_hrnetv2_w44': oth_hrnetv2_w44,
     'oth_hrnetv2_w48': oth_hrnetv2_w48,
+    'oth_hrnetv2_w64': oth_hrnetv2_w64,
 }
 
 trained_model_metainfo_list = (

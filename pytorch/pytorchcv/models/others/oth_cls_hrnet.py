@@ -11,7 +11,7 @@ import torch._utils
 import torch.nn.functional as F
 
 __all__ = ['oth_hrnet_w18_small_model_v1', 'oth_hrnet_w18_small_model_v2', 'oth_hrnetv2_w18', 'oth_hrnetv2_w30',
-           'oth_hrnetv2_w32', 'oth_hrnetv2_w40', 'oth_hrnetv2_w44', 'oth_hrnetv2_w48']
+           'oth_hrnetv2_w32', 'oth_hrnetv2_w40', 'oth_hrnetv2_w44', 'oth_hrnetv2_w48', 'oth_hrnetv2_w64']
 
 
 BN_MOMENTUM = 0.1
@@ -586,6 +586,15 @@ def oth_hrnetv2_w48(**kwargs):
     return get_cls_net(cfg)
 
 
+def oth_hrnetv2_w64(**kwargs):
+    cfg = {'MODEL': {'NAME': 'cls_hrnet', 'IMAGE_SIZE': [224, 224], 'EXTRA': {
+        'STAGE1': {'NUM_MODULES': 1, 'NUM_RANCHES': 1, 'BLOCK': 'BOTTLENECK', 'NUM_BLOCKS': [4], 'NUM_CHANNELS': [64], 'FUSE_METHOD': 'SUM'},
+        'STAGE2': {'NUM_MODULES': 1, 'NUM_BRANCHES': 2, 'BLOCK': 'BASIC', 'NUM_BLOCKS': [4, 4], 'NUM_CHANNELS': [64, 128], 'FUSE_METHOD': 'SUM'},
+        'STAGE3': {'NUM_MODULES': 4, 'NUM_BRANCHES': 3, 'BLOCK': 'BASIC', 'NUM_BLOCKS': [4, 4, 4], 'NUM_CHANNELS': [64, 128, 256], 'FUSE_METHOD': 'SUM'},
+        'STAGE4': {'NUM_MODULES': 3, 'NUM_BRANCHES': 4, 'BLOCK': 'BASIC', 'NUM_BLOCKS': [4, 4, 4, 4], 'NUM_CHANNELS': [64, 128, 256, 512], 'FUSE_METHOD': 'SUM'}}}}
+    return get_cls_net(cfg)
+
+
 def _calc_width(net):
     import numpy as np
     net_params = filter(lambda p: p.requires_grad, net.parameters())
@@ -609,6 +618,7 @@ def _test():
         oth_hrnetv2_w40,
         oth_hrnetv2_w44,
         oth_hrnetv2_w48,
+        oth_hrnetv2_w64,
     ]
 
     for model in models:
@@ -627,6 +637,7 @@ def _test():
         assert (model != oth_hrnetv2_w40 or weight_count == 57557160)
         assert (model != oth_hrnetv2_w44 or weight_count == 67064984)
         assert (model != oth_hrnetv2_w48 or weight_count == 77469864)
+        assert (model != oth_hrnetv2_w64 or weight_count == 128059944)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)

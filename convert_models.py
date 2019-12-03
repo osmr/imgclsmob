@@ -267,11 +267,17 @@ def prepare_dst_model(dst_fwk,
         dst_param_keys = [v.name for v in tf.global_variables()]
         dst_params = {v.name: v for v in tf.global_variables()}
     elif dst_fwk == "tf2":
+        import tensorflow as tf
         from tensorflow2.utils import prepare_model as prepare_model_tf2
         dst_net = prepare_model_tf2(
             model_name=dst_model,
             use_pretrained=False,
             pretrained_model_file_path="")
+        batch_size = 1
+        input_shape = ((batch_size, 3, dst_net.in_size[0], dst_net.in_size[1]) if
+                       dst_net.data_format == "channels_first" else
+                       (batch_size, dst_net.in_size[0], dst_net.in_size[1], 3))
+        dst_net(tf.random.normal(input_shape))
         dst_param_keys = [v.name for v in dst_net.weights]
         dst_params = {v.name: v for v in dst_net.weights}
     else:
@@ -805,9 +811,13 @@ def convert_gl2tf2(dst_net,
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
+    dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
+
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
+
+    dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
 
     def process_width(src_key, dst_key, src_weight):
         if len(src_weight.shape) == 4:

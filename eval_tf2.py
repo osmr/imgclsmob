@@ -142,7 +142,7 @@ def main():
     assert (hasattr(net, "in_size"))
     # input_image_size = net.in_size
 
-    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
+    test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name="test_accuracy")
 
     @tf.function
     def test_step(images, labels):

@@ -107,7 +107,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-# from .models.others.oth_mobilenetv3 import *
+from .models.hrnet import *
 
 __all__ = ['get_model']
 
@@ -971,7 +971,16 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    # 'oth_mobilenetv3_small': oth_mobilenet_v3_small,
+
+    'hrnet_w18_small_v1': hrnet_w18_small_v1,
+    'hrnet_w18_small_v2': hrnet_w18_small_v2,
+    'hrnetv2_w18': hrnetv2_w18,
+    'hrnetv2_w30': hrnetv2_w30,
+    'hrnetv2_w32': hrnetv2_w32,
+    'hrnetv2_w40': hrnetv2_w40,
+    'hrnetv2_w44': hrnetv2_w44,
+    'hrnetv2_w48': hrnetv2_w48,
+    'hrnetv2_w64': hrnetv2_w64,
 }
 
 

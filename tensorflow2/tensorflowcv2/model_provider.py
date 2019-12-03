@@ -1,9 +1,23 @@
-from tensorflow2.tensorflowcv2.models.resnet import *
+from .models.vgg import *
+from .models.resnet import *
 
 __all__ = ['get_model']
 
 
 _models = {
+    'vgg11': vgg11,
+    'vgg13': vgg13,
+    'vgg16': vgg16,
+    'vgg19': vgg19,
+    'bn_vgg11': bn_vgg11,
+    'bn_vgg13': bn_vgg13,
+    'bn_vgg16': bn_vgg16,
+    'bn_vgg19': bn_vgg19,
+    'bn_vgg11b': bn_vgg11b,
+    'bn_vgg13b': bn_vgg13b,
+    'bn_vgg16b': bn_vgg16b,
+    'bn_vgg19b': bn_vgg19b,
+
     'resnet10': resnet10,
     'resnet12': resnet12,
     'resnet14': resnet14,

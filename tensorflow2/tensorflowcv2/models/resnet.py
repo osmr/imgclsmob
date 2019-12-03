@@ -298,8 +298,8 @@ class ResNet(tf.keras.Model):
             input_dim=in_channels,
             name="output")
 
-    def call(self, x):
-        x = self.features(x)
+    def call(self, x, training=None):
+        x = self.features(x, training=training)
         x = flatten(x, self.data_format)
         x = self.output1(x)
         return x

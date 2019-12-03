@@ -849,6 +849,9 @@ class SimpleSequential(Chain):
             x = self[name](x)
         return x
 
+    def el(self, index):
+        return self[self.layer_names[index]]
+
 
 class DualPathSequential(SimpleSequential):
     """

@@ -1,5 +1,5 @@
 """
-    HRNet for ImageNet-1K, implemented in PyTorch.
+    HRNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
 """
@@ -8,12 +8,17 @@ __all__ = ['hrnet_w18_small_v1', 'hrnet_w18_small_v2', 'hrnetv2_w18', 'hrnetv2_w
            'hrnetv2_w44', 'hrnetv2_w48', 'hrnetv2_w64']
 
 import os
-import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, Identity
+from inspect import isfunction
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import conv1x1_block, conv3x3_block, SimpleSequential
 from .resnet import ResUnit
 
 
-class UpSamplingBlock(nn.Module):
+class UpSamplingBlock(Chain):
     """
     HFNet specific upsampling block.
 
@@ -31,22 +36,24 @@ class UpSamplingBlock(nn.Module):
                  out_channels,
                  scale_factor):
         super(UpSamplingBlock, self).__init__()
-        self.conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=1,
-            activation=None)
-        self.upsample = nn.Upsample(
-            scale_factor=scale_factor,
-            mode="nearest")
+        self.scale_factor = scale_factor
 
-    def forward(self, x):
+        with self.init_scope():
+            self.conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=1,
+                activation=None)
+
+    def __call__(self, x):
         x = self.conv(x)
-        x = self.upsample(x)
-        return x
+        return F.unpooling_2d(
+            x=x,
+            ksize=self.scale_factor,
+            cover_all=False)
 
 
-class HRBlock(nn.Module):
+class HRBlock(Chain):
     """
     HFNet block.
 
@@ -70,72 +77,78 @@ class HRBlock(nn.Module):
         self.in_channels_list = in_channels_list
         self.num_branches = num_branches
 
-        self.branches = nn.Sequential()
-        for i in range(num_branches):
-            layers = nn.Sequential()
-            in_channels_i = self.in_channels_list[i]
-            out_channels_i = out_channels_list[i]
-            for j in range(num_subblocks[i]):
-                layers.add_module("unit{}".format(j + 1), ResUnit(
-                    in_channels=in_channels_i,
-                    out_channels=out_channels_i,
-                    stride=1,
-                    bottleneck=False))
-                in_channels_i = out_channels_i
-            self.in_channels_list[i] = out_channels_i
-            self.branches.add_module("branch{}".format(i + 1), layers)
+        with self.init_scope():
+            self.branches = SimpleSequential()
+            with self.branches.init_scope():
+                for i in range(num_branches):
+                    layers = SimpleSequential()
+                    with layers.init_scope():
+                        in_channels_i = self.in_channels_list[i]
+                        out_channels_i = out_channels_list[i]
+                        for j in range(num_subblocks[i]):
+                            setattr(layers, "unit{}".format(j + 1), ResUnit(
+                                in_channels=in_channels_i,
+                                out_channels=out_channels_i,
+                                stride=1,
+                                bottleneck=False))
+                            in_channels_i = out_channels_i
+                        self.in_channels_list[i] = out_channels_i
+                        setattr(self.branches, "branch{}".format(i + 1), layers)
 
-        if num_branches > 1:
-            self.fuse_layers = nn.Sequential()
-            for i in range(num_branches):
-                fuse_layer = nn.Sequential()
-                for j in range(num_branches):
-                    if j > i:
-                        fuse_layer.add_module("block{}".format(j + 1), UpSamplingBlock(
-                            in_channels=in_channels_list[j],
-                            out_channels=in_channels_list[i],
-                            scale_factor=2 ** (j - i)))
-                    elif j == i:
-                        fuse_layer.add_module("block{}".format(j + 1), Identity())
-                    else:
-                        conv3x3_seq = nn.Sequential()
-                        for k in range(i - j):
-                            if k == i - j - 1:
-                                conv3x3_seq.add_module("subblock{}".format(k + 1), conv3x3_block(
-                                    in_channels=in_channels_list[j],
-                                    out_channels=in_channels_list[i],
-                                    stride=2,
-                                    activation=None))
-                            else:
-                                conv3x3_seq.add_module("subblock{}".format(k + 1), conv3x3_block(
-                                    in_channels=in_channels_list[j],
-                                    out_channels=in_channels_list[j],
-                                    stride=2))
-                        fuse_layer.add_module("block{}".format(j + 1), conv3x3_seq)
-                self.fuse_layers.add_module("layer{}".format(i + 1), fuse_layer)
-            self.activ = nn.ReLU(True)
+            if num_branches > 1:
+                self.fuse_layers = SimpleSequential()
+                with self.fuse_layers.init_scope():
+                    for i in range(num_branches):
+                        fuse_layer = SimpleSequential()
+                        with fuse_layer.init_scope():
+                            for j in range(num_branches):
+                                if j > i:
+                                    setattr(fuse_layer, "block{}".format(j + 1), UpSamplingBlock(
+                                        in_channels=in_channels_list[j],
+                                        out_channels=in_channels_list[i],
+                                        scale_factor=2 ** (j - i)))
+                                elif j == i:
+                                    setattr(fuse_layer, "block{}".format(j + 1), F.identity)
+                                else:
+                                    conv3x3_seq = SimpleSequential()
+                                    with conv3x3_seq.init_scope():
+                                        for k in range(i - j):
+                                            if k == i - j - 1:
+                                                setattr(conv3x3_seq, "subblock{}".format(k + 1), conv3x3_block(
+                                                    in_channels=in_channels_list[j],
+                                                    out_channels=in_channels_list[i],
+                                                    stride=2,
+                                                    activation=None))
+                                            else:
+                                                setattr(conv3x3_seq, "subblock{}".format(k + 1), conv3x3_block(
+                                                    in_channels=in_channels_list[j],
+                                                    out_channels=in_channels_list[j],
+                                                    stride=2))
+                                    setattr(fuse_layer, "block{}".format(j + 1), conv3x3_seq)
+                        setattr(self.fuse_layers, "layer{}".format(i + 1), fuse_layer)
+                self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         for i in range(self.num_branches):
-            x[i] = self.branches[i](x[i])
+            x[i] = self.branches.el(i)(x[i])
 
         if self.num_branches == 1:
             return x
 
         x_fuse = []
         for i in range(len(self.fuse_layers)):
-            y = x[0] if i == 0 else self.fuse_layers[i][0](x[0])
+            y = x[0] if i == 0 else self.fuse_layers.el(i).el(0)(x[0])
             for j in range(1, self.num_branches):
                 if i == j:
                     y = y + x[j]
                 else:
-                    y = y + self.fuse_layers[i][j](x[j])
+                    y = y + self.fuse_layers.el(i).el(j)(x[j])
             x_fuse.append(self.activ(y))
 
         return x_fuse
 
 
-class HRStage(nn.Module):
+class HRStage(Chain):
     """
     HRNet stage block.
 
@@ -164,41 +177,46 @@ class HRStage(nn.Module):
         in_branches = len(in_channels_list)
         out_branches = len(out_channels_list)
 
-        self.transition = nn.Sequential()
-        for i in range(out_branches):
-            if i < in_branches:
-                if out_channels_list[i] != in_channels_list[i]:
-                    self.transition.add_module("block{}".format(i + 1), conv3x3_block(
-                        in_channels=in_channels_list[i],
-                        out_channels=out_channels_list[i],
-                        stride=1))
-                else:
-                    self.transition.add_module("block{}".format(i + 1), Identity())
-            else:
-                conv3x3_seq = nn.Sequential()
-                for j in range(i + 1 - in_branches):
-                    in_channels_i = in_channels_list[-1]
-                    out_channels_i = out_channels_list[i] if j == i - in_branches else in_channels_i
-                    conv3x3_seq.add_module("subblock{}".format(j + 1), conv3x3_block(
-                        in_channels=in_channels_i,
-                        out_channels=out_channels_i,
-                        stride=2))
-                self.transition.add_module("block{}".format(i + 1), conv3x3_seq)
+        with self.init_scope():
+            self.transition = SimpleSequential()
+            with self.transition.init_scope():
+                for i in range(out_branches):
+                    if i < in_branches:
+                        if out_channels_list[i] != in_channels_list[i]:
+                            setattr(self.transition, "block{}".format(i + 1), conv3x3_block(
+                                in_channels=in_channels_list[i],
+                                out_channels=out_channels_list[i],
+                                stride=1))
+                        else:
+                            setattr(self.transition, "block{}".format(i + 1), F.identity)
+                    else:
+                        conv3x3_seq = SimpleSequential()
+                        with conv3x3_seq.init_scope():
+                            for j in range(i + 1 - in_branches):
+                                in_channels_i = in_channels_list[-1]
+                                out_channels_i = out_channels_list[i] if j == i - in_branches else in_channels_i
+                                setattr(conv3x3_seq, "subblock{}".format(j + 1), conv3x3_block(
+                                    in_channels=in_channels_i,
+                                    out_channels=out_channels_i,
+                                    stride=2))
+                        setattr(self.transition, "block{}".format(i + 1), conv3x3_seq)
 
-        self.layers = nn.Sequential()
-        for i in range(num_modules):
-            self.layers.add_module("block{}".format(i + 1), HRBlock(
-                in_channels_list=self.in_channels_list,
-                out_channels_list=out_channels_list,
-                num_branches=num_branches,
-                num_subblocks=num_subblocks))
-            self.in_channels_list = self.layers[-1].in_channels_list
+            self.layers = SimpleSequential()
+            with self.layers.init_scope():
+                for i in range(num_modules):
+                    block = HRBlock(
+                        in_channels_list=self.in_channels_list,
+                        out_channels_list=out_channels_list,
+                        num_branches=num_branches,
+                        num_subblocks=num_subblocks)
+                    setattr(self.layers, "block{}".format(i + 1), block)
+                    self.in_channels_list = block.in_channels_list
 
-    def forward(self, x):
+    def __call__(self, x):
         x_list = []
         for j in range(self.branches):
-            if not isinstance(self.transition[j], Identity):
-                x_list.append(self.transition[j](x[-1] if type(x) is list else x))
+            if not isfunction(self.transition.el(j)):
+                x_list.append(self.transition.el(j)(x[-1] if type(x) is list else x))
             else:
                 x_list_j = x[j] if type(x) is list else x
                 x_list.append(x_list_j)
@@ -206,7 +224,7 @@ class HRStage(nn.Module):
         return y_list
 
 
-class HRInitBlock(nn.Module):
+class HRInitBlock(Chain):
     """
     HRNet specific initial block.
 
@@ -227,32 +245,34 @@ class HRInitBlock(nn.Module):
                  mid_channels,
                  num_subblocks):
         super(HRInitBlock, self).__init__()
-        self.conv1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=2)
-        self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=2)
-        in_channels = mid_channels
-        self.subblocks = nn.Sequential()
-        for i in range(num_subblocks):
-            self.subblocks.add_module("block{}".format(i + 1), ResUnit(
+        with self.init_scope():
+            self.conv1 = conv3x3_block(
                 in_channels=in_channels,
-                out_channels=out_channels,
-                stride=1,
-                bottleneck=True))
-            in_channels = out_channels
+                out_channels=mid_channels,
+                stride=2)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=2)
+            in_channels = mid_channels
+            self.subblocks = SimpleSequential()
+            with self.subblocks.init_scope():
+                for i in range(num_subblocks):
+                    setattr(self.subblocks, "block{}".format(i + 1), ResUnit(
+                        in_channels=in_channels,
+                        out_channels=out_channels,
+                        stride=1,
+                        bottleneck=True))
+                    in_channels = out_channels
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.subblocks(x)
         return x
 
 
-class HRFinalBlock(nn.Module):
+class HRFinalBlock(Chain):
     """
     HRNet specific final block.
 
@@ -267,35 +287,38 @@ class HRFinalBlock(nn.Module):
                  in_channels_list,
                  out_channels_list):
         super(HRFinalBlock, self).__init__()
-        self.inc_blocks = nn.Sequential()
-        for i, in_channels_i in enumerate(in_channels_list):
-            self.inc_blocks.add_module("block{}".format(i + 1), ResUnit(
-                in_channels=in_channels_i,
-                out_channels=out_channels_list[i],
+        with self.init_scope():
+            self.inc_blocks = SimpleSequential()
+            with self.inc_blocks.init_scope():
+                for i, in_channels_i in enumerate(in_channels_list):
+                    setattr(self.inc_blocks, "block{}".format(i + 1), ResUnit(
+                        in_channels=in_channels_i,
+                        out_channels=out_channels_list[i],
+                        stride=1,
+                        bottleneck=True))
+            self.down_blocks = SimpleSequential()
+            with self.down_blocks.init_scope():
+                for i in range(len(in_channels_list) - 1):
+                    setattr(self.down_blocks, "block{}".format(i + 1), conv3x3_block(
+                        in_channels=out_channels_list[i],
+                        out_channels=out_channels_list[i + 1],
+                        stride=2,
+                        use_bias=True))
+            self.final_layer = conv1x1_block(
+                in_channels=1024,
+                out_channels=2048,
                 stride=1,
-                bottleneck=True))
-        self.down_blocks = nn.Sequential()
-        for i in range(len(in_channels_list) - 1):
-            self.down_blocks.add_module("block{}".format(i + 1), conv3x3_block(
-                in_channels=out_channels_list[i],
-                out_channels=out_channels_list[i + 1],
-                stride=2,
-                bias=True))
-        self.final_layer = conv1x1_block(
-            in_channels=1024,
-            out_channels=2048,
-            stride=1,
-            bias=True)
+                use_bias=True)
 
-    def forward(self, x):
-        y = self.inc_blocks[0](x[0])
+    def __call__(self, x):
+        y = self.inc_blocks.el(0)(x[0])
         for i in range(len(self.down_blocks)):
-            y = self.inc_blocks[i + 1](x[i + 1]) + self.down_blocks[i](y)
+            y = self.inc_blocks.el(i + 1)(x[i + 1]) + self.down_blocks.el(i)(y)
         y = self.final_layer(y)
         return y
 
 
-class HRNet(nn.Module):
+class HRNet(Chain):
     """
     HRNet model from 'Deep High-Resolution Representation Learning for Visual Recognition,'
     https://arxiv.org/abs/1908.07919.
@@ -316,7 +339,7 @@ class HRNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -327,53 +350,50 @@ class HRNet(nn.Module):
                  num_subblocks,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
+                 classes=1000):
         super(HRNet, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         self.branches = [2, 3, 4]
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", HRInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            mid_channels=64,
-            num_subblocks=init_num_subblocks))
-        in_channels_list = [init_block_channels]
-        for i in range(len(self.branches)):
-            self.features.add_module("stage{}".format(i + 1), HRStage(
-                in_channels_list=in_channels_list,
-                out_channels_list=channels[i],
-                num_modules=num_modules[i],
-                num_branches=self.branches[i],
-                num_subblocks=num_subblocks[i]))
-            in_channels_list = self.features[-1].in_channels_list
-        self.features.add_module("final_block", HRFinalBlock(
-            in_channels_list=in_channels_list,
-            out_channels_list=[128, 256, 512, 1024]))
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", HRInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
+                    mid_channels=64,
+                    num_subblocks=init_num_subblocks))
+                in_channels_list = [init_block_channels]
+                for i in range(len(self.branches)):
+                    stage = HRStage(
+                        in_channels_list=in_channels_list,
+                        out_channels_list=channels[i],
+                        num_modules=num_modules[i],
+                        num_branches=self.branches[i],
+                        num_subblocks=num_subblocks[i])
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                    in_channels_list = stage.in_channels_list
+                setattr(self.features, "final_block", HRFinalBlock(
+                    in_channels_list=in_channels_list,
+                    out_channels_list=[128, 256, 512, 1024]))
+                setattr(self.features, "final_pool", partial(
+                    F.average_pooling_2d,
+                    ksize=7,
+                    stride=1))
 
-        self.output = nn.Linear(
-            in_features=2048,
-            out_features=num_classes)
+            in_channels = 2048
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, "flatten", partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, "fc", L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-        self._init_params()
-
-    def _init_params(self):
-        for module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight, mode="fan_out", nonlinearity="relu")
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-            elif isinstance(module, nn.BatchNorm2d):
-                nn.init.constant_(module.weight, 1)
-                nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -381,7 +401,7 @@ class HRNet(nn.Module):
 def get_hrnet(version,
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".torch", "models"),
+              root=os.path.join("~", ".chainer", "models"),
               **kwargs):
     """
     Create HRNet model with specific parameters.
@@ -394,7 +414,7 @@ def get_hrnet(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     if version == "w18s1":
@@ -458,11 +478,12 @@ def get_hrnet(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -476,7 +497,7 @@ def hrnet_w18_small_v1(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w18s1", model_name="hrnet_w18_small_v1", **kwargs)
@@ -491,7 +512,7 @@ def hrnet_w18_small_v2(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w18s2", model_name="hrnet_w18_small_v2", **kwargs)
@@ -506,7 +527,7 @@ def hrnetv2_w18(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w18", model_name="hrnetv2_w18", **kwargs)
@@ -521,7 +542,7 @@ def hrnetv2_w30(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w30", model_name="hrnetv2_w30", **kwargs)
@@ -536,7 +557,7 @@ def hrnetv2_w32(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w32", model_name="hrnetv2_w32", **kwargs)
@@ -551,7 +572,7 @@ def hrnetv2_w40(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w40", model_name="hrnetv2_w40", **kwargs)
@@ -566,7 +587,7 @@ def hrnetv2_w44(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w44", model_name="hrnetv2_w44", **kwargs)
@@ -581,7 +602,7 @@ def hrnetv2_w48(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w48", model_name="hrnetv2_w48", **kwargs)
@@ -596,23 +617,17 @@ def hrnetv2_w64(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hrnet(version="w64", model_name="hrnetv2_w64", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -631,10 +646,7 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != hrnet_w18_small_v1 or weight_count == 13187464)
         assert (model != hrnet_w18_small_v2 or weight_count == 15597464)
@@ -646,10 +658,9 @@ def _test():
         assert (model != hrnetv2_w48 or weight_count == 77469864)
         assert (model != hrnetv2_w64 or weight_count == 128059944)
 
-        x = torch.randn(1, 3, 224, 224)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

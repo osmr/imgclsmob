@@ -42,6 +42,7 @@ from .models.dla import *
 from .models.msdnet import *
 from .models.fishnet import *
 from .models.espnetv2 import *
+from .models.hrnet import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -104,9 +105,6 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.superpointnet import *
-
-from .models.hrnet import *
-from .models.others.oth_cls_hrnet import *
 
 __all__ = ['get_model', 'trained_model_metainfo_list']
 
@@ -408,6 +406,16 @@ _models = {
     'espnetv2_w5d4': espnetv2_w5d4,
     'espnetv2_w3d2': espnetv2_w3d2,
     'espnetv2_w2': espnetv2_w2,
+
+    'hrnet_w18_small_v1': hrnet_w18_small_v1,
+    'hrnet_w18_small_v2': hrnet_w18_small_v2,
+    'hrnetv2_w18': hrnetv2_w18,
+    'hrnetv2_w30': hrnetv2_w30,
+    'hrnetv2_w32': hrnetv2_w32,
+    'hrnetv2_w40': hrnetv2_w40,
+    'hrnetv2_w44': hrnetv2_w44,
+    'hrnetv2_w48': hrnetv2_w48,
+    'hrnetv2_w64': hrnetv2_w64,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,
@@ -907,26 +915,6 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-
-    'hrnet_w18_small_v1': hrnet_w18_small_v1,
-    'hrnet_w18_small_v2': hrnet_w18_small_v2,
-    'hrnetv2_w18': hrnetv2_w18,
-    'hrnetv2_w30': hrnetv2_w30,
-    'hrnetv2_w32': hrnetv2_w32,
-    'hrnetv2_w40': hrnetv2_w40,
-    'hrnetv2_w44': hrnetv2_w44,
-    'hrnetv2_w48': hrnetv2_w48,
-    'hrnetv2_w64': hrnetv2_w64,
-
-    'oth_hrnet_w18_small_model_v1': oth_hrnet_w18_small_model_v1,
-    'oth_hrnet_w18_small_model_v2': oth_hrnet_w18_small_model_v2,
-    'oth_hrnetv2_w18': oth_hrnetv2_w18,
-    'oth_hrnetv2_w30': oth_hrnetv2_w30,
-    'oth_hrnetv2_w32': oth_hrnetv2_w32,
-    'oth_hrnetv2_w40': oth_hrnetv2_w40,
-    'oth_hrnetv2_w44': oth_hrnetv2_w44,
-    'oth_hrnetv2_w48': oth_hrnetv2_w48,
-    'oth_hrnetv2_w64': oth_hrnetv2_w64,
 }
 
 trained_model_metainfo_list = (
@@ -1065,6 +1053,15 @@ trained_model_metainfo_list = (
     ('espnetv2_w5d4', 'ESPNetv2 x1.25', '1811.11431', 224, 0.875, 200, 'pytorch, from [sacmehta/ESPNetv2]'),
     ('espnetv2_w3d2', 'ESPNetv2 x1.5', '1811.11431', 224, 0.875, 200, 'pytorch, from [sacmehta/ESPNetv2]'),
     ('espnetv2_w2', 'ESPNetv2 x2.0', '1811.11431', 224, 0.875, 200, 'pytorch, from [sacmehta/ESPNetv2]'),
+    ('hrnet_w18_small_v1', 'HRNet-W18 Small V1', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnet_w18_small_v2', 'HRNet-W18 Small V2', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w18', 'HRNetV2-W18', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w30', 'HRNetV2-W30', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w32', 'HRNetV2-W32', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w40', 'HRNetV2-W40', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w44', 'HRNetV2-W44', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w48', 'HRNetV2-W48', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
+    ('hrnetv2_w64', 'HRNetV2-W64', '1908.07919', 224, 0.875, 200, 'pytorch, from [HRNet/HRNet...ation]'),
     ('squeezenet_v1_0', 'SqueezeNet v1.0', '1602.07360', 224, 0.875, 200, 'pytorch'),
     ('squeezenet_v1_1', 'SqueezeNet v1.1', '1602.07360', 224, 0.875, 200, 'pytorch'),
     ('squeezeresnet_v1_0', 'SqueezeResNet v1.0', '1602.07360', 224, 0.875, 200, 'pytorch'),

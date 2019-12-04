@@ -47,6 +47,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - DLA (['Deep Layer Aggregation'](https://arxiv.org/abs/1707.06484))
 - FishNet (['FishNet: A Versatile Backbone for Image, Region, and Pixel Level Prediction'](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf))
 - ESPNetv2 (['ESPNetv2: A Light-weight, Power Efficient, and General Purpose Convolutional Neural Network'](https://arxiv.org/abs/1811.11431))
+- HRNet (['Deep High-Resolution Representation Learning for Visual Recognition'](https://arxiv.org/abs/1908.07919))
 - X-DenseNet (['Deep Expander Networks: Efficient Deep Networks from Graph Theory'](https://arxiv.org/abs/1711.08757))
 - SqueezeNet/SqueezeResNet (['SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'](https://arxiv.org/abs/1602.07360))
 - SqueezeNext (['SqueezeNext: Hardware-Aware Neural Network Design'](https://arxiv.org/abs/1803.10615))
@@ -247,6 +248,15 @@ Some remarks:
 | ESPNetv2 x1.25 | 33.07 | 12.68 | 1,965,440 | 138.18M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w5d4-1268-dc69f420.npz.log)) |
 | ESPNetv2 x1.5 | 31.96 | 11.92 | 2,314,856 | 185.77M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w3d2-1192-2b7fc5cf.npz.log)) |
 | ESPNetv2 x2.0 | 28.95 | 9.90 | 3,498,136 | 306.93M | From [sacmehta/ESPNetv2] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.238/espnetv2_w2-0990-bfb3ab7c.npz.log)) |
+| HRNet-W18 Small V1 | 28.41 | 9.74 | 13,187,464 | 1,615.00M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v1-0974-591a9e49.npz.log)) |
+| HRNet-W18 Small V2 | 25.69 | 8.02 | 15,597,464 | 2,618.84M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnet_w18_small_v2-0802-17518355.npz.log)) |
+| HRNetV2-W18 | 24.02 | 6.85 | 21,299,004 | 4,323.07M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w18-0685-fc886311.npz.log)) |
+| HRNetV2-W30 | 22.28 | 6.07 | 37,712,220 | 8,156.82M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w30-0607-f685319f.npz.log)) |
+| HRNetV2-W32 | 22.32 | 6.07 | 41,232,680 | 8,974.04M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w32-0607-0b9c71a6.npz.log)) |
+| HRNetV2-W40 | 21.72 | 5.73 | 57,557,160 | 12,752.26M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w40-0573-340d594a.npz.log)) |
+| HRNetV2-W44 | 21.74 | 5.93 | 67,064,984 | 14,946.96M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w44-0593-8426d89a.npz.log)) |
+| HRNetV2-W48 | 21.40 | 5.81 | 77,469,864 | 17,345.39M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0581-d8e905a2.npz.log)) |
+| HRNetV2-W64 | 21.10 | 5.53 | 128,059,944 | 28,976.42M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0553-4d8859ee.npz.log)) |
 | SqueezeNet v1.0 | 38.76 | 17.38 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1738-4c55a6a5.npz.log)) |
 | SqueezeNet v1.1 | 39.13 | 17.40 | 1,235,496 | 352.02M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1740-b236c204.npz.log)) |
 | SqueezeResNet v1.0 | 39.36 | 17.66 | 1,248,424 | 823.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.178/squeezeresnet_v1_0-1766-6dc69dc2.npz.log)) |
@@ -630,3 +640,4 @@ Some remarks:
 [MIT-HAN-LAB/ProxylessNAS]: https://github.com/MIT-HAN-LAB/ProxylessNAS
 [yangze0930/NTS-Net]: https://github.com/yangze0930/NTS-Net
 [rwightman/pyt...models]: https://github.com/rwightman/pytorch-image-models
+[HRNet/HRNet...ation]: https://github.com/HRNet/HRNet-Image-Classification

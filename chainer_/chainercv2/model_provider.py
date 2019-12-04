@@ -35,6 +35,7 @@ from .models.bagnet import *
 from .models.dla import *
 from .models.fishnet import *
 from .models.espnetv2 import *
+from .models.hrnet import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -93,8 +94,6 @@ from .models.ntsnet_cub import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
-
-from .models.hrnet import *
 
 __all__ = ['get_model']
 
@@ -373,6 +372,16 @@ _models = {
     'espnetv2_w5d4': espnetv2_w5d4,
     'espnetv2_w3d2': espnetv2_w3d2,
     'espnetv2_w2': espnetv2_w2,
+
+    'hrnet_w18_small_v1': hrnet_w18_small_v1,
+    'hrnet_w18_small_v2': hrnet_w18_small_v2,
+    'hrnetv2_w18': hrnetv2_w18,
+    'hrnetv2_w30': hrnetv2_w30,
+    'hrnetv2_w32': hrnetv2_w32,
+    'hrnetv2_w40': hrnetv2_w40,
+    'hrnetv2_w44': hrnetv2_w44,
+    'hrnetv2_w48': hrnetv2_w48,
+    'hrnetv2_w64': hrnetv2_w64,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,
@@ -859,16 +868,6 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
-
-    'hrnet_w18_small_v1': hrnet_w18_small_v1,
-    'hrnet_w18_small_v2': hrnet_w18_small_v2,
-    'hrnetv2_w18': hrnetv2_w18,
-    'hrnetv2_w30': hrnetv2_w30,
-    'hrnetv2_w32': hrnetv2_w32,
-    'hrnetv2_w40': hrnetv2_w40,
-    'hrnetv2_w44': hrnetv2_w44,
-    'hrnetv2_w48': hrnetv2_w48,
-    'hrnetv2_w64': hrnetv2_w64,
 }
 
 

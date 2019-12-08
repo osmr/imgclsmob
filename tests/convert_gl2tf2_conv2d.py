@@ -1,27 +1,23 @@
 import numpy as np
-import mxnet as mx
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 
 
-class GluonModel(mx.gluon.HybridBlock):
+def is_channels_first(data_format):
+    """
+    Is tested data format channels first.
 
-    def __init__(self,
-                 **kwargs):
-        super(GluonModel, self).__init__(**kwargs)
+    Parameters:
+    ----------
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
 
-        with self.name_scope():
-            self.conv = mx.gluon.nn.Conv2D(
-                channels=64,
-                kernel_size=7,
-                strides=2,
-                padding=3,
-                use_bias=True,
-                in_channels=3)
-
-    def hybrid_forward(self, F, x):
-        x = self.conv(x)
-        return x
+    Returns
+    -------
+    bool
+        A flag.
+    """
+    return data_format == "channels_first"
 
 
 class TF2Model(tf.keras.Model):
@@ -31,17 +27,21 @@ class TF2Model(tf.keras.Model):
                  **kwargs):
         super(TF2Model, self).__init__(**kwargs)
 
-        padding = 3
-        padding = (padding, padding)
-        self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+        padding = (3, 3)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+        if is_channels_first(data_format):
+            self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+        else:
+            self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
         self.conv = nn.Conv2D(
             filters=64,
-            kernel_size=7,
+            kernel_size=(7, 7),
             strides=2,
             padding="valid",
-            data_format="channels_last",
+            data_format=data_format,
             dilation_rate=1,
-            use_bias=True,
+            use_bias=False,
             name="conv")
 
     def call(self, x):
@@ -50,37 +50,111 @@ class TF2Model(tf.keras.Model):
         return x
 
 
+class TF2Model2(tf.keras.Model):
+
+    def __init__(self,
+                 data_format="channels_last",
+                 **kwargs):
+        super(TF2Model2, self).__init__(**kwargs)
+
+        padding = (3, 3)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+        self.pad = nn.ZeroPadding2D(
+            padding=padding,
+            data_format=data_format)
+        self.conv = nn.Conv2D(
+            filters=64,
+            kernel_size=(7, 7),
+            strides=2,
+            padding="valid",
+            data_format=data_format,
+            dilation_rate=1,
+            use_bias=False,
+            name="conv")
+
+    def call(self, x):
+        x = self.pad(x)
+        x = self.conv(x)
+        return x
+
+
+def gl_calc(gl_w, x):
+    import mxnet as mx
+
+    class GluonModel(mx.gluon.HybridBlock):
+
+        def __init__(self,
+                     **kwargs):
+            super(GluonModel, self).__init__(**kwargs)
+
+            with self.name_scope():
+                self.conv = mx.gluon.nn.Conv2D(
+                    channels=64,
+                    kernel_size=(7, 7),
+                    strides=2,
+                    padding=(3, 3),
+                    use_bias=False,
+                    in_channels=3)
+
+        def hybrid_forward(self, F, x):
+            x = self.conv(x)
+            return x
+
+    gl_model = GluonModel()
+
+    # ctx = mx.cpu()
+    ctx = mx.gpu(0)
+    gl_params = gl_model._collect_params_with_prefix()
+    # gl_w = np.transpose(tf2_w, axes=(3, 2, 0, 1))
+    gl_params['conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
+    # gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
+
+    gl_x = mx.nd.array(x, ctx)
+    gl_y = gl_model(gl_x).asnumpy()
+
+    return gl_y
+
+
 def main():
+    gpus = tf.config.experimental.list_physical_devices("GPU")
+    if gpus:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
 
     success = True
     for i in range(10):
-        # gl_w = np.random.randn(64, 3, 7, 7).astype(np.float32)
-        tf_w = np.random.randn(7, 7, 3, 64).astype(np.float32)
+        gl_w = np.random.randn(64, 3, 7, 7).astype(np.float32)
+        # tf2_w = np.random.randn(7, 7, 3, 64).astype(np.float32)
         b = np.random.randn(64, ).astype(np.float32)
-        x = np.random.randn(10, 3, 224, 224).astype(np.float32)
+        x = np.random.randn(10, 3, 224, 256).astype(np.float32)
+        assert (b is not None)
 
-        gl_model = GluonModel()
+        data_format = "channels_last"
+        # data_format = "channels_first"
+        tf2_use_cuda = True
 
-        # ctx = mx.cpu()
-        ctx = mx.gpu(0)
-        gl_params = gl_model._collect_params_with_prefix()
-        gl_w = np.transpose(tf_w, axes=(3, 2, 0, 1))
-        gl_params['conv.weight']._load_init(mx.nd.array(gl_w, ctx), ctx)
-        gl_params['conv.bias']._load_init(mx.nd.array(b, ctx), ctx)
-
-        gl_x = mx.nd.array(x, ctx)
-        gl_y = gl_model(gl_x).asnumpy()
-
-        tf2_model = TF2Model()
-        tf2_model.build(input_shape=(10, 224, 224, 3))
+        if not tf2_use_cuda:
+            with tf.device("/cpu:0"):
+                tf2_model = TF2Model2(data_format=data_format)
+        else:
+            tf2_model = TF2Model2(data_format=data_format)
+        input_shape = (1, 224, 256, 3) if data_format == "channels_last" else (1, 3, 224, 256)
+        tf2_model.build(input_shape=input_shape)
         tf2_params = {v.name: v for v in tf2_model.weights}
-        tf2_params["conv/kernel:0"].assign(tf_w)
-        tf2_params["conv/bias:0"].assign(b)
+        # print(tf2_params["conv/kernel:0"].shape)
+        # tf2_w = np.transpose(gl_w, axes=(2, 3, 1, 0))
+        tf2_w = np.transpose(gl_w, axes=(2, 3, 1, 0))
+        tf2_params["conv/kernel:0"].assign(tf2_w)
+        # tf2_params["conv/bias:0"].assign(b)
 
-        tf2_x = tf.convert_to_tensor(x.transpose((0, 2, 3, 1)))
+        tf2_x = x.transpose((0, 2, 3, 1)) if data_format == "channels_last" else x
+        tf2_x = tf.convert_to_tensor(tf2_x)
         tf2_y = tf2_model(tf2_x).numpy()
+        if data_format == "channels_last":
+            tf2_y = tf2_y.transpose((0, 3, 1, 2))
 
-        tf.reset_default_graph()
+        gl_y = gl_calc(gl_w, x)
 
         dist = np.sum(np.abs(gl_y - tf2_y))
         if dist > 1e-5:
@@ -93,5 +167,5 @@ def main():
         print("All ok.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -260,13 +260,13 @@ class ConvBlock(nn.Layer):
         self.use_pad = (padding[0] > 0) or (padding[1] > 0)
 
         if self.use_pad:
-            # self.pad = nn.ZeroPadding2D(
-            #     padding=padding,
-            #     data_format=data_format)
-            if is_channels_first(data_format):
-                self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
-            else:
-                self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+            self.pad = nn.ZeroPadding2D(
+                padding=padding,
+                data_format=data_format)
+            # if is_channels_first(data_format):
+            #     self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+            # else:
+            #     self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
         self.conv = nn.Conv2D(
             filters=out_channels,
             kernel_size=kernel_size,
@@ -285,8 +285,8 @@ class ConvBlock(nn.Layer):
 
     def call(self, x, training=None):
         if self.use_pad:
-            # x = self.pad(x)
-            x = tf.pad(x, paddings=self.paddings_tf)
+            x = self.pad(x)
+            # x = tf.pad(x, paddings=self.paddings_tf)
         x = self.conv(x)
         if self.use_bn:
             x = self.bn(x, training=training)

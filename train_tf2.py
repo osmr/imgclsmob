@@ -9,7 +9,7 @@ import numpy as np
 import random
 import tensorflow as tf
 from common.logger_utils import initialize_logging
-from tensorflow2.tensorflowcv2.model_provider import get_model
+from tensorflow2.tf2cv.model_provider import get_model
 
 
 def parse_args():

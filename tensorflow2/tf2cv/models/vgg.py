@@ -136,7 +136,8 @@ class VGG(tf.keras.Model):
                 pool_size=2,
                 strides=2,
                 padding=0,
-                data_format=data_format))
+                data_format=data_format,
+                name="pool{}".format(i + 1)))
             self.features.add(stage)
 
         self.output1 = VGGOutputBlock(
@@ -145,7 +146,7 @@ class VGG(tf.keras.Model):
             name="output1")
 
     def call(self, x, training=None):
-        x = self.features(x)
+        x = self.features(x, training=training)
         x = flatten(x, self.data_format)
         x = self.output1(x)
         return x

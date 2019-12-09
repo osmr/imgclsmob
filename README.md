@@ -12,7 +12,7 @@ The following frameworks are used:
 - PyTorch ([info](https://pytorch.org)),
 - Chainer ([info](https://chainer.org)),
 - Keras ([info](https://keras.io)),
-- TensorFlow ([info](https://www.tensorflow.org)).
+- TensorFlow 1.x/2.x ([info](https://www.tensorflow.org)).
 
 For each supported framework, there is a PIP-package containing pure models without auxiliary scripts. List of packages:
 - [gluoncv2](https://pypi.org/project/gluoncv2) for Gluon,

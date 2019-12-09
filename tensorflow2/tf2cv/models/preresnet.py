@@ -1,22 +1,23 @@
 """
-    ResNet for ImageNet-1K, implemented in TensorFlow.
-    Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet for ImageNet-1K, implemented in TensorFlow.
+    Original papers: 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 """
 
-__all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet16', 'resnet18_wd4', 'resnet18_wd2',
-           'resnet18_w3d4', 'resnet18', 'resnet26', 'resnetbc26b', 'resnet34', 'resnetbc38b', 'resnet50', 'resnet50b',
-           'resnet101', 'resnet101b', 'resnet152', 'resnet152b', 'resnet200', 'resnet200b', 'ResBlock', 'ResBottleneck',
-           'ResUnit', 'ResInitBlock']
+__all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetbc14b', 'preresnet16', 'preresnet18_wd4',
+           'preresnet18_wd2', 'preresnet18_w3d4', 'preresnet18', 'preresnet26', 'preresnetbc26b', 'preresnet34',
+           'preresnetbc38b', 'preresnet50', 'preresnet50b', 'preresnet101', 'preresnet101b', 'preresnet152',
+           'preresnet152b', 'preresnet200', 'preresnet200b', 'preresnet269b', 'PreResBlock', 'PreResBottleneck',
+           'PreResUnit', 'PreResInitBlock', 'PreResActivation']
 
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, flatten
+from .common import Conv2d, pre_conv1x1_block, pre_conv3x3_block, conv1x1, MaxPool2d, GluonBatchNormalization, flatten
 
 
-class ResBlock(nn.Layer):
+class PreResBlock(nn.Layer):
     """
-    Simple ResNet block for residual path in ResNet unit.
+    Simple PreResNet block for residual path in PreResNet unit.
 
     Parameters:
     ----------
@@ -35,29 +36,29 @@ class ResBlock(nn.Layer):
                  strides,
                  data_format="channels_last",
                  **kwargs):
-        super(ResBlock, self).__init__(**kwargs)
-        self.conv1 = conv3x3_block(
+        super(PreResBlock, self).__init__(**kwargs)
+        self.conv1 = pre_conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            return_preact=True,
             data_format=data_format,
             name="conv1")
-        self.conv2 = conv3x3_block(
+        self.conv2 = pre_conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
-            activation=None,
             data_format=data_format,
             name="conv2")
 
     def call(self, x, training=None):
-        x = self.conv1(x, training=training)
+        x, x_pre_activ = self.conv1(x, training=training)
         x = self.conv2(x, training=training)
-        return x
+        return x, x_pre_activ
 
 
-class ResBottleneck(nn.Layer):
+class PreResBottleneck(nn.Layer):
     """
-    ResNet bottleneck block for residual path in ResNet unit.
+    PreResNet bottleneck block for residual path in PreResNet unit.
 
     Parameters:
     ----------
@@ -67,14 +68,8 @@ class ResBottleneck(nn.Layer):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer.
-    conv1_stride : bool, default False
+    conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
-    bottleneck_factor : int, default 4
-        Bottleneck factor.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -82,46 +77,41 @@ class ResBottleneck(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
-                 padding=1,
-                 dilation=1,
-                 conv1_stride=False,
-                 bottleneck_factor=4,
+                 conv1_stride,
                  data_format="channels_last",
                  **kwargs):
-        super(ResBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // bottleneck_factor
+        super(PreResBottleneck, self).__init__(**kwargs)
+        mid_channels = out_channels // 4
 
-        self.conv1 = conv1x1_block(
+        self.conv1 = pre_conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
             strides=(strides if conv1_stride else 1),
+            return_preact=True,
             data_format=data_format,
             name="conv1")
-        self.conv2 = conv3x3_block(
+        self.conv2 = pre_conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
             strides=(1 if conv1_stride else strides),
-            padding=padding,
-            dilation=dilation,
             data_format=data_format,
             name="conv2")
-        self.conv3 = conv1x1_block(
+        self.conv3 = pre_conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            activation=None,
             data_format=data_format,
             name="conv3")
 
     def call(self, x, training=None):
-        x = self.conv1(x, training=training)
+        x, x_pre_activ = self.conv1(x, training=training)
         x = self.conv2(x, training=training)
         x = self.conv3(x, training=training)
-        return x
+        return x, x_pre_activ
 
 
-class ResUnit(nn.Layer):
+class PreResUnit(nn.Layer):
     """
-    ResNet unit with residual connection.
+    PreResNet unit with residual connection.
 
     Parameters:
     ----------
@@ -131,13 +121,9 @@ class ResUnit(nn.Layer):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer in bottleneck.
-    bottleneck : bool, default True
+    bottleneck : bool
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool, default False
+    conv1_stride : bool
         Whether to use stride in the first or the second convolution layer of the block.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -146,56 +132,48 @@ class ResUnit(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
-                 padding=1,
-                 dilation=1,
-                 bottleneck=True,
-                 conv1_stride=False,
+                 bottleneck,
+                 conv1_stride,
                  data_format="channels_last",
                  **kwargs):
-        super(ResUnit, self).__init__(**kwargs)
+        super(PreResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
 
         if bottleneck:
-            self.body = ResBottleneck(
+            self.body = PreResBottleneck(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                padding=padding,
-                dilation=dilation,
                 conv1_stride=conv1_stride,
                 data_format=data_format,
                 name="body")
         else:
-            self.body = ResBlock(
+            self.body = PreResBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
                 data_format=data_format,
                 name="body")
         if self.resize_identity:
-            self.identity_conv = conv1x1_block(
+            self.identity_conv = conv1x1(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                activation=None,
                 data_format=data_format,
                 name="identity_conv")
-        self.activ = nn.ReLU()
 
     def call(self, x, training=None):
+        identity = x
+        x, x_pre_activ = self.body(x, training=training)
         if self.resize_identity:
-            identity = self.identity_conv(x, training=training)
-        else:
-            identity = x
-        x = self.body(x, training=training)
+            identity = self.identity_conv(x_pre_activ, training=training)
         x = x + identity
-        x = self.activ(x)
         return x
 
 
-class ResInitBlock(nn.Layer):
+class PreResInitBlock(nn.Layer):
     """
-    ResNet specific initial block.
+    PreResNet specific initial block.
 
     Parameters:
     ----------
@@ -211,13 +189,20 @@ class ResInitBlock(nn.Layer):
                  out_channels,
                  data_format="channels_last",
                  **kwargs):
-        super(ResInitBlock, self).__init__(**kwargs)
-        self.conv = conv7x7_block(
+        super(PreResInitBlock, self).__init__(**kwargs)
+        self.conv = Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
+            kernel_size=7,
             strides=2,
+            padding=3,
+            use_bias=False,
             data_format=data_format,
             name="conv")
+        self.bn = GluonBatchNormalization(
+            data_format=data_format,
+            name="bn")
+        self.activ = nn.ReLU()
         self.pool = MaxPool2d(
             pool_size=3,
             strides=2,
@@ -225,14 +210,43 @@ class ResInitBlock(nn.Layer):
             name="pool")
 
     def call(self, x, training=None):
-        x = self.conv(x, training=training)
+        x = self.conv(x)
+        x = self.bn(x, training=training)
+        x = self.activ(x)
         x = self.pool(x)
         return x
 
 
-class ResNet(tf.keras.Model):
+class PreResActivation(nn.Layer):
     """
-    ResNet model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet pure pre-activation block without convolution layer. It's used by itself as the final block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 data_format="channels_last",
+                 **kwargs):
+        super(PreResActivation, self).__init__(**kwargs)
+        self.bn = GluonBatchNormalization(
+            data_format=data_format,
+            name="bn")
+        self.activ = nn.ReLU()
+
+    def call(self, x, training=None):
+        x = self.bn(x, training=training)
+        x = self.activ(x)
+        return x
+
+
+class PreResNet(tf.keras.Model):
+    """
+    PreResNet model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -263,13 +277,13 @@ class ResNet(tf.keras.Model):
                  classes=1000,
                  data_format="channels_last",
                  **kwargs):
-        super(ResNet, self).__init__(**kwargs)
+        super(PreResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
         self.data_format = data_format
 
         self.features = tf.keras.Sequential(name="features")
-        self.features.add(ResInitBlock(
+        self.features.add(PreResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
             data_format=data_format,
@@ -279,7 +293,7 @@ class ResNet(tf.keras.Model):
             stage = tf.keras.Sequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
-                stage.add(ResUnit(
+                stage.add(PreResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
@@ -289,6 +303,10 @@ class ResNet(tf.keras.Model):
                     name="unit{}".format(j + 1)))
                 in_channels = out_channels
             self.features.add(stage)
+        self.features.add(PreResActivation(
+            in_channels=in_channels,
+            data_format=data_format,
+            name="post_activ"))
         self.features.add(nn.AveragePooling2D(
             pool_size=7,
             strides=1,
@@ -307,16 +325,16 @@ class ResNet(tf.keras.Model):
         return x
 
 
-def get_resnet(blocks,
-               bottleneck=None,
-               conv1_stride=True,
-               width_scale=1.0,
-               model_name=None,
-               pretrained=False,
-               root=os.path.join("~", ".tensorflow", "models"),
-               **kwargs):
+def get_preresnet(blocks,
+                  bottleneck=None,
+                  conv1_stride=True,
+                  width_scale=1.0,
+                  model_name=None,
+                  pretrained=False,
+                  root=os.path.join("~", ".tensorflow", "models"),
+                  **kwargs):
     """
-    Create ResNet model with specific parameters.
+    Create PreResNet model with specific parameters.
 
     Parameters:
     ----------
@@ -366,8 +384,10 @@ def get_resnet(blocks,
         layers = [3, 8, 36, 3]
     elif blocks == 200:
         layers = [3, 24, 36, 3]
+    elif blocks == 269:
+        layers = [3, 30, 48, 8]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported PreResNet with number of blocks: {}".format(blocks))
 
     if bottleneck:
         assert (sum(layers) * 3 + 2 == blocks)
@@ -388,7 +408,7 @@ def get_resnet(blocks,
                      for j, cij in enumerate(ci)] for i, ci in enumerate(channels)]
         init_block_channels = int(init_block_channels * width_scale)
 
-    net = ResNet(
+    net = PreResNet(
         channels=channels,
         init_block_channels=init_block_channels,
         bottleneck=bottleneck,
@@ -411,9 +431,9 @@ def get_resnet(blocks,
     return net
 
 
-def resnet10(**kwargs):
+def preresnet10(**kwargs):
     """
-    ResNet-10 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-10 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -423,12 +443,12 @@ def resnet10(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=10, model_name="resnet10", **kwargs)
+    return get_preresnet(blocks=10, model_name="preresnet10", **kwargs)
 
 
-def resnet12(**kwargs):
+def preresnet12(**kwargs):
     """
-    ResNet-12 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-12 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -438,12 +458,12 @@ def resnet12(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=12, model_name="resnet12", **kwargs)
+    return get_preresnet(blocks=12, model_name="preresnet12", **kwargs)
 
 
-def resnet14(**kwargs):
+def preresnet14(**kwargs):
     """
-    ResNet-14 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-14 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -453,12 +473,12 @@ def resnet14(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, model_name="resnet14", **kwargs)
+    return get_preresnet(blocks=14, model_name="preresnet14", **kwargs)
 
 
-def resnetbc14b(**kwargs):
+def preresnetbc14b(**kwargs):
     """
-    ResNet-BC-14b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-BC-14b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -468,12 +488,12 @@ def resnetbc14b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetbc14b", **kwargs)
+    return get_preresnet(blocks=14, bottleneck=True, conv1_stride=False, model_name="preresnetbc14b", **kwargs)
 
 
-def resnet16(**kwargs):
+def preresnet16(**kwargs):
     """
-    ResNet-16 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-16 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -483,13 +503,13 @@ def resnet16(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=16, model_name="resnet16", **kwargs)
+    return get_preresnet(blocks=16, model_name="preresnet16", **kwargs)
 
 
-def resnet18_wd4(**kwargs):
+def preresnet18_wd4(**kwargs):
     """
-    ResNet-18 model with 0.25 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.25 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -498,13 +518,13 @@ def resnet18_wd4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.25, model_name="resnet18_wd4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.25, model_name="preresnet18_wd4", **kwargs)
 
 
-def resnet18_wd2(**kwargs):
+def preresnet18_wd2(**kwargs):
     """
-    ResNet-18 model with 0.5 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.5 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -513,13 +533,13 @@ def resnet18_wd2(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.5, model_name="resnet18_wd2", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.5, model_name="preresnet18_wd2", **kwargs)
 
 
-def resnet18_w3d4(**kwargs):
+def preresnet18_w3d4(**kwargs):
     """
-    ResNet-18 model with 0.75 width scale from 'Deep Residual Learning for Image Recognition,'
-    https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-18 model with 0.75 width scale from 'Identity Mappings in Deep Residual Networks,'
+    https://arxiv.org/abs/1603.05027. It's an experimental model.
 
     Parameters:
     ----------
@@ -528,12 +548,12 @@ def resnet18_w3d4(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, width_scale=0.75, model_name="resnet18_w3d4", **kwargs)
+    return get_preresnet(blocks=18, width_scale=0.75, model_name="preresnet18_w3d4", **kwargs)
 
 
-def resnet18(**kwargs):
+def preresnet18(**kwargs):
     """
-    ResNet-18 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-18 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -542,12 +562,12 @@ def resnet18(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=18, model_name="resnet18", **kwargs)
+    return get_preresnet(blocks=18, model_name="preresnet18", **kwargs)
 
 
-def resnet26(**kwargs):
+def preresnet26(**kwargs):
     """
-    ResNet-26 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-26 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model.
 
     Parameters:
@@ -557,12 +577,12 @@ def resnet26(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=26, bottleneck=False, model_name="resnet26", **kwargs)
+    return get_preresnet(blocks=26, bottleneck=False, model_name="preresnet26", **kwargs)
 
 
-def resnetbc26b(**kwargs):
+def preresnetbc26b(**kwargs):
     """
-    ResNet-BC-26b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-BC-26b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -572,12 +592,12 @@ def resnetbc26b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="resnetbc26b", **kwargs)
+    return get_preresnet(blocks=26, bottleneck=True, conv1_stride=False, model_name="preresnetbc26b", **kwargs)
 
 
-def resnet34(**kwargs):
+def preresnet34(**kwargs):
     """
-    ResNet-34 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-34 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -586,12 +606,12 @@ def resnet34(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=34, model_name="resnet34", **kwargs)
+    return get_preresnet(blocks=34, model_name="preresnet34", **kwargs)
 
 
-def resnetbc38b(**kwargs):
+def preresnetbc38b(**kwargs):
     """
-    ResNet-BC-38b model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-BC-38b model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
     It's an experimental model (bottleneck compressed).
 
     Parameters:
@@ -601,12 +621,12 @@ def resnetbc38b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="resnetbc38b", **kwargs)
+    return get_preresnet(blocks=38, bottleneck=True, conv1_stride=False, model_name="preresnetbc38b", **kwargs)
 
 
-def resnet50(**kwargs):
+def preresnet50(**kwargs):
     """
-    ResNet-50 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-50 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -615,13 +635,13 @@ def resnet50(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, model_name="resnet50", **kwargs)
+    return get_preresnet(blocks=50, model_name="preresnet50", **kwargs)
 
 
-def resnet50b(**kwargs):
+def preresnet50b(**kwargs):
     """
-    ResNet-50 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-50 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -630,12 +650,12 @@ def resnet50b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=50, conv1_stride=False, model_name="resnet50b", **kwargs)
+    return get_preresnet(blocks=50, conv1_stride=False, model_name="preresnet50b", **kwargs)
 
 
-def resnet101(**kwargs):
+def preresnet101(**kwargs):
     """
-    ResNet-101 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-101 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -644,13 +664,13 @@ def resnet101(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, model_name="resnet101", **kwargs)
+    return get_preresnet(blocks=101, model_name="preresnet101", **kwargs)
 
 
-def resnet101b(**kwargs):
+def preresnet101b(**kwargs):
     """
-    ResNet-101 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-101 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -659,12 +679,12 @@ def resnet101b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=101, conv1_stride=False, model_name="resnet101b", **kwargs)
+    return get_preresnet(blocks=101, conv1_stride=False, model_name="preresnet101b", **kwargs)
 
 
-def resnet152(**kwargs):
+def preresnet152(**kwargs):
     """
-    ResNet-152 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-152 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -673,13 +693,13 @@ def resnet152(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, model_name="resnet152", **kwargs)
+    return get_preresnet(blocks=152, model_name="preresnet152", **kwargs)
 
 
-def resnet152b(**kwargs):
+def preresnet152b(**kwargs):
     """
-    ResNet-152 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385.
+    PreResNet-152 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -688,13 +708,12 @@ def resnet152b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=152, conv1_stride=False, model_name="resnet152b", **kwargs)
+    return get_preresnet(blocks=152, conv1_stride=False, model_name="preresnet152b", **kwargs)
 
 
-def resnet200(**kwargs):
+def preresnet200(**kwargs):
     """
-    ResNet-200 model from 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
-    It's an experimental model.
+    PreResNet-200 model from 'Identity Mappings in Deep Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -703,13 +722,13 @@ def resnet200(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, model_name="resnet200", **kwargs)
+    return get_preresnet(blocks=200, model_name="preresnet200", **kwargs)
 
 
-def resnet200b(**kwargs):
+def preresnet200b(**kwargs):
     """
-    ResNet-200 model with stride at the second convolution in bottleneck block from 'Deep Residual Learning for Image
-    Recognition,' https://arxiv.org/abs/1512.03385. It's an experimental model.
+    PreResNet-200 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
 
     Parameters:
     ----------
@@ -718,7 +737,22 @@ def resnet200b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnet(blocks=200, conv1_stride=False, model_name="resnet200b", **kwargs)
+    return get_preresnet(blocks=200, conv1_stride=False, model_name="preresnet200b", **kwargs)
+
+
+def preresnet269b(**kwargs):
+    """
+    PreResNet-269 model with stride at the second convolution in bottleneck block from 'Identity Mappings in Deep
+    Residual Networks,' https://arxiv.org/abs/1603.05027.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_preresnet(blocks=269, conv1_stride=False, model_name="preresnet269b", **kwargs)
 
 
 def _test():
@@ -728,27 +762,28 @@ def _test():
     pretrained = False
 
     models = [
-        resnet10,
-        resnet12,
-        resnet14,
-        resnetbc14b,
-        resnet16,
-        resnet18_wd4,
-        resnet18_wd2,
-        resnet18_w3d4,
-        resnet18,
-        resnet26,
-        resnetbc26b,
-        resnet34,
-        resnetbc38b,
-        resnet50,
-        resnet50b,
-        resnet101,
-        resnet101b,
-        resnet152,
-        resnet152b,
-        resnet200,
-        resnet200b,
+        preresnet10,
+        preresnet12,
+        preresnet14,
+        preresnetbc14b,
+        preresnet16,
+        preresnet18_wd4,
+        preresnet18_wd2,
+        preresnet18_w3d4,
+        preresnet18,
+        preresnet26,
+        preresnetbc26b,
+        preresnet34,
+        preresnetbc38b,
+        preresnet50,
+        preresnet50b,
+        preresnet101,
+        preresnet101b,
+        preresnet152,
+        preresnet152b,
+        preresnet200,
+        preresnet200b,
+        preresnet269b,
     ]
 
     for model in models:
@@ -762,27 +797,28 @@ def _test():
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != resnet10 or weight_count == 5418792)
-        assert (model != resnet12 or weight_count == 5492776)
-        assert (model != resnet14 or weight_count == 5788200)
-        assert (model != resnetbc14b or weight_count == 10064936)
-        assert (model != resnet16 or weight_count == 6968872)
-        assert (model != resnet18_wd4 or weight_count == 3937400)
-        assert (model != resnet18_wd2 or weight_count == 5804296)
-        assert (model != resnet18_w3d4 or weight_count == 8476056)
-        assert (model != resnet18 or weight_count == 11689512)
-        assert (model != resnet26 or weight_count == 17960232)
-        assert (model != resnetbc26b or weight_count == 15995176)
-        assert (model != resnet34 or weight_count == 21797672)
-        assert (model != resnetbc38b or weight_count == 21925416)
-        assert (model != resnet50 or weight_count == 25557032)
-        assert (model != resnet50b or weight_count == 25557032)
-        assert (model != resnet101 or weight_count == 44549160)
-        assert (model != resnet101b or weight_count == 44549160)
-        assert (model != resnet152 or weight_count == 60192808)
-        assert (model != resnet152b or weight_count == 60192808)
-        assert (model != resnet200 or weight_count == 64673832)
-        assert (model != resnet200b or weight_count == 64673832)
+        assert (model != preresnet10 or weight_count == 5417128)
+        assert (model != preresnet12 or weight_count == 5491112)
+        assert (model != preresnet14 or weight_count == 5786536)
+        assert (model != preresnetbc14b or weight_count == 10057384)
+        assert (model != preresnet16 or weight_count == 6967208)
+        assert (model != preresnet18_wd4 or weight_count == 3935960)
+        assert (model != preresnet18_wd2 or weight_count == 5802440)
+        assert (model != preresnet18_w3d4 or weight_count == 8473784)
+        assert (model != preresnet18 or weight_count == 11687848)
+        assert (model != preresnet26 or weight_count == 17958568)
+        assert (model != preresnetbc26b or weight_count == 15987624)
+        assert (model != preresnet34 or weight_count == 21796008)
+        assert (model != preresnetbc38b or weight_count == 21917864)
+        assert (model != preresnet50 or weight_count == 25549480)
+        assert (model != preresnet50b or weight_count == 25549480)
+        assert (model != preresnet101 or weight_count == 44541608)
+        assert (model != preresnet101b or weight_count == 44541608)
+        assert (model != preresnet152 or weight_count == 60185256)
+        assert (model != preresnet152b or weight_count == 60185256)
+        assert (model != preresnet200 or weight_count == 64666280)
+        assert (model != preresnet200b or weight_count == 64666280)
+        assert (model != preresnet269b or weight_count == 102065832)
 
 
 if __name__ == "__main__":

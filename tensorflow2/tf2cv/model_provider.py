@@ -6,6 +6,22 @@ from .models.preresnet import *
 from .models.resnext import *
 from .models.seresnet import *
 from .models.sepreresnet import *
+from .models.seresnext import *
+from .models.senet import *
+from .models.densenet import *
+from .models.darknet import *
+from .models.darknet53 import *
+from .models.squeezenet import *
+from .models.squeezenext import *
+from .models.shufflenet import *
+from .models.shufflenetv2 import *
+from .models.shufflenetv2b import *
+from .models.menet import *
+from .models.mobilenet import *
+from .models.mobilenetv2 import *
+from .models.mobilenetv3 import *
+from .models.igcv3 import *
+from .models.mnasnet import *
 
 __all__ = ['get_model']
 
@@ -121,6 +137,106 @@ _models = {
     'sepreresnet152b': sepreresnet152b,
     'sepreresnet200': sepreresnet200,
     'sepreresnet200b': sepreresnet200b,
+
+    'seresnext50_32x4d': seresnext50_32x4d,
+    'seresnext101_32x4d': seresnext101_32x4d,
+    'seresnext101_64x4d': seresnext101_64x4d,
+
+    'senet16': senet16,
+    'senet28': senet28,
+    'senet40': senet40,
+    'senet52': senet52,
+    'senet103': senet103,
+    'senet154': senet154,
+
+    'densenet121': densenet121,
+    'densenet161': densenet161,
+    'densenet169': densenet169,
+    'densenet201': densenet201,
+
+    'darknet_ref': darknet_ref,
+    'darknet_tiny': darknet_tiny,
+    'darknet19': darknet19,
+    'darknet53': darknet53,
+
+    'squeezenet_v1_0': squeezenet_v1_0,
+    'squeezenet_v1_1': squeezenet_v1_1,
+
+    'squeezeresnet_v1_0': squeezeresnet_v1_0,
+    'squeezeresnet_v1_1': squeezeresnet_v1_1,
+
+    'sqnxt23_w1': sqnxt23_w1,
+    'sqnxt23_w3d2': sqnxt23_w3d2,
+    'sqnxt23_w2': sqnxt23_w2,
+    'sqnxt23v5_w1': sqnxt23v5_w1,
+    'sqnxt23v5_w3d2': sqnxt23v5_w3d2,
+    'sqnxt23v5_w2': sqnxt23v5_w2,
+
+    'shufflenet_g1_w1': shufflenet_g1_w1,
+    'shufflenet_g2_w1': shufflenet_g2_w1,
+    'shufflenet_g3_w1': shufflenet_g3_w1,
+    'shufflenet_g4_w1': shufflenet_g4_w1,
+    'shufflenet_g8_w1': shufflenet_g8_w1,
+    'shufflenet_g1_w3d4': shufflenet_g1_w3d4,
+    'shufflenet_g3_w3d4': shufflenet_g3_w3d4,
+    'shufflenet_g1_wd2': shufflenet_g1_wd2,
+    'shufflenet_g3_wd2': shufflenet_g3_wd2,
+    'shufflenet_g1_wd4': shufflenet_g1_wd4,
+    'shufflenet_g3_wd4': shufflenet_g3_wd4,
+
+    'shufflenetv2_wd2': shufflenetv2_wd2,
+    'shufflenetv2_w1': shufflenetv2_w1,
+    'shufflenetv2_w3d2': shufflenetv2_w3d2,
+    'shufflenetv2_w2': shufflenetv2_w2,
+
+    'shufflenetv2b_wd2': shufflenetv2b_wd2,
+    'shufflenetv2b_w1': shufflenetv2b_w1,
+    'shufflenetv2b_w3d2': shufflenetv2b_w3d2,
+    'shufflenetv2b_w2': shufflenetv2b_w2,
+
+    'menet108_8x1_g3': menet108_8x1_g3,
+    'menet128_8x1_g4': menet128_8x1_g4,
+    'menet160_8x1_g8': menet160_8x1_g8,
+    'menet228_12x1_g3': menet228_12x1_g3,
+    'menet256_12x1_g4': menet256_12x1_g4,
+    'menet348_12x1_g3': menet348_12x1_g3,
+    'menet352_12x1_g8': menet352_12x1_g8,
+    'menet456_24x1_g3': menet456_24x1_g3,
+
+    'mobilenet_w1': mobilenet_w1,
+    'mobilenet_w3d4': mobilenet_w3d4,
+    'mobilenet_wd2': mobilenet_wd2,
+    'mobilenet_wd4': mobilenet_wd4,
+
+    'fdmobilenet_w1': fdmobilenet_w1,
+    'fdmobilenet_w3d4': fdmobilenet_w3d4,
+    'fdmobilenet_wd2': fdmobilenet_wd2,
+    'fdmobilenet_wd4': fdmobilenet_wd4,
+
+    'mobilenetv2_w1': mobilenetv2_w1,
+    'mobilenetv2_w3d4': mobilenetv2_w3d4,
+    'mobilenetv2_wd2': mobilenetv2_wd2,
+    'mobilenetv2_wd4': mobilenetv2_wd4,
+
+    'mobilenetv3_small_w7d20': mobilenetv3_small_w7d20,
+    'mobilenetv3_small_wd2': mobilenetv3_small_wd2,
+    'mobilenetv3_small_w3d4': mobilenetv3_small_w3d4,
+    'mobilenetv3_small_w1': mobilenetv3_small_w1,
+    'mobilenetv3_small_w5d4': mobilenetv3_small_w5d4,
+    'mobilenetv3_large_w7d20': mobilenetv3_large_w7d20,
+    'mobilenetv3_large_wd2': mobilenetv3_large_wd2,
+    'mobilenetv3_large_w3d4': mobilenetv3_large_w3d4,
+    'mobilenetv3_large_w1': mobilenetv3_large_w1,
+    'mobilenetv3_large_w5d4': mobilenetv3_large_w5d4,
+
+    'igcv3_w1': igcv3_w1,
+    'igcv3_w3d4': igcv3_w3d4,
+    'igcv3_wd2': igcv3_wd2,
+    'igcv3_wd4': igcv3_wd4,
+
+    'mnasnet_b1': mnasnet_b1,
+    'mnasnet_a1': mnasnet_a1,
+    'mnasnet_small': mnasnet_small,
 }
 
 

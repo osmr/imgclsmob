@@ -126,6 +126,8 @@ def get_activation_layer(activation):
     elif isinstance(activation, str):
         if activation == "relu":
             return nn.ReLU()
+        elif activation == "relu6":
+            return ReLU6()
         elif activation == "swish":
             return nn.Swish()
         elif activation == "hswish":
@@ -432,14 +434,14 @@ class Conv2d(nn.Layer):
                 use_bias=use_bias,
                 name="dw_conv")
         else:
+            assert (groups > 1)
             assert (in_channels % groups == 0)
             assert (out_channels % groups == 0)
-            self.in_group_channels = in_channels // groups
-            self.out_group_channels = out_channels // groups
-            self.convs = tf.keras.Sequential(name="convs")
+            self.groups = groups
+            self.convs = []
             for i in range(groups):
-                self.convs.add(nn.Conv2D(
-                    filters=self.out_group_channels,
+                self.convs.append(nn.Conv2D(
+                    filters=(out_channels // groups),
                     kernel_size=kernel_size,
                     strides=strides,
                     padding="valid",
@@ -456,15 +458,11 @@ class Conv2d(nn.Layer):
         elif self.use_dw_conv:
             x = self.dw_conv(x)
         else:
-            group_list = []
-            for i, convi in enumerate(self.convs.layers):
-                if is_channels_first(self.data_format):
-                    xi = x[:, i * self.in_group_channels:(i + 1) * self.in_group_channels, :, :]
-                else:
-                    xi = x[:, :, :, i * self.in_group_channels:(i + 1) * self.in_group_channels]
-                xi = convi(xi)
-                group_list.append(xi)
-            x = tf.concat(group_list, axis=get_channel_axis(self.data_format))
+            yy = []
+            xx = tf.split(x, num_or_size_splits=self.groups, axis=get_channel_axis(self.data_format))
+            for xi, convi in zip(xx, self.convs):
+                yy.append(convi(xi))
+            x = tf.concat(yy, axis=get_channel_axis(self.data_format))
         return x
 
 
@@ -570,6 +568,7 @@ def depthwise_conv3x3(channels,
         kernel_size=3,
         strides=strides,
         padding=1,
+        groups=channels,
         use_bias=False,
         data_format=data_format,
         **kwargs)
@@ -1187,7 +1186,7 @@ class ChannelShuffle(nn.Layer):
         self.groups = groups
         self.data_format = data_format
 
-    def call(self, x, training=None):
+    def call(self, x):
         return channel_shuffle(x, groups=self.groups, data_format=self.data_format)
 
 
@@ -1261,7 +1260,7 @@ class ChannelShuffle2(nn.Layer):
         self.channels_per_group = channels // groups
         self.data_format = data_format
 
-    def call(self, x, training=None):
+    def call(self, x):
         return channel_shuffle2(x, channels_per_group=self.channels_per_group, data_format=self.data_format)
 
 

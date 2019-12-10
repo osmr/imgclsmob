@@ -206,7 +206,6 @@ def prepare_dst_model(dst_fwk,
                       use_cuda,
                       num_classes=None,
                       in_channels=None):
-
     if dst_fwk == "gluon":
         from gluon.utils import prepare_model as prepare_model_gl
         dst_net = prepare_model_gl(
@@ -269,6 +268,10 @@ def prepare_dst_model(dst_fwk,
     elif dst_fwk == "tf2":
         import tensorflow as tf
         from tensorflow2.utils import prepare_model as prepare_model_tf2
+        gpus = tf.config.experimental.list_physical_devices("GPU")
+        if gpus:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
         dst_net = prepare_model_tf2(
             model_name=dst_model,
             use_pretrained=False,
@@ -1048,8 +1051,46 @@ def convert_tf2gl(dst_net,
     dst_net.save_parameters(dst_params_file_path)
 
 
+def _init_ctx(args):
+    ctx = None
+    if args.src_fwk in ("gluon", "mxnet", "keras") or args.dst_fwk in ("gluon", "mxnet", "keras"):
+        import mxnet as mx
+        ctx = mx.cpu()
+    return ctx
+
+
+def _prepare_src_model(args, ctx, use_cuda):
+    return prepare_src_model(
+        src_fwk=args.src_fwk,
+        src_model=args.src_model,
+        src_params_file_path=args.src_params,
+        dst_fwk=args.dst_fwk,
+        ctx=ctx,
+        use_cuda=use_cuda,
+        remove_module=args.remove_module,
+        num_classes=args.src_num_classes,
+        in_channels=args.src_in_channels)
+
+
+def _prepare_dst_model(args, ctx, use_cuda):
+    return prepare_dst_model(
+        dst_fwk=args.dst_fwk,
+        dst_model=args.dst_model,
+        src_fwk=args.src_fwk,
+        ctx=ctx,
+        use_cuda=use_cuda,
+        num_classes=args.dst_num_classes,
+        in_channels=args.dst_in_channels)
+
+
 def main():
     args = parse_args()
+
+    ctx = None
+    use_cuda = False
+
+    if args.dst_fwk == "tf2":
+        dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
 
     packages = []
     pip_packages = []
@@ -1078,32 +1119,10 @@ def main():
         log_packages=packages,
         log_pip_packages=pip_packages)
 
-    use_cuda = False
-    if args.src_fwk in ("gluon", "mxnet", "keras") or args.dst_fwk in ("gluon", "mxnet", "keras"):
-        import mxnet as mx
-        ctx = mx.cpu()
-    else:
-        ctx = None
-
-    src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2 = prepare_src_model(
-        src_fwk=args.src_fwk,
-        src_model=args.src_model,
-        src_params_file_path=args.src_params,
-        dst_fwk=args.dst_fwk,
-        ctx=ctx,
-        use_cuda=use_cuda,
-        remove_module=args.remove_module,
-        num_classes=args.src_num_classes,
-        in_channels=args.src_in_channels)
-
-    dst_params, dst_param_keys, dst_net = prepare_dst_model(
-        dst_fwk=args.dst_fwk,
-        dst_model=args.dst_model,
-        src_fwk=args.src_fwk,
-        ctx=ctx,
-        use_cuda=use_cuda,
-        num_classes=args.dst_num_classes,
-        in_channels=args.dst_in_channels)
+    ctx = _init_ctx(args)
+    src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2 = _prepare_src_model(args, ctx, use_cuda)
+    if args.dst_fwk != "tf2":
+        dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
 
     if ((args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys])) or\
             ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):

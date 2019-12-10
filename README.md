@@ -34,7 +34,7 @@ the documentation dedicated to a particular package:
 - [Chainer models](chainer_/README.md),
 - [Keras models](keras_/README.md),
 - [TensorFlow 1.x models](tensorflow_/README.md),
-- [TensorFlow 2.x models](tensorflow_/README.md).
+- [TensorFlow 2.x models](tensorflow2/README.md).
 
 ## Installation
 

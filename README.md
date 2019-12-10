@@ -19,7 +19,8 @@ For each supported framework, there is a PIP-package containing pure models with
 - [pytorchcv](https://pypi.org/project/pytorchcv) for PyTorch,
 - [chainercv2](https://pypi.org/project/chainercv2) for Chainer,
 - [kerascv](https://pypi.org/project/kerascv) for Keras,
-- [tensorflowcv](https://pypi.org/project/tensorflowcv) for TensorFlow.
+- [tensorflowcv](https://pypi.org/project/tensorflowcv) for TensorFlow 1.x,
+- [tf2cv](https://pypi.org/project/tf2cv) for TensorFlow 2.x.
 
 Currently, models are mostly implemented on Gluon and then ported to other frameworks. Some models are pretrained on
 [ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
@@ -32,7 +33,8 @@ the documentation dedicated to a particular package:
 - [PyTorch models](pytorch/README.md),
 - [Chainer models](chainer_/README.md),
 - [Keras models](keras_/README.md),
-- [TensorFlow models](tensorflow_/README.md).
+- [TensorFlow 1.x models](tensorflow_/README.md),
+- [TensorFlow 2.x models](tensorflow_/README.md).
 
 ## Installation
 

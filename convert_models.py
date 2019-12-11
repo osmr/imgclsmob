@@ -807,24 +807,39 @@ def convert_gl2tf2(dst_net,
                    dst_param_keys,
                    src_params,
                    src_param_keys):
-    # import mxnet as mx
-    assert (len(src_param_keys) == len(dst_param_keys))
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
     dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/depthwise_kernel:', '/weight_depthwise:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
 
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
     dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/weight_depthwise:', '/depthwise_kernel:') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+
+    dst_param_keys_orig = dst_param_keys.copy()
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+                      for s in dst_param_keys]
+    dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
+    dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
+
+    assert (len(src_param_keys) == len(dst_param_keys))
 
     def process_width(src_key, dst_key, src_weight):
         if len(src_weight.shape) == 4:
-            src_weight = np.transpose(src_weight, axes=(2, 3, 1, 0))
+            if dst_key.split("/")[-1][:-2] == "depthwise_kernel":
+                src_weight = np.transpose(src_weight, axes=(2, 3, 0, 1))
+            else:
+                src_weight = np.transpose(src_weight, axes=(2, 3, 1, 0))
         elif len(src_weight.shape) == 2:
             src_weight = np.transpose(src_weight, axes=(1, 0))
         dst_weight = dst_params[dst_key]
@@ -834,8 +849,24 @@ def convert_gl2tf2(dst_net,
         dst_weight.assign(src_weight)
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
-        src_weight = src_params[src_key]._data[0].asnumpy()
-        process_width(src_key, dst_key, src_weight)
+        if dst_key.find("convgroup") >= 0:
+            import mxnet as mx
+            dst_key_stem = dst_key[:(dst_key.find("convgroup") + 9)]
+            dst_keys = [s for s in dst_param_keys_orig if s.startswith(dst_key_stem)]
+            if src_key.endswith("weight"):
+                dst_keys = [s for s in dst_keys if s.endswith("kernel:0")]
+            elif src_key.endswith("bias"):
+                dst_keys = [s for s in dst_keys if s.endswith("bias:0")]
+            groups = len(dst_keys)
+            src_weight0 = src_params[src_key]._data[0]
+            src_weight0_list = mx.nd.split(src_weight0, axis=0, num_outputs=groups)
+            for gi in range(groups):
+                src_weight_gi = src_weight0_list[gi].asnumpy()
+                dst_key_gi = dst_keys[gi]
+                process_width(src_key, dst_key_gi, src_weight_gi)
+        else:
+            src_weight = src_params[src_key]._data[0].asnumpy()
+            process_width(src_key, dst_key, src_weight)
 
     dst_net.save_weights(dst_params_file_path)
 
@@ -1124,8 +1155,8 @@ def main():
     if args.dst_fwk != "tf2":
         dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
 
-    if ((args.dst_fwk in ["keras", "tensorflow"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys])) or\
-            ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
+    if ((args.dst_fwk in ["keras", "tensorflow", "tf2"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]))\
+            or ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
     elif (args.dst_fwk == "chainer") and (args.src_model.startswith("diaresnet") or
                                           args.src_model.startswith("diapreresnet")):

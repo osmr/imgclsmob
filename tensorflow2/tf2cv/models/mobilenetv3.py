@@ -11,7 +11,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
-    HSwish, flatten
+    HSwish, flatten, is_channels_first
 
 
 class MobileNetV3Unit(nn.Layer):
@@ -97,7 +97,7 @@ class MobileNetV3Unit(nn.Layer):
             identity = x
         if self.use_exp_conv:
             x = self.exp_conv(x, training=training)
-        x = self.conv1(x)
+        x = self.conv1(x, training=training)
         if self.use_se:
             x = self.se(x)
         x = self.conv2(x, training=training)
@@ -200,7 +200,7 @@ class MobileNetV3Classifier(nn.Layer):
         x = self.conv1(x)
         x = self.activ(x)
         if self.use_dropout:
-            x = self.dropout(x)
+            x = self.dropout(x, training=training)
         x = self.conv2(x)
         return x
 
@@ -313,7 +313,7 @@ class MobileNetV3(tf.keras.Model):
 
     def call(self, x, training=None):
         x = self.features(x, training=training)
-        x = self.output1(x)
+        x = self.output1(x, training=training)
         x = flatten(x, self.data_format)
         return x
 
@@ -545,6 +545,7 @@ def _test():
     import numpy as np
     import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -562,10 +563,10 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
 
         batch_saze = 14
-        x = tf.random.normal((batch_saze, 224, 224, 3))
+        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
         y = net(x)
         assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
 

@@ -100,7 +100,7 @@ class DarkNet(tf.keras.Model):
                     alpha=alpha,
                     pointwise=(len(channels_per_stage) > 1) and not (((j + 1) % 2 == 1) ^ odd_pointwise),
                     data_format=data_format,
-                    name="pool{}".format(i + 1)))
+                    name="unit{}".format(j + 1)))
                 in_channels = out_channels
             if i != len(channels) - 1:
                 stage.add(MaxPool2d(

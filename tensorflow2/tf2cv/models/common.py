@@ -102,7 +102,7 @@ class HSwish(nn.Layer):
     def __init__(self, **kwargs):
         super(HSwish, self).__init__(**kwargs)
 
-    def hybrid_forward(self, F, x):
+    def call(self, x):
         return x * tf.nn.relu6(x + 3.0) / 6.0
 
 

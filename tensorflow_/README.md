@@ -11,6 +11,7 @@ same ordinary normalization. Scripts for training/evaluating/converting models a
 ## List of implemented models
 
 - AlexNet (['One weird trick for parallelizing convolutional neural networks'](https://arxiv.org/abs/1404.5997))
+- ZFNet (['Visualizing and Understanding Convolutional Networks'](https://arxiv.org/abs/1311.2901))
 - VGG/BN-VGG (['Very Deep Convolutional Networks for Large-Scale Image Recognition'](https://arxiv.org/abs/1409.1556))
 - ResNet (['Deep Residual Learning for Image Recognition'](https://arxiv.org/abs/1512.03385))
 - PreResNet (['Identity Mappings in Deep Residual Networks'](https://arxiv.org/abs/1603.05027))

@@ -204,9 +204,9 @@ class AlexNet(tf.keras.Model):
             name="output1")
 
     def call(self, x, training=None):
-        x = self.features(x)
+        x = self.features(x, training=training)
         x = flatten(x, self.data_format)
-        x = self.output1(x)
+        x = self.output1(x, training=training)
         return x
 
 

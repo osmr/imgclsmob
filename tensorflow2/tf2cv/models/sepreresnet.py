@@ -77,12 +77,12 @@ class SEPreResUnit(nn.Layer):
         x, x_pre_activ = self.body(x, training=training)
         x = self.se(x)
         if self.resize_identity:
-            identity = self.identity_conv(x_pre_activ, training=training)
+            identity = self.identity_conv(x_pre_activ)
         x = x + identity
         return x
 
 
-class SEPreResNet(nn.Layer):
+class SEPreResNet(tf.keras.Model):
     """
     SE-PreResNet model from 'Squeeze-and-Excitation Networks,' https://arxiv.org/abs/1709.01507.
 

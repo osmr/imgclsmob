@@ -1,4 +1,4 @@
-# Large-scale image classification models on TensorFlow
+# Large-scale image classification models on TensorFlow 1.x
 
 [![PyPI](https://img.shields.io/pypi/v/tensorflowcv.svg)](https://pypi.python.org/pypi/tensorflowcv)
 [![Downloads](https://pepy.tech/badge/tensorflowcv)](https://pepy.tech/project/tensorflowcv)

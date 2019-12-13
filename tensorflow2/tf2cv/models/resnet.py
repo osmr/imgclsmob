@@ -11,7 +11,7 @@ __all__ = ['ResNet', 'resnet10', 'resnet12', 'resnet14', 'resnetbc14b', 'resnet1
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, flatten
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, flatten, is_channels_first
 
 
 class ResBlock(nn.Layer):
@@ -222,6 +222,7 @@ class ResInitBlock(nn.Layer):
             pool_size=3,
             strides=2,
             padding=1,
+            data_format=data_format,
             name="pool")
 
     def call(self, x, training=None):
@@ -725,6 +726,8 @@ def _test():
     import numpy as np
     import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
+    # data_format = "channels_first"
     pretrained = False
 
     models = [
@@ -753,10 +756,10 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
 
         batch_saze = 14
-        x = tf.random.normal((batch_saze, 224, 224, 3))
+        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
         y = net(x)
         assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
 

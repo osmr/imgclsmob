@@ -28,8 +28,29 @@ same ordinary normalization. Scripts for training/evaluating/converting models a
 - MobileNet (['MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications'](https://arxiv.org/abs/1704.04861))
 - FD-MobileNet (['FD-MobileNet: Improved MobileNet with A Fast Downsampling Strategy'](https://arxiv.org/abs/1802.03750))
 - MobileNetV2 (['MobileNetV2: Inverted Residuals and Linear Bottlenecks'](https://arxiv.org/abs/1801.04381))
+- MobileNetV3 (['Searching for MobileNetV3'](https://arxiv.org/abs/1905.02244))
 - IGCV3 (['IGCV3: Interleaved Low-Rank Group Convolutions for Efficient Deep Neural Networks'](https://arxiv.org/abs/1806.00178))
 - MnasNet (['MnasNet: Platform-Aware Neural Architecture Search for Mobile'](https://arxiv.org/abs/1807.11626))
+
+## Installation
+
+To use the models in your project, simply install the `tf2cv` package with `tensorflow`:
+```
+pip install tf2cv tensorflow>=2.0.0
+```
+To enable/disable different hardware supports, check out TensorFlow installation [instructions](https://www.tensorflow.org).
+
+## Usage
+
+Example of using a pretrained ResNet-18 model (with `channels_first` data format):
+```
+from tf2cv.model_provider import get_model as tf2cv_get_model
+import tensorflow as tf
+
+net = tf2cv_get_model("resnet18", pretrained=True, data_format="channels_last")
+x = tf.random.normal((1, 224, 224, 3))
+y_net = net(x)
+```
 
 ## Pretrained models (ImageNet-1K)
 
@@ -179,6 +200,7 @@ Some remarks:
 | MobileNetV2 x0.5 | 35.62 | 14.46 | 1,964,736 | 100.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_wd2-1446-b0c9a98b.tf2.h5.log)) |
 | MobileNetV2 x0.75 | 29.75 | 10.44 | 2,627,592 | 198.50M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w3d4-1044-e122c73e.tf2.h5.log)) |
 | MobileNetV2 x1.0 | 26.80 | 8.63 | 3,504,960 | 329.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w1-0863-b32cede3.tf2.h5.log)) |
+| MobileNetV3 L/224/1.0 | 24.65 | 7.69 | 5,481,752 | 226.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0769-f66596ae.tf2.h5.log)) |
 | IGCV3 x0.25 | 53.38 | 28.28 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd4-2828-309359dc.tf2.h5.log)) |
 | IGCV3 x0.5 | 39.36 | 17.01 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd2-1701-b952333a.tf2.h5.log)) |
 | IGCV3 x0.75 | 30.74 | 11.00 | 2,638,084 | 210.95M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_w3d4-1100-00294c7b.tf2.h5.log)) |

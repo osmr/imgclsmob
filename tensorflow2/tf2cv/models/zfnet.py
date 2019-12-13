@@ -13,7 +13,7 @@ from .alexnet import AlexNet
 def get_zfnet(version="a",
               model_name=None,
               pretrained=False,
-              root=os.path.join("~", ".alexnet", "models"),
+              root=os.path.join("~", ".tensorflow", "models"),
               **kwargs):
     """
     Create ZFNet model with specific parameters.
@@ -26,7 +26,7 @@ def get_zfnet(version="a",
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.alexnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     if version == "a":
@@ -76,7 +76,7 @@ def zfnet(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.alexnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_zfnet(model_name="zfnet", **kwargs)
@@ -90,7 +90,7 @@ def zfnetb(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.alexnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_zfnet(version="b", model_name="zfnetb", **kwargs)

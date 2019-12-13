@@ -412,6 +412,10 @@ class Conv2d(nn.Layer):
             self.pad = nn.ZeroPadding2D(
                 padding=padding,
                 data_format=data_format)
+            # if is_channels_first(data_format):
+            #     self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+            # else:
+            #     self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
 
         if self.use_conv:
             self.conv = nn.Conv2D(
@@ -453,6 +457,7 @@ class Conv2d(nn.Layer):
     def call(self, x):
         if self.use_pad:
             x = self.pad(x)
+            # x = tf.pad(x, paddings=self.paddings_tf)
         if self.use_conv:
             x = self.conv(x)
         elif self.use_dw_conv:

@@ -1,5 +1,8 @@
 # Large-scale image classification models on TensorFlow 2.x
 
+[![PyPI](https://img.shields.io/pypi/v/tf2cv.svg)](https://pypi.python.org/pypi/tf2cv)
+[![Downloads](https://pepy.tech/badge/tf2cv)](https://pepy.tech/project/tf2cv)
+
 This is a collection of large-scale image classification models. Many of them are pretrained on
 [ImageNet-1K](http://www.image-net.org) dataset and loaded automatically during use. All pretrained models require the
 same ordinary normalization. Scripts for training/evaluating/converting models are in the

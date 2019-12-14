@@ -221,3 +221,4 @@ Some remarks:
 [clavichord93/MENet]: https://github.com/clavichord93/MENet
 [zeusees/Mnasnet...Model]: https://github.com/zeusees/Mnasnet-Pretrained-Model
 [soeaver/mxnet-model]: https://github.com/soeaver/mxnet-model
+[rwightman/pyt...models]: https://github.com/rwightman/pytorch-image-models

@@ -277,9 +277,9 @@ class MixUnit(nn.Module):
             self.se = SEBlock(
                 channels=mid_channels,
                 reduction=(exp_factor * se_factor),
-                approx_sigmoid=False,
+                # approx_sigmoid=False,
                 round_mid=False,
-                activation=activation)
+                mid_activation=activation)
         if conv2_kernel_count == 1:
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,

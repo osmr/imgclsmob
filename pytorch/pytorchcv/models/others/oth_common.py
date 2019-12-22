@@ -99,10 +99,6 @@ def get_activation_layer(activation):
             return Swish()
         elif activation == "hswish":
             return HSwish(inplace=True)
-        elif activation == "sigmoid":
-            return nn.Sigmoid()
-        elif activation == "hsigmoid":
-            return HSigmoid()
         else:
             raise NotImplementedError()
     else:

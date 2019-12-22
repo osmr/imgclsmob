@@ -88,7 +88,7 @@ class EffiDwsConvUnit(nn.Module):
         self.se = SEBlock(
             channels=in_channels,
             reduction=4,
-            activation=activation)
+            mid_activation=activation)
         self.pw_conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -163,7 +163,7 @@ class EffiInvResUnit(nn.Module):
         self.se = SEBlock(
             channels=mid_channels,
             reduction=24,
-            activation=activation)
+            mid_activation=activation)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,

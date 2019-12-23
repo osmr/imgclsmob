@@ -40,7 +40,7 @@ class ShaConvBlock(Chain):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
@@ -129,7 +129,7 @@ def sha_conv3x3_block(in_channels,
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.

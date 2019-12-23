@@ -73,9 +73,8 @@ class DwsExpSEResUnit(nn.Layer):
             self.se = SEBlock(
                 channels=mid_channels,
                 reduction=(exp_factor * se_factor),
-                approx_sigmoid=False,
                 round_mid=False,
-                activation=activation,
+                mid_activation=activation,
                 data_format=data_format,
                 name="se")
         self.pw_conv = conv1x1_block(

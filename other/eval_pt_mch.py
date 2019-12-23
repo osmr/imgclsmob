@@ -238,12 +238,12 @@ class SuperPointFrontend(object):
         # assert img.ndim == 2, 'Image must be grayscale.'
         # assert img.dtype == np.float32, 'Image must be float32.'
         # H, W = img.shape[0], img.shape[1]
-        # inp = img.copy()
-        # inp = (inp.reshape(1, H, W))
-        # inp = torch.from_numpy(inp)
-        # inp = torch.autograd.Variable(inp).view(1, 1, H, W)
+        # in_channels = img.copy()
+        # in_channels = (in_channels.reshape(1, H, W))
+        # in_channels = torch.from_numpy(in_channels)
+        # in_channels = torch.autograd.Variable(in_channels).view(1, 1, H, W)
         # if self.cuda:
-        #     inp = inp.cuda()
+        #     in_channels = in_channels.cuda()
         inp = img
         H, W = img.shape[2], img.shape[3]
         # Forward pass of network.

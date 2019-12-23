@@ -97,7 +97,7 @@ def sqnxt_unit(x,
         name=name + "/conv5")
 
     x = nn.add([x, identity], name=name + "/add")
-    x = nn.Activation('relu', name=name + "/final_activ")(x)
+    x = nn.Activation("relu", name=name + "/final_activ")(x)
     return x
 
 

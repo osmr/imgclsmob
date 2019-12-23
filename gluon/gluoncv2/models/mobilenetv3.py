@@ -80,8 +80,8 @@ class MobileNetV3Unit(HybridBlock):
                 self.se = SEBlock(
                     channels=mid_channels,
                     reduction=4,
-                    approx_sigmoid=True,
-                    round_mid=True)
+                    round_mid=True,
+                    out_activation="hsigmoid")
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -137,8 +137,8 @@ class MobileNetV3FinalBlock(HybridBlock):
                 self.se = SEBlock(
                     channels=out_channels,
                     reduction=4,
-                    approx_sigmoid=True,
-                    round_mid=True)
+                    round_mid=True,
+                    out_activation="hsigmoid")
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)

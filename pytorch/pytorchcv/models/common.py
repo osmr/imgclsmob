@@ -606,10 +606,10 @@ class DwsConvBlock(nn.Module):
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    activate : bool, default True
-        Whether activate the convolution block.
+    dw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the depthwise convolution block.
+    pw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the pointwise convolution block.
     """
     def __init__(self,
                  in_channels,
@@ -621,7 +621,8 @@ class DwsConvBlock(nn.Module):
                  bias=False,
                  use_bn=True,
                  bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
+                 dw_activation=(lambda: nn.ReLU(inplace=True)),
+                 pw_activation=(lambda: nn.ReLU(inplace=True))):
         super(DwsConvBlock, self).__init__()
         self.dw_conv = dwconv_block(
             in_channels=in_channels,
@@ -633,14 +634,14 @@ class DwsConvBlock(nn.Module):
             bias=bias,
             use_bn=use_bn,
             bn_eps=bn_eps,
-            activation=activation)
+            activation=dw_activation)
         self.pw_conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
             bias=bias,
             use_bn=use_bn,
             bn_eps=bn_eps,
-            activation=activation)
+            activation=pw_activation)
 
     def forward(self, x):
         x = self.dw_conv(x)
@@ -655,7 +656,8 @@ def dwsconv3x3_block(in_channels,
                      dilation=1,
                      bias=False,
                      bn_eps=1e-5,
-                     activation=(lambda: nn.ReLU(inplace=True))):
+                     dw_activation=(lambda: nn.ReLU(inplace=True)),
+                     pw_activation=(lambda: nn.ReLU(inplace=True))):
     """
     3x3 depthwise separable version of the standard convolution block.
 
@@ -675,8 +677,10 @@ def dwsconv3x3_block(in_channels,
         Whether the layer uses a bias vector.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
+    dw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the depthwise convolution block.
+    pw_activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the pointwise convolution block.
     """
     return DwsConvBlock(
         in_channels=in_channels,
@@ -687,7 +691,8 @@ def dwsconv3x3_block(in_channels,
         dilation=dilation,
         bias=bias,
         bn_eps=bn_eps,
-        activation=activation)
+        dw_activation=dw_activation,
+        pw_activation=pw_activation)
 
 
 class PreConvBlock(nn.Module):
@@ -942,7 +947,7 @@ class SEBlock(nn.Module):
         Squeeze reduction value.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
-    mid_activation : function, or str, or nn.Module, default 'relu'
+    activation : function, or str, or nn.Module, default 'relu'
         Activation function after the first convolution.
     out_activation : function, or str, or nn.Module, default 'sigmoid'
         Activation function after the last convolution.
@@ -950,7 +955,6 @@ class SEBlock(nn.Module):
     def __init__(self,
                  channels,
                  reduction=16,
-                 # approx_sigmoid=False,
                  round_mid=False,
                  mid_activation=(lambda: nn.ReLU(inplace=True)),
                  out_activation=(lambda: nn.Sigmoid())):
@@ -967,7 +971,6 @@ class SEBlock(nn.Module):
             in_channels=mid_channels,
             out_channels=channels,
             bias=True)
-        # self.sigmoid = HSigmoid() if approx_sigmoid else nn.Sigmoid()
         self.sigmoid = get_activation_layer(out_activation)
 
     def forward(self, x):

@@ -130,7 +130,7 @@ def resnext_unit(x,
 
     x = nn.add([x, identity], name=name + "/add")
 
-    activ = nn.Activation('relu', name=name + "/activ")
+    activ = nn.Activation("relu", name=name + "/activ")
     x = activ(x)
     return x
 

@@ -130,7 +130,7 @@ class MixConvBlock(Chain):
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     """
     def __init__(self,
@@ -205,7 +205,7 @@ def mixconv1x1_block(in_channels,
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str, or None, default F.relu
+    activation : function or str, or None, default F.activate
         Activation function or name of activation function.
     """
     return MixConvBlock(
@@ -298,9 +298,8 @@ class MixUnit(Chain):
                 self.se = SEBlock(
                     channels=mid_channels,
                     reduction=(exp_factor * se_factor),
-                    approx_sigmoid=False,
                     round_mid=False,
-                    activation=activation)
+                    mid_activation=activation)
             if conv2_kernel_count == 1:
                 self.conv2 = conv1x1_block(
                     in_channels=mid_channels,

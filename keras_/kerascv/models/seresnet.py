@@ -81,7 +81,7 @@ def seres_unit(x,
 
     x = nn.add([x, identity], name=name + "/add")
 
-    x = nn.Activation('relu', name=name + "/activ")(x)
+    x = nn.Activation("relu", name=name + "/activ")(x)
     return x
 
 

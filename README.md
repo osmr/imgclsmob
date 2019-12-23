@@ -117,6 +117,7 @@ Some remarks:
 | MobileNetV2 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1801.04381) | [link](https://github.com/tensorflow/models) | 2018 |
 | MobileNetV3 | A+ | A+ | A+ | A+ | A | [link](https://arxiv.org/abs/1905.02244) | [link](https://github.com/tensorflow/models) | 2019 |
 | IGCV3 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1806.00178) | [link](https://github.com/homles11/IGCV3) | 2018 |
+| GhostNet | A | A | A | - | A | [link](https://arxiv.org/abs/1911.11907) | [link](https://github.com/iamhankai/ghostnet) | 2019 |
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
 | ProxylessNAS | A+E+ | A+E+ | A+E+ | - | - | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |

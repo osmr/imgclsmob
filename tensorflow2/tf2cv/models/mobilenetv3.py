@@ -81,8 +81,8 @@ class MobileNetV3Unit(nn.Layer):
             self.se = SEBlock(
                 channels=mid_channels,
                 reduction=4,
-                approx_sigmoid=True,
                 round_mid=True,
+                out_activation="hsigmoid",
                 data_format=data_format,
                 name="se")
         self.conv2 = conv1x1_block(
@@ -140,8 +140,8 @@ class MobileNetV3FinalBlock(nn.Layer):
             self.se = SEBlock(
                 channels=out_channels,
                 reduction=4,
-                approx_sigmoid=True,
                 round_mid=True,
+                out_activation="hsigmoid",
                 data_format=data_format,
                 name="se")
 

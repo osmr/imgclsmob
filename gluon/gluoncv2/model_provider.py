@@ -55,6 +55,7 @@ from .models.mobilenet import *
 from .models.mobilenetv2 import *
 from .models.mobilenetv3 import *
 from .models.igcv3 import *
+from .models.ghostnet import *
 from .models.mnasnet import *
 from .models.darts import *
 from .models.proxylessnas import *
@@ -501,6 +502,7 @@ _models = {
     'igcv3_wd2': igcv3_wd2,
     'igcv3_wd4': igcv3_wd4,
 
+    'ghostnet': ghostnet,
 
     'mnasnet_b1': mnasnet_b1,
     'mnasnet_a1': mnasnet_a1,

@@ -112,7 +112,7 @@ class MixConvBlock(HybridBlock):
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default nn.Activation("relu")
         Activation function or name of activation function.
     """
     def __init__(self,
@@ -194,7 +194,7 @@ def mixconv1x1_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activation : function or str, or None, default nn.Activation('relu')
+    activation : function or str, or None, default nn.Activation("relu")
         Activation function or name of activation function.
     """
     return MixConvBlock(
@@ -297,9 +297,8 @@ class MixUnit(HybridBlock):
                 self.se = SEBlock(
                     channels=mid_channels,
                     reduction=(exp_factor * se_factor),
-                    approx_sigmoid=False,
                     round_mid=False,
-                    activation=activation)
+                    mid_activation=activation)
             if conv2_kernel_count == 1:
                 self.conv2 = conv1x1_block(
                     in_channels=mid_channels,

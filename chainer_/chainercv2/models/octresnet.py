@@ -196,7 +196,7 @@ class OctConvBlock(Chain):
         Octave convolution mode. It can be 'first', 'norm', 'last', or 'std'.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
@@ -298,7 +298,7 @@ def oct_conv1x1_block(in_channels,
         Octave convolution mode. It can be 'first', 'norm', 'last', or 'std'.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
@@ -355,7 +355,7 @@ def oct_conv3x3_block(in_channels,
         Octave convolution mode. It can be 'first', 'norm', 'last', or 'std'.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    activation : function or str or None, default F.relu
+    activation : function or str or None, default F.activate
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.

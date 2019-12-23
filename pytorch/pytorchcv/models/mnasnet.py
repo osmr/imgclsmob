@@ -65,7 +65,6 @@ class DwsExpSEResUnit(nn.Module):
             self.se = SEBlock(
                 channels=mid_channels,
                 reduction=(exp_factor * se_factor),
-                # approx_sigmoid=False,
                 round_mid=False,
                 mid_activation=activation)
         self.pw_conv = conv1x1_block(

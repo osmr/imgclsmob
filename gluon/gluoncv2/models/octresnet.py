@@ -217,7 +217,7 @@ class OctConvBlock(HybridBlock):
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default nn.Activation("relu")
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
@@ -325,7 +325,7 @@ def oct_conv1x1_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default nn.Activation("relu")
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.
@@ -388,7 +388,7 @@ def oct_conv3x3_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default nn.Activation("relu")
         Activation function or name of activation function.
     activate : bool, default True
         Whether activate the convolution block.

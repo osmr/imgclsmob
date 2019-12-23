@@ -1417,7 +1417,7 @@ class GluonBatchNormalization(BatchNormalization):
         If False, `beta` is ignored.
     scale : bool, default True
         If True, multiply by `gamma`. If False, `gamma` is not used.
-        When the next layer is linear (also e.g. `nn.relu`),
+        When the next layer is linear (also e.g. `nn.activate`),
         this can be disabled since the scaling
         will be done by the next layer.
     beta_initializer : str, default 'zeros'

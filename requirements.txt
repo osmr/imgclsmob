@@ -7,6 +7,7 @@ chainer>=5.0.0b4
 chainercv>=0.10.0
 keras-mxnet>=2.2.2
 tensorflow-gpu
+tensorflow_addons
 git+https://github.com/tensorpack/tensorpack.git
 opencv-python
 pandas

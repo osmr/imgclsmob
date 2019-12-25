@@ -1,6 +1,7 @@
 from .models.alexnet import *
 from .models.zfnet import *
 from .models.vgg import *
+from .models.bninception import *
 from .models.resnet import *
 from .models.preresnet import *
 from .models.resnext import *
@@ -8,7 +9,11 @@ from .models.seresnet import *
 from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
+from .models.airnet import *
+from .models.airnext import *
+from .models.pyramidnet import *
 from .models.densenet import *
+from .models.wrn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.squeezenet import *
@@ -23,6 +28,7 @@ from .models.mobilenetv3 import *
 from .models.igcv3 import *
 from .models.ghostnet import *
 from .models.mnasnet import *
+from .models.xception import *
 
 __all__ = ['get_model']
 
@@ -46,6 +52,8 @@ _models = {
     'bn_vgg13b': bn_vgg13b,
     'bn_vgg16b': bn_vgg16b,
     'bn_vgg19b': bn_vgg19b,
+
+    'bninception': bninception,
 
     'resnet10': resnet10,
     'resnet12': resnet12,
@@ -150,10 +158,22 @@ _models = {
     'senet103': senet103,
     'senet154': senet154,
 
+    'airnet50_1x64d_r2': airnet50_1x64d_r2,
+    'airnet50_1x64d_r16': airnet50_1x64d_r16,
+    'airnet101_1x64d_r2': airnet101_1x64d_r2,
+
+    'airnext50_32x4d_r2': airnext50_32x4d_r2,
+    'airnext101_32x4d_r2': airnext101_32x4d_r2,
+    'airnext101_32x4d_r16': airnext101_32x4d_r16,
+
+    'pyramidnet101_a360': pyramidnet101_a360,
+
     'densenet121': densenet121,
     'densenet161': densenet161,
     'densenet169': densenet169,
     'densenet201': densenet201,
+
+    'wrn50_2': wrn50_2,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
@@ -240,6 +260,8 @@ _models = {
     'mnasnet_b1': mnasnet_b1,
     'mnasnet_a1': mnasnet_a1,
     'mnasnet_small': mnasnet_small,
+
+    'xception': xception,
 }
 
 

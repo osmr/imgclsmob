@@ -6,7 +6,7 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', '
            'flatten', 'GluonBatchNormalization', 'MaxPool2d', 'AvgPool2d', 'Conv2d', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block',
            'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock']
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'SimpleSequential', 'Concurrent']
 
 import math
 from inspect import isfunction
@@ -234,7 +234,8 @@ class MaxPool2d(nn.Layer):
         if isinstance(padding, int):
             padding = (padding, padding)
 
-        self.ceil_mode = ceil_mode
+        self.use_stride = (strides[0] > 1) or (strides[1] > 1)
+        self.ceil_mode = ceil_mode and self.use_stride
         self.use_pad = (padding[0] > 0) or (padding[1] > 0)
 
         if self.ceil_mode:
@@ -242,7 +243,7 @@ class MaxPool2d(nn.Layer):
             self.pool_size = pool_size
             self.strides = strides
             self.data_format = data_format
-        else:
+        elif self.use_pad:
             if is_channels_first(data_format):
                 self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
             else:
@@ -256,13 +257,18 @@ class MaxPool2d(nn.Layer):
 
     def call(self, x):
         if self.ceil_mode:
+            x_shape = x.get_shape().as_list()
+            if is_channels_first(self.data_format):
+                height = x_shape[2]
+                width = x_shape[3]
+            else:
+                height = x_shape[1]
+                width = x_shape[2]
             padding = self.padding
-            height = int(x.shape[2])
             out_height = float(height + 2 * padding[0] - self.pool_size[0]) / self.strides[0] + 1.0
+            out_width = float(width + 2 * padding[1] - self.pool_size[1]) / self.strides[1] + 1.0
             if math.ceil(out_height) > math.floor(out_height):
                 padding = (padding[0] + 1, padding[1])
-            width = int(x.shape[3])
-            out_width = float(width + 2 * padding[1] - self.pool_size[1]) / self.strides[1] + 1.0
             if math.ceil(out_width) > math.floor(out_width):
                 padding = (padding[0], padding[1] + 1)
             if (padding[0] > 0) or (padding[1] > 0):
@@ -272,8 +278,7 @@ class MaxPool2d(nn.Layer):
                     paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
                 x = tf.pad(x, paddings=paddings_tf)
         elif self.use_pad:
-            if self.use_pad:
-                x = tf.pad(x, paddings=self.paddings_tf)
+            x = tf.pad(x, paddings=self.paddings_tf)
 
         x = self.pool(x)
         return x
@@ -311,7 +316,8 @@ class AvgPool2d(nn.Layer):
         if isinstance(padding, int):
             padding = (padding, padding)
 
-        self.ceil_mode = ceil_mode
+        self.use_stride = (strides[0] > 1) or (strides[1] > 1)
+        self.ceil_mode = ceil_mode and self.use_stride
         self.use_pad = (padding[0] > 0) or (padding[1] > 0)
 
         if self.ceil_mode:
@@ -319,7 +325,7 @@ class AvgPool2d(nn.Layer):
             self.pool_size = pool_size
             self.strides = strides
             self.data_format = data_format
-        else:
+        elif self.use_pad:
             if is_channels_first(data_format):
                 self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
             else:
@@ -331,9 +337,7 @@ class AvgPool2d(nn.Layer):
             padding="valid",
             data_format=data_format,
             name="pool")
-
-        self.use_stride_pool = (strides[0] > 1) or (strides[1] > 1)
-        if self.use_stride_pool:
+        if self.use_stride:
             self.stride_pool = nn.AveragePooling2D(
                 pool_size=1,
                 strides=strides,
@@ -343,13 +347,18 @@ class AvgPool2d(nn.Layer):
 
     def call(self, x):
         if self.ceil_mode:
+            x_shape = x.get_shape().as_list()
+            if is_channels_first(self.data_format):
+                height = x_shape[2]
+                width = x_shape[3]
+            else:
+                height = x_shape[1]
+                width = x_shape[2]
             padding = self.padding
-            height = int(x.shape[2])
             out_height = float(height + 2 * padding[0] - self.pool_size[0]) / self.strides[0] + 1.0
+            out_width = float(width + 2 * padding[1] - self.pool_size[1]) / self.strides[1] + 1.0
             if math.ceil(out_height) > math.floor(out_height):
                 padding = (padding[0] + 1, padding[1])
-            width = int(x.shape[3])
-            out_width = float(width + 2 * padding[1] - self.pool_size[1]) / self.strides[1] + 1.0
             if math.ceil(out_width) > math.floor(out_width):
                 padding = (padding[0], padding[1] + 1)
             if (padding[0] > 0) or (padding[1] > 0):
@@ -359,11 +368,10 @@ class AvgPool2d(nn.Layer):
                     paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
                 x = tf.pad(x, paddings=paddings_tf)
         elif self.use_pad:
-            if self.use_pad:
-                x = tf.pad(x, paddings=self.paddings_tf)
+            x = tf.pad(x, paddings=self.paddings_tf)
 
         x = self.pool(x)
-        if self.use_stride_pool:
+        if self.use_stride:
             x = self.stride_pool(x)
         return x
 
@@ -1523,3 +1531,113 @@ class SEBlock(nn.Layer):
         w = self.sigmoid(w)
         x = x * w
         return x
+
+
+class IBN(nn.Layer):
+    """
+    Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    inst_fraction : float, default 0.5
+        The first fraction of channels for normalization.
+    inst_first : bool, default True
+        Whether instance normalization be on the first part of channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 channels,
+                 first_fraction=0.5,
+                 inst_first=True,
+                 data_format="channels_last",
+                 **kwargs):
+        super(IBN, self).__init__(**kwargs)
+        import tensorflow_addons as tfa
+
+        self.inst_first = inst_first
+        h1_channels = int(math.floor(channels * first_fraction))
+        h2_channels = channels - h1_channels
+        self.split_sections = [h1_channels, h2_channels]
+
+        if self.inst_first:
+            self.inst_norm = tfa.layers.InstanceNormalization(
+                epsilon=1e-5,
+                data_format=data_format,
+                name="inst_norm")
+            self.batch_norm = GluonBatchNormalization(
+                data_format=data_format,
+                name="batch_norm")
+
+        else:
+            self.batch_norm = GluonBatchNormalization(
+                data_format=data_format,
+                name="batch_norm")
+            self.inst_norm = tfa.layers.InstanceNormalization(
+                epsilon=1e-5,
+                data_format=data_format,
+                name="inst_norm")
+
+    def call(self, x, training=None):
+        axis = get_channel_axis(self.data_format)
+        x1, x2 = tf.split(x, num_or_size_splits=self.split_sections, axis=axis)
+        if self.inst_first:
+            x1 = self.inst_norm(x1, training=training)
+            x2 = self.batch_norm(x2, training=training)
+        else:
+            x1 = self.batch_norm(x1, training=training)
+            x2 = self.inst_norm(x2, training=training)
+        x = tf.concat([x1, x2], axis=axis)
+        return x
+
+
+class SimpleSequential(nn.Layer):
+    """
+    A sequential layer that can be used instead of tf.keras.Sequential.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(SimpleSequential, self).__init__(**kwargs)
+        self.children = []
+
+    def __len__(self):
+        return len(self.children)
+
+    def call(self, x, training=None):
+        for block in self.children:
+            x = block(x, training=training)
+        return x
+
+
+class Concurrent(nn.Layer):
+    """
+    A container for concatenation of blocks.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False,
+                 **kwargs):
+        super(Concurrent, self).__init__(**kwargs)
+        self.axis = axis
+        self.stack = stack
+        self.children = []
+
+    def call(self, x, training=None):
+        out = []
+        for block in self.children:
+            out.append(block(x, training=training))
+        if self.stack:
+            out = tf.stack(out, axis=self.axis)
+        else:
+            out = tf.concat(out, axis=self.axis)
+        return out

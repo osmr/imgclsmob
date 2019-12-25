@@ -242,7 +242,7 @@ class GhostClassifier(nn.Layer):
         return x
 
 
-class GhostNet(nn.Layer):
+class GhostNet(tf.keras.Model):
     """
     GhostNet model from 'GhostNet: More Features from Cheap Operations,' https://arxiv.org/abs/1911.11907.
 

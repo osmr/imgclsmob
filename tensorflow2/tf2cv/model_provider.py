@@ -11,11 +11,13 @@ from .models.seresnext import *
 from .models.senet import *
 from .models.airnet import *
 from .models.airnext import *
+from .models.bamresnet import *
 from .models.pyramidnet import *
 from .models.densenet import *
 from .models.wrn import *
 from .models.darknet import *
 from .models.darknet53 import *
+from .models.bagnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -28,6 +30,7 @@ from .models.mobilenetv3 import *
 from .models.igcv3 import *
 from .models.ghostnet import *
 from .models.mnasnet import *
+from .models.proxylessnas import *
 from .models.xception import *
 
 __all__ = ['get_model']
@@ -166,6 +169,12 @@ _models = {
     'airnext101_32x4d_r2': airnext101_32x4d_r2,
     'airnext101_32x4d_r16': airnext101_32x4d_r16,
 
+    'bam_resnet18': bam_resnet18,
+    'bam_resnet34': bam_resnet34,
+    'bam_resnet50': bam_resnet50,
+    'bam_resnet101': bam_resnet101,
+    'bam_resnet152': bam_resnet152,
+
     'pyramidnet101_a360': pyramidnet101_a360,
 
     'densenet121': densenet121,
@@ -179,6 +188,10 @@ _models = {
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
     'darknet53': darknet53,
+
+    'bagnet9': bagnet9,
+    'bagnet17': bagnet17,
+    'bagnet33': bagnet33,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,
@@ -260,6 +273,11 @@ _models = {
     'mnasnet_b1': mnasnet_b1,
     'mnasnet_a1': mnasnet_a1,
     'mnasnet_small': mnasnet_small,
+
+    'proxylessnas_cpu': proxylessnas_cpu,
+    'proxylessnas_gpu': proxylessnas_gpu,
+    'proxylessnas_mobile': proxylessnas_mobile,
+    'proxylessnas_mobile14': proxylessnas_mobile14,
 
     'xception': xception,
 }

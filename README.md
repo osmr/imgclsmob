@@ -70,7 +70,7 @@ Some remarks:
 | IBN-DenseNet | A+ | A+ | - | - | - | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
 | AirNet | A+ | A+ | A+ | - | A | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
 | AirNeXt | A+ | A+ | A+ | - | A | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
-| BAM-ResNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1807.06514) | [link](https://github.com/Jongchan/attention-module) | 2018 |
+| BAM-ResNet | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1807.06514) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | CBAM-ResNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | A | A | A | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
@@ -99,7 +99,7 @@ Some remarks:
 | iSQRT-COV-ResNet | A | A | - | - | - | [link](https://arxiv.org/abs/1712.01034) | [link](https://github.com/jiangtaoxie/fast-MPN-COV) | 2017 |
 | RevNet | - | A | - | - | - | [link](https://arxiv.org/abs/1707.04585) | [link](https://github.com/renmengye/revnet-public) | 2017 |
 | i-RevNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1802.07088) | [link](https://github.com/jhjacobsen/pytorch-i-revnet) | 2018 |
-| BagNet | A+ | A+ | A+ | - | - | [link](https://openreview.net/pdf?id=SkfMWhAqYQ) | [link](https://github.com/wielandbrendel/bag-of-local-features-models) | 2019 |
+| BagNet | A+ | A+ | A+ | - | A | [link](https://openreview.net/pdf?id=SkfMWhAqYQ) | [link](https://github.com/wielandbrendel/bag-of-local-features-models) | 2019 |
 | DLA | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.06484) | [link](https://github.com/ucbdrive/dla) | 2017 |
 | MSDNet | A | AB | - | - | - | [link](https://arxiv.org/abs/1703.09844) | [link](https://github.com/gaohuang/MSDNet) | 2017 |
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |
@@ -120,7 +120,7 @@ Some remarks:
 | GhostNet | A | A | A | - | A | [link](https://arxiv.org/abs/1911.11907) | [link](https://github.com/iamhankai/ghostnet) | 2019 |
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
-| ProxylessNAS | A+E+ | A+E+ | A+E+ | - | - | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
+| ProxylessNAS | A+E+ | A+E+ | A+E+ | - | A | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
 | FBNet-C | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
 | Xception | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |

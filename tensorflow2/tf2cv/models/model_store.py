@@ -26,6 +26,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('bn_vgg13b', '1019', '1102ffb7817ff11a8db85f1b9b8519b100da26a0', 'v0.0.422'),
     ('bn_vgg16b', '0862', '137178f78ace3943333a98d980dd88b4746e66af', 'v0.0.422'),
     ('bn_vgg19b', '0817', 'cd68a741183cbbab52562c4b7330d721e8ffa739', 'v0.0.422'),
+    ('bninception', '0865', '4cab3cce0eb1b79b872b189f5b0d9e4bb20f5ff4', 'v0.0.423'),
     ('resnet10', '1390', '9e787f637312e04d3ec85136bf0ceca50acf8c80', 'v0.0.422'),
     ('resnet12', '1301', '8bc41d1b1da87463857bb5ca03fe252ef03116ad', 'v0.0.422'),
     ('resnet14', '1224', '7573d98872e622ef74e036c8a436a39ab75e9378', 'v0.0.422'),
@@ -93,10 +94,15 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('senet16', '0805', 'f5f576568d02a572be5276b0b64e71ce4d1c4531', 'v0.0.422'),
     ('senet28', '0590', '667d56873564cc22b2f10478d5f3d55cda580c61', 'v0.0.422'),
     ('senet154', '0466', 'f1b79a9bf0f7073bacf534d846c03d1b71dc404b', 'v0.0.422'),
+    ('airnet50_1x64d_r2', '0623', '6940f0e553a65c1beb4b769e31685cdde59359b8', 'v0.0.423'),
+    ('airnet50_1x64d_r16', '0650', 'b7bb86623e680f08a39828894052099cc5198842', 'v0.0.423'),
+    ('airnext50_32x4d_r2', '0572', 'fa8e40ab400cd8507a02606db72d270382482ecf', 'v0.0.423'),
+    ('pyramidnet101_a360', '0651', '9db84918734d8fe916664ecef49df0a0c0168530', 'v0.0.423'),
     ('densenet121', '0684', 'e9196a9c93534ca7b71ef136e5cc27f240370481', 'v0.0.422'),
     ('densenet161', '0618', 'e77cf292bfd791403f5ab5b16eeedd900ed91d17', 'v0.0.422'),
     ('densenet169', '0606', 'f708dc3310008e59814745ffc22ddf829fb2d25a', 'v0.0.422'),
     ('densenet201', '0637', 'f45e9450de86d67733a0fd3dce871343c9ca6e23', 'v0.0.422'),
+    ('wrn50_2', '0614', 'bea17aa953afed82540c509d7c2964d602fcb2af', 'v0.0.423'),
     ('darknet_tiny', '1745', 'd30be41aad15edf40dfed0bbf53d0e68c520f9f3', 'v0.0.422'),
     ('darknet_ref', '1671', 'b4991f6b58ae95118aa9ea84cae4a27e328196b5', 'v0.0.422'),
     ('darknet53', '0558', '4a63ab3005e5138445da5fac4247c460de02a41b', 'v0.0.422'),
@@ -155,7 +161,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_w3d4', '1100', '00294c7b1ab9dddf7ab2cef3e7ec0a627bd67b29', 'v0.0.422'),
     ('igcv3_w1', '0899', 'a0cb775dd5bb2c13dce35a21d6fd53a783959702', 'v0.0.422'),
     ('mnasnet_b1', '0802', '763d6849142ce86f46cb7ec4c003ccf15542d6eb', 'v0.0.422'),
-    ('mnasnet_a1', '0756', '8e0f49481a3473b9457d0987c9c6f7e51ff57576', 'v0.0.422')]}
+    ('mnasnet_a1', '0756', '8e0f49481a3473b9457d0987c9c6f7e51ff57576', 'v0.0.422'),
+    ('xception', '0558', 'b95b50510de4e39e2ddf759e69501a7470787c00', 'v0.0.423')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

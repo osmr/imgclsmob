@@ -97,6 +97,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('airnet50_1x64d_r2', '0623', '6940f0e553a65c1beb4b769e31685cdde59359b8', 'v0.0.423'),
     ('airnet50_1x64d_r16', '0650', 'b7bb86623e680f08a39828894052099cc5198842', 'v0.0.423'),
     ('airnext50_32x4d_r2', '0572', 'fa8e40ab400cd8507a02606db72d270382482ecf', 'v0.0.423'),
+    ('bam_resnet50', '0697', '3a4101c80ee21a615835f954c5ca67a959978554', 'v0.0.424'),
     ('pyramidnet101_a360', '0651', '9db84918734d8fe916664ecef49df0a0c0168530', 'v0.0.423'),
     ('densenet121', '0684', 'e9196a9c93534ca7b71ef136e5cc27f240370481', 'v0.0.422'),
     ('densenet161', '0618', 'e77cf292bfd791403f5ab5b16eeedd900ed91d17', 'v0.0.422'),
@@ -106,6 +107,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('darknet_tiny', '1745', 'd30be41aad15edf40dfed0bbf53d0e68c520f9f3', 'v0.0.422'),
     ('darknet_ref', '1671', 'b4991f6b58ae95118aa9ea84cae4a27e328196b5', 'v0.0.422'),
     ('darknet53', '0558', '4a63ab3005e5138445da5fac4247c460de02a41b', 'v0.0.422'),
+    ('bagnet9', '3553', '43eb57dcbbce90287d0c3158457077fcc6a4c5ef', 'v0.0.424'),
+    ('bagnet17', '2154', '8a31e34793f4ebc9c7585f531dab1b47b3befc0d', 'v0.0.424'),
+    ('bagnet33', '1497', 'ef600c89aacdd881c2c5483defa9cb220286d31b', 'v0.0.424'),
     ('squeezenet_v1_0', '1760', 'd13ba73265325f21eb34e782989a7269cad406c6', 'v0.0.422'),
     ('squeezenet_v1_1', '1742', '95b614487f1f0572bd0dba18e0fc6d63df3a6bfc', 'v0.0.422'),
     ('squeezeresnet_v1_0', '1783', 'db620d998257c84fd6d5e80bba48cc1022febda3', 'v0.0.422'),
@@ -162,6 +166,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('igcv3_w1', '0899', 'a0cb775dd5bb2c13dce35a21d6fd53a783959702', 'v0.0.422'),
     ('mnasnet_b1', '0802', '763d6849142ce86f46cb7ec4c003ccf15542d6eb', 'v0.0.422'),
     ('mnasnet_a1', '0756', '8e0f49481a3473b9457d0987c9c6f7e51ff57576', 'v0.0.422'),
+    ('proxylessnas_cpu', '0751', '47e1431680e115462835e73ec21dec8b6e88eb13', 'v0.0.424'),
+    ('proxylessnas_gpu', '0726', 'd536cb3e27a47a4a18aa8e230ebe6b4a8f748910', 'v0.0.424'),
+    ('proxylessnas_mobile', '0783', 'da8cdb80c5bd618258c657ebd8506e1342eaeb0d', 'v0.0.424'),
+    ('proxylessnas_mobile14', '0653', '478b58cdb6c94007f786ec06a9e71a8dbc14507f', 'v0.0.424'),
     ('xception', '0558', 'b95b50510de4e39e2ddf759e69501a7470787c00', 'v0.0.423')]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

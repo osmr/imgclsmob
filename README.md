@@ -69,7 +69,7 @@ Some remarks:
 | IBN-ResNeXt | A+ | A+ | - | - | - | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
 | IBN-DenseNet | A+ | A+ | - | - | - | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
 | AirNet | A+ | A+ | A+ | - | A+ | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
-| AirNeXt | A+ | A+ | A+ | - | A | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
+| AirNeXt | A+ | A+ | A+ | - | A+ | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
 | BAM-ResNet | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1807.06514) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | CBAM-ResNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |

@@ -1,16 +1,17 @@
 """
-    DRN for ImageNet-1K, implemented in Gluon.
+    DRN for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 """
 
 __all__ = ['DRN', 'drnc26', 'drnc42', 'drnc58', 'drnd22', 'drnd38', 'drnd54', 'drnd105']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
+import tensorflow as tf
+import tensorflow.keras.layers as nn
+from .common import Conv2d, GluonBatchNormalization, flatten, is_channels_first
 
 
-class DRNConv(HybridBlock):
+class DRNConv(nn.Layer):
     """
     DRN specific convolution block.
 
@@ -28,10 +29,10 @@ class DRNConv(HybridBlock):
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int
         Dilation value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
@@ -40,30 +41,31 @@ class DRNConv(HybridBlock):
                  strides,
                  padding,
                  dilation,
-                 bn_use_global_stats,
                  activate,
+                 data_format="channels_last",
                  **kwargs):
         super(DRNConv, self).__init__(**kwargs)
         self.activate = activate
 
-        with self.name_scope():
-            self.conv = nn.Conv2D(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                dilation=dilation,
-                use_bias=False,
-                in_channels=in_channels)
-            self.bn = nn.BatchNorm(
-                in_channels=out_channels,
-                use_global_stats=bn_use_global_stats)
-            if self.activate:
-                self.activ = nn.Activation("relu")
+        self.conv = Conv2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            use_bias=False,
+            data_format=data_format,
+            name="conv")
+        self.bn = GluonBatchNormalization(
+            data_format=data_format,
+            name="bn")
+        if self.activate:
+            self.activ = nn.ReLU()
 
-    def hybrid_forward(self, F, x):
+    def call(self, x, training=None):
         x = self.conv(x)
-        x = self.bn(x)
+        x = self.bn(x, training=training)
         if self.activate:
             x = self.activ(x)
         return x
@@ -72,8 +74,8 @@ class DRNConv(HybridBlock):
 def drn_conv1x1(in_channels,
                 out_channels,
                 strides,
-                bn_use_global_stats,
                 activate,
+                data_format="channels_last",
                 **kwargs):
     """
     1x1 version of the DRN specific convolution block.
@@ -86,10 +88,10 @@ def drn_conv1x1(in_channels,
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     return DRNConv(
         in_channels=in_channels,
@@ -98,8 +100,8 @@ def drn_conv1x1(in_channels,
         strides=strides,
         padding=0,
         dilation=1,
-        bn_use_global_stats=bn_use_global_stats,
         activate=activate,
+        data_format=data_format,
         **kwargs)
 
 
@@ -107,8 +109,8 @@ def drn_conv3x3(in_channels,
                 out_channels,
                 strides,
                 dilation,
-                bn_use_global_stats,
                 activate,
+                data_format="channels_last",
                 **kwargs):
     """
     3x3 version of the DRN specific convolution block.
@@ -123,10 +125,10 @@ def drn_conv3x3(in_channels,
         Strides of the convolution.
     dilation : int or tuple/list of 2 int
         Padding/dilation value for convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activate : bool
         Whether activate the convolution block.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     return DRNConv(
         in_channels=in_channels,
@@ -135,12 +137,12 @@ def drn_conv3x3(in_channels,
         strides=strides,
         padding=dilation,
         dilation=dilation,
-        bn_use_global_stats=bn_use_global_stats,
         activate=activate,
+        data_format=data_format,
         **kwargs)
 
 
-class DRNBlock(HybridBlock):
+class DRNBlock(nn.Layer):
     """
     Simple DRN block for residual path in DRN unit.
 
@@ -154,40 +156,41 @@ class DRNBlock(HybridBlock):
         Strides of the convolution.
     dilation : int or tuple/list of 2 int
         Padding/dilation value for convolution layers.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
+                 stride,
                  dilation,
-                 bn_use_global_stats,
+                 data_format="channels_last",
                  **kwargs):
         super(DRNBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.conv1 = drn_conv3x3(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = drn_conv3x3(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                strides=1,
-                dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+        self.conv1 = drn_conv3x3(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=stride,
+            dilation=dilation,
+            activate=True,
+            data_format=data_format,
+            name="conv1")
+        self.conv2 = drn_conv3x3(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            strides=1,
+            dilation=dilation,
+            activate=False,
+            data_format=data_format,
+            name="conv2")
 
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
+    def call(self, x, training=None):
+        x = self.conv1(x, training=training)
+        x = self.conv2(x, training=training)
         return x
 
 
-class DRNBottleneck(HybridBlock):
+class DRNBottleneck(nn.Layer):
     """
     DRN bottleneck block for residual path in DRN unit.
 
@@ -201,48 +204,50 @@ class DRNBottleneck(HybridBlock):
         Strides of the convolution.
     dilation : int or tuple/list of 2 int
         Padding/dilation value for 3x3 convolution layer.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  dilation,
-                 bn_use_global_stats,
+                 data_format="channels_last",
                  **kwargs):
         super(DRNBottleneck, self).__init__(**kwargs)
         mid_channels = out_channels // 4
 
-        with self.name_scope():
-            self.conv1 = drn_conv1x1(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                strides=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv2 = drn_conv3x3(
-                in_channels=mid_channels,
-                out_channels=mid_channels,
-                strides=strides,
-                dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=True)
-            self.conv3 = drn_conv1x1(
-                in_channels=mid_channels,
-                out_channels=out_channels,
-                strides=1,
-                bn_use_global_stats=bn_use_global_stats,
-                activate=False)
+        self.conv1 = drn_conv1x1(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            strides=1,
+            activate=True,
+            data_format=data_format,
+            name="conv1")
+        self.conv2 = drn_conv3x3(
+            in_channels=mid_channels,
+            out_channels=mid_channels,
+            strides=strides,
+            dilation=dilation,
+            activate=True,
+            data_format=data_format,
+            name="conv2")
+        self.conv3 = drn_conv1x1(
+            in_channels=mid_channels,
+            out_channels=out_channels,
+            strides=1,
+            activate=False,
+            data_format=data_format,
+            name="conv3")
 
-    def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        x = self.conv3(x)
+    def call(self, x, training=None):
+        x = self.conv1(x, training=training)
+        x = self.conv2(x, training=training)
+        x = self.conv3(x, training=training)
         return x
 
 
-class DRNUnit(HybridBlock):
+class DRNUnit(nn.Layer):
     """
     DRN unit with residual connection.
 
@@ -256,24 +261,24 @@ class DRNUnit(HybridBlock):
         Strides of the convolution.
     dilation : int or tuple/list of 2 int
         Padding/dilation value for 3x3 convolution layers.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
     simplified : bool
         Whether to use a simple or simplified block in units.
     residual : bool
         Whether do residual calculations.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  dilation,
-                 bn_use_global_stats,
                  bottleneck,
                  simplified,
                  residual,
+                 data_format="channels_last",
                  **kwargs):
         super(DRNUnit, self).__init__(**kwargs)
         assert residual or (not bottleneck)
@@ -282,44 +287,47 @@ class DRNUnit(HybridBlock):
         self.residual = residual
         self.resize_identity = ((in_channels != out_channels) or (strides != 1)) and self.residual and (not simplified)
 
-        with self.name_scope():
-            if bottleneck:
-                self.body = DRNBottleneck(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    dilation=dilation,
-                    bn_use_global_stats=bn_use_global_stats)
-            elif simplified:
-                self.body = drn_conv3x3(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    dilation=dilation,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
-            else:
-                self.body = DRNBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    dilation=dilation,
-                    bn_use_global_stats=bn_use_global_stats)
-            if self.resize_identity:
-                self.identity_conv = drn_conv1x1(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
-                    activate=False)
-            self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x):
+        if bottleneck:
+            self.body = DRNBottleneck(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                dilation=dilation,
+                data_format=data_format,
+                name="body")
+        elif simplified:
+            self.body = drn_conv3x3(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                dilation=dilation,
+                activate=False,
+                data_format=data_format,
+                name="body")
+        else:
+            self.body = DRNBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=strides,
+                dilation=dilation,
+                data_format=data_format,
+                name="body")
         if self.resize_identity:
-            identity = self.identity_conv(x)
+            self.identity_conv = drn_conv1x1(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                activate=False,
+                data_format=data_format,
+                name="identity_conv")
+        self.activ = nn.ReLU()
+
+    def call(self, x, training=None):
+        if self.resize_identity:
+            identity = self.identity_conv(x, training=training)
         else:
             identity = x
-        x = self.body(x)
+        x = self.body(x, training=training)
         if self.residual:
             x = x + identity
         x = self.activ(x)
@@ -328,7 +336,7 @@ class DRNUnit(HybridBlock):
 
 def drn_init_block(in_channels,
                    out_channels,
-                   bn_use_global_stats,
+                   data_format="channels_last",
                    **kwargs):
     """
     DRN specific initial block.
@@ -339,8 +347,8 @@ def drn_init_block(in_channels,
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     return DRNConv(
         in_channels=in_channels,
@@ -349,12 +357,12 @@ def drn_init_block(in_channels,
         strides=1,
         padding=3,
         dilation=1,
-        bn_use_global_stats=bn_use_global_stats,
         activate=True,
+        data_format=data_format,
         **kwargs)
 
 
-class DRN(HybridBlock):
+class DRN(nn.Layer):
     """
     DRN-C&D model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 
@@ -372,15 +380,14 @@ class DRN(HybridBlock):
         Whether to use a simple or simplified block in each unit.
     residuals : list of list of int
         Whether to use residual block in each unit.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
     classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -389,52 +396,56 @@ class DRN(HybridBlock):
                  bottlenecks,
                  simplifieds,
                  residuals,
-                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
+                 data_format="channels_last",
                  **kwargs):
         super(DRN, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
+        self.data_format = data_format
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix="")
-            self.features.add(drn_init_block(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) and (i != 0) else 1
-                        stage.add(DRNUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            dilation=dilations[i][j],
-                            bn_use_global_stats=bn_use_global_stats,
-                            bottleneck=(bottlenecks[i][j] == 1),
-                            simplified=(simplifieds[i][j] == 1),
-                            residual=(residuals[i][j] == 1)))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.AvgPool2D(
-                pool_size=28,
-                strides=1))
+        self.features = tf.keras.Sequential(name="features")
+        self.features.add(drn_init_block(
+            in_channels=in_channels,
+            out_channels=init_block_channels,
+            data_format=data_format,
+            name="init_block"))
+        in_channels = init_block_channels
+        for i, channels_per_stage in enumerate(channels):
+            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            for j, out_channels in enumerate(channels_per_stage):
+                strides = 2 if (j == 0) and (i != 0) else 1
+                stage.add(DRNUnit(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    strides=strides,
+                    dilation=dilations[i][j],
+                    bottleneck=(bottlenecks[i][j] == 1),
+                    simplified=(simplifieds[i][j] == 1),
+                    residual=(residuals[i][j] == 1),
+                    data_format=data_format,
+                    name="unit{}".format(j + 1)))
+                in_channels = out_channels
+            self.features.add(stage)
+        self.features.add(nn.AveragePooling2D(
+            pool_size=28,
+            strides=1,
+            data_format=data_format,
+            name="final_pool"))
 
-            self.output = nn.HybridSequential(prefix="")
-            self.output.add(nn.Conv2D(
-                channels=classes,
-                kernel_size=1,
-                in_channels=in_channels))
-            self.output.add(nn.Flatten())
+        self.output1 = Conv2d(
+            in_channels=in_channels,
+            out_channels=classes,
+            kernel_size=1,
+            data_format=data_format,
+            name="output1")
 
-    def hybrid_forward(self, F, x):
-        x = self.features(x)
-        x = self.output(x)
+    def call(self, x, training=None):
+        x = self.features(x, training=training)
+        x = self.output1(x)
+        x = flatten(x, self.data_format)
         return x
 
 
@@ -442,8 +453,7 @@ def get_drn(blocks,
             simplified=False,
             model_name=None,
             pretrained=False,
-            ctx=cpu(),
-            root=os.path.join("~", ".mxnet", "models"),
+            root=os.path.join("~", ".tensorflow", "models"),
             **kwargs):
     """
     Create DRN-C or DRN-D model with specific parameters.
@@ -458,9 +468,7 @@ def get_drn(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
 
@@ -530,11 +538,14 @@ def get_drn(blocks,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
+        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
+            (1,) + net.in_size + (in_channels,)
+        net.build(input_shape=input_shape)
+        net.load_weights(
+            filepath=get_model_file(
                 model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+                local_model_store_dir_path=root))
 
     return net
 
@@ -547,9 +558,7 @@ def drnc26(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=26, model_name="drnc26", **kwargs)
@@ -563,9 +572,7 @@ def drnc42(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=42, model_name="drnc42", **kwargs)
@@ -579,9 +586,7 @@ def drnc58(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=58, model_name="drnc58", **kwargs)
@@ -595,9 +600,7 @@ def drnd22(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=22, simplified=True, model_name="drnd22", **kwargs)
@@ -611,9 +614,7 @@ def drnd38(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=38, simplified=True, model_name="drnd38", **kwargs)
@@ -627,9 +628,7 @@ def drnd54(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=54, simplified=True, model_name="drnd54", **kwargs)
@@ -643,9 +642,7 @@ def drnd105(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_drn(blocks=105, simplified=True, model_name="drnd105", **kwargs)
@@ -653,8 +650,9 @@ def drnd105(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
     pretrained = False
 
     models = [
@@ -669,18 +667,14 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
+        batch_saze = 14
+        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
+        y = net(x)
+        assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
 
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != drnc26 or weight_count == 21126584)
         assert (model != drnc42 or weight_count == 31234744)
@@ -689,10 +683,6 @@ def _test():
         assert (model != drnd38 or weight_count == 26501912)
         assert (model != drnd54 or weight_count == 35809176)
         assert (model != drnd105 or weight_count == 54801304)
-
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
-        y = net(x)
-        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

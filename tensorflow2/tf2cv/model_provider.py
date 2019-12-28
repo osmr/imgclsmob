@@ -12,9 +12,12 @@ from .models.senet import *
 from .models.airnet import *
 from .models.airnext import *
 from .models.bamresnet import *
+from .models.cbamresnet import *
 from .models.pyramidnet import *
+from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.wrn import *
+from .models.drn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.bagnet import *
@@ -175,7 +178,16 @@ _models = {
     'bam_resnet101': bam_resnet101,
     'bam_resnet152': bam_resnet152,
 
+    'cbam_resnet18': cbam_resnet18,
+    'cbam_resnet34': cbam_resnet34,
+    'cbam_resnet50': cbam_resnet50,
+    'cbam_resnet101': cbam_resnet101,
+    'cbam_resnet152': cbam_resnet152,
+
     'pyramidnet101_a360': pyramidnet101_a360,
+
+    'diracnet18v2': diracnet18v2,
+    'diracnet34v2': diracnet34v2,
 
     'densenet121': densenet121,
     'densenet161': densenet161,
@@ -183,6 +195,14 @@ _models = {
     'densenet201': densenet201,
 
     'wrn50_2': wrn50_2,
+
+    'drnc26': drnc26,
+    'drnc42': drnc42,
+    'drnc58': drnc58,
+    'drnd22': drnd22,
+    'drnd38': drnd38,
+    'drnd54': drnd54,
+    'drnd105': drnd105,
 
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,

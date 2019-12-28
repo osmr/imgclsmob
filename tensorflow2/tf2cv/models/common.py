@@ -418,6 +418,8 @@ class Conv2d(nn.Layer):
         self.use_conv = (groups == 1)
         self.use_dw_conv = (groups > 1) and (groups == out_channels) and (out_channels == in_channels)
 
+        # assert (strides == 1) or (dilation == 1)
+
         if isinstance(kernel_size, int):
             kernel_size = (kernel_size, kernel_size)
         if isinstance(strides, int):
@@ -1559,6 +1561,7 @@ class IBN(nn.Layer):
         import tensorflow_addons as tfa
 
         self.inst_first = inst_first
+        self.data_format = data_format
         h1_channels = int(math.floor(channels * first_fraction))
         h2_channels = channels - h1_channels
         self.split_sections = [h1_channels, h2_channels]

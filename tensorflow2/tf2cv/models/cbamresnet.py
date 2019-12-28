@@ -8,7 +8,7 @@ __all__ = ['CbamResNet', 'cbam_resnet18', 'cbam_resnet34', 'cbam_resnet50', 'cba
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv7x7_block, flatten, is_channels_first
+from .common import conv1x1_block, conv7x7_block, flatten, is_channels_first, get_channel_axis
 from .resnet import ResInitBlock, ResBlock, ResBottleneck
 
 
@@ -110,6 +110,8 @@ class SpatialGate(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(SpatialGate, self).__init__(**kwargs)
+        self.data_format = data_format
+
         self.conv = conv7x7_block(
             in_channels=2,
             out_channels=1,
@@ -119,9 +121,10 @@ class SpatialGate(nn.Layer):
         self.sigmoid = tf.nn.sigmoid
 
     def call(self, x, training=None):
-        att1 = tf.expand_dims(tf.math.reduce_max(x, axis=1), 1)
-        att2 = tf.expand_dims(tf.math.reduce_max(x, axis=1), 1)
-        att = tf.concat([att1, att2], axis=1)
+        axis = get_channel_axis(self.data_format)
+        att1 = tf.math.reduce_max(x, axis=axis, keepdims=True)
+        att2 = tf.math.reduce_mean(x, axis=axis, keepdims=True)
+        att = tf.concat([att1, att2], axis=axis)
         att = self.conv(att, training=training)
         att = tf.broadcast_to(self.sigmoid(att), shape=x.shape)
         x = x * att
@@ -230,7 +233,7 @@ class CbamResUnit(nn.Layer):
         return x
 
 
-class CbamResNet(nn.Layer):
+class CbamResNet(tf.keras.Model):
     """
     CBAM-ResNet model from 'CBAM: Convolutional Block Attention Module,' https://arxiv.org/abs/1807.06521.
 

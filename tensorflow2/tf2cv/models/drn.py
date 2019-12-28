@@ -362,7 +362,7 @@ def drn_init_block(in_channels,
         **kwargs)
 
 
-class DRN(nn.Layer):
+class DRN(tf.keras.Model):
     """
     DRN-C&D model from 'Dilated Residual Networks,' https://arxiv.org/abs/1705.09914.
 

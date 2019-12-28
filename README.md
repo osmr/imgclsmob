@@ -71,13 +71,13 @@ Some remarks:
 | AirNet | A+ | A+ | A+ | - | A+ | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
 | AirNeXt | A+ | A+ | A+ | - | A+ | [link](https://ieeexplore.ieee.org/document/8510896) | [link](https://github.com/soeaver/AirNet-PyTorch) | 2018 |
 | BAM-ResNet | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1807.06514) | [link](https://github.com/Jongchan/attention-module) | 2018 |
-| CBAM-ResNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
+| CBAM-ResNet | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | A | A | A | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | A | A | A | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
 | DIA-ResNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | DIA-PreResNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | PyramidNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | A+ | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |
-| DiracNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
+| DiracNetV2 | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1706.00388) | [link](https://github.com/szagoruyko/diracnets) | 2017 |
 | ShaResNet | A | A | A | - | - | [link](https://arxiv.org/abs/1702.08782) | [link](https://github.com/aboulch/sharesnet) | 2017 |
 | CRU-Net | A+ | - | - | - | - | [link](https://www.ijcai.org/proceedings/2018/88) | [link](https://github.com/cypw/CRU-Net) | 2018 |
 | DenseNet | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | A+ | A+ | [link](https://arxiv.org/abs/1608.06993) | [link](https://github.com/liuzhuang13/DenseNet) | 2016 |
@@ -88,8 +88,8 @@ Some remarks:
 | Res2Net | A | - | - | - | - | [link](https://arxiv.org/abs/1904.01169) | - | 2019 |
 | WRN | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | A+ | [link](https://arxiv.org/abs/1605.07146) | [link](https://github.com/szagoruyko/wide-residual-networks) | 2016 |
 | WRN-1bit | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1802.08530) | [link](https://github.com/McDonnell-Lab/1-bit-per-weight) | 2018 |
-| DRN-C | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
-| DRN-D | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
+| DRN-C | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
+| DRN-D | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
 | DPN | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.01629) | [link](https://github.com/cypw/DPNs) | 2017 |
 | DarkNet Ref | A+ | A+ | A+ | A+ | A+ | [link](https://github.com/pjreddie/darknet) | [link](https://github.com/pjreddie/darknet) | - |
 | DarkNet Tiny | A+ | A+ | A+ | A+ | A+ | [link](https://github.com/pjreddie/darknet) | [link](https://github.com/pjreddie/darknet) | - |
@@ -115,7 +115,7 @@ Some remarks:
 | MobileNet | A+E+ | A+E+ | A+E+ | A+ | A+ | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
 | FD-MobileNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1802.03750) | [link](https://github.com/clavichord93/FD-MobileNet) | 2018 |
 | MobileNetV2 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1801.04381) | [link](https://github.com/tensorflow/models) | 2018 |
-| MobileNetV3 | A+ | A+ | A+ | A+ | A | [link](https://arxiv.org/abs/1905.02244) | [link](https://github.com/tensorflow/models) | 2019 |
+| MobileNetV3 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1905.02244) | [link](https://github.com/tensorflow/models) | 2019 |
 | IGCV3 | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1806.00178) | [link](https://github.com/homles11/IGCV3) | 2018 |
 | GhostNet | A | A | A | - | A | [link](https://arxiv.org/abs/1911.11907) | [link](https://github.com/iamhankai/ghostnet) | 2019 |
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |

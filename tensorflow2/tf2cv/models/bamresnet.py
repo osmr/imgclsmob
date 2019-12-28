@@ -73,7 +73,9 @@ class ChannelGate(nn.Layer):
         self.data_format = data_format
         mid_channels = channels // reduction_ratio
 
-        self.pool = nn.GlobalAvgPool2D()
+        self.pool = nn.GlobalAvgPool2D(
+            data_format=data_format,
+            name="pool")
         self.flatten = nn.Flatten()
         self.init_fc = DenseBlock(
             in_channels=channels,

@@ -35,6 +35,8 @@ from .models.ghostnet import *
 from .models.mnasnet import *
 from .models.proxylessnas import *
 from .models.xception import *
+from .models.efficientnet import *
+from .models.mixnet import *
 
 __all__ = ['get_model']
 
@@ -300,6 +302,27 @@ _models = {
     'proxylessnas_mobile14': proxylessnas_mobile14,
 
     'xception': xception,
+
+    'efficientnet_b0': efficientnet_b0,
+    'efficientnet_b1': efficientnet_b1,
+    'efficientnet_b2': efficientnet_b2,
+    'efficientnet_b3': efficientnet_b3,
+    'efficientnet_b4': efficientnet_b4,
+    'efficientnet_b5': efficientnet_b5,
+    'efficientnet_b6': efficientnet_b6,
+    'efficientnet_b7': efficientnet_b7,
+    'efficientnet_b0b': efficientnet_b0b,
+    'efficientnet_b1b': efficientnet_b1b,
+    'efficientnet_b2b': efficientnet_b2b,
+    'efficientnet_b3b': efficientnet_b3b,
+    'efficientnet_b4b': efficientnet_b4b,
+    'efficientnet_b5b': efficientnet_b5b,
+    'efficientnet_b6b': efficientnet_b6b,
+    'efficientnet_b7b': efficientnet_b7b,
+
+    'mixnet_s': mixnet_s,
+    'mixnet_m': mixnet_m,
+    'mixnet_l': mixnet_l,
 }
 
 

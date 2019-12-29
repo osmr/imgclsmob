@@ -12,7 +12,7 @@ __all__ = ['PreResNet', 'preresnet10', 'preresnet12', 'preresnet14', 'preresnetb
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, pre_conv1x1_block, pre_conv3x3_block, conv1x1, MaxPool2d, GluonBatchNormalization, flatten
+from .common import Conv2d, pre_conv1x1_block, pre_conv3x3_block, conv1x1, MaxPool2d, BatchNorm, flatten
 
 
 class PreResBlock(nn.Layer):
@@ -199,7 +199,7 @@ class PreResInitBlock(nn.Layer):
             use_bias=False,
             data_format=data_format,
             name="conv")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
         self.activ = nn.ReLU()
@@ -233,7 +233,7 @@ class PreResActivation(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(PreResActivation, self).__init__(**kwargs)
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
         self.activ = nn.ReLU()

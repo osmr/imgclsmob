@@ -10,7 +10,7 @@ __all__ = ['MENet', 'menet108_8x1_g3', 'menet128_8x1_g4', 'menet160_8x1_g8', 'me
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, Conv2d, GluonBatchNormalization, AvgPool2d,\
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, Conv2d, BatchNorm, AvgPool2d,\
     MaxPool2d, get_channel_axis, flatten
 
 
@@ -59,7 +59,7 @@ class MEUnit(nn.Layer):
             groups=(1 if ignore_group else groups),
             data_format=data_format,
             name="compress_conv1")
-        self.compress_bn1 = GluonBatchNormalization(
+        self.compress_bn1 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="compress_bn1")
@@ -73,7 +73,7 @@ class MEUnit(nn.Layer):
             strides=(2 if self.downsample else 1),
             data_format=data_format,
             name="dw_conv2")
-        self.dw_bn2 = GluonBatchNormalization(
+        self.dw_bn2 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="dw_bn2")
@@ -83,7 +83,7 @@ class MEUnit(nn.Layer):
             groups=groups,
             data_format=data_format,
             name="expand_conv3")
-        self.expand_bn3 = GluonBatchNormalization(
+        self.expand_bn3 = BatchNorm(
             # in_channels=out_channels,
             data_format=data_format,
             name="expand_bn3")
@@ -102,7 +102,7 @@ class MEUnit(nn.Layer):
             out_channels=side_channels,
             data_format=data_format,
             name="s_merge_conv")
-        self.s_merge_bn = GluonBatchNormalization(
+        self.s_merge_bn = BatchNorm(
             # in_channels=side_channels,
             data_format=data_format,
             name="s_merge_bn")
@@ -112,7 +112,7 @@ class MEUnit(nn.Layer):
             strides=(2 if self.downsample else 1),
             data_format=data_format,
             name="s_conv")
-        self.s_conv_bn = GluonBatchNormalization(
+        self.s_conv_bn = BatchNorm(
             # in_channels=side_channels,
             data_format=data_format,
             name="s_conv_bn")
@@ -121,7 +121,7 @@ class MEUnit(nn.Layer):
             out_channels=mid_channels,
             data_format=data_format,
             name="s_evolve_conv")
-        self.s_evolve_bn = GluonBatchNormalization(
+        self.s_evolve_bn = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="s_evolve_bn")
@@ -189,7 +189,7 @@ class MEInitBlock(nn.Layer):
             use_bias=False,
             data_format=data_format,
             name="conv")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             # in_channels=out_channels,
             data_format=data_format,
             name="bn")

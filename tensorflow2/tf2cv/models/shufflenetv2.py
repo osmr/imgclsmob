@@ -10,7 +10,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import conv1x1, depthwise_conv3x3, conv1x1_block, conv3x3_block, ChannelShuffle, SEBlock,\
-    GluonBatchNormalization, MaxPool2d, get_channel_axis, flatten
+    BatchNorm, MaxPool2d, get_channel_axis, flatten
 
 
 class ShuffleUnit(nn.Layer):
@@ -52,7 +52,7 @@ class ShuffleUnit(nn.Layer):
             out_channels=mid_channels,
             data_format=data_format,
             name="compress_conv1")
-        self.compress_bn1 = GluonBatchNormalization(
+        self.compress_bn1 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="compress_bn1")
@@ -61,7 +61,7 @@ class ShuffleUnit(nn.Layer):
             strides=(2 if self.downsample else 1),
             data_format=data_format,
             name="dw_conv2")
-        self.dw_bn2 = GluonBatchNormalization(
+        self.dw_bn2 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="dw_bn2")
@@ -70,7 +70,7 @@ class ShuffleUnit(nn.Layer):
             out_channels=mid_channels,
             data_format=data_format,
             name="expand_conv3")
-        self.expand_bn3 = GluonBatchNormalization(
+        self.expand_bn3 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="expand_bn3")
@@ -85,7 +85,7 @@ class ShuffleUnit(nn.Layer):
                 strides=2,
                 data_format=data_format,
                 name="dw_conv4")
-            self.dw_bn4 = GluonBatchNormalization(
+            self.dw_bn4 = BatchNorm(
                 # in_channels=in_channels,
                 data_format=data_format,
                 name="dw_bn4")
@@ -94,7 +94,7 @@ class ShuffleUnit(nn.Layer):
                 out_channels=mid_channels,
                 data_format=data_format,
                 name="expand_conv5")
-            self.expand_bn5 = GluonBatchNormalization(
+            self.expand_bn5 = BatchNorm(
                 # in_channels=mid_channels,
                 data_format=data_format,
                 name="expand_bn5")

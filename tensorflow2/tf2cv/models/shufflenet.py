@@ -11,7 +11,7 @@ __all__ = ['ShuffleNet', 'shufflenet_g1_w1', 'shufflenet_g2_w1', 'shufflenet_g3_
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, GluonBatchNormalization, MaxPool2d, AvgPool2d,\
+from .common import conv1x1, conv3x3, depthwise_conv3x3, ChannelShuffle, BatchNorm, MaxPool2d, AvgPool2d,\
     get_channel_axis, flatten
 
 
@@ -56,7 +56,7 @@ class ShuffleUnit(nn.Layer):
             groups=(1 if ignore_group else groups),
             data_format=data_format,
             name="compress_conv1")
-        self.compress_bn1 = GluonBatchNormalization(
+        self.compress_bn1 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="compress_bn1")
@@ -70,7 +70,7 @@ class ShuffleUnit(nn.Layer):
             strides=(2 if self.downsample else 1),
             data_format=data_format,
             name="dw_conv2")
-        self.dw_bn2 = GluonBatchNormalization(
+        self.dw_bn2 = BatchNorm(
             # in_channels=mid_channels,
             data_format=data_format,
             name="dw_bn2")
@@ -80,7 +80,7 @@ class ShuffleUnit(nn.Layer):
             groups=groups,
             data_format=data_format,
             name="expand_conv3")
-        self.expand_bn3 = GluonBatchNormalization(
+        self.expand_bn3 = BatchNorm(
             # in_channels=out_channels,
             data_format=data_format,
             name="expand_bn3")
@@ -137,7 +137,7 @@ class ShuffleInitBlock(nn.Layer):
             strides=2,
             data_format=data_format,
             name="conv")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             # in_channels=out_channels,
             data_format=data_format,
             name="bn")

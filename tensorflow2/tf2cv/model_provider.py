@@ -9,6 +9,10 @@ from .models.seresnet import *
 from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
+from .models.ibnresnet import *
+from .models.ibnbresnet import *
+from .models.ibnresnext import *
+from .models.ibndensenet import *
 from .models.airnet import *
 from .models.airnext import *
 from .models.bamresnet import *
@@ -165,6 +169,23 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'ibn_resnet50': ibn_resnet50,
+    'ibn_resnet101': ibn_resnet101,
+    'ibn_resnet152': ibn_resnet152,
+
+    'ibnb_resnet50': ibnb_resnet50,
+    'ibnb_resnet101': ibnb_resnet101,
+    'ibnb_resnet152': ibnb_resnet152,
+
+    'ibn_resnext50_32x4d': ibn_resnext50_32x4d,
+    'ibn_resnext101_32x4d': ibn_resnext101_32x4d,
+    'ibn_resnext101_64x4d': ibn_resnext101_64x4d,
+
+    'ibn_densenet121': ibn_densenet121,
+    'ibn_densenet161': ibn_densenet161,
+    'ibn_densenet169': ibn_densenet169,
+    'ibn_densenet201': ibn_densenet201,
 
     'airnet50_1x64d_r2': airnet50_1x64d_r2,
     'airnet50_1x64d_r16': airnet50_1x64d_r16,

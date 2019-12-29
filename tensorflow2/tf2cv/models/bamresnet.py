@@ -8,7 +8,7 @@ __all__ = ['BamResNet', 'bam_resnet18', 'bam_resnet34', 'bam_resnet50', 'bam_res
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, GluonBatchNormalization, SimpleSequential, flatten,\
+from .common import conv1x1, conv1x1_block, conv3x3_block, BatchNorm, SimpleSequential, flatten,\
     is_channels_first
 from .resnet import ResInitBlock, ResUnit
 
@@ -36,7 +36,7 @@ class DenseBlock(nn.Layer):
             units=out_channels,
             input_dim=in_channels,
             name="fc")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
         self.activ = nn.ReLU()

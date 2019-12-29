@@ -8,7 +8,7 @@ __all__ = ['MixNet', 'mixnet_s', 'mixnet_m', 'mixnet_l']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import round_channels, get_activation_layer, Conv2d, GluonBatchNormalization, conv1x1_block,\
+from .common import round_channels, get_activation_layer, Conv2d, BatchNorm, conv1x1_block,\
     conv3x3_block, dwconv3x3_block, SEBlock, flatten, is_channels_first, get_channel_axis
 
 
@@ -152,7 +152,7 @@ class MixConvBlock(nn.Layer):
             data_format=data_format,
             name="conv")
         if self.use_bn:
-            self.bn = GluonBatchNormalization(
+            self.bn = BatchNorm(
                 epsilon=bn_eps,
                 data_format=data_format,
                 name="bn")

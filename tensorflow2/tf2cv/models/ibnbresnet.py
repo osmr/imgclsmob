@@ -1,21 +1,21 @@
 """
-    PyramidNet for ImageNet-1K, implemented in TensorFlow.
-    Original paper: 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
+    IBN(b)-ResNet for ImageNet-1K, implemented in TensorFlow.
+    Original paper: 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
 """
 
-__all__ = ['PyramidNet', 'pyramidnet101_a360', 'PyrUnit']
+__all__ = ['IBNbResNet', 'ibnb_resnet50', 'ibnb_resnet101', 'ibnb_resnet152']
 
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, BatchNorm, MaxPool2d, AvgPool2d, pre_conv1x1_block, pre_conv3x3_block,\
-    flatten, is_channels_first
-from .preresnet import PreResActivation
+from .common import MaxPool2d, InstanceNorm, Conv2d, conv1x1_block, flatten, is_channels_first
+from .resnet import ResBottleneck
 
 
-class PyrBlock(nn.Layer):
+class IBNbConvBlock(nn.Layer):
     """
-    Simple PyramidNet block for residual path in PyramidNet unit.
+    IBN(b)-ResNet specific convolution block with Instance normalization and ReLU activation.
 
     Parameters:
     ----------
@@ -23,189 +23,192 @@ class PyrBlock(nn.Layer):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
+                 kernel_size,
                  strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 activate=True,
                  data_format="channels_last",
                  **kwargs):
-        super(PyrBlock, self).__init__(**kwargs)
-        self.conv1 = pre_conv3x3_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            strides=strides,
-            activate=False,
-            data_format=data_format,
-            name="conv1")
-        self.conv2 = pre_conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            data_format=data_format,
-            name="conv2")
+        super(IBNbConvBlock, self).__init__(**kwargs)
+        self.activate = activate
 
-    def call(self, x, training=None):
-        x = self.conv1(x, training=training)
-        x = self.conv2(x, training=training)
-        return x
-
-
-class PyrBottleneck(nn.Layer):
-    """
-    PyramidNet bottleneck block for residual path in PyramidNet unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 data_format="channels_last",
-                 **kwargs):
-        super(PyrBottleneck, self).__init__(**kwargs)
-        mid_channels = out_channels // 4
-
-        self.conv1 = pre_conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            activate=False,
-            data_format=data_format,
-            name="conv1")
-        self.conv2 = pre_conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            strides=strides,
-            data_format=data_format,
-            name="conv2")
-        self.conv3 = pre_conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            data_format=data_format,
-            name="conv3")
-
-    def call(self, x, training=None):
-        x = self.conv1(x, training=training)
-        x = self.conv2(x, training=training)
-        x = self.conv3(x, training=training)
-        return x
-
-
-class PyrUnit(nn.Layer):
-    """
-    PyramidNet unit with residual connection.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bottleneck : bool
-        Whether to use a bottleneck or simple block in units.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 bottleneck,
-                 data_format="channels_last",
-                 **kwargs):
-        super(PyrUnit, self).__init__(**kwargs)
-        assert (out_channels >= in_channels)
-        self.data_format = data_format
-        self.resize_identity = (strides != 1)
-        self.identity_pad_width = out_channels - in_channels
-
-        if bottleneck:
-            self.body = PyrBottleneck(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                data_format=data_format,
-                name="body")
-        else:
-            self.body = PyrBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                strides=strides,
-                data_format=data_format,
-                name="body")
-        self.bn = BatchNorm(
-            data_format=data_format,
-            name="bn")
-        if self.resize_identity:
-            self.identity_pool = AvgPool2d(
-                pool_size=2,
-                strides=strides,
-                ceil_mode=True,
-                data_format=data_format,
-                name="identity_pool")
-
-    def call(self, x, training=None):
-        identity = x
-        x = self.body(x, training=training)
-        x = self.bn(x, training=training)
-        if self.resize_identity:
-            identity = self.identity_pool(identity)
-        if self.identity_pad_width > 0:
-            if is_channels_first(self.data_format):
-                paddings = [[0, 0], [0, self.identity_pad_width], [0, 0], [0, 0]]
-            else:
-                paddings = [[0, 0], [0, 0], [0, 0], [0, self.identity_pad_width]]
-            identity = tf.pad(identity, paddings=paddings)
-        x = x + identity
-        return x
-
-
-class PyrInitBlock(nn.Layer):
-    """
-    PyramidNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 data_format="channels_last",
-                 **kwargs):
-        super(PyrInitBlock, self).__init__(**kwargs)
         self.conv = Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=7,
-            strides=2,
-            padding=3,
-            use_bias=False,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            use_bias=use_bias,
             data_format=data_format,
             name="conv")
-        self.bn = BatchNorm(
+        self.inst_norm = InstanceNorm(
+            scale=True,
             data_format=data_format,
-            name="bn")
+            name="inst_norm")
+        if self.activate:
+            self.activ = nn.ReLU()
+
+    def call(self, x, training=None):
+        x = self.conv(x, training=training)
+        x = self.inst_norm(x, training=training)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+def ibnb_conv7x7_block(in_channels,
+                       out_channels,
+                       strides=1,
+                       padding=3,
+                       use_bias=False,
+                       activate=True,
+                       data_format="channels_last",
+                       **kwargs):
+    """
+    7x7 version of the IBN(b)-ResNet specific convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 3
+        Padding value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    activate : bool, default True
+        Whether activate the convolution block.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    return IBNbConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=7,
+        strides=strides,
+        padding=padding,
+        use_bias=use_bias,
+        activate=activate,
+        data_format=data_format,
+        **kwargs)
+
+
+class IBNbResUnit(nn.Layer):
+    """
+    IBN(b)-ResNet unit.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    use_inst_norm : bool
+        Whether to use instance normalization.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 strides,
+                 use_inst_norm,
+                 data_format="channels_last",
+                 **kwargs):
+        super(IBNbResUnit, self).__init__(**kwargs)
+        self.use_inst_norm = use_inst_norm
+        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+
+        self.body = ResBottleneck(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=strides,
+            conv1_stride=False,
+            data_format=data_format,
+            name="body")
+        if self.resize_identity:
+            self.identity_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                strides=strides,
+                activation=None,
+                data_format=data_format,
+                name="identity_conv")
+        if self.use_inst_norm:
+            self.inst_norm = InstanceNorm(
+                scale=True,
+                data_format=data_format,
+                name="inst_norm")
         self.activ = nn.ReLU()
+
+    def call(self, x, training=None):
+        if self.resize_identity:
+            identity = self.identity_conv(x, training=training)
+        else:
+            identity = x
+        x = self.body(x, training=training)
+        x = x + identity
+        if self.use_inst_norm:
+            x = self.inst_norm(x, training=training)
+        x = self.activ(x)
+        return x
+
+
+class IBNbResInitBlock(nn.Layer):
+    """
+    IBN(b)-ResNet specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 data_format="channels_last",
+                 **kwargs):
+        super(IBNbResInitBlock, self).__init__(**kwargs)
+        self.conv = ibnb_conv7x7_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            strides=2,
+            data_format=data_format,
+            name="conv")
         self.pool = MaxPool2d(
             pool_size=3,
             strides=2,
@@ -214,16 +217,15 @@ class PyrInitBlock(nn.Layer):
             name="pool")
 
     def call(self, x, training=None):
-        x = self.conv(x)
-        x = self.bn(x, training=training)
-        x = self.activ(x)
+        x = self.conv(x, training=training)
         x = self.pool(x)
         return x
 
 
-class PyramidNet(tf.keras.Model):
+class IBNbResNet(tf.keras.Model):
     """
-    PyramidNet model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
+    IBN(b)-ResNet model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
 
     Parameters:
     ----------
@@ -231,8 +233,6 @@ class PyramidNet(tf.keras.Model):
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    bottleneck : bool
-        Whether to use a bottleneck or simple block in units.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -245,19 +245,18 @@ class PyramidNet(tf.keras.Model):
     def __init__(self,
                  channels,
                  init_block_channels,
-                 bottleneck,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
                  data_format="channels_last",
                  **kwargs):
-        super(PyramidNet, self).__init__(**kwargs)
+        super(IBNbResNet, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
         self.data_format = data_format
 
         self.features = tf.keras.Sequential(name="features")
-        self.features.add(PyrInitBlock(
+        self.features.add(IBNbResInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
             data_format=data_format,
@@ -267,19 +266,16 @@ class PyramidNet(tf.keras.Model):
             stage = tf.keras.Sequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and (i != 0) else 1
-                stage.add(PyrUnit(
+                use_inst_norm = (i < 2) and (j == len(channels_per_stage) - 1)
+                stage.add(IBNbResUnit(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
-                    bottleneck=bottleneck,
+                    use_inst_norm=use_inst_norm,
                     data_format=data_format,
                     name="unit{}".format(j + 1)))
                 in_channels = out_channels
             self.features.add(stage)
-        self.features.add(PreResActivation(
-            in_channels=in_channels,
-            data_format=data_format,
-            name="post_activ"))
         self.features.add(nn.AveragePooling2D(
             pool_size=7,
             strides=1,
@@ -298,21 +294,18 @@ class PyramidNet(tf.keras.Model):
         return x
 
 
-def get_pyramidnet(blocks,
-                   alpha,
+def get_ibnbresnet(blocks,
                    model_name=None,
                    pretrained=False,
                    root=os.path.join("~", ".tensorflow", "models"),
                    **kwargs):
     """
-    Create PyramidNet model with specific parameters.
+    Create IBN(b)-ResNet model with specific parameters.
 
     Parameters:
     ----------
     blocks : int
         Number of blocks.
-    alpha : int
-        PyramidNet's alpha value.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -321,49 +314,22 @@ def get_pyramidnet(blocks,
         Location for keeping the model parameters.
     """
 
-    if blocks == 10:
-        layers = [1, 1, 1, 1]
-    elif blocks == 12:
-        layers = [2, 1, 1, 1]
-    elif blocks == 14:
-        layers = [2, 2, 1, 1]
-    elif blocks == 16:
-        layers = [2, 2, 2, 1]
-    elif blocks == 18:
-        layers = [2, 2, 2, 2]
-    elif blocks == 34:
-        layers = [3, 4, 6, 3]
-    elif blocks == 50:
+    if blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
         layers = [3, 4, 23, 3]
     elif blocks == 152:
         layers = [3, 8, 36, 3]
-    elif blocks == 200:
-        layers = [3, 24, 36, 3]
     else:
-        raise ValueError("Unsupported ResNet with number of blocks: {}".format(blocks))
+        raise ValueError("Unsupported IBN(b)-ResNet with number of blocks: {}".format(blocks))
 
     init_block_channels = 64
+    channels_per_layers = [256, 512, 1024, 2048]
+    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
-    growth_add = float(alpha) / float(sum(layers))
-    from functools import reduce
-    channels = reduce(
-        lambda xi, yi: xi + [[(i + 1) * growth_add + xi[-1][-1] for i in list(range(yi))]],
-        layers,
-        [[init_block_channels]])[1:]
-    channels = [[int(round(cij)) for cij in ci] for ci in channels]
-
-    if blocks < 50:
-        bottleneck = False
-    else:
-        bottleneck = True
-        channels = [[cij * 4 for cij in ci] for ci in channels]
-
-    net = PyramidNet(
+    net = IBNbResNet(
         channels=channels,
         init_block_channels=init_block_channels,
-        bottleneck=bottleneck,
         **kwargs)
 
     if pretrained:
@@ -382,9 +348,10 @@ def get_pyramidnet(blocks,
     return net
 
 
-def pyramidnet101_a360(**kwargs):
+def ibnb_resnet50(**kwargs):
     """
-    PyramidNet-101 model from 'Deep Pyramidal Residual Networks,' https://arxiv.org/abs/1610.02915.
+    IBN(b)-ResNet-50 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
 
     Parameters:
     ----------
@@ -393,7 +360,37 @@ def pyramidnet101_a360(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_pyramidnet(blocks=101, alpha=360, model_name="pyramidnet101_a360", **kwargs)
+    return get_ibnbresnet(blocks=50, model_name="ibnb_resnet50", **kwargs)
+
+
+def ibnb_resnet101(**kwargs):
+    """
+    IBN(b)-ResNet-101 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_ibnbresnet(blocks=101, model_name="ibnb_resnet101", **kwargs)
+
+
+def ibnb_resnet152(**kwargs):
+    """
+    IBN(b)-ResNet-152 model from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_ibnbresnet(blocks=152, model_name="ibnb_resnet152", **kwargs)
 
 
 def _test():
@@ -404,7 +401,9 @@ def _test():
     pretrained = False
 
     models = [
-        pyramidnet101_a360,
+        ibnb_resnet50,
+        ibnb_resnet101,
+        ibnb_resnet152,
     ]
 
     for model in models:
@@ -418,7 +417,9 @@ def _test():
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != pyramidnet101_a360 or weight_count == 42455070)
+        assert (model != ibnb_resnet50 or weight_count == 25558568)
+        assert (model != ibnb_resnet101 or weight_count == 44550696)
+        assert (model != ibnb_resnet152 or weight_count == 60194344)
 
 
 if __name__ == "__main__":

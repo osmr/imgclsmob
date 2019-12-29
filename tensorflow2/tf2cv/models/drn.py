@@ -8,7 +8,7 @@ __all__ = ['DRN', 'drnc26', 'drnc42', 'drnc58', 'drnd22', 'drnd38', 'drnd54', 'd
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, GluonBatchNormalization, flatten, is_channels_first
+from .common import Conv2d, BatchNorm, flatten, is_channels_first
 
 
 class DRNConv(nn.Layer):
@@ -57,7 +57,7 @@ class DRNConv(nn.Layer):
             use_bias=False,
             data_format=data_format,
             name="conv")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
         if self.activate:

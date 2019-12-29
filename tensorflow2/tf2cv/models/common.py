@@ -3,10 +3,10 @@
 """
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', 'HSwish', 'get_activation_layer',
-           'flatten', 'GluonBatchNormalization', 'MaxPool2d', 'AvgPool2d', 'Conv2d', 'conv1x1', 'conv3x3',
+           'flatten', 'MaxPool2d', 'AvgPool2d', 'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block',
            'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'SimpleSequential', 'Concurrent']
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'Concurrent']
 
 import math
 from inspect import isfunction
@@ -172,34 +172,6 @@ def flatten(x,
         x = tf.transpose(x, perm=(0, 3, 1, 2))
     x = tf.reshape(x, shape=(-1, np.prod(x.get_shape().as_list()[1:])))
     return x
-
-
-class GluonBatchNormalization(nn.BatchNormalization):
-    """
-    MXNet/Gluon-like batch normalization.
-
-    Parameters:
-    ----------
-    momentum : float, default 0.9
-        Momentum for the moving average.
-    epsilon : float, default 1e-5
-        Small float added to variance to avoid dividing by zero.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 momentum=0.9,
-                 epsilon=1e-5,
-                 data_format="channels_last",
-                 **kwargs):
-        super(GluonBatchNormalization, self).__init__(
-            axis=get_channel_axis(data_format),
-            momentum=momentum,
-            epsilon=epsilon,
-            **kwargs)
-
-    # def call(self, inputs, training=None):
-    #     super(GluonBatchNormalization, self).call(inputs, training)
 
 
 class MaxPool2d(nn.Layer):
@@ -373,6 +345,281 @@ class AvgPool2d(nn.Layer):
         x = self.pool(x)
         if self.use_stride:
             x = self.stride_pool(x)
+        return x
+
+
+class BatchNorm(nn.BatchNormalization):
+    """
+    MXNet/Gluon-like batch normalization.
+
+    Parameters:
+    ----------
+    momentum : float, default 0.9
+        Momentum for the moving average.
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 momentum=0.9,
+                 epsilon=1e-5,
+                 data_format="channels_last",
+                 **kwargs):
+        super(BatchNorm, self).__init__(
+            axis=get_channel_axis(data_format),
+            momentum=momentum,
+            epsilon=epsilon,
+            **kwargs)
+
+
+class InstanceNorm(nn.Layer):
+    """
+    MXNet/Gluon-like instance normalization layer as in 'Instance Normalization: The Missing Ingredient for Fast
+    Stylization' (https://arxiv.org/abs/1607.08022). On the base of `tensorflow_addons` implementation.
+
+    Parameters:
+    ----------
+    epsilon : float, default 1e-5
+        Small float added to variance to avoid dividing by zero.
+    center : bool, default True
+        If True, add offset of `beta` to normalized tensor. If False, `beta` is ignored.
+    scale : bool, default False
+        If True, multiply by `gamma`. If False, `gamma` is not used.
+    beta_initializer : str, default 'zeros'
+        Initializer for the beta weight.
+    gamma_initializer : str, default 'ones'
+        Initializer for the gamma weight.
+    beta_regularizer : object or None, default None
+        Optional regularizer for the beta weight.
+    gamma_regularizer : object or None, default None
+        Optional regularizer for the gamma weight.
+    beta_constraint : object or None, default None
+        Optional constraint for the beta weight.
+    gamma_constraint : object or None, default None
+        Optional constraint for the gamma weight.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 epsilon=1e-5,
+                 center=True,
+                 scale=False,
+                 beta_initializer="zeros",
+                 gamma_initializer="ones",
+                 beta_regularizer=None,
+                 gamma_regularizer=None,
+                 beta_constraint=None,
+                 gamma_constraint=None,
+                 data_format="channels_last",
+                 **kwargs):
+        super(InstanceNorm, self).__init__(**kwargs)
+        self.supports_masking = True
+        self.groups = -1
+        self.axis = get_channel_axis(data_format)
+        self.epsilon = epsilon
+        self.center = center
+        self.scale = scale
+        self.beta_initializer = tf.keras.initializers.get(beta_initializer)
+        self.gamma_initializer = tf.keras.initializers.get(gamma_initializer)
+        self.beta_regularizer = tf.keras.regularizers.get(beta_regularizer)
+        self.gamma_regularizer = tf.keras.regularizers.get(gamma_regularizer)
+        self.beta_constraint = tf.keras.constraints.get(beta_constraint)
+        self.gamma_constraint = tf.keras.constraints.get(gamma_constraint)
+        self._check_axis()
+
+    def build(self, input_shape):
+        self._check_if_input_shape_is_none(input_shape)
+        self._set_number_of_groups_for_instance_norm(input_shape)
+        self._check_size_of_dimensions(input_shape)
+        self._create_input_spec(input_shape)
+        self._add_gamma_weight(input_shape)
+        self._add_beta_weight(input_shape)
+        self.built = True
+        super(InstanceNorm, self).build(input_shape)
+
+    def call(self, inputs):
+        input_shape = tf.keras.backend.int_shape(inputs)
+        tensor_input_shape = tf.shape(inputs)
+        reshaped_inputs, group_shape = self._reshape_into_groups(inputs, input_shape, tensor_input_shape)
+        normalized_inputs = self._apply_normalization(reshaped_inputs, input_shape)
+        outputs = tf.reshape(normalized_inputs, tensor_input_shape)
+        return outputs
+
+    def get_config(self):
+        config = {
+            "groups": self.groups,
+            "axis": self.axis,
+            "epsilon": self.epsilon,
+            "center": self.center,
+            "scale": self.scale,
+            "beta_initializer": tf.keras.initializers.serialize(self.beta_initializer),
+            "gamma_initializer": tf.keras.initializers.serialize(self.gamma_initializer),
+            "beta_regularizer": tf.keras.regularizers.serialize(self.beta_regularizer),
+            "gamma_regularizer": tf.keras.regularizers.serialize(self.gamma_regularizer),
+            "beta_constraint": tf.keras.constraints.serialize(self.beta_constraint),
+            "gamma_constraint": tf.keras.constraints.serialize(self.gamma_constraint)
+        }
+        base_config = super(InstanceNorm, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
+    def _reshape_into_groups(self, inputs, input_shape, tensor_input_shape):
+        group_shape = [tensor_input_shape[i] for i in range(len(input_shape))]
+        group_shape[self.axis] = input_shape[self.axis] // self.groups
+        group_shape.insert(self.axis, self.groups)
+        group_shape = tf.stack(group_shape)
+        reshaped_inputs = tf.reshape(inputs, group_shape)
+        return reshaped_inputs, group_shape
+
+    def _apply_normalization(self, reshaped_inputs, input_shape):
+        group_shape = tf.keras.backend.int_shape(reshaped_inputs)
+        group_reduction_axes = list(range(1, len(group_shape)))
+        axis = -2 if self.axis == -1 else self.axis - 1
+        group_reduction_axes.pop(axis)
+        mean, variance = tf.nn.moments(reshaped_inputs, group_reduction_axes, keepdims=True)
+        gamma, beta = self._get_reshaped_weights(input_shape)
+        normalized_inputs = tf.nn.batch_normalization(
+            reshaped_inputs,
+            mean=mean,
+            variance=variance,
+            scale=gamma,
+            offset=beta,
+            variance_epsilon=self.epsilon)
+        return normalized_inputs
+
+    def _get_reshaped_weights(self, input_shape):
+        broadcast_shape = self._create_broadcast_shape(input_shape)
+        gamma = None
+        beta = None
+        if self.scale:
+            gamma = tf.reshape(self.gamma, broadcast_shape)
+        if self.center:
+            beta = tf.reshape(self.beta, broadcast_shape)
+        return gamma, beta
+
+    def _check_if_input_shape_is_none(self, input_shape):
+        dim = input_shape[self.axis]
+        if dim is None:
+            raise ValueError("Axis {} of input tensor should have a defined dimension but the layer received an input "
+                             "with shape {}".format(self.axis, input_shape))
+
+    def _set_number_of_groups_for_instance_norm(self, input_shape):
+        dim = input_shape[self.axis]
+        if self.groups == -1:
+            self.groups = dim
+
+    def _check_size_of_dimensions(self, input_shape):
+        dim = input_shape[self.axis]
+        if dim < self.groups:
+            raise ValueError("Number of groups ({}) cannot be more than the number of channels ({})".format(
+                self.groups, dim))
+        if (dim % self.groups) != 0:
+            raise ValueError('Number of groups ({}) must be a multiple of the number of channels ({})'.format(
+                self.groups, dim))
+
+    def _check_axis(self):
+        if self.axis == 0:
+            raise ValueError("You are trying to normalize your batch axis. Do you want to use "
+                             "tf.layer.batch_normalization instead")
+
+    def _create_input_spec(self, input_shape):
+        dim = input_shape[self.axis]
+        self.input_spec = tf.keras.layers.InputSpec(
+            ndim=len(input_shape),
+            axes={self.axis: dim})
+
+    def _add_gamma_weight(self, input_shape):
+        dim = input_shape[self.axis]
+        shape = (dim,)
+        if self.scale:
+            self.gamma = self.add_weight(
+                shape=shape,
+                name="gamma",
+                initializer=self.gamma_initializer,
+                regularizer=self.gamma_regularizer,
+                constraint=self.gamma_constraint)
+        else:
+            self.gamma = None
+
+    def _add_beta_weight(self, input_shape):
+        dim = input_shape[self.axis]
+        shape = (dim,)
+        if self.center:
+            self.beta = self.add_weight(
+                shape=shape,
+                name="beta",
+                initializer=self.beta_initializer,
+                regularizer=self.beta_regularizer,
+                constraint=self.beta_constraint)
+        else:
+            self.beta = None
+
+    def _create_broadcast_shape(self, input_shape):
+        broadcast_shape = [1] * len(input_shape)
+        broadcast_shape[self.axis] = input_shape[self.axis] // self.groups
+        broadcast_shape.insert(self.axis, self.groups)
+        return broadcast_shape
+
+
+class IBN(nn.Layer):
+    """
+    Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
+    https://arxiv.org/abs/1807.09441.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    inst_fraction : float, default 0.5
+        The first fraction of channels for normalization.
+    inst_first : bool, default True
+        Whether instance normalization be on the first part of channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 channels,
+                 first_fraction=0.5,
+                 inst_first=True,
+                 data_format="channels_last",
+                 **kwargs):
+        super(IBN, self).__init__(**kwargs)
+        self.inst_first = inst_first
+        self.data_format = data_format
+        h1_channels = int(math.floor(channels * first_fraction))
+        h2_channels = channels - h1_channels
+        self.split_sections = [h1_channels, h2_channels]
+
+        if self.inst_first:
+            self.inst_norm = InstanceNorm(
+                scale=True,
+                data_format=data_format,
+                name="inst_norm")
+            self.batch_norm = BatchNorm(
+                data_format=data_format,
+                name="batch_norm")
+        else:
+            self.batch_norm = BatchNorm(
+                data_format=data_format,
+                name="batch_norm")
+            self.inst_norm = InstanceNorm(
+                scale=True,
+                data_format=data_format,
+                name="inst_norm")
+
+    def call(self, x, training=None):
+        axis = get_channel_axis(self.data_format)
+        x1, x2 = tf.split(x, num_or_size_splits=self.split_sections, axis=axis)
+        if self.inst_first:
+            x1 = self.inst_norm(x1, training=training)
+            x2 = self.batch_norm(x2, training=training)
+        else:
+            x1 = self.batch_norm(x1, training=training)
+            x2 = self.inst_norm(x2, training=training)
+        x = tf.concat([x1, x2], axis=axis)
         return x
 
 
@@ -663,7 +910,7 @@ class ConvBlock(nn.Layer):
             data_format=data_format,
             name="conv")
         if self.use_bn:
-            self.bn = GluonBatchNormalization(
+            self.bn = BatchNorm(
                 epsilon=bn_eps,
                 data_format=data_format,
                 name="bn")
@@ -1209,7 +1456,7 @@ class PreConvBlock(nn.Layer):
         self.return_preact = return_preact
         self.activate = activate
 
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
         if self.activate:
@@ -1532,68 +1779,6 @@ class SEBlock(nn.Layer):
         w = self.conv2(w)
         w = self.sigmoid(w)
         x = x * w
-        return x
-
-
-class IBN(nn.Layer):
-    """
-    Instance-Batch Normalization block from 'Two at Once: Enhancing Learning and Generalization Capacities via IBN-Net,'
-    https://arxiv.org/abs/1807.09441.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of channels.
-    inst_fraction : float, default 0.5
-        The first fraction of channels for normalization.
-    inst_first : bool, default True
-        Whether instance normalization be on the first part of channels.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 channels,
-                 first_fraction=0.5,
-                 inst_first=True,
-                 data_format="channels_last",
-                 **kwargs):
-        super(IBN, self).__init__(**kwargs)
-        import tensorflow_addons as tfa
-
-        self.inst_first = inst_first
-        self.data_format = data_format
-        h1_channels = int(math.floor(channels * first_fraction))
-        h2_channels = channels - h1_channels
-        self.split_sections = [h1_channels, h2_channels]
-
-        if self.inst_first:
-            self.inst_norm = tfa.layers.InstanceNormalization(
-                epsilon=1e-5,
-                data_format=data_format,
-                name="inst_norm")
-            self.batch_norm = GluonBatchNormalization(
-                data_format=data_format,
-                name="batch_norm")
-
-        else:
-            self.batch_norm = GluonBatchNormalization(
-                data_format=data_format,
-                name="batch_norm")
-            self.inst_norm = tfa.layers.InstanceNormalization(
-                epsilon=1e-5,
-                data_format=data_format,
-                name="inst_norm")
-
-    def call(self, x, training=None):
-        axis = get_channel_axis(self.data_format)
-        x1, x2 = tf.split(x, num_or_size_splits=self.split_sections, axis=axis)
-        if self.inst_first:
-            x1 = self.inst_norm(x1, training=training)
-            x2 = self.batch_norm(x2, training=training)
-        else:
-            x1 = self.batch_norm(x1, training=training)
-            x2 = self.inst_norm(x2, training=training)
-        x = tf.concat([x1, x2], axis=axis)
         return x
 
 

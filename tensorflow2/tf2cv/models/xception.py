@@ -8,7 +8,7 @@ __all__ = ['Xception', 'xception']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import Conv2d, GluonBatchNormalization, MaxPool2d, AvgPool2d, conv1x1_block, conv3x3_block, flatten,\
+from .common import Conv2d, BatchNorm, MaxPool2d, AvgPool2d, conv1x1_block, conv3x3_block, flatten,\
     SimpleSequential, is_channels_first
 
 
@@ -107,7 +107,7 @@ class DwsConvBlock(nn.Layer):
             padding=padding,
             data_format=data_format,
             name="conv")
-        self.bn = GluonBatchNormalization(
+        self.bn = BatchNorm(
             data_format=data_format,
             name="bn")
 

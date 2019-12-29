@@ -38,6 +38,7 @@ from .models.igcv3 import *
 from .models.ghostnet import *
 from .models.mnasnet import *
 from .models.proxylessnas import *
+from .models.fbnet import *
 from .models.xception import *
 from .models.efficientnet import *
 from .models.mixnet import *
@@ -321,6 +322,8 @@ _models = {
     'proxylessnas_gpu': proxylessnas_gpu,
     'proxylessnas_mobile': proxylessnas_mobile,
     'proxylessnas_mobile14': proxylessnas_mobile14,
+
+    'fbnet_cb': fbnet_cb,
 
     'xception': xception,
 

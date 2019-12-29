@@ -121,7 +121,7 @@ Some remarks:
 | MnasNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
 | ProxylessNAS | A+E+ | A+E+ | A+E+ | - | A+ | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
-| FBNet-C | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
+| FBNet-C | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
 | Xception | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |
 | InceptionV4 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |

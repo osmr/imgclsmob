@@ -169,6 +169,13 @@ Some remarks:
 | DenseNet-169 | 22.13 | 6.06 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet169-0606-f708dc33.tf2.h5.log)) |
 | DenseNet-201 | 22.67 | 6.37 | 20,013,928 | 4,347.15M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet201-0637-f45e9450.tf2.h5.log)) |
 | WRN-50-2 | 22.10 | 6.14 | 68,849,128 | 11,405.42M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/wrn50_2-0614-bea17aa9.tf2.h5.log)) |
+| DRN-C-26 | 25.70 | 7.88 | 21,126,584 | 16,993.90M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc26-0788-571eb2dc.tf2.h5.log)) |
+| DRN-C-42 | 23.74 | 6.93 | 31,234,744 | 25,093.75M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc42-0693-52dd6028.tf2.h5.log)) |
+| DRN-C-58 | 22.36 | 6.26 | 40,542,008 | 32,489.94M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc58-0626-e5c7be89.tf2.h5.log)) |
+| DRN-D-22 | 26.67 | 8.48 | 16,393,752 | 13,051.33M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd22-0848-42f7a37b.tf2.h5.log)) |
+| DRN-D-38 | 24.52 | 7.37 | 26,501,912 | 21,151.19M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd38-0737-a1108275.tf2.h5.log)) |
+| DRN-D-54 | 22.07 | 6.26 | 35,809,176 | 28,547.38M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd54-0626-cb792485.tf2.h5.log)) |
+| DRN-D-105 | 21.31 | 5.83 | 54,801,304 | 43,442.43M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnd105-0583-80eb9ec2.tf2.h5.log)) |
 | DarkNet Tiny | 40.34 | 17.45 | 1,042,104 | 500.85M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_tiny-1745-d30be41a.tf2.h5.log)) |
 | DarkNet Ref | 38.10 | 16.71 | 7,319,416 | 367.59M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet_ref-1671-b4991f6b.tf2.h5.log)) |
 | DarkNet-53 | 21.41 | 5.58 | 41,609,928 | 7,133.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/darknet53-0558-4a63ab30.tf2.h5.log)) |
@@ -250,3 +257,4 @@ Some remarks:
 [szagoruyko/functional-zoo]: https://github.com/szagoruyko/functional-zoo
 [Jongchan/attention-module]: https://github.com/Jongchan/attention-module
 [wielandbrendel/bag...models]: https://github.com/wielandbrendel/bag-of-local-features-models
+[fyu/drn]: https://github.com/fyu/drn

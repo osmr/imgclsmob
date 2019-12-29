@@ -88,8 +88,8 @@ Some remarks:
 | Res2Net | A | - | - | - | - | [link](https://arxiv.org/abs/1904.01169) | - | 2019 |
 | WRN | A+B+C+D+ | A+B+C+D+ | A+B+C+D+ | - | A+ | [link](https://arxiv.org/abs/1605.07146) | [link](https://github.com/szagoruyko/wide-residual-networks) | 2016 |
 | WRN-1bit | B+C+D+ | B+C+D+ | B+C+D+ | - | - | [link](https://arxiv.org/abs/1802.08530) | [link](https://github.com/McDonnell-Lab/1-bit-per-weight) | 2018 |
-| DRN-C | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
-| DRN-D | A+ | A+ | A+ | - | A | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
+| DRN-C | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
+| DRN-D | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1705.09914) | [link](https://github.com/fyu/drn) | 2017 |
 | DPN | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.01629) | [link](https://github.com/cypw/DPNs) | 2017 |
 | DarkNet Ref | A+ | A+ | A+ | A+ | A+ | [link](https://github.com/pjreddie/darknet) | [link](https://github.com/pjreddie/darknet) | - |
 | DarkNet Tiny | A+ | A+ | A+ | A+ | A+ | [link](https://github.com/pjreddie/darknet) | [link](https://github.com/pjreddie/darknet) | - |

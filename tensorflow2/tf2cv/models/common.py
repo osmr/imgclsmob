@@ -3,10 +3,11 @@
 """
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', 'HSwish', 'get_activation_layer',
-           'flatten', 'MaxPool2d', 'AvgPool2d', 'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block',
-           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'Concurrent']
+           'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d', 'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d',
+           'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
+           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
+           'DualPathSequential', 'Concurrent']
 
 import math
 from inspect import isfunction
@@ -345,6 +346,27 @@ class AvgPool2d(nn.Layer):
         x = self.pool(x)
         if self.use_stride:
             x = self.stride_pool(x)
+        return x
+
+
+class GlobalAvgPool2d(nn.GlobalAvgPool2D):
+    """
+    Global average pooling.
+
+    Parameters:
+    ----------
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 data_format="channels_last",
+                 **kwargs):
+        super(GlobalAvgPool2d, self).__init__(data_format=data_format, **kwargs)
+        self.axis = get_channel_axis(data_format)
+
+    def call(self, x, training=None):
+        x = super(GlobalAvgPool2d, self).call(x, training)
+        x = tf.expand_dims(tf.expand_dims(x, axis=self.axis), axis=self.axis)
         return x
 
 
@@ -1798,6 +1820,51 @@ class SimpleSequential(nn.Layer):
         for block in self.children:
             x = block(x, training=training)
         return x
+
+
+class DualPathSequential(SimpleSequential):
+    """
+    A sequential container for layers with dual inputs/outputs.
+    Layers will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    return_two : bool, default True
+        Whether to return two output after execution.
+    first_ordinals : int, default 0
+        Number of the first layers with single input/output.
+    last_ordinals : int, default 0
+        Number of the final layers with single input/output.
+    dual_path_scheme : function
+        Scheme of dual path response for a layer.
+    dual_path_scheme_ordinal : function
+        Scheme of dual path response for an ordinal layer.
+    """
+    def __init__(self,
+                 return_two=True,
+                 first_ordinals=0,
+                 last_ordinals=0,
+                 dual_path_scheme=(lambda block, x1, x2, training: block(x1, x2, training)),
+                 dual_path_scheme_ordinal=(lambda block, x1, x2, training: (block(x1, training), x2)),
+                 **kwargs):
+        super(DualPathSequential, self).__init__(**kwargs)
+        self.return_two = return_two
+        self.first_ordinals = first_ordinals
+        self.last_ordinals = last_ordinals
+        self.dual_path_scheme = dual_path_scheme
+        self.dual_path_scheme_ordinal = dual_path_scheme_ordinal
+
+    def call(self, x1, x2=None, training=None):
+        length = len(self.children)
+        for i, block in enumerate(self.children):
+            if (i < self.first_ordinals) or (i >= length - self.last_ordinals):
+                x1, x2 = self.dual_path_scheme_ordinal(block, x1, x2, training)
+            else:
+                x1, x2 = self.dual_path_scheme(block, x1, x2, training)
+        if self.return_two:
+            return x1, x2
+        else:
+            return x1
 
 
 class Concurrent(nn.Layer):

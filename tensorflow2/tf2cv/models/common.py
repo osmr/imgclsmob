@@ -7,7 +7,7 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', '
            'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
-           'DualPathSequential', 'Concurrent']
+           'ParametricSequential', 'DualPathSequential', 'Concurrent', 'ParametricConcurrent']
 
 import math
 from inspect import isfunction
@@ -1822,6 +1822,25 @@ class SimpleSequential(nn.Layer):
         return x
 
 
+class ParametricSequential(nn.Layer):
+    """
+    A sequential container for layers with parameters.
+    Layers will be executed in the order they are added.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(ParametricSequential, self).__init__(**kwargs)
+        self.children = []
+
+    def __len__(self):
+        return len(self.children)
+
+    def call(self, x, **kwargs):
+        for block in self.children:
+            x = block(x, **kwargs)
+        return x
+
+
 class DualPathSequential(SimpleSequential):
     """
     A sequential container for layers with dual inputs/outputs.
@@ -1869,21 +1888,21 @@ class DualPathSequential(SimpleSequential):
 
 class Concurrent(nn.Layer):
     """
-    A container for concatenation of blocks.
+    A container for concatenation of layers.
 
     Parameters:
     ----------
-    axis : int, default 1
-        The axis on which to concatenate the outputs.
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
-                 axis=1,
                  stack=False,
+                 data_format="channels_last",
                  **kwargs):
         super(Concurrent, self).__init__(**kwargs)
-        self.axis = axis
+        self.axis = get_channel_axis(data_format)
         self.stack = stack
         self.children = []
 
@@ -1895,4 +1914,28 @@ class Concurrent(nn.Layer):
             out = tf.stack(out, axis=self.axis)
         else:
             out = tf.concat(out, axis=self.axis)
+        return out
+
+
+class ParametricConcurrent(nn.Layer):
+    """
+    A container for concatenation of layers with parameters.
+
+    Parameters:
+    ----------
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 data_format="channels_last",
+                 **kwargs):
+        super(ParametricConcurrent, self).__init__(**kwargs)
+        self.axis = get_channel_axis(data_format)
+        self.children = []
+
+    def call(self, x, **kwargs):
+        out = []
+        for block in self.children:
+            out.append(block(x, **kwargs))
+        out = tf.concat(out, axis=self.axis)
         return out

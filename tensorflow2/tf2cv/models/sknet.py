@@ -53,8 +53,8 @@ class SKConvBlock(nn.Layer):
         mid_channels = max(in_channels // reduction, min_channels)
 
         self.branches = Concurrent(
-            axis=self.axis,
             stack=True,
+            data_format=data_format,
             name="branches")
         for i in range(num_branches):
             dilation = 1 + i

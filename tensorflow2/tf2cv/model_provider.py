@@ -25,6 +25,7 @@ from .models.drn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.bagnet import *
+from .models.dla import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -40,6 +41,13 @@ from .models.mnasnet import *
 from .models.proxylessnas import *
 from .models.fbnet import *
 from .models.xception import *
+from .models.inceptionv3 import *
+from .models.inceptionv4 import *
+from .models.inceptionresnetv2 import *
+from .models.polynet import *
+from .models.nasnet import *
+from .models.pnasnet import *
+from .models.spnasnet import *
 from .models.efficientnet import *
 from .models.mixnet import *
 
@@ -237,6 +245,17 @@ _models = {
     'bagnet17': bagnet17,
     'bagnet33': bagnet33,
 
+    'dla34': dla34,
+    'dla46c': dla46c,
+    'dla46xc': dla46xc,
+    'dla60': dla60,
+    'dla60x': dla60x,
+    'dla60xc': dla60xc,
+    'dla102': dla102,
+    'dla102x': dla102x,
+    'dla102x2': dla102x2,
+    'dla169': dla169,
+
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,
 
@@ -326,6 +345,17 @@ _models = {
     'fbnet_cb': fbnet_cb,
 
     'xception': xception,
+    'inceptionv3': inceptionv3,
+    'inceptionv4': inceptionv4,
+    'inceptionresnetv2': inceptionresnetv2,
+    'polynet': polynet,
+
+    'nasnet_4a1056': nasnet_4a1056,
+    'nasnet_6a4032': nasnet_6a4032,
+
+    'pnasnet5large': pnasnet5large,
+
+    'spnasnet': spnasnet,
 
     'efficientnet_b0': efficientnet_b0,
     'efficientnet_b1': efficientnet_b1,

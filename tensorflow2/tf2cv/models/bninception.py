@@ -10,7 +10,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, AvgPool2d, Concurrent, flatten,\
-    get_channel_axis, is_channels_first
+    is_channels_first
 
 
 class Inception3x3Branch(nn.Layer):
@@ -287,7 +287,9 @@ class InceptionBlock(nn.Layer):
         assert (len(mid1_channels_list) == 2)
         assert (len(mid2_channels_list) == 4)
 
-        self.branches = Concurrent(axis=get_channel_axis(data_format))
+        self.branches = Concurrent(
+            data_format=data_format,
+            name="branches")
         self.branches.children.append(conv1x1_block(
             in_channels=in_channels,
             out_channels=mid2_channels_list[0],
@@ -356,7 +358,9 @@ class ReductionBlock(nn.Layer):
         assert (len(mid1_channels_list) == 2)
         assert (len(mid2_channels_list) == 4)
 
-        self.branches = Concurrent(axis=get_channel_axis(data_format))
+        self.branches = Concurrent(
+            data_format=data_format,
+            name="branches")
         self.branches.children.append(Inception3x3Branch(
             in_channels=in_channels,
             out_channels=mid2_channels_list[1],

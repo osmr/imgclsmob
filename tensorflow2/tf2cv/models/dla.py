@@ -628,9 +628,8 @@ def dla102x2(**kwargs):
         Location for keeping the model parameters.
     """
     class DLABottleneckX64(DLABottleneckX):
-        def __init__(self, in_channels, out_channels, strides, bn_use_global_stats):
-            super(DLABottleneckX64, self).__init__(in_channels, out_channels, strides, bn_use_global_stats,
-                                                   cardinality=64)
+        def __init__(self, in_channels, out_channels, strides):
+            super(DLABottleneckX64, self).__init__(in_channels, out_channels, strides, cardinality=64)
 
     return get_dla(levels=[1, 3, 4, 1], channels=[128, 256, 512, 1024], res_body_class=DLABottleneckX64,
                    residual_root=True, model_name="dla102x2", **kwargs)

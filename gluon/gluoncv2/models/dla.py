@@ -184,7 +184,7 @@ class DLARoot(HybridBlock):
         x = F.concat(x2, x1, *extra, dim=1)
         x = self.conv(x)
         if self.residual:
-            x += last_branch
+            x = x + last_branch
         x = self.activ(x)
         return x
 

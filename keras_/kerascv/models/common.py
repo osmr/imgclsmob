@@ -391,9 +391,9 @@ def maxpool2d(x,
         if (padding[0] > 0) or (padding[1] > 0):
             import tensorflow as tf
             x = nn.Lambda(
-                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT"))
+                (lambda z: tf.pad(z, [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2], mode="REFLECT"))
                 if is_channels_first() else
-                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
+                (lambda z: tf.pad(z, [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]], mode="REFLECT")))(x)
         padding_ke = "valid"
     else:
         if ceil_mode:
@@ -467,9 +467,9 @@ def avgpool2d(x,
         if (padding[0] > 0) or (padding[1] > 0):
             import tensorflow as tf
             x = nn.Lambda(
-                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT"))
+                (lambda z: tf.pad(z, [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2], mode="REFLECT"))
                 if is_channels_first() else
-                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")))(x)
+                (lambda z: tf.pad(z, [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]], mode="REFLECT")))(x)
 
         x = nn.AvgPool2D(
             pool_size=pool_size,
@@ -548,9 +548,9 @@ def conv2d(x,
         if (padding[0] > 0) or (padding[1] > 0):
             import tensorflow as tf
             x = nn.Lambda(
-                (lambda z: tf.pad(z, [[0, 0], [0, 0], list(padding), list(padding)]))
+                (lambda z: tf.pad(z, [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]))
                 if is_channels_first() else
-                (lambda z: tf.pad(z, [[0, 0], list(padding), list(padding), [0, 0]])))(x)
+                (lambda z: tf.pad(z, [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]])))(x)
             if not ((padding[0] == padding[1]) and (kernel_size[0] == kernel_size[1]) and
                     (kernel_size[0] // 2 == padding[0])):
                 extra_pad = True

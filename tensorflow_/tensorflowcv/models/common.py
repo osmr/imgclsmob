@@ -260,9 +260,9 @@ def maxpool2d(x,
 
     if (padding[0] > 0) or (padding[1] > 0):
         if is_channels_first(data_format):
-            x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)], mode="REFLECT")
+            x = tf.pad(x, [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2], mode="REFLECT")
         else:
-            x = tf.pad(x, [[0, 0], list(padding), list(padding), [0, 0]], mode="REFLECT")
+            x = tf.pad(x, [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]], mode="REFLECT")
 
     x = tf.keras.layers.MaxPooling2D(
         pool_size=pool_size,
@@ -324,9 +324,9 @@ def avgpool2d(x,
 
     if (padding[0] > 0) or (padding[1] > 0):
         if is_channels_first(data_format):
-            x = tf.pad(x, [[0, 0], [0, 0], list(padding), list(padding)], mode="CONSTANT")
+            x = tf.pad(x, [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2], mode="CONSTANT")
         else:
-            x = tf.pad(x, [[0, 0], list(padding), list(padding), [0, 0]], mode="CONSTANT")
+            x = tf.pad(x, [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]], mode="CONSTANT")
 
     x = tf.keras.layers.AveragePooling2D(
         pool_size=pool_size,
@@ -400,9 +400,9 @@ def conv2d(x,
 
     if (padding[0] > 0) or (padding[1] > 0):
         if is_channels_first(data_format):
-            paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+            paddings_tf = [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]
         else:
-            paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+            paddings_tf = [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]]
         x = tf.pad(x, paddings=paddings_tf)
 
     if groups == 1:

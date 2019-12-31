@@ -22,15 +22,18 @@ class MLP(nn.Layer):
         Number of input/output channels.
     reduction_ratio : int, default 16
         Channel reduction ratio.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
                  reduction_ratio=16,
+                 data_format="channels_last",
                  **kwargs):
         super(MLP, self).__init__(**kwargs)
+        self.data_format = data_format
         mid_channels = channels // reduction_ratio
 
-        self.flatten = nn.Flatten()
         self.fc1 = nn.Dense(
             units=mid_channels,
             input_dim=channels,
@@ -42,7 +45,7 @@ class MLP(nn.Layer):
             name="fc2")
 
     def call(self, x, training=None):
-        x = self.flatten(x)
+        # x = flatten(x, self.data_format)
         x = self.fc1(x)
         x = self.activ(x)
         x = self.fc2(x)
@@ -79,6 +82,7 @@ class ChannelGate(nn.Layer):
         self.mlp = MLP(
             channels=channels,
             reduction_ratio=reduction_ratio,
+            data_format=data_format,
             name="mlp")
         self.sigmoid = tf.nn.sigmoid
 

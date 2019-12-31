@@ -22,10 +22,12 @@ from .models.diracnetv2 import *
 from .models.densenet import *
 from .models.wrn import *
 from .models.drn import *
+from .models.dpn import *
 from .models.darknet import *
 from .models.darknet53 import *
 from .models.bagnet import *
 from .models.dla import *
+from .models.hrnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -236,6 +238,12 @@ _models = {
     'drnd54': drnd54,
     'drnd105': drnd105,
 
+    'dpn68': dpn68,
+    'dpn68b': dpn68b,
+    'dpn98': dpn98,
+    'dpn107': dpn107,
+    'dpn131': dpn131,
+
     'darknet_ref': darknet_ref,
     'darknet_tiny': darknet_tiny,
     'darknet19': darknet19,
@@ -255,6 +263,16 @@ _models = {
     'dla102x': dla102x,
     'dla102x2': dla102x2,
     'dla169': dla169,
+
+    'hrnet_w18_small_v1': hrnet_w18_small_v1,
+    'hrnet_w18_small_v2': hrnet_w18_small_v2,
+    'hrnetv2_w18': hrnetv2_w18,
+    'hrnetv2_w30': hrnetv2_w30,
+    'hrnetv2_w32': hrnetv2_w32,
+    'hrnetv2_w40': hrnetv2_w40,
+    'hrnetv2_w44': hrnetv2_w44,
+    'hrnetv2_w48': hrnetv2_w48,
+    'hrnetv2_w64': hrnetv2_w64,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

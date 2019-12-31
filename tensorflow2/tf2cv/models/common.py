@@ -6,8 +6,8 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', '
            'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d', 'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d',
            'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
-           'ParametricSequential', 'DualPathSequential', 'Concurrent', 'ParametricConcurrent']
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'Identity',
+           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'ParametricConcurrent']
 
 import math
 from inspect import isfunction
@@ -218,9 +218,9 @@ class MaxPool2d(nn.Layer):
             self.data_format = data_format
         elif self.use_pad:
             if is_channels_first(data_format):
-                self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+                self.paddings_tf = [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]
             else:
-                self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+                self.paddings_tf = [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]]
 
         self.pool = nn.MaxPooling2D(
             pool_size=pool_size,
@@ -246,9 +246,9 @@ class MaxPool2d(nn.Layer):
                 padding = (padding[0], padding[1] + 1)
             if (padding[0] > 0) or (padding[1] > 0):
                 if is_channels_first(self.data_format):
-                    paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+                    paddings_tf = [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]
                 else:
-                    paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+                    paddings_tf = [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]]
                 x = tf.pad(x, paddings=paddings_tf)
         elif self.use_pad:
             x = tf.pad(x, paddings=self.paddings_tf)
@@ -300,9 +300,9 @@ class AvgPool2d(nn.Layer):
             self.data_format = data_format
         elif self.use_pad:
             if is_channels_first(data_format):
-                self.paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+                self.paddings_tf = [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]
             else:
-                self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+                self.paddings_tf = [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]]
 
         self.pool = nn.AveragePooling2D(
             pool_size=pool_size,
@@ -336,9 +336,9 @@ class AvgPool2d(nn.Layer):
                 padding = (padding[0], padding[1] + 1)
             if (padding[0] > 0) or (padding[1] > 0):
                 if is_channels_first(self.data_format):
-                    paddings_tf = [[0, 0], [0, 0], list(padding), list(padding)]
+                    paddings_tf = [[0, 0], [0, 0], [padding[0]] * 2, [padding[1]] * 2]
                 else:
-                    paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
+                    paddings_tf = [[0, 0], [padding[0]] * 2, [padding[1]] * 2, [0, 0]]
                 x = tf.pad(x, paddings=paddings_tf)
         elif self.use_pad:
             x = tf.pad(x, paddings=self.paddings_tf)
@@ -1804,6 +1804,18 @@ class SEBlock(nn.Layer):
         return x
 
 
+class Identity(nn.Layer):
+    """
+    Identity layer.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(Identity, self).__init__(**kwargs)
+
+    def call(self, x, training=None):
+        return x
+
+
 class SimpleSequential(nn.Layer):
     """
     A sequential layer that can be used instead of tf.keras.Sequential.
@@ -1813,8 +1825,14 @@ class SimpleSequential(nn.Layer):
         super(SimpleSequential, self).__init__(**kwargs)
         self.children = []
 
+    def __getitem__(self, i):
+        return self.children[i]
+
     def __len__(self):
         return len(self.children)
+
+    def add(self, layer):
+        self.children.append(layer)
 
     def call(self, x, training=None):
         for block in self.children:

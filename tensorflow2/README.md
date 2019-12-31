@@ -27,6 +27,7 @@ same ordinary normalization. Scripts for training/evaluating/converting models a
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
 - WRN (['Wide Residual Networks'](https://arxiv.org/abs/1605.07146))
 - DRN-C/DRN-D (['Dilated Residual Networks'](https://arxiv.org/abs/1705.09914))
+- DPN (['Dual Path Networks'](https://arxiv.org/abs/1707.01629))
 - DarkNet Ref/Tiny/19 (['Darknet: Open source neural networks in c'](https://github.com/pjreddie/darknet))
 - DarkNet-53 (['YOLOv3: An Incremental Improvement'](https://arxiv.org/abs/1804.02767))
 - BagNet (['Approximating CNNs with Bag-of-local-Features models works surprisingly well on ImageNet'](https://openreview.net/pdf?id=SkfMWhAqYQ))

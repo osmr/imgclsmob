@@ -18,7 +18,7 @@ for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 e
     input_image_size = img_size
     resize_inv_factor = scale
     batch_size = batch
-    model_description = "pytroch" + (rem if rem == "" else ", " + rem)
+    model_description = "pytorch" + (rem if rem == "" else ", " + rem)
     assert (not hasattr(net, "in_size")) or (input_image_size == net.in_size[0])
     ImageNet.benchmark(
         model=net,

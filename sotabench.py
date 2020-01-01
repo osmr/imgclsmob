@@ -1,23 +1,28 @@
 from torchbench.image_classification import ImageNet
-from pytorch.pytorchcv.model_provider import trained_model_metainfo_list
+from pytorch.pytorchcv.models.model_store import _model_sha1
 from pytorch.pytorchcv.model_provider import get_model as ptcv_get_model
 import torchvision.transforms as transforms
 import torch
 import math
 # import os
 
-for model_metainfo in trained_model_metainfo_list:
-    net = ptcv_get_model(model_metainfo[0], pretrained=True)
-    input_image_size = model_metainfo[3]
-    resize_inv_factor = model_metainfo[4]
-    batch_size = model_metainfo[5]
-    model_description = model_metainfo[6]
+for model_name, model_metainfo in _model_sha1:
+    net = ptcv_get_model(model_name, pretrained=True)
+    error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
+    if (ds != "in1k") or (img_size == 0):
+        continue
+    paper_model_name = caption
+    paper_arxiv_id = paper
+    input_image_size = img_size
+    resize_inv_factor = scale
+    batch_size = batch
+    model_description = "pytroch" + (rem if rem == "" else ", " + rem)
     assert (not hasattr(net, "in_size")) or (input_image_size == net.in_size[0])
     ImageNet.benchmark(
         model=net,
         model_description=model_description,
-        paper_model_name=model_metainfo[1],
-        paper_arxiv_id=model_metainfo[2],
+        paper_model_name=paper_model_name,
+        paper_arxiv_id=paper_arxiv_id,
         input_transform=transforms.Compose([
             transforms.Resize(int(math.ceil(float(input_image_size) / resize_inv_factor))),
             transforms.CenterCrop(input_image_size),

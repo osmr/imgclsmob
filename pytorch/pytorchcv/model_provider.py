@@ -1131,7 +1131,7 @@ trained_model_metainfo_list = (
     ('xception', 'Xception', '1610.02357', 299, 0.875, 200, 'pytorch, from [Cadene/pretrained...pytorch]'),
     ('inceptionv3', 'InceptionV3', '1512.00567', 299, 0.875, 200, 'pytorch, from [dmlc/gluon-cv]'),
     ('inceptionv4', 'InceptionV4', '1602.07261', 299, 0.875, 200, 'pytorch, from [Cadene/pretrained...pytorch]'),
-    ('inceptionresnetv2', 'InceptionResNetV', '1602.07261', 299, 0.875, 200,
+    ('inceptionresnetv2', 'InceptionResNetV2', '1602.07261', 299, 0.875, 200,
      'pytorch, from [Cadene/pretrained...pytorch]'),
     ('polynet', 'PolyNet', '1611.05725', 331, 0.875, 200, 'pytorch, from [Cadene/pretrained...pytorch]'),
     ('nasnet_4a1056', 'NASNet-A 4@1056', '1707.07012', 224, 0.875, 200, 'pytorch, from [Cadene/pretrained...pytorch]'),

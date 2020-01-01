@@ -4,9 +4,11 @@ from pytorch.pytorchcv.model_provider import get_model as ptcv_get_model
 import torchvision.transforms as transforms
 import torch
 import math
+from sys import version_info
 # import os
 
-for model_name, model_metainfo in _model_sha1:
+
+for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
     net = ptcv_get_model(model_name, pretrained=True)
     error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
     if (ds != "in1k") or (img_size == 0):

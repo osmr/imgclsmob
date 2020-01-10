@@ -823,11 +823,11 @@ class InceptionV4(tf.keras.Model):
         if dropout_rate > 0.0:
             self.output1.add(nn.Dropout(
                 rate=dropout_rate,
-                name="dropout"))
+                name="output1/dropout"))
         self.output1.add(nn.Dense(
             units=classes,
             input_dim=1536,
-            name="fc"))
+            name="output1/fc"))
 
     def call(self, x, training=None):
         x = self.features(x, training=training)

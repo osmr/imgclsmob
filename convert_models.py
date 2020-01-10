@@ -806,17 +806,26 @@ def convert_gl2tf2(dst_net,
                    dst_params,
                    dst_param_keys,
                    src_params,
-                   src_param_keys):
+                   src_param_keys,
+                   src_model):
+    if src_model.startswith("hrnet"):
+        src_param_keys = [key.replace('.transition.', '.atransition.') for key in src_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
+    if src_model.startswith("hrnet"):
+        src_param_keys = [key.replace('.atransition.', '.transition.') for key in src_param_keys]
+
     dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/depthwise_kernel:', '/weight_depthwise:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/transition/', '/atransition/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+    if src_model.startswith("hrnet"):
+        dst_param_keys = [key.replace('/transition/', '/atransition/') for key in dst_param_keys]
 
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -826,7 +835,10 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/weight_depthwise:', '/depthwise_kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/atransition/', '/transition/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
+    if src_model.startswith("hrnet"):
+        dst_param_keys = [key.replace('/atransition/', '/transition/') for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
     dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
@@ -851,6 +863,7 @@ def convert_gl2tf2(dst_net,
         dst_weight.assign(src_weight)
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
+        # print("src_key={},\tsrc_key2={},\tdst_key={}".format(src_key, src_params[src_key].name, dst_key))
         if dst_key.find("convgroup") >= 0:
             import mxnet as mx
             dst_key_stem = dst_key[:(dst_key.find("convgroup") + 9)]
@@ -1116,15 +1129,15 @@ def _prepare_dst_model(args, ctx, use_cuda):
         in_channels=args.dst_in_channels)
 
 
-def main():
-    args = parse_args()
+def update_and_initialize_logging(args):
+    """
+    Update arguments ans initialize logging.
 
-    ctx = None
-    use_cuda = False
-
-    if args.dst_fwk == "tf2":
-        dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
-
+    Parameters
+    ----------
+    args : ArgumentParser
+        Main script arguments.
+    """
     packages = []
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
@@ -1151,6 +1164,18 @@ def main():
         script_args=args,
         log_packages=packages,
         log_pip_packages=pip_packages)
+
+
+def main():
+    args = parse_args()
+
+    ctx = None
+    use_cuda = False
+
+    if args.dst_fwk == "tf2":
+        dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
+
+    update_and_initialize_logging(args=args)
 
     ctx = _init_ctx(args)
     src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2 = _prepare_src_model(args, ctx, use_cuda)
@@ -1225,7 +1250,8 @@ def main():
             dst_params=dst_params,
             dst_param_keys=dst_param_keys,
             src_params=src_params,
-            src_param_keys=src_param_keys)
+            src_param_keys=src_param_keys,
+            src_model=args.src_model)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "gluon":
         convert_pt2gl(
             dst_net=dst_net,

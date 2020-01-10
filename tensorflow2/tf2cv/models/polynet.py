@@ -222,7 +222,7 @@ class ConvSeqBranch(nn.Layer):
         self.conv_list = SimpleSequential(name="conv_list")
         for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                 out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.children.append(ConvBlock(
+            self.conv_list.add(ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
@@ -275,7 +275,7 @@ class PolyConvSeqBranch(nn.Layer):
         self.conv_list = ParametricSequential(name="conv_list")
         for i, (out_channels, kernel_size, strides, padding) in enumerate(zip(
                 out_channels_list, kernel_size_list, strides_list, padding_list)):
-            self.conv_list.children.append(PolyConv(
+            self.conv_list.add(PolyConv(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=kernel_size,
@@ -309,7 +309,7 @@ class TwoWayABlock(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(32, 48, 64),
             kernel_size_list=(1, 3, 3),
@@ -317,7 +317,7 @@ class TwoWayABlock(nn.Layer):
             padding_list=(0, 1, 1),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(32, 32),
             kernel_size_list=(1, 3),
@@ -325,7 +325,7 @@ class TwoWayABlock(nn.Layer):
             padding_list=(0, 1),
             data_format=data_format,
             name="branch2"))
-        self.branches.children.append(Conv1x1Branch(
+        self.branches.add(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=32,
             data_format=data_format,
@@ -335,7 +335,7 @@ class TwoWayABlock(nn.Layer):
             out_channels=in_channels,
             activation=None,
             data_format=data_format,
-            name="branch4")
+            name="conv")
 
     def call(self, x, training=None):
         x = self.branches(x, training=training)
@@ -361,7 +361,7 @@ class TwoWayBBlock(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(128, 160, 192),
             kernel_size_list=(1, (1, 7), (7, 1)),
@@ -369,7 +369,7 @@ class TwoWayBBlock(nn.Layer):
             padding_list=(0, (0, 3), (3, 0)),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(Conv1x1Branch(
+        self.branches.add(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=192,
             data_format=data_format,
@@ -379,7 +379,7 @@ class TwoWayBBlock(nn.Layer):
             out_channels=in_channels,
             activation=None,
             data_format=data_format,
-            name="branch3")
+            name="conv")
 
     def call(self, x, training=None):
         x = self.branches(x, training=training)
@@ -405,7 +405,7 @@ class TwoWayCBlock(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(192, 224, 256),
             kernel_size_list=(1, (1, 3), (3, 1)),
@@ -413,7 +413,7 @@ class TwoWayCBlock(nn.Layer):
             padding_list=(0, (0, 1), (1, 0)),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(Conv1x1Branch(
+        self.branches.add(Conv1x1Branch(
             in_channels=in_channels,
             out_channels=192,
             data_format=data_format,
@@ -423,7 +423,7 @@ class TwoWayCBlock(nn.Layer):
             out_channels=in_channels,
             activation=None,
             data_format=data_format,
-            name="branch3")
+            name="conv")
 
     def call(self, x, training=None):
         x = self.branches(x, training=training)
@@ -452,7 +452,7 @@ class PolyPreBBlock(nn.Layer):
         self.branches = ParametricConcurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(PolyConvSeqBranch(
+        self.branches.add(PolyConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(128, 160, 192),
             kernel_size_list=(1, (1, 7), (7, 1)),
@@ -461,7 +461,7 @@ class PolyPreBBlock(nn.Layer):
             num_blocks=num_blocks,
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(poly_conv1x1(
+        self.branches.add(poly_conv1x1(
             in_channels=in_channels,
             out_channels=192,
             num_blocks=num_blocks,
@@ -494,7 +494,7 @@ class PolyPreCBlock(nn.Layer):
         self.branches = ParametricConcurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(PolyConvSeqBranch(
+        self.branches.add(PolyConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(192, 224, 256),
             kernel_size_list=(1, (1, 3), (3, 1)),
@@ -503,7 +503,7 @@ class PolyPreCBlock(nn.Layer):
             num_blocks=num_blocks,
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(poly_conv1x1(
+        self.branches.add(poly_conv1x1(
             in_channels=in_channels,
             out_channels=192,
             num_blocks=num_blocks,
@@ -797,7 +797,7 @@ class ReductionAUnit(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(256, 256, 384),
             kernel_size_list=(1, 3, 3),
@@ -805,7 +805,7 @@ class ReductionAUnit(nn.Layer):
             padding_list=(0, 1, 0),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(384,),
             kernel_size_list=(3,),
@@ -813,7 +813,7 @@ class ReductionAUnit(nn.Layer):
             padding_list=(0,),
             data_format=data_format,
             name="branch2"))
-        self.branches.children.append(MaxPoolBranch(
+        self.branches.add(MaxPoolBranch(
             data_format=data_format,
             name="branch3"))
 
@@ -840,7 +840,7 @@ class ReductionBUnit(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(256, 256, 256),
             kernel_size_list=(1, 3, 3),
@@ -848,7 +848,7 @@ class ReductionBUnit(nn.Layer):
             padding_list=(0, 1, 0),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(256, 256),
             kernel_size_list=(1, 3),
@@ -856,7 +856,7 @@ class ReductionBUnit(nn.Layer):
             padding_list=(0, 0),
             data_format=data_format,
             name="branch2"))
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=in_channels,
             out_channels_list=(256, 384),
             kernel_size_list=(1, 3),
@@ -864,7 +864,7 @@ class ReductionBUnit(nn.Layer):
             padding_list=(0, 0),
             data_format=data_format,
             name="branch3"))
-        self.branches.children.append(MaxPoolBranch(
+        self.branches.add(MaxPoolBranch(
             data_format=data_format,
             name="branch4"))
 
@@ -889,10 +889,10 @@ class PolyBlock3a(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(MaxPoolBranch(
+        self.branches.add(MaxPoolBranch(
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(Conv3x3Branch(
+        self.branches.add(Conv3x3Branch(
             in_channels=64,
             out_channels=96,
             data_format=data_format,
@@ -919,7 +919,7 @@ class PolyBlock4a(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=160,
             out_channels_list=(64, 96),
             kernel_size_list=(1, 3),
@@ -927,7 +927,7 @@ class PolyBlock4a(nn.Layer):
             padding_list=(0, 0),
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(ConvSeqBranch(
+        self.branches.add(ConvSeqBranch(
             in_channels=160,
             out_channels_list=(64, 64, 64, 96),
             kernel_size_list=(1, (7, 1), (1, 7), 3),
@@ -957,10 +957,10 @@ class PolyBlock5a(nn.Layer):
         self.branches = Concurrent(
             data_format=data_format,
             name="branches")
-        self.branches.children.append(MaxPoolBranch(
+        self.branches.add(MaxPoolBranch(
             data_format=data_format,
             name="branch1"))
-        self.branches.children.append(Conv3x3Branch(
+        self.branches.add(Conv3x3Branch(
             in_channels=192,
             out_channels=192,
             data_format=data_format,

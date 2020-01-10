@@ -100,33 +100,35 @@ class HRBlock(HybridBlock):
             if num_branches > 1:
                 self.fuse_layers = nn.HybridSequential(prefix="")
                 for i in range(num_branches):
-                    fuse_layer = nn.HybridSequential(prefix="fuse_layer{}_".format(i + 1))
-                    for j in range(num_branches):
-                        if j > i:
-                            fuse_layer.add(UpSamplingBlock(
-                                in_channels=in_channels_list[j],
-                                out_channels=in_channels_list[i],
-                                bn_use_global_stats=bn_use_global_stats,
-                                scale_factor=2 ** (j - i)))
-                        elif j == i:
-                            fuse_layer.add(Identity())
-                        else:
-                            conv3x3_seq = nn.HybridSequential(prefix="conv3x3_seq{}_".format(j + 1))
-                            for k in range(i - j):
-                                if k == i - j - 1:
-                                    conv3x3_seq.add(conv3x3_block(
-                                        in_channels=in_channels_list[j],
-                                        out_channels=in_channels_list[i],
-                                        strides=2,
-                                        activation=None,
-                                        bn_use_global_stats=bn_use_global_stats))
-                                else:
-                                    conv3x3_seq.add(conv3x3_block(
-                                        in_channels=in_channels_list[j],
-                                        out_channels=in_channels_list[j],
-                                        strides=2,
-                                        bn_use_global_stats=bn_use_global_stats))
-                            fuse_layer.add(conv3x3_seq)
+                    fuse_layer = nn.HybridSequential(prefix="fuselayer{}_".format(i + 1))
+                    with fuse_layer.name_scope():
+                        for j in range(num_branches):
+                            if j > i:
+                                fuse_layer.add(UpSamplingBlock(
+                                    in_channels=in_channels_list[j],
+                                    out_channels=in_channels_list[i],
+                                    bn_use_global_stats=bn_use_global_stats,
+                                    scale_factor=2 ** (j - i)))
+                            elif j == i:
+                                fuse_layer.add(Identity())
+                            else:
+                                conv3x3_seq = nn.HybridSequential(prefix="conv3x3seq{}_".format(j + 1))
+                                with conv3x3_seq.name_scope():
+                                    for k in range(i - j):
+                                        if k == i - j - 1:
+                                            conv3x3_seq.add(conv3x3_block(
+                                                in_channels=in_channels_list[j],
+                                                out_channels=in_channels_list[i],
+                                                strides=2,
+                                                activation=None,
+                                                bn_use_global_stats=bn_use_global_stats))
+                                        else:
+                                            conv3x3_seq.add(conv3x3_block(
+                                                in_channels=in_channels_list[j],
+                                                out_channels=in_channels_list[j],
+                                                strides=2,
+                                                bn_use_global_stats=bn_use_global_stats))
+                                fuse_layer.add(conv3x3_seq)
                     self.fuse_layers.add(fuse_layer)
                 self.activ = nn.Activation("relu")
 

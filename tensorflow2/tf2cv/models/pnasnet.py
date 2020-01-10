@@ -581,14 +581,14 @@ class PNASNet(tf.keras.Model):
             first_ordinals=2,
             last_ordinals=2,
             name="features")
-        self.features.children.append(NASNetInitBlock(
+        self.features.add(NASNetInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
             data_format=data_format,
             name="init_block"))
         in_channels = init_block_channels
 
-        self.features.children.append(Stem1Unit(
+        self.features.add(Stem1Unit(
             in_channels=in_channels,
             out_channels=stem1_blocks_channels,
             data_format=data_format,
@@ -603,7 +603,7 @@ class PNASNet(tf.keras.Model):
                 reduction = (j == 0)
                 extra_padding = (j == 0) and (i not in [0, 2])
                 match_prev_layer_dimensions = (j == 1) or ((j == 0) and (i == 0))
-                stage.children.append(PnasUnit(
+                stage.add(PnasUnit(
                     in_channels=in_channels,
                     prev_in_channels=prev_in_channels,
                     out_channels=out_channels,
@@ -614,10 +614,10 @@ class PNASNet(tf.keras.Model):
                     name="unit{}".format(j + 1)))
                 prev_in_channels = in_channels
                 in_channels = out_channels
-            self.features.children.append(stage)
+            self.features.add(stage)
 
-        self.features.children.append(nn.ReLU(name="activ"))
-        self.features.children.append(nn.AveragePooling2D(
+        self.features.add(nn.ReLU(name="activ"))
+        self.features.add(nn.AveragePooling2D(
             pool_size=11,
             strides=1,
             data_format=data_format,

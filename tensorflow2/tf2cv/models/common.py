@@ -1832,6 +1832,7 @@ class SimpleSequential(nn.Layer):
         return len(self.children)
 
     def add(self, layer):
+        layer._name = "{}/{}".format(self.name, layer._name)
         self.children.append(layer)
 
     def call(self, x, training=None):
@@ -1840,7 +1841,7 @@ class SimpleSequential(nn.Layer):
         return x
 
 
-class ParametricSequential(nn.Layer):
+class ParametricSequential(SimpleSequential):
     """
     A sequential container for layers with parameters.
     Layers will be executed in the order they are added.
@@ -1848,10 +1849,6 @@ class ParametricSequential(nn.Layer):
     def __init__(self,
                  **kwargs):
         super(ParametricSequential, self).__init__(**kwargs)
-        self.children = []
-
-    def __len__(self):
-        return len(self.children)
 
     def call(self, x, **kwargs):
         for block in self.children:
@@ -1904,7 +1901,7 @@ class DualPathSequential(SimpleSequential):
             return x1
 
 
-class Concurrent(nn.Layer):
+class Concurrent(SimpleSequential):
     """
     A container for concatenation of layers.
 
@@ -1922,7 +1919,6 @@ class Concurrent(nn.Layer):
         super(Concurrent, self).__init__(**kwargs)
         self.axis = get_channel_axis(data_format)
         self.stack = stack
-        self.children = []
 
     def call(self, x, training=None):
         out = []
@@ -1935,7 +1931,7 @@ class Concurrent(nn.Layer):
         return out
 
 
-class ParametricConcurrent(nn.Layer):
+class ParametricConcurrent(SimpleSequential):
     """
     A container for concatenation of layers with parameters.
 
@@ -1949,7 +1945,6 @@ class ParametricConcurrent(nn.Layer):
                  **kwargs):
         super(ParametricConcurrent, self).__init__(**kwargs)
         self.axis = get_channel_axis(data_format)
-        self.children = []
 
     def call(self, x, **kwargs):
         out = []

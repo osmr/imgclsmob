@@ -118,7 +118,7 @@ class HRBlock(nn.Layer):
                     elif j == i:
                         fuse_layer.add(Identity(name=fuse_layer_name + "/block{}".format(j + 1)))
                     else:
-                        conv3x3_seq_name = fuse_layer_name + "/conv3x3_seq{}".format(j + 1)
+                        conv3x3_seq_name = fuse_layer_name + "/block{}_conv3x3_seq".format(j + 1)
                         conv3x3_seq = SimpleSequential(name=conv3x3_seq_name)
                         for k in range(i - j):
                             if k == i - j - 1:
@@ -324,7 +324,7 @@ class HRFinalBlock(nn.Layer):
                 strides=1,
                 bottleneck=True,
                 data_format=data_format,
-                name="block{}".format(i + 1)))
+                name="inc_blocks/block{}".format(i + 1)))
         self.down_blocks = SimpleSequential(name="down_blocks")
         for i in range(len(in_channels_list) - 1):
             self.down_blocks.add(conv3x3_block(
@@ -333,7 +333,7 @@ class HRFinalBlock(nn.Layer):
                 strides=2,
                 use_bias=True,
                 data_format=data_format,
-                name="block{}".format(i + 1)))
+                name="down_blocks/block{}".format(i + 1)))
         self.final_layer = conv1x1_block(
             in_channels=1024,
             out_channels=2048,

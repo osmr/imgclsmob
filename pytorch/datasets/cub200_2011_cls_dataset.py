@@ -134,6 +134,14 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
 
     def update(self,
                args):
+        """
+        Update CUB-200-2011 dataset metainfo after user customizing.
+
+        Parameters:
+        ----------
+        args : ArgumentParser
+            Main script arguments.
+        """
         super(CUB200MetaInfo, self).update(args)
         if args.no_aux:
             self.net_extra_kwargs = None

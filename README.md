@@ -104,7 +104,7 @@ Some remarks:
 | MSDNet | A | AB | - | - | - | [link](https://arxiv.org/abs/1703.09844) | [link](https://github.com/gaohuang/MSDNet) | 2017 |
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |
 | ESPNetv2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1811.11431) | [link](https://github.com/sacmehta/ESPNetv2) | 2018 |
-| HRNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1908.07919) | [link](https://github.com/HRNet/HRNet-Image-Classification) | 2019 |
+| HRNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1908.07919) | [link](https://github.com/HRNet/HRNet-Image-Classification) | 2019 |
 | X-DenseNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
 | SqueezeNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | [link](https://github.com/DeepScale/SqueezeNet) | 2016 |
 | SqueezeResNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | - | 2016 |
@@ -124,12 +124,12 @@ Some remarks:
 | FBNet-C | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
 | Xception | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |
-| InceptionV4 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
-| InceptionResNetV2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
-| PolyNet | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1611.05725) | [link](https://github.com/open-mmlab/polynet) | 2016 |
-| NASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
-| NASNet-Mobile | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
-| PNASNet-Large | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
+| InceptionV4 | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
+| InceptionResNetV2 | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1602.07261) | [link](https://github.com/tensorflow/models) | 2016 |
+| PolyNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1611.05725) | [link](https://github.com/open-mmlab/polynet) | 2016 |
+| NASNet-Large | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
+| NASNet-Mobile | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1707.07012) | [link](https://github.com/tensorflow/models) | 2017 |
+| PNASNet-Large | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1712.00559) | [link](https://github.com/tensorflow/models) | 2017 |
 | SPNASNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1904.02877) | [link](https://github.com/dstamoulis/single-path-nas) | 2019 |
 | EfficientNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1905.11946) | [link](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet) | 2019 |
 | MixNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1907.09595) | [link](https://github.com/tensorflow/tpu/tree/master/models/official/mnasnet/mixnet) | 2019 |

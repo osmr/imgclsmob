@@ -823,13 +823,13 @@ class PolyNet(nn.Module):
                         poly_scale=poly_scale))
             self.features.add_module("stage{}".format(i + 1), stage)
 
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=9,
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
-        self.output.add_module('fc', nn.Linear(
+        self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
+        self.output.add_module("fc", nn.Linear(
             in_features=2048,
             out_features=num_classes))
 

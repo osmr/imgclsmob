@@ -402,24 +402,24 @@ class DPN(nn.Module):
                     b_case=b_case))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', DPNFinalBlock(channels=in_channels))
+        self.features.add_module("final_block", DPNFinalBlock(channels=in_channels))
 
         self.output = nn.Sequential()
         if for_training or not test_time_pool:
-            self.output.add_module('final_pool', nn.AdaptiveAvgPool2d(output_size=1))
-            self.output.add_module('classifier', conv1x1(
+            self.output.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
+            self.output.add_module("classifier", conv1x1(
                 in_channels=in_channels,
                 out_channels=num_classes,
                 bias=True))
         else:
-            self.output.add_module('avg_pool', nn.AvgPool2d(
+            self.output.add_module("avg_pool", nn.AvgPool2d(
                 kernel_size=7,
                 stride=1))
-            self.output.add_module('classifier', conv1x1(
+            self.output.add_module("classifier", conv1x1(
                 in_channels=in_channels,
                 out_channels=num_classes,
                 bias=True))
-            self.output.add_module('avgmax_pool', GlobalAvgMaxPool2D())
+            self.output.add_module("avgmax_pool", GlobalAvgMaxPool2D())
 
         self._init_params()
 

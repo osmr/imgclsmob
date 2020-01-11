@@ -29,7 +29,6 @@ class PeleeBranch1(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -70,7 +69,6 @@ class PeleeBranch2(HybridBlock):
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -209,7 +207,6 @@ class TransitionBlock(HybridBlock):
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -335,7 +332,6 @@ def get_peleenet(model_name=None,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     init_block_channels = 32
     growth_rate = 32
     layers = [3, 4, 8, 6]

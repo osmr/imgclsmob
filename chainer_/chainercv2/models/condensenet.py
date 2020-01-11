@@ -134,7 +134,7 @@ class CondenseComplexConv(Chain):
                 shape=(in_channels,),
                 xp=self.xp,
                 dtype=np.int32)
-            self.register_persistent('index')
+            self.register_persistent("index")
 
     def __call__(self, x):
         x = self.xp.take(x.array, self.index, axis=1)
@@ -308,7 +308,7 @@ class CondenseLinear(Chain):
                 shape=(drop_in_units,),
                 xp=self.xp,
                 dtype=np.int32)
-            self.register_persistent('index')
+            self.register_persistent("index")
 
     def __call__(self, x):
         x = self.xp.take(x.array, self.index, axis=1)
@@ -368,17 +368,17 @@ class CondenseNet(Chain):
                     setattr(self.features, "stage{}".format(i + 1), stage)
                 setattr(self.features, 'post_activ', PostActivation(
                     in_channels=in_channels))
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'fc', CondenseLinear(
+                setattr(self.output, "fc", CondenseLinear(
                     units=classes,
                     in_units=in_channels))
 

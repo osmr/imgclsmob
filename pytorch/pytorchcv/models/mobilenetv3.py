@@ -249,12 +249,12 @@ class MobileNetV3(nn.Module):
                     use_se=use_se_flag))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', MobileNetV3FinalBlock(
+        self.features.add_module("final_block", MobileNetV3FinalBlock(
             in_channels=in_channels,
             out_channels=final_block_channels,
             use_se=final_use_se))
         in_channels = final_block_channels
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 
@@ -302,7 +302,6 @@ def get_mobilenetv3(version,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     if version == "small":
         init_block_channels = 16
         channels = [[16], [24, 24], [40, 40, 40, 48, 48], [96, 96, 96]]

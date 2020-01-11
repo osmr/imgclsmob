@@ -579,16 +579,16 @@ class CIFARWRN1bit(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', conv1x1_block_1bit(
+                setattr(self.output, "final_conv", conv1x1_block_1bit(
                     in_channels=in_channels,
                     out_channels=classes,
                     activate=False,
                     binarized=binarized))
-                setattr(self.output, 'final_pool', partial(
+                setattr(self.output, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=8,
                     stride=1))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

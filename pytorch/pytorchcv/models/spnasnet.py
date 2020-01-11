@@ -209,12 +209,12 @@ class SPNASNet(nn.Module):
                     exp_factor=exp_factor))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', SPNASFinalBlock(
+        self.features.add_module("final_block", SPNASFinalBlock(
             in_channels=in_channels,
             out_channels=final_block_channels[1],
             mid_channels=final_block_channels[0]))
         in_channels = final_block_channels[1]
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

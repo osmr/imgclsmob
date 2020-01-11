@@ -491,8 +491,8 @@ class PNASNet(nn.Module):
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=0.5))
-        self.output.add_module('fc', nn.Linear(
+        self.output.add_module("dropout", nn.Dropout(p=0.5))
+        self.output.add_module("fc", nn.Linear(
             in_features=in_channels,
             out_features=num_classes))
 

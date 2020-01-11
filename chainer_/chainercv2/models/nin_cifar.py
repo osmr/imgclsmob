@@ -118,11 +118,11 @@ class CIFARNIN(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', NINConv(
+                setattr(self.output, "final_conv", NINConv(
                     in_channels=in_channels,
                     out_channels=classes,
                     ksize=1))
-                setattr(self.output, 'final_pool', partial(
+                setattr(self.output, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=8,
                     stride=1))

@@ -227,13 +227,13 @@ class MnasNet(nn.Module):
                     se_factor=se_factor))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', MnasFinalBlock(
+        self.features.add_module("final_block", MnasFinalBlock(
             in_channels=in_channels,
             out_channels=final_block_channels[1],
             mid_channels=final_block_channels[0],
             use_skip=final_block_use_skip))
         in_channels = final_block_channels[1]
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

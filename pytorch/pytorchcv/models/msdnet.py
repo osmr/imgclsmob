@@ -201,11 +201,11 @@ class MSDInitLayer(nn.Module):
         self.scale_blocks = MultiOutputSequential()
         for i, out_channels_per_scale in enumerate(out_channels):
             if i == 0:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), ResInitBlock(
+                self.scale_blocks.add_module("scale_block{}".format(i + 1), ResInitBlock(
                     in_channels=in_channels,
                     out_channels=out_channels_per_scale))
             else:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv3x3_block(
+                self.scale_blocks.add_module("scale_block{}".format(i + 1), conv3x3_block(
                     in_channels=in_channels,
                     out_channels=out_channels_per_scale,
                     stride=2))
@@ -246,13 +246,13 @@ class MSDLayer(nn.Module):
         self.scale_blocks = nn.Sequential()
         for i in range(out_scales):
             if (i == 0) and (self.dec_scales == 0):
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDFirstScaleBlock(
+                self.scale_blocks.add_module("scale_block{}".format(i + 1), MSDFirstScaleBlock(
                     in_channels=in_channels[self.dec_scales + i],
                     out_channels=out_channels[i],
                     use_bottleneck=use_bottleneck,
                     bottleneck_factor=bottleneck_factors[self.dec_scales + i]))
             else:
-                self.scale_blocks.add_module('scale_block{}'.format(i + 1), MSDScaleBlock(
+                self.scale_blocks.add_module("scale_block{}".format(i + 1), MSDScaleBlock(
                     in_channels_prev=in_channels[self.dec_scales + i - 1],
                     in_channels=in_channels[self.dec_scales + i],
                     out_channels=out_channels[i],
@@ -293,7 +293,7 @@ class MSDTransitionLayer(nn.Module):
 
         self.scale_blocks = MultiBlockSequential()
         for i in range(len(out_channels)):
-            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv1x1_block(
+            self.scale_blocks.add_module("scale_block{}".format(i + 1), conv1x1_block(
                 in_channels=in_channels[i],
                 out_channels=out_channels[i]))
 
@@ -327,11 +327,11 @@ class MSDFeatureBlock(nn.Module):
         self.blocks = nn.Sequential()
         for i, out_channels_per_layer in enumerate(out_channels):
             if len(bottleneck_factors[i]) == 0:
-                self.blocks.add_module('trans{}'.format(i + 1), MSDTransitionLayer(
+                self.blocks.add_module("trans{}".format(i + 1), MSDTransitionLayer(
                     in_channels=in_channels,
                     out_channels=out_channels_per_layer))
             else:
-                self.blocks.add_module('layer{}'.format(i + 1), MSDLayer(
+                self.blocks.add_module("layer{}".format(i + 1), MSDLayer(
                     in_channels=in_channels,
                     out_channels=out_channels_per_layer,
                     use_bottleneck=use_bottleneck,

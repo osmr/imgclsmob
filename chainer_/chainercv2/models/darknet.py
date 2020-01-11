@@ -107,19 +107,19 @@ class DarkNet(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', L.Convolution2D(
+                setattr(self.output, "final_conv", L.Convolution2D(
                     in_channels=in_channels,
                     out_channels=classes,
                     ksize=1))
                 if cls_activ:
-                    setattr(self.output, 'final_activ', partial(
+                    setattr(self.output, "final_activ", partial(
                         F.leaky_relu,
                         slope=alpha))
-                setattr(self.output, 'final_pool', partial(
+                setattr(self.output, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=avg_pool_size,
                     stride=1))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

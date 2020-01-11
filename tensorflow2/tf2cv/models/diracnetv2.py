@@ -181,6 +181,7 @@ class DiracNetV2(tf.keras.Model):
                     data_format=data_format,
                     name="pool{}".format(i + 1)))
             self.features.add(stage)
+        self.features.add(nn.ReLU(name="final_activ"))
         self.features.add(nn.AveragePooling2D(
             pool_size=7,
             strides=1,

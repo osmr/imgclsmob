@@ -603,14 +603,14 @@ class InceptionV4(nn.Module):
                 stage.add_module("unit{}".format(j + 1), unit())
             self.features.add_module("stage{}".format(i + 1), stage)
 
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=8,
             stride=1))
 
         self.output = nn.Sequential()
         if dropout_rate > 0.0:
-            self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
-        self.output.add_module('fc', nn.Linear(
+            self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
+        self.output.add_module("fc", nn.Linear(
             in_features=1536,
             out_features=num_classes))
 

@@ -363,7 +363,7 @@ class DRN(nn.Module):
                     residual=(residuals[i][j] == 1)))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=28,
             stride=1))
 

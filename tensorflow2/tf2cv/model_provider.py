@@ -20,6 +20,7 @@ from .models.cbamresnet import *
 from .models.pyramidnet import *
 from .models.diracnetv2 import *
 from .models.densenet import *
+from .models.peleenet import *
 from .models.wrn import *
 from .models.drn import *
 from .models.dpn import *
@@ -227,6 +228,8 @@ _models = {
     'densenet161': densenet161,
     'densenet169': densenet169,
     'densenet201': densenet201,
+
+    'peleenet': peleenet,
 
     'wrn50_2': wrn50_2,
 

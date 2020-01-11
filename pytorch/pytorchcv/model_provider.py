@@ -107,6 +107,9 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
+from .models.selecsls import *
+from .models.others.oth_selecsls import *
+
 __all__ = ['get_model']
 
 
@@ -918,6 +921,16 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'selecsls42': selecsls42,
+    'selecsls42b': selecsls42b,
+    'selecsls60': selecsls60,
+    'selecsls60b': selecsls60b,
+    'selecsls84': selecsls84,
+
+    'oth_selecsls42b': oth_selecsls42b,
+    'oth_selecsls60': oth_selecsls60,
+    'oth_selecsls60b': oth_selecsls60b,
 }
 
 

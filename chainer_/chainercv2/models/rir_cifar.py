@@ -200,7 +200,7 @@ class CIFARRiR(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', conv1x1_block(
+                setattr(self.output, "final_conv", conv1x1_block(
                     in_channels=in_channels,
                     out_channels=classes,
                     activation=None))
@@ -208,7 +208,7 @@ class CIFARRiR(Chain):
                     F.average_pooling_2d,
                     ksize=8,
                     stride=1))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

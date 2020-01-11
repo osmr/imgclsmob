@@ -280,22 +280,22 @@ class GhostNet(Chain):
                                 use_se=use_se_flag))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', conv1x1_block(
+                setattr(self.features, "final_block", conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels))
                 in_channels = final_block_channels
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', GhostClassifier(
+                setattr(self.output, "final_conv", GhostClassifier(
                     in_channels=in_channels,
                     out_channels=classes,
                     mid_channels=classifier_mid_channels))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

@@ -439,11 +439,11 @@ class MixNet(Chain):
                                 activation=activation))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', conv1x1_block(
+                setattr(self.features, "final_block", conv1x1_block(
                     in_channels=in_channels,
                     out_channels=final_block_channels))
                 in_channels = final_block_channels
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))

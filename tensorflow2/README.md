@@ -25,6 +25,7 @@ same ordinary normalization. Scripts for training/evaluating/converting models a
 - PyramidNet (['Deep Pyramidal Residual Networks'](https://arxiv.org/abs/1610.02915))
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))
+- PeleeNet (['Pelee: A Real-Time Object Detection System on Mobile Devices'](https://arxiv.org/abs/1804.06882))
 - WRN (['Wide Residual Networks'](https://arxiv.org/abs/1605.07146))
 - DRN-C/DRN-D (['Dilated Residual Networks'](https://arxiv.org/abs/1705.09914))
 - DPN (['Dual Path Networks'](https://arxiv.org/abs/1707.01629))
@@ -179,11 +180,15 @@ Some remarks:
 | AirNet50-1x64d (r=16) | 22.89 | 6.50 | 25,714,952 | 4,399.97M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnet50_1x64d_r16-0650-b7bb8662.tf2.h5.log)) |
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
 | BAM-ResNet-50 | 23.67 | 6.97 | 25,915,099 | 4,196.09M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bam_resnet50-0697-3a4101c8.tf2.h5.log)) |
+| CBAM-ResNet-50 | 22.96 | 6.39 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/cbam_resnet50-0639-1d0bdb0e.tf2.h5.log)) |
 | PyramidNet-101 (a=360) | 22.68 | 6.51 | 42,455,070 | 8,743.54M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/pyramidnet101_a360-0651-9db84918.tf2.h5.log)) |
+| DiracNetV2-18 | 30.59 | 11.13 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet18v2-1113-4d687b74.tf2.h5.log)) |
+| DiracNetV2-34 | 27.92 | 9.50 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet34v2-0950-161d97fd.tf2.h5.log)) |
 | DenseNet-121 | 23.23 | 6.84 | 7,978,856 | 2,872.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet121-0684-e9196a9c.tf2.h5.log)) |
 | DenseNet-161 | 22.37 | 6.18 | 28,681,000 | 7,793.16M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet161-0618-e77cf292.tf2.h5.log)) |
 | DenseNet-169 | 22.13 | 6.06 | 14,149,480 | 3,403.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/densenet169-0606-f708dc33.tf2.h5.log)) |
 | DenseNet-201 | 21.57 | 5.91 | 20,013,928 | 4,347.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.426/densenet201-0591-450c6568.tf2.h5.log)) |
+| PeleeNet | 31.65 | 11.29 | 2,802,248 | 514.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/peleenet-1129-e1c3cdea.tf2.h5.log)) |
 | WRN-50-2 | 22.10 | 6.14 | 68,849,128 | 11,405.42M | From [szagoruyko/functional-zoo] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/wrn50_2-0614-bea17aa9.tf2.h5.log)) |
 | DRN-C-26 | 25.70 | 7.88 | 21,126,584 | 16,993.90M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc26-0788-571eb2dc.tf2.h5.log)) |
 | DRN-C-42 | 23.74 | 6.93 | 31,234,744 | 25,093.75M | From [fyu/drn] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.425/drnc42-0693-52dd6028.tf2.h5.log)) |
@@ -292,6 +297,14 @@ Some remarks:
 | SPNASNet | 26.97 | 8.73 | 4,421,616 | 346.73M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/spnasnet-0873-a38a57a3.tf2.h5.log)) |
 | EfficientNet-B0 | 24.49 | 7.25 | 5,288,548 | 413.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/efficientnet_b0-0725-fc13925b.tf2.h5.log)) |
 | EfficientNet-B1 | 22.93 | 6.30 | 7,794,184 | 730.44M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/efficientnet_b1-0630-82e0c512.tf2.h5.log)) |
+| EfficientNet-B0b | 23.05 | 6.68 | 5,288,548 | 413.13M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b0b-0668-77127244.tf2.h5.log)) |
+| EfficientNet-B1b | 21.17 | 5.77 | 7,794,184 | 730.44M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b1b-0577-b294ee16.tf2.h5.log)) |
+| EfficientNet-B2b | 20.22 | 5.30 | 9,109,994 | 1,049.29M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b2b-0530-55bcdc5d.tf2.h5.log)) |
+| EfficientNet-B3b | 19.14 | 4.69 | 12,233,232 | 1,923.98M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b3b-0469-b8210e1a.tf2.h5.log)) |
+| EfficientNet-B4b | 17.52 | 3.99 | 19,341,616 | 4,597.56M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b4b-0399-5e35e9c5.tf2.h5.log)) |
+| EfficientNet-B5b | 16.43 | 3.43 | 30,389,784 | 10,674.67M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b5b-0343-0ed0c69d.tf2.h5.log)) |
+| EfficientNet-B6b | 15.96 | 3.12 | 43,040,704 | 19,761.35M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b6b-0312-faf63104.tf2.h5.log)) |
+| EfficientNet-B7b | 15.85 | 3.15 | 66,347,960 | 38,949.07M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/efficientnet_b7b-0315-4024912e.tf2.h5.log)) |
 | MixNet-S | 24.34 | 7.37 | 4,134,606 | 260.26M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_s-0737-d68d63f1.tf2.h5.log)) |
 | MixNet-M | 23.29 | 6.79 | 5,014,382 | 366.05M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_m-0679-f74eab6c.tf2.h5.log)) |
 | MixNet-L | 21.57 | 6.01 | 7,329,252 | 590.45M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_l-0601-5c2ccc0c.tf2.h5.log)) |

@@ -312,7 +312,7 @@ class EfficientNet(nn.Module):
                         tf_mode=tf_mode))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('final_block', conv1x1_block(
+        self.features.add_module("final_block", conv1x1_block(
             in_channels=in_channels,
             out_channels=final_block_channels,
             bn_eps=bn_eps,

@@ -29,7 +29,6 @@ class PeleeBranch1(Chain):
     stride : int or tuple/list of 2 int, default 1
         Stride of the second convolution.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -64,7 +63,6 @@ class PeleeBranch2(Chain):
     mid_channels : int
         Number of intermediate channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -186,7 +184,6 @@ class TransitionBlock(Chain):
     out_channels : int
         Number of output channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -276,7 +273,7 @@ class PeleeNet(Chain):
                 setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
-                setattr(self.output, 'dropout', partial(
+                setattr(self.output, "dropout", partial(
                     F.dropout,
                     ratio=dropout_rate))
                 setattr(self.output, "fc", L.Linear(
@@ -305,7 +302,6 @@ def get_peleenet(model_name=None,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-
     init_block_channels = 32
     growth_rate = 32
     layers = [3, 4, 8, 6]

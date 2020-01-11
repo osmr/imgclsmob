@@ -73,10 +73,10 @@ class ChannelGate(nn.Layer):
         super(ChannelGate, self).__init__(**kwargs)
         self.data_format = data_format
 
-        self.avg_pool = nn.GlobalAveragePooling2D(
+        self.avg_pool = nn.GlobalAvgPool2D(
             data_format=data_format,
             name="avg_pool")
-        self.max_pool = nn.GlobalAveragePooling2D(
+        self.max_pool = nn.GlobalMaxPool2D(
             data_format=data_format,
             name="max_pool")
         self.mlp = MLP(

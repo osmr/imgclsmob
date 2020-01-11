@@ -521,11 +521,11 @@ class FishNet(Chain):
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', conv1x1(
+                setattr(self.output, "final_conv", conv1x1(
                     in_channels=in_channels,
                     out_channels=classes,
                     use_bias=True))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

@@ -34,7 +34,7 @@ class CIFAR10MSDInitLayer(nn.Module):
         self.scale_blocks = MultiOutputSequential()
         for i, out_channels_per_scale in enumerate(out_channels):
             stride = 1 if i == 0 else 2
-            self.scale_blocks.add_module('scale_block{}'.format(i + 1), conv3x3_block(
+            self.scale_blocks.add_module("scale_block{}".format(i + 1), conv3x3_block(
                 in_channels=in_channels,
                 out_channels=out_channels_per_scale,
                 stride=stride))

@@ -188,15 +188,15 @@ class SqueezeNet(nn.Module):
                     residual=((residuals is not None) and (residuals[i][j] == 1))))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('dropout', nn.Dropout(p=0.5))
+        self.features.add_module("dropout", nn.Dropout(p=0.5))
 
         self.output = nn.Sequential()
-        self.output.add_module('final_conv', nn.Conv2d(
+        self.output.add_module("final_conv", nn.Conv2d(
             in_channels=in_channels,
             out_channels=num_classes,
             kernel_size=1))
-        self.output.add_module('final_activ', nn.ReLU(inplace=True))
-        self.output.add_module('final_pool', nn.AvgPool2d(
+        self.output.add_module("final_activ", nn.ReLU(inplace=True))
+        self.output.add_module("final_pool", nn.AvgPool2d(
             kernel_size=13,
             stride=1))
 

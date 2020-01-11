@@ -637,7 +637,7 @@ class InceptionV4(Chain):
                             setattr(stage, "unit{}".format(j + 1), unit())
                     setattr(self.features, "stage{}".format(i + 1), stage)
 
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=8,
                     stride=1))
@@ -645,14 +645,14 @@ class InceptionV4(Chain):
             in_channels = 1536
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
                 if dropout_rate > 0.0:
-                    setattr(self.output, 'dropout', partial(
+                    setattr(self.output, "dropout", partial(
                         F.dropout,
                         ratio=dropout_rate))
-                setattr(self.output, 'fc', L.Linear(
+                setattr(self.output, "fc", L.Linear(
                     in_size=in_channels,
                     out_size=classes))
 

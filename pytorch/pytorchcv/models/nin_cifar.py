@@ -104,11 +104,11 @@ class CIFARNIN(nn.Module):
             self.features.add_module("stage{}".format(i + 1), stage)
 
         self.output = nn.Sequential()
-        self.output.add_module('final_conv', NINConv(
+        self.output.add_module("final_conv", NINConv(
             in_channels=in_channels,
             out_channels=num_classes,
             kernel_size=1))
-        self.output.add_module('final_pool', nn.AvgPool2d(
+        self.output.add_module("final_pool", nn.AvgPool2d(
             kernel_size=8,
             stride=1))
 

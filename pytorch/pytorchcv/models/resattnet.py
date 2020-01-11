@@ -157,7 +157,7 @@ class ResBlockSequence(nn.Module):
         super(ResBlockSequence, self).__init__()
         self.blocks = nn.Sequential()
         for i in range(length):
-            self.blocks.add_module('block{}'.format(i + 1), ResBlock(
+            self.blocks.add_module("block{}".format(i + 1), ResBlock(
                 in_channels=in_channels,
                 out_channels=out_channels))
 
@@ -293,22 +293,22 @@ class AttBlock(nn.Module):
         up_seq = nn.Sequential()
         skip_seq = nn.Sequential()
         for i in range(hourglass_depth):
-            down_seq.add_module('down{}'.format(i + 1), DownAttBlock(
+            down_seq.add_module("down{}".format(i + 1), DownAttBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 length=scale_r))
-            up_seq.add_module('up{}'.format(i + 1), UpAttBlock(
+            up_seq.add_module("up{}".format(i + 1), UpAttBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 length=scale_r,
                 scale_factor=scale_factor))
             if i == 0:
-                skip_seq.add_module('skip1', ResBlockSequence(
+                skip_seq.add_module("skip1", ResBlockSequence(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     length=scale_t))
             else:
-                skip_seq.add_module('skip{}'.format(i + 1), DoubleSkipBlock(
+                skip_seq.add_module("skip{}".format(i + 1), DoubleSkipBlock(
                     in_channels=in_channels,
                     out_channels=out_channels))
         self.hg = Hourglass(
@@ -438,8 +438,8 @@ class ResAttNet(nn.Module):
                         stride=stride))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module('post_activ', PreActivation(in_channels=in_channels))
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("post_activ", PreActivation(in_channels=in_channels))
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=7,
             stride=1))
 

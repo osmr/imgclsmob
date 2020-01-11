@@ -259,24 +259,24 @@ class MobileNetV3(Chain):
                                 use_se=use_se_flag))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', MobileNetV3FinalBlock(
+                setattr(self.features, "final_block", MobileNetV3FinalBlock(
                     in_channels=in_channels,
                     out_channels=final_block_channels,
                     use_se=final_use_se))
                 in_channels = final_block_channels
-                setattr(self.features, 'final_pool', partial(
+                setattr(self.features, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=7,
                     stride=1))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', MobileNetV3Classifier(
+                setattr(self.output, "final_conv", MobileNetV3Classifier(
                     in_channels=in_channels,
                     out_channels=classes,
                     mid_channels=classifier_mid_channels,
                     dropout_rate=0.2))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

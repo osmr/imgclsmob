@@ -420,30 +420,30 @@ class DPN(Chain):
                                 b_case=b_case))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'final_block', DPNFinalBlock(channels=in_channels))
+                setattr(self.features, "final_block", DPNFinalBlock(channels=in_channels))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
                 if for_training or not test_time_pool:
-                    setattr(self.output, 'final_pool', GlobalAvgPool2D())
-                    setattr(self.output, 'final_conv', conv1x1(
+                    setattr(self.output, "final_pool", GlobalAvgPool2D())
+                    setattr(self.output, "final_conv", conv1x1(
                         in_channels=in_channels,
                         out_channels=classes,
                         use_bias=True))
-                    setattr(self.output, 'final_flatten', partial(
+                    setattr(self.output, "final_flatten", partial(
                         F.reshape,
                         shape=(-1, classes)))
                 else:
-                    setattr(self.output, 'avg_pool', partial(
+                    setattr(self.output, "avg_pool", partial(
                         F.average_pooling_2d,
                         ksize=7,
                         stride=1))
-                    setattr(self.output, 'final_conv', conv1x1(
+                    setattr(self.output, "final_conv", conv1x1(
                         in_channels=in_channels,
                         out_channels=classes,
                         use_bias=True))
-                    setattr(self.output, 'avgmax_pool', GlobalAvgMaxPool2D())
-                    setattr(self.output, 'final_flatten', partial(
+                    setattr(self.output, "avgmax_pool", GlobalAvgMaxPool2D())
+                    setattr(self.output, "final_flatten", partial(
                         F.reshape,
                         shape=(-1, classes)))
 

@@ -27,7 +27,6 @@ class PeleeBranch1(nn.Module):
     stride : int or tuple/list of 2 int, default 1
         Strides of the second convolution.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -61,7 +60,6 @@ class PeleeBranch2(nn.Module):
     mid_channels : int
         Number of intermediate channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -177,7 +175,6 @@ class TransitionBlock(nn.Module):
     out_channels : int
         Number of output channels.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels):
@@ -257,8 +254,8 @@ class PeleeNet(nn.Module):
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
-        self.output.add_module('fc', nn.Linear(
+        self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
+        self.output.add_module("fc", nn.Linear(
             in_features=in_channels,
             out_features=num_classes))
 
@@ -294,7 +291,6 @@ def get_peleenet(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     init_block_channels = 32
     growth_rate = 32
     layers = [3, 4, 8, 6]

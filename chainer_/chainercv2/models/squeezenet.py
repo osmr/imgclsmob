@@ -195,22 +195,22 @@ class SqueezeNet(Chain):
                                 residual=((residuals is not None) and (residuals[i][j] == 1))))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
-                setattr(self.features, 'dropout', partial(
+                setattr(self.features, "dropout", partial(
                     F.dropout,
                     ratio=0.5))
 
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'final_conv', L.Convolution2D(
+                setattr(self.output, "final_conv", L.Convolution2D(
                     in_channels=in_channels,
                     out_channels=classes,
                     ksize=1))
-                setattr(self.output, 'final_activ', F.relu)
-                setattr(self.output, 'final_pool', partial(
+                setattr(self.output, "final_activ", F.relu)
+                setattr(self.output, "final_pool", partial(
                     F.average_pooling_2d,
                     ksize=13,
                     stride=1))
-                setattr(self.output, 'final_flatten', partial(
+                setattr(self.output, "final_flatten", partial(
                     F.reshape,
                     shape=(-1, classes)))
 

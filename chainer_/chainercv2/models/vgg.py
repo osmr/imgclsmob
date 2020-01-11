@@ -137,7 +137,7 @@ class VGG(Chain):
             in_channels = in_channels * 7 * 7
             self.output = SimpleSequential()
             with self.output.init_scope():
-                setattr(self.output, 'flatten', partial(
+                setattr(self.output, "flatten", partial(
                     F.reshape,
                     shape=(-1, in_channels)))
                 setattr(self.output, 'classifier', VGGOutputBlock(

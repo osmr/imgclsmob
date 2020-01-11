@@ -579,13 +579,13 @@ class InceptionV3(nn.Module):
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
 
-        self.features.add_module('final_pool', nn.AvgPool2d(
+        self.features.add_module("final_pool", nn.AvgPool2d(
             kernel_size=8,
             stride=1))
 
         self.output = nn.Sequential()
-        self.output.add_module('dropout', nn.Dropout(p=dropout_rate))
-        self.output.add_module('fc', nn.Linear(
+        self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
+        self.output.add_module("fc", nn.Linear(
             in_features=in_channels,
             out_features=num_classes))
 

@@ -11,8 +11,8 @@ from functools import partial
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .activations import sigmoid
-from .conv2d_layers import *
+# from .activations import sigmoid
+# from .conv2d_layers import *
 
 
 __all__ = ['oth_efficientnet_b0_tf', 'oth_efficientnet_b1_tf', 'oth_efficientnet_b2_tf', 'oth_efficientnet_b3_tf',
@@ -948,8 +948,7 @@ def _gen_efficientnet(variant, channel_multiplier=1.0, depth_multiplier=1.0, pre
         channel_multiplier=channel_multiplier,
         act_layer=Swish,
         norm_kwargs=resolve_bn_args(kwargs),
-        **kwargs,
-    )
+    ).update(**kwargs)
     model = _create_model(model_kwargs, default_cfgs[variant], pretrained)
     return model
 

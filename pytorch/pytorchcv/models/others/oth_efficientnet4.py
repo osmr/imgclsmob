@@ -976,8 +976,7 @@ def _gen_efficientnet_edge(variant, channel_multiplier=1.0, depth_multiplier=1.0
         channel_multiplier=channel_multiplier,
         norm_kwargs=resolve_bn_args(kwargs),
         act_layer=nn.ReLU,
-        **kwargs,
-    )
+    ).update(**kwargs)
     model = _create_model(model_kwargs, default_cfgs[variant], pretrained)
     return model
 

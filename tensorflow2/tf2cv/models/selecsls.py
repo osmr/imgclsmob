@@ -1,5 +1,5 @@
 """
-    SelecSLS for ImageNet-1K, implemented in PyTorch.
+    SelecSLS for ImageNet-1K, implemented in TensorFlow.
     Original paper: 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 """
@@ -7,12 +7,13 @@
 __all__ = ['SelecSLS', 'selecsls42', 'selecsls42b', 'selecsls60', 'selecsls60b', 'selecsls84']
 
 import os
-import torch
-import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, DualPathSequential
+import tensorflow as tf
+import tensorflow.keras.layers as nn
+from .common import conv1x1_block, conv3x3_block, DualPathSequential, AvgPool2d, flatten, is_channels_first,\
+    get_channel_axis
 
 
-class SelecSLSBlock(nn.Module):
+class SelecSLSBlock(nn.Layer):
     """
     SelecSLS block.
 
@@ -22,27 +23,35 @@ class SelecSLSBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(SelecSLSBlock, self).__init__()
+                 out_channels,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SelecSLSBlock, self).__init__(**kwargs)
         mid_channels = 2 * out_channels
 
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
-            out_channels=mid_channels)
+            out_channels=mid_channels,
+            data_format=data_format,
+            name="conv1")
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            data_format=data_format,
+            name="conv2")
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
+    def call(self, x, training=None):
+        x = self.conv1(x, training=training)
+        x = self.conv2(x, training=training)
         return x
 
 
-class SelecSLSUnit(nn.Module):
+class SelecSLSUnit(nn.Layer):
     """
     SelecSLS unit.
 
@@ -56,49 +65,62 @@ class SelecSLSUnit(nn.Module):
         Number of skipped channels.
     mid_channels : int
         Number of middle channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the branch convolution layers.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  skip_channels,
                  mid_channels,
-                 stride):
-        super(SelecSLSUnit, self).__init__()
-        self.resize = (stride == 2)
+                 strides,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SelecSLSUnit, self).__init__(**kwargs)
+        self.data_format = data_format
+        self.resize = (strides == 2)
         mid2_channels = mid_channels // 2
-        last_channels = 2 * mid_channels + (skip_channels if stride == 1 else 0)
+        last_channels = 2 * mid_channels + (skip_channels if strides == 1 else 0)
 
         self.branch1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=stride)
+            strides=strides,
+            data_format=data_format,
+            name="branch1")
         self.branch2 = SelecSLSBlock(
             in_channels=mid_channels,
-            out_channels=mid2_channels)
+            out_channels=mid2_channels,
+            data_format=data_format,
+            name="branch2")
         self.branch3 = SelecSLSBlock(
             in_channels=mid2_channels,
-            out_channels=mid2_channels)
+            out_channels=mid2_channels,
+            data_format=data_format,
+            name="branch3")
         self.last_conv = conv1x1_block(
             in_channels=last_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            data_format=data_format,
+            name="last_conv")
 
-    def forward(self, x, x0):
-        x1 = self.branch1(x)
-        x2 = self.branch2(x1)
-        x3 = self.branch3(x2)
+    def call(self, x, x0=None, training=None):
+        x1 = self.branch1(x, training=training)
+        x2 = self.branch2(x1, training=training)
+        x3 = self.branch3(x2, training=training)
         if self.resize:
-            y = torch.cat((x1, x2, x3), dim=1)
-            y = self.last_conv(y)
+            y = tf.concat([x1, x2, x3], axis=get_channel_axis(self.data_format))
+            y = self.last_conv(y, training=training)
             return y, y
         else:
-            y = torch.cat((x1, x2, x3, x0), dim=1)
-            y = self.last_conv(y)
+            y = tf.concat([x1, x2, x3, x0], axis=get_channel_axis(self.data_format))
+            y = self.last_conv(y, training=training)
             return y, x0
 
 
-class SelecSLS(nn.Module):
+class SelecSLS(tf.keras.Model):
     """
     SelecSLS model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
@@ -117,8 +139,10 @@ class SelecSLS(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  channels,
@@ -127,73 +151,75 @@ class SelecSLS(nn.Module):
                  kernels3,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(SelecSLS, self).__init__()
+                 classes=1000,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SelecSLS, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
+        self.data_format = data_format
         init_block_channels = 32
 
         self.features = DualPathSequential(
             return_two=False,
             first_ordinals=1,
-            last_ordinals=(1 + len(kernels3)))
-        self.features.add_module("init_block", conv3x3_block(
+            last_ordinals=(1 + len(kernels3)),
+            name="features")
+        self.features.add(conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            stride=2))
+            strides=2,
+            data_format=data_format,
+            name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
             k = i - len(skip_channels)
-            stage = DualPathSequential() if k < 0 else nn.Sequential()
+            stage = DualPathSequential(name="stage{}".format(i + 1)) if k < 0 else\
+                tf.keras.Sequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if j == 0 else 1
+                strides = 2 if j == 0 else 1
                 if k < 0:
                     unit = SelecSLSUnit(
                         in_channels=in_channels,
                         out_channels=out_channels,
                         skip_channels=skip_channels[i][j],
                         mid_channels=mid_channels[i][j],
-                        stride=stride)
+                        strides=strides,
+                        data_format=data_format,
+                        name="unit{}".format(j + 1))
                 else:
                     conv_block_class = conv3x3_block if kernels3[k][j] == 1 else conv1x1_block
                     unit = conv_block_class(
                         in_channels=in_channels,
                         out_channels=out_channels,
-                        stride=stride)
-                stage.add_module("unit{}".format(j + 1), unit)
+                        strides=strides,
+                        data_format=data_format,
+                        name="unit{}".format(j + 1))
+                stage.add(unit)
                 in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=4,
-            stride=1))
+            self.features.add(stage)
+        self.features.add(AvgPool2d(
+            pool_size=4,
+            strides=1,
+            data_format=data_format,
+            name="final_pool"))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+        self.output1 = nn.Dense(
+            units=classes,
+            input_dim=in_channels,
+            name="output1")
 
-        self._init_params()
-
-    def _init_params(self):
-        for module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight, mode="fan_out", nonlinearity="relu")
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-            elif isinstance(module, nn.BatchNorm2d):
-                nn.init.constant_(module.weight, 1)
-                nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.features(x)
-        x = x.view(x.size(0), -1)
-        x = self.output(x)
+    def call(self, x, training=None):
+        x = self.features(x, training=training)
+        x = flatten(x, self.data_format)
+        x = self.output1(x)
         return x
 
 
 def get_selecsls(version,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join("~", ".torch", "models"),
+                 root=os.path.join("~", ".tensorflow", "models"),
                  **kwargs):
     """
     Create SelecSLS model with specific parameters.
@@ -206,7 +232,7 @@ def get_selecsls(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     if version in ("42", "42b"):
@@ -248,11 +274,15 @@ def get_selecsls(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
+        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
+            (1,) + net.in_size + (in_channels,)
+        net.build(input_shape=input_shape)
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 
@@ -266,7 +296,7 @@ def selecsls42(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="42", model_name="selecsls42", **kwargs)
@@ -281,7 +311,7 @@ def selecsls42b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="42b", model_name="selecsls42b", **kwargs)
@@ -296,7 +326,7 @@ def selecsls60(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="60", model_name="selecsls60", **kwargs)
@@ -311,7 +341,7 @@ def selecsls60b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="60b", model_name="selecsls60b", **kwargs)
@@ -326,24 +356,18 @@ def selecsls84(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="84", model_name="selecsls84", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
+    # data_format = "channels_first"
     pretrained = False
 
     models = [
@@ -356,22 +380,20 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(pretrained=pretrained, data_format=data_format)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        batch_saze = 14
+        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
+        y = net(x)
+        assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
+
+        weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != selecsls42 or weight_count == 30354952)
         assert (model != selecsls42b or weight_count == 32458248)
         assert (model != selecsls60 or weight_count == 30670768)
         assert (model != selecsls60b or weight_count == 32774064)
         assert (model != selecsls84 or weight_count == 50954600)
-
-        x = torch.randn(1, 3, 224, 224)
-        y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
 
 
 if __name__ == "__main__":

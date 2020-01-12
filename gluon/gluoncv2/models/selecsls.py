@@ -1,5 +1,5 @@
 """
-    SelecSLS for ImageNet-1K, implemented in PyTorch.
+    SelecSLS for ImageNet-1K, implemented in Gluon.
     Original paper: 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
 """
@@ -7,12 +7,12 @@
 __all__ = ['SelecSLS', 'selecsls42', 'selecsls42b', 'selecsls60', 'selecsls60b', 'selecsls84']
 
 import os
-import torch
-import torch.nn as nn
+from mxnet import cpu
+from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1_block, conv3x3_block, DualPathSequential
 
 
-class SelecSLSBlock(nn.Module):
+class SelecSLSBlock(HybridBlock):
     """
     SelecSLS block.
 
@@ -22,27 +22,34 @@ class SelecSLSBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
-                 out_channels):
-        super(SelecSLSBlock, self).__init__()
+                 out_channels,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(SelecSLSBlock, self).__init__(**kwargs)
         mid_channels = 2 * out_channels
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=out_channels)
+        with self.name_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
 
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class SelecSLSUnit(nn.Module):
+class SelecSLSUnit(HybridBlock):
     """
     SelecSLS unit.
 
@@ -56,49 +63,58 @@ class SelecSLSUnit(nn.Module):
         Number of skipped channels.
     mid_channels : int
         Number of middle channels.
-    stride : int or tuple/list of 2 int
+    strides : int or tuple/list of 2 int
         Strides of the branch convolution layers.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  skip_channels,
                  mid_channels,
-                 stride):
-        super(SelecSLSUnit, self).__init__()
-        self.resize = (stride == 2)
+                 strides,
+                 bn_use_global_stats,
+                 **kwargs):
+        super(SelecSLSUnit, self).__init__(**kwargs)
+        self.resize = (strides == 2)
         mid2_channels = mid_channels // 2
-        last_channels = 2 * mid_channels + (skip_channels if stride == 1 else 0)
+        last_channels = 2 * mid_channels + (skip_channels if strides == 1 else 0)
 
-        self.branch1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=stride)
-        self.branch2 = SelecSLSBlock(
-            in_channels=mid_channels,
-            out_channels=mid2_channels)
-        self.branch3 = SelecSLSBlock(
-            in_channels=mid2_channels,
-            out_channels=mid2_channels)
-        self.last_conv = conv1x1_block(
-            in_channels=last_channels,
-            out_channels=out_channels)
+        with self.name_scope():
+            self.branch1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                strides=strides,
+                bn_use_global_stats=bn_use_global_stats)
+            self.branch2 = SelecSLSBlock(
+                in_channels=mid_channels,
+                out_channels=mid2_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.branch3 = SelecSLSBlock(
+                in_channels=mid2_channels,
+                out_channels=mid2_channels,
+                bn_use_global_stats=bn_use_global_stats)
+            self.last_conv = conv1x1_block(
+                in_channels=last_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats)
 
-    def forward(self, x, x0):
+    def hybrid_forward(self, F, x, x0=None):
         x1 = self.branch1(x)
         x2 = self.branch2(x1)
         x3 = self.branch3(x2)
         if self.resize:
-            y = torch.cat((x1, x2, x3), dim=1)
+            y = F.concat(x1, x2, x3, dim=1)
             y = self.last_conv(y)
             return y, y
         else:
-            y = torch.cat((x1, x2, x3, x0), dim=1)
+            y = F.concat(x1, x2, x3, x0, dim=1)
             y = self.last_conv(y)
             return y, x0
 
 
-class SelecSLS(nn.Module):
+class SelecSLS(HybridBlock):
     """
     SelecSLS model from 'XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera,'
     https://arxiv.org/abs/1907.00837.
@@ -113,11 +129,13 @@ class SelecSLS(nn.Module):
         Number of middle channels for each unit.
     kernels3 : list of list of int/bool
         Using 3x3 (instead of 1x1) kernel for each head unit.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -125,67 +143,65 @@ class SelecSLS(nn.Module):
                  skip_channels,
                  mid_channels,
                  kernels3,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
-        super(SelecSLS, self).__init__()
+                 classes=1000,
+                 **kwargs):
+        super(SelecSLS, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         init_block_channels = 32
 
-        self.features = DualPathSequential(
-            return_two=False,
-            first_ordinals=1,
-            last_ordinals=(1 + len(kernels3)))
-        self.features.add_module("init_block", conv3x3_block(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            stride=2))
-        in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            k = i - len(skip_channels)
-            stage = DualPathSequential() if k < 0 else nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if j == 0 else 1
-                if k < 0:
-                    unit = SelecSLSUnit(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        skip_channels=skip_channels[i][j],
-                        mid_channels=mid_channels[i][j],
-                        stride=stride)
-                else:
-                    conv_block_class = conv3x3_block if kernels3[k][j] == 1 else conv1x1_block
-                    unit = conv_block_class(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        stride=stride)
-                stage.add_module("unit{}".format(j + 1), unit)
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=4,
-            stride=1))
+        with self.name_scope():
+            self.features = DualPathSequential(
+                return_two=False,
+                first_ordinals=1,
+                last_ordinals=(1 + len(kernels3)),
+                prefix="")
+            self.features.add(conv3x3_block(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                strides=2,
+                bn_use_global_stats=bn_use_global_stats))
+            in_channels = init_block_channels
+            for i, channels_per_stage in enumerate(channels):
+                k = i - len(skip_channels)
+                stage = DualPathSequential(prefix="stage{}_".format(i + 1)) if k < 0 else\
+                    nn.HybridSequential(prefix="stage{}_".format(i + 1))
+                with stage.name_scope():
+                    for j, out_channels in enumerate(channels_per_stage):
+                        strides = 2 if j == 0 else 1
+                        if k < 0:
+                            unit = SelecSLSUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                skip_channels=skip_channels[i][j],
+                                mid_channels=mid_channels[i][j],
+                                strides=strides,
+                                bn_use_global_stats=bn_use_global_stats)
+                        else:
+                            conv_block_class = conv3x3_block if kernels3[k][j] == 1 else conv1x1_block
+                            unit = conv_block_class(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                strides=strides,
+                                bn_use_global_stats=bn_use_global_stats)
+                        stage.add(unit)
+                        in_channels = out_channels
+                self.features.add(stage)
+            self.features.add(nn.AvgPool2D(
+                pool_size=4,
+                strides=1))
 
-        self.output = nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes)
+            self.output = nn.HybridSequential(prefix="")
+            self.output.add(nn.Flatten())
+            self.output.add(nn.Dense(
+                units=classes,
+                in_units=in_channels))
 
-        self._init_params()
-
-    def _init_params(self):
-        for module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight, mode="fan_out", nonlinearity="relu")
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-            elif isinstance(module, nn.BatchNorm2d):
-                nn.init.constant_(module.weight, 1)
-                nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def hybrid_forward(self, F, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -193,7 +209,8 @@ class SelecSLS(nn.Module):
 def get_selecsls(version,
                  model_name=None,
                  pretrained=False,
-                 root=os.path.join("~", ".torch", "models"),
+                 ctx=cpu(),
+                 root=os.path.join("~", ".mxnet", "models"),
                  **kwargs):
     """
     Create SelecSLS model with specific parameters.
@@ -206,7 +223,9 @@ def get_selecsls(version,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     if version in ("42", "42b"):
@@ -248,11 +267,12 @@ def get_selecsls(version,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        net.load_parameters(
+            filename=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            ctx=ctx)
 
     return net
 
@@ -266,7 +286,9 @@ def selecsls42(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="42", model_name="selecsls42", **kwargs)
@@ -281,7 +303,9 @@ def selecsls42b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="42b", model_name="selecsls42b", **kwargs)
@@ -296,7 +320,9 @@ def selecsls60(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="60", model_name="selecsls60", **kwargs)
@@ -311,7 +337,9 @@ def selecsls60b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="60b", model_name="selecsls60b", **kwargs)
@@ -326,23 +354,17 @@ def selecsls84(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
     return get_selecsls(version="84", model_name="selecsls84", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import mxnet as mx
 
     pretrained = False
 
@@ -358,9 +380,17 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != selecsls42 or weight_count == 30354952)
         assert (model != selecsls42b or weight_count == 32458248)
@@ -368,10 +398,9 @@ def _test():
         assert (model != selecsls60b or weight_count == 32774064)
         assert (model != selecsls84 or weight_count == 50954600)
 
-        x = torch.randn(1, 3, 224, 224)
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

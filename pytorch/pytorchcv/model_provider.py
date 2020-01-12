@@ -43,6 +43,7 @@ from .models.msdnet import *
 from .models.fishnet import *
 from .models.espnetv2 import *
 from .models.hrnet import *
+from .models.selecsls import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -107,8 +108,7 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.selecsls import *
-from .models.others.oth_selecsls import *
+from .models.others.oth_vovnet import *
 
 __all__ = ['get_model']
 
@@ -420,6 +420,12 @@ _models = {
     'hrnetv2_w44': hrnetv2_w44,
     'hrnetv2_w48': hrnetv2_w48,
     'hrnetv2_w64': hrnetv2_w64,
+
+    'selecsls42': selecsls42,
+    'selecsls42b': selecsls42b,
+    'selecsls60': selecsls60,
+    'selecsls60b': selecsls60b,
+    'selecsls84': selecsls84,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,
@@ -922,15 +928,8 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    'selecsls42': selecsls42,
-    'selecsls42b': selecsls42b,
-    'selecsls60': selecsls60,
-    'selecsls60b': selecsls60b,
-    'selecsls84': selecsls84,
-
-    'oth_selecsls42b': oth_selecsls42b,
-    'oth_selecsls60': oth_selecsls60,
-    'oth_selecsls60b': oth_selecsls60b,
+    'oth_vovnet39': oth_vovnet39,
+    'oth_vovnet57': oth_vovnet57,
 }
 
 

@@ -29,6 +29,7 @@ from .models.darknet53 import *
 from .models.bagnet import *
 from .models.dla import *
 from .models.hrnet import *
+from .models.selecsls import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -276,6 +277,12 @@ _models = {
     'hrnetv2_w44': hrnetv2_w44,
     'hrnetv2_w48': hrnetv2_w48,
     'hrnetv2_w64': hrnetv2_w64,
+
+    'selecsls42': selecsls42,
+    'selecsls42b': selecsls42b,
+    'selecsls60': selecsls60,
+    'selecsls60b': selecsls60b,
+    'selecsls84': selecsls84,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

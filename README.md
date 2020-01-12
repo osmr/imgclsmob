@@ -105,7 +105,7 @@ Some remarks:
 | FishNet | A+ | A+ | A+ | - | - | [link](http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf) | [link](https://github.com/kevin-ssy/FishNet) | 2018 |
 | ESPNetv2 | A+ | A+ | A+ | - | - | [link](https://arxiv.org/abs/1811.11431) | [link](https://github.com/sacmehta/ESPNetv2) | 2018 |
 | HRNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1908.07919) | [link](https://github.com/HRNet/HRNet-Image-Classification) | 2019 |
-| SelecSLS | - | A | - | - | - | [link](https://arxiv.org/abs/1907.00837) | [link](https://github.com/mehtadushy/SelecSLS-Pytorch) | 2019 |
+| SelecSLS | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1907.00837) | [link](https://github.com/mehtadushy/SelecSLS-Pytorch) | 2019 |
 | X-DenseNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
 | SqueezeNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | [link](https://github.com/DeepScale/SqueezeNet) | 2016 |
 | SqueezeResNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | - | 2016 |

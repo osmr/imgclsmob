@@ -36,6 +36,7 @@ from .models.dla import *
 from .models.fishnet import *
 from .models.espnetv2 import *
 from .models.hrnet import *
+from .models.selecsls import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -383,6 +384,12 @@ _models = {
     'hrnetv2_w44': hrnetv2_w44,
     'hrnetv2_w48': hrnetv2_w48,
     'hrnetv2_w64': hrnetv2_w64,
+
+    'selecsls42': selecsls42,
+    'selecsls42b': selecsls42b,
+    'selecsls60': selecsls60,
+    'selecsls60b': selecsls60b,
+    'selecsls84': selecsls84,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,

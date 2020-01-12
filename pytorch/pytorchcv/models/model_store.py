@@ -159,6 +159,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnetv2_w44', '0563', '9321bfd82f7f02a789dc054ac079706f0e8784c4', 'v0.0.421', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w48', '0548', '40f986102a5650bae90d62c459781704626bd890', 'v0.0.421', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w64', '0535', '5961efd0e93740184a582ed4e00de445c91447b9', 'v0.0.421', 'HRNetV2-W64', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
+    ('selecsls42b', '0659', '6933727857ee697e9205241fb2d2a134770b7924', 'v0.0.430', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('selecsls60b', '0584', '470ace6b9b8db32b84924825908b426a9e38dd09', 'v0.0.430', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('squeezenet_v1_0', '1766', 'afdbcf1aef39237300656d2c5a7dba19230e29fc', 'v0.0.128', 'SqueezeNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezenet_v1_1', '1772', '25b77bc39e35612abbe7c2344d2c3e1e6756c2f8', 'v0.0.88', 'SqueezeNet v1.1', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezeresnet_v1_0', '1809', '25bfc02edeffb279010242614e7d73bbeacc0170', 'v0.0.178', 'SqueezeResNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa

@@ -318,7 +318,7 @@ class AvgPool2d(nn.Layer):
                 data_format=data_format,
                 name="stride_pool")
 
-    def call(self, x):
+    def call(self, x, training=None):
         if self.ceil_mode:
             x_shape = x.get_shape().as_list()
             if is_channels_first(self.data_format):

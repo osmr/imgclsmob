@@ -159,6 +159,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('hrnetv2_w44', '0563', '9321bfd82f7f02a789dc054ac079706f0e8784c4', 'v0.0.421', 'HRNetV2-W44', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w48', '0548', '40f986102a5650bae90d62c459781704626bd890', 'v0.0.421', 'HRNetV2-W48', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
     ('hrnetv2_w64', '0535', '5961efd0e93740184a582ed4e00de445c91447b9', 'v0.0.421', 'HRNetV2-W64', '1908.07919', 'in1k', 224, 0.875, 200, '[HRNet/HRNet...ation]'),  # noqa
+    ('vovnet39', '0657', '27d24ae335330412f09ce848e89f6f261d2d0dde', 'v0.0.431', 'VoVNet-39', '1904.09730', 'in1k', 224, 0.875, 200, '[stigma0617/VoVNet.pytorch]'),  # noqa
+    ('vovnet57', '0628', '99f8a0c8958de38e89194014a08e312205bb3e1e', 'v0.0.431', 'VoVNet-57', '1904.09730', 'in1k', 224, 0.875, 200, '[stigma0617/VoVNet.pytorch]'),  # noqa
     ('selecsls42b', '0659', '6933727857ee697e9205241fb2d2a134770b7924', 'v0.0.430', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60b', '0584', '470ace6b9b8db32b84924825908b426a9e38dd09', 'v0.0.430', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

@@ -275,6 +275,8 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | HRNetV2-W44 | 21.11 | 5.63 | 67,064,984 | 14,946.96M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w44-0563-9321bfd8.pth.log)) |
 | HRNetV2-W48 | 20.69 | 5.48 | 77,469,864 | 17,345.39M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w48-0548-40f98610.pth.log)) |
 | HRNetV2-W64 | 20.53 | 5.35 | 128,059,944 | 28,976.42M | From [HRNet/HRNet...ation] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.421/hrnetv2_w64-0535-5961efd0.pth.log)) |
+| VoVNet-39 | 23.22 | 6.57 | 22,600,296 | 7,086.16M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet39-0657-27d24ae3.pth.log)) |
+| VoVNet-57 | 22.27 | 6.28 | 36,640,296 | 8,943.09M | From [stigma0617/VoVNet.pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.431/vovnet57-0628-99f8a0c8.pth.log)) |
 | SelecSLS-42b | 22.89 | 6.59 | 32,458,248 | 2,980.62M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls42b-0659-69337278.pth.log)) |
 | SelecSLS-60 | 22.10 | 6.12 | 30,670,768 | 3,591.78M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60-0612-5261403f.pth.log)) |
 | SelecSLS-60b | 21.62 | 5.84 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0584-470ace6b.pth.log)) |
@@ -664,3 +666,4 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 [yangze0930/NTS-Net]: https://github.com/yangze0930/NTS-Net
 [rwightman/pyt...models]: https://github.com/rwightman/pytorch-image-models
 [HRNet/HRNet...ation]: https://github.com/HRNet/HRNet-Image-Classification
+[stigma0617/VoVNet.pytorch]: https://github.com/stigma0617/VoVNet.pytorch

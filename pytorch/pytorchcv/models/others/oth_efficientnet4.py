@@ -615,10 +615,6 @@ class EfficientNetBuilder:
         return stages
 
 
-def efficientnet_init_weights(model: nn.Module, init_fn=None):
-    pass
-
-
 def get_bn_args_tf():
     return _BN_ARGS_TF.copy()
 
@@ -1059,8 +1055,6 @@ class EfficientNet(nn.Module):
 
         # Classifier
         self.classifier = nn.Linear(self.num_features, self.num_classes)
-
-        efficientnet_init_weights(self)
 
     def forward_features(self, x):
         x = self.conv_stem(x)

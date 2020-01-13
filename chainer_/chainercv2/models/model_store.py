@@ -152,6 +152,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('hrnetv2_w44', '0593', '8426d89ac900c33640a57b301f4c47db4c9a782a', 'v0.0.421'),
     ('hrnetv2_w48', '0581', 'd8e905a215a3bfe8edc1319f6ed5b9537bc8cdb4', 'v0.0.421'),
     ('hrnetv2_w64', '0553', '4d8859eec42a458d22164816109cf5b831d7ba38', 'v0.0.421'),
+    ('vovnet39', '0695', '72dd2e746f0da28712a2e45d96879b24cc2300cc', 'v0.0.431'),
+    ('vovnet57', '0662', 'aa34e6d03dba3d5b2e4cc3b3c9ac019adaa5da9b', 'v0.0.431'),
     ('selecsls42b', '0674', '6d6241e1d6f0c272f3fb1797cc4a6afa71346273', 'v0.0.430'),
     ('selecsls60', '0628', '72a7265e3f631e8a0a641be2316dbb4a7dcdae7d', 'v0.0.430'),
     ('selecsls60b', '0601', '12266671dc30168eb2e4643c46d45a8fda3d0c21', 'v0.0.430'),

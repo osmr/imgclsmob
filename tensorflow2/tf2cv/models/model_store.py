@@ -150,6 +150,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('hrnetv2_w44', '0595', 'a4e4781ca1c32fc98beed3167832601ca51266c9', 'v0.0.428', 'in1k', 0.875),
     ('hrnetv2_w48', '0581', '3af4ed57e2c7dab91794f933f7e8105320935d31', 'v0.0.428', 'in1k', 0.875),
     ('hrnetv2_w64', '0553', 'aede8def2f12173f640f85187b531c5218615d92', 'v0.0.428', 'in1k', 0.875),
+    ('vovnet39', '0825', '49cbcdc62cc7815a4bc76e508da8feee0f802e00', 'v0.0.431', 'in1k', 0.875),
+    ('vovnet57', '0812', '0977958aceb28a7481a230e0ba52750d43e5b152', 'v0.0.431', 'in1k', 0.875),
     ('selecsls42b', '0676', '0d785bec0c31aee57e1d267900ae1a942a665fcb', 'v0.0.430', 'in1k', 0.875),
     ('selecsls60', '0630', 'a799a0e5ddcc3991808bd8d98a83a3e717ee87e4', 'v0.0.430', 'in1k', 0.875),
     ('selecsls60b', '0604', 'bc9c43191043382b38e3be5893d1d8316ca401e9', 'v0.0.430', 'in1k', 0.875),

@@ -121,8 +121,12 @@ class VoVNet(nn.Module):
                  config_concat_ch,
                  block_per_stage,
                  layer_per_block,
+                 in_channels=3,
+                 in_size=(224, 224),
                  num_classes=1000):
         super(VoVNet, self).__init__()
+        self.in_size = in_size
+        self.num_classes = num_classes
 
         # Stem module
         stem = conv3x3(3,   64, 'stem', '1', 2)

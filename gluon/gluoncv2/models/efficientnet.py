@@ -5,9 +5,11 @@
 """
 
 __all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b0b',
-           'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b', 'efficientnet_b5b',
-           'efficientnet_b6b', 'efficientnet_b7b']
+           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b8',
+           'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b',
+           'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b', 'efficientnet_b0c', 'efficientnet_b1c',
+           'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c', 'efficientnet_b5c', 'efficientnet_b6c',
+           'efficientnet_b7c', 'efficientnet_b8c']
 
 import os
 import math
@@ -648,6 +650,23 @@ def efficientnet_b7(in_size=(600, 600), **kwargs):
     return get_efficientnet(version="b7", in_size=in_size, model_name="efficientnet_b7", **kwargs)
 
 
+def efficientnet_b8(in_size=(672, 672), **kwargs):
+    """
+    EfficientNet-B8 model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
+    https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (672, 672)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b8", in_size=in_size, model_name="efficientnet_b8", **kwargs)
+
+
 def efficientnet_b0b(in_size=(224, 224), **kwargs):
     """
     EfficientNet-B0-b (like TF-implementation) model from 'EfficientNet: Rethinking Model Scaling for Convolutional
@@ -808,6 +827,186 @@ def efficientnet_b7b(in_size=(600, 600), **kwargs):
                             **kwargs)
 
 
+def efficientnet_b0c(in_size=(224, 224), **kwargs):
+    """
+    EfficientNet-B0-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (224, 224)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0c",
+                            **kwargs)
+
+
+def efficientnet_b1c(in_size=(240, 240), **kwargs):
+    """
+    EfficientNet-B1-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (240, 240)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1c",
+                            **kwargs)
+
+
+def efficientnet_b2c(in_size=(260, 260), **kwargs):
+    """
+    EfficientNet-B2-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (260, 260)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2c",
+                            **kwargs)
+
+
+def efficientnet_b3c(in_size=(300, 300), **kwargs):
+    """
+    EfficientNet-B3-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (300, 300)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3c",
+                            **kwargs)
+
+
+def efficientnet_b4c(in_size=(380, 380), **kwargs):
+    """
+    EfficientNet-B4-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (380, 380)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4c",
+                            **kwargs)
+
+
+def efficientnet_b5c(in_size=(456, 456), **kwargs):
+    """
+    EfficientNet-B5-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (456, 456)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5c",
+                            **kwargs)
+
+
+def efficientnet_b6c(in_size=(528, 528), **kwargs):
+    """
+    EfficientNet-B6-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (528, 528)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6c",
+                            **kwargs)
+
+
+def efficientnet_b7c(in_size=(600, 600), **kwargs):
+    """
+    EfficientNet-B7-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (600, 600)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7c",
+                            **kwargs)
+
+
+def efficientnet_b8c(in_size=(672, 672), **kwargs):
+    """
+    EfficientNet-B8-c (like TF-implementation, trained with AdvProp) model from 'EfficientNet: Rethinking Model Scaling
+    for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946.
+
+    Parameters:
+    ----------
+    in_size : tuple of two ints, default (672, 672)
+        Spatial size of the expected input image.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_efficientnet(version="b8", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b8c",
+                            **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -823,6 +1022,7 @@ def _test():
         efficientnet_b5,
         efficientnet_b6,
         efficientnet_b7,
+        efficientnet_b8,
         efficientnet_b0b,
         efficientnet_b1b,
         efficientnet_b2b,
@@ -831,6 +1031,15 @@ def _test():
         efficientnet_b5b,
         efficientnet_b6b,
         efficientnet_b7b,
+        efficientnet_b0c,
+        efficientnet_b1c,
+        efficientnet_b2c,
+        efficientnet_b3c,
+        efficientnet_b4c,
+        efficientnet_b5c,
+        efficientnet_b6c,
+        efficientnet_b7c,
+        efficientnet_b8c,
     ]
 
     for model in models:
@@ -856,6 +1065,7 @@ def _test():
         assert (model != efficientnet_b5 or weight_count == 30389784)
         assert (model != efficientnet_b6 or weight_count == 43040704)
         assert (model != efficientnet_b7 or weight_count == 66347960)
+        assert (model != efficientnet_b8 or weight_count == 87413142)
         assert (model != efficientnet_b0b or weight_count == 5288548)
         assert (model != efficientnet_b1b or weight_count == 7794184)
         assert (model != efficientnet_b2b or weight_count == 9109994)

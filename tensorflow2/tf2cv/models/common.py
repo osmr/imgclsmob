@@ -7,7 +7,8 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', '
            'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'Identity',
-           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'ParametricConcurrent']
+           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
+           'ParametricConcurrent']
 
 import math
 from inspect import isfunction
@@ -1924,6 +1925,42 @@ class Concurrent(SimpleSequential):
         out = []
         for block in self.children:
             out.append(block(x, training=training))
+        if self.stack:
+            out = tf.stack(out, axis=self.axis)
+        else:
+            out = tf.concat(out, axis=self.axis)
+        return out
+
+
+class SequentialConcurrent(SimpleSequential):
+    """
+    A sequential container with concatenated outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    cat_input : bool, default True
+        Whether to concatenate input tensor.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 stack=False,
+                 cat_input=True,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SequentialConcurrent, self).__init__(**kwargs)
+        self.axis = get_channel_axis(data_format)
+        self.stack = stack
+        self.cat_input = cat_input
+
+    def call(self, x, training=None):
+        out = [x] if self.cat_input else []
+        for block in self.children:
+            x = block(x, training=training)
+            out.append(x)
         if self.stack:
             out = tf.stack(out, axis=self.axis)
         else:

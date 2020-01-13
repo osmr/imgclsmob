@@ -6,8 +6,8 @@ __all__ = ['round_channels', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_laye
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten']
+           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
 
 import math
 from inspect import isfunction
@@ -1107,6 +1107,41 @@ class Concurrent(nn.Sequential):
         out = []
         for module in self._modules.values():
             out.append(module(x))
+        if self.stack:
+            out = torch.stack(tuple(out), dim=self.axis)
+        else:
+            out = torch.cat(tuple(out), dim=self.axis)
+        return out
+
+
+class SequentialConcurrent(nn.Sequential):
+    """
+    A sequential container with concatenated outputs.
+    Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    cat_input : bool, default True
+        Whether to concatenate input tensor.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False,
+                 cat_input=True):
+        super(SequentialConcurrent, self).__init__()
+        self.axis = axis
+        self.stack = stack
+        self.cat_input = cat_input
+
+    def forward(self, x):
+        out = [x] if self.cat_input else []
+        for module in self._modules.values():
+            x = module(x)
+            out.append(x)
         if self.stack:
             out = torch.stack(tuple(out), dim=self.axis)
         else:

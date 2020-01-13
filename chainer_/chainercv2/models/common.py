@@ -6,8 +6,8 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalA
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
+           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
 
 from inspect import isfunction
 from chainer import Chain
@@ -1088,6 +1088,41 @@ class Concurrent(SimpleSequential):
         out = []
         for name in self.layer_names:
             out.append(self[name](x))
+        if self.stack:
+            out = F.stack(tuple(out), axis=self.axis)
+        else:
+            out = F.concat(tuple(out), axis=self.axis)
+        return out
+
+
+class SequentialConcurrent(SimpleSequential):
+    """
+    A sequential container with concatenated outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    cat_input : bool, default True
+        Whether to concatenate input tensor.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False,
+                 cat_input=True):
+        super(SequentialConcurrent, self).__init__()
+        self.axis = axis
+        self.stack = stack
+        self.cat_input = cat_input
+
+    def __call__(self, x):
+        out = [x] if self.cat_input else []
+        for name in self.layer_names:
+            x = self[name](x)
+            out.append(x)
         if self.stack:
             out = F.stack(tuple(out), axis=self.axis)
         else:

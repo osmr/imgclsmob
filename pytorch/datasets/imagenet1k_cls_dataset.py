@@ -62,6 +62,9 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.test_transform = imagenet_val_transform
         self.ml_type = "imgcls"
         self.use_cv_resize = False
+        self.mean_rgb = (0.485, 0.456, 0.406)
+        self.std_rgb = (0.229, 0.224, 0.225)
+        self.interpolation = Image.BILINEAR
 
     def add_dataset_parser_arguments(self,
                                      parser,
@@ -91,6 +94,23 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
             "--use-cv-resize",
             action="store_true",
             help="use OpenCV resize preprocessing")
+        parser.add_argument(
+            "--mean-rgb",
+            nargs=3,
+            type=float,
+            default=self.mean_rgb,
+            help="Mean of RGB channels in the dataset")
+        parser.add_argument(
+            "--std-rgb",
+            nargs=3,
+            type=float,
+            default=self.std_rgb,
+            help="STD of RGB channels in the dataset")
+        parser.add_argument(
+            "--interpolation",
+            type=int,
+            default=self.interpolation,
+            help="Preprocessing interpolation")
 
     def update(self,
                args):
@@ -105,11 +125,12 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         super(ImageNet1KMetaInfo, self).update(args)
         self.input_image_size = (args.input_size, args.input_size)
         self.use_cv_resize = args.use_cv_resize
+        self.mean_rgb = args.mean_rgb
+        self.std_rgb = args.std_rgb
+        self.interpolation = args.interpolation
 
 
 def imagenet_train_transform(ds_metainfo,
-                             mean_rgb=(0.485, 0.456, 0.406),
-                             std_rgb=(0.229, 0.224, 0.225),
                              jitter_param=0.4):
     """
     Create image transform sequence for training subset.
@@ -118,10 +139,6 @@ def imagenet_train_transform(ds_metainfo,
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
-    mean_rgb : tuple of 3 float
-        Mean of RGB channels in the dataset.
-    std_rgb : tuple of 3 float
-        STD of RGB channels in the dataset.
     jitter_param : float
         How much to jitter values.
 
@@ -132,7 +149,7 @@ def imagenet_train_transform(ds_metainfo,
     """
     input_image_size = ds_metainfo.input_image_size
     return transforms.Compose([
-        transforms.RandomResizedCrop(input_image_size),
+        transforms.RandomResizedCrop(size=input_image_size, interpolation=ds_metainfo.interpolation),
         transforms.RandomHorizontalFlip(),
         transforms.ColorJitter(
             brightness=jitter_param,
@@ -140,14 +157,12 @@ def imagenet_train_transform(ds_metainfo,
             saturation=jitter_param),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=mean_rgb,
-            std=std_rgb)
+            mean=ds_metainfo.mean_rgb,
+            std=ds_metainfo.std_rgb)
     ])
 
 
-def imagenet_val_transform(ds_metainfo,
-                           mean_rgb=(0.485, 0.456, 0.406),
-                           std_rgb=(0.229, 0.224, 0.225)):
+def imagenet_val_transform(ds_metainfo):
     """
     Create image transform sequence for validation subset.
 
@@ -155,10 +170,6 @@ def imagenet_val_transform(ds_metainfo,
     ----------
     ds_metainfo : DatasetMetaInfo
         ImageNet-1K dataset metainfo.
-    mean_rgb : tuple of 3 float
-        Mean of RGB channels in the dataset.
-    std_rgb : tuple of 3 float
-        STD of RGB channels in the dataset.
 
     Returns
     -------
@@ -170,12 +181,13 @@ def imagenet_val_transform(ds_metainfo,
         input_image_size=ds_metainfo.input_image_size,
         resize_inv_factor=ds_metainfo.resize_inv_factor)
     return transforms.Compose([
-        CvResize(resize_value) if ds_metainfo.use_cv_resize else transforms.Resize(resize_value),
+        CvResize(size=resize_value, interpolation=ds_metainfo.interpolation) if ds_metainfo.use_cv_resize else
+        transforms.Resize(size=resize_value, interpolation=ds_metainfo.interpolation),
         transforms.CenterCrop(size=input_image_size),
         transforms.ToTensor(),
         transforms.Normalize(
-            mean=mean_rgb,
-            std=std_rgb)
+            mean=ds_metainfo.mean_rgb,
+            std=ds_metainfo.std_rgb)
     ])
 
 

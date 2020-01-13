@@ -85,7 +85,9 @@ def center_crop(img,
     return img.crop((j, i, j + tw, i + th))
 
 
-def img_normalization(img):
+def img_normalization(img,
+                      mean_rgb=(0.485, 0.456, 0.406),
+                      std_rgb=(0.229, 0.224, 0.225)):
     """
     Normalization as in the ImageNet-1K validation procedure.
 
@@ -93,14 +95,18 @@ def img_normalization(img):
     ----------
     img : np.array
         input image.
+    mean_rgb : tuple of 3 float
+        Mean of RGB channels in the dataset.
+    std_rgb : tuple of 3 float
+        STD of RGB channels in the dataset.
 
     Returns
     -------
     np.array
         Output image.
     """
-    mean_rgb = np.array([0.485, 0.456, 0.406], np.float32) * 255.0
-    std_rgb = np.array([0.229, 0.224, 0.225], np.float32) * 255.0
+    mean_rgb = np.array(mean_rgb, np.float32) * 255.0
+    std_rgb = np.array(std_rgb, np.float32) * 255.0
     img = (img - mean_rgb) / std_rgb
     return img
 

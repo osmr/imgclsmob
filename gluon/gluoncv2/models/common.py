@@ -6,7 +6,8 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
-           'Concurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
+           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -1238,6 +1239,42 @@ class Concurrent(nn.HybridSequential):
         out = []
         for block in self._children.values():
             out.append(block(x))
+        if self.stack:
+            out = F.stack(*out, axis=self.axis)
+        else:
+            out = F.concat(*out, dim=self.axis)
+        return out
+
+
+class SequentialConcurrent(nn.HybridSequential):
+    """
+    A sequential container with concatenated outputs.
+    Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    cat_input : bool, default True
+        Whether to concatenate input tensor.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False,
+                 cat_input=True,
+                 **kwargs):
+        super(SequentialConcurrent, self).__init__(**kwargs)
+        self.axis = axis
+        self.stack = stack
+        self.cat_input = cat_input
+
+    def hybrid_forward(self, F, x):
+        out = [x] if self.cat_input else []
+        for block in self._children.values():
+            x = block(x)
+            out.append(x)
         if self.stack:
             out = F.stack(*out, axis=self.axis)
         else:

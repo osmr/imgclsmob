@@ -43,6 +43,7 @@ from .models.msdnet import *
 from .models.fishnet import *
 from .models.espnetv2 import *
 from .models.hrnet import *
+from .models.vovnet import *
 from .models.selecsls import *
 from .models.xdensenet import *
 from .models.squeezenet import *
@@ -108,7 +109,8 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.others.oth_vovnet import *
+# from .models.others.oth_vovnet import *
+from .models.others.oth_efficientnet4 import *
 
 __all__ = ['get_model']
 
@@ -421,6 +423,10 @@ _models = {
     'hrnetv2_w48': hrnetv2_w48,
     'hrnetv2_w64': hrnetv2_w64,
 
+    'vovnet27s': vovnet27s,
+    'vovnet39': vovnet39,
+    'vovnet57': vovnet57,
+
     'selecsls42': selecsls42,
     'selecsls42b': selecsls42b,
     'selecsls60': selecsls60,
@@ -543,6 +549,7 @@ _models = {
     'efficientnet_b5': efficientnet_b5,
     'efficientnet_b6': efficientnet_b6,
     'efficientnet_b7': efficientnet_b7,
+    'efficientnet_b8': efficientnet_b8,
     'efficientnet_b0b': efficientnet_b0b,
     'efficientnet_b1b': efficientnet_b1b,
     'efficientnet_b2b': efficientnet_b2b,
@@ -551,6 +558,15 @@ _models = {
     'efficientnet_b5b': efficientnet_b5b,
     'efficientnet_b6b': efficientnet_b6b,
     'efficientnet_b7b': efficientnet_b7b,
+    'efficientnet_b0c': efficientnet_b0c,
+    'efficientnet_b1c': efficientnet_b1c,
+    'efficientnet_b2c': efficientnet_b2c,
+    'efficientnet_b3c': efficientnet_b3c,
+    'efficientnet_b4c': efficientnet_b4c,
+    'efficientnet_b5c': efficientnet_b5c,
+    'efficientnet_b6c': efficientnet_b6c,
+    'efficientnet_b7c': efficientnet_b7c,
+    'efficientnet_b8c': efficientnet_b8c,
 
     'mixnet_s': mixnet_s,
     'mixnet_m': mixnet_m,
@@ -928,8 +944,21 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    'oth_vovnet39': oth_vovnet39,
-    'oth_vovnet57': oth_vovnet57,
+    # 'oth_vovnet39': oth_vovnet39,
+    # 'oth_vovnet57': oth_vovnet57,
+
+    'oth_efficientnet_b0_tf': oth_efficientnet_b0_tf,
+    'oth_efficientnet_b1_tf': oth_efficientnet_b1_tf,
+    'oth_efficientnet_b2_tf': oth_efficientnet_b2_tf,
+    'oth_efficientnet_b3_tf': oth_efficientnet_b3_tf,
+    'oth_efficientnet_b4_tf': oth_efficientnet_b4_tf,
+    'oth_efficientnet_b5_tf': oth_efficientnet_b5_tf,
+    'oth_efficientnet_b6_tf': oth_efficientnet_b6_tf,
+    'oth_efficientnet_b7_tf': oth_efficientnet_b7_tf,
+    'oth_efficientnet_b8_tf': oth_efficientnet_b8_tf,
+    'oth_efficientnet_es_tf': oth_efficientnet_es_tf,
+    'oth_efficientnet_em_tf': oth_efficientnet_em_tf,
+    'oth_efficientnet_el_tf': oth_efficientnet_el_tf,
 }
 
 

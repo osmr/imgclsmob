@@ -119,6 +119,24 @@ def parse_args():
         action="store_true",
         help="test all pretrained models for partucular dataset")
 
+    parser.add_argument(
+        "--mean-rgb",
+        nargs=3,
+        type=float,
+        default=(0.485, 0.456, 0.406),
+        help="Mean of RGB channels in the dataset")
+    parser.add_argument(
+        "--std-rgb",
+        nargs=3,
+        type=float,
+        default=(0.229, 0.224, 0.225),
+        help="STD of RGB channels in the dataset")
+    parser.add_argument(
+        "--interpolation",
+        type=str,
+        default="bilinear",
+        help="Preprocessing interpolation")
+
     args = parser.parse_args()
     return args
 
@@ -168,7 +186,7 @@ def test_model(args,
     val_dir = os.path.join(data_dir, "val")
 
     val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        preprocessing_function=img_normalization,
+        preprocessing_function=(lambda img: img_normalization(img=img, mean_rgb=args.mean_rgb, std_rgb=args.std_rgb)),
         data_format=data_format)
     val_generator = val_datagen.flow_from_directory(
         directory=val_dir,
@@ -176,7 +194,7 @@ def test_model(args,
         class_mode="binary",
         batch_size=batch_size,
         shuffle=False,
-        interpolation="bilinear:" + str(resize_inv_factor))
+        interpolation="{}:{}".format(args.interpolation, resize_inv_factor))
     val_ds = tf.data.Dataset.from_generator(
         generator=lambda: val_generator,
         output_types=(tf.float32, tf.float32))

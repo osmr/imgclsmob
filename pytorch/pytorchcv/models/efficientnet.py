@@ -4,12 +4,12 @@
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b8',
-           'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b',
-           'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b', 'efficientnet_b0c', 'efficientnet_b1c',
-           'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c', 'efficientnet_b5c', 'efficientnet_b6c',
-           'efficientnet_b7c', 'efficientnet_b8c']
+__all__ = ['EfficientNet', 'calc_tf_padding', 'EffiInvResUnit', 'EffiInitBlock', 'efficientnet_b0', 'efficientnet_b1',
+           'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6',
+           'efficientnet_b7', 'efficientnet_b8', 'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b',
+           'efficientnet_b3b', 'efficientnet_b4b', 'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b',
+           'efficientnet_b0c', 'efficientnet_b1c', 'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c',
+           'efficientnet_b5c', 'efficientnet_b6c', 'efficientnet_b7c', 'efficientnet_b8c']
 
 import os
 import math
@@ -124,8 +124,10 @@ class EffiInvResUnit(nn.Module):
         Convolution window size.
     stride : int or tuple/list of 2 int
         Strides of the second convolution layer.
-    expansion_factor : int
+    exp_factor : int
         Factor for expansion of channels.
+    se_factor : int
+        SE reduction factor for each unit.
     bn_eps : float
         Small float added to variance in Batch norm.
     activation : str
@@ -138,7 +140,8 @@ class EffiInvResUnit(nn.Module):
                  out_channels,
                  kernel_size,
                  stride,
-                 expansion_factor,
+                 exp_factor,
+                 se_factor,
                  bn_eps,
                  activation,
                  tf_mode):
@@ -147,7 +150,8 @@ class EffiInvResUnit(nn.Module):
         self.stride = stride
         self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (stride == 1)
-        mid_channels = in_channels * expansion_factor
+        self.use_se = se_factor > 0
+        mid_channels = in_channels * exp_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
         self.conv1 = conv1x1_block(
@@ -162,10 +166,11 @@ class EffiInvResUnit(nn.Module):
             padding=(0 if tf_mode else (kernel_size // 2)),
             bn_eps=bn_eps,
             activation=activation)
-        self.se = SEBlock(
-            channels=mid_channels,
-            reduction=24,
-            mid_activation=activation)
+        if self.use_se:
+            self.se = SEBlock(
+                channels=mid_channels,
+                reduction=(exp_factor * se_factor),
+                mid_activation=activation)
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
@@ -179,7 +184,8 @@ class EffiInvResUnit(nn.Module):
         if self.tf_mode:
             x = F.pad(x, pad=calc_tf_padding(x, kernel_size=self.kernel_size, stride=self.stride))
         x = self.conv2(x)
-        x = self.se(x)
+        if self.use_se:
+            x = self.se(x)
         x = self.conv3(x)
         if self.residual:
             x = x + identity
@@ -230,7 +236,7 @@ class EffiInitBlock(nn.Module):
 
 class EfficientNet(nn.Module):
     """
-    EfficientNet(-B0) model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
+    EfficientNet model from 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
     https://arxiv.org/abs/1905.11946.
 
     Parameters:
@@ -308,7 +314,8 @@ class EfficientNet(nn.Module):
                         out_channels=out_channels,
                         kernel_size=kernel_size,
                         stride=stride,
-                        expansion_factor=expansion_factor,
+                        exp_factor=expansion_factor,
+                        se_factor=4,
                         bn_eps=bn_eps,
                         activation=activation,
                         tf_mode=tf_mode))
@@ -323,6 +330,7 @@ class EfficientNet(nn.Module):
         self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
 
         self.output = nn.Sequential()
+        # print("self.drop_rate={}".format(dropout_rate))
         if dropout_rate > 0.0:
             self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
         self.output.add_module("fc", nn.Linear(

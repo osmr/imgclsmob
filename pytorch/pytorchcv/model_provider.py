@@ -70,6 +70,7 @@ from .models.nasnet import *
 from .models.pnasnet import *
 from .models.spnasnet import *
 from .models.efficientnet import *
+from .models.efficientnetedge import *
 from .models.mixnet import *
 
 from .models.nin_cifar import *
@@ -109,7 +110,6 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-# from .models.others.oth_vovnet import *
 from .models.others.oth_efficientnet4 import *
 
 __all__ = ['get_model']
@@ -568,6 +568,10 @@ _models = {
     'efficientnet_b7c': efficientnet_b7c,
     'efficientnet_b8c': efficientnet_b8c,
 
+    'efficientnet_edge_small_b': efficientnet_edge_small_b,
+    'efficientnet_edge_medium_b': efficientnet_edge_medium_b,
+    'efficientnet_edge_large_b': efficientnet_edge_large_b,
+
     'mixnet_s': mixnet_s,
     'mixnet_m': mixnet_m,
     'mixnet_l': mixnet_l,
@@ -943,9 +947,6 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-
-    # 'oth_vovnet39': oth_vovnet39,
-    # 'oth_vovnet57': oth_vovnet57,
 
     'oth_efficientnet_b0_tf': oth_efficientnet_b0_tf,
     'oth_efficientnet_b1_tf': oth_efficientnet_b1_tf,

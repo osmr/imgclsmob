@@ -2,10 +2,10 @@
     Common routines for models in TensorFlow 2.0.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', 'HSwish', 'get_activation_layer',
-           'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d', 'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d',
-           'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
-           'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
+__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', 'HSwish', 'PReLU2',
+           'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d', 'BatchNorm', 'InstanceNorm',
+           'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
+           'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'Identity',
            'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
            'ParametricConcurrent']
@@ -114,6 +114,25 @@ class HSwish(nn.Layer):
 
     def call(self, x):
         return x * tf.nn.relu6(x + 3.0) / 6.0
+
+
+class PReLU2(nn.Layer):
+    """
+    Parametric leaky version of a Rectified Linear Unit (with wide alpha).
+
+    Parameters:
+    ----------
+    alpha : int, default 0.25
+        Negative slope coefficient.
+    """
+    def __init__(self,
+                 alpha=0.25,
+                 **kwargs):
+        super(PReLU2, self).__init__(**kwargs)
+        self.active = nn.LeakyReLU(alpha=alpha)
+
+    def call(self, x):
+        return self.active(x)
 
 
 def get_activation_layer(activation):
@@ -720,7 +739,7 @@ class Conv2d(nn.Layer):
                 use_bias=use_bias,
                 name="conv")
         elif self.use_dw_conv:
-            assert (dilation[0] == 1) and (dilation[1] == 1)
+            # assert (dilation[0] == 1) and (dilation[1] == 1)
             self.dw_conv = nn.DepthwiseConv2D(
                 kernel_size=kernel_size,
                 strides=strides,

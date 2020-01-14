@@ -4,12 +4,12 @@
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b8',
-           'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b',
-           'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b', 'efficientnet_b0c', 'efficientnet_b1c',
-           'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c', 'efficientnet_b5c', 'efficientnet_b6c',
-           'efficientnet_b7c', 'efficientnet_b8c']
+__all__ = ['EfficientNet', 'calc_tf_padding', 'EffiInvResUnit', 'EffiInitBlock', 'efficientnet_b0', 'efficientnet_b1',
+           'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6',
+           'efficientnet_b7', 'efficientnet_b8', 'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b',
+           'efficientnet_b3b', 'efficientnet_b4b', 'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b',
+           'efficientnet_b0c', 'efficientnet_b1c', 'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c',
+           'efficientnet_b5c', 'efficientnet_b6c', 'efficientnet_b7c', 'efficientnet_b8c']
 
 import os
 import math
@@ -142,8 +142,10 @@ class EffiInvResUnit(nn.Layer):
         Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the second convolution layer.
-    expansion_factor : int
+    exp_factor : int
         Factor for expansion of channels.
+    se_factor : int
+        SE reduction factor for each unit.
     bn_eps : float
         Small float added to variance in Batch norm.
     activation : str
@@ -158,7 +160,8 @@ class EffiInvResUnit(nn.Layer):
                  out_channels,
                  kernel_size,
                  strides,
-                 expansion_factor,
+                 exp_factor,
+                 se_factor,
                  bn_eps,
                  activation,
                  tf_mode,
@@ -170,7 +173,8 @@ class EffiInvResUnit(nn.Layer):
         self.tf_mode = tf_mode
         self.data_format = data_format
         self.residual = (in_channels == out_channels) and (strides == 1)
-        mid_channels = in_channels * expansion_factor
+        self.use_se = se_factor > 0
+        mid_channels = in_channels * exp_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
         self.conv1 = conv1x1_block(
@@ -189,12 +193,13 @@ class EffiInvResUnit(nn.Layer):
             activation=activation,
             data_format=data_format,
             name="conv2")
-        self.se = SEBlock(
-            channels=mid_channels,
-            reduction=24,
-            mid_activation=activation,
-            data_format=data_format,
-            name="se")
+        if self.use_se:
+            self.se = SEBlock(
+                channels=mid_channels,
+                reduction=(exp_factor * se_factor),
+                mid_activation=activation,
+                data_format=data_format,
+                name="se")
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
@@ -211,7 +216,8 @@ class EffiInvResUnit(nn.Layer):
             x = tf.pad(x, paddings=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides,
                                                    data_format=self.data_format))
         x = self.conv2(x, training=training)
-        x = self.se(x)
+        if self.use_se:
+            x = self.se(x)
         x = self.conv3(x, training=training)
         if self.residual:
             x = x + identity
@@ -355,7 +361,8 @@ class EfficientNet(tf.keras.Model):
                         out_channels=out_channels,
                         kernel_size=kernel_size,
                         strides=strides,
-                        expansion_factor=expansion_factor,
+                        exp_factor=expansion_factor,
+                        se_factor=4,
                         bn_eps=bn_eps,
                         activation=activation,
                         tf_mode=tf_mode,
@@ -459,6 +466,11 @@ def get_efficientnet(version,
         assert (in_size == (600, 600))
         depth_factor = 3.1
         width_factor = 2.0
+        dropout_rate = 0.5
+    elif version == "b8":
+        assert (in_size == (672, 672))
+        depth_factor = 3.6
+        width_factor = 2.2
         dropout_rate = 0.5
     else:
         raise ValueError("Unsupported EfficientNet version {}".format(version))

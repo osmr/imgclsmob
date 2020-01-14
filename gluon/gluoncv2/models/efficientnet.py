@@ -4,12 +4,12 @@
     https://arxiv.org/abs/1905.11946.
 """
 
-__all__ = ['EfficientNet', 'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2', 'efficientnet_b3',
-           'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6', 'efficientnet_b7', 'efficientnet_b8',
-           'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b', 'efficientnet_b3b', 'efficientnet_b4b',
-           'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b', 'efficientnet_b0c', 'efficientnet_b1c',
-           'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c', 'efficientnet_b5c', 'efficientnet_b6c',
-           'efficientnet_b7c', 'efficientnet_b8c']
+__all__ = ['EfficientNet', 'calc_tf_padding', 'EffiInvResUnit', 'EffiInitBlock', 'efficientnet_b0', 'efficientnet_b1',
+           'efficientnet_b2', 'efficientnet_b3', 'efficientnet_b4', 'efficientnet_b5', 'efficientnet_b6',
+           'efficientnet_b7', 'efficientnet_b8', 'efficientnet_b0b', 'efficientnet_b1b', 'efficientnet_b2b',
+           'efficientnet_b3b', 'efficientnet_b4b', 'efficientnet_b5b', 'efficientnet_b6b', 'efficientnet_b7b',
+           'efficientnet_b0c', 'efficientnet_b1c', 'efficientnet_b2c', 'efficientnet_b3c', 'efficientnet_b4c',
+           'efficientnet_b5c', 'efficientnet_b6c', 'efficientnet_b7c', 'efficientnet_b8c']
 
 import os
 import math
@@ -130,8 +130,10 @@ class EffiInvResUnit(HybridBlock):
         Convolution window size.
     strides : int or tuple/list of 2 int
         Strides of the second convolution layer.
-    expansion_factor : int
+    exp_factor : int
         Factor for expansion of channels.
+    se_factor : int
+        SE reduction factor for each unit.
     bn_epsilon : float
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool
@@ -146,7 +148,8 @@ class EffiInvResUnit(HybridBlock):
                  out_channels,
                  kernel_size,
                  strides,
-                 expansion_factor,
+                 exp_factor,
+                 se_factor,
                  bn_epsilon,
                  bn_use_global_stats,
                  activation,
@@ -157,7 +160,8 @@ class EffiInvResUnit(HybridBlock):
         self.strides = strides
         self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (strides == 1)
-        mid_channels = in_channels * expansion_factor
+        self.use_se = se_factor > 0
+        mid_channels = in_channels * exp_factor
         dwconv_block_fn = dwconv3x3_block if kernel_size == 3 else (dwconv5x5_block if kernel_size == 5 else None)
 
         with self.name_scope():
@@ -175,10 +179,11 @@ class EffiInvResUnit(HybridBlock):
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation)
-            self.se = SEBlock(
-                channels=mid_channels,
-                reduction=24,
-                mid_activation=activation)
+            if self.use_se:
+                self.se = SEBlock(
+                    channels=mid_channels,
+                    reduction=(exp_factor * se_factor),
+                    mid_activation=activation)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
@@ -192,9 +197,11 @@ class EffiInvResUnit(HybridBlock):
         x = self.conv1(x)
         if self.tf_mode:
             x = F.pad(x, mode="constant",
-                      pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides), constant_value=0)
+                      pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides),
+                      constant_value=0)
         x = self.conv2(x)
-        x = self.se(x)
+        if self.use_se:
+            x = self.se(x)
         x = self.conv3(x)
         if self.residual:
             x = x + identity
@@ -338,7 +345,8 @@ class EfficientNet(HybridBlock):
                                 out_channels=out_channels,
                                 kernel_size=kernel_size,
                                 strides=strides,
-                                expansion_factor=expansion_factor,
+                                exp_factor=expansion_factor,
+                                se_factor=4,
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,
@@ -439,6 +447,11 @@ def get_efficientnet(version,
         assert (in_size == (600, 600))
         depth_factor = 3.1
         width_factor = 2.0
+        dropout_rate = 0.5
+    elif version == "b8":
+        assert (in_size == (672, 672))
+        depth_factor = 3.6
+        width_factor = 2.2
         dropout_rate = 0.5
     else:
         raise ValueError("Unsupported EfficientNet version {}".format(version))
@@ -843,7 +856,7 @@ def efficientnet_b0c(in_size=(224, 224), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b0c",
+    return get_efficientnet(version="b0", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b0c",
                             **kwargs)
 
 
@@ -863,7 +876,7 @@ def efficientnet_b1c(in_size=(240, 240), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b1c",
+    return get_efficientnet(version="b1", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b1c",
                             **kwargs)
 
 
@@ -883,7 +896,7 @@ def efficientnet_b2c(in_size=(260, 260), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b2c",
+    return get_efficientnet(version="b2", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b2c",
                             **kwargs)
 
 
@@ -903,7 +916,7 @@ def efficientnet_b3c(in_size=(300, 300), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b3c",
+    return get_efficientnet(version="b3", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b3c",
                             **kwargs)
 
 
@@ -923,7 +936,7 @@ def efficientnet_b4c(in_size=(380, 380), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b4c",
+    return get_efficientnet(version="b4", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b4c",
                             **kwargs)
 
 
@@ -943,7 +956,7 @@ def efficientnet_b5c(in_size=(456, 456), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b5c",
+    return get_efficientnet(version="b5", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b5c",
                             **kwargs)
 
 
@@ -963,7 +976,7 @@ def efficientnet_b6c(in_size=(528, 528), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b6c",
+    return get_efficientnet(version="b6", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b6c",
                             **kwargs)
 
 
@@ -983,7 +996,7 @@ def efficientnet_b7c(in_size=(600, 600), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b7c",
+    return get_efficientnet(version="b7", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b7c",
                             **kwargs)
 
 
@@ -1003,7 +1016,7 @@ def efficientnet_b8c(in_size=(672, 672), **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_efficientnet(version="b8", in_size=in_size, tf_mode=True, bn_eps=1e-3, model_name="efficientnet_b8c",
+    return get_efficientnet(version="b8", in_size=in_size, tf_mode=True, bn_epsilon=1e-3, model_name="efficientnet_b8c",
                             **kwargs)
 
 

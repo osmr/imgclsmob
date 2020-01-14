@@ -63,6 +63,7 @@ from .models.nasnet import *
 from .models.pnasnet import *
 from .models.spnasnet import *
 from .models.efficientnet import *
+from .models.efficientnetedge import *
 from .models.mixnet import *
 
 from .models.nin_cifar import *
@@ -530,6 +531,10 @@ _models = {
     'efficientnet_b6c': efficientnet_b6c,
     'efficientnet_b7c': efficientnet_b7c,
     'efficientnet_b8c': efficientnet_b8c,
+
+    'efficientnet_edge_small_b': efficientnet_edge_small_b,
+    'efficientnet_edge_medium_b': efficientnet_edge_medium_b,
+    'efficientnet_edge_large_b': efficientnet_edge_large_b,
 
     'mixnet_s': mixnet_s,
     'mixnet_m': mixnet_m,

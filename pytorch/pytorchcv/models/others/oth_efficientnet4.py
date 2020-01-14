@@ -1070,6 +1070,7 @@ class EfficientNet(nn.Module):
         x = self.forward_features(x)
         x = self.global_pool(x)
         x = x.flatten(1)
+        # print("self.drop_rate={}".format(self.drop_rate))
         if self.drop_rate > 0.:
             x = F.dropout(x, p=self.drop_rate, training=self.training)
         return self.classifier(x)
@@ -1307,15 +1308,16 @@ def _test():
     pretrained = False
 
     models = [
-        (oth_efficientnet_b0_tf, 224),
-        (oth_efficientnet_b1_tf, 240),
-        (oth_efficientnet_b2_tf, 260),
-        (oth_efficientnet_b3_tf, 300),
-        (oth_efficientnet_b4_tf, 380),
-        (oth_efficientnet_b5_tf, 456),
-        (oth_efficientnet_b6_tf, 528),
-        (oth_efficientnet_b7_tf, 600),
-        (oth_efficientnet_b8_tf, 672),
+        # (oth_efficientnet_b0_tf, 224),
+        # (oth_efficientnet_b1_tf, 240),
+        # (oth_efficientnet_b2_tf, 260),
+        # (oth_efficientnet_b3_tf, 300),
+        # (oth_efficientnet_b4_tf, 380),
+        # (oth_efficientnet_b5_tf, 456),
+        # (oth_efficientnet_b6_tf, 528),
+        # (oth_efficientnet_b7_tf, 600),
+        # (oth_efficientnet_b8_tf, 672),
+
         (oth_efficientnet_es_tf, 224),
         (oth_efficientnet_em_tf, 240),
         (oth_efficientnet_el_tf, 300),

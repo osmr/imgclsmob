@@ -1,7 +1,8 @@
 """
     EfficientNet for ImageNet-1K, implemented in PyTorch.
-    Original paper: 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,'
-    https://arxiv.org/abs/1905.11946.
+    Original papers:
+    - 'EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks,' https://arxiv.org/abs/1905.11946,
+    - 'Adversarial Examples Improve Image Recognition,' https://arxiv.org/abs/1911.09665.
 """
 
 __all__ = ['EfficientNet', 'calc_tf_padding', 'EffiInvResUnit', 'EffiInitBlock', 'efficientnet_b0', 'efficientnet_b1',

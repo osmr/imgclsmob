@@ -9,10 +9,9 @@ __all__ = ['EfficientNetEdge', 'efficientnet_edge_small_b', 'efficientnet_edge_m
 import os
 import math
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.init as init
 from .common import round_channels, conv1x1_block, conv3x3_block, SEBlock
-from .efficientnet import calc_tf_padding, EffiInvResUnit, EffiInitBlock
+from .efficientnet import EffiInvResUnit, EffiInitBlock
 
 
 class EffiEdgeResUnit(nn.Module):
@@ -39,8 +38,6 @@ class EffiEdgeResUnit(nn.Module):
         Small float added to variance in Batch norm.
     activation : str
         Name of activation function.
-    tf_mode : bool
-        Whether to use TF-like mode.
     """
     def __init__(self,
                  in_channels,
@@ -51,12 +48,8 @@ class EffiEdgeResUnit(nn.Module):
                  mid_from_in,
                  use_skip,
                  bn_eps,
-                 activation,
-                 tf_mode):
+                 activation):
         super(EffiEdgeResUnit, self).__init__()
-        self.kernel_size = 3
-        self.stride = stride
-        self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (stride == 1) and use_skip
         self.use_se = se_factor > 0
         mid_channels = in_channels * exp_factor if mid_from_in else out_channels * exp_factor
@@ -64,8 +57,6 @@ class EffiEdgeResUnit(nn.Module):
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=stride,
-            padding=(0 if tf_mode else 1),
             bn_eps=bn_eps,
             activation=activation)
         if self.use_se:
@@ -76,14 +67,13 @@ class EffiEdgeResUnit(nn.Module):
         self.conv2 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
+            stride=stride,
             bn_eps=bn_eps,
             activation=None)
 
     def forward(self, x):
         if self.residual:
             identity = x
-        if self.tf_mode:
-            x = F.pad(x, pad=calc_tf_padding(x, kernel_size=3, stride=self.stride))
         x = self.conv1(x)
         if self.use_se:
             x = self.se(x)
@@ -171,8 +161,7 @@ class EfficientNetEdge(nn.Module):
                         mid_from_in=mid_from_in,
                         use_skip=use_skip,
                         bn_eps=bn_eps,
-                        activation=activation,
-                        tf_mode=tf_mode))
+                        activation=activation))
                 else:
                     stage.add_module("unit{}".format(j + 1), EffiInvResUnit(
                         in_channels=in_channels,

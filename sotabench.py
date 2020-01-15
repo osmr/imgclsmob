@@ -11,7 +11,7 @@ from sys import version_info
 for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
     net = ptcv_get_model(model_name, pretrained=True)
     error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
-    if (ds != "in1k") or (img_size == 0):
+    if (ds != "in1k") or (img_size == 0) or ((len(rem) > 0) and (rem[-1] == "*")):
         continue
     paper_model_name = caption
     paper_arxiv_id = paper

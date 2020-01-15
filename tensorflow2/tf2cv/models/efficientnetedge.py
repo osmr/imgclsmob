@@ -11,7 +11,7 @@ import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, conv1x1_block, conv3x3_block, SEBlock, is_channels_first
-from .efficientnet import calc_tf_padding, EffiInvResUnit, EffiInitBlock
+from .efficientnet import EffiInvResUnit, EffiInitBlock
 
 
 class EffiEdgeResUnit(nn.Layer):
@@ -38,8 +38,6 @@ class EffiEdgeResUnit(nn.Layer):
         Small float added to variance in Batch norm.
     activation : str
         Name of activation function.
-    tf_mode : bool
-        Whether to use TF-like mode.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -53,23 +51,16 @@ class EffiEdgeResUnit(nn.Layer):
                  use_skip,
                  bn_eps,
                  activation,
-                 tf_mode,
                  data_format="channels_last",
                  **kwargs):
         super(EffiEdgeResUnit, self).__init__(**kwargs)
-        self.kernel_size = 3
-        self.strides = strides
-        self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (strides == 1) and use_skip
         self.use_se = se_factor > 0
-        self.data_format = data_format
         mid_channels = in_channels * exp_factor if mid_from_in else out_channels * exp_factor
 
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            strides=strides,
-            padding=(0 if tf_mode else 1),
             bn_eps=bn_eps,
             activation=activation,
             data_format=data_format,
@@ -84,6 +75,7 @@ class EffiEdgeResUnit(nn.Layer):
         self.conv2 = conv1x1_block(
             in_channels=mid_channels,
             out_channels=out_channels,
+            strides=strides,
             bn_eps=bn_eps,
             activation=None,
             data_format=data_format,
@@ -92,9 +84,6 @@ class EffiEdgeResUnit(nn.Layer):
     def call(self, x, training=None):
         if self.residual:
             identity = x
-        if self.tf_mode:
-            x = tf.pad(x, paddings=calc_tf_padding(x, kernel_size=3, strides=self.strides,
-                                                   data_format=self.data_format))
         x = self.conv1(x, training=training)
         if self.use_se:
             x = self.se(x)
@@ -190,7 +179,6 @@ class EfficientNetEdge(tf.keras.Model):
                         use_skip=use_skip,
                         bn_eps=bn_eps,
                         activation=activation,
-                        tf_mode=tf_mode,
                         data_format=data_format,
                         name="unit{}".format(j + 1)))
                 else:

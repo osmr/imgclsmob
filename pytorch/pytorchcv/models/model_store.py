@@ -110,7 +110,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('diracnet18v2', '1170', 'e06737707a1f5a5c7fe4e57da92ed890b034cb9a', 'v0.0.111', 'DiracNetV2-18', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa
     ('diracnet34v2', '0993', 'a6a661c0c3e96af320e5b9bf65a6c8e5e498a474', 'v0.0.111', 'DiracNetV2-34', '1706.00388', 'in1k', 224, 0.875, 200, '[szagoruyko/diracnets]'),  # noqa
     ('densenet121', '0704', 'cf90d1394d197fde953f57576403950345bd0a66', 'v0.0.314', 'DenseNet-121', '1608.06993', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('densenet161', '0644', 'c0fb22c83e8077a952ce1a0c9703d1a08b2b9e3a', 'v0.0.3', 'DenseNet-161', '1608.06993', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
+    ('densenet161', '0606', 'da489277afe7f53048ec15bed7919486e22f1afa', 'v0.0.432', 'DenseNet-161', '1608.06993', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('densenet169', '0629', '44974a17309bb378e97c8f70f96f961ffbf9458d', 'v0.0.406', 'DenseNet-169', '1608.06993', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('densenet201', '0612', '6adc8625a4afa53e335272bab01b4908a0ca3f00', 'v0.0.426', 'DenseNet-201', '1608.06993', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('condensenet74_c4_g4', '0828', '5ba550494cae7081d12c14b02b2a02365539d377', 'v0.0.4', 'CondenseNet-74 (C=G=4)', '1711.09224', 'in1k', 224, 0.875, 200, '[ShichenLiu/CondenseNet]'),  # noqa
@@ -245,6 +245,18 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('efficientnet_b5b', '0337', 'e1c2ffcf710cbd3c53b9c08723282a370906731c', 'v0.0.403', 'EfficientNet-B5b', '1905.11946', 'in1k', 456, 0.934, 70, '[rwightman/pyt...models]'),  # noqa
     ('efficientnet_b6b', '0323', 'e5c1d7c35fcff5fac07921a7696f7c04aba84012', 'v0.0.403', 'EfficientNet-B6b', '1905.11946', 'in1k', 528, 0.942, 60, '[rwightman/pyt...models]'),  # noqa
     ('efficientnet_b7b', '0322', 'b9c5965a1e2572aaa772e20e8a2e3af7b4bee9a6', 'v0.0.403', 'EfficientNet-B7b', '1905.11946', 'in1k', 600, 0.949, 50, '[rwightman/pyt...models]'),  # noqa
+    ('efficientnet_b0c', '0675', '21778c6e3b5a1b9b08b60c3e69401ce7e12bead4', 'v0.0.433', 'EfficientNet-B0с', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b1c', '0569', '239ed6a412530f60f810b29807da70c8ca63d8cc', 'v0.0.433', 'EfficientNet-B1с', '1905.11946', 'in1k', 240, 0.882, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b2c', '0503', 'be48d3d79f25a13a807b137d8a7ced41e8aab2bf', 'v0.0.433', 'EfficientNet-B2с', '1905.11946', 'in1k', 260, 0.890, 100, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b3c', '0442', 'ea7080aba3fc20ac25c3c925bfadf1e8c1e7df4d', 'v0.0.433', 'EfficientNet-B3с', '1905.11946', 'in1k', 300, 0.904, 90, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b4c', '0369', '5954cc05cfba3b0c8ee488b4488354fc0cef6623', 'v0.0.433', 'EfficientNet-B4с', '1905.11946', 'in1k', 380, 0.922, 80, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b5c', '0310', '589fefc6de5d93b54698b5b03f1e05637f9d0cb6', 'v0.0.433', 'EfficientNet-B5с', '1905.11946', 'in1k', 456, 0.934, 70, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b6c', '0296', '546e61da82bec69e3db5870b8df977e4615f7b32', 'v0.0.433', 'EfficientNet-B6с', '1905.11946', 'in1k', 528, 0.942, 60, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b7c', '0288', '13d683f2ca56c1007acd9ad0be450f45efeec828', 'v0.0.433', 'EfficientNet-B7с', '1905.11946', 'in1k', 600, 0.949, 50, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_b8c', '0276', 'a9973d66d599c4e83029577842c039a20799f2c9', 'v0.0.433', 'EfficientNet-B8с', '1905.11946', 'in1k', 672, 0.954, 50, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_edge_small_b', '0640', 'e27c3444406ebddd86824e41a924c0b8188c4067', 'v0.0.434', 'EfficientNet-Edge-Small-b', '1905.11946', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_edge_medium_b', '0563', '99fa34c7044281e521fb7cf4267763a5b03b7f1c', 'v0.0.434', 'EfficientNet-Edge-Medium-b', '1905.11946', 'in1k', 240, 0.882, 200, '[rwightman/pyt...models]*'),  # noqa
+    ('efficientnet_edge_large_b', '0491', 'd502326f9568f096491354a117f12562cf47e038', 'v0.0.434', 'EfficientNet-Edge-Large-b', '1905.11946', 'in1k', 300, 0.904, 90, '[rwightman/pyt...models]*'),  # noqa
     ('mixnet_s', '0719', 'aeafe8432c11ffafbe72b9456d0c040151a5465c', 'v0.0.412', 'MixNet-S', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_m', '0660', '5aab9fbd5a1d53cca58cdab4e1c644cacb6e0d8c', 'v0.0.413', 'MixNet-M', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_l', '0582', '6cf2c97538d4173d9f6bc80a6ec299463df2d1f3', 'v0.0.414', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

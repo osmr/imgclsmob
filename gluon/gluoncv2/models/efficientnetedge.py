@@ -11,7 +11,7 @@ import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import round_channels, conv1x1_block, conv3x3_block, SEBlock
-from .efficientnet import calc_tf_padding, EffiInvResUnit, EffiInitBlock
+from .efficientnet import EffiInvResUnit, EffiInitBlock
 
 
 class EffiEdgeResUnit(HybridBlock):
@@ -40,8 +40,6 @@ class EffiEdgeResUnit(HybridBlock):
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     activation : str
         Name of activation function.
-    tf_mode : bool
-        Whether to use TF-like mode.
     """
     def __init__(self,
                  in_channels,
@@ -54,12 +52,8 @@ class EffiEdgeResUnit(HybridBlock):
                  bn_epsilon,
                  bn_use_global_stats,
                  activation,
-                 tf_mode,
                  **kwargs):
         super(EffiEdgeResUnit, self).__init__(**kwargs)
-        self.kernel_size = 3
-        self.strides = strides
-        self.tf_mode = tf_mode
         self.residual = (in_channels == out_channels) and (strides == 1) and use_skip
         self.use_se = se_factor > 0
         mid_channels = in_channels * exp_factor if mid_from_in else out_channels * exp_factor
@@ -68,8 +62,6 @@ class EffiEdgeResUnit(HybridBlock):
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=mid_channels,
-                strides=strides,
-                padding=(0 if tf_mode else 1),
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation)
@@ -81,6 +73,7 @@ class EffiEdgeResUnit(HybridBlock):
             self.conv2 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
+                strides=strides,
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
@@ -88,9 +81,6 @@ class EffiEdgeResUnit(HybridBlock):
     def hybrid_forward(self, F, x):
         if self.residual:
             identity = x
-        if self.tf_mode:
-            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3, strides=self.strides),
-                      constant_value=0)
         x = self.conv1(x)
         if self.use_se:
             x = self.se(x)
@@ -187,8 +177,7 @@ class EfficientNetEdge(HybridBlock):
                                 use_skip=use_skip,
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
-                                activation=activation,
-                                tf_mode=tf_mode))
+                                activation=activation))
                         else:
                             stage.add(EffiInvResUnit(
                                 in_channels=in_channels,

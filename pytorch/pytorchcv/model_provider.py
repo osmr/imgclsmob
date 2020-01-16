@@ -110,8 +110,6 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.others.oth_efficientnet4 import *
-
 __all__ = ['get_model']
 
 
@@ -947,19 +945,6 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-
-    'oth_efficientnet_b0_tf': oth_efficientnet_b0_tf,
-    'oth_efficientnet_b1_tf': oth_efficientnet_b1_tf,
-    'oth_efficientnet_b2_tf': oth_efficientnet_b2_tf,
-    'oth_efficientnet_b3_tf': oth_efficientnet_b3_tf,
-    'oth_efficientnet_b4_tf': oth_efficientnet_b4_tf,
-    'oth_efficientnet_b5_tf': oth_efficientnet_b5_tf,
-    'oth_efficientnet_b6_tf': oth_efficientnet_b6_tf,
-    'oth_efficientnet_b7_tf': oth_efficientnet_b7_tf,
-    'oth_efficientnet_b8_tf': oth_efficientnet_b8_tf,
-    'oth_efficientnet_es_tf': oth_efficientnet_es_tf,
-    'oth_efficientnet_em_tf': oth_efficientnet_em_tf,
-    'oth_efficientnet_el_tf': oth_efficientnet_el_tf,
 }
 
 

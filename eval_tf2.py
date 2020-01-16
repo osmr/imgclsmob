@@ -3,6 +3,7 @@
 """
 
 import os
+import time
 import logging
 import argparse
 from sys import version_info
@@ -57,6 +58,11 @@ def parse_args():
         dest="calc_flops",
         action="store_true",
         help="calculate FLOPs")
+    parser.add_argument(
+        "--calc-flops-only",
+        dest="calc_flops_only",
+        action="store_true",
+        help="calculate FLOPs without quality estimation")
 
     parser.add_argument(
         "--input-size",
@@ -179,42 +185,49 @@ def test_model(args,
 
     resize_inv_factor = args.resize_inv_factor
 
-    val_top1_acc = tf.keras.metrics.SparseCategoricalAccuracy(name="val_top1_acc")
-    val_top5_acc = tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="val_top6_acc")
+    if not args.calc_flops_only:
+        tic = time.time()
+        val_top1_acc = tf.keras.metrics.SparseCategoricalAccuracy(name="val_top1_acc")
+        val_top5_acc = tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="val_top6_acc")
 
-    data_dir = args.data_dir
-    val_dir = os.path.join(data_dir, "val")
+        data_dir = args.data_dir
+        val_dir = os.path.join(data_dir, "val")
 
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        preprocessing_function=(lambda img: img_normalization(img=img, mean_rgb=args.mean_rgb, std_rgb=args.std_rgb)),
-        data_format=data_format)
-    val_generator = val_datagen.flow_from_directory(
-        directory=val_dir,
-        target_size=input_image_size,
-        class_mode="binary",
-        batch_size=batch_size,
-        shuffle=False,
-        interpolation="{}:{}".format(args.interpolation, resize_inv_factor))
-    val_ds = tf.data.Dataset.from_generator(
-        generator=lambda: val_generator,
-        output_types=(tf.float32, tf.float32))
+        val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
+            preprocessing_function=(lambda img: img_normalization(
+                img=img, mean_rgb=args.mean_rgb, std_rgb=args.std_rgb)),
+            data_format=data_format)
+        val_generator = val_datagen.flow_from_directory(
+            directory=val_dir,
+            target_size=input_image_size,
+            class_mode="binary",
+            batch_size=batch_size,
+            shuffle=False,
+            interpolation="{}:{}".format(args.interpolation, resize_inv_factor))
+        val_ds = tf.data.Dataset.from_generator(
+            generator=lambda: val_generator,
+            output_types=(tf.float32, tf.float32))
 
-    total_img_count = val_generator.n
-    processed_img_count = 0
-    for test_images, test_labels in val_ds:
+        total_img_count = val_generator.n
+        processed_img_count = 0
+        for test_images, test_labels in val_ds:
 
-        predictions = net(test_images)
-        val_top1_acc.update_state(test_labels, predictions)
-        val_top5_acc.update_state(test_labels, predictions)
-        processed_img_count += len(test_images)
-        if processed_img_count >= total_img_count:
-            break
+            predictions = net(test_images)
+            val_top1_acc.update_state(test_labels, predictions)
+            val_top5_acc.update_state(test_labels, predictions)
+            processed_img_count += len(test_images)
+            if processed_img_count >= total_img_count:
+                break
 
-    top1_err = 1.0 - float(val_top1_acc.result().numpy())
-    top5_err = 1.0 - float(val_top5_acc.result().numpy())
-    logging.info("Test: err-top1={top1:.4f} ({top1}), err-top5={top5:.4f} ({top5})".format(
-        top1=top1_err,
-        top5=top5_err))
+        top1_err = 1.0 - float(val_top1_acc.result().numpy())
+        top5_err = 1.0 - float(val_top5_acc.result().numpy())
+        logging.info("Test: err-top1={top1:.4f} ({top1}), err-top5={top5:.4f} ({top5})".format(
+            top1=top1_err,
+            top5=top5_err))
+        logging.info("Time cost: {:.4f} sec".format(
+            time.time() - tic))
+    else:
+        top5_err = None
 
     return top5_err
 
@@ -268,9 +281,10 @@ def main():
                 input_image_size=None,
                 use_cuda=use_cuda,
                 data_format=data_format)
-            exp_value = int(error) * 1e-4
-            if abs(acc_value - exp_value) > 2e-4:
-                logging.info("----> Wrong value detected (expected value: {})!".format(exp_value))
+            if acc_value is not None:
+                exp_value = int(error) * 1e-4
+                if abs(acc_value - exp_value) > 2e-4:
+                    logging.info("----> Wrong value detected (expected value: {})!".format(exp_value))
             tf.keras.backend.clear_session()
     else:
         test_model(

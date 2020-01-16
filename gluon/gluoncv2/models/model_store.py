@@ -256,7 +256,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('efficientnet_b8c', '0270', '050ec6358583d0a48c74b02563474ecc1d9dacba', 'v0.0.433'),
     ('efficientnet_edge_small_b', '0629', '5b398abc73c4c4870d88c62452ff919bec2440c9', 'v0.0.434'),
     ('efficientnet_edge_medium_b', '0553', '0b3c86d49b3684d19e6589030aeceb918faa648c', 'v0.0.434'),
-    ('efficientnet_edge_large_b', '0624', '055436da0fa440933b906c528cb34b200e28f73c', 'v0.0.434'),
+    ('efficientnet_edge_large_b', '0477', '055436da0fa440933b906c528cb34b200e28f73c', 'v0.0.434'),
     ('mixnet_s', '0739', '54434771161c33256d67748ad3460556dc4a14d5', 'v0.0.412'),
     ('mixnet_m', '0678', '810b89677e81fafe256c2396ed3984af7740c91d', 'v0.0.413'),
     ('mixnet_l', '0603', '0576f35d60442379df422268e0f3070af82c3b72', 'v0.0.414'),

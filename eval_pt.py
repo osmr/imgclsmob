@@ -426,6 +426,8 @@ def main():
         }
         for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
             error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem = model_metainfo
+            if (ds != "in1k") or (img_size == 0) or ((len(rem) > 0) and (rem[-1] == "*")):
+                continue
             args.dataset = dataset_name_map[ds]
             args.model = model_name
             args.input_size = img_size
@@ -434,9 +436,10 @@ def main():
             logging.info("==============")
             logging.info("Checking model: {}".format(model_name))
             acc_value = test_model(args=args)
-            exp_value = int(error) * 1e-4
-            if abs(acc_value - exp_value) > 2e-4:
-                logging.info("----> Wrong value detected (expected value: {})!".format(exp_value))
+            if acc_value is not None:
+                exp_value = int(error) * 1e-4
+                if abs(acc_value - exp_value) > 2e-4:
+                    logging.info("----> Wrong value detected (expected value: {})!".format(exp_value))
     else:
         test_model(args=args)
 

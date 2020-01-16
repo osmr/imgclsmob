@@ -317,7 +317,7 @@ class ESPNetv2(Chain):
                  classes=1000):
         super(ESPNetv2, self).__init__()
         self.in_size = in_size
-        self.num_classes = classes
+        self.classes = classes
         x0_channels = in_channels
 
         with self.init_scope():

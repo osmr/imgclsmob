@@ -1,8 +1,7 @@
-import os
 import torch
 import torch.nn as nn
 
-__all__ = ['hardnet39ds', 'hardnet68', 'hardnet68ds', 'hardnet85']
+__all__ = ['oth_hardnet39ds', 'oth_hardnet68', 'oth_hardnet68ds', 'oth_hardnet85']
 
 
 class Flatten(nn.Module):
@@ -255,7 +254,7 @@ class HarDNet(nn.Module):
         return x
 
 
-def hardnet68(pretrained=False, **kwargs):
+def oth_hardnet68(pretrained=False, **kwargs):
     """ # This docstring shows up in hub.help()
     Harmonic DenseNet 68 model
     pretrained (bool): kwargs, load pretrained weights into the model
@@ -265,7 +264,7 @@ def hardnet68(pretrained=False, **kwargs):
     return model
 
 
-def hardnet85(pretrained=False, **kwargs):
+def oth_hardnet85(pretrained=False, **kwargs):
     """ # This docstring shows up in hub.help()
     Harmonic DenseNet 85 model
     pretrained (bool): kwargs, load pretrained weights into the model
@@ -275,7 +274,7 @@ def hardnet85(pretrained=False, **kwargs):
     return model
 
 
-def hardnet68ds(pretrained=False, **kwargs):
+def oth_hardnet68ds(pretrained=False, **kwargs):
     """ # This docstring shows up in hub.help()
     Harmonic DenseNet 68ds (Depthwise Separable) model
     pretrained (bool): kwargs, load pretrained weights into the model
@@ -285,7 +284,7 @@ def hardnet68ds(pretrained=False, **kwargs):
     return model
 
 
-def hardnet39ds(pretrained=False, **kwargs):
+def oth_hardnet39ds(pretrained=False, **kwargs):
     """ # This docstring shows up in hub.help()
     Harmonic DenseNet 68ds (Depthwise Separable) model
     pretrained (bool): kwargs, load pretrained weights into the model
@@ -336,10 +335,10 @@ def _test():
     pretrained = False
 
     models = [
-        hardnet39ds,
-        hardnet68ds,
-        hardnet68,
-        hardnet85,
+        oth_hardnet39ds,
+        oth_hardnet68ds,
+        oth_hardnet68,
+        oth_hardnet85,
     ]
 
     for model in models:
@@ -349,10 +348,10 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != hardnet39ds or weight_count == 3488228)
-        assert (model != hardnet68ds or weight_count == 4180602)
-        assert (model != hardnet68 or weight_count == 17565348)
-        assert (model != hardnet85 or weight_count == 36670212)
+        assert (model != oth_hardnet39ds or weight_count == 3488228)
+        assert (model != oth_hardnet68ds or weight_count == 4180602)
+        assert (model != oth_hardnet68 or weight_count == 17565348)
+        assert (model != oth_hardnet85 or weight_count == 36670212)
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)

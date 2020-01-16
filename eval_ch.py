@@ -6,6 +6,7 @@ import os
 import time
 import logging
 import argparse
+from sys import version_info
 from chainer import global_config
 from chainercv.utils import apply_to_iterator
 from chainercv.utils import ProgressHook
@@ -14,6 +15,7 @@ from chainer_.utils import prepare_ch_context, prepare_model, Predictor
 from chainer_.utils import get_composite_metric, report_accuracy
 from chainer_.dataset_utils import get_dataset_metainfo
 from chainer_.dataset_utils import get_val_data_source, get_test_data_source
+from chainer_.chainercv2.models.model_store import _model_sha1
 
 
 def add_eval_parser_arguments(parser):
@@ -39,6 +41,11 @@ def add_eval_parser_arguments(parser):
         type=str,
         default="",
         help="resume from previously saved parameters")
+    parser.add_argument(
+        "--calc-flops-only",
+        dest="calc_flops_only",
+        action="store_true",
+        help="calculate FLOPs without quality estimation")
     parser.add_argument(
         "--data-subset",
         type=str,
@@ -94,6 +101,10 @@ def add_eval_parser_arguments(parser):
         "--show-progress",
         action="store_true",
         help="show progress bar")
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="test all pretrained models for partucular dataset")
 
 
 def parse_args():
@@ -132,11 +143,12 @@ def parse_args():
     return args
 
 
-def test(net,
-         test_data,
-         metric,
-         calc_weight_count=False,
-         extended_log=False):
+def calc_model_accuracy(net,
+                        test_data,
+                        metric,
+                        calc_weight_count=False,
+                        calc_flops_only=True,
+                        extended_log=False):
     """
     Main test routine.
 
@@ -152,6 +164,11 @@ def test(net,
         Whether to calculate count of weights.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+
+    Returns
+    -------
+    list of floats
+        Accuracy values.
     """
     tic = time.time()
 
@@ -163,53 +180,58 @@ def test(net,
         weight_count = net.count_params()
         logging.info("Model: {} trainable parameters".format(weight_count))
 
-    in_values, out_values, rest_values = apply_to_iterator(
-        func=predictor,
-        iterator=test_data["iterator"],
-        hook=ProgressHook(test_data["ds_len"]))
-    assert (len(rest_values) == 1)
-    assert (len(out_values) == 1)
-    assert (len(in_values) == 1)
+    if not calc_flops_only:
+        in_values, out_values, rest_values = apply_to_iterator(
+            func=predictor,
+            iterator=test_data["iterator"],
+            hook=ProgressHook(test_data["ds_len"]))
+        assert (len(rest_values) == 1)
+        assert (len(out_values) == 1)
+        assert (len(in_values) == 1)
 
-    if True:
-        labels = iter(rest_values[0])
-        preds = iter(out_values[0])
-        inputs = iter(in_values[0])
-        for label, pred, inputi in zip(labels, preds, inputs):
-            metric.update(label, pred)
-            del label
-            del pred
-            del inputi
+        if True:
+            labels = iter(rest_values[0])
+            preds = iter(out_values[0])
+            inputs = iter(in_values[0])
+            for label, pred, inputi in zip(labels, preds, inputs):
+                metric.update(label, pred)
+                del label
+                del pred
+                del inputi
+        else:
+            import numpy as np
+            metric.update(
+                labels=np.array(list(rest_values[0])),
+                preds=np.array(list(out_values[0])))
+
+        accuracy_msg = report_accuracy(
+            metric=metric,
+            extended_log=extended_log)
+        logging.info("Test: {}".format(accuracy_msg))
+        logging.info("Time cost: {:.4f} sec".format(
+            time.time() - tic))
+        acc_values = metric.get()[1]
+        acc_values = acc_values if type(acc_values) == list else [acc_values]
     else:
-        import numpy as np
-        metric.update(
-            labels=np.array(list(rest_values[0])),
-            preds=np.array(list(out_values[0])))
+        acc_values = []
 
-    accuracy_msg = report_accuracy(
-        metric=metric,
-        extended_log=extended_log)
-    logging.info("Test: {}".format(accuracy_msg))
-    logging.info("Time cost: {:.4f} sec".format(
-        time.time() - tic))
+    return acc_values
 
 
-def main():
+def test_model(args):
     """
-    Main body of script.
+    Main test routine.
+
+    Parameters:
+    ----------
+    args : ArgumentParser
+        Main script arguments.
+
+    Returns
+    -------
+    float
+        Main accuracy value.
     """
-    args = parse_args()
-
-    if args.disable_cudnn_autotune:
-        os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
-
-    _, log_file_exist = initialize_logging(
-        logging_dir_path=args.save_dir,
-        logging_file_name=args.logging_file_name,
-        script_args=args,
-        log_packages=args.log_packages,
-        log_pip_packages=args.log_pip_packages)
-
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)
     assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
@@ -245,12 +267,46 @@ def main():
         num_workers=args.num_workers)
 
     assert (args.use_pretrained or args.resume.strip())
-    test(
+    acc_values = calc_model_accuracy(
         net=net,
         test_data=test_data,
         metric=test_metric,
         calc_weight_count=True,
+        calc_flops_only=args.calc_flops_only,
         extended_log=True)
+    return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
+
+
+def main():
+    """
+    Main body of script.
+    """
+    args = parse_args()
+
+    if args.disable_cudnn_autotune:
+        os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"] = "0"
+
+    _, log_file_exist = initialize_logging(
+        logging_dir_path=args.save_dir,
+        logging_file_name=args.logging_file_name,
+        script_args=args,
+        log_packages=args.log_packages,
+        log_pip_packages=args.log_pip_packages)
+
+    if args.all:
+        args.use_pretrained = True
+        for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):
+            error, checksum, repo_release_tag = model_metainfo
+            args.model = model_name
+            logging.info("==============")
+            logging.info("Checking model: {}".format(model_name))
+            acc_value = test_model(args=args)
+            if acc_value is not None:
+                exp_value = int(error) * 1e-4
+                if abs(acc_value - exp_value) > 2e-4:
+                    logging.info("----> Wrong value detected (expected value: {})!".format(exp_value))
+    else:
+        test_model(args=args)
 
 
 if __name__ == "__main__":

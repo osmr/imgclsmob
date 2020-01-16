@@ -331,7 +331,6 @@ class EfficientNet(nn.Module):
         self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
 
         self.output = nn.Sequential()
-        # print("self.drop_rate={}".format(dropout_rate))
         if dropout_rate > 0.0:
             self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
         self.output.add_module("fc", nn.Linear(

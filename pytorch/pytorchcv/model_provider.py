@@ -111,8 +111,6 @@ from .models.deeplabv3 import *
 
 from .models.superpointnet import *
 
-from .models.others.oth_hardnet import *
-
 __all__ = ['get_model']
 
 
@@ -953,11 +951,6 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
-
-    'oth_hardnet39ds': oth_hardnet39ds,
-    'oth_hardnet68ds': oth_hardnet68ds,
-    'oth_hardnet68': oth_hardnet68,
-    'oth_hardnet85': oth_hardnet85,
 }
 
 

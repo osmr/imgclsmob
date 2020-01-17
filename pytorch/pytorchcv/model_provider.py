@@ -45,6 +45,7 @@ from .models.espnetv2 import *
 from .models.hrnet import *
 from .models.vovnet import *
 from .models.selecsls import *
+from .models.hardnet import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -109,6 +110,8 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 
 from .models.superpointnet import *
+
+from .models.others.oth_hardnet import *
 
 __all__ = ['get_model']
 
@@ -430,6 +433,11 @@ _models = {
     'selecsls60': selecsls60,
     'selecsls60b': selecsls60b,
     'selecsls84': selecsls84,
+
+    'hardnet39ds': hardnet39ds,
+    'hardnet68ds': hardnet68ds,
+    'hardnet68': hardnet68,
+    'hardnet85': hardnet85,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,
@@ -945,6 +953,11 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'oth_hardnet39ds': oth_hardnet39ds,
+    'oth_hardnet68ds': oth_hardnet68ds,
+    'oth_hardnet68': oth_hardnet68,
+    'oth_hardnet85': oth_hardnet85,
 }
 
 

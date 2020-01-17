@@ -1382,7 +1382,8 @@ class DwsConvBlock(nn.Layer):
             use_bn=use_bn,
             bn_eps=bn_eps,
             activation=dw_activation,
-            data_format=data_format)
+            data_format=data_format,
+            name="dw_conv")
         self.pw_conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -1390,7 +1391,8 @@ class DwsConvBlock(nn.Layer):
             use_bn=use_bn,
             bn_eps=bn_eps,
             activation=pw_activation,
-            data_format=data_format)
+            data_format=data_format,
+            name="pw_conv")
 
     def call(self, x, training=None):
         x = self.dw_conv(x, training=training)

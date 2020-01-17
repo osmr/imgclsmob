@@ -1,17 +1,20 @@
 """
-    HarDNet for ImageNet-1K, implemented in PyTorch.
+    HarDNet for ImageNet-1K, implemented in Chainer.
     Original paper: 'HarDNet: A Low Memory Traffic Network,' https://arxiv.org/abs/1909.00948.
 """
 
 __all__ = ['HarDNet', 'hardnet39ds', 'hardnet68ds', 'hardnet68', 'hardnet85']
 
 import os
-import torch
-import torch.nn as nn
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv_block
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv_block, SimpleSequential
 
 
-class InvDwsConvBlock(nn.Module):
+class InvDwsConvBlock(Chain):
     """
     Inverse depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
@@ -21,58 +24,59 @@ class InvDwsConvBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    kernel_size : int or tuple/list of 2 int
+    ksize : int or tuple/list of 2 int
         Convolution window size.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilate : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    pw_activation : function or str or None, default nn.ReLU(inplace=True)
+    pw_activation : function or str or None, default F.relu
         Activation function after the pointwise convolution block.
-    dw_activation : function or str or None, default nn.ReLU(inplace=True)
+    dw_activation : function or str or None, default F.relu
         Activation function after the depthwise convolution block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 kernel_size,
+                 ksize,
                  stride,
-                 padding,
-                 dilation=1,
-                 bias=False,
+                 pad,
+                 dilate=1,
+                 use_bias=False,
                  use_bn=True,
                  bn_eps=1e-5,
-                 pw_activation=(lambda: nn.ReLU(inplace=True)),
-                 dw_activation=(lambda: nn.ReLU(inplace=True))):
+                 pw_activation=(lambda: F.relu),
+                 dw_activation=(lambda: F.relu)):
         super(InvDwsConvBlock, self).__init__()
-        self.pw_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bias=bias,
-            use_bn=use_bn,
-            bn_eps=bn_eps,
-            activation=pw_activation)
-        self.dw_conv = dwconv_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            dilation=dilation,
-            bias=bias,
-            use_bn=use_bn,
-            bn_eps=bn_eps,
-            activation=dw_activation)
+        with self.init_scope():
+            self.pw_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                use_bias=use_bias,
+                use_bn=use_bn,
+                bn_eps=bn_eps,
+                activation=pw_activation)
+            self.dw_conv = dwconv_block(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                dilate=dilate,
+                use_bias=use_bias,
+                use_bn=use_bn,
+                bn_eps=bn_eps,
+                activation=dw_activation)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.pw_conv(x)
         x = self.dw_conv(x)
         return x
@@ -81,12 +85,12 @@ class InvDwsConvBlock(nn.Module):
 def invdwsconv3x3_block(in_channels,
                         out_channels,
                         stride=1,
-                        padding=1,
-                        dilation=1,
-                        bias=False,
+                        pad=1,
+                        dilate=1,
+                        use_bias=False,
                         bn_eps=1e-5,
-                        pw_activation=(lambda: nn.ReLU(inplace=True)),
-                        dw_activation=(lambda: nn.ReLU(inplace=True))):
+                        pw_activation=(lambda: F.relu),
+                        dw_activation=(lambda: F.relu)):
     """
     3x3 inverse depthwise separable version of the standard convolution block.
 
@@ -97,34 +101,34 @@ def invdwsconv3x3_block(in_channels,
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
         Padding value for convolution layer.
-    dilation : int or tuple/list of 2 int, default 1
+    dilate : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
-    bias : bool, default False
+    use_bias : bool, default False
         Whether the layer uses a bias vector.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    pw_activation : function or str or None, default nn.ReLU(inplace=True)
+    pw_activation : function or str or None, default F.relu
         Activation function after the pointwise convolution block.
-    dw_activation : function or str or None, default nn.ReLU(inplace=True)
+    dw_activation : function or str or None, default F.relu
         Activation function after the depthwise convolution block.
     """
     return InvDwsConvBlock(
         in_channels=in_channels,
         out_channels=out_channels,
-        kernel_size=3,
+        ksize=3,
         stride=stride,
-        padding=padding,
-        dilation=dilation,
-        bias=bias,
+        pad=pad,
+        dilate=dilate,
+        use_bias=use_bias,
         bn_eps=bn_eps,
         pw_activation=pw_activation,
         dw_activation=dw_activation)
 
 
-class HarDUnit(nn.Module):
+class HarDUnit(Chain):
     """
     HarDNet unit.
 
@@ -158,49 +162,56 @@ class HarDUnit(nn.Module):
         self.use_dropout = use_dropout
         self.downsampling = downsampling
 
-        self.blocks = nn.Sequential()
-        for i in range(len(links_list)):
-            in_channels = in_channels_list[i]
-            out_channels = out_channels_list[i]
-            if use_deptwise:
-                unit = invdwsconv3x3_block(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    pw_activation=activation,
-                    dw_activation=None)
-            else:
-                unit = conv3x3_block(
-                    in_channels=in_channels,
-                    out_channels=out_channels)
-            self.blocks.add_module("block{}".format(i + 1), unit)
+        with self.init_scope():
+            self.blocks = SimpleSequential()
+            with self.blocks.init_scope():
+                for i in range(len(links_list)):
+                    in_channels = in_channels_list[i]
+                    out_channels = out_channels_list[i]
+                    if use_deptwise:
+                        unit = invdwsconv3x3_block(
+                            in_channels=in_channels,
+                            out_channels=out_channels,
+                            pw_activation=activation,
+                            dw_activation=None)
+                    else:
+                        unit = conv3x3_block(
+                            in_channels=in_channels,
+                            out_channels=out_channels)
+                    setattr(self.blocks, "block{}".format(i + 1), unit)
 
-        if self.use_dropout:
-            self.dropout = nn.Dropout(p=0.1)
-        self.conv = conv1x1_block(
-            in_channels=in_channels_list[-1],
-            out_channels=out_channels_list[-1],
-            activation=activation)
+            if self.use_dropout:
+                self.dropout = partial(
+                    F.dropout,
+                    ratio=0.1)
+            self.conv = conv1x1_block(
+                in_channels=in_channels_list[-1],
+                out_channels=out_channels_list[-1],
+                activation=activation)
 
-        if self.downsampling:
-            if use_deptwise:
-                self.downsample = dwconv3x3_block(
-                    in_channels=out_channels_list[-1],
-                    out_channels=out_channels_list[-1],
-                    stride=2,
-                    activation=None)
-            else:
-                self.downsample = nn.MaxPool2d(
-                    kernel_size=2,
-                    stride=2)
+            if self.downsampling:
+                if use_deptwise:
+                    self.downsample = dwconv3x3_block(
+                        in_channels=out_channels_list[-1],
+                        out_channels=out_channels_list[-1],
+                        stride=2,
+                        activation=None)
+                else:
+                    self.downsample = partial(
+                        F.max_pooling_2d,
+                        ksize=2,
+                        stride=2,
+                        cover_all=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         layer_outs = [x]
-        for links_i, layer_i in zip(self.links_list, self.blocks._modules.values()):
+        for links_i, layer_name_i in zip(self.links_list, self.blocks.layer_names):
+            layer_i = self.blocks[layer_name_i]
             layer_in = []
             for idx_ij in links_i:
                 layer_in.append(layer_outs[idx_ij])
             if len(layer_in) > 1:
-                x = torch.cat(layer_in, dim=1)
+                x = F.concat(layer_in, axis=1)
             else:
                 x = layer_in[0]
             out = layer_i(x)
@@ -210,7 +221,7 @@ class HarDUnit(nn.Module):
         for i, layer_out_i in enumerate(layer_outs):
             if (i == len(layer_outs) - 1) or (i % 2 == 1):
                 outs.append(layer_out_i)
-        x = torch.cat(outs, dim=1)
+        x = F.concat(outs, axis=1)
 
         if self.use_dropout:
             x = self.dropout(x)
@@ -221,7 +232,7 @@ class HarDUnit(nn.Module):
         return x
 
 
-class HarDInitBlock(nn.Module):
+class HarDInitBlock(Chain):
     """
     HarDNet specific initial block.
 
@@ -244,36 +255,39 @@ class HarDInitBlock(nn.Module):
         super(HarDInitBlock, self).__init__()
         mid_channels = out_channels // 2
 
-        self.conv1 = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            stride=2,
-            activation=activation)
-        conv2_block_class = conv1x1_block if use_deptwise else conv3x3_block
-        self.conv2 = conv2_block_class(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            activation=activation)
-        if use_deptwise:
-            self.downsample = dwconv3x3_block(
-                in_channels=out_channels,
+        with self.init_scope():
+            self.conv1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                stride=2,
+                activation=activation)
+            conv2_block_class = conv1x1_block if use_deptwise else conv3x3_block
+            self.conv2 = conv2_block_class(
+                in_channels=mid_channels,
                 out_channels=out_channels,
-                stride=2,
-                activation=None)
-        else:
-            self.downsample = nn.MaxPool2d(
-                kernel_size=3,
-                stride=2,
-                padding=1)
+                activation=activation)
+            if use_deptwise:
+                self.downsample = dwconv3x3_block(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    stride=2,
+                    activation=None)
+            else:
+                self.downsample = partial(
+                    F.max_pooling_2d,
+                    ksize=3,
+                    stride=2,
+                    pad=1,
+                    cover_all=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.downsample(x)
         return x
 
 
-class HarDNet(nn.Module):
+class HarDNet(Chain):
     """
     HarDNet model from 'HarDNet: A Low Memory Traffic Network,' https://arxiv.org/abs/1909.00948.
 
@@ -297,7 +311,7 @@ class HarDNet(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -310,60 +324,57 @@ class HarDNet(nn.Module):
                  output_dropout_rate,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000):
+                 classes=1000):
         super(HarDNet, self).__init__()
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
         activation = "relu6"
 
-        self.features = nn.Sequential()
-        self.features.add_module("init_block", HarDInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels,
-            use_deptwise=use_deptwise,
-            activation=activation))
-        for i, (in_channels_list_i, out_channels_list_i) in enumerate(zip(unit_in_channels, unit_out_channels)):
-            stage = nn.Sequential()
-            for j, (in_channels_list_ij, out_channels_list_ij) in enumerate(zip(in_channels_list_i,
-                                                                                out_channels_list_i)):
-                use_dropout = ((j == len(in_channels_list_i) - 1) and (i == len(unit_in_channels) - 1) and
-                               use_last_dropout)
-                downsampling = ((j == len(in_channels_list_i) - 1) and (i != len(unit_in_channels) - 1))
-                stage.add_module("unit{}".format(j + 1), HarDUnit(
-                    in_channels_list=in_channels_list_ij,
-                    out_channels_list=out_channels_list_ij,
-                    links_list=unit_links[i][j],
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", HarDInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels,
                     use_deptwise=use_deptwise,
-                    use_dropout=use_dropout,
-                    downsampling=downsampling,
                     activation=activation))
-            self.features.add_module("stage{}".format(i + 1), stage)
-        in_channels = unit_out_channels[-1][-1][-1]
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+                for i, (in_channels_list_i, out_channels_list_i) in enumerate(zip(unit_in_channels, unit_out_channels)):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, (in_channels_list_ij, out_channels_list_ij) in enumerate(zip(in_channels_list_i,
+                                                                                            out_channels_list_i)):
+                            use_dropout = ((j == len(in_channels_list_i) - 1) and (i == len(unit_in_channels) - 1) and
+                                           use_last_dropout)
+                            downsampling = ((j == len(in_channels_list_i) - 1) and (i != len(unit_in_channels) - 1))
+                            setattr(stage, "unit{}".format(j + 1), HarDUnit(
+                                in_channels_list=in_channels_list_ij,
+                                out_channels_list=out_channels_list_ij,
+                                links_list=unit_links[i][j],
+                                use_deptwise=use_deptwise,
+                                use_dropout=use_dropout,
+                                downsampling=downsampling,
+                                activation=activation))
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                in_channels = unit_out_channels[-1][-1][-1]
+                setattr(self.features, "final_pool", partial(
+                    F.average_pooling_2d,
+                    ksize=7,
+                    stride=1))
 
-        self.output = nn.Sequential()
-        self.output.add_module("dropout", nn.Dropout(p=output_dropout_rate))
-        self.output.add_module("fc", nn.Linear(
-            in_features=in_channels,
-            out_features=num_classes))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, "flatten", partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, "dropout", partial(
+                    F.dropout,
+                    ratio=output_dropout_rate))
+                setattr(self.output, "fc", L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-        self._init_params()
-
-    def _init_params(self):
-        for module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight, mode="fan_out", nonlinearity="relu")
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-            elif isinstance(module, nn.BatchNorm2d):
-                nn.init.constant_(module.weight, 1)
-                nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -372,7 +383,7 @@ def get_hardnet(blocks,
                 use_deptwise=True,
                 model_name=None,
                 pretrained=False,
-                root=os.path.join("~", ".torch", "models"),
+                root=os.path.join("~", ".chainer", "models"),
                 **kwargs):
     """
     Create HarDNet model with specific parameters.
@@ -387,7 +398,7 @@ def get_hardnet(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     if blocks == 39:
@@ -513,11 +524,12 @@ def get_hardnet(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -531,7 +543,7 @@ def hardnet39ds(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hardnet(blocks=39, use_deptwise=True, model_name="hardnet39ds", **kwargs)
@@ -546,7 +558,7 @@ def hardnet68ds(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hardnet(blocks=68, use_deptwise=True, model_name="hardnet68ds", **kwargs)
@@ -560,7 +572,7 @@ def hardnet68(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hardnet(blocks=68, use_deptwise=False, model_name="hardnet68", **kwargs)
@@ -574,23 +586,17 @@ def hardnet85(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_hardnet(blocks=85, use_deptwise=False, model_name="hardnet85", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -604,20 +610,16 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != hardnet39ds or weight_count == 3488228)
         assert (model != hardnet68ds or weight_count == 4180602)
         assert (model != hardnet68 or weight_count == 17565348)
         assert (model != hardnet85 or weight_count == 36670212)
 
-        x = torch.randn(1, 3, 224, 224)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

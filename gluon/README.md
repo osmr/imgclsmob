@@ -55,6 +55,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - HRNet (['Deep High-Resolution Representation Learning for Visual Recognition'](https://arxiv.org/abs/1908.07919))
 - VoVNet (['An Energy and GPU-Computation Efficient Backbone Network for Real-Time Object Detection'](https://arxiv.org/abs/1904.09730))
 - SelecSLS (['XNect: Real-time Multi-person 3D Human Pose Estimation with a Single RGB Camera'](https://arxiv.org/abs/1907.00837))
+- HarDNet (['HarDNet: A Low Memory Traffic Network'](https://arxiv.org/abs/1909.00948))
 - X-DenseNet (['Deep Expander Networks: Efficient Deep Networks from Graph Theory'](https://arxiv.org/abs/1711.08757))
 - SqueezeNet/SqueezeResNet (['SqueezeNet: AlexNet-level accuracy with 50x fewer parameters and <0.5MB model size'](https://arxiv.org/abs/1602.07360))
 - SqueezeNext (['SqueezeNext: Hardware-Aware Neural Network Design'](https://arxiv.org/abs/1803.10615))
@@ -287,6 +288,10 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SelecSLS-42b | 23.31 | 6.78 | 32,458,248 | 2,980.62M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls42b-0678-7d223ce8.params.log)) |
 | SelecSLS-60 | 22.50 | 6.33 | 30,670,768 | 3,591.78M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60-0633-86377594.params.log)) |
 | SelecSLS-60b | 21.90 | 6.00 | 32,774,064 | 3,629.14M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.430/selecsls60b-0600-aaa75794.params.log)) |
+| HarDNet-39DS | 28.71 | 10.04 | 3,488,228 | 437.52M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet39ds-1004-9452be3e.params.log)) |
+| HarDNet-68DS | 26.43 | 8.47 | 4,180,602 | 788.86M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68ds-0847-0962e9a5.params.log)) |
+| HarDNet-68 | 24.58 | 7.36 | 17,565,348 | 4,256.32M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet68-0736-84d17675.params.log)) |
+| HarDNet-85 | 22.61 | 6.42 | 36,670,212 | 9,088.58M | From [PingoLH/Pytorch-HarDNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.435/hardnet85-0642-00c005ce.params.log)) |
 | SqueezeNet v1.0 | 38.73 | 17.34 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.128/squeezenet_v1_0-1734-e6f8b0e8.params.log)) |
 | SqueezeNet v1.1 | 39.09 | 17.39 | 1,235,496 | 352.02M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.88/squeezenet_v1_1-1739-d7a1483a.params.log)) |
 | SqueezeResNet v1.0 | 39.32 | 17.67 | 1,248,424 | 823.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.178/squeezeresnet_v1_0-1767-66474b9b.params.log)) |
@@ -753,3 +758,4 @@ Some remarks:
 [rwightman/pyt...models]: https://github.com/rwightman/pytorch-image-models
 [HRNet/HRNet...ation]: https://github.com/HRNet/HRNet-Image-Classification
 [stigma0617/VoVNet.pytorch]: https://github.com/stigma0617/VoVNet.pytorch
+[PingoLH/Pytorch-HarDNet]: https://github.com/PingoLH/Pytorch-HarDNet

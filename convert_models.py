@@ -826,6 +826,9 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):
         dst_param_keys = [key.replace('/transition/', '/atransition/') for key in dst_param_keys]
+    if src_model.startswith("hardnet"):
+        # dst_param_keys = [key.replace('/dw_conv/', '/z_dw_conv/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('features/down', 'features/z_down') for key in dst_param_keys]
 
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -839,6 +842,9 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):
         dst_param_keys = [key.replace('/atransition/', '/transition/') for key in dst_param_keys]
+    if src_model.startswith("hardnet"):
+        # dst_param_keys = [key.replace('/z_dw_conv/', '/dw_conv/') for key in dst_param_keys]
+        dst_param_keys = [key.replace('features/z_down', 'features/down') for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
     dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s

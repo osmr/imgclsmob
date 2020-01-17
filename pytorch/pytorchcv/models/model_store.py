@@ -164,6 +164,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('selecsls42b', '0659', '6933727857ee697e9205241fb2d2a134770b7924', 'v0.0.430', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60b', '0584', '470ace6b9b8db32b84924825908b426a9e38dd09', 'v0.0.430', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('hardnet39ds', '0957', '9479e9ad0de538e80f7b2b73e5f19795994addce', 'v0.0.435', 'HarDNet-39DS', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
+    ('hardnet68ds', '0813', '7187522dd301ce82b5272df29ffb3b37473e122c', 'v0.0.435', 'HarDNet-68DS', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
+    ('hardnet68', '0699', '2e207f79a1995f5f30d5b9fca3391bb8e7b8594f', 'v0.0.435', 'HarDNet-68', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
+    ('hardnet85', '0611', 'ae85d8af40610e08765f1bfc25b8414ac70d7451', 'v0.0.435', 'HarDNet-85', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
     ('squeezenet_v1_0', '1766', 'afdbcf1aef39237300656d2c5a7dba19230e29fc', 'v0.0.128', 'SqueezeNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezenet_v1_1', '1772', '25b77bc39e35612abbe7c2344d2c3e1e6756c2f8', 'v0.0.88', 'SqueezeNet v1.1', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('squeezeresnet_v1_0', '1809', '25bfc02edeffb279010242614e7d73bbeacc0170', 'v0.0.178', 'SqueezeResNet v1.0', '1602.07360', 'in1k', 224, 0.875, 200, ''),  # noqa

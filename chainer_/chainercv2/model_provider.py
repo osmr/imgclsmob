@@ -38,6 +38,7 @@ from .models.espnetv2 import *
 from .models.hrnet import *
 from .models.vovnet import *
 from .models.selecsls import *
+from .models.hardnet import *
 from .models.xdensenet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
@@ -396,6 +397,11 @@ _models = {
     'selecsls60': selecsls60,
     'selecsls60b': selecsls60b,
     'selecsls84': selecsls84,
+
+    'hardnet39ds': hardnet39ds,
+    'hardnet68ds': hardnet68ds,
+    'hardnet68': hardnet68,
+    'hardnet85': hardnet85,
 
     'xdensenet121_2': xdensenet121_2,
     'xdensenet161_2': xdensenet161_2,

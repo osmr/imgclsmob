@@ -107,6 +107,7 @@ Some remarks:
 | HRNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1908.07919) | [link](https://github.com/HRNet/HRNet-Image-Classification) | 2019 |
 | VoVNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1904.09730) | [link](https://github.com/stigma0617/VoVNet.pytorch) | 2019 |
 | SelecSLS | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1907.00837) | [link](https://github.com/mehtadushy/SelecSLS-Pytorch) | 2019 |
+| HarDNet | A+ | A+ | A+ | - | A+ | [link](https://arxiv.org/abs/1909.00948) | [link](https://github.com/PingoLH/Pytorch-HarDNet) | 2019 |
 | X-DenseNet | AB+C+D+ | AB+C+D+ | AB+C+D+ | - | - | [link](https://arxiv.org/abs/1711.08757) | [link](https://github.com/DrImpossible/Deep-Expander-Networks) | 2017 |
 | SqueezeNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | [link](https://github.com/DeepScale/SqueezeNet) | 2016 |
 | SqueezeResNet | A+ | A+ | A+ | A+ | A+ | [link](https://arxiv.org/abs/1602.07360) | - | 2016 |

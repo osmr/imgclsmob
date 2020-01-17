@@ -31,6 +31,7 @@ from .models.dla import *
 from .models.hrnet import *
 from .models.vovnet import *
 from .models.selecsls import *
+from .models.hardnet import *
 from .models.squeezenet import *
 from .models.squeezenext import *
 from .models.shufflenet import *
@@ -289,6 +290,11 @@ _models = {
     'selecsls60': selecsls60,
     'selecsls60b': selecsls60b,
     'selecsls84': selecsls84,
+
+    'hardnet39ds': hardnet39ds,
+    'hardnet68ds': hardnet68ds,
+    'hardnet68': hardnet68,
+    'hardnet85': hardnet85,
 
     'squeezenet_v1_0': squeezenet_v1_0,
     'squeezenet_v1_1': squeezenet_v1_1,

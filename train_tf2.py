@@ -10,31 +10,18 @@ import random
 import tensorflow as tf
 from common.logger_utils import initialize_logging
 from tensorflow2.tf2cv.model_provider import get_model
+from tensorflow2.dataset_utils import get_dataset_metainfo, get_train_data_source, get_val_data_source
 
 
-def parse_args():
+def add_train_cls_parser_arguments(parser):
     """
-    Parse python script parameters.
+    Create python script parameters (for training/classification specific subpart).
 
-    Returns
-    -------
-    ArgumentParser
-        Resulted args.
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
     """
-    parser = argparse.ArgumentParser(
-        description="Train a model for image classification (TensorFlow 2.0)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--data-dir",
-        type=str,
-        default="../imgclsmob_data/imagenet",
-        help="training and validation pictures to use")
-
-    parser.add_argument(
-        "--data-format",
-        type=str,
-        default="channels_last",
-        help="ordering of the dimensions in tensors. options are channels_last and channels_first")
     parser.add_argument(
         "--model",
         type=str,
@@ -49,17 +36,11 @@ def parse_args():
         type=str,
         default="",
         help="resume from previously saved parameters if not None")
-
     parser.add_argument(
-        "--input-size",
-        type=int,
-        default=224,
-        help="size of the input for model")
-    parser.add_argument(
-        "--resize-inv-factor",
-        type=float,
-        default=0.875,
-        help="inverted ratio for input image crop")
+        "--resume-state",
+        type=str,
+        default="",
+        help="resume from previously saved optimizer state if not None")
 
     parser.add_argument(
         "--num-gpus",
@@ -83,7 +64,7 @@ def parse_args():
         "--num-epochs",
         type=int,
         default=120,
-        help="number of training epochs")
+        help="number of training epochs.")
     parser.add_argument(
         "--start-epoch",
         type=int,
@@ -93,7 +74,7 @@ def parse_args():
         "--attempt",
         type=int,
         default=1,
-        help="current number of training")
+        help="current attempt number for training")
 
     parser.add_argument(
         "--optimizer-name",
@@ -105,6 +86,31 @@ def parse_args():
         type=float,
         default=0.1,
         help="learning rate")
+    parser.add_argument(
+        "--lr-mode",
+        type=str,
+        default="cosine",
+        help="learning rate scheduler mode. options are step, poly and cosine")
+    parser.add_argument(
+        "--lr-decay",
+        type=float,
+        default=0.1,
+        help="decay rate of learning rate")
+    parser.add_argument(
+        "--lr-decay-period",
+        type=int,
+        default=0,
+        help="interval for periodic learning rate decays. default is 0 to disable")
+    parser.add_argument(
+        "--lr-decay-epoch",
+        type=str,
+        default="40,60",
+        help="epoches at which learning rate decays")
+    parser.add_argument(
+        "--target-lr",
+        type=float,
+        default=1e-8,
+        help="ending learning rate")
     parser.add_argument(
         "--momentum",
         type=float,
@@ -152,6 +158,39 @@ def parse_args():
         type=str,
         default="tensorflow-gpu",
         help="list of pip packages for logging")
+
+
+def parse_args():
+    """
+    Parse python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
+    parser = argparse.ArgumentParser(
+        description="Train a model for image classification/segmentation (TensorFlow 2.0)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="ImageNet1K",
+        help="dataset name. options are ImageNet1K, CIFAR10")
+    parser.add_argument(
+        "--work-dir",
+        type=str,
+        default=os.path.join("..", "imgclsmob_data"),
+        help="path to working directory only for dataset root path preset")
+
+    args, _ = parser.parse_known_args()
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    dataset_metainfo.add_dataset_parser_arguments(
+        parser=parser,
+        work_dir_path=args.work_dir)
+
+    add_train_cls_parser_arguments(parser)
+
     args = parser.parse_args()
     return args
 
@@ -208,36 +247,29 @@ def main():
         test_loss(t_loss)
         test_accuracy(labels, predictions)
 
-    data_dir = args.data_dir
-    train_dir = os.path.join(data_dir, "train")
-    val_dir = os.path.join(data_dir, "val")
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+    assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
+    assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
     batch_size = args.batch_size
-    train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=(1.0 / 255),
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
-    val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(rescale=(1.0 / 255))
-    train_generator = train_datagen.flow_from_directory(
-        train_dir,
-        target_size=(224, 224),
+
+    train_data, train_img_count = get_train_data_source(
+        ds_metainfo=ds_metainfo,
         batch_size=batch_size,
-        class_mode="binary",
-        shuffle=True)
-    val_generator = val_datagen.flow_from_directory(
-        val_dir,
-        target_size=(224, 224),
+        data_format=data_format)
+    val_data, val_img_count = get_val_data_source(
+        ds_metainfo=ds_metainfo,
         batch_size=batch_size,
-        class_mode="binary")
+        data_format=data_format)
 
     num_epochs = args.num_epochs
     for epoch in range(num_epochs):
-        for images, labels in train_generator:
+        for images, labels in train_data:
             train_step(images, labels)
             # break
 
-        for test_images, test_labels in val_generator:
+        for test_images, test_labels in val_data:
             test_step(test_images, test_labels)
             # break
 

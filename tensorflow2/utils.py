@@ -1,183 +1,11 @@
-__all__ = ['load_image_imagenet1k_val', 'img_normalization', 'prepare_model']
+__all__ = ['prepare_model']
 
 import os
-import cv2
-import math
 import logging
-import numpy as np
-from PIL import Image
-import keras_preprocessing as keras_prep
 import tensorflow as tf
 from .tf2cv.model_provider import get_model
-
-
-def resize(img,
-           size,
-           interpolation):
-    """
-    Resize the input PIL Image to the given size via OpenCV.
-
-    Parameters
-    ----------
-    img : PIL.Image
-        input image.
-    size : int or tuple of (W, H)
-        Size of output image.
-    interpolation : int
-        Interpolation method for resizing.
-
-    Returns
-    -------
-    PIL.Image
-        Resulted image.
-    """
-    if interpolation == Image.NEAREST:
-        cv_interpolation = cv2.INTER_NEAREST
-    elif interpolation == Image.BILINEAR:
-        cv_interpolation = cv2.INTER_LINEAR
-    elif interpolation == Image.BICUBIC:
-        cv_interpolation = cv2.INTER_CUBIC
-    elif interpolation == Image.LANCZOS:
-        cv_interpolation = cv2.INTER_LANCZOS4
-    else:
-        raise ValueError("Invalid interpolation method: {}", interpolation)
-
-    cv_img = np.array(img)
-
-    if isinstance(size, int):
-        w, h = img.size
-        if (w <= h and w == size) or (h <= w and h == size):
-            return img
-        if w < h:
-            out_size = (size, int(size * h / w))
-        else:
-            out_size = (int(size * w / h), size)
-        cv_img = cv2.resize(cv_img, dsize=out_size, interpolation=cv_interpolation)
-        return Image.fromarray(cv_img)
-    else:
-        cv_img = cv2.resize(cv_img, dsize=size, interpolation=cv_interpolation)
-        return Image.fromarray(cv_img)
-
-
-def center_crop(img,
-                output_size):
-    """
-    Crop the given PIL Image.
-
-    Parameters
-    ----------
-    img : PIL.Image
-        input image.
-    output_size : tuple of (W, H)
-        Size of output image.
-
-    Returns
-    -------
-    PIL.Image
-        Resulted image.
-    """
-    if isinstance(output_size, int):
-        output_size = (int(output_size), int(output_size))
-    w, h = img.size
-    th, tw = output_size
-    i = int(round((h - th) / 2.))
-    j = int(round((w - tw) / 2.))
-    return img.crop((j, i, j + tw, i + th))
-
-
-def img_normalization(img,
-                      mean_rgb=(0.485, 0.456, 0.406),
-                      std_rgb=(0.229, 0.224, 0.225)):
-    """
-    Normalization as in the ImageNet-1K validation procedure.
-
-    Parameters
-    ----------
-    img : np.array
-        input image.
-    mean_rgb : tuple of 3 float
-        Mean of RGB channels in the dataset.
-    std_rgb : tuple of 3 float
-        STD of RGB channels in the dataset.
-
-    Returns
-    -------
-    np.array
-        Output image.
-    """
-    mean_rgb = np.array(mean_rgb, np.float32) * 255.0
-    std_rgb = np.array(std_rgb, np.float32) * 255.0
-    img = (img - mean_rgb) / std_rgb
-    return img
-
-
-def load_image_imagenet1k_val(path,
-                              grayscale=False,
-                              color_mode="rgb",
-                              target_size=None,
-                              interpolation="nearest"):
-    """
-    Wraps keras_preprocessing.image.utils.load_img and apply center crop as in ImageNet-1K validation procedure.
-
-    # Arguments
-        path: Path to image file.
-        color_mode: One of "grayscale", 'rgb', 'rgba'. Default: 'rgb'.
-            The desired image format.
-        target_size: Either `None` (default to original size)
-            or tuple of ints `(img_height, img_width)`.
-        interpolation: Interpolation and crop methods used to resample and crop the image
-            if the target size is different from that of the loaded image.
-            Methods are delimited by ":" where first part is interpolation and second is an inverted ratio for input
-            image crop, e.g. 'lanczos:0.875'.
-            Supported interpolation methods are 'nearest', 'bilinear', 'bicubic', 'lanczos',
-            'box', 'hamming' By default, 'nearest' is used.
-
-    # Returns
-        A PIL Image instance.
-
-    # Raises
-        ImportError: if PIL is not available.
-        ValueError: if interpolation method is not supported.
-    """
-    interpolation, resize_inv_factor = interpolation.split(":") if ":" in interpolation else (interpolation, "none")
-    if resize_inv_factor == "none":
-        return keras_prep.image.utils.load_img(
-            path=path,
-            grayscale=grayscale,
-            color_mode=color_mode,
-            target_size=target_size,
-            interpolation=interpolation)
-
-    img = keras_prep.image.utils.load_img(
-        path=path,
-        grayscale=grayscale,
-        color_mode=color_mode,
-        target_size=None,
-        interpolation=interpolation)
-
-    if (target_size is None) or (img.size == (target_size[1], target_size[0])):
-        return img
-
-    try:
-        resize_inv_factor = float(resize_inv_factor)
-    except ValueError:
-        raise ValueError("Invalid crop inverted ratio: {}", resize_inv_factor)
-
-    if interpolation not in keras_prep.image.utils._PIL_INTERPOLATION_METHODS:
-        raise ValueError("Invalid interpolation method {} specified. Supported methods are {}".format(
-            interpolation,
-            ", ".join(keras_prep.image.utils._PIL_INTERPOLATION_METHODS.keys())))
-    resample = keras_prep.image.utils._PIL_INTERPOLATION_METHODS[interpolation]
-
-    resize_value = int(math.ceil(float(target_size[0]) / resize_inv_factor))
-
-    img = resize(
-        img=img,
-        size=resize_value,
-        interpolation=resample)
-    return center_crop(
-        img=img,
-        output_size=target_size)
+from .metrics.metric import EvalMetric, CompositeEvalMetric
+from .metrics.cls_metrics import Top1Error, TopKError
 
 
 def prepare_model(model_name,
@@ -214,3 +42,56 @@ def prepare_model(model_name,
         net.load_weights(filepath=pretrained_model_file_path)
 
     return net
+
+
+def report_accuracy(metric,
+                    extended_log=False):
+    metric_info = metric.get()
+    if extended_log:
+        msg_pattern = "{name}={value:.4f} ({value})"
+    else:
+        msg_pattern = "{name}={value:.4f}"
+    if isinstance(metric, CompositeEvalMetric):
+        msg = ""
+        for m in zip(*metric_info):
+            if msg != "":
+                msg += ", "
+            msg += msg_pattern.format(name=m[0], value=m[1])
+    elif isinstance(metric, EvalMetric):
+        msg = msg_pattern.format(name=metric_info[0], value=metric_info[1])
+    else:
+        raise Exception("Wrong metric type: {}".format(type(metric)))
+    return msg
+
+
+def get_metric(metric_name, metric_extra_kwargs):
+    if metric_name == "Top1Error":
+        return Top1Error(**metric_extra_kwargs)
+    elif metric_name == "TopKError":
+        return TopKError(**metric_extra_kwargs)
+    # elif metric_name == "PixelAccuracyMetric":
+    #     return PixelAccuracyMetric(**metric_extra_kwargs)
+    # elif metric_name == "MeanIoUMetric":
+    #     return MeanIoUMetric(**metric_extra_kwargs)
+    else:
+        raise Exception("Wrong metric name: {}".format(metric_name))
+
+
+def get_composite_metric(metric_names, metric_extra_kwargs):
+    if len(metric_names) == 1:
+        metric = get_metric(metric_names[0], metric_extra_kwargs[0])
+    else:
+        metric = CompositeEvalMetric()
+        for name, extra_kwargs in zip(metric_names, metric_extra_kwargs):
+            metric.add(get_metric(name, extra_kwargs))
+    return metric
+
+
+def get_metric_name(metric, index):
+    if isinstance(metric, CompositeEvalMetric):
+        return metric.metrics[index].name
+    elif isinstance(metric, EvalMetric):
+        assert (index == 0)
+        return metric.name
+    else:
+        raise Exception("Wrong metric type: {}".format(type(metric)))

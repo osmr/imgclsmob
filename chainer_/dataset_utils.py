@@ -17,6 +17,19 @@ from .datasets.coco_seg_dataset import COCOMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
+    """
+    Get dataset metainfo by name of dataset.
+
+    Parameters
+    ----------
+    dataset_name : str
+        Dataset name.
+
+    Returns
+    -------
+    DatasetMetaInfo
+        Dataset metainfo.
+    """
     dataset_metainfo_map = {
         "ImageNet1K": ImageNet1KMetaInfo,
         "CUB200_2011": CUB200MetaInfo,

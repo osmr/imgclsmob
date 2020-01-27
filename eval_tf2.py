@@ -9,36 +9,22 @@ import argparse
 from sys import version_info
 import tensorflow as tf
 from common.logger_utils import initialize_logging
-from tensorflow2.utils import load_image_imagenet1k_val, img_normalization, prepare_model
+from tensorflow2.utils import prepare_model
 from tensorflow2.tf2cv.models.model_store import _model_sha1
+from tensorflow2.dataset_utils import get_dataset_metainfo, get_val_data_source
+from tensorflow2.utils import get_composite_metric
+from tensorflow2.utils import report_accuracy
 
-import keras_preprocessing as keras_prep
-keras_prep.image.iterator.load_img = load_image_imagenet1k_val
 
-
-def parse_args():
+def add_eval_parser_arguments(parser):
     """
-    Parse python script parameters.
+    Create python script parameters (for eval specific subpart).
 
-    Returns
-    -------
-    ArgumentParser
-        Resulted args.
+    Parameters:
+    ----------
+    parser : ArgumentParser
+        ArgumentParser instance.
     """
-    parser = argparse.ArgumentParser(
-        description="Evaluate a model for image classification (TensorFlow 2.0 / ImageNet-1K)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument(
-        "--data-dir",
-        type=str,
-        default="../imgclsmob_data/imagenet",
-        help="training and validation pictures to use")
-
-    parser.add_argument(
-        "--data-format",
-        type=str,
-        default="channels_last",
-        help="ordering of the dimensions in tensors. options are channels_last and channels_first")
     parser.add_argument(
         "--model",
         type=str,
@@ -47,33 +33,22 @@ def parse_args():
     parser.add_argument(
         "--use-pretrained",
         action="store_true",
-        help="enable using pretrained model")
+        help="enable using pretrained model from github repo")
     parser.add_argument(
         "--resume",
         type=str,
         default="",
-        help="resume from previously saved parameters if not None")
-    parser.add_argument(
-        "--calc-flops",
-        dest="calc_flops",
-        action="store_true",
-        help="calculate FLOPs")
+        help="resume from previously saved parameters")
     parser.add_argument(
         "--calc-flops-only",
         dest="calc_flops_only",
         action="store_true",
         help="calculate FLOPs without quality estimation")
-
     parser.add_argument(
-        "--input-size",
-        type=int,
-        default=224,
-        help="size of the input for model")
-    parser.add_argument(
-        "--resize-inv-factor",
-        type=float,
-        default=0.875,
-        help="inverted ratio for input image crop")
+        "--data-subset",
+        type=str,
+        default="val",
+        help="data subset. options are val and test")
 
     parser.add_argument(
         "--num-gpus",
@@ -117,6 +92,10 @@ def parse_args():
         help="list of pip packages for logging")
 
     parser.add_argument(
+        "--disable-cudnn-autotune",
+        action="store_true",
+        help="disable cudnn autotune for segmentation models")
+    parser.add_argument(
         "--show-progress",
         action="store_true",
         help="show progress bar")
@@ -125,30 +104,43 @@ def parse_args():
         action="store_true",
         help="test all pretrained models for partucular dataset")
 
+
+def parse_args():
+    """
+    Create python script parameters (common part).
+
+    Returns
+    -------
+    ArgumentParser
+        Resulted args.
+    """
+    parser = argparse.ArgumentParser(
+        description="Evaluate a model for image classification (TensorFlow 2.0)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        "--mean-rgb",
-        nargs=3,
-        type=float,
-        default=(0.485, 0.456, 0.406),
-        help="Mean of RGB channels in the dataset")
-    parser.add_argument(
-        "--std-rgb",
-        nargs=3,
-        type=float,
-        default=(0.229, 0.224, 0.225),
-        help="STD of RGB channels in the dataset")
-    parser.add_argument(
-        "--interpolation",
+        "--dataset",
         type=str,
-        default="bilinear",
-        help="Preprocessing interpolation")
+        default="ImageNet1K",
+        help="dataset name. options are ImageNet1K, CIFAR10")
+    parser.add_argument(
+        "--work-dir",
+        type=str,
+        default=os.path.join("..", "imgclsmob_data"),
+        help="path to working directory only for dataset root path preset")
+
+    args, _ = parser.parse_known_args()
+    dataset_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    dataset_metainfo.add_dataset_parser_arguments(
+        parser=parser,
+        work_dir_path=args.work_dir)
+
+    add_eval_parser_arguments(parser)
 
     args = parser.parse_args()
     return args
 
 
 def test_model(args,
-               input_image_size,
                use_cuda,
                data_format):
     """
@@ -158,8 +150,6 @@ def test_model(args,
     ----------
     args : ArgumentParser
         Main script arguments.
-    input_image_size : tuple of two ints or None
-        Spatial size of the expected input image.
     use_cuda : bool
         Whether to use CUDA.
     data_format : str
@@ -178,58 +168,44 @@ def test_model(args,
         batch_size=batch_size,
         use_cuda=use_cuda)
     assert (hasattr(net, "in_size"))
-    if input_image_size is None:
-        input_image_size = net.in_size
-    elif net.in_size != input_image_size:
-        logging.info("Warning: input image size value is not recommended")
-
-    resize_inv_factor = args.resize_inv_factor
 
     if not args.calc_flops_only:
         tic = time.time()
-        val_top1_acc = tf.keras.metrics.SparseCategoricalAccuracy(name="val_top1_acc")
-        val_top5_acc = tf.keras.metrics.SparseTopKCategoricalAccuracy(k=5, name="val_top6_acc")
 
-        data_dir = args.data_dir
-        val_dir = os.path.join(data_dir, "val")
+        ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+        ds_metainfo.update(args=args)
+        assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
+        assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
-        val_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-            preprocessing_function=(lambda img: img_normalization(
-                img=img, mean_rgb=args.mean_rgb, std_rgb=args.std_rgb)),
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.val_metric_names,
+            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+        test_data, total_img_count = get_val_data_source(
+            ds_metainfo=ds_metainfo,
+            batch_size=args.batch_size,
             data_format=data_format)
-        val_generator = val_datagen.flow_from_directory(
-            directory=val_dir,
-            target_size=input_image_size,
-            class_mode="binary",
-            batch_size=batch_size,
-            shuffle=False,
-            interpolation="{}:{}".format(args.interpolation, resize_inv_factor))
-        val_ds = tf.data.Dataset.from_generator(
-            generator=lambda: val_generator,
-            output_types=(tf.float32, tf.float32))
 
-        total_img_count = val_generator.n
         processed_img_count = 0
-        for test_images, test_labels in val_ds:
+        for test_images, test_labels in test_data:
 
             predictions = net(test_images)
-            val_top1_acc.update_state(test_labels, predictions)
-            val_top5_acc.update_state(test_labels, predictions)
+            test_metric.update(test_labels, predictions)
             processed_img_count += len(test_images)
             if processed_img_count >= total_img_count:
                 break
 
-        top1_err = 1.0 - float(val_top1_acc.result().numpy())
-        top5_err = 1.0 - float(val_top5_acc.result().numpy())
-        logging.info("Test: err-top1={top1:.4f} ({top1}), err-top5={top5:.4f} ({top5})".format(
-            top1=top1_err,
-            top5=top5_err))
+        accuracy_msg = report_accuracy(
+            metric=test_metric,
+            extended_log=True)
+        logging.info("Test: {}".format(accuracy_msg))
         logging.info("Time cost: {:.4f} sec".format(
             time.time() - tic))
+        acc_values = test_metric.get()[1]
+        acc_values = acc_values if type(acc_values) == list else [acc_values]
     else:
-        top5_err = None
+        acc_values = []
 
-    return top5_err
+    return acc_values
 
 
 def main():
@@ -278,7 +254,6 @@ def main():
             logging.info("Checking model: {}".format(model_name))
             acc_value = test_model(
                 args=args,
-                input_image_size=None,
                 use_cuda=use_cuda,
                 data_format=data_format)
             if acc_value is not None:
@@ -289,7 +264,6 @@ def main():
     else:
         test_model(
             args=args,
-            input_image_size=(args.input_size, args.input_size),
             use_cuda=use_cuda,
             data_format=data_format)
 

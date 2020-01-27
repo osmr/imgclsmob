@@ -13,9 +13,9 @@ def check_label_shapes(labels, preds, shape=False):
 
     Parameters
     ----------
-    labels : list of xp.array
+    labels : list of tensor
         The labels of the data.
-    preds : list of xp.array
+    preds : list of tensor
         Predicted values.
     shape : boolean
         If True, check the shape of labels and preds, otherwise only check their length.
@@ -78,9 +78,9 @@ class EvalMetric(object):
 
         Parameters
         ----------
-        labels : OrderedDict of str -> xp.array
+        labels : OrderedDict of str -> tensor
             name to array mapping for labels.
-        preds : OrderedDict of str -> xp.array
+        preds : OrderedDict of str -> tensor
             name to array mapping of predicted outputs.
         """
         if self.output_names is not None:
@@ -101,9 +101,9 @@ class EvalMetric(object):
 
         Parameters
         ----------
-        labels : xp.array
+        labels : tensor
             The labels of the data.
-        preds : xp.array
+        preds : tensor
             Predicted values.
         """
         raise NotImplementedError()
@@ -250,10 +250,10 @@ class CompositeEvalMetric(EvalMetric):
 
         Parameters
         ----------
-        labels : xp.array
+        labels : tensor
             The labels of the data.
 
-        preds : xp.array
+        preds : tensor
             Predicted values.
         """
         for metric in self.metrics:

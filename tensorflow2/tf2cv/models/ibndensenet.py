@@ -170,7 +170,6 @@ class IBNDenseUnit(nn.Layer):
         if self.use_dropout:
             self.dropout = nn.Dropout(
                 rate=dropout_rate,
-                data_format=data_format,
                 name="dropout")
 
     def call(self, x, training=None):

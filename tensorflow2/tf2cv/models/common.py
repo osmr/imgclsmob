@@ -8,7 +8,7 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', '
            'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'Identity',
            'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricConcurrent']
+           'ParametricConcurrent', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -2010,3 +2010,21 @@ class ParametricConcurrent(SimpleSequential):
             out.append(block(x, **kwargs))
         out = tf.concat(out, axis=self.axis)
         return out
+
+
+class MultiOutputSequential(SimpleSequential):
+    """
+    A sequential container with multiple outputs.
+    Layers will be executed in the order they are added.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(MultiOutputSequential, self).__init__(**kwargs)
+
+    def call(self, x, **kwargs):
+        outs = []
+        for block in self.children:
+            x = block(x, **kwargs)
+            if hasattr(block, "do_output") and block.do_output:
+                outs.append(x)
+        return [x] + outs

@@ -8,6 +8,7 @@ import tensorflow as tf
 from .datasets.imagenet1k_cls_dataset import ImageNet1KMetaInfo
 from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
 from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
+from .datasets.svhn_cls_dataset import SVHNMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -28,6 +29,7 @@ def get_dataset_metainfo(dataset_name):
         "ImageNet1K": ImageNet1KMetaInfo,
         "CIFAR10": CIFAR10MetaInfo,
         "CIFAR100": CIFAR100MetaInfo,
+        "SVHN": SVHNMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()

@@ -63,6 +63,17 @@ from .models.preresnet_cifar import *
 from .models.resnext_cifar import *
 from .models.seresnet_cifar import *
 from .models.sepreresnet_cifar import *
+from .models.pyramidnet_cifar import *
+from .models.densenet_cifar import *
+from .models.wrn_cifar import *
+
+from .models.resnetd import *
+
+from .models.resnet_cub import *
+
+from .models.fcn8sd import *
+from .models.pspnet import *
+from .models.deeplabv3 import *
 
 __all__ = ['get_model']
 
@@ -610,6 +621,118 @@ _models = {
     'sepreresnet1202_cifar10': sepreresnet1202_cifar10,
     'sepreresnet1202_cifar100': sepreresnet1202_cifar100,
     'sepreresnet1202_svhn': sepreresnet1202_svhn,
+
+    'pyramidnet110_a48_cifar10': pyramidnet110_a48_cifar10,
+    'pyramidnet110_a48_cifar100': pyramidnet110_a48_cifar100,
+    'pyramidnet110_a48_svhn': pyramidnet110_a48_svhn,
+    'pyramidnet110_a84_cifar10': pyramidnet110_a84_cifar10,
+    'pyramidnet110_a84_cifar100': pyramidnet110_a84_cifar100,
+    'pyramidnet110_a84_svhn': pyramidnet110_a84_svhn,
+    'pyramidnet110_a270_cifar10': pyramidnet110_a270_cifar10,
+    'pyramidnet110_a270_cifar100': pyramidnet110_a270_cifar100,
+    'pyramidnet110_a270_svhn': pyramidnet110_a270_svhn,
+    'pyramidnet164_a270_bn_cifar10': pyramidnet164_a270_bn_cifar10,
+    'pyramidnet164_a270_bn_cifar100': pyramidnet164_a270_bn_cifar100,
+    'pyramidnet164_a270_bn_svhn': pyramidnet164_a270_bn_svhn,
+    'pyramidnet200_a240_bn_cifar10': pyramidnet200_a240_bn_cifar10,
+    'pyramidnet200_a240_bn_cifar100': pyramidnet200_a240_bn_cifar100,
+    'pyramidnet200_a240_bn_svhn': pyramidnet200_a240_bn_svhn,
+    'pyramidnet236_a220_bn_cifar10': pyramidnet236_a220_bn_cifar10,
+    'pyramidnet236_a220_bn_cifar100': pyramidnet236_a220_bn_cifar100,
+    'pyramidnet236_a220_bn_svhn': pyramidnet236_a220_bn_svhn,
+    'pyramidnet272_a200_bn_cifar10': pyramidnet272_a200_bn_cifar10,
+    'pyramidnet272_a200_bn_cifar100': pyramidnet272_a200_bn_cifar100,
+    'pyramidnet272_a200_bn_svhn': pyramidnet272_a200_bn_svhn,
+
+    'densenet40_k12_cifar10': densenet40_k12_cifar10,
+    'densenet40_k12_cifar100': densenet40_k12_cifar100,
+    'densenet40_k12_svhn': densenet40_k12_svhn,
+    'densenet40_k12_bc_cifar10': densenet40_k12_bc_cifar10,
+    'densenet40_k12_bc_cifar100': densenet40_k12_bc_cifar100,
+    'densenet40_k12_bc_svhn': densenet40_k12_bc_svhn,
+    'densenet40_k24_bc_cifar10': densenet40_k24_bc_cifar10,
+    'densenet40_k24_bc_cifar100': densenet40_k24_bc_cifar100,
+    'densenet40_k24_bc_svhn': densenet40_k24_bc_svhn,
+    'densenet40_k36_bc_cifar10': densenet40_k36_bc_cifar10,
+    'densenet40_k36_bc_cifar100': densenet40_k36_bc_cifar100,
+    'densenet40_k36_bc_svhn': densenet40_k36_bc_svhn,
+    'densenet100_k12_cifar10': densenet100_k12_cifar10,
+    'densenet100_k12_cifar100': densenet100_k12_cifar100,
+    'densenet100_k12_svhn': densenet100_k12_svhn,
+    'densenet100_k24_cifar10': densenet100_k24_cifar10,
+    'densenet100_k24_cifar100': densenet100_k24_cifar100,
+    'densenet100_k24_svhn': densenet100_k24_svhn,
+    'densenet100_k12_bc_cifar10': densenet100_k12_bc_cifar10,
+    'densenet100_k12_bc_cifar100': densenet100_k12_bc_cifar100,
+    'densenet100_k12_bc_svhn': densenet100_k12_bc_svhn,
+    'densenet190_k40_bc_cifar10': densenet190_k40_bc_cifar10,
+    'densenet190_k40_bc_cifar100': densenet190_k40_bc_cifar100,
+    'densenet190_k40_bc_svhn': densenet190_k40_bc_svhn,
+    'densenet250_k24_bc_cifar10': densenet250_k24_bc_cifar10,
+    'densenet250_k24_bc_cifar100': densenet250_k24_bc_cifar100,
+    'densenet250_k24_bc_svhn': densenet250_k24_bc_svhn,
+
+    'wrn16_10_cifar10': wrn16_10_cifar10,
+    'wrn16_10_cifar100': wrn16_10_cifar100,
+    'wrn16_10_svhn': wrn16_10_svhn,
+    'wrn28_10_cifar10': wrn28_10_cifar10,
+    'wrn28_10_cifar100': wrn28_10_cifar100,
+    'wrn28_10_svhn': wrn28_10_svhn,
+    'wrn40_8_cifar10': wrn40_8_cifar10,
+    'wrn40_8_cifar100': wrn40_8_cifar100,
+    'wrn40_8_svhn': wrn40_8_svhn,
+
+    'resnetd50b': resnetd50b,
+    'resnetd101b': resnetd101b,
+    'resnetd152b': resnetd152b,
+
+    'resnet10_cub': resnet10_cub,
+    'resnet12_cub': resnet12_cub,
+    'resnet14_cub': resnet14_cub,
+    'resnetbc14b_cub': resnetbc14b_cub,
+    'resnet16_cub': resnet16_cub,
+    'resnet18_cub': resnet18_cub,
+    'resnet26_cub': resnet26_cub,
+    'resnetbc26b_cub': resnetbc26b_cub,
+    'resnet34_cub': resnet34_cub,
+    'resnetbc38b_cub': resnetbc38b_cub,
+    'resnet50_cub': resnet50_cub,
+    'resnet50b_cub': resnet50b_cub,
+    'resnet101_cub': resnet101_cub,
+    'resnet101b_cub': resnet101b_cub,
+    'resnet152_cub': resnet152_cub,
+    'resnet152b_cub': resnet152b_cub,
+    'resnet200_cub': resnet200_cub,
+    'resnet200b_cub': resnet200b_cub,
+
+    'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
+    'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,
+    'fcn8sd_resnetd50b_coco': fcn8sd_resnetd50b_coco,
+    'fcn8sd_resnetd101b_coco': fcn8sd_resnetd101b_coco,
+    'fcn8sd_resnetd50b_ade20k': fcn8sd_resnetd50b_ade20k,
+    'fcn8sd_resnetd101b_ade20k': fcn8sd_resnetd101b_ade20k,
+    'fcn8sd_resnetd50b_cityscapes': fcn8sd_resnetd50b_cityscapes,
+    'fcn8sd_resnetd101b_cityscapes': fcn8sd_resnetd101b_cityscapes,
+
+    'pspnet_resnetd50b_voc': pspnet_resnetd50b_voc,
+    'pspnet_resnetd101b_voc': pspnet_resnetd101b_voc,
+    'pspnet_resnetd50b_coco': pspnet_resnetd50b_coco,
+    'pspnet_resnetd101b_coco': pspnet_resnetd101b_coco,
+    'pspnet_resnetd50b_ade20k': pspnet_resnetd50b_ade20k,
+    'pspnet_resnetd101b_ade20k': pspnet_resnetd101b_ade20k,
+    'pspnet_resnetd50b_cityscapes': pspnet_resnetd50b_cityscapes,
+    'pspnet_resnetd101b_cityscapes': pspnet_resnetd101b_cityscapes,
+
+    'deeplabv3_resnetd50b_voc': deeplabv3_resnetd50b_voc,
+    'deeplabv3_resnetd101b_voc': deeplabv3_resnetd101b_voc,
+    'deeplabv3_resnetd152b_voc': deeplabv3_resnetd152b_voc,
+    'deeplabv3_resnetd50b_coco': deeplabv3_resnetd50b_coco,
+    'deeplabv3_resnetd101b_coco': deeplabv3_resnetd101b_coco,
+    'deeplabv3_resnetd152b_coco': deeplabv3_resnetd152b_coco,
+    'deeplabv3_resnetd50b_ade20k': deeplabv3_resnetd50b_ade20k,
+    'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
+    'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
+    'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 }
 
 

@@ -2,10 +2,10 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['round_channels', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
+__all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'Identity', 'DualPathSequential', 'Concurrent',
+           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'Concurrent',
            'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
            'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
 
@@ -37,6 +37,17 @@ def round_channels(channels,
     if float(rounded_channels) < 0.9 * channels:
         rounded_channels += divisor
     return rounded_channels
+
+
+class Identity(nn.Module):
+    """
+    Identity block.
+    """
+    def __init__(self):
+        super(Identity, self).__init__()
+
+    def forward(self, x):
+        return x
 
 
 class Swish(nn.Module):
@@ -103,6 +114,8 @@ def get_activation_layer(activation):
             return nn.Sigmoid()
         elif activation == "hsigmoid":
             return HSigmoid()
+        elif activation == "identity":
+            return Identity()
         else:
             raise NotImplementedError()
     else:
@@ -1027,17 +1040,6 @@ class IBN(nn.Module):
             x1 = self.batch_norm(x1.contiguous())
             x2 = self.inst_norm(x2.contiguous())
         x = torch.cat((x1, x2), dim=1)
-        return x
-
-
-class Identity(nn.Module):
-    """
-    Identity block.
-    """
-    def __init__(self):
-        super(Identity, self).__init__()
-
-    def forward(self, x):
         return x
 
 

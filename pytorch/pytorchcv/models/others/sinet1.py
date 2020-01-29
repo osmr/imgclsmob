@@ -6,6 +6,7 @@
 
 __all__ = ['SBNet_aux', 'sinet']
 
+import numpy as np
 from inspect import isfunction
 import torch
 import torch.nn as nn
@@ -535,288 +536,533 @@ def dwconv3x3_block(in_channels,
         activation=activation)
 
 
-class BR(nn.Module):
-    '''
-        This class groups the batch normalization and PReLU activation
-    '''
+class FDWConvBlock(nn.Module):
+    """
+    Factorized depthwise separable convolution block with BatchNorms and activations at each convolution layers.
 
-    def __init__(self,
-                 out_channels):
-        '''
-        :param out_channels: output feature maps
-        '''
-        super().__init__()
-        self.bn = nn.BatchNorm2d(out_channels, eps=1e-03)
-        self.act = nn.PReLU(out_channels)
-
-    def forward(self, input):
-        '''
-        :param input: input feature map
-        :return: normalized and thresholded feature map
-        '''
-        output = self.bn(input)
-        output = self.act(output)
-        return output
-
-
-class SBblock(nn.Module):
-    '''
-    This class defines the dilated convolution.
-    '''
-
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function after the each convolution block.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 config):
-        '''
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param kSize: kernel size
-        :param stride: optional stride rate for down-sampling
-        :param d: optional dilation rate
-        '''
-        super().__init__()
-        kernel_size = config[0]
-        avg_size = config[1]
-        self.SB = True if avg_size > 0 else False
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(FDWConvBlock, self).__init__()
+        self.activate = (activation is not None)
 
-        if avg_size == 0:
-            self.conv = dwconv3x3_block(
+        self.v_conv = dwconv_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=(kernel_size, 1),
+            stride=stride,
+            padding=(padding, 0),
+            dilation=dilation,
+            bias=bias,
+            use_bn=use_bn,
+            bn_eps=bn_eps,
+            activation=None)
+        self.h_conv = dwconv_block(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=(1, kernel_size),
+            stride=stride,
+            padding=(0, padding),
+            dilation=dilation,
+            bias=bias,
+            use_bn=use_bn,
+            bn_eps=bn_eps,
+            activation=None)
+        if self.activate:
+            self.act = get_activation_layer(activation)
+
+    def forward(self, x):
+        x = self.v_conv(x) + self.h_conv(x)
+        if self.activate:
+            x = self.act(x)
+        return x
+
+
+def fdwconv3x3_block(in_channels,
+                     out_channels,
+                     stride=1,
+                     padding=1,
+                     dilation=1,
+                     bias=False,
+                     use_bn=True,
+                     bn_eps=1e-5,
+                     activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    3x3 factorized depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return FDWConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        bias=bias,
+        use_bn=use_bn,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+def fdwconv5x5_block(in_channels,
+                     out_channels,
+                     stride=1,
+                     padding=2,
+                     dilation=1,
+                     bias=False,
+                     use_bn=True,
+                     bn_eps=1e-5,
+                     activation=(lambda: nn.ReLU(inplace=True))):
+    """
+    5x5 factorized depthwise version of the standard convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int, default 1
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    return FDWConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=5,
+        stride=stride,
+        padding=padding,
+        dilation=dilation,
+        bias=bias,
+        use_bn=use_bn,
+        bn_eps=bn_eps,
+        activation=activation)
+
+
+class SBBlock(nn.Module):
+    """
+    SB-block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size for a factorized depthwise separable convolution block.
+    scale_factor : int
+        Scale factor.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 scale_factor,
+                 bn_eps=1e-5):
+        super(SBBlock, self).__init__()
+        self.use_scale = (scale_factor > 1)
+
+        if self.use_scale:
+            self.down_scale = nn.AvgPool2d(
+                kernel_size=scale_factor,
+                stride=scale_factor)
+            self.up_scale = nn.UpsamplingBilinear2d(scale_factor=scale_factor)
+
+        use_fdw = scale_factor > 0
+        if use_fdw:
+            fdwconv3x3_class = fdwconv3x3_block if kernel_size == 3 else fdwconv5x5_block
+            self.conv1 = fdwconv3x3_class(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                bn_eps=1e-3,
-                activation=None)
+                bn_eps=bn_eps,
+                activation=(lambda: nn.PReLU(in_channels)))
         else:
-            self.resolution_down = False
-            if avg_size > 1:
-                self.resolution_down = True
-                self.down_res = nn.AvgPool2d(avg_size, avg_size)
-                self.up_res = nn.UpsamplingBilinear2d(scale_factor=avg_size)
-
-            padding = int((kernel_size - 1) / 2)
-            self.vertical = dwconv_block(
+            self.conv1 = dwconv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
-                kernel_size=(kernel_size, 1),
-                padding=(padding, 0),
-                bn_eps=1e-3,
-                activation=None)
-            self.horizontal = dwconv_block(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                kernel_size=(1, kernel_size),
-                padding=(0, padding),
-                bn_eps=1e-3,
-                activation=None)
+                bn_eps=bn_eps,
+                activation=(lambda: nn.PReLU(in_channels)))
 
-        self.act_conv1x1 = nn.Sequential(
-            nn.PReLU(in_channels),
-            nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-                stride=1,
-                bias=False),
-        )
+        self.conv2 = conv1x1(
+            in_channels=in_channels,
+            out_channels=out_channels)
 
         self.bn = nn.BatchNorm2d(
             num_features=out_channels,
-            eps=1e-03)
+            eps=bn_eps)
 
     def forward(self, x):
-        if self.SB:
-            if self.resolution_down:
-                x = self.down_res(x)
-            # y_v = self.B_v(self.vertical(x))
-            # y_h = self.B_h(self.horizontal(x))
-            y_v = self.vertical(x)
-            y_h = self.horizontal(x)
-            y = y_v + y_h
+        if self.use_scale:
+            x = self.down_scale(x)
+
+        x = self.conv1(x)
+        x = self.conv2(x)
+
+        if self.use_scale:
+            x = self.up_scale(x)
+
+        x = self.bn(x)
+        return x
+
+
+class PreActivation(nn.Module):
+    """
+    PreResNet like pure pre-activation block without convolution layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    """
+    def __init__(self,
+                 in_channels,
+                 bn_eps=1e-5):
+        super(PreActivation, self).__init__()
+        self.bn = nn.BatchNorm2d(
+            num_features=in_channels,
+            eps=bn_eps)
+        self.activ = nn.PReLU(num_parameters=in_channels)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.activ(x)
+        return x
+
+
+class Concurrent(nn.Sequential):
+    """
+    A container for concatenation of modules on the base of the sequential container.
+
+    Parameters:
+    ----------
+    axis : int, default 1
+        The axis on which to concatenate the outputs.
+    stack : bool, default False
+        Whether to concatenate tensors along a new dimension.
+    """
+    def __init__(self,
+                 axis=1,
+                 stack=False):
+        super(Concurrent, self).__init__()
+        self.axis = axis
+        self.stack = stack
+
+    def forward(self, x):
+        out = []
+        for module in self._modules.values():
+            out.append(module(x))
+        if self.stack:
+            out = torch.stack(tuple(out), dim=self.axis)
         else:
-            y = self.conv(x)
-
-        y = self.act_conv1x1(y)
-        if self.SB and self.resolution_down:
-            y = self.up_res(y)
-        return self.bn(y)
+            out = torch.cat(tuple(out), dim=self.axis)
+        return out
 
 
-def channel_shuffle(x, groups):
-    batchsize, num_channels, height, width = x.data.size()
+def channel_shuffle(x,
+                    groups):
+    """
+    Channel shuffle operation from 'ShuffleNet: An Extremely Efficient Convolutional Neural Network for Mobile Devices,'
+    https://arxiv.org/abs/1707.01083.
 
-    channels_per_group = num_channels // groups
+    Parameters:
+    ----------
+    x : Tensor
+        Input tensor.
+    groups : int
+        Number of groups.
 
-    # reshape
-    x = x.view(batchsize, groups,
-               channels_per_group, height, width)
-
-    # transpose
-    # - contiguous() required if transpose() is used before view().
-    #   See https://github.com/pytorch/pytorch/issues/764
+    Returns
+    -------
+    Tensor
+        Resulted tensor.
+    """
+    batch, channels, height, width = x.size()
+    # assert (channels % groups == 0)
+    channels_per_group = channels // groups
+    x = x.view(batch, groups, channels_per_group, height, width)
     x = torch.transpose(x, 1, 2).contiguous()
-
-    # flatten
-    x = x.view(batchsize, -1, height, width)
-
+    x = x.view(batch, channels, height, width)
     return x
 
 
-class SBmodule(nn.Module):
-    '''
-    This class defines the ESP block, which is based on the following principle
-        Reduce ---> Split ---> Transform --> Merge
-    '''
+class ChannelShuffle(nn.Module):
+    """
+    Channel shuffle layer. This is a wrapper over the same operation. It is designed to save the number of groups.
 
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    groups : int
+        Number of groups.
+    """
+    def __init__(self,
+                 channels,
+                 groups):
+        super(ChannelShuffle, self).__init__()
+        # assert (channels % groups == 0)
+        if channels % groups != 0:
+            raise ValueError('channels must be divisible by groups')
+        self.groups = groups
+
+    def forward(self, x):
+        return channel_shuffle(x, self.groups)
+
+
+class ESPBlock(nn.Module):
+    """
+    ESP block, which is based on the following principle: Reduce ---> Split ---> Transform --> Merge.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_sizes : list of int
+        Convolution window size for branches.
+    scale_factors : list of int
+        Scale factor for branches.
+    use_residual : bool
+        Whether to use residual connection.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 add=True,
-                 config=[[3, 1], [5, 1]]):
-        '''
-        :param in_channels: number of input channels
-        :param out_channels: number of output channels
-        :param add: if true, add a residual connection through identity operation. You can use projection too as
-                in ResNet paper, but we avoid to use it if the dimensions are not the same because we do not want to
-                increase the module complexity
-        '''
-        super().__init__()
-        # print("This module has " + str(config))
+                 kernel_sizes,
+                 scale_factors,
+                 use_residual,
+                 bn_eps=1e-5):
+        super(ESPBlock, self).__init__()
+        self.use_residual = use_residual
+        groups = len(kernel_sizes)
 
-        group_n = len(config)
-        n = int(out_channels / group_n)
-        n1 = out_channels - group_n * n
+        mid_channels = int(out_channels / groups)
+        res_channels = out_channels - groups * mid_channels
 
-        self.c1 = conv1x1(
+        self.conv = conv1x1(
             in_channels=in_channels,
-            out_channels=n,
-            groups=group_n)
+            out_channels=mid_channels,
+            groups=groups)
 
-        for i in range(group_n):
-            var_name = 'd{}'.format(i + 1)
-            if i == 0:
-                self.__dict__["_modules"][var_name] = SBblock(n, n + n1, config[i])
-            else:
-                self.__dict__["_modules"][var_name] = SBblock(n, n,  config[i])
+        self.c_shuffle = ChannelShuffle(
+            channels=mid_channels,
+            groups=groups)
 
-        self.BR = BR(out_channels)
-        self.add = add
-        self.group_n = group_n
+        self.branches = Concurrent()
+        for i in range(groups):
+            out_channels_i = (mid_channels + res_channels) if i == 0 else mid_channels
+            self.branches.add_module("branch{}".format(i + 2), SBBlock(
+                    in_channels=mid_channels,
+                    out_channels=out_channels_i,
+                    kernel_size=kernel_sizes[i],
+                    scale_factor=scale_factors[i],
+                    bn_eps=bn_eps))
 
-    def forward(self, input):
-        '''
-        :param input: input feature map
-        :return: transformed feature map
-        '''
-        # reduce
-        output1 = self.c1(input)
-        output1 = channel_shuffle(output1, self.group_n)
+        self.preactiv = PreActivation(
+            in_channels=out_channels,
+            bn_eps=bn_eps)
 
-        for i in range(self.group_n):
-            var_name = 'd{}'.format(i + 1)
-            result_d = self.__dict__["_modules"][var_name](output1)
-            if i == 0:
-                combine = result_d
-            else:
-                combine = torch.cat([combine, result_d], 1)
+    def forward(self, x):
+        if self.use_residual:
+            identity = x
 
-        # if residual version
-        if self.add:
-            combine = input + combine
-        output = self.BR(combine)
-        return output
+        x = self.conv(x)
+        x = self.c_shuffle(x)
+        x = self.branches(x)
+
+        if self.use_residual:
+            x = identity + x
+
+        x = self.preactiv(x)
+        return x
 
 
-class SBNet_Encoder(nn.Module):
-
+class SBEncoder(nn.Module):
     def __init__(self,
-                 config,
+                 kernel_sizes_list,
+                 scale_factors_list,
                  classes=20,
                  p=5,
                  q=3,
-                 chnn=1.0):
+                 chnn=1.0,
+                 bn_eps=1e-5):
         '''
         :param classes: number of classes in the dataset. Default is 20 for the cityscapes
         :param p: depth multiplier
         :param q: depth multiplier
         '''
-        super().__init__()
-        # print("SB Net Enc bracnch num :  " + str(len(config[0])))
-        # print("SB Net Enc chnn num:  " + str(chnn))
+        super(SBEncoder, self).__init__()
         dim1 = 24
         dim2 = 48 + 4 * (chnn - 1)
         dim3 = 72 + 4 * (chnn - 1)
         dim4 = 96 + 4 * (chnn - 1)
 
+        bn_eps = 1e-3
+
+        in_channels = 3
         out_channels = 16
         self.level1 = conv3x3_block(
-            in_channels=3,
+            in_channels=in_channels,
             out_channels=out_channels,
             stride=2,
-            bn_eps=1e-3,
+            bn_eps=bn_eps,
             activation=(lambda: nn.PReLU(out_channels)))
 
+        in_channels = out_channels
         self.level2_0 = dwsconv3x3_block(
-            in_channels=16,
+            in_channels=in_channels,
             out_channels=classes,
             stride=2,
             dw_use_bn=False,
-            bn_eps=1e-3,
+            bn_eps=bn_eps,
             dw_activation=None,
             pw_activation=(lambda: nn.PReLU(classes)),
             se_reduction=1)
+
         self.level3_0 = dwsconv3x3_block(
             in_channels=classes,
             out_channels=dim1,
             stride=2,
             dw_use_bn=False,
-            bn_eps=1e-3,
+            bn_eps=bn_eps,
             dw_activation=None,
             pw_activation=(lambda: nn.PReLU(dim1)),
             se_reduction=1)
-
         self.level3 = nn.ModuleList()
-        for i in range(0, p):
-            if i ==0:
-                self.level3.append(SBmodule(dim1, dim2, config=config[i], add=False))
-            else:
-                self.level3.append(SBmodule(dim2, dim2,config=config[i]))
-        self.BR3 = BR(dim2+dim1)
+        in_channels = dim1
+        out_channels = dim2
+        for i in range(p):
+            use_residual = (i != 0)
+            kernel_sizes = kernel_sizes_list[i]
+            scale_factors = scale_factors_list[i]
+            self.level3.append(ESPBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_sizes=kernel_sizes,
+                scale_factors=scale_factors,
+                use_residual=use_residual,
+                bn_eps=bn_eps))
+            in_channels = out_channels
+        self.BR3 = PreActivation(
+            in_channels=(dim2 + dim1),
+            bn_eps=bn_eps)
 
         self.level4_0 = dwsconv3x3_block(
-            in_channels=dim2+dim1,
+            in_channels=(dim2 + dim1),
             out_channels=dim2,
             stride=2,
             dw_use_bn=False,
-            bn_eps=1e-3,
+            bn_eps=bn_eps,
             dw_activation=None,
             pw_activation=(lambda: nn.PReLU(dim2)),
             se_reduction=2)
         self.level4 = nn.ModuleList()
-        for i in range(0, q//2):
-            if i == 0:
-                self.level4.append(SBmodule(dim2, dim3, config=config[p + i], add=False))
-            else:
-                self.level4.append(SBmodule(dim3, dim3,config=config[p+i]))
-
-        for i in range(q//2,q):
-            if i == q//2:
-                self.level4.append(SBmodule(dim3, dim4, config=config[p + i], add=False))
-            else:
-                self.level4.append(SBmodule(dim4, dim4,config=config[p+i]))
-
-        self.BR4 = BR(dim4+dim2)
+        out_channels = dim3
+        for i in range(q // 2):
+            use_residual = (i != 0)
+            kernel_sizes = kernel_sizes_list[p + i]
+            scale_factors = scale_factors_list[p + i]
+            self.level4.append(ESPBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_sizes=kernel_sizes,
+                scale_factors=scale_factors,
+                use_residual=use_residual,
+                bn_eps=bn_eps))
+            in_channels = out_channels
+        out_channels = dim4
+        for i in range(q // 2, q):
+            kernel_sizes = kernel_sizes_list[p + i]
+            scale_factors = scale_factors_list[p + i]
+            use_residual = (i != q // 2)
+            self.level4.append(ESPBlock(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_sizes=kernel_sizes,
+                scale_factors=scale_factors,
+                use_residual=use_residual,
+                bn_eps=bn_eps))
+            in_channels = out_channels
+        self.BR4 = PreActivation(
+            in_channels=(dim4 + dim2),
+            bn_eps=bn_eps)
 
         self.classifier = conv1x1(
-            in_channels=dim4+dim2,
+            in_channels=(dim4 + dim2),
             out_channels=classes)
 
     def forward(self, input):
-        '''
-        :param input: Receives the input RGB image
-        :return: the transformed feature map with spatial dimensions 1/8th of the input image
-        '''
         output1 = self.level1(input) #8h 8w
-
         output2_0 = self.level2_0(output1)  # 4h 4w
         output3_0 = self.level3_0(output2_0)  # 4h 4w
 
@@ -846,12 +1092,13 @@ class SBNet_Encoder(nn.Module):
 class SBNet_aux(nn.Module):
 
     def __init__(self,
-                 config,
+                 kernel_sizes_list,
+                 scale_factors_list,
                  classes=20,
                  p=2,
                  q=3,
                  chnn=1.0,
-                 encoderFile=None):
+                 bn_eps=1e-5):
         '''
         :param classes: number of classes in the dataset. Default is 20 for the cityscapes
         :param p: depth multiplier
@@ -867,14 +1114,13 @@ class SBNet_aux(nn.Module):
         # dim3 = 72 + 4 * (chnn - 1)
         # dim4 = 96 + 4 * (chnn - 1)
 
-        self.encoder = SBNet_Encoder(config, classes, p, q, chnn)
-        # # load the encoder modules
-        if encoderFile != None:
-            if torch.cuda.device_count() == 0:
-                self.encoder.load_state_dict(torch.load(encoderFile,map_location="cpu"))
-            else:
-                self.encoder.load_state_dict(torch.load(encoderFile))
-            print('Encoder loaded!')
+        self.encoder = SBEncoder(
+            kernel_sizes_list,
+            scale_factors_list,
+            classes,
+            p,
+            q,
+            chnn)
 
         self.up = nn.functional.interpolate
         self.bn_4 = nn.BatchNorm2d(classes, eps=1e-03)
@@ -953,28 +1199,17 @@ def sinet(classes=19,
           chnn=4,
           encoderFile=None,
           pretrained=False):
-    #
-    config = [[[3, 1], [5, 1]],
-              [[3, 0], [3, 1]],
-              [[3, 0], [3, 1]],
-              [[3, 1], [5, 1]],
-              [[3, 0], [3, 1]],
-              [[5, 1], [5, 4]],
-              [[3, 2], [5, 8]],
-              [[3, 1], [5, 1]],
-              [[3, 1], [5, 1]],
-              [[3, 0], [3, 1]],
-              [[5, 1], [5, 8]],
-              [[3, 2], [5, 4]],
-              [[3, 0], [5, 2]]]
-    # print("SINet with auxillary loss")
+    kernel_sizes_list =\
+        [[3, 5], [3, 3], [3, 3], [3, 5], [3, 3], [5, 5], [3, 5], [3, 5], [3, 5], [3, 3], [5, 5], [3, 5], [3, 5]]
+    scale_factors_list =\
+        [[1, 1], [0, 1], [0, 1], [1, 1], [0, 1], [1, 4], [2, 8], [1, 1], [1, 1], [0, 1], [1, 8], [2, 4], [0, 2]]
     model = SBNet_aux(
-        config,
+        kernel_sizes_list=kernel_sizes_list,
+        scale_factors_list=scale_factors_list,
         classes=classes,
         p=p,
         q=q,
-        chnn=chnn,
-        encoderFile=encoderFile)
+        chnn=chnn)
     return model
 
 

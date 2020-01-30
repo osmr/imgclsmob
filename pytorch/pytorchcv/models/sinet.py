@@ -1080,7 +1080,7 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sinet_cityscapes or weight_count == 119418)
 
-        x = torch.randn(14, 3, 480, 480)
+        x = torch.randn(14, 3, 1024, 2048)
         y = net(x)
         # y.sum().backward()
         assert (tuple(y.size()) == (14, 19, 1024, 2048))

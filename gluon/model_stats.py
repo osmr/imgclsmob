@@ -12,6 +12,7 @@ from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock
 from .gluoncv2.models.proxylessnas import ProxylessUnit
+from .gluoncv2.models.sinet import InterpolationBlock as InterpolationBlock2
 
 __all__ = ['measure_model']
 
@@ -131,6 +132,9 @@ def measure_model(model,
         elif isinstance(block, HSwish):
             extra_num_flops = 2 * x[0].size
             extra_num_macs = 0
+        elif type(block) in [nn.Conv2DTranspose]:
+            extra_num_flops = 4 * x[0].size
+            extra_num_macs = 0
         elif isinstance(block, nn.Conv2D):
             batch = x[0].shape[0]
             x_h = x[0].shape[2]
@@ -191,7 +195,7 @@ def measure_model(model,
         elif isinstance(block, Identity):
             extra_num_flops = 0
             extra_num_macs = 0
-        elif isinstance(block, InterpolationBlock):
+        elif type(block) in [InterpolationBlock, InterpolationBlock2]:
             extra_num_flops = x[0].size
             extra_num_macs = 0
         elif isinstance(block, ChannelSqueeze):

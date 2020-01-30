@@ -375,7 +375,7 @@ def test_model(args):
         remove_module=args.remove_module)
     input_image_size = update_input_image_size(
         net=net,
-        input_size=args.input_size)
+        input_size=(args.input_size if hasattr(args, "input_size") else None))
     if args.show_progress:
         from tqdm import tqdm
         data_source = tqdm(data_source)

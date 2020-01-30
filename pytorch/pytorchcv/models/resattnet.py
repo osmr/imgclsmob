@@ -109,7 +109,7 @@ class InterpolationBlock(nn.Module):
         return F.interpolate(
             input=x,
             scale_factor=self.scale_factor,
-            mode='bilinear',
+            mode="bilinear",
             align_corners=True)
 
 

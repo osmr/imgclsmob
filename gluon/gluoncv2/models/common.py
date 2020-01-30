@@ -3,11 +3,11 @@
 """
 
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
-           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential']
+           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
+           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN', 'DualPathSequential',
+           'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction

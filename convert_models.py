@@ -957,6 +957,45 @@ def convert_pt2pt(dst_params_file_path,
         dst_param_keys = [key for key in dst_param_keys if key not in dst_bams]
         dst_param_keys = dst_param_keys + dst_bams
 
+    elif dst_model.startswith("sinet"):
+        src1 = list(filter(re.compile("\.vertical.weight").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n + src1
+        src2 = list(filter(re.compile("\.horizontal.weight").search, src_param_keys))
+        src2n = [key for key in src_param_keys if key not in src2]
+        src_param_keys = src2n + src2
+        src3 = list(filter(re.compile("\.B_v\.").search, src_param_keys))
+        src3n = [key for key in src_param_keys if key not in src3]
+        src_param_keys = src3n + src3
+        src4 = list(filter(re.compile("\.B_h\.").search, src_param_keys))
+        src4n = [key for key in src_param_keys if key not in src4]
+        src_param_keys = src4n + src4
+        src5 = list(filter(re.compile("bn_4\.").search, src_param_keys))
+        src5n = [key for key in src_param_keys if key not in src5]
+        src_param_keys = src5n + src5
+        src6 = list(filter(re.compile("bn_3\.").search, src_param_keys))
+        src6n = [key for key in src_param_keys if key not in src6]
+        src_param_keys = src6n + src6
+
+        dst1 = list(filter(re.compile("\.v_conv.conv\.").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst_param_keys = dst1n + dst1
+        dst2 = list(filter(re.compile("\.h_conv.conv\.").search, dst_param_keys))
+        dst2n = [key for key in dst_param_keys if key not in dst2]
+        dst_param_keys = dst2n + dst2
+        dst3 = list(filter(re.compile("\.v_conv.bn\.").search, dst_param_keys))
+        dst3n = [key for key in dst_param_keys if key not in dst3]
+        dst_param_keys = dst3n + dst3
+        dst4 = list(filter(re.compile("\.h_conv.bn\.").search, dst_param_keys))
+        dst4n = [key for key in dst_param_keys if key not in dst4]
+        dst_param_keys = dst4n + dst4
+        dst5 = list(filter(re.compile("decoder.decode1.bn\.").search, dst_param_keys))
+        dst5n = [key for key in dst_param_keys if key not in dst5]
+        dst_param_keys = dst5n + dst5
+        dst6 = list(filter(re.compile("decoder.decode2.bn\.").search, dst_param_keys))
+        dst6n = [key for key in dst_param_keys if key not in dst6]
+        dst_param_keys = dst6n + dst6
+
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if (src_model == "oth_shufflenetv2_wd2" and dst_model == "shufflenetv2_wd2") and \
                 (src_key == "network.8.weight"):

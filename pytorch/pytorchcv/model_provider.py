@@ -110,6 +110,8 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.sinet import *
 
+from .models.others.oth_sinet import *
+
 from .models.superpointnet import *
 
 __all__ = ['get_model']
@@ -952,6 +954,7 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'sinet_cityscapes': sinet_cityscapes,
+    'oth_sinet_cityscapes': oth_sinet_cityscapes,
 
     'superpointnet': superpointnet,
 }

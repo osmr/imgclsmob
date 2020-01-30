@@ -110,6 +110,7 @@ from .models.ntsnet_cub import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
+from .models.sinet import *
 
 from .models.superpointnet import *
 
@@ -1012,6 +1013,8 @@ _models = {
     'deeplabv3_resnetd101b_ade20k': deeplabv3_resnetd101b_ade20k,
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
+
+    'sinet_cityscapes': sinet_cityscapes,
 
     'superpointnet': superpointnet,
 }

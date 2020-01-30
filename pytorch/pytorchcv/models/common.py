@@ -3,10 +3,10 @@
 """
 
 __all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv3x3_block',
-           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential', 'Concurrent',
-           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
+           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN', 'DualPathSequential',
+           'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
            'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
 
 import math

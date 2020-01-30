@@ -12,6 +12,7 @@ from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
 from .pytorchcv.models.proxylessnas import ProxylessUnit
+from .pytorchcv.models.sinet import InterpolationBlock as InterpolationBlock2
 
 __all__ = ['measure_model']
 
@@ -124,7 +125,10 @@ def measure_model(model,
         elif isinstance(module, HSwish):
             extra_num_flops = 2 * x[0].numel()
             extra_num_macs = 0
-        elif isinstance(module, nn.Conv2d):
+        elif type(module) in [nn.ConvTranspose2d]:
+            extra_num_flops = 4 * x[0].numel()
+            extra_num_macs = 0
+        elif type(module) in [nn.Conv2d]:
             batch = x[0].shape[0]
             x_h = x[0].shape[2]
             x_w = x[0].shape[3]
@@ -205,7 +209,7 @@ def measure_model(model,
         elif isinstance(module, Flatten):
             extra_num_flops = 0
             extra_num_macs = 0
-        elif isinstance(module, InterpolationBlock):
+        elif type(module) in [InterpolationBlock, InterpolationBlock2]:
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
         elif isinstance(module, nn.Upsample):
@@ -228,6 +232,9 @@ def measure_model(model,
             extra_num_macs = 0
         elif isinstance(module, ProxylessUnit):
             extra_num_flops = x[0].numel()
+            extra_num_macs = 0
+        elif isinstance(module, nn.Softmax2d):
+            extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
         else:
             raise TypeError("Unknown layer type: {}".format(type(module)))

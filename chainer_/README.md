@@ -633,6 +633,7 @@ Some remarks:
 | Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.72 | 57.57 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_cityscapes-5757-2e2315d4.npz.log)) |
+| SINet | - | 92.57 | 56.79 | 119,418 | 177.46M | From [clovaai/c3_sinet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.436/sinet_cityscapes-5679-f9377bc1.npz.log)) |
 
 ### COCO
 
@@ -670,3 +671,4 @@ Some remarks:
 [HRNet/HRNet...ation]: https://github.com/HRNet/HRNet-Image-Classification
 [stigma0617/VoVNet.pytorch]: https://github.com/stigma0617/VoVNet.pytorch
 [PingoLH/Pytorch-HarDNet]: https://github.com/PingoLH/Pytorch-HarDNet
+[clovaai/c3_sinet]: https://github.com/clovaai/c3_sinet

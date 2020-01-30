@@ -158,4 +158,4 @@ Some remarks:
 | PSPNet | ABCD | ABCD | ABCD | - | - | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
 | DeepLabv3 | ABcD | ABcD | ABcD | - | - | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
 | FCN-8s(d) | ABcD | ABcD | ABcD | - | - | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
-| SINet | c | c | c | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |
+| SINet | C | C | C | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |

@@ -498,6 +498,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('fcn8sd_resnetd50b_ade20k', '3339', 'e1dad8a15c2a1be1138bd3ec51ba1b100bb8d9c9', 'v0.0.299', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_ade20k', '3588', '30d05ca42392a164ea7c93a9cbd7f33911d3c1af', 'v0.0.299', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_coco', '6011', 'ebe2ad0bc1de5b4cecade61d17d269aa8bf6df7f', 'v0.0.299', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
+    ('sinet_cityscapes', '6172', '8ecd14141b85a682c2cc1c74e13077fee4746d87', 'v0.0.436', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

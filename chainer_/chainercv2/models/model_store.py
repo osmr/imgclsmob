@@ -491,6 +491,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('fcn8sd_resnetd50b_ade20k', '3339', '1d03bc38ea64551806ddfd4185b5eb49fb9e160f', 'v0.0.299'),
     ('fcn8sd_resnetd101b_ade20k', '3588', 'ff385e1913bc8c05c6abe9cb19896f477b9b75a7', 'v0.0.299'),
     ('fcn8sd_resnetd101b_coco', '6011', '4a469997cdc3e52c1dee1a2d58578f9df54c419b', 'v0.0.299'),
+    ('sinet_cityscapes', '5679', 'f9377bc114c8249d8ad157d37280aedbf5dffd60', 'v0.0.436'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

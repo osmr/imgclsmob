@@ -1,11 +1,12 @@
-# Large-scale image classification models on TensorFlow 2.x
+# Computer vision models on TensorFlow 2.x
 
 [![PyPI](https://img.shields.io/pypi/v/tf2cv.svg)](https://pypi.python.org/pypi/tf2cv)
 [![Downloads](https://pepy.tech/badge/tf2cv)](https://pepy.tech/project/tf2cv)
 
-This is a collection of large-scale image classification models. Many of them are pretrained on
-[ImageNet-1K](http://www.image-net.org) dataset and loaded automatically during use. All pretrained models require the
-same ordinary normalization. Scripts for training/evaluating/converting models are in the
+This is a collection of image classification models. Many of them are pretrained on
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
+[SVHN](http://ufldl.stanford.edu/housenumbers) datasets and loaded automatically during use. All pretrained models
+require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
 [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
@@ -333,6 +334,44 @@ Some remarks:
 | MixNet-S | 24.34 | 7.37 | 4,134,606 | 260.26M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_s-0737-d68d63f1.tf2.h5.log)) |
 | MixNet-M | 23.29 | 6.79 | 5,014,382 | 366.05M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_m-0679-f74eab6c.tf2.h5.log)) |
 | MixNet-L | 21.57 | 6.01 | 7,329,252 | 590.45M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.427/mixnet_l-0601-5c2ccc0c.tf2.h5.log)) |
+
+### CIFAR-10
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-20 | 5.97 | 272,474 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet20_cifar10-0597-451230e9.tf2.h5.log)) |
+| ResNet-56 | 4.52 | 855,770 | 127.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet56_cifar10-0452-a39ad94a.tf2.h5.log)) |
+| ResNet-110 | 3.69 | 1,730,714 | 255.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet110_cifar10-0369-c625643a.tf2.h5.log)) |
+| ResNet-164(BN) | 3.68 | 1,704,154 | 255.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet164bn_cifar10-0368-cf08cca7.tf2.h5.log)) |
+| ResNet-272(BN) | 3.33 | 2,816,986 | 420.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet272bn_cifar10-0333-c8b0a926.tf2.h5.log)) |
+| ResNet-542(BN) | 3.43 | 5,599,066 | 833.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_cifar10-0343-c31829d4.tf2.h5.log)) |
+| ResNet-1001 | 3.28 | 10,328,602 | 1,536.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_cifar10-0328-552ab287.tf2.h5.log)) |
+| ResNet-1202 | 3.53 | 19,424,026 | 2,857.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1202_cifar10-0353-3559a943.tf2.h5.log)) |
+
+### CIFAR-100
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-20 | 29.64 | 278,324 | 41.30M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet20_cifar100-2964-5fa28f78.tf2.h5.log)) |
+| ResNet-56 | 24.88 | 861,620 | 127.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet56_cifar100-2488-8e413ab9.tf2.h5.log)) |
+| ResNet-110 | 22.80 | 1,736,564 | 255.71M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet110_cifar100-2280-c248211b.tf2.h5.log)) |
+| ResNet-164(BN) | 20.44 | 1,727,284 | 255.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet164bn_cifar100-2044-1ba34790.tf2.h5.log)) |
+| ResNet-272(BN) | 20.07 | 2,840,116 | 420.63M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet272bn_cifar100-2007-5357e0df.tf2.h5.log)) |
+| ResNet-542(BN) | 19.32 | 5,622,196 | 833.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_cifar100-1932-2db913a6.tf2.h5.log)) |
+| ResNet-1001 | 19.79 | 10,351,732 | 1,536.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_cifar100-1979-75c8acac.tf2.h5.log)) |
+| ResNet-1202 | 21.56 | 19,429,876 | 2,857.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1202_cifar100-2156-28fcf786.tf2.h5.log)) |
+
+### SVHN
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-20 | 3.43 | 272,474 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet20_svhn-0343-3480eec0.tf2.h5.log)) |
+| ResNet-56 | 2.75 | 855,770 | 127.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet56_svhn-0275-5acc5537.tf2.h5.log)) |
+| ResNet-110 | 2.45 | 1,730,714 | 255.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet110_svhn-0245-a07e849f.tf2.h5.log)) |
+| ResNet-164(BN) | 2.42 | 1,704,154 | 255.31M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet164bn_svhn-0242-1bfa8083.tf2.h5.log)) |
+| ResNet-272(BN) | 2.43 | 2,816,986 | 420.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet272bn_svhn-0243-e2a8e355.tf2.h5.log)) |
+| ResNet-542(BN) | 2.34 | 5,599,066 | 833.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_svhn-0234-0d6759e7.tf2.h5.log)) |
+| ResNet-1001 | 2.41 | 10,328,602 | 1,536.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_svhn-0241-c9a01550.tf2.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

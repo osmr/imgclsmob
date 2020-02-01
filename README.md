@@ -58,8 +58,8 @@ Some remarks:
 | VGG | A | A | A | A | A | A | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A | A | A | A | A | A | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |
 | BN-Inception | A | A | A | - | - | A | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |
-| ResNet | ABCDE | ABCDE | ABCDE | A | A | Abcde | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
-| PreResNet | ABCD | ABCD | ABCD | A | A | A | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
+| ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCDe | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
+| PreResNet | ABCD | ABCD | ABCD | A | A | Aabcd | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
 | ResNeXt | ABCD | ABCD | ABCD | A | A | A | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNet | ABCDE | ABCDE | ABCDE | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |

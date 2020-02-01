@@ -253,7 +253,30 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('efficientnet_edge_large_b', '0496', 'd72edce103b4bdac37afeabec281f1aedc9632bc', 'v0.0.434', 'in1k', 0.904),
     ('mixnet_s', '0737', 'd68d63f1914beeaec4e068c0dbd1defe09c7ffb6', 'v0.0.427', 'in1k', 0.875),
     ('mixnet_m', '0679', 'f74eab6c0ed1bc453453f433bce1cdde2d3e6bda', 'v0.0.427', 'in1k', 0.875),
-    ('mixnet_l', '0601', '5c2ccc0c906ae29985043dc590317133c0be3376', 'v0.0.427', 'in1k', 0.875)]}
+    ('mixnet_l', '0601', '5c2ccc0c906ae29985043dc590317133c0be3376', 'v0.0.427', 'in1k', 0.875),
+    ('resnet20_cifar10', '0597', '13c5ab19145591d75873da3497be1dd1bd2afd46', 'v0.0.438', 'cf', 0.0),
+    ('resnet20_cifar100', '2964', '4e1443526ee96648bfe4d4954871a97a9c9622f4', 'v0.0.438', 'cf', 0.0),
+    ('resnet20_svhn', '0343', '7ac0d94a4563c9611092ce08f2124a3828103139', 'v0.0.438', 'cf', 0.0),
+    ('resnet56_cifar10', '0452', 'a73e63e9d0f3f7adde59b4142323c0dd05930de7', 'v0.0.438', 'cf', 0.0),
+    ('resnet56_cifar100', '2488', '590977100774a289b91088245dd2bd0cbe6567e6', 'v0.0.438', 'cf', 0.0),
+    ('resnet56_svhn', '0275', 'e676e4216a771b7d0339e87284c7ebb03af8ed25', 'v0.0.438', 'cf', 0.0),
+    ('resnet110_cifar10', '0369', 'f89f1c4d9fdd9e5cd00949a872211376979ff703', 'v0.0.438', 'cf', 0.0),
+    ('resnet110_cifar100', '2280', '6c5fa14bb4ced2dffe6ee1536306687aae57f9cb', 'v0.0.438', 'cf', 0.0),
+    ('resnet110_svhn', '0245', '0570b5942680cf88c66ae9a76c0e7ff0a41e71a6', 'v0.0.438', 'cf', 0.0),
+    ('resnet164bn_cifar10', '0368', 'e7941eeeddef9336664522eaa3af92d77128cac0', 'v0.0.438', 'cf', 0.0),
+    ('resnet164bn_cifar100', '2044', 'c7db7b5e6fbe6dc0f9501d25784f1a107c6e0315', 'v0.0.438', 'cf', 0.0),
+    ('resnet164bn_svhn', '0242', '8cdce67452d2780c7c69f4d0b979e80189d4bff8', 'v0.0.438', 'cf', 0.0),
+    ('resnet272bn_cifar10', '0333', '99dc36ca2abc91f3f82db181a14c5364cd5526be', 'v0.0.438', 'cf', 0.0),
+    ('resnet272bn_cifar100', '2007', '088af5c23634fe75206081d946fc82fdc9e999ad', 'v0.0.438', 'cf', 0.0),
+    ('resnet272bn_svhn', '0243', '39d741c8d081ebd2266a114e82363839ffdf8ebb', 'v0.0.438', 'cf', 0.0),
+    ('resnet542bn_cifar10', '0343', 'e687b254e1eace223ceef39ad17106e61b8649ba', 'v0.0.438', 'cf', 0.0),
+    ('resnet542bn_cifar100', '1932', 'df8bd5264c1db11dd545f62e9c750c7976edccc9', 'v0.0.438', 'cf', 0.0),
+    ('resnet542bn_svhn', '0234', '4f78075cbcba196fc8f5297b71730906c1bf7d8a', 'v0.0.438', 'cf', 0.0),
+    ('resnet1001_cifar10', '0328', 'bb979d53089138b5060b418cad6c8ad9a940bf81', 'v0.0.438', 'cf', 0.0),
+    ('resnet1001_cifar100', '1979', '692d9516620bc8b7a4da30a98ebcb7432243f5e9', 'v0.0.438', 'cf', 0.0),
+    ('resnet1001_svhn', '0241', '031fb0ce5e5ddbebca2fd7d856d63ddd147fe933', 'v0.0.438', 'cf', 0.0),
+    ('resnet1202_cifar10', '0353', '377510a63595e544333f6f57523222cd845744a8', 'v0.0.438', 'cf', 0.0),
+    ('resnet1202_cifar100', '2156', '1d94f9ccdd81e1785ea6ec02a861a4a05f39e5c9', 'v0.0.438', 'cf', 0.0)]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

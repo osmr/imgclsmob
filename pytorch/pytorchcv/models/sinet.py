@@ -456,7 +456,7 @@ class SBBlock(nn.Module):
         Convolution window size for a factorized depthwise separable convolution block.
     scale_factor : int
         Scale factor.
-    bn_eps : float, default 1e-5
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -464,7 +464,7 @@ class SBBlock(nn.Module):
                  out_channels,
                  kernel_size,
                  scale_factor,
-                 bn_eps=1e-5):
+                 bn_eps):
         super(SBBlock, self).__init__()
         self.use_scale = (scale_factor > 1)
 
@@ -519,12 +519,12 @@ class PreActivation(nn.Module):
     ----------
     in_channels : int
         Number of input channels.
-    bn_eps : float, default 1e-5
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
                  in_channels,
-                 bn_eps=1e-5):
+                 bn_eps):
         super(PreActivation, self).__init__()
         self.bn = nn.BatchNorm2d(
             num_features=in_channels,
@@ -553,7 +553,7 @@ class ESPBlock(nn.Module):
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
-    bn_eps : float, default 1e-5
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -562,7 +562,7 @@ class ESPBlock(nn.Module):
                  kernel_sizes,
                  scale_factors,
                  use_residual,
-                 bn_eps=1e-5):
+                 bn_eps):
         super(ESPBlock, self).__init__()
         self.use_residual = use_residual
         groups = len(kernel_sizes)
@@ -583,11 +583,11 @@ class ESPBlock(nn.Module):
         for i in range(groups):
             out_channels_i = (mid_channels + res_channels) if i == 0 else mid_channels
             self.branches.add_module("branch{}".format(i + 1), SBBlock(
-                    in_channels=mid_channels,
-                    out_channels=out_channels_i,
-                    kernel_size=kernel_sizes[i],
-                    scale_factor=scale_factors[i],
-                    bn_eps=bn_eps))
+                in_channels=mid_channels,
+                out_channels=out_channels_i,
+                kernel_size=kernel_sizes[i],
+                scale_factor=scale_factors[i],
+                bn_eps=bn_eps))
 
         self.preactiv = PreActivation(
             in_channels=out_channels,
@@ -628,7 +628,7 @@ class SBStage(nn.Module):
         List of flags for using residual in each ESP-block.
     se_reduction : int
         Squeeze reduction value (0 means no-se).
-    bn_eps : float, default 1e-5
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -690,7 +690,7 @@ class SBEncoderInitBlock(nn.Module):
         Number of middle channels.
     out_channels : int
         Number of output channels.
-    bn_eps : float, default 1e-5
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -757,7 +757,6 @@ class SBEncoder(nn.Module):
                  use_residual_list,
                  bn_eps):
         super(SBEncoder, self).__init__()
-
         self.init_block = SBEncoderInitBlock(
             in_channels=in_channels,
             mid_channels=init_block_channels[0],
@@ -805,20 +804,20 @@ class SBDecodeBlock(nn.Module):
 
     Parameters:
     ----------
+    channels : int
+        Number of output classes.
     bn_eps : float
         Small float added to variance in Batch norm.
-    out_classes : int
-        Number of output classes.
     """
     def __init__(self,
-                 bn_eps,
-                 out_classes):
+                 channels,
+                 bn_eps):
         super(SBDecodeBlock, self).__init__()
         self.up = InterpolationBlock(
             scale_factor=2,
             align_corners=False)
         self.bn = nn.BatchNorm2d(
-            num_features=out_classes,
+            num_features=channels,
             eps=bn_eps)
         self.conf = nn.Softmax2d()
 
@@ -839,22 +838,22 @@ class SBDecoder(nn.Module):
     ----------
     dim2 : int
         Size of dimension #2.
-    bn_eps : float
-        Small float added to variance in Batch norm.
     num_classes : int
         Number of segmentation classes.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  dim2,
-                 bn_eps,
-                 num_classes):
+                 num_classes,
+                 bn_eps):
         super(SBDecoder, self).__init__()
         self.decode1 = SBDecodeBlock(
-            bn_eps=bn_eps,
-            out_classes=num_classes)
+            channels=num_classes,
+            bn_eps=bn_eps)
         self.decode2 = SBDecodeBlock(
-            bn_eps=bn_eps,
-            out_classes=num_classes)
+            channels=num_classes,
+            bn_eps=bn_eps)
         self.conv3c = conv1x1_block(
             in_channels=dim2,
             out_channels=num_classes,
@@ -922,7 +921,7 @@ class SINet(nn.Module):
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
-                 in_size=(512, 512),
+                 in_size=(1024, 2048),
                  num_classes=21):
         super(SINet, self).__init__()
         assert (fixed_size is not None)
@@ -947,8 +946,8 @@ class SINet(nn.Module):
 
         self.decoder = SBDecoder(
             dim2=dim2,
-            bn_eps=bn_eps,
-            num_classes=num_classes)
+            num_classes=num_classes,
+            bn_eps=bn_eps)
 
         self._init_params()
 
@@ -1063,7 +1062,9 @@ def _calc_width(net):
 def _test():
     import torch
 
+    in_size = (1024, 2048)
     aux = False
+    fixed_size = True
     pretrained = False
 
     models = [
@@ -1072,7 +1073,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, aux=aux)
+        net = model(pretrained=pretrained, aux=aux, fixed_size=fixed_size)
 
         # net.train()
         net.eval()
@@ -1080,10 +1081,10 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sinet_cityscapes or weight_count == 119418)
 
-        x = torch.randn(14, 3, 1024, 2048)
+        x = torch.randn(14, 3, in_size[0], in_size[1])
         y = net(x)
         # y.sum().backward()
-        assert (tuple(y.size()) == (14, 19, 1024, 2048))
+        assert (tuple(y.size()) == (14, 19, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

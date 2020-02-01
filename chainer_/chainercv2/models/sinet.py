@@ -24,17 +24,20 @@ class InterpolationBlock(Chain):
     ----------
     scale_factor : int
         Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
-                 scale_factor):
+                 scale_factor,
+                 out_size=None):
         super(InterpolationBlock, self).__init__()
         self.scale_factor = scale_factor
+        self.out_size = out_size
 
     def __call__(self, x):
-        return F.unpooling_2d(
-            x=x,
-            ksize=self.scale_factor,
-            cover_all=False)
+        out_size = self.out_size if (self.out_size is not None) else\
+            (x.shape[2] * self.scale_factor, x.shape[3] * self.scale_factor)
+        return F.resize_images(x, output_shape=out_size)
 
 
 class SEBlock(Chain):
@@ -454,7 +457,9 @@ class SBBlock(Chain):
         Convolution window size for a factorized depthwise separable convolution block.
     scale_factor : int
         Scale factor.
-    bn_eps : float, default 1e-5
+    size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -462,7 +467,8 @@ class SBBlock(Chain):
                  out_channels,
                  ksize,
                  scale_factor,
-                 bn_eps=1e-5):
+                 size,
+                 bn_eps):
         super(SBBlock, self).__init__()
         self.use_scale = (scale_factor > 1)
 
@@ -472,7 +478,9 @@ class SBBlock(Chain):
                     F.average_pooling_2d,
                     ksize=scale_factor,
                     stride=scale_factor)
-                self.up_scale = InterpolationBlock(scale_factor=scale_factor)
+                self.up_scale = InterpolationBlock(
+                    scale_factor=scale_factor,
+                    out_size=size)
 
             use_fdw = (scale_factor > 0)
             if use_fdw:
@@ -554,7 +562,9 @@ class ESPBlock(Chain):
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
-    bn_eps : float, default 1e-5
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -563,7 +573,8 @@ class ESPBlock(Chain):
                  ksizes,
                  scale_factors,
                  use_residual,
-                 bn_eps=1e-5):
+                 in_size,
+                 bn_eps):
         super(ESPBlock, self).__init__()
         self.use_residual = use_residual
         groups = len(ksizes)
@@ -586,11 +597,12 @@ class ESPBlock(Chain):
                 for i in range(groups):
                     out_channels_i = (mid_channels + res_channels) if i == 0 else mid_channels
                     setattr(self.branches, "branch{}".format(i + 1), SBBlock(
-                            in_channels=mid_channels,
-                            out_channels=out_channels_i,
-                            ksize=ksizes[i],
-                            scale_factor=scale_factors[i],
-                            bn_eps=bn_eps))
+                        in_channels=mid_channels,
+                        out_channels=out_channels_i,
+                        ksize=ksizes[i],
+                        scale_factor=scale_factors[i],
+                        size=in_size,
+                        bn_eps=bn_eps))
 
             self.preactiv = PreActivation(
                 in_channels=out_channels,
@@ -631,7 +643,9 @@ class SBStage(Chain):
         List of flags for using residual in each ESP-block.
     se_reduction : int
         Squeeze reduction value (0 means no-se).
-    bn_eps : float, default 1e-5
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_eps : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -642,6 +656,7 @@ class SBStage(Chain):
                  scale_factors_list,
                  use_residual_list,
                  se_reduction,
+                 in_size,
                  bn_eps):
         super(SBStage, self).__init__()
         with self.init_scope():
@@ -668,6 +683,7 @@ class SBStage(Chain):
                         ksizes=ksizes,
                         scale_factors=scale_factors,
                         use_residual=use_residual,
+                        in_size=((in_size[0] // 2, in_size[1] // 2) if in_size else None),
                         bn_eps=bn_eps))
                     in_channels = out_channels
 
@@ -749,6 +765,8 @@ class SBEncoder(Chain):
         Scale factor for each residual block.
     use_residual_list : list of list of int
         List of flags for using residual in each residual block.
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
     """
@@ -761,6 +779,7 @@ class SBEncoder(Chain):
                  ksizes_list,
                  scale_factors_list,
                  use_residual_list,
+                 in_size,
                  bn_eps):
         super(SBEncoder, self).__init__()
         with self.init_scope():
@@ -779,6 +798,7 @@ class SBEncoder(Chain):
                 scale_factors_list=scale_factors_list[0],
                 use_residual_list=use_residual_list[0],
                 se_reduction=1,
+                in_size=((in_size[0] // 4, in_size[1] // 4) if in_size else None),
                 bn_eps=bn_eps)
 
             in_channels = down_channels_list[0] + channels_list[0][-1]
@@ -790,6 +810,7 @@ class SBEncoder(Chain):
                 scale_factors_list=scale_factors_list[1],
                 use_residual_list=use_residual_list[1],
                 se_reduction=2,
+                in_size=((in_size[0] // 8, in_size[1] // 8) if in_size else None),
                 bn_eps=bn_eps)
 
             in_channels = down_channels_list[1] + channels_list[1][-1]
@@ -811,19 +832,24 @@ class SBDecodeBlock(Chain):
 
     Parameters:
     ----------
+    channels : int
+        Number of output classes.
+    out_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
     bn_eps : float
         Small float added to variance in Batch norm.
-    out_classes : int
-        Number of output classes.
     """
     def __init__(self,
                  bn_eps,
-                 out_classes):
+                 out_size,
+                 channels):
         super(SBDecodeBlock, self).__init__()
         with self.init_scope():
-            self.up = InterpolationBlock(scale_factor=2)
+            self.up = InterpolationBlock(
+                scale_factor=2,
+                out_size=out_size)
             self.bn = L.BatchNormalization(
-                size=out_classes,
+                size=channels,
                 eps=bn_eps)
 
     def __call__(self, x, y):
@@ -843,23 +869,28 @@ class SBDecoder(Chain):
     ----------
     dim2 : int
         Size of dimension #2.
-    bn_eps : float
-        Small float added to variance in Batch norm.
     classes : int
         Number of segmentation classes.
+    out_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_eps : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  dim2,
-                 bn_eps,
-                 classes):
+                 classes,
+                 out_size,
+                 bn_eps):
         super(SBDecoder, self).__init__()
         with self.init_scope():
             self.decode1 = SBDecodeBlock(
-                bn_eps=bn_eps,
-                out_classes=classes)
+                channels=classes,
+                out_size=((out_size[0] // 8, out_size[1] // 8) if out_size else None),
+                bn_eps=bn_eps)
             self.decode2 = SBDecodeBlock(
-                bn_eps=bn_eps,
-                out_classes=classes)
+                channels=classes,
+                out_size=((out_size[0] // 4, out_size[1] // 4) if out_size else None),
+                bn_eps=bn_eps)
             self.conv3c = conv1x1_block(
                 in_channels=dim2,
                 out_channels=classes,
@@ -927,7 +958,7 @@ class SINet(Chain):
                  aux=False,
                  fixed_size=False,
                  in_channels=3,
-                 in_size=(512, 512),
+                 in_size=(1024, 2048),
                  classes=21):
         super(SINet, self).__init__()
         assert (fixed_size is not None)
@@ -949,12 +980,14 @@ class SINet(Chain):
                 ksizes_list=ksizes_list,
                 scale_factors_list=scale_factors_list,
                 use_residual_list=use_residual_list,
+                in_size=(in_size if fixed_size else None),
                 bn_eps=bn_eps)
 
             self.decoder = SBDecoder(
                 dim2=dim2,
-                bn_eps=bn_eps,
-                classes=classes)
+                classes=classes,
+                out_size=(in_size if fixed_size else None),
+                bn_eps=bn_eps)
 
     def __call__(self, x):
         y3, y2, y1 = self.encoder(x)
@@ -1055,7 +1088,9 @@ def _test():
 
     chainer.global_config.train = False
 
+    in_size = (1024, 2048)
     aux = False
+    fixed_size = False
     pretrained = False
 
     models = [
@@ -1064,14 +1099,14 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, aux=aux)
+        net = model(pretrained=pretrained, aux=aux, fixed_size=fixed_size)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sinet_cityscapes or weight_count == 119418)
 
-        x = np.zeros((14, 3, 1024, 2048), np.float32)
+        x = np.zeros((14, 3, in_size[0], in_size[1]), np.float32)
         y = net(x)
-        assert (y.shape == (14, 19, 1024, 2048))
+        assert (y.shape == (14, 19, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

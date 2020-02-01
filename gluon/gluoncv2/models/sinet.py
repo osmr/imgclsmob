@@ -20,17 +20,30 @@ class InterpolationBlock(HybridBlock):
 
     Parameters:
     ----------
-    scale_factor : float
+    scale_factor : int
         Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear upsampling operation.
     """
     def __init__(self,
                  scale_factor,
+                 out_size=None,
                  **kwargs):
         super(InterpolationBlock, self).__init__(**kwargs)
         self.scale_factor = scale_factor
+        self.out_size = out_size
 
     def hybrid_forward(self, F, x):
-        return F.UpSampling(x, scale=self.scale_factor, sample_type="nearest")
+        out_size = self.out_size if (self.out_size is not None) else\
+            (x.shape[2] * self.scale_factor, x.shape[3] * self.scale_factor)
+        return F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
+
+    def __repr__(self):
+        s = '{name}(scale_factor={scale_factor}, out_size={out_size})'
+        return s.format(
+            name=self.__class__.__name__,
+            scale_factor=self.scale_factor,
+            out_size=self.out_size)
 
 
 class SEBlock(HybridBlock):
@@ -462,7 +475,9 @@ class SBBlock(HybridBlock):
         Convolution window size for a factorized depthwise separable convolution block.
     scale_factor : int
         Scale factor.
-    bn_epsilon : float, default 1e-5
+    size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -470,7 +485,8 @@ class SBBlock(HybridBlock):
                  out_channels,
                  kernel_size,
                  scale_factor,
-                 bn_epsilon=1e-5,
+                 size,
+                 bn_epsilon,
                  **kwargs):
         super(SBBlock, self).__init__(**kwargs)
         self.use_scale = (scale_factor > 1)
@@ -480,7 +496,9 @@ class SBBlock(HybridBlock):
                 self.down_scale = nn.AvgPool2D(
                     pool_size=scale_factor,
                     strides=scale_factor)
-                self.up_scale = InterpolationBlock(scale_factor=scale_factor)
+                self.up_scale = InterpolationBlock(
+                    scale_factor=scale_factor,
+                    out_size=size)
 
             use_fdw = (scale_factor > 0)
             if use_fdw:
@@ -563,7 +581,9 @@ class ESPBlock(HybridBlock):
         Scale factor for branches.
     use_residual : bool
         Whether to use residual connection.
-    bn_epsilon : float, default 1e-5
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -572,7 +592,8 @@ class ESPBlock(HybridBlock):
                  kernel_sizes,
                  scale_factors,
                  use_residual,
-                 bn_epsilon=1e-5,
+                 in_size,
+                 bn_epsilon,
                  **kwargs):
         super(ESPBlock, self).__init__(**kwargs)
         self.use_residual = use_residual
@@ -596,11 +617,12 @@ class ESPBlock(HybridBlock):
                 for i in range(groups):
                     out_channels_i = (mid_channels + res_channels) if i == 0 else mid_channels
                     self.branches.add(SBBlock(
-                            in_channels=mid_channels,
-                            out_channels=out_channels_i,
-                            kernel_size=kernel_sizes[i],
-                            scale_factor=scale_factors[i],
-                            bn_epsilon=bn_epsilon))
+                        in_channels=mid_channels,
+                        out_channels=out_channels_i,
+                        kernel_size=kernel_sizes[i],
+                        scale_factor=scale_factors[i],
+                        size=in_size,
+                        bn_epsilon=bn_epsilon))
 
             self.preactiv = PreActivation(
                 in_channels=out_channels,
@@ -641,7 +663,9 @@ class SBStage(HybridBlock):
         List of flags for using residual in each ESP-block.
     se_reduction : int
         Squeeze reduction value (0 means no-se).
-    bn_epsilon : float, default 1e-5
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_epsilon : float
         Small float added to variance in Batch norm.
     """
     def __init__(self,
@@ -652,6 +676,7 @@ class SBStage(HybridBlock):
                  scale_factors_list,
                  use_residual_list,
                  se_reduction,
+                 in_size,
                  bn_epsilon,
                  **kwargs):
         super(SBStage, self).__init__(**kwargs)
@@ -679,6 +704,7 @@ class SBStage(HybridBlock):
                         kernel_sizes=kernel_sizes,
                         scale_factors=scale_factors,
                         use_residual=use_residual,
+                        in_size=((in_size[0] // 2, in_size[1] // 2) if in_size else None),
                         bn_epsilon=bn_epsilon))
                     in_channels = out_channels
 
@@ -761,6 +787,8 @@ class SBEncoder(HybridBlock):
         Scale factor for each residual block.
     use_residual_list : list of list of int
         List of flags for using residual in each residual block.
+    in_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
     bn_epsilon : float
         Small float added to variance in Batch norm.
     """
@@ -773,6 +801,7 @@ class SBEncoder(HybridBlock):
                  kernel_sizes_list,
                  scale_factors_list,
                  use_residual_list,
+                 in_size,
                  bn_epsilon,
                  **kwargs):
         super(SBEncoder, self).__init__(**kwargs)
@@ -792,6 +821,7 @@ class SBEncoder(HybridBlock):
                 scale_factors_list=scale_factors_list[0],
                 use_residual_list=use_residual_list[0],
                 se_reduction=1,
+                in_size=((in_size[0] // 4, in_size[1] // 4) if in_size else None),
                 bn_epsilon=bn_epsilon)
 
             in_channels = down_channels_list[0] + channels_list[0][-1]
@@ -803,6 +833,7 @@ class SBEncoder(HybridBlock):
                 scale_factors_list=scale_factors_list[1],
                 use_residual_list=use_residual_list[1],
                 se_reduction=2,
+                in_size=((in_size[0] // 8, in_size[1] // 8) if in_size else None),
                 bn_epsilon=bn_epsilon)
 
             in_channels = down_channels_list[1] + channels_list[1][-1]
@@ -824,20 +855,25 @@ class SBDecodeBlock(HybridBlock):
 
     Parameters:
     ----------
+    channels : int
+        Number of output classes.
+    out_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
     bn_epsilon : float
         Small float added to variance in Batch norm.
-    out_classes : int
-        Number of output classes.
     """
     def __init__(self,
+                 channels,
+                 out_size,
                  bn_epsilon,
-                 out_classes,
                  **kwargs):
         super(SBDecodeBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.up = InterpolationBlock(scale_factor=2)
+            self.up = InterpolationBlock(
+                scale_factor=2,
+                out_size=out_size)
             self.bn = nn.BatchNorm(
-                in_channels=out_classes,
+                in_channels=channels,
                 epsilon=bn_epsilon)
 
     def hybrid_forward(self, F, x, y):
@@ -857,24 +893,29 @@ class SBDecoder(HybridBlock):
     ----------
     dim2 : int
         Size of dimension #2.
-    bn_epsilon : float
-        Small float added to variance in Batch norm.
     classes : int
         Number of segmentation classes.
+    out_size : tuple of 2 int
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    bn_epsilon : float
+        Small float added to variance in Batch norm.
     """
     def __init__(self,
                  dim2,
-                 bn_epsilon,
                  classes,
+                 out_size,
+                 bn_epsilon,
                  **kwargs):
         super(SBDecoder, self).__init__(**kwargs)
         with self.name_scope():
             self.decode1 = SBDecodeBlock(
-                bn_epsilon=bn_epsilon,
-                out_classes=classes)
+                channels=classes,
+                out_size=((out_size[0] // 8, out_size[1] // 8) if out_size else None),
+                bn_epsilon=bn_epsilon)
             self.decode2 = SBDecodeBlock(
-                bn_epsilon=bn_epsilon,
-                out_classes=classes)
+                channels=classes,
+                out_size=((out_size[0] // 4, out_size[1] // 4) if out_size else None),
+                bn_epsilon=bn_epsilon)
             self.conv3c = conv1x1_block(
                 in_channels=dim2,
                 out_channels=classes,
@@ -888,7 +929,9 @@ class SBDecoder(HybridBlock):
                 output_padding=0,
                 in_channels=classes,
                 use_bias=False)
-            self.up = InterpolationBlock(scale_factor=2)
+            self.up = InterpolationBlock(
+                scale_factor=2,
+                out_size=out_size)
 
     def hybrid_forward(self, F, y3, y2, y1):
         y2 = self.conv3c(y2)
@@ -922,7 +965,7 @@ class SINet(HybridBlock):
         Small float added to variance in Batch norm.
     aux : bool, default False
         Whether to output an auxiliary result.
-    fixed_size : bool, default False
+    fixed_size : bool, default True
         Whether to expect fixed spatial size of input image.
     in_channels : int, default 3
         Number of input channels.
@@ -940,9 +983,9 @@ class SINet(HybridBlock):
                  dim2,
                  bn_epsilon,
                  aux=False,
-                 fixed_size=False,
+                 fixed_size=True,
                  in_channels=3,
-                 in_size=(512, 512),
+                 in_size=(1024, 2048),
                  classes=21,
                  **kwargs):
         super(SINet, self).__init__(**kwargs)
@@ -965,12 +1008,14 @@ class SINet(HybridBlock):
                 kernel_sizes_list=kernel_sizes_list,
                 scale_factors_list=scale_factors_list,
                 use_residual_list=use_residual_list,
+                in_size=(in_size if fixed_size else None),
                 bn_epsilon=bn_epsilon)
 
             self.decoder = SBDecoder(
                 dim2=dim2,
-                bn_epsilon=bn_epsilon,
-                classes=classes)
+                classes=classes,
+                out_size=(in_size if fixed_size else None),
+                bn_epsilon=bn_epsilon)
 
     def hybrid_forward(self, F, x):
         y3, y2, y1 = self.encoder(x)
@@ -1072,7 +1117,9 @@ def _test():
     import numpy as np
     import mxnet as mx
 
+    in_size = (1024, 2048)
     aux = False
+    fixed_size = True
     pretrained = False
 
     models = [
@@ -1081,12 +1128,13 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, aux=aux)
+        net = model(pretrained=pretrained, in_size=in_size, aux=aux, fixed_size=fixed_size)
 
         ctx = mx.cpu()
         if not pretrained:
             net.initialize(ctx=ctx)
 
+        net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():
@@ -1096,9 +1144,9 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sinet_cityscapes or weight_count == 119418)
 
-        x = mx.nd.zeros((14, 3, 1024, 2048), ctx=ctx)
+        x = mx.nd.zeros((14, 3, in_size[0], in_size[1]), ctx=ctx)
         y = net(x)
-        assert (y.shape == (14, 19, 1024, 2048))
+        assert (y.shape == (14, 19, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

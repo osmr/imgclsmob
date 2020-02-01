@@ -648,7 +648,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 96.17 | 71.72 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.297/pspnet_resnetd101b_cityscapes-7172-0a6efb49.pth.log)) |
-| SINet | - | 94.08 | 61.72 | 119,418 | 177.46M | From [clovaai/c3_sinet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.436/sinet_cityscapes-6172-8ecd1414.pth.log)) |
+| SINet | - | 94.08 | 61.72 | 119,418 | 1,419.90M | From [clovaai/c3_sinet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.437/sinet_cityscapes-6172-8ecd1414.pth.log)) |
 
 ### COCO
 

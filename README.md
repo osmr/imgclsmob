@@ -149,9 +149,9 @@ Some remarks:
 
 Some remarks:
 - `a/A` corresponds to Pascal VOC2012.
-- `b/B` corresponds to Pascal ADE20K.
-- `c/C` corresponds to Pascal Cityscapes.
-- `d/D` corresponds to Pascal COCO.
+- `b/B` corresponds to ADE20K.
+- `c/C` corresponds to Cityscapes.
+- `d/D` corresponds to COCO.
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

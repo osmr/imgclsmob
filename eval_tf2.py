@@ -121,7 +121,7 @@ def parse_args():
         "--dataset",
         type=str,
         default="ImageNet1K",
-        help="dataset name. options are ImageNet1K, CIFAR10")
+        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN")
     parser.add_argument(
         "--work-dir",
         type=str,

@@ -16,7 +16,7 @@ class CUB200_2011(GetterDataset):
 
     Parameters
     ----------
-    root : str, default '~/.torch/datasets/CUB_200_2011'
+    root : str, default '~/.chainer/datasets/CUB_200_2011'
         Path to the folder stored the dataset.
     mode : str, default 'train'
         'train', 'val', or 'test'.
@@ -24,7 +24,7 @@ class CUB200_2011(GetterDataset):
         A function that takes data and transforms it.
     """
     def __init__(self,
-                 root=os.path.join("~", ".torch", "datasets", "CUB_200_2011"),
+                 root=os.path.join("~", ".chainer", "datasets", "CUB_200_2011"),
                  mode="train",
                  transform=None):
         super(CUB200_2011, self).__init__()

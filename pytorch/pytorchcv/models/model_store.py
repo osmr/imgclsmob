@@ -81,7 +81,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('seresnet26', '0824', '64fc8759c5bb9b9b40b2e33a46420ee22ae268c9', 'v0.0.363', 'SE-ResNet-26', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnetbc26b', '0703', 'b98d9d6afca4d79d0347001542162b9fe4071d39', 'v0.0.366', 'SE-ResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnetbc38b', '0595', '03671c05f5f684b44085383b7b89a8b44a7524fe', 'v0.0.374', 'SE-ResNet-BC-38b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('seresnet50', '0640', '8820f2af62421ce2e1df989d6e0ce7916c78ff86', 'v0.0.11', 'SE-ResNet-50', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
+    ('seresnet50', '0575', '004bfde422c860c4f11b1e1190bb5a8db477d939', 'v0.0.441', 'SE-ResNet-50', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet50b', '0539', '459e6871e944d1c7102ee9c055ea428b8d9a168c', 'v0.0.387', 'SE-ResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnet101', '0589', '5e6e831b7518b9b8a049dd60ed1ff82ae75ff55e', 'v0.0.11', 'SE-ResNet-101', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('seresnet152', '0576', '814cf72e0deeab530332b16fb9b609e574afec61', 'v0.0.11', 'SE-ResNet-152', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa

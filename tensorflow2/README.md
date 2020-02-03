@@ -161,7 +161,7 @@ Some remarks:
 | SE-ResNet-26 | 25.42 | 8.07 | 18,093,852 | 2,747.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnet26-0807-5178b3b1.tf2.h5.log)) |
 | SE-ResNet-BC-26b | 23.39 | 6.84 | 17,395,976 | 2,359.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnetbc26b-0684-1460a381.tf2.h5.log)) |
 | SE-ResNet-BC-38b | 21.43 | 5.75 | 24,026,616 | 3,238.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnetbc38b-0575-18fcfcc1.tf2.h5.log)) |
-| SE-ResNet-50 | 22.52 | 6.42 | 28,088,024 | 3,880.49M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnet50-0642-21b366af.tf2.h5.log)) |
+| SE-ResNet-50 | 21.09 | 5.60 | 28,088,024 | 3,883.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.441/seresnet50-0560-f1b84c8d.tf2.h5.log)) |
 | SE-ResNet-50b | 20.58 | 5.33 | 28,088,024 | 4,115.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnet50b-0533-256002c3.tf2.h5.log)) |
 | SE-ResNet-101 | 21.94 | 5.89 | 49,326,872 | 7,602.76M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnet101-0589-2a22ba87.tf2.h5.log)) |
 | SE-ResNet-152 | 21.47 | 5.76 | 66,821,848 | 11,328.52M | From [Cadene/pretrained...pytorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/seresnet152-0576-8023259a.tf2.h5.log)) |
@@ -347,6 +347,39 @@ Some remarks:
 | ResNet-542(BN) | 3.43 | 5,599,066 | 833.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_cifar10-0343-c31829d4.tf2.h5.log)) |
 | ResNet-1001 | 3.28 | 10,328,602 | 1,536.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_cifar10-0328-552ab287.tf2.h5.log)) |
 | ResNet-1202 | 3.53 | 19,424,026 | 2,857.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1202_cifar10-0353-3559a943.tf2.h5.log)) |
+| PreResNet-20 | 6.51 | 272,282 | 41.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet20_cifar10-0651-d3e7771e.tf2.h5.log)) |
+| PreResNet-56 | 4.49 | 855,578 | 127.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet56_cifar10-0449-b4bfdaa8.tf2.h5.log)) |
+| PreResNet-110 | 3.86 | 1,730,522 | 255.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet110_cifar10-0386-287a4b0c.tf2.h5.log)) |
+| PreResNet-164(BN) | 3.64 | 1,703,258 | 255.08M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet164bn_cifar10-0364-29a459fa.tf2.h5.log)) |
+| PreResNet-272(BN) | 3.25 | 2,816,090 | 420.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet272bn_cifar10-0325-5bacdc95.tf2.h5.log)) |
+| PreResNet-542(BN) | 3.14 | 5,598,170 | 833.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet542bn_cifar10-0314-d8324d47.tf2.h5.log)) |
+| PreResNet-1001 | 2.65 | 10,327,706 | 1,536.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet1001_cifar10-0265-978844c1.tf2.h5.log)) |
+| PreResNet-1202 | 3.39 | 19,423,834 | 2,857.14M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet1202_cifar10-0339-ab04c456.tf2.h5.log)) |
+| ResNeXt-20 (1x64d) | 4.33 | 3,446,602 | 538.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_1x64d_cifar10-0433-e0ab8667.tf2.h5.log)) |
+| ResNeXt-20 (2x32d) | 4.53 | 2,672,458 | 425.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x32d_cifar10-0453-7aa966dd.tf2.h5.log)) |
+| ResNeXt-20 (4x16d) | 4.70 | 2,285,386 | 368.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x16d_cifar10-0470-333e834d.tf2.h5.log)) |
+| ResNeXt-20 (8x8d) | 4.66 | 2,091,850 | 340.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x8d_cifar10-0466-1dbd9f5e.tf2.h5.log)) |
+| ResNeXt-20 (16x4d) | 4.04 | 1,995,082 | 326.10M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x4d_cifar10-0404-c6719935.tf2.h5.log)) |
+| ResNeXt-20 (32x2d) | 4.61 | 1,946,698 | 319.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x2d_cifar10-0461-b05d3491.tf2.h5.log)) |
+| ResNeXt-20 (64x1d) | 4.93 | 1,922,506 | 315.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x1d_cifar10-0493-a13300ce.tf2.h5.log)) |
+| ResNeXt-20 (2x64d) | 4.03 | 6,198,602 | 987.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x64d_cifar10-0403-367377ed.tf2.h5.log)) |
+| ResNeXt-20 (4x32d) | 3.73 | 4,650,314 | 761.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x32d_cifar10-0373-e4aa1b0d.tf2.h5.log)) |
+| ResNeXt-20 (8x16d) | 4.04 | 3,876,170 | 648.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x16d_cifar10-0404-5329db5f.tf2.h5.log)) |
+| ResNeXt-20 (16x8d) | 3.94 | 3,489,098 | 591.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x8d_cifar10-0394-cf7c675c.tf2.h5.log)) |
+| ResNeXt-20 (32x4d) | 4.20 | 3,295,562 | 563.47M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x4d_cifar10-0420-6011e9e9.tf2.h5.log)) |
+| ResNeXt-20 (64x2d) | 4.38 | 3,198,794 | 549.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x2d_cifar10-0438-3846d7a7.tf2.h5.log)) |
+| ResNeXt-56 (1x64d) | 2.87 | 9,317,194 | 1,399.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_1x64d_cifar10-0287-5da5fe18.tf2.h5.log)) |
+| ResNeXt-56 (2x32d) | 3.01 | 6,994,762 | 1,059.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_2x32d_cifar10-0301-54d6f2df.tf2.h5.log)) |
+| ResNeXt-56 (4x16d) | 3.11 | 5,833,546 | 889.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_4x16d_cifar10-0311-766ab89f.tf2.h5.log)) |
+| ResNeXt-56 (8x8d) | 3.07 | 5,252,938 | 805.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_8x8d_cifar10-0307-685eab39.tf2.h5.log)) |
+| ResNeXt-56 (16x4d) | 3.12 | 4,962,634 | 762.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_16x4d_cifar10-0312-930e5d5b.tf2.h5.log)) |
+| ResNeXt-56 (32x2d) | 3.14 | 4,817,482 | 741.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_32x2d_cifar10-0314-9e387e2e.tf2.h5.log)) |
+| ResNeXt-56 (64x1d) | 3.41 | 4,744,906 | 730.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_64x1d_cifar10-0341-bc746947.tf2.h5.log)) |
+| ResNeXt-29 (32x4d) | 3.15 | 4,775,754 | 780.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x2d_cifar10-0438-3846d7a7.tf2.h5.log)) |
+| ResNeXt-29 (16x64d) | 2.41 | 68,155,210 | 10,709.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_cifar10-0241-712e4744.tf2.h5.log)) |
+| ResNeXt-272 (1x64d) | 2.55 | 44,540,746 | 6,565.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_cifar10-0255-6efe448a.tf2.h5.log)) |
+| ResNeXt-272 (2x32d) | 2.74 | 32,928,586 | 4,867.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_cifar10-0274-4e35f994.tf2.h5.log)) |
+
 
 ### CIFAR-100
 
@@ -360,6 +393,37 @@ Some remarks:
 | ResNet-542(BN) | 19.32 | 5,622,196 | 833.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_cifar100-1932-2db913a6.tf2.h5.log)) |
 | ResNet-1001 | 19.79 | 10,351,732 | 1,536.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_cifar100-1979-75c8acac.tf2.h5.log)) |
 | ResNet-1202 | 21.56 | 19,429,876 | 2,857.17M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1202_cifar100-2156-28fcf786.tf2.h5.log)) |
+| PreResNet-20 | 30.22 | 278,132 | 41.28M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet20_cifar100-3022-447255f8.tf2.h5.log)) |
+| PreResNet-56 | 25.05 | 861,428 | 127.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet56_cifar100-2505-180fc208.tf2.h5.log)) |
+| PreResNet-110 | 22.67 | 1,736,372 | 255.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet110_cifar100-2267-ab677c09.tf2.h5.log)) |
+| PreResNet-164(BN) | 20.18 | 1,726,388 | 255.10M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet164bn_cifar100-2018-c7649701.tf2.h5.log)) |
+| PreResNet-272(BN) | 19.63 | 2,839,220 | 420.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet272bn_cifar100-1963-22e09198.tf2.h5.log)) |
+| PreResNet-542(BN) | 18.71 | 5,621,300 | 833.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet542bn_cifar100-1871-703875c6.tf2.h5.log)) |
+| PreResNet-1001 | 18.41 | 10,350,836 | 1,536.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet1001_cifar100-1841-7481e79c.tf2.h5.log)) |
+| ResNeXt-20 (1x64d) | 21.97 | 3,538,852 | 538.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_1x64d_cifar100-2197-413945af.tf2.h5.log)) |
+| ResNeXt-20 (2x32d) | 22.55 | 2,764,708 | 425.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x32d_cifar100-2255-bf34e56a.tf2.h5.log)) |
+| ResNeXt-20 (4x16d) | 23.04 | 2,377,636 | 368.65M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x16d_cifar100-2304-fa8d4e06.tf2.h5.log)) |
+| ResNeXt-20 (8x8d) | 22.82 | 2,184,100 | 340.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x8d_cifar100-2282-51922108.tf2.h5.log)) |
+| ResNeXt-20 (16x4d) | 22.82 | 2,087,332 | 326.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x4d_cifar100-2282-e800aabb.tf2.h5.log)) |
+| ResNeXt-20 (32x2d) | 21.73 | 2,038,948 | 319.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x2d_cifar100-2322-2def8cc2.tf2.h5.log)) |
+| ResNeXt-20 (64x1d) | 23.53 | 2,014,756 | 315.58M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x1d_cifar100-2353-91695baa.tf2.h5.log)) |
+| ResNeXt-20 (2x64d) | 20.60 | 6,290,852 | 988.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x64d_cifar100-2060-6eef33bc.tf2.h5.log)) |
+| ResNeXt-20 (4x32d) | 21.31 | 4,742,564 | 761.66M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x32d_cifar100-2131-edabd5da.tf2.h5.log)) |
+| ResNeXt-20 (8x16d) | 21.72 | 3,968,420 | 648.46M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x16d_cifar100-2172-3665fda7.tf2.h5.log)) |
+| ResNeXt-20 (16x8d) | 21.73 | 3,581,348 | 591.86M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x8d_cifar100-2173-0a330298.tf2.h5.log)) |
+| ResNeXt-20 (32x4d) | 22.13 | 3,387,812 | 563.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x4d_cifar100-2213-9508c15d.tf2.h5.log)) |
+| ResNeXt-20 (64x2d) | 22.35 | 3,291,044 | 549.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x2d_cifar100-2235-e4a559cc.tf2.h5.log)) |
+| ResNeXt-56 (1x64d) | 18.25 | 9,409,444 | 1,399.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_1x64d_cifar100-1825-72700951.tf2.h5.log)) |
+| ResNeXt-56 (2x32d) | 17.86 | 7,087,012 | 1,059.81M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_2x32d_cifar100-1786-6639c30d.tf2.h5.log)) |
+| ResNeXt-56 (4x16d) | 18.09 | 5,925,796 | 890.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_4x16d_cifar100-1809-61b41c3b.tf2.h5.log)) |
+| ResNeXt-56 (8x8d) | 18.06 | 5,345,188 | 805.10M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_8x8d_cifar100-1806-f3f80382.tf2.h5.log)) |
+| ResNeXt-56 (16x4d) | 18.24 | 5,054,884 | 762.65M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_16x4d_cifar100-1824-667ba183.tf2.h5.log)) |
+| ResNeXt-56 (32x2d) | 18.60 | 4,909,732 | 741.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_32x2d_cifar100-1860-7a236896.tf2.h5.log)) |
+| ResNeXt-56 (64x1d) | 18.16 | 4,837,156 | 730.81M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_64x1d_cifar100-1816-06c6c7a0.tf2.h5.log)) |
+| ResNeXt-29 (32x4d) | 19.50 | 4,868,004 | 780.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_32x4d_cifar100-1950-e9979139.tf2.h5.log)) |
+| ResNeXt-29 (16x64d) | 16.93 | 68,247,460 | 10,709.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_cifar100-1693-2df09272.tf2.h5.log)) |
+| ResNeXt-272 (1x64d) | 19.11 | 44,632,996 | 6,565.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_cifar100-1911-e9275c94.tf2.h5.log)) |
+| ResNeXt-272 (2x32d) | 18.34 | 33,020,836 | 4,867.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_cifar100-1834-274ef607.tf2.h5.log)) |
 
 ### SVHN
 
@@ -372,6 +436,36 @@ Some remarks:
 | ResNet-272(BN) | 2.43 | 2,816,986 | 420.61M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet272bn_svhn-0243-e2a8e355.tf2.h5.log)) |
 | ResNet-542(BN) | 2.34 | 5,599,066 | 833.87M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet542bn_svhn-0234-0d6759e7.tf2.h5.log)) |
 | ResNet-1001 | 2.41 | 10,328,602 | 1,536.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.438/resnet1001_svhn-0241-c9a01550.tf2.h5.log)) |
+| PreResNet-20 | 3.22 | 272,282 | 41.27M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet20_svhn-0322-6dcae612.tf2.h5.log)) |
+| PreResNet-56 | 2.80 | 855,578 | 127.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet56_svhn-0280-6e074c73.tf2.h5.log)) |
+| PreResNet-110 | 2.79 | 1,730,522 | 255.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet110_svhn-0279-226a0b34.tf2.h5.log)) |
+| PreResNet-164(BN) | 2.58 | 1,703,258 | 255.08M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet164bn_svhn-0258-2307c36f.tf2.h5.log)) |
+| PreResNet-272(BN) | 2.34 | 2,816,090 | 420.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet272bn_svhn-0234-3451d5fb.tf2.h5.log)) |
+| PreResNet-542(BN) | 2.36 | 5,598,170 | 833.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.439/preresnet542bn_svhn-0236-5ca07592.tf2.h5.log)) |
+| ResNeXt-20 (1x64d) | 2.98 | 3,446,602 | 538.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_1x64d_svhn-0298-105736c8.tf2.h5.log)) |
+| ResNeXt-20 (2x32d) | 2.96 | 2,672,458 | 425.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x32d_svhn-0296-b61e1395.tf2.h5.log)) |
+| ResNeXt-20 (4x16d) | 3.17 | 2,285,386 | 368.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x16d_svhn-0317-cab6d9fd.tf2.h5.log)) |
+| ResNeXt-20 (8x8d) | 3.18 | 2,091,850 | 340.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x8d_svhn-0318-6ef55252.tf2.h5.log)) |
+| ResNeXt-20 (16x4d) | 3.21 | 1,995,082 | 326.10M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x4d_svhn-0321-77a670a8.tf2.h5.log)) |
+| ResNeXt-20 (32x2d) | 3.27 | 1,946,698 | 319.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x2d_svhn-0327-0c099194.tf2.h5.log)) |
+| ResNeXt-20 (64x1d) | 3.42 | 1,922,506 | 315.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x1d_svhn-0342-a3bad459.tf2.h5.log)) |
+| ResNeXt-20 (2x64d) | 2.83 | 6,198,602 | 987.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_2x64d_svhn-0283-dedfbac2.tf2.h5.log)) |
+| ResNeXt-20 (4x32d) | 2.98 | 4,650,314 | 761.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_4x32d_svhn-0298-82b75cbb.tf2.h5.log)) |
+| ResNeXt-20 (8x16d) | 3.01 | 3,876,170 | 648.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_8x16d_svhn-0301-d1a547e4.tf2.h5.log)) |
+| ResNeXt-20 (16x8d) | 2.93 | 3,489,098 | 591.77M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_16x8d_svhn-0293-4ebac276.tf2.h5.log)) |
+| ResNeXt-20 (32x4d) | 3.09 | 3,295,562 | 563.47M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_32x4d_svhn-0309-c8a843e1.tf2.h5.log)) |
+| ResNeXt-20 (64x2d) | 3.14 | 3,198,794 | 549.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext20_64x2d_svhn-0314-c755e25d.tf2.h5.log)) |
+| ResNeXt-56 (1x64d) | 2.42 | 9,317,194 | 1,399.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_1x64d_svhn-0242-dd7ac31e.tf2.h5.log)) |
+| ResNeXt-56 (2x32d) | 2.46 | 6,994,762 | 1,059.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_2x32d_svhn-0246-61524d8a.tf2.h5.log)) |
+| ResNeXt-56 (4x16d) | 2.44 | 5,833,546 | 889.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_4x16d_svhn-0244-b7ab2469.tf2.h5.log)) |
+| ResNeXt-56 (8x8d) | 2.47 | 5,252,938 | 805.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_8x8d_svhn-0247-85692d77.tf2.h5.log)) |
+| ResNeXt-56 (16x4d) | 2.56 | 4,962,634 | 762.56M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_16x4d_svhn-0256-86f327a9.tf2.h5.log)) |
+| ResNeXt-56 (32x2d) | 2.53 | 4,817,482 | 741.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_32x2d_svhn-0253-b93a0535.tf2.h5.log)) |
+| ResNeXt-56 (64x1d) | 2.55 | 4,744,906 | 730.72M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext56_64x1d_svhn-0255-9e9e3cc2.tf2.h5.log)) |
+| ResNeXt-29 (32x4d) | 2.80 | 4,775,754 | 780.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_32x4d_svhn-0280-de6cba99.tf2.h5.log)) |
+| ResNeXt-29 (16x64d) | 2.68 | 68,155,210 | 10,709.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_svhn-0268-c929fada.tf2.h5.log)) |
+| ResNeXt-272 (1x64d) | 2.34 | 44,540,746 | 6,565.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_svhn-0234-4d348e9e.tf2.h5.log)) |
+| ResNeXt-272 (2x32d) | 2.44 | 32,928,586 | 4,867.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_svhn-0244-f7923965.tf2.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

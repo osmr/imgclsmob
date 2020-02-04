@@ -5,6 +5,7 @@
 import os
 import numpy as np
 import pandas as pd
+import threading
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
 from .cls_dataset import img_normalization
 from .imagenet1k_cls_dataset import ImageNet1KMetaInfo
@@ -30,7 +31,8 @@ class CUBDirectoryIterator(DirectoryIterator):
                  follow_links=False,
                  subset=None,
                  interpolation='nearest',
-                 dtype='float32'):
+                 dtype='float32',
+                 mode="val"):
         super(CUBDirectoryIterator, self).set_processing_attrs(
             image_data_generator,
             target_size,
@@ -41,8 +43,6 @@ class CUBDirectoryIterator(DirectoryIterator):
             save_format,
             subset,
             interpolation)
-
-        mode = "val"
 
         root_dir_path = os.path.expanduser(directory)
         assert os.path.exists(root_dir_path)
@@ -100,20 +100,19 @@ class CUBDirectoryIterator(DirectoryIterator):
         self.dtype = dtype
         self._filepaths = [os.path.join(self.images_dir_path, image_file_name) for image_file_name in image_file_names]
         self.classes = [int(class_id) for class_id in class_ids]
-        self.samples = len(class_ids)
 
-        super(CUBDirectoryIterator, self).__init__(
-            self.samples,
-            batch_size,
-            shuffle,
-            seed)
+        self.n = len(class_ids)
+        self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.batch_index = 0
+        self.total_batches_seen = 0
+        self.lock = threading.Lock()
+        self.index_array = None
+        self.index_generator = self._flow_index()
 
 
 class CubImageDataGenerator(ImageDataGenerator):
-
-    def __init__(self,
-                 **kwargs):
-        super(CubImageDataGenerator, self).__init__(**kwargs)
 
     def flow_from_directory(self,
                             directory,
@@ -129,7 +128,8 @@ class CubImageDataGenerator(ImageDataGenerator):
                             save_format='png',
                             follow_links=False,
                             subset=None,
-                            interpolation='nearest'):
+                            interpolation='nearest',
+                            mode="val"):
         return CUBDirectoryIterator(
             directory,
             self,
@@ -146,8 +146,8 @@ class CubImageDataGenerator(ImageDataGenerator):
             save_format=save_format,
             follow_links=follow_links,
             subset=subset,
-            interpolation=interpolation
-        )
+            interpolation=interpolation,
+            mode=mode)
 
 
 class CUB200MetaInfo(ImageNet1KMetaInfo):
@@ -169,6 +169,9 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
         self.train_transform = cub200_train_transform
         self.val_transform = cub200_val_transform
         self.test_transform = cub200_val_transform
+        self.train_generator = cub200_train_generator
+        self.val_generator = cub200_val_generator
+        self.test_generator = cub200_val_generator
         self.net_extra_kwargs = {"aux": False}
         self.load_ignore_extra = True
 
@@ -243,3 +246,67 @@ def cub200_val_transform(ds_metainfo,
             std_rgb=ds_metainfo.std_rgb)),
         data_format=data_format)
     return data_generator
+
+
+def cub200_train_generator(data_generator,
+                           ds_metainfo,
+                           batch_size):
+    """
+    Create image generator for training subset.
+
+    Parameters:
+    ----------
+    data_generator : ImageDataGenerator
+        Image transform sequence.
+    ds_metainfo : DatasetMetaInfo
+        ImageNet-1K dataset metainfo.
+    batch_size : int
+        Batch size.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
+    root = ds_metainfo.root_dir_path
+    generator = data_generator.flow_from_directory(
+        directory=root,
+        target_size=ds_metainfo.input_image_size,
+        class_mode="binary",
+        batch_size=batch_size,
+        shuffle=False,
+        interpolation=ds_metainfo.interpolation_msg,
+        mode="val")
+    return generator
+
+
+def cub200_val_generator(data_generator,
+                         ds_metainfo,
+                         batch_size):
+    """
+    Create image generator for validation subset.
+
+    Parameters:
+    ----------
+    data_generator : ImageDataGenerator
+        Image transform sequence.
+    ds_metainfo : DatasetMetaInfo
+        ImageNet-1K dataset metainfo.
+    batch_size : int
+        Batch size.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
+    root = ds_metainfo.root_dir_path
+    generator = data_generator.flow_from_directory(
+        directory=root,
+        target_size=ds_metainfo.input_image_size,
+        class_mode="binary",
+        batch_size=batch_size,
+        shuffle=False,
+        interpolation=ds_metainfo.interpolation_msg,
+        mode="val")
+    return generator

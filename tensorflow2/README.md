@@ -379,7 +379,34 @@ Some remarks:
 | ResNeXt-29 (16x64d) | 2.41 | 68,155,210 | 10,709.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_cifar10-0241-712e4744.tf2.h5.log)) |
 | ResNeXt-272 (1x64d) | 2.55 | 44,540,746 | 6,565.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_cifar10-0255-6efe448a.tf2.h5.log)) |
 | ResNeXt-272 (2x32d) | 2.74 | 32,928,586 | 4,867.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_cifar10-0274-4e35f994.tf2.h5.log)) |
-
+| SE-ResNet-20 | 6.01 | 274,847 | 41.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet20_cifar10-0601-2f392e4a.tf2.h5.log)) |
+| SE-ResNet-56 | 4.13 | 862,889 | 127.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet56_cifar10-0413-0224e930.tf2.h5.log)) |
+| SE-ResNet-110 | 3.63 | 1,744,952 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet110_cifar10-0363-4c28f93f.tf2.h5.log)) |
+| SE-ResNet-164(BN) | 3.39 | 1,906,258 | 256.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet164bn_cifar10-0339-64d05154.tf2.h5.log)) |
+| SE-ResNet-272(BN) | 3.39 | 3,153,826 | 422.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet272bn_cifar10-0339-baa561b6.tf2.h5.log)) |
+| SE-ResNet-542(BN) | 3.47 | 6,272,746 | 838.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet542bn_cifar10-0347-e95ebdb9.tf2.h5.log)) |
+| SE-PreResNet-20 | 6.18 | 274,559 | 41.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet20_cifar10-0618-22217b32.tf2.h5.log)) |
+| SE-PreResNet-56 | 4.51 | 862,601 | 127.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet56_cifar10-0451-32637db5.tf2.h5.log)) |
+| SE-PreResNet-110 | 4.54 | 1,744,664 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet110_cifar10-0454-e317c569.tf2.h5.log)) |
+| SE-PreResNet-164(BN) | 3.73 | 1,904,882 | 256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet164bn_cifar10-0373-253c0430.tf2.h5.log)) |
+| SE-PreResNet-272(BN) | 3.39 | 3,152,450 | 422.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet272bn_cifar10-0339-1ca0bed3.tf2.h5.log)) |
+| SE-PreResNet-542(BN) | 3.08 | 6,271,370 | 837.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet542bn_cifar10-0309-7764e8bd.tf2.h5.log)) |
+| PyramidNet-110 (a=48) | 3.72 | 1,772,706 | 408.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a48_cifar10-0372-3b6ab160.tf2.h5.log)) |
+| PyramidNet-110 (a=84) | 2.98 | 3,904,446 | 778.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a84_cifar10-0298-bf303f34.tf2.h5.log)) |
+| PyramidNet-110 (a=270) | 2.51 | 28,485,477 | 4,730.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a270_cifar10-0251-983d9983.tf2.h5.log)) |
+| PyramidNet-164 (a=270, BN) | 2.42 | 27,216,021 | 4,608.81M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet164_a270_bn_cifar10-0242-aa879193.tf2.h5.log)) |
+| PyramidNet-200 (a=240, BN) | 2.44 | 26,752,702 | 4,563.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet200_a240_bn_cifar10-0244-c269bf7d.tf2.h5.log)) |
+| PyramidNet-236 (a=220, BN) | 2.47 | 26,969,046 | 4,631.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet236_a220_bn_cifar10-0247-26aac5d0.tf2.h5.log)) |
+| PyramidNet-272 (a=200, BN) | 2.39 | 26,210,842 | 4,541.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet272_a200_bn_cifar10-0239-b57f64f1.tf2.h5.log)) |
+| DenseNet-40 (k=12) | 5.61 | 599,050 | 210.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_cifar10-0561-e6e20ebf.tf2.h5.log)) |
+| DenseNet-BC-40 (k=12) | 6.43 | 176,122 | 74.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_bc_cifar10-0643-58950791.tf2.h5.log)) |
+| DenseNet-BC-40 (k=24) | 4.52 | 690,346 | 293.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k24_bc_cifar10-0452-61a7fe9c.tf2.h5.log)) |
+| DenseNet-BC-40 (k=36) | 4.04 | 1,542,682 | 654.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k36_bc_cifar10-0404-ce27624f.tf2.h5.log)) |
+| DenseNet-100 (k=12) | 3.66 | 4,068,490 | 1,353.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_cifar10-fc483c0b.tf2.h5.log)) |
+| DenseNet-100 (k=24) | 3.13 | 16,114,138 | 5,354.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k24_cifar10-0313-7f9ee9b3.tf2.h5.log)) |
+| DenseNet-BC-100 (k=12) | 4.16 | 769,162 | 298.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_bc_cifar10-0416-66beb8fc.tf2.h5.log)) |
+| DenseNet-BC-190 (k=40) | 2.52 | 25,624,430 | 9,400.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet190_k40_bc_cifar10-0252-9cc5cfcb.tf2.h5.log)) |
+| DenseNet-BC-250 (k=24) | 2.67 | 15,324,406 | 5,519.54M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet250_k24_bc_cifar10-0267-3217a1b3.tf2.h5.log)) |
 
 ### CIFAR-100
 
@@ -424,6 +451,33 @@ Some remarks:
 | ResNeXt-29 (16x64d) | 16.93 | 68,247,460 | 10,709.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_cifar100-1693-2df09272.tf2.h5.log)) |
 | ResNeXt-272 (1x64d) | 19.11 | 44,632,996 | 6,565.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_cifar100-1911-e9275c94.tf2.h5.log)) |
 | ResNeXt-272 (2x32d) | 18.34 | 33,020,836 | 4,867.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_cifar100-1834-274ef607.tf2.h5.log)) |
+| SE-ResNet-20 | 28.54 | 280,697 | 41.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet20_cifar100-2854-598b5858.tf2.h5.log)) |
+| SE-ResNet-56 | 22.94 | 868,739 | 127.07M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet56_cifar100-2294-9c86ec99.tf2.h5.log)) |
+| SE-ResNet-110 | 20.86 | 1,750,802 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet110_cifar100-2086-6435b022.tf2.h5.log)) |
+| SE-ResNet-164(BN) | 19.95 | 1,929,388 | 256.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet164bn_cifar100-1995-121a777a.tf2.h5.log)) |
+| SE-ResNet-272(BN) | 19.07 | 3,176,956 | 422.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet272bn_cifar100-1907-a29e50de.tf2.h5.log)) |
+| SE-ResNet-542(BN) | 18.87 | 6,295,876 | 838.03M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet542bn_cifar100-1887-ddc4d5c8.tf2.h5.log)) |
+| SE-PreResNet-20 | 28.31 | 280,409 | 41.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet20_cifar100-2831-e8dab8b8.tf2.h5.log)) |
+| SE-PreResNet-56 | 23.05 | 868,451 | 127.21M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet56_cifar100-2305-aea4d90b.tf2.h5.log)) |
+| SE-PreResNet-110 | 22.61 | 1,750,514 | 255.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet110_cifar100-2261-19a8d4a1.tf2.h5.log)) |
+| SE-PreResNet-164(BN) | 20.05 | 1,928,012 | 256.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet164bn_cifar100-2005-9c3ed250.tf2.h5.log)) |
+| SE-PreResNet-272(BN) | 19.13 | 3,175,580 | 422.47M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet272bn_cifar100-1913-eb75217f.tf2.h5.log)) |
+| SE-PreResNet-542(BN) | 19.45 | 6,294,500 | 837.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet542bn_cifar100-1945-969d2bf0.tf2.h5.log)) |
+| PyramidNet-110 (a=48) | 20.95 | 1,778,556 | 408.38M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a48_cifar100-2095-3490690a.tf2.h5.log)) |
+| PyramidNet-110 (a=84) | 18.87 | 3,913,536 | 778.16M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a84_cifar100-1887-85789d68.tf2.h5.log)) |
+| PyramidNet-110 (a=270) | 17.10 | 28,511,307 | 4,730.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a270_cifar100-1710-cc58021f.tf2.h5.log)) |
+| PyramidNet-164 (a=270, BN) | 16.70 | 27,319,071 | 4,608.91M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet164_a270_bn_cifar100-1670-25ddf056.tf2.h5.log)) |
+| PyramidNet-200 (a=240, BN) | 16.09 | 26,844,952 | 4,563.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet200_a240_bn_cifar100-1609-d2b16822.tf2.h5.log)) |
+| PyramidNet-236 (a=220, BN) | 16.34 | 27,054,096 | 4,631.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet236_a220_bn_cifar100-1634-37d5b197.tf2.h5.log)) |
+| PyramidNet-272 (a=200, BN) | 16.19 | 26,288,692 | 4,541.43M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet272_a200_bn_cifar100-1619-5c233384.tf2.h5.log)) |
+| DenseNet-40 (k=12) | 24.90 | 622,360 | 210.82M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_cifar100-2490-ef38ff65.tf2.h5.log)) |
+| DenseNet-BC-40 (k=12) | 28.41 | 188,092 | 74.90M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_bc_cifar100-2841-c7fbb0f4.tf2.h5.log)) |
+| DenseNet-BC-40 (k=24) | 22.67 | 714,196 | 293.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k24_bc_cifar100-2267-b3878e82.tf2.h5.log)) |
+| DenseNet-BC-40 (k=36) | 20.50 | 1,578,412 | 654.64M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k36_bc_cifar100-2050-045ae83a.tf2.h5.log)) |
+| DenseNet-100 (k=12) | 19.65 | 4,129,600 | 1,353.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_cifar100-1965-4f0083d6.tf2.h5.log)) |
+| DenseNet-100 (k=24) | 18.08 | 16,236,268 | 5,354.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k24_cifar100-1808-b0842c59.tf2.h5.log)) |
+| DenseNet-BC-100 (k=12) | 21.19 | 800,032 | 298.48M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_bc_cifar100-2119-c1b857d5.tf2.h5.log)) |
+| DenseNet-BC-250 (k=24) | 17.39 | 15,480,556 | 5,519.69M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet250_k24_bc_cifar100-1739-02d967b5.tf2.h5.log)) |
 
 ### SVHN
 
@@ -466,6 +520,30 @@ Some remarks:
 | ResNeXt-29 (16x64d) | 2.68 | 68,155,210 | 10,709.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext29_16x64d_svhn-0268-c929fada.tf2.h5.log)) |
 | ResNeXt-272 (1x64d) | 2.34 | 44,540,746 | 6,565.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_1x64d_svhn-0234-4d348e9e.tf2.h5.log)) |
 | ResNeXt-272 (2x32d) | 2.44 | 32,928,586 | 4,867.11M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.440/resnext272_2x32d_svhn-0244-f7923965.tf2.h5.log)) |
+| SE-ResNet-20 | 3.23 | 274,847 | 41.34M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet20_svhn-0323-ef43ce80.tf2.h5.log)) |
+| SE-ResNet-56 | 2.64 | 862,889 | 127.19M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet56_svhn-0264-a8fcc570.tf2.h5.log)) |
+| SE-ResNet-110 | 2.35 | 1,744,952 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet110_svhn-0235-57751ac7.tf2.h5.log)) |
+| SE-ResNet-164(BN) | 2.45 | 1,906,258 | 256.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet164bn_svhn-0245-a19e2e88.tf2.h5.log)) |
+| SE-ResNet-272(BN) | 2.38 | 3,153,826 | 422.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet272bn_svhn-0238-918ee0de.tf2.h5.log)) |
+| SE-ResNet-542(BN) | 2.26 | 6,272,746 | 838.01M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.442/seresnet542bn_svhn-0226-5ec784aa.tf2.h5.log)) |
+| SE-PreResNet-20 | 3.24 | 274,559 | 41.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet20_svhn-0324-e7dbcc96.tf2.h5.log)) |
+| SE-PreResNet-56 | 2.71 | 862,601 | 127.20M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet56_svhn-0271-ea024196.tf2.h5.log)) |
+| SE-PreResNet-110 | 2.59 | 1,744,664 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet110_svhn-0259-6291c548.tf2.h5.log)) |
+| SE-PreResNet-164(BN) | 2.56 | 1,904,882 | 256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet164bn_svhn-0256-c8952322.tf2.h5.log)) |
+| SE-PreResNet-272(BN) | 2.49 | 3,152,450 | 422.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet272bn_svhn-0249-0a778e9d.tf2.h5.log)) |
+| SE-PreResNet-542(BN) | 2.47 | 6,271,370 | 837.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet542bn_svhn-0247-8e242736.tf2.h5.log)) |
+| PyramidNet-110 (a=48) | 2.47 | 1,772,706 | 408.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a48_svhn-0247-15827390.tf2.h5.log)) |
+| PyramidNet-110 (a=84) | 2.43 | 3,904,446 | 778.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a84_svhn-0243-aacb5f88.tf2.h5.log)) |
+| PyramidNet-110 (a=270) | 2.38 | 28,485,477 | 4,730.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a270_svhn-0238-b8742320.tf2.h5.log)) |
+| PyramidNet-164 (a=270, BN) | 2.34 | 27,216,021 | 4,608.81M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet164_a270_bn_svhn-0234-94bb4029.tf2.h5.log)) |
+| PyramidNet-200 (a=240, BN) | 2.32 | 26,752,702 | 4,563.40M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet200_a240_bn_svhn-0232-77f2380c.tf2.h5.log)) |
+| PyramidNet-236 (a=220, BN) | 2.35 | 26,969,046 | 4,631.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet236_a220_bn_svhn-0235-6a9a8b0a.tf2.h5.log)) |
+| PyramidNet-272 (a=200, BN) | 2.40 | 26,210,842 | 4,541.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet272_a200_bn_svhn-0240-0a389e2f.tf2.h5.log)) |
+| DenseNet-40 (k=12) | 3.05 | 599,050 | 210.80M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_svhn-0305-7d5860ae.tf2.h5.log)) |
+| DenseNet-BC-40 (k=12) | 3.20 | 176,122 | 74.89M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k12_bc_svhn-0320-77fd3ddf.tf2.h5.log)) |
+| DenseNet-BC-40 (k=24) | 2.90 | 690,346 | 293.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k24_bc_svhn-0290-b8a231f7.tf2.h5.log)) |
+| DenseNet-BC-40 (k=36) | 2.60 | 1,542,682 | 654.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k36_bc_svhn-0260-a176dcf1.tf2.h5.log)) |
+| DenseNet-100 (k=12) | 2.60 | 4,068,490 | 1,353.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_svhn-0260-e810c380.tf2.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

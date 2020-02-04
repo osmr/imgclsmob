@@ -63,7 +63,7 @@ Some remarks:
 | ResNeXt | ABCD | ABCD | ABCD | A | A | ABCD | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCD | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
-| SE-PreResNet | ABCD | ABCD | ABCD | A | A | Abcd | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
+| SE-PreResNet | ABCD | ABCD | ABCD | A | A | ABCD | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNeXt | A | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | IBN-ResNet | A | A | - | - | - | A | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
 | IBN-ResNeXt | A | A | - | - | - | A | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |

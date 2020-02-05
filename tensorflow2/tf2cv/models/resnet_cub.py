@@ -7,8 +7,8 @@ __all__ = ['resnet10_cub', 'resnet12_cub', 'resnet14_cub', 'resnetbc14b_cub', 'r
            'resnet26_cub', 'resnetbc26b_cub', 'resnet34_cub', 'resnetbc38b_cub', 'resnet50_cub', 'resnet50b_cub',
            'resnet101_cub', 'resnet101b_cub', 'resnet152_cub', 'resnet152b_cub', 'resnet200_cub', 'resnet200b_cub']
 
-from .resnet import get_resnet
 from .common import is_channels_first
+from .resnet import get_resnet
 
 
 def resnet10_cub(classes=200, **kwargs):

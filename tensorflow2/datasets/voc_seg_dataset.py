@@ -55,21 +55,29 @@ class VOCSegDataset(SegDataset):
 
         assert (len(self.images) == len(self.masks))
 
-    def _get_image(self, i):
-        image = Image.open(self.images[i]).convert("RGB")
-        assert (self.mode in ("test", "demo"))
-        image = self._img_transform(image)
+    def __getitem__(self, index):
+        image = Image.open(self.images[index]).convert("RGB")
+        if self.mode == "demo":
+            image = self._img_transform(image)
+            if self.transform is not None:
+                image = self.transform(image)
+            return image, os.path.basename(self.images[index])
+        mask = Image.open(self.masks[index])
+
+        if self.mode == "train":
+            image, mask = self._sync_transform(image, mask)
+        elif self.mode == "val":
+            image, mask = self._val_sync_transform(image, mask)
+        else:
+            assert self.mode == "test"
+            image, mask = self._img_transform(image), self._mask_transform(mask)
+
         if self.transform is not None:
             image = self.transform(image)
-        return image
 
-    def _get_label(self, i):
-        if self.mode == "demo":
-            return os.path.basename(self.images[i])
-        assert (self.mode == "test")
-        mask = Image.open(self.masks[i])
-        mask = self._mask_transform(mask)
-        return mask
+        # print("---> image.shape={}".format(image.shape))
+        # print("---> mask.shape={}".format(mask.shape))
+        return image, mask
 
     classes = 21
     vague_idx = 255
@@ -96,12 +104,11 @@ class VOCSegTrainTransform(object):
                  mean_rgb=(0.485, 0.456, 0.406),
                  std_rgb=(0.229, 0.224, 0.225)):
         assert (ds_metainfo is not None)
-        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
-        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.mean = np.array(mean_rgb, np.float32)[np.newaxis, np.newaxis, :]
+        self.std = np.array(std_rgb, np.float32)[np.newaxis, np.newaxis, :]
 
     def __call__(self, img):
         dtype = get_dtype(None)
-        img = img.transpose(2, 0, 1)
         img = img.astype(dtype)
         img *= 1.0 / 255.0
 
@@ -119,12 +126,11 @@ class VOCSegTestTransform(object):
                  mean_rgb=(0.485, 0.456, 0.406),
                  std_rgb=(0.229, 0.224, 0.225)):
         assert (ds_metainfo is not None)
-        self.mean = np.array(mean_rgb, np.float32)[:, np.newaxis, np.newaxis]
-        self.std = np.array(std_rgb, np.float32)[:, np.newaxis, np.newaxis]
+        self.mean = np.array(mean_rgb, np.float32)[np.newaxis, np.newaxis, :]
+        self.std = np.array(std_rgb, np.float32)[np.newaxis, np.newaxis, :]
 
     def __call__(self, img):
         dtype = get_dtype(None)
-        img = img.transpose(2, 0, 1)
         img = img.astype(dtype)
         img *= 1.0 / 255.0
 
@@ -168,7 +174,7 @@ class VOCMetaInfo(DatasetMetaInfo):
         self.test_transform = voc_val_transform
         self.train_generator = voc_train_generator
         self.val_generator = voc_val_generator
-        self.test_generator = voc_val_generator
+        self.test_generator = voc_test_generator
         self.ml_type = "imgseg"
         self.allow_hybridize = False
         self.net_extra_kwargs = {"aux": False, "fixed_size": False}
@@ -307,11 +313,48 @@ def voc_val_generator(data_generator,
         class_mode="binary",
         batch_size=batch_size,
         shuffle=False,
-        interpolation=ds_metainfo.interpolation_msg,
+        interpolation="bilinear",
         seg_dataset=ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="val",
-            transform=ds_metainfo.val_transform(
-                ds_metainfo=ds_metainfo,
-                data_format=None)))
+            transform=VOCSegTestTransform(
+                ds_metainfo=ds_metainfo)))
+    return generator
+
+
+def voc_test_generator(data_generator,
+                       ds_metainfo,
+                       batch_size):
+    """
+    Create image generator for testing subset.
+
+    Parameters:
+    ----------
+    data_generator : ImageDataGenerator
+        Image transform sequence.
+    ds_metainfo : DatasetMetaInfo
+        Pascal VOC2012 dataset metainfo.
+    batch_size : int
+        Batch size.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
+    split = "val"
+    root = ds_metainfo.root_dir_path
+    root = os.path.join(root, split)
+    generator = data_generator.flow_from_directory(
+        directory=root,
+        target_size=ds_metainfo.input_image_size,
+        class_mode="binary",
+        batch_size=batch_size,
+        shuffle=False,
+        interpolation="bilinear",
+        seg_dataset=ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            mode="test",
+            transform=VOCSegTestTransform(
+                ds_metainfo=ds_metainfo)))
     return generator

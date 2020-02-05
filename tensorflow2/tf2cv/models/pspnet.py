@@ -114,7 +114,12 @@ class PyramidPoolingBranch(nn.Layer):
             name="conv")
 
     def call(self, x, training=None):
-        in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
+        x_shape = x.get_shape().as_list()
+        if is_channels_first(self.data_format):
+            x_size = (x_shape[2], x_shape[3])
+        else:
+            x_size = (x_shape[1], x_shape[2])
+        in_size = self.upscale_out_size if self.upscale_out_size is not None else x_size
         x = self.pool(x)
         x = self.conv(x, training=training)
         x_shape = x.get_shape().as_list()
@@ -170,11 +175,13 @@ class PyramidPooling(nn.Layer):
                 name="branch{}".format(i + 2)))
 
     def call(self, x, training=None):
+        # print("---> x.shape={}".format(x.shape))
         x = self.branches(x, training=training)
+        # print("*---> x.shape={}".format(x.shape))
         return x
 
 
-class PSPNet(nn.Layer):
+class PSPNet(tf.keras.Model):
     """
     PSPNet model from 'Pyramid Scene Parsing Network,' https://arxiv.org/abs/1612.01105.
 
@@ -240,7 +247,12 @@ class PSPNet(nn.Layer):
                 name="aux_block")
 
     def call(self, x, training=None):
-        in_size = self.in_size if self.fixed_size else x.shape[2:]
+        x_shape = x.get_shape().as_list()
+        if is_channels_first(self.data_format):
+            x_size = (x_shape[2], x_shape[3])
+        else:
+            x_size = (x_shape[1], x_shape[2])
+        in_size = self.in_size if self.fixed_size else x_size
         x, y = self.backbone(x, training=training)
         x = self.pool(x, training=training)
         x = self.final_block(x, in_size, training=training)
@@ -297,7 +309,9 @@ def get_pspnet(backbone,
         net.load_weights(
             filepath=get_model_file(
                 model_name=model_name,
-                local_model_store_dir_path=root))
+                local_model_store_dir_path=root),
+            by_name=True,
+            skip_mismatch=True)
 
     return net
 

@@ -70,6 +70,9 @@ from .models.wrn_cifar import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
+from .models.seresnet_cub import *
+from .models.mobilenet_cub import *
+from .models.proxylessnas_cub import *
 
 from .models.fcn8sd import *
 from .models.pspnet import *
@@ -704,6 +707,40 @@ _models = {
     'resnet152b_cub': resnet152b_cub,
     'resnet200_cub': resnet200_cub,
     'resnet200b_cub': resnet200b_cub,
+
+    'seresnet10_cub': seresnet10_cub,
+    'seresnet12_cub': seresnet12_cub,
+    'seresnet14_cub': seresnet14_cub,
+    'seresnetbc14b_cub': seresnetbc14b_cub,
+    'seresnet16_cub': seresnet16_cub,
+    'seresnet18_cub': seresnet18_cub,
+    'seresnet26_cub': seresnet26_cub,
+    'seresnetbc26b_cub': seresnetbc26b_cub,
+    'seresnet34_cub': seresnet34_cub,
+    'seresnetbc38b_cub': seresnetbc38b_cub,
+    'seresnet50_cub': seresnet50_cub,
+    'seresnet50b_cub': seresnet50b_cub,
+    'seresnet101_cub': seresnet101_cub,
+    'seresnet101b_cub': seresnet101b_cub,
+    'seresnet152_cub': seresnet152_cub,
+    'seresnet152b_cub': seresnet152b_cub,
+    'seresnet200_cub': seresnet200_cub,
+    'seresnet200b_cub': seresnet200b_cub,
+
+    'mobilenet_w1_cub': mobilenet_w1_cub,
+    'mobilenet_w3d4_cub': mobilenet_w3d4_cub,
+    'mobilenet_wd2_cub': mobilenet_wd2_cub,
+    'mobilenet_wd4_cub': mobilenet_wd4_cub,
+
+    'fdmobilenet_w1_cub': fdmobilenet_w1_cub,
+    'fdmobilenet_w3d4_cub': fdmobilenet_w3d4_cub,
+    'fdmobilenet_wd2_cub': fdmobilenet_wd2_cub,
+    'fdmobilenet_wd4_cub': fdmobilenet_wd4_cub,
+
+    'proxylessnas_cpu_cub': proxylessnas_cpu_cub,
+    'proxylessnas_gpu_cub': proxylessnas_gpu_cub,
+    'proxylessnas_mobile_cub': proxylessnas_mobile_cub,
+    'proxylessnas_mobile14_cub': proxylessnas_mobile14_cub,
 
     'fcn8sd_resnetd50b_voc': fcn8sd_resnetd50b_voc,
     'fcn8sd_resnetd101b_voc': fcn8sd_resnetd101b_voc,

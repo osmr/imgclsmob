@@ -1,4 +1,5 @@
 import random
+import threading
 import numpy as np
 from PIL import Image, ImageOps, ImageFilter
 from tensorflow.keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
@@ -12,7 +13,7 @@ class SegDataset(object):
     ----------
     root : str
         Path to data folder.
-    mode: str
+    mode : str
         'train', 'val', 'test', or 'demo'.
     transform : callable
         A function that transforms the image.
@@ -99,10 +100,7 @@ class SegDataset(object):
     def _mask_transform(mask):
         return np.array(mask).astype(np.int32)
 
-    def _get_image(self, i):
-        raise NotImplementedError
-
-    def _get_label(self, i):
+    def __getitem__(self, index):
         raise NotImplementedError
 
 
@@ -142,13 +140,16 @@ class SegDirectoryIterator(DirectoryIterator):
         self.seg_dataset = seg_dataset
         self.class_mode = class_mode
         self.dtype = dtype
-        self.samples = len(self.seg_dataset.images)
 
-        super(SegDirectoryIterator, self).__init__(
-            self.samples,
-            batch_size,
-            shuffle,
-            seed)
+        self.n = len(self.seg_dataset.images)
+        self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.batch_index = 0
+        self.total_batches_seen = 0
+        self.lock = threading.Lock()
+        self.index_array = None
+        self.index_generator = self._flow_index()
 
     def _get_batches_of_transformed_samples(self, index_array):
         """Gets a batch of transformed samples.
@@ -159,11 +160,23 @@ class SegDirectoryIterator(DirectoryIterator):
         # Returns
             A batch of transformed samples.
         """
-        batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=self.dtype)
-        batch_y = np.zeros((len(index_array),) + self.image_shape, dtype=np.int32)
+        # batch_x = np.zeros((len(index_array),) + self.image_shape, dtype=self.dtype)
+        # batch_y = np.zeros((len(index_array),) + self.image_shape, dtype=np.int32)
+        batch_x = None
+        batch_y = None
         for i, j in enumerate(index_array):
-            batch_x[i] = self.seg_dataset._get_image(self, j)
-            batch_y[i] = self.seg_dataset._get_label(self, j)
+            x, y = self.seg_dataset[j]
+            if batch_x is None:
+                batch_x = np.zeros((len(index_array),) + x.shape, dtype=self.dtype)
+                batch_y = np.zeros((len(index_array),) + y.shape, dtype=np.int32)
+            # if self.data_format == "channel_first":
+            #     print("*")
+            # print("batch_x.shape={}".format(batch_x.shape))
+            # print("batch_y.shape={}".format(batch_y.shape))
+            # print("x.shape={}".format(x.shape))
+            # print("y.shape={}".format(y.shape))
+            batch_x[i] = x
+            batch_y[i] = y
         return batch_x, batch_y
 
 

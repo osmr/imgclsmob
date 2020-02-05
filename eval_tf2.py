@@ -11,7 +11,7 @@ import tensorflow as tf
 from common.logger_utils import initialize_logging
 from tensorflow2.utils import prepare_model
 from tensorflow2.tf2cv.models.model_store import _model_sha1
-from tensorflow2.dataset_utils import get_dataset_metainfo, get_val_data_source
+from tensorflow2.dataset_utils import get_dataset_metainfo, get_val_data_source, get_test_data_source
 from tensorflow2.utils import get_composite_metric
 from tensorflow2.utils import report_accuracy
 
@@ -115,13 +115,14 @@ def parse_args():
         Resulted args.
     """
     parser = argparse.ArgumentParser(
-        description="Evaluate a model for image classification (TensorFlow 2.0)",
+        description="Evaluate a model for image classification/segmentation (TensorFlow 2.0)",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "--dataset",
         type=str,
         default="ImageNet1K",
-        help="dataset name. options are ImageNet1K, CUB200_2011, CIFAR10, CIFAR100, SVHN")
+        help="dataset name. options are ImageNet1K, ImageNet1K_rec, CUB200_2011, CIFAR10, CIFAR100, SVHN, VOC2012, "
+             "ADE20K, Cityscapes, COCO")
     parser.add_argument(
         "--work-dir",
         type=str,
@@ -160,11 +161,18 @@ def test_model(args,
     float
         Main accuracy value.
     """
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+    assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
+    assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
+
     batch_size = args.batch_size
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
+        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
+        load_ignore_extra=ds_metainfo.load_ignore_extra,
         batch_size=batch_size,
         use_cuda=use_cuda)
     assert (hasattr(net, "in_size"))
@@ -172,15 +180,17 @@ def test_model(args,
     if not args.calc_flops_only:
         tic = time.time()
 
-        ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-        ds_metainfo.update(args=args)
-        assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
-        assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
-
-        test_metric = get_composite_metric(
-            metric_names=ds_metainfo.val_metric_names,
-            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
-        test_data, total_img_count = get_val_data_source(
+        if args.data_subset == "val":
+            get_test_data_source_class = get_val_data_source
+            test_metric = get_composite_metric(
+                metric_names=ds_metainfo.val_metric_names,
+                metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+        else:
+            get_test_data_source_class = get_test_data_source
+            test_metric = get_composite_metric(
+                metric_names=ds_metainfo.test_metric_names,
+                metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+        test_data, total_img_count = get_test_data_source_class(
             ds_metainfo=ds_metainfo,
             batch_size=args.batch_size,
             data_format=data_format)

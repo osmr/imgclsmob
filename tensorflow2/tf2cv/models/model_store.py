@@ -403,7 +403,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('sepreresnet272bn_cifar10', '0339', '1ca0bed3b3ae20d55322fa2f75057edb744fb63d', 'v0.0.443', 'cf', 0.0),
     ('sepreresnet272bn_cifar100', '1913', 'eb75217f625dbc97af737e5878a9eab28fdf3b03', 'v0.0.443', 'cf', 0.0),
     ('sepreresnet272bn_svhn', '0249', '0a778e9d68f6921463563ef84054969221809aef', 'v0.0.443', 'cf', 0.0),
-    ('sepreresnet542bn_cifar10', '0308', '7764e8bddba21c75b8f8d4775093721d859f850c', 'v0.0.443', 'cf', 0.0),
+    ('sepreresnet542bn_cifar10', '0309', '7764e8bddba21c75b8f8d4775093721d859f850c', 'v0.0.443', 'cf', 0.0),
     ('sepreresnet542bn_cifar100', '1945', '969d2bf0a8d213757486e18c180ba14058e08eac', 'v0.0.443', 'cf', 0.0),
     ('sepreresnet542bn_svhn', '0247', '8e2427367762cf20b67b407e2a1ec8479b0ad41c', 'v0.0.443', 'cf', 0.0),
     ('pyramidnet110_a48_cifar10', '0372', '3b6ab16073fb0ff438d4376d320be9b119aee362', 'v0.0.444', 'cf', 0.0),
@@ -412,7 +412,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('pyramidnet110_a84_cifar10', '0298', 'bf303f3414123bdf79cb23d3316dd171df74f5d4', 'v0.0.444', 'cf', 0.0),
     ('pyramidnet110_a84_cifar100', '1887', '85789d68d11ad663a53ed921ce6fb28a98248874', 'v0.0.444', 'cf', 0.0),
     ('pyramidnet110_a84_svhn', '0243', 'aacb5f882c7810181c0d4de061c2a76dfbf4925b', 'v0.0.444', 'cf', 0.0),
-    ('pyramidnet110_a270_cifar10', '0251', 'aacb5f882c7810181c0d4de061c2a76dfbf4925b', 'v0.0.444', 'cf', 0.0),
+    ('pyramidnet110_a270_cifar10', '0251', '983d99830e7bb23ca0123ec47dfa05143eb8a37e', 'v0.0.444', 'cf', 0.0),
     ('pyramidnet110_a270_cifar100', '1710', 'cc58021f2406c3593a51f62d03fea714d0649036', 'v0.0.444', 'cf', 0.0),
     ('pyramidnet110_a270_svhn', '0238', 'b8742320795657a0b51d35226c2e14fc76acac11', 'v0.0.444', 'cf', 0.0),
     ('pyramidnet164_a270_bn_cifar10', '0242', 'aa879193cd4730fd06430b494c11497121fad2df', 'v0.0.444', 'cf', 0.0),
@@ -448,7 +448,21 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('densenet100_k12_bc_cifar100', '2119', 'c1b857d51eb582eee8dbd7250d05871e40a7f4c4', 'v0.0.445', 'cf', 0.0),
     ('densenet190_k40_bc_cifar10', '0252', '9cc5cfcbef9425227370ac8c6404cfc1e3edbf55', 'v0.0.445', 'cf', 0.0),
     ('densenet250_k24_bc_cifar10', '0267', '3217a1b3c61afc9d08bc4b43bff4aac103da0012', 'v0.0.445', 'cf', 0.0),
-    ('densenet250_k24_bc_cifar100', '1739', '02d967b564c48b25117aac6cd7b095fd5d30d4d5', 'v0.0.445', 'cf', 0.0)]}
+    ('densenet250_k24_bc_cifar100', '1739', '02d967b564c48b25117aac6cd7b095fd5d30d4d5', 'v0.0.445', 'cf', 0.0),
+    ('resnet10_cub', '2758', '1a6846b3854d1942997d7082e94b330ddce3db19', 'v0.0.446', 'cub', 0.0),
+    ('resnet12_cub', '2668', '03c8073655ae51f21ceed7d7f86f9ed6169fc310', 'v0.0.446', 'cub', 0.0),
+    ('resnet14_cub', '2435', '24b0bfebaa0d1b4442fa63a659d22de8ff594118', 'v0.0.446', 'cub', 0.0),
+    ('resnet16_cub', '2328', '81cc8192c880c687175d636a0339e16463c61627', 'v0.0.446', 'cub', 0.0),
+    ('resnet18_cub', '2335', '198bdc26bbfaad777ea6d494c41b9d66a493aac7', 'v0.0.446', 'cub', 0.0),
+    ('resnet26_cub', '2264', '545967849063af9b5ec55a5cf339f5897f394e85', 'v0.0.446', 'cub', 0.0),
+    ('seresnet10_cub', '2749', '484fc1661dda247db32dd6a54b88dc156da5156c', 'v0.0.446', 'cub', 0.0),
+    ('seresnet12_cub', '2611', '0e5b4e23f30add924f8cad41704cb335a36b2049', 'v0.0.446', 'cub', 0.0),
+    ('seresnet14_cub', '2375', '56c268728f7343aa1410cb2f046860c34428b123', 'v0.0.446', 'cub', 0.0),
+    ('seresnet16_cub', '2321', 'ed3ead791be4af44aa1202f0dbf4b26fdb770963', 'v0.0.446', 'cub', 0.0),
+    ('seresnet18_cub', '2309', 'f699f05f2a2ce41dae01d5d6c180ec2569356f0a', 'v0.0.446', 'cub', 0.0),
+    ('seresnet26_cub', '2258', 'c02ba47493bc9185a7fb06584e23b5a740082e77', 'v0.0.446', 'cub', 0.0),
+    ('mobilenet_w1_cub', '2346', 'b8f24c14b9ed9629efb161510547e30c4a37edc2', 'v0.0.446', 'cub', 0.0),
+    ('proxylessnas_mobile_cub', '2202', '73ceed5a6a3f870b306da0c48318d969e53d6340', 'v0.0.446', 'cub', 0.0)]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

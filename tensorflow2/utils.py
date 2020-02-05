@@ -6,14 +6,19 @@ import tensorflow as tf
 from .tf2cv.model_provider import get_model
 from .metrics.metric import EvalMetric, CompositeEvalMetric
 from .metrics.cls_metrics import Top1Error, TopKError
+from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 
 
 def prepare_model(model_name,
                   use_pretrained,
                   pretrained_model_file_path,
+                  net_extra_kwargs=None,
+                  load_ignore_extra=False,
                   batch_size=None,
                   use_cuda=True):
     kwargs = {"pretrained": use_pretrained}
+    if net_extra_kwargs is not None:
+        kwargs.update(net_extra_kwargs)
     # kwargs["input_shape"] = (1, 224, 224, 3)
 
     # my_devices = tf.config.experimental.list_physical_devices(device_type="CPU")
@@ -39,7 +44,14 @@ def prepare_model(model_name,
         input_shape = ((batch_size, 3, net.in_size[0], net.in_size[1]) if
                        net.data_format == "channels_first" else (batch_size, net.in_size[0], net.in_size[1], 3))
         net.build(input_shape=input_shape)
-        net.load_weights(filepath=pretrained_model_file_path)
+        if load_ignore_extra:
+            net.load_weights(
+                filepath=pretrained_model_file_path,
+                by_name=True,
+                skip_mismatch=True)
+        else:
+            net.load_weights(
+                filepath=pretrained_model_file_path)
 
     return net
 
@@ -69,10 +81,10 @@ def get_metric(metric_name, metric_extra_kwargs):
         return Top1Error(**metric_extra_kwargs)
     elif metric_name == "TopKError":
         return TopKError(**metric_extra_kwargs)
-    # elif metric_name == "PixelAccuracyMetric":
-    #     return PixelAccuracyMetric(**metric_extra_kwargs)
-    # elif metric_name == "MeanIoUMetric":
-    #     return MeanIoUMetric(**metric_extra_kwargs)
+    elif metric_name == "PixelAccuracyMetric":
+        return PixelAccuracyMetric(**metric_extra_kwargs)
+    elif metric_name == "MeanIoUMetric":
+        return MeanIoUMetric(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 

@@ -191,7 +191,7 @@ class AtrousSpatialPyramidPooling(nn.Layer):
         return x
 
 
-class DeepLabv3(nn.Layer):
+class DeepLabv3(tf.keras.Model):
     """
     DeepLabv3 model from 'Rethinking Atrous Convolution for Semantic Image Segmentation,'
     https://arxiv.org/abs/1706.05587.

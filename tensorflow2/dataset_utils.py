@@ -10,6 +10,7 @@ from .datasets.cub200_2011_cls_dataset import CUB200MetaInfo
 from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
 from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
 from .datasets.svhn_cls_dataset import SVHNMetaInfo
+from .datasets.voc_seg_dataset import VOCMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -32,6 +33,7 @@ def get_dataset_metainfo(dataset_name):
         "CIFAR10": CIFAR10MetaInfo,
         "CIFAR100": CIFAR100MetaInfo,
         "SVHN": SVHNMetaInfo,
+        "VOC": VOCMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -131,10 +133,10 @@ def get_test_data_source(ds_metainfo,
     int
         Dataset size.
     """
-    data_generator = ds_metainfo.val_transform(
+    data_generator = ds_metainfo.test_transform(
         ds_metainfo=ds_metainfo,
         data_format=data_format)
-    generator = ds_metainfo.val_generator(
+    generator = ds_metainfo.test_generator(
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)

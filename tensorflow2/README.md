@@ -4,10 +4,11 @@
 [![Downloads](https://pepy.tech/badge/tf2cv)](https://pepy.tech/project/tf2cv)
 
 This is a collection of image classification models. Many of them are pretrained on
-[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html), and
-[SVHN](http://ufldl.stanford.edu/housenumbers) datasets and loaded automatically during use. All pretrained models
-require the same ordinary normalization. Scripts for training/evaluating/converting models are in the
-[`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+[ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
+[SVHN](http://ufldl.stanford.edu/housenumbers), and
+[CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) datasets and loaded automatically during use.
+All pretrained models require the same ordinary normalization. Scripts for training/evaluating/converting models are in
+the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 
@@ -390,7 +391,7 @@ Some remarks:
 | SE-PreResNet-110 | 4.54 | 1,744,664 | 255.98M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet110_cifar10-0454-e317c569.tf2.h5.log)) |
 | SE-PreResNet-164(BN) | 3.73 | 1,904,882 | 256.32M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet164bn_cifar10-0373-253c0430.tf2.h5.log)) |
 | SE-PreResNet-272(BN) | 3.39 | 3,152,450 | 422.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet272bn_cifar10-0339-1ca0bed3.tf2.h5.log)) |
-| SE-PreResNet-542(BN) | 3.08 | 6,271,370 | 837.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet542bn_cifar10-0309-7764e8bd.tf2.h5.log)) |
+| SE-PreResNet-542(BN) | 3.09 | 6,271,370 | 837.78M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.443/sepreresnet542bn_cifar10-0309-7764e8bd.tf2.h5.log)) |
 | PyramidNet-110 (a=48) | 3.72 | 1,772,706 | 408.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a48_cifar10-0372-3b6ab160.tf2.h5.log)) |
 | PyramidNet-110 (a=84) | 2.98 | 3,904,446 | 778.15M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a84_cifar10-0298-bf303f34.tf2.h5.log)) |
 | PyramidNet-110 (a=270) | 2.51 | 28,485,477 | 4,730.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.444/pyramidnet110_a270_cifar10-0251-983d9983.tf2.h5.log)) |
@@ -544,6 +545,25 @@ Some remarks:
 | DenseNet-BC-40 (k=24) | 2.90 | 690,346 | 293.09M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k24_bc_svhn-0290-b8a231f7.tf2.h5.log)) |
 | DenseNet-BC-40 (k=36) | 2.60 | 1,542,682 | 654.60M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet40_k36_bc_svhn-0260-a176dcf1.tf2.h5.log)) |
 | DenseNet-100 (k=12) | 2.60 | 4,068,490 | 1,353.55M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.445/densenet100_k12_svhn-0260-e810c380.tf2.h5.log)) |
+
+### CUB-200-2011
+
+| Model | Error, % | Params | FLOPs/2 | Remarks |
+| --- | ---: | ---: | ---: | --- |
+| ResNet-10 | 27.58 | 5,008,392 | 893.63M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet10_cub-2758-1a6846b3.tf2.h5.log)) |
+| ResNet-12 | 26.68 | 5,082,376 | 1,125.84M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet12_cub-2668-03c80736.tf2.h5.log)) |
+| ResNet-14 | 24.35 | 5,377,800 | 1,357.53M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet14_cub-2435-24b0bfeb.tf2.h5.log)) |
+| ResNet-16 | 23.28 | 6,558,472 | 1,588.93M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet16_cub-2328-81cc8192.tf2.h5.log)) |
+| ResNet-18 | 23.35 | 11,279,112 | 1,820.00M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet18_cub-2335-198bdc26.tf2.h5.log)) |
+| ResNet-26 | 22.64 | 17,549,832 | 2,746.38M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/resnet26_cub-2264-54596784.tf2.h5.log)) |
+| SE-ResNet-10 | 27.49 | 5,052,932 | 893.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet10_cub-2749-484fc166.tf2.h5.log)) |
+| SE-ResNet-12 | 26.11 | 5,127,496 | 1,125.88M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet12_cub-2611-0e5b4e23.tf2.h5.log)) |
+| SE-ResNet-14 | 23.75 | 5,425,104 | 1,357.58M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet14_cub-2375-56c26872.tf2.h5.log)) |
+| SE-ResNet-16 | 23.21 | 6,614,240 | 1,588.99M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet16_cub-2321-ed3ead79.tf2.h5.log)) |
+| SE-ResNet-18 | 23.09 | 11,368,192 | 1,820.10M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet18_cub-2309-f699f05f.tf2.h5.log)) |
+| SE-ResNet-26 | 22.58 | 17,683,452 | 2,746.52M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/seresnet26_cub-2258-c02ba474.tf2.h5.log)) |
+| MobileNet x1.0 | 23.46 | 3,411,976 | 578.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/mobilenet_w1_cub-2346-b8f24c14.tf2.h5.log)) |
+| ProxylessNAS Mobile | 22.02 | 3,055,712 | 331.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/proxylessnas_mobile_cub-2202-73ceed5a.tf2.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

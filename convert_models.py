@@ -821,7 +821,9 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/depthwise_kernel:', '/weight_depthwise:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
+
+    if not src_model.startswith("pspnet_"):
+        dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):
@@ -837,7 +839,8 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/weight_depthwise:', '/depthwise_kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+    if not src_model.startswith("pspnet_"):
+        dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):

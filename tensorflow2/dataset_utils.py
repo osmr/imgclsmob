@@ -11,6 +11,9 @@ from .datasets.cifar10_cls_dataset import CIFAR10MetaInfo
 from .datasets.cifar100_cls_dataset import CIFAR100MetaInfo
 from .datasets.svhn_cls_dataset import SVHNMetaInfo
 from .datasets.voc_seg_dataset import VOCMetaInfo
+from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
+from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
+from .datasets.coco_seg_dataset import COCOMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -34,6 +37,9 @@ def get_dataset_metainfo(dataset_name):
         "CIFAR100": CIFAR100MetaInfo,
         "SVHN": SVHNMetaInfo,
         "VOC": VOCMetaInfo,
+        "ADE20K": ADE20KMetaInfo,
+        "Cityscapes": CityscapesMetaInfo,
+        "COCO": COCOMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()

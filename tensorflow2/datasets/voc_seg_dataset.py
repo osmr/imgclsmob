@@ -1,3 +1,7 @@
+"""
+    Pascal VOC2012 semantic segmentation dataset.
+"""
+
 import os
 import numpy as np
 from PIL import Image
@@ -172,6 +176,9 @@ class VOCMetaInfo(DatasetMetaInfo):
         self.train_transform = voc_train_transform
         self.val_transform = voc_val_transform
         self.test_transform = voc_val_transform
+        self.train_transform2 = VOCSegTrainTransform
+        self.val_transform2 = VOCSegTestTransform
+        self.test_transform2 = VOCSegTestTransform
         self.train_generator = voc_train_generator
         self.val_generator = voc_val_generator
         self.test_generator = voc_test_generator

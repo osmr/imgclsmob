@@ -10,7 +10,7 @@ __all__ = ['FCN8sd', 'fcn8sd_resnetd50b_voc', 'fcn8sd_resnetd101b_voc', 'fcn8sd_
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3_block, is_channels_first
+from .common import conv1x1, conv3x3_block, is_channels_first, interpolate_im, get_im_size
 from .resnetd import resnetd50b, resnetd101b
 
 
@@ -59,18 +59,7 @@ class FCNFinalBlock(nn.Layer):
         x = self.conv1(x, training=training)
         x = self.dropout(x, training=training)
         x = self.conv2(x)
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-        x = nn.UpSampling2D(
-            size=(out_size[0] // height, out_size[1] // width),
-            data_format=self.data_format,
-            interpolation="bilinear",
-            name="upsample")(x)
+        x = interpolate_im(x, out_size=out_size, data_format=self.data_format)
         return x
 
 
@@ -132,7 +121,7 @@ class FCN8sd(tf.keras.Model):
                 name="aux_block")
 
     def call(self, x, training=None):
-        in_size = self.in_size if self.fixed_size else x.shape[2:]
+        in_size = self.in_size if self.fixed_size else get_im_size(x, data_format=self.data_format)
         x, y = self.backbone(x, training=training)
         x = self.final_block(x, in_size, training=training)
         if self.aux:

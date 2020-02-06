@@ -15,7 +15,7 @@ class PixelAccuracyMetric(EvalMetric):
 
     Parameters
     ----------
-    axis : int, default 0
+    axis : int, default -1
         The axis that represents classes.
     name : str, default 'pix_acc'
         Name of this metric instance for display.
@@ -37,7 +37,7 @@ class PixelAccuracyMetric(EvalMetric):
         Whether to use micro or macro averaging.
     """
     def __init__(self,
-                 axis=0,
+                 axis=-1,
                  name="pix_acc",
                  output_names=None,
                  label_names=None,
@@ -71,10 +71,10 @@ class PixelAccuracyMetric(EvalMetric):
         """
         if self.on_cpu:
             if self.sparse_label:
-                label_imask = labels.astype(np.int32)
+                label_imask = labels.numpy().astype(np.int32)
             else:
-                label_imask = np.argmax(labels, axis=self.axis).astype(np.int32)
-            pred_imask = np.argmax(preds, axis=self.axis).astype(np.int32)
+                label_imask = np.argmax(labels.numpy(), axis=self.axis).astype(np.int32)
+            pred_imask = np.argmax(preds.numpy(), axis=self.axis).astype(np.int32)
             acc = seg_pixel_accuracy_np(
                 label_imask=label_imask,
                 pred_imask=pred_imask,
@@ -130,7 +130,7 @@ class MeanIoUMetric(EvalMetric):
 
     Parameters
     ----------
-    axis : int, default 0
+    axis : int, default -1
         The axis that represents classes
     name : str, default 'mean_iou'
         Name of this metric instance for display.
@@ -158,7 +158,7 @@ class MeanIoUMetric(EvalMetric):
         Whether to use micro or macro averaging.
     """
     def __init__(self,
-                 axis=0,
+                 axis=-1,
                  name="mean_iou",
                  output_names=None,
                  label_names=None,
@@ -201,11 +201,15 @@ class MeanIoUMetric(EvalMetric):
         """
         if self.on_cpu:
             if self.sparse_label:
-                label_imask = labels.astype(np.int32)
+                label_imask = labels.numpy().astype(np.int32)
             else:
                 assert False
-            pred_imask = np.argmax(preds, axis=self.axis).astype(np.int32)
+            pred_imask = np.argmax(preds.numpy(), axis=self.axis).astype(np.int32)
             if self.sparse_label:
+                assert (label_imask.shape[0] == 1)
+                assert (pred_imask.shape[0] == 1)
+                label_imask = np.squeeze(label_imask, axis=0)
+                pred_imask = np.squeeze(pred_imask, axis=0)
                 acc = seg_mean_iou_imasks_np(
                     label_imask=label_imask,
                     pred_imask=pred_imask,

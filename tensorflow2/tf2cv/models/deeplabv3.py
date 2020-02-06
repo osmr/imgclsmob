@@ -11,7 +11,8 @@ __all__ = ['DeepLabv3', 'deeplabv3_resnetd50b_voc', 'deeplabv3_resnetd101b_voc',
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, is_channels_first
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, is_channels_first, interpolate_im,\
+    get_im_size
 from .resnetd import resnetd50b, resnetd101b, resnetd152b
 
 
@@ -60,18 +61,7 @@ class DeepLabv3FinalBlock(nn.Layer):
         x = self.conv1(x, training=training)
         x = self.dropout(x, training=training)
         x = self.conv2(x)
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-        x = nn.UpSampling2D(
-            size=(out_size[0] // height, out_size[1] // width),
-            data_format=self.data_format,
-            interpolation="bilinear",
-            name="upsample")(x)
+        x = interpolate_im(x, out_size=out_size, data_format=self.data_format)
         return x
 
 
@@ -111,21 +101,11 @@ class ASPPAvgBranch(nn.Layer):
             name="conv")
 
     def call(self, x, training=None):
-        in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
+        in_size = self.upscale_out_size if self.upscale_out_size is not None else\
+            get_im_size(x, data_format=self.data_format)
         x = self.pool(x)
         x = self.conv(x, training=training)
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-        x = nn.UpSampling2D(
-            size=(in_size[0] // height, in_size[1] // width),
-            data_format=self.data_format,
-            interpolation="bilinear",
-            name="upsample")(x)
+        x = interpolate_im(x, out_size=in_size, data_format=self.data_format)
         return x
 
 
@@ -258,7 +238,7 @@ class DeepLabv3(tf.keras.Model):
                 name="aux_block")
 
     def call(self, x, training=None):
-        in_size = self.in_size if self.fixed_size else x.shape[2:]
+        in_size = self.in_size if self.fixed_size else get_im_size(x, data_format=self.data_format)
         x, y = self.backbone(x, training=training)
         x = self.pool(x, training=training)
         x = self.final_block(x, in_size, training=training)

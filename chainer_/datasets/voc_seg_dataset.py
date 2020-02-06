@@ -1,3 +1,7 @@
+"""
+    Pascal VOC2012 semantic segmentation dataset.
+"""
+
 import os
 import numpy as np
 from PIL import Image

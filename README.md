@@ -58,11 +58,11 @@ Some remarks:
 | VGG | A | A | A | A | A | A | [link](https://arxiv.org/abs/1409.1556) | - | 2014 |
 | BN-VGG | A | A | A | A | A | A | [link](https://arxiv.org/abs/1409.1556) | - | 2015 |
 | BN-Inception | A | A | A | - | - | A | [link](https://arxiv.org/abs/1502.03167) | - | 2015 |
-| ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCDe | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
+| ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCDE | [link](https://arxiv.org/abs/1512.03385) | [link](https://github.com/KaimingHe/deep-residual-networks) | 2015 |
 | PreResNet | ABCD | ABCD | ABCD | A | A | ABCD | [link](https://arxiv.org/abs/1603.05027) | [link](https://github.com/facebook/fb.resnet.torch) | 2016 |
 | ResNeXt | ABCD | ABCD | ABCD | A | A | ABCD | [link](http://arxiv.org/abs/1611.05431) | [link](https://github.com/facebookresearch/ResNeXt) | 2016 |
 | SENet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
-| SE-ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCD | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
+| SE-ResNet | ABCDE | ABCDE | ABCDE | A | A | ABCDE | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-PreResNet | ABCD | ABCD | ABCD | A | A | ABCD | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | SE-ResNeXt | A | A | A | A | A | A | [link](https://arxiv.org/abs/1709.01507) | [link](https://github.com/hujie-frank/SENet) | 2017 |
 | IBN-ResNet | A | A | - | - | - | A | [link](https://arxiv.org/abs/1807.09441) | [link](https://github.com/XingangPan/IBN-Net) | 2018 |
@@ -115,7 +115,7 @@ Some remarks:
 | ShuffleNet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1707.01083) | - | 2017 |
 | ShuffleNetV2 | A | A | A | A | A | A | [link](https://arxiv.org/abs/1807.11164) | - | 2018 |
 | MENet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1803.09127) | [link](https://github.com/clavichord93/MENet) | 2018 |
-| MobileNet | AE | AE | AE | A | A | A | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
+| MobileNet | AE | AE | AE | A | A | AE | [link](https://arxiv.org/abs/1704.04861) | [link](https://github.com/tensorflow/models) | 2017 |
 | FD-MobileNet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1802.03750) | [link](https://github.com/clavichord93/FD-MobileNet) | 2018 |
 | MobileNetV2 | A | A | A | A | A | A | [link](https://arxiv.org/abs/1801.04381) | [link](https://github.com/tensorflow/models) | 2018 |
 | MobileNetV3 | A | A | A | A | - | A | [link](https://arxiv.org/abs/1905.02244) | [link](https://github.com/tensorflow/models) | 2019 |
@@ -123,7 +123,7 @@ Some remarks:
 | GhostNet | a | a | a | - | - | a | [link](https://arxiv.org/abs/1911.11907) | [link](https://github.com/iamhankai/ghostnet) | 2019 |
 | MnasNet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1807.11626) | - | 2018 |
 | DARTS | A | A | A | - | - | - | [link](https://arxiv.org/abs/1806.09055) | [link](https://github.com/quark0/darts) | 2018 |
-| ProxylessNAS | AE | AE | AE | - | - | A | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
+| ProxylessNAS | AE | AE | AE | - | - | AE | [link](https://arxiv.org/abs/1812.00332) | [link](https://github.com/mit-han-lab/ProxylessNAS) | 2018 |
 | FBNet-C | A | A | A | - | - | A | [link](https://arxiv.org/abs/1812.03443) | - | 2018 |
 | Xception | A | A | A | - | - | A | [link](https://arxiv.org/abs/1610.02357) | [link](https://github.com/fchollet/deep-learning-models) | 2016 |
 | InceptionV3 | A | A | A | - | - | A | [link](https://arxiv.org/abs/1512.00567) | [link](https://github.com/tensorflow/models) | 2015 |

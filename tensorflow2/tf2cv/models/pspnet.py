@@ -10,7 +10,8 @@ __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity, is_channels_first
+from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity, is_channels_first, interpolate_im,\
+    get_im_size
 from .resnetd import resnetd50b, resnetd101b
 
 
@@ -59,18 +60,7 @@ class PSPFinalBlock(nn.Layer):
         x = self.conv1(x, training=training)
         x = self.dropout(x, training=training)
         x = self.conv2(x)
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-        x = nn.UpSampling2D(
-            size=(out_size[0] // height, out_size[1] // width),
-            data_format=self.data_format,
-            interpolation="bilinear",
-            name="upsample")(x)
+        x = interpolate_im(x, out_size=out_size, data_format=self.data_format)
         return x
 
 
@@ -99,7 +89,6 @@ class PyramidPoolingBranch(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(PyramidPoolingBranch, self).__init__(**kwargs)
-        # self.pool_out_size = pool_out_size
         self.upscale_out_size = upscale_out_size
         self.data_format = data_format
 
@@ -114,26 +103,11 @@ class PyramidPoolingBranch(nn.Layer):
             name="conv")
 
     def call(self, x, training=None):
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            x_size = (x_shape[2], x_shape[3])
-        else:
-            x_size = (x_shape[1], x_shape[2])
-        in_size = self.upscale_out_size if self.upscale_out_size is not None else x_size
+        in_size = self.upscale_out_size if self.upscale_out_size is not None else\
+            get_im_size(x, data_format=self.data_format)
         x = self.pool(x)
         x = self.conv(x, training=training)
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-        x = nn.UpSampling2D(
-            size=(in_size[0] // height, in_size[1] // width),
-            data_format=self.data_format,
-            interpolation="bilinear",
-            name="upsample")(x)
+        x = interpolate_im(x, out_size=in_size, data_format=self.data_format)
         return x
 
 
@@ -175,9 +149,7 @@ class PyramidPooling(nn.Layer):
                 name="branch{}".format(i + 2)))
 
     def call(self, x, training=None):
-        # print("---> x.shape={}".format(x.shape))
         x = self.branches(x, training=training)
-        # print("*---> x.shape={}".format(x.shape))
         return x
 
 
@@ -247,12 +219,7 @@ class PSPNet(tf.keras.Model):
                 name="aux_block")
 
     def call(self, x, training=None):
-        x_shape = x.get_shape().as_list()
-        if is_channels_first(self.data_format):
-            x_size = (x_shape[2], x_shape[3])
-        else:
-            x_size = (x_shape[1], x_shape[2])
-        in_size = self.in_size if self.fixed_size else x_size
+        in_size = self.in_size if self.fixed_size else get_im_size(x, data_format=self.data_format)
         x, y = self.backbone(x, training=training)
         x = self.pool(x, training=training)
         x = self.final_block(x, in_size, training=training)

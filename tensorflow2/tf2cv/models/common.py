@@ -2,13 +2,13 @@
     Common routines for models in TensorFlow 2.0.
 """
 
-__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'ReLU6', 'HSwish', 'PReLU2',
-           'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d', 'BatchNorm', 'InstanceNorm',
-           'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block',
-           'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'Identity',
-           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricConcurrent', 'MultiOutputSequential']
+__all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'ReLU6',
+           'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
+           'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
+           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block',
+           'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'Identity', 'SimpleSequential', 'ParametricSequential', 'DualPathSequential',
+           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'MultiOutputSequential', 'InterpolationBlock']
 
 import math
 from inspect import isfunction
@@ -72,6 +72,63 @@ def round_channels(channels,
     if float(rounded_channels) < 0.9 * channels:
         rounded_channels += divisor
     return rounded_channels
+
+
+def get_im_size(x,
+                data_format):
+    """
+    Get spatial size for a tensor.
+
+    Parameters:
+    ----------
+    x : tensor
+        A tensor.
+    data_format : str
+        The ordering of the dimensions in the tensor.
+
+    Returns
+    -------
+    (int, int)
+        Size (height x width).
+    """
+    x_shape = x.get_shape().as_list()
+    return x_shape[2:4] if is_channels_first(data_format) else x_shape[1:3]
+
+
+def interpolate_im(x,
+                   scale_factor=1,
+                   out_size=None,
+                   data_format="channels_last"):
+    """
+    Bilinear change spatial size for a tensor.
+
+    Parameters:
+    ----------
+    x : tensor
+        A tensor.
+    scale_factor : int, default 1
+        Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+
+    Returns
+    -------
+    tensor
+        Resulted tensor.
+    """
+    if out_size is None:
+        in_size = get_im_size(x, data_format=data_format)
+        out_size = tuple(i * scale_factor for i in in_size) if scale_factor != 0 else in_size
+    if is_channels_first(data_format):
+        x = tf.transpose(x, perm=[0, 2, 3, 1])
+    x = tf.image.resize(
+        images=x,
+        size=out_size)
+    if is_channels_first(data_format):
+        x = tf.transpose(x, perm=[0, 3, 1, 2])
+    return x
 
 
 class ReLU6(nn.Layer):
@@ -2028,3 +2085,42 @@ class MultiOutputSequential(SimpleSequential):
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
         return [x] + outs
+
+
+class InterpolationBlock(nn.Layer):
+    """
+    Bilinear interpolation block.
+
+    Parameters:
+    ----------
+    scale_factor : int, default 1
+        Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 scale_factor=1,
+                 out_size=None,
+                 data_format="channels_last",
+                 **kwargs):
+        super(InterpolationBlock, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+        self.out_size = out_size
+        self.data_format = data_format
+
+    def call(self, x, training=None):
+        if self.out_size is not None:
+            out_size = self.out_size
+        else:
+            in_size = get_im_size(x, data_format=self.data_format)
+            out_size = tuple(i * self.scale_factor for i in in_size)
+        if is_channels_first(self.data_format):
+            x = tf.transpose(x, perm=[0, 2, 3, 1])
+        x = tf.image.resize(
+            images=x,
+            size=out_size)
+        if is_channels_first(self.data_format):
+            x = tf.transpose(x, perm=[0, 3, 1, 2])
+        return x

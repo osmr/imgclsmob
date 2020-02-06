@@ -3,12 +3,13 @@
 [![PyPI](https://img.shields.io/pypi/v/tf2cv.svg)](https://pypi.python.org/pypi/tf2cv)
 [![Downloads](https://pepy.tech/badge/tf2cv)](https://pepy.tech/project/tf2cv)
 
-This is a collection of image classification models. Many of them are pretrained on
+This is a collection of image classification and segmentation models. Many of them are pretrained on
 [ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
-[SVHN](http://ufldl.stanford.edu/housenumbers), and
-[CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) datasets and loaded automatically during use.
-All pretrained models require the same ordinary normalization. Scripts for training/evaluating/converting models are in
-the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
+[SVHN](http://ufldl.stanford.edu/housenumbers), [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html),
+[Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012), [ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K),
+[Cityscapes](https://www.cityscapes-dataset.com), and [COCO](http://cocodataset.org) datasets and loaded automatically
+during use. All pretrained models require the same ordinary normalization. Scripts for training/evaluating/converting
+models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 
 ## List of implemented models
 
@@ -61,6 +62,9 @@ the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - SPNASNet (['Single-Path NAS: Designing Hardware-Efficient ConvNets in less than 4 Hours'](https://arxiv.org/abs/1904.02877))
 - EfficientNet (['EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks'](https://arxiv.org/abs/1905.11946))
 - MixNet (['MixConv: Mixed Depthwise Convolutional Kernels'](https://arxiv.org/abs/1907.09595))
+- FCN-8s (['Fully Convolutional Networks for Semantic Segmentation'](https://arxiv.org/abs/1411.4038))
+- PSPNet (['Pyramid Scene Parsing Network'](https://arxiv.org/abs/1612.01105))
+- DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
 
 ## Installation
 

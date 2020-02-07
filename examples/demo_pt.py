@@ -88,9 +88,9 @@ def main():
     # Center crop of the image:
     h, w = image.shape[:2]
     th, tw = args.input_size, args.input_size
-    i = int(round(0.5 * (h - th)))
-    j = int(round(0.5 * (w - tw)))
-    image = image[i:(i + th), j:(j + tw), :]
+    ih = int(round(0.5 * (h - th)))
+    jw = int(round(0.5 * (w - tw)))
+    image = image[ih:(ih + th), jw:(jw + tw), :]
     # cv2.imshow("image2", image)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
@@ -126,11 +126,11 @@ def main():
     top_k_inds = probs_np.argsort()[::-1][:top_k]
     classes = ImageNet1kAttr().classes
     print("The input picture is classified to be:")
-    for i in range(top_k):
+    for k in range(top_k):
         print("{idx}: [{class_name}], with probability {prob:.3f}.".format(
-            idx=(i + 1),
-            class_name=classes[top_k_inds[i]],
-            prob=probs_np[top_k_inds[i]]))
+            idx=(k + 1),
+            class_name=classes[top_k_inds[k]],
+            prob=probs_np[top_k_inds[k]]))
 
 
 if __name__ == "__main__":

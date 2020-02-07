@@ -295,7 +295,9 @@ def get_deeplabv3(backbone,
         net.load_weights(
             filepath=get_model_file(
                 model_name=model_name,
-                local_model_store_dir_path=root))
+                local_model_store_dir_path=root),
+            by_name=True,
+            skip_mismatch=True)
 
     return net
 

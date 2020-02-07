@@ -467,10 +467,20 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('mobilenet_w1_cub', '2346', 'b8f24c14b9ed9629efb161510547e30c4a37edc2', 'v0.0.446', 'cub', 0.0),
     ('proxylessnas_mobile_cub', '2202', '73ceed5a6a3f870b306da0c48318d969e53d6340', 'v0.0.446', 'cub', 0.0),
     ('pspnet_resnetd101b_voc', '7599', 'fbe47bfce77b8c9cab3c9c5913f6a42c04cce946', 'v0.0.448', 'voc', 0.0),
+    ('pspnet_resnetd50b_ade20k', '2712', 'f4fadf0b3f5a39e1ab070736d792bd9259c0d371', 'v0.0.450', 'voc', 0.0),
+    ('pspnet_resnetd101b_ade20k', '3259', 'ac8569f44bd646ee8875d2b3eae0ab54c72c4904', 'v0.0.450', 'voc', 0.0),
+    ('pspnet_resnetd101b_coco', '5438', 'b64ff2dcde6d3f989c45cec2a021d3769f4cb9eb', 'v0.0.451', 'voc', 0.0),
     ('pspnet_resnetd101b_cityscapes', '5760', '6dc20af68e9de31b663469b170e75cb016bd3a1f', 'v0.0.449', 'cs', 0.0),
     ('deeplabv3_resnetd101b_voc', '7560', 'e261b6fd9c4878c41bfa088777ea53fcddb4fa51', 'v0.0.448', 'voc', 0.0),
     ('deeplabv3_resnetd152b_voc', '7791', '72038caba5f552c77d08ad768bda004643f1c53e', 'v0.0.448', 'voc', 0.0),
+    ('deeplabv3_resnetd50b_ade20k', '3172', '2ba069a73d81d6b2ceaf7f2c57f2fe3dd673b78b', 'v0.0.450', 'voc', 0.0),
+    ('deeplabv3_resnetd101b_ade20k', '3488', '08c90933a65061a56e3b22e9c143340a98455075', 'v0.0.450', 'voc', 0.0),
+    ('deeplabv3_resnetd101b_coco', '5865', '39525a1333ebf12ca32578f32831b3e5b22a887a', 'v0.0.451', 'voc', 0.0),
+    ('deeplabv3_resnetd152b_coco', '6067', 'f4dabc62dc8209e7a9adf0dceef97837b06b21c9', 'v0.0.451', 'voc', 0.0),
     ('fcn8sd_resnetd101b_voc', '8039', 'e140349ce60ad3943b535efb081b3e9c2a58f6e9', 'v0.0.448', 'voc', 0.0),
+    ('fcn8sd_resnetd50b_ade20k', '3310', 'd440f859bad1c84790aa1c3e1c0addc21b171d4a', 'v0.0.450', 'voc', 0.0),
+    ('fcn8sd_resnetd101b_ade20k', '3550', '970d968a1fb44670993b065c1603a6a7c0bd57a1', 'v0.0.450', 'voc', 0.0),
+    ('fcn8sd_resnetd101b_coco', '5968', '69c001b3875c5399dfc1281eb5a051bafef40e4b', 'v0.0.451', 'voc', 0.0),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

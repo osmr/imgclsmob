@@ -64,7 +64,7 @@ class COCOSegDataset(SegDataset):
             image = self._img_transform(image)
             if self.transform is not None:
                 image = self.transform(image)
-            return image, os.path.basename(self.images[index])
+            return image, os.path.basename(image_file_path)
 
         coco_target = self.coco.loadAnns(self.coco.getAnnIds(imgIds=image_idx))
         mask = Image.fromarray(self._gen_seg_mask(

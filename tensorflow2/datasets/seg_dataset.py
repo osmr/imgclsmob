@@ -103,6 +103,9 @@ class SegDataset(object):
     def __getitem__(self, index):
         raise NotImplementedError
 
+    def __len__(self):
+        raise NotImplementedError
+
 
 class SegDirectoryIterator(DirectoryIterator):
     allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
@@ -141,7 +144,7 @@ class SegDirectoryIterator(DirectoryIterator):
         self.class_mode = class_mode
         self.dtype = dtype
 
-        self.n = len(self.seg_dataset.images)
+        self.n = len(self.seg_dataset)
         self.batch_size = batch_size
         self.seed = seed
         self.shuffle = shuffle

@@ -68,7 +68,11 @@ class COCOSegDataset(SegDataset):
 
     def _get_label(self, i):
         if self.mode == "demo":
-            return os.path.basename(self.images[i])
+            image_idx = int(self.idx[i])
+            img_metadata = self.coco.loadImgs(image_idx)[0]
+            image_file_name = img_metadata["file_name"]
+            image_file_path = os.path.join(self.image_dir_path, image_file_name)
+            return os.path.basename(image_file_path)
         assert (self.mode == "test")
 
         image_idx = int(self.idx[i])

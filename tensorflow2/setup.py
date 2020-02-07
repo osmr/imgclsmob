@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='tf2cv',
-    version='0.0.7',
+    version='0.0.10',
     description='Image classification models for TensorFlow 2.0',
     license='MIT',
     long_description=long_description,
@@ -26,7 +26,7 @@ setup(
     ],
     keywords='machine-learning deep-learning neuralnetwork image-classification tensorflow imagenet vgg resnet resnext '
              'senet densenet darknet squeezenet squeezenext shufflenet menet mobilenent igcv3 mnasnet',
-    packages=find_packages(exclude=['others', '*.others', 'others.*', '*.others.*']),
+    packages=find_packages(exclude=['datasets', 'metrics', 'others', '*.others', 'others.*', '*.others.*']),
     include_package_data=True,
     install_requires=['numpy', 'requests'],
 )

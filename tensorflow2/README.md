@@ -572,6 +572,21 @@ Some remarks:
 | MobileNet x1.0 | 23.46 | 3,411,976 | 578.98M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/mobilenet_w1_cub-2346-b8f24c14.tf2.h5.log)) |
 | ProxylessNAS Mobile | 22.02 | 3,055,712 | 331.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.446/proxylessnas_mobile_cub-2202-73ceed5a.tf2.h5.log)) |
 
+### Pascal VOC20102
+
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-101b | 96.28 | 75.99 | 65,708,501 | 230,771.01M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.448/pspnet_resnetd101b_voc-7599-fbe47bfc.tf2.h5.log)) |
+| DeepLabv3 | ResNet(D)-101b | 96.32 | 75.60 | 58,754,773 | 47,625.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.448/deeplabv3_resnetd101b_voc-7560-e261b6fd.tf2.h5.log)) |
+| DeepLabv3 | ResNet(D)-152b | 96.95 | 77.91 | 74,398,421 | 59,894.87M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.448/deeplabv3_resnetd152b_voc-7791-72038cab.tf2.h5.log)) |
+| FCN-8s(d) | ResNet(D)-101b | 97.53 | 80.39 | 52,072,917 | 196,562.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.448/fcn8sd_resnetd101b_voc-8039-e140349c.tf2.h5.log)) |
+
+### Cityscapes
+
+| Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| PSPNet | ResNet(D)-101b | 92.80 | 57.60 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.449/pspnet_resnetd101b_cityscapes-5760-6dc20af6.tf2.h5.log)) |
+
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet
 [Cadene/pretrained...pytorch]: https://github.com/Cadene/pretrained-models.pytorch

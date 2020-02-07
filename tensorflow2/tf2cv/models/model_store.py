@@ -465,7 +465,13 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('seresnet18_cub', '2309', 'f699f05f2a2ce41dae01d5d6c180ec2569356f0a', 'v0.0.446', 'cub', 0.0),
     ('seresnet26_cub', '2258', 'c02ba47493bc9185a7fb06584e23b5a740082e77', 'v0.0.446', 'cub', 0.0),
     ('mobilenet_w1_cub', '2346', 'b8f24c14b9ed9629efb161510547e30c4a37edc2', 'v0.0.446', 'cub', 0.0),
-    ('proxylessnas_mobile_cub', '2202', '73ceed5a6a3f870b306da0c48318d969e53d6340', 'v0.0.446', 'cub', 0.0)]}
+    ('proxylessnas_mobile_cub', '2202', '73ceed5a6a3f870b306da0c48318d969e53d6340', 'v0.0.446', 'cub', 0.0),
+    ('pspnet_resnetd101b_voc', '7599', 'fbe47bfce77b8c9cab3c9c5913f6a42c04cce946', 'v0.0.448', 'voc', 0.0),
+    ('pspnet_resnetd101b_cityscapes', '5760', '6dc20af68e9de31b663469b170e75cb016bd3a1f', 'v0.0.449', 'cs', 0.0),
+    ('deeplabv3_resnetd101b_voc', '7560', 'e261b6fd9c4878c41bfa088777ea53fcddb4fa51', 'v0.0.448', 'voc', 0.0),
+    ('deeplabv3_resnetd152b_voc', '7791', '72038caba5f552c77d08ad768bda004643f1c53e', 'v0.0.448', 'voc', 0.0),
+    ('fcn8sd_resnetd101b_voc', '8039', 'e140349ce60ad3943b535efb081b3e9c2a58f6e9', 'v0.0.448', 'voc', 0.0),
+               ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'
 

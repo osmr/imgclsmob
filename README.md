@@ -155,7 +155,7 @@ Some remarks:
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| PSPNet | ABCD | ABCD | ABCD | - | - | - | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
-| DeepLabv3 | ABcD | ABcD | ABcD | - | - | - | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
-| FCN-8s(d) | ABcD | ABcD | ABcD | - | - | - | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
+| PSPNet | ABCD | ABCD | ABCD | - | - | Abcd | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
+| DeepLabv3 | ABcD | ABcD | ABcD | - | - | Abcd | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
+| FCN-8s(d) | ABcD | ABcD | ABcD | - | - | Abcd | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
 | SINet | C | C | C | - | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |

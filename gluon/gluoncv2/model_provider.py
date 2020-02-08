@@ -99,6 +99,7 @@ from .models.octresnet import *
 from .models.octresnet_cifar import *
 from .models.res2net import *
 
+from .models.resneta import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
@@ -113,6 +114,9 @@ from .models.deeplabv3 import *
 from .models.sinet import *
 
 from .models.superpointnet import *
+
+from .models.simplepose_coco import *
+from .models.others.oth_simple_pose_resnet import *
 
 __all__ = ['get_model']
 
@@ -913,6 +917,10 @@ _models = {
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
 
+    'resneta50b': resneta50b,
+    'resneta101b': resneta101b,
+    'resneta152b': resneta152b,
+
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
@@ -1017,6 +1025,26 @@ _models = {
     'sinet_cityscapes': sinet_cityscapes,
 
     'superpointnet': superpointnet,
+
+    'simplepose_resnet18_coco': simplepose_resnet18_coco,
+    'simplepose_resnet50b_coco': simplepose_resnet50b_coco,
+    'simplepose_resnet101b_coco': simplepose_resnet101b_coco,
+    'simplepose_resnet152b_coco': simplepose_resnet152b_coco,
+    'simplepose_resneta50b_coco': simplepose_resneta50b_coco,
+    'simplepose_resneta101b_coco': simplepose_resneta101b_coco,
+    'simplepose_resneta152b_coco': simplepose_resneta152b_coco,
+
+    'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
+    'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,
+    'oth_simple_pose_resnet101_v1b': oth_simple_pose_resnet101_v1b,
+    'oth_simple_pose_resnet152_v1b': oth_simple_pose_resnet152_v1b,
+    'oth_simple_pose_resnet50_v1d': oth_simple_pose_resnet50_v1d,
+    'oth_simple_pose_resnet101_v1d': oth_simple_pose_resnet101_v1d,
+    'oth_simple_pose_resnet152_v1d': oth_simple_pose_resnet152_v1d,
+
+    'oth_resnet50_v1d': oth_resnet50_v1d,
+    'oth_resnet101_v1d': oth_resnet101_v1d,
+    'oth_resnet152_v1d': oth_resnet152_v1d,
 }
 
 

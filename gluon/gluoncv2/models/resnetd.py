@@ -30,6 +30,8 @@ class ResNetD(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
     multi_output : bool, default False
@@ -47,6 +49,7 @@ class ResNetD(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  ordinary_init=False,
                  multi_output=False,
                  in_channels=3,
@@ -64,13 +67,15 @@ class ResNetD(HybridBlock):
                 self.features.add(ResInitBlock(
                     in_channels=in_channels,
                     out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
             else:
                 init_block_channels = 2 * init_block_channels
                 self.features.add(SEInitBlock(
                     in_channels=in_channels,
                     out_channels=init_block_channels,
-                    bn_use_global_stats=bn_use_global_stats))
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
@@ -85,6 +90,7 @@ class ResNetD(HybridBlock):
                             padding=dilation,
                             dilation=dilation,
                             bn_use_global_stats=bn_use_global_stats,
+                            bn_cudnn_off=bn_cudnn_off,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
@@ -137,7 +143,6 @@ def get_resnetd(blocks,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:

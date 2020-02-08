@@ -104,7 +104,7 @@ def main():
     if args.num_gpus == 0:
         tf.config.set_visible_devices([], "GPU")
 
-    # Convert the tensor to a MXNet nd-array:
+    # Convert the tensor to a TF tensor:
     x = np.expand_dims(x, axis=0)
     x = tf.convert_to_tensor(x, dtype=np.float32)
 

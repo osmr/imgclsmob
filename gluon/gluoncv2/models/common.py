@@ -3,11 +3,11 @@
 """
 
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
-           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN', 'DualPathSequential',
-           'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass',
-           'SesquialteralHourglass', 'MultiOutputSequential']
+           'depthwise_conv3x3', 'BatchNormExtra', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
+           'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN',
+           'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -218,9 +218,23 @@ def depthwise_conv3x3(channels,
         in_channels=channels)
 
 
+class BatchNormExtra(nn.BatchNorm):
+    """
+    Batch normalization layer with extra parameters.
+    """
+    def __init__(self, **kwargs):
+        has_cudnn_off = ("cudnn_off" in kwargs)
+        if has_cudnn_off:
+            cudnn_off = kwargs["cudnn_off"]
+            del kwargs["cudnn_off"]
+        super(BatchNormExtra, self).__init__(**kwargs)
+        if has_cudnn_off:
+            self._kwargs["cudnn_off"] = cudnn_off
+
+
 class ConvBlock(HybridBlock):
     """
-    Standard convolution block with Batch normalization and activation.
+    Standard convolution block with batch normalization and activation.
 
     Parameters:
     ----------
@@ -246,6 +260,8 @@ class ConvBlock(HybridBlock):
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     """
@@ -261,6 +277,7 @@ class ConvBlock(HybridBlock):
                  use_bn=True,
                  bn_epsilon=1e-5,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  activation=(lambda: nn.Activation("relu")),
                  **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
@@ -278,10 +295,11 @@ class ConvBlock(HybridBlock):
                 use_bias=use_bias,
                 in_channels=in_channels)
             if self.use_bn:
-                self.bn = nn.BatchNorm(
+                self.bn = BatchNormExtra(
                     in_channels=out_channels,
                     epsilon=bn_epsilon,
-                    use_global_stats=bn_use_global_stats)
+                    use_global_stats=bn_use_global_stats,
+                    cudnn_off=bn_cudnn_off)
             if self.activate:
                 self.activ = get_activation_layer(activation)
 
@@ -302,6 +320,7 @@ def conv1x1_block(in_channels,
                   use_bn=True,
                   bn_epsilon=1e-5,
                   bn_use_global_stats=False,
+                  bn_cudnn_off=False,
                   activation=(lambda: nn.Activation("relu")),
                   **kwargs):
     """
@@ -325,6 +344,8 @@ def conv1x1_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     """
@@ -339,6 +360,7 @@ def conv1x1_block(in_channels,
         use_bn=use_bn,
         bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
+        bn_cudnn_off=bn_cudnn_off,
         activation=activation,
         **kwargs)
 
@@ -353,6 +375,7 @@ def conv3x3_block(in_channels,
                   use_bn=True,
                   bn_epsilon=1e-5,
                   bn_use_global_stats=False,
+                  bn_cudnn_off=False,
                   activation=(lambda: nn.Activation("relu")),
                   **kwargs):
     """
@@ -380,6 +403,8 @@ def conv3x3_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     """
@@ -395,6 +420,7 @@ def conv3x3_block(in_channels,
         use_bn=use_bn,
         bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
+        bn_cudnn_off=bn_cudnn_off,
         activation=activation,
         **kwargs)
 
@@ -408,6 +434,7 @@ def conv5x5_block(in_channels,
                   use_bias=False,
                   bn_epsilon=1e-5,
                   bn_use_global_stats=False,
+                  bn_cudnn_off=False,
                   activation=(lambda: nn.Activation("relu")),
                   **kwargs):
     """
@@ -433,6 +460,8 @@ def conv5x5_block(in_channels,
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     """
@@ -447,6 +476,7 @@ def conv5x5_block(in_channels,
         use_bias=use_bias,
         bn_epsilon=bn_epsilon,
         bn_use_global_stats=bn_use_global_stats,
+        bn_cudnn_off=bn_cudnn_off,
         activation=activation,
         **kwargs)
 
@@ -458,6 +488,7 @@ def conv7x7_block(in_channels,
                   use_bias=False,
                   use_bn=True,
                   bn_use_global_stats=False,
+                  bn_cudnn_off=False,
                   activation=(lambda: nn.Activation("relu")),
                   **kwargs):
     """
@@ -479,6 +510,8 @@ def conv7x7_block(in_channels,
         Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     activation : function or str or None, default nn.Activation('relu')
         Activation function or name of activation function.
     """
@@ -491,6 +524,7 @@ def conv7x7_block(in_channels,
         use_bias=use_bias,
         use_bn=use_bn,
         bn_use_global_stats=bn_use_global_stats,
+        bn_cudnn_off=bn_cudnn_off,
         activation=activation,
         **kwargs)
 

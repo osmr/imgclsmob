@@ -103,7 +103,7 @@ def main():
     # Create `use_cuda` flag:
     use_cuda = (args.num_gpus > 0)
 
-    # Convert the tensor to a MXNet nd-array:
+    # Convert the tensor to a Pytorch tensor:
     x = x.transpose(2, 0, 1)
     x = np.expand_dims(x, axis=0)
     x = torch.FloatTensor(x)

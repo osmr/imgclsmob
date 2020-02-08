@@ -152,11 +152,14 @@ class SEInitBlock(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  **kwargs):
         super(SEInitBlock, self).__init__(**kwargs)
         mid_channels = out_channels // 2
@@ -166,15 +169,18 @@ class SEInitBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=2,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.conv3 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,

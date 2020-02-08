@@ -28,12 +28,15 @@ class ResBlock(HybridBlock):
         Strides of the convolution.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -41,11 +44,13 @@ class ResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
 
     def hybrid_forward(self, F, x):
@@ -72,6 +77,8 @@ class ResBottleneck(HybridBlock):
         Dilation value for the second convolution layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     bottleneck_factor : int, default 4
@@ -84,6 +91,7 @@ class ResBottleneck(HybridBlock):
                  padding=1,
                  dilation=1,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  conv1_stride=False,
                  bottleneck_factor=4,
                  **kwargs):
@@ -95,18 +103,21 @@ class ResBottleneck(HybridBlock):
                 in_channels=in_channels,
                 out_channels=mid_channels,
                 strides=(strides if conv1_stride else 1),
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.conv2 = conv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
                 strides=(1 if conv1_stride else strides),
                 padding=padding,
                 dilation=dilation,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.conv3 = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
 
     def hybrid_forward(self, F, x):
@@ -134,6 +145,8 @@ class ResUnit(HybridBlock):
         Dilation value for the second convolution layer in bottleneck.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default False
@@ -146,6 +159,7 @@ class ResUnit(HybridBlock):
                  padding=1,
                  dilation=1,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  bottleneck=True,
                  conv1_stride=False,
                  **kwargs):
@@ -161,19 +175,22 @@ class ResUnit(HybridBlock):
                     padding=padding,
                     dilation=dilation,
                     bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off,
                     conv1_stride=conv1_stride)
             else:
                 self.body = ResBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
-                    bn_use_global_stats=bn_use_global_stats)
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off,
                     activation=None)
             self.activ = nn.Activation("relu")
 
@@ -200,11 +217,14 @@ class ResInitBlock(HybridBlock):
         Number of output channels.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  **kwargs):
         super(ResInitBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -212,7 +232,8 @@ class ResInitBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=2,
-                bn_use_global_stats=bn_use_global_stats)
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
             self.pool = nn.MaxPool2D(
                 pool_size=3,
                 strides=2,
@@ -241,6 +262,8 @@ class ResNet(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -254,6 +277,7 @@ class ResNet(HybridBlock):
                  bottleneck,
                  conv1_stride,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -267,7 +291,8 @@ class ResNet(HybridBlock):
             self.features.add(ResInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
@@ -279,6 +304,7 @@ class ResNet(HybridBlock):
                             out_channels=out_channels,
                             strides=strides,
                             bn_use_global_stats=bn_use_global_stats,
+                            bn_cudnn_off=bn_cudnn_off,
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels

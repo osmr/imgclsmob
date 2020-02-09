@@ -11,7 +11,7 @@ from mxnet.gluon.data.vision import transforms
 from gluon.datasets.voc_seg_dataset import VOCSegDataset
 from gluon.datasets.ade20k_seg_dataset import ADE20KSegDataset
 from gluon.datasets.cityscapes_seg_dataset import CityscapesSegDataset
-from gluon.datasets.coco_seg_dataset import COCOSegDataset
+from gluon.datasets.coco_seg_dataset import CocoSegDataset
 # from gluoncv.data.mscoco.segmentation import COCOSegmentation
 
 
@@ -114,10 +114,10 @@ def get_metainfo(dataset_name):
             "ignore_bg": CityscapesSegDataset.ignore_bg}
     elif dataset_name == "COCO":
         return {
-            "vague_idx": COCOSegDataset.vague_idx,
-            "use_vague": COCOSegDataset.use_vague,
-            "background_idx": COCOSegDataset.background_idx,
-            "ignore_bg": COCOSegDataset.ignore_bg}
+            "vague_idx": CocoSegDataset.vague_idx,
+            "use_vague": CocoSegDataset.use_vague,
+            "background_idx": CocoSegDataset.background_idx,
+            "ignore_bg": CocoSegDataset.ignore_bg}
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 
@@ -143,7 +143,7 @@ def get_test_data_source(dataset_name,
     elif dataset_name == "Cityscapes":
         dataset_class = CityscapesSegDataset
     elif dataset_name == "COCO":
-        dataset_class = COCOSegDataset
+        dataset_class = CocoSegDataset
     else:
         raise Exception('Unrecognized dataset: {}'.format(dataset_name))
 

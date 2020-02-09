@@ -97,6 +97,7 @@ from .models.diapreresnet_cifar import *
 
 from .models.octresnet import *
 
+from .models.resneta import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
@@ -861,6 +862,10 @@ _models = {
     'isqrtcovresnet50b': isqrtcovresnet50b,
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
+
+    'resneta50b': resneta50b,
+    'resneta101b': resneta101b,
+    'resneta152b': resneta152b,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

@@ -88,6 +88,7 @@ from .models.diapreresnet_cifar import *
 
 from .models.octresnet import *
 
+from .models.resneta import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
@@ -813,6 +814,10 @@ _models = {
     'diapreresnet1202_cifar10': diapreresnet1202_cifar10,
     'diapreresnet1202_cifar100': diapreresnet1202_cifar100,
     'diapreresnet1202_svhn': diapreresnet1202_svhn,
+
+    'resneta50b': resneta50b,
+    'resneta101b': resneta101b,
+    'resneta152b': resneta152b,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

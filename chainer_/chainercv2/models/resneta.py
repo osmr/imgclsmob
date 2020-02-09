@@ -1,19 +1,22 @@
 """
-    ResNet(A) with average downsampling for ImageNet-1K, implemented in Gluon.
+    ResNet(A) with average downsampling for ImageNet-1K, implemented in Chainer.
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
 __all__ = ['ResNetA', 'resneta50b', 'resneta101b', 'resneta152b']
 
 import os
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block
+import chainer.functions as F
+import chainer.links as L
+from chainer import Chain
+from functools import partial
+from chainer.serializers import load_npz
+from .common import conv1x1_block, SimpleSequential
 from .resnet import ResBlock, ResBottleneck
 from .senet import SEInitBlock
 
 
-class ResADownBlock(HybridBlock):
+class ResADownBlock(Chain):
     """
     ResNet(A) downsample block for the identity branch of a residual unit.
 
@@ -23,44 +26,40 @@ class ResADownBlock(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    dilation : int or tuple/list of 2 int, default 1
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    dilate : int or tuple/list of 2 int, default 1
         Dilation value for the second convolution layer in bottleneck.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
-                 dilation=1,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
+                 stride,
+                 dilate=1,
                  **kwargs):
         super(ResADownBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.pool = nn.AvgPool2D(
-                pool_size=(strides if dilation == 1 else 1),
-                strides=(strides if dilation == 1 else 1),
-                ceil_mode=True,
-                count_include_pad=False)
+        with self.init_scope():
+            # self.pool = partial(
+            #     F.average_pooling_2d,
+            #     ksize=(stride if dilate == 1 else 1),
+            #     stride=(stride if dilate == 1 else 1))
+            self.pool = partial(
+                F.average_pooling_nd,
+                ksize=(stride if dilate == 1 else 1),
+                stride=(stride if dilate == 1 else 1),
+                pad_value=None)
             self.conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off,
                 activation=None)
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.pool(x)
         x = self.conv(x)
         return x
 
 
-class ResAUnit(HybridBlock):
+class ResAUnit(Chain):
     """
     ResNet(A) unit with residual connection.
 
@@ -70,16 +69,12 @@ class ResAUnit(HybridBlock):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
         Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
+    dilate : int or tuple/list of 2 int, default 1
         Dilation value for the second convolution layer in bottleneck.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default False
@@ -88,46 +83,38 @@ class ResAUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
-                 padding=1,
-                 dilation=1,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
+                 stride,
+                 pad=1,
+                 dilate=1,
                  bottleneck=True,
                  conv1_stride=False,
                  **kwargs):
         super(ResAUnit, self).__init__(**kwargs)
-        self.resize_identity = (in_channels != out_channels) or (strides != 1)
+        self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        with self.name_scope():
+        with self.init_scope():
             if bottleneck:
                 self.body = ResBottleneck(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides,
-                    padding=padding,
-                    dilation=dilation,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off,
+                    stride=stride,
+                    pad=pad,
+                    dilate=dilate,
                     conv1_stride=conv1_stride)
             else:
                 self.body = ResBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off)
+                    stride=stride)
             if self.resize_identity:
                 self.identity_block = ResADownBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides,
-                    dilation=dilation,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off)
-            self.activ = nn.Activation("relu")
+                    stride=stride,
+                    dilate=dilate)
+            self.activ = F.relu
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         if self.resize_identity:
             identity = self.identity_block(x)
         else:
@@ -138,7 +125,7 @@ class ResAUnit(HybridBlock):
         return x
 
 
-class ResNetA(HybridBlock):
+class ResNetA(Chain):
     """
     ResNet(A) with average downsampling model from 'Deep Residual Learning for Image Recognition,'
     https://arxiv.org/abs/1512.03385.
@@ -155,11 +142,6 @@ class ResNetA(HybridBlock):
         Whether to use stride in the first or the second convolution layer in units.
     dilated : bool, default False
         Whether to use dilation.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -172,8 +154,6 @@ class ResNetA(HybridBlock):
                  init_block_channels,
                  bottleneck,
                  conv1_stride,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
                  dilated=False,
                  in_channels=3,
                  in_size=(224, 224),
@@ -183,45 +163,47 @@ class ResNetA(HybridBlock):
         self.in_size = in_size
         self.classes = classes
 
-        with self.name_scope():
-            self.features = nn.HybridSequential(prefix="")
-            self.features.add(SEInitBlock(
-                in_channels=in_channels,
-                out_channels=init_block_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
-                with stage.name_scope():
-                    for j, out_channels in enumerate(channels_per_stage):
-                        if dilated:
-                            strides = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
-                            dilation = (2 ** max(0, i - 1 - int(j == 0)))
-                        else:
-                            strides = 2 if (j == 0) and (i != 0) else 1
-                            dilation = 1
-                        stage.add(ResAUnit(
-                            in_channels=in_channels,
-                            out_channels=out_channels,
-                            strides=strides,
-                            padding=dilation,
-                            dilation=dilation,
-                            bn_use_global_stats=bn_use_global_stats,
-                            bn_cudnn_off=bn_cudnn_off,
-                            bottleneck=bottleneck,
-                            conv1_stride=conv1_stride))
-                        in_channels = out_channels
-                self.features.add(stage)
-            self.features.add(nn.GlobalAvgPool2D())
+        with self.init_scope():
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                setattr(self.features, "init_block", SEInitBlock(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            if dilated:
+                                stride = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
+                                dilate = (2 ** max(0, i - 1 - int(j == 0)))
+                            else:
+                                stride = 2 if (j == 0) and (i != 0) else 1
+                                dilate = 1
+                            setattr(stage, "unit{}".format(j + 1), ResAUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                pad=dilate,
+                                dilate=dilate,
+                                bottleneck=bottleneck,
+                                conv1_stride=conv1_stride))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, "final_pool", partial(
+                    F.average_pooling_2d,
+                    ksize=(in_size[0] // 32, in_size[1] // 32)))
 
-            self.output = nn.HybridSequential(prefix="")
-            self.output.add(nn.Flatten())
-            self.output.add(nn.Dense(
-                units=classes,
-                in_units=in_channels))
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, "flatten", partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, "fc", L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-    def hybrid_forward(self, F, x):
+    def __call__(self, x):
         x = self.features(x)
         x = self.output(x)
         return x
@@ -232,8 +214,7 @@ def get_resnetda(blocks,
                  width_scale=1.0,
                  model_name=None,
                  pretrained=False,
-                 ctx=cpu(),
-                 root=os.path.join("~", ".mxnet", "models"),
+                 root=os.path.join("~", ".chainer", "models"),
                  **kwargs):
     """
     Create ResNet(A) with average downsampling model with specific parameters.
@@ -250,9 +231,7 @@ def get_resnetda(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     if blocks == 10:
@@ -305,11 +284,11 @@ def get_resnetda(blocks,
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
         from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
+        load_npz(
+            file=get_model_file(
                 model_name=model_name,
                 local_model_store_dir_path=root),
-            ctx=ctx)
+            obj=net)
 
     return net
 
@@ -323,9 +302,7 @@ def resneta50b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_resnetda(blocks=50, conv1_stride=False, model_name="resneta50b", **kwargs)
@@ -340,9 +317,7 @@ def resneta101b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_resnetda(blocks=101, conv1_stride=False, model_name="resneta101b", **kwargs)
@@ -357,9 +332,7 @@ def resneta152b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_resnetda(blocks=152, conv1_stride=False, model_name="resneta152b", **kwargs)
@@ -367,7 +340,9 @@ def resneta152b(**kwargs):
 
 def _test():
     import numpy as np
-    import mxnet as mx
+    import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -379,26 +354,14 @@ def _test():
 
     for model in models:
 
-        net = model(
-            pretrained=pretrained)
-
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        # net.hybridize()
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        net = model(pretrained=pretrained)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != resneta50b or weight_count == 25576264)
         assert (model != resneta101b or weight_count == 44568392)
         assert (model != resneta152b or weight_count == 60212040)
 
-        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
         assert (y.shape == (1, 1000))
 

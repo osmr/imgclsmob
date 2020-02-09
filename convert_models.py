@@ -1189,16 +1189,16 @@ def update_and_initialize_logging(args):
     packages = []
     pip_packages = []
     if (args.src_fwk == "gluon") or (args.dst_fwk == "gluon"):
-        packages += ["mxnet"]
-        pip_packages += ["mxnet", "mxnet-cu100", "mxnet-cu101"]
+        packages += ["mxnet, numpy"]
+        pip_packages += ["mxnet-cu101"]
     if (args.src_fwk == "pytorch") or (args.dst_fwk == "pytorch"):
         packages += ["torch", "torchvision"]
     if (args.src_fwk == "chainer") or (args.dst_fwk == "chainer"):
         packages += ["chainer"]
-        pip_packages += ["cupy-cuda92", "cupy-cuda100", "cupy-cuda101", "chainer"]
+        pip_packages += ["cupy-cuda101", "chainer"]
     if (args.src_fwk == "keras") or (args.dst_fwk == "keras"):
         packages += ["keras"]
-        pip_packages += ["keras", "keras-mxnet", "mxnet-cu100", "mxnet-cu101"]
+        pip_packages += ["keras", "keras-mxnet", "mxnet-cu101"]
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
         pip_packages += ["tensorflow", "tensorflow-gpu", "tensorpack"]

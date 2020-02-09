@@ -67,6 +67,7 @@ from .models.pyramidnet_cifar import *
 from .models.densenet_cifar import *
 from .models.wrn_cifar import *
 
+from .models.resneta import *
 from .models.resnetd import *
 
 from .models.resnet_cub import *
@@ -684,6 +685,10 @@ _models = {
     'wrn40_8_cifar10': wrn40_8_cifar10,
     'wrn40_8_cifar100': wrn40_8_cifar100,
     'wrn40_8_svhn': wrn40_8_svhn,
+
+    'resneta50b': resneta50b,
+    'resneta101b': resneta101b,
+    'resneta152b': resneta152b,
 
     'resnetd50b': resnetd50b,
     'resnetd101b': resnetd101b,

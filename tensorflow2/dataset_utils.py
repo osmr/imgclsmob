@@ -13,7 +13,7 @@ from .datasets.svhn_cls_dataset import SVHNMetaInfo
 from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
-from .datasets.coco_seg_dataset import COCOMetaInfo
+from .datasets.coco_seg_dataset import CocoSegMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -39,7 +39,7 @@ def get_dataset_metainfo(dataset_name):
         "VOC": VOCMetaInfo,
         "ADE20K": ADE20KMetaInfo,
         "Cityscapes": CityscapesMetaInfo,
-        "COCO": COCOMetaInfo,
+        "CocoSeg": CocoSegMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()

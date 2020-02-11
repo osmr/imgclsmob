@@ -89,6 +89,7 @@ def get_train_data_source(ds_metainfo,
             transform=(transform_train if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_train)
+        ds_metainfo.update_from_dataset(dataset)
         if not ds_metainfo.train_use_weighted_sampler:
             return DataLoader(
                 dataset=dataset,
@@ -142,6 +143,7 @@ def get_val_data_source(ds_metainfo,
             transform=(transform_val if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_val)
+        ds_metainfo.update_from_dataset(dataset)
         return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
@@ -182,6 +184,7 @@ def get_test_data_source(ds_metainfo,
             transform=(transform_test if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
             dataset = dataset.transform_first(fn=transform_test)
+        ds_metainfo.update_from_dataset(dataset)
         return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
@@ -189,29 +192,39 @@ def get_test_data_source(ds_metainfo,
             num_workers=num_workers)
 
 
-def get_batch_fn(use_imgrec):
+def get_batch_fn(ds_metainfo):
     """
     Get function for splitting data after extraction from data loader.
 
     Parameters
     ----------
-    use_imgrec : bool
-        Whether to use ImageRecordIter.
+    ds_metainfo : DatasetMetaInfo
+        Dataset metainfo.
 
     Returns
     -------
     func
         Desired function.
     """
-    if use_imgrec:
-        def batch_fn(batch, ctx):
-            data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-            label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-            return data, label
-        return batch_fn
-    else:
+    if ds_metainfo.ml_type == "hpe":
         def batch_fn(batch, ctx):
             data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-            label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-            return data, label
+            scale = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            center = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
+            score = split_and_load(batch[3], ctx_list=ctx, batch_axis=0)
+            img_id = split_and_load(batch[4], ctx_list=ctx, batch_axis=0)
+            return data, scale, center, score, img_id
         return batch_fn
+    else:
+        if ds_metainfo.use_imgrec:
+            def batch_fn(batch, ctx):
+                data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+                label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+                return data, label
+            return batch_fn
+        else:
+            def batch_fn(batch, ctx):
+                data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+                label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+                return data, label
+            return batch_fn

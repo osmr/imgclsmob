@@ -1042,9 +1042,9 @@ _models = {
     'oth_simple_pose_resnet101_v1d': oth_simple_pose_resnet101_v1d,
     'oth_simple_pose_resnet152_v1d': oth_simple_pose_resnet152_v1d,
 
-    'oth_resnet50_v1d': oth_resnet50_v1d,
-    'oth_resnet101_v1d': oth_resnet101_v1d,
-    'oth_resnet152_v1d': oth_resnet152_v1d,
+    # 'oth_resnet50_v1d': oth_resnet50_v1d,
+    # 'oth_resnet101_v1d': oth_resnet101_v1d,
+    # 'oth_resnet152_v1d': oth_resnet152_v1d,
 }
 
 

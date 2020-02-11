@@ -10,6 +10,7 @@ import mxnet as mx
 from .gluoncv2.model_provider import get_model
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.hpe_metrics import CocoHpeOksApMetric
 
 
 def prepare_mx_context(num_gpus,
@@ -224,6 +225,63 @@ def validate(metric,
     return metric
 
 
+def validate_hpe(metric,
+                 net,
+                 val_data,
+                 batch_fn,
+                 data_source_needs_reset,
+                 dtype,
+                 ctx):
+    """
+    Core validation/testing routine for HPE task.
+
+    Parameters:
+    ----------
+    metric : EvalMetric
+        Metric object instance.
+    net : HybridBlock
+        Model.
+    val_data : DataLoader or ImageRecordIter
+        Data loader or ImRec-iterator.
+    batch_fn : func
+        Function for splitting data after extraction from data loader.
+    data_source_needs_reset : bool
+        Whether to reset data (if test_data is ImageRecordIter).
+    dtype : str
+        Base data type for tensors.
+    ctx : Context
+        MXNet context.
+
+    Returns
+    -------
+    EvalMetric
+        Metric object instance.
+    """
+    from gluoncv.data.transforms.pose import get_final_preds
+
+    if data_source_needs_reset:
+        val_data.reset()
+    metric.reset()
+    for batch in val_data:
+        data_list, scale_list, center_list, score_list, img_id_list = batch_fn(batch, ctx)
+        outputs_list = [net(X.astype(dtype, copy=False)) for X in data_list]
+
+        if len(outputs_list) > 1:
+            outputs_stack = mx.nd.concat(*[o.as_in_context(mx.cpu()) for o in outputs_list], dim=0)
+            center_stack = mx.nd.concat(*[o.as_in_context(mx.cpu()) for o in center_list], dim=0)
+            score_stack = mx.nd.concat(*[o.as_in_context(mx.cpu()) for o in score_list], dim=0)
+            img_id_stack = mx.nd.concat(*[o.as_in_context(mx.cpu()) for o in img_id_list], dim=0)
+        else:
+            outputs_stack = outputs_list[0].as_in_context(mx.cpu())
+            center_stack = center_list[0].as_in_context(mx.cpu())
+            score_stack = score_list[0].as_in_context(mx.cpu())
+            img_id_stack = img_id_list[0].as_in_context(mx.cpu())
+
+        preds, maxvals = get_final_preds(outputs_stack, center_stack.asnumpy(), score_stack.asnumpy())
+        metric.update(outputs_stack, maxvals, score_stack, img_id_stack)
+    return metric
+
+
 def report_accuracy(metric,
                     extended_log=False):
     """
@@ -283,6 +341,8 @@ def get_metric(metric_name, metric_extra_kwargs):
         return PixelAccuracyMetric(**metric_extra_kwargs)
     elif metric_name == "MeanIoUMetric":
         return MeanIoUMetric(**metric_extra_kwargs)
+    elif metric_name == "CocoHpeOksApMetric":
+        return CocoHpeOksApMetric(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 

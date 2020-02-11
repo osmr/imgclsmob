@@ -9,7 +9,7 @@ import argparse
 from sys import version_info
 from common.logger_utils import initialize_logging
 from gluon.utils import prepare_mx_context, prepare_model
-from gluon.utils import calc_net_weight_count, validate
+from gluon.utils import calc_net_weight_count, validate, validate_hpe
 from gluon.utils import get_composite_metric
 from gluon.utils import report_accuracy
 from gluon.dataset_utils import get_dataset_metainfo
@@ -166,7 +166,8 @@ def calc_model_accuracy(net,
                         calc_weight_count=False,
                         calc_flops=False,
                         calc_flops_only=True,
-                        extended_log=False):
+                        extended_log=False,
+                        ml_type="imgcls"):
     """
     Main test routine.
 
@@ -198,6 +199,8 @@ def calc_model_accuracy(net,
         Whether to only calculate FLOPs without testing.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+    ml_type : str, default 'imgcls'
+        Machine learning type.
 
     Returns
     -------
@@ -206,7 +209,8 @@ def calc_model_accuracy(net,
     """
     if not calc_flops_only:
         tic = time.time()
-        validate(
+        validate_fn = validate if ml_type != "hpe" else validate_hpe
+        validate_fn(
             metric=metric,
             net=net,
             val_data=test_data,
@@ -273,28 +277,27 @@ def test_model(args):
         dtype=args.dtype,
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,
-        classes=args.num_classes,
+        classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels,
         do_hybridize=(ds_metainfo.allow_hybridize and (not args.calc_flops)),
         ctx=ctx)
     assert (hasattr(net, "in_size"))
     input_image_size = net.in_size
 
-    if args.data_subset == "val":
-        get_test_data_source_class = get_val_data_source
-        test_metric = get_composite_metric(
-            metric_names=ds_metainfo.val_metric_names,
-            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
-    else:
-        get_test_data_source_class = get_test_data_source
-        test_metric = get_composite_metric(
-            metric_names=ds_metainfo.test_metric_names,
-            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+    get_test_data_source_class = get_val_data_source if args.data_subset == "val" else get_test_data_source
     test_data = get_test_data_source_class(
         ds_metainfo=ds_metainfo,
         batch_size=args.batch_size,
         num_workers=args.num_workers)
-    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
+    batch_fn = get_batch_fn(ds_metainfo=ds_metainfo)
+    if args.data_subset == "val":
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.val_metric_names,
+            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+    else:
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.test_metric_names,
+            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
 
     if args.show_progress:
         from tqdm import tqdm
@@ -315,7 +318,8 @@ def test_model(args):
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        ml_type=ds_metainfo.ml_type)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

@@ -5,11 +5,13 @@ __all__ = ['oth_simple_pose_resnet18_v1b', 'oth_simple_pose_resnet50_v1b', 'oth_
            'oth_simple_pose_resnet152_v1d', 'oth_resnet50_v1d', 'oth_resnet101_v1d',
            'oth_resnet152_v1d']
 
+import mxnet as mx
 from mxnet.context import cpu
 from mxnet.gluon.block import HybridBlock
 from mxnet.gluon import nn
 from mxnet import initializer
 import gluoncv as gcv
+from gluoncv.data.transforms.pose import get_final_preds
 
 
 class SimplePoseResNet(HybridBlock):
@@ -24,8 +26,12 @@ class SimplePoseResNet(HybridBlock):
                  num_deconv_kernels=(4, 4, 4),
                  final_conv_kernel=1,
                  deconv_with_bias=False,
+                 in_channels=3,
+                 in_size=(256, 192),
                  **kwargs):
         super(SimplePoseResNet, self).__init__(**kwargs)
+        assert (in_channels == 3)
+        self.in_size = in_size
 
         from gluoncv.model_zoo import get_model
         base_network = get_model(
@@ -106,13 +112,17 @@ class SimplePoseResNet(HybridBlock):
 
         return layer
 
-    def hybrid_forward(self, F, x):
+    def hybrid_forward(self, F, x, center=None, scale=None):
         x = self.resnet(x)
 
         x = self.deconv_layers(x)
         x = self.final_layer(x)
 
-        return x
+        if center is not None:
+            y, maxvals = get_final_preds(x.as_in_context(mx.cpu()), center.asnumpy(), scale.asnumpy())
+            return y, maxvals
+        else:
+            return x
 
 
 def get_simple_pose_resnet(base_name,

@@ -4,6 +4,7 @@
 
 import os
 import copy
+import cv2
 import numpy as np
 import mxnet as mx
 from mxnet.gluon.data import dataset
@@ -62,14 +63,13 @@ class CocoHpeDataset(dataset.Dataset):
                  transform=None,
                  splits=("person_keypoints_val2017",),
                  check_centers=False,
-                 skip_empty=True,
-                 **kwargs):
-        super(CocoHpeDataset, self).__init__(
-            root=root,
-            mode=mode,
-            transform=transform,
-            **kwargs)
+                 skip_empty=True):
+        super(CocoHpeDataset, self).__init__()
         self._root = os.path.expanduser(root)
+        self.mode = mode
+        self.transform = transform
+        self.num_class = len(self.CLASSES)
+
         if isinstance(splits, mx.base.string_types):
             splits = [splits]
         self._splits = splits
@@ -129,7 +129,10 @@ class CocoHpeDataset(dataset.Dataset):
 
         label = copy.deepcopy(self._labels[idx])
         img = mx.image.imread(img_path, 1)
-        return img, (label, img_id)
+
+        if self.transform is not None:
+            img, scale, center, score = self.transform(img, label)
+        return img, scale, center, score, img_id
 
     def _load_jsons(self):
         """
@@ -192,7 +195,7 @@ class CocoHpeDataset(dataset.Dataset):
             if max(obj["keypoints"]) == 0:
                 continue
             # convert from (x, y, w, h) to (xmin, ymin, xmax, ymax) and clip bound
-            xmin, ymin, xmax, ymax = bbox_clip_xyxy(bbox_xywh_to_xyxy(obj["bbox"]), width, height)
+            xmin, ymin, xmax, ymax = self.bbox_clip_xyxy(self.bbox_xywh_to_xyxy(obj["bbox"]), width, height)
             # require non-zero box area
             if obj['area'] <= 0 or xmax <= xmin or ymax <= ymin:
                 continue
@@ -251,79 +254,185 @@ class CocoHpeDataset(dataset.Dataset):
         num = float(np.sum(keypoints[:, 0, 1]))
         return np.array([keypoint_x / num, keypoint_y / num]), num
 
+    @staticmethod
+    def bbox_clip_xyxy(xyxy, width, height):
+        """
+        Clip bounding box with format (xmin, ymin, xmax, ymax) to specified boundary.
 
-def bbox_clip_xyxy(xyxy, width, height):
-    """
-    Clip bounding box with format (xmin, ymin, xmax, ymax) to specified boundary.
+        All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
 
-    All bounding boxes will be clipped to the new region `(0, 0, width, height)`.
+        Parameters
+        ----------
+        xyxy : list, tuple or numpy.ndarray
+            The bbox in format (xmin, ymin, xmax, ymax).
+            If numpy.ndarray is provided, we expect multiple bounding boxes with
+            shape `(N, 4)`.
+        width : int or float
+            Boundary width.
+        height : int or float
+            Boundary height.
 
-    Parameters
-    ----------
-    xyxy : list, tuple or numpy.ndarray
-        The bbox in format (xmin, ymin, xmax, ymax).
-        If numpy.ndarray is provided, we expect multiple bounding boxes with
-        shape `(N, 4)`.
-    width : int or float
-        Boundary width.
-    height : int or float
-        Boundary height.
+        Returns
+        -------
+        tuple or np.array
+            Description of returned object.
+        """
+        if isinstance(xyxy, (tuple, list)):
+            if not len(xyxy) == 4:
+                raise IndexError("Bounding boxes must have 4 elements, given {}".format(len(xyxy)))
+            x1 = np.minimum(width - 1, np.maximum(0, xyxy[0]))
+            y1 = np.minimum(height - 1, np.maximum(0, xyxy[1]))
+            x2 = np.minimum(width - 1, np.maximum(0, xyxy[2]))
+            y2 = np.minimum(height - 1, np.maximum(0, xyxy[3]))
+            return x1, y1, x2, y2
+        elif isinstance(xyxy, np.ndarray):
+            if not xyxy.size % 4 == 0:
+                raise IndexError("Bounding boxes must have n * 4 elements, given {}".format(xyxy.shape))
+            x1 = np.minimum(width - 1, np.maximum(0, xyxy[:, 0]))
+            y1 = np.minimum(height - 1, np.maximum(0, xyxy[:, 1]))
+            x2 = np.minimum(width - 1, np.maximum(0, xyxy[:, 2]))
+            y2 = np.minimum(height - 1, np.maximum(0, xyxy[:, 3]))
+            return np.hstack((x1, y1, x2, y2))
+        else:
+            raise TypeError("Expect input xywh a list, tuple or numpy.ndarray, given {}".format(type(xyxy)))
 
-    Returns
-    -------
-    tuple or np.array
-        Description of returned object.
-    """
-    if isinstance(xyxy, (tuple, list)):
-        if not len(xyxy) == 4:
-            raise IndexError("Bounding boxes must have 4 elements, given {}".format(len(xyxy)))
-        x1 = np.minimum(width - 1, np.maximum(0, xyxy[0]))
-        y1 = np.minimum(height - 1, np.maximum(0, xyxy[1]))
-        x2 = np.minimum(width - 1, np.maximum(0, xyxy[2]))
-        y2 = np.minimum(height - 1, np.maximum(0, xyxy[3]))
-        return x1, y1, x2, y2
-    elif isinstance(xyxy, np.ndarray):
-        if not xyxy.size % 4 == 0:
-            raise IndexError("Bounding boxes must have n * 4 elements, given {}".format(xyxy.shape))
-        x1 = np.minimum(width - 1, np.maximum(0, xyxy[:, 0]))
-        y1 = np.minimum(height - 1, np.maximum(0, xyxy[:, 1]))
-        x2 = np.minimum(width - 1, np.maximum(0, xyxy[:, 2]))
-        y2 = np.minimum(height - 1, np.maximum(0, xyxy[:, 3]))
-        return np.hstack((x1, y1, x2, y2))
+    @staticmethod
+    def bbox_xywh_to_xyxy(xywh):
+        """
+        Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
+
+        Parameters
+        ----------
+        xywh : list, tuple or numpy.ndarray
+            The bbox in format (x, y, w, h).
+            If numpy.ndarray is provided, we expect multiple bounding boxes with
+            shape `(N, 4)`.
+
+        Returns
+        -------
+        tuple or np.ndarray
+            The converted bboxes in format (xmin, ymin, xmax, ymax).
+            If input is numpy.ndarray, return is numpy.ndarray correspondingly.
+
+        """
+        if isinstance(xywh, (tuple, list)):
+            if not len(xywh) == 4:
+                raise IndexError("Bounding boxes must have 4 elements, given {}".format(len(xywh)))
+            w, h = np.maximum(xywh[2] - 1, 0), np.maximum(xywh[3] - 1, 0)
+            return xywh[0], xywh[1], xywh[0] + w, xywh[1] + h
+        elif isinstance(xywh, np.ndarray):
+            if not xywh.size % 4 == 0:
+                raise IndexError("Bounding boxes must have n * 4 elements, given {}".format(xywh.shape))
+            xyxy = np.hstack((xywh[:, :2], xywh[:, :2] + np.maximum(0, xywh[:, 2:4] - 1)))
+            return xyxy
+        else:
+            raise TypeError("Expect input xywh a list, tuple or numpy.ndarray, given {}".format(type(xywh)))
+
+
+class CocoHpeValTransform(object):
+    def __init__(self,
+                 ds_metainfo):
+        self.ds_metainfo = ds_metainfo
+        self.image_size = self.ds_metainfo.input_image_size
+        height = self.image_size[0]
+        width = self.image_size[1]
+        self.aspect_ratio = float(width / height)
+        self.mean = ds_metainfo.mean_rgb
+        self.std = ds_metainfo.std_rgb
+
+    def __call__(self, src, label):
+        bbox = label["bbox"]
+        assert len(bbox) == 4
+        xmin, ymin, xmax, ymax = bbox
+        center, scale = _box_to_center_scale(xmin, ymin, xmax - xmin, ymax - ymin, self.aspect_ratio)
+        score = label.get("score", 1)
+
+        h, w = self.image_size
+        trans = get_affine_transform(center, scale, 0, [w, h])
+        img = cv2.warpAffine(src.asnumpy(), trans, (int(w), int(h)), flags=cv2.INTER_LINEAR)
+
+        img = mx.nd.image.to_tensor(mx.nd.array(img))
+        img = mx.nd.image.normalize(img, mean=self.mean, std=self.std)
+
+        return img, scale, center, score
+
+
+def _box_to_center_scale(x, y, w, h, aspect_ratio=1.0, scale_mult=1.25):
+    pixel_std = 1
+    center = np.zeros((2,), dtype=np.float32)
+    center[0] = x + w * 0.5
+    center[1] = y + h * 0.5
+
+    if w > aspect_ratio * h:
+        h = w / aspect_ratio
+    elif w < aspect_ratio * h:
+        w = h * aspect_ratio
+    scale = np.array(
+        [w * 1.0 / pixel_std, h * 1.0 / pixel_std], dtype=np.float32)
+    if center[0] != -1:
+        scale = scale * scale_mult
+    return center, scale
+
+
+def get_dir(src_point, rot_rad):
+    sn, cs = np.sin(rot_rad), np.cos(rot_rad)
+
+    src_result = [0, 0]
+    src_result[0] = src_point[0] * cs - src_point[1] * sn
+    src_result[1] = src_point[0] * sn + src_point[1] * cs
+
+    return src_result
+
+
+def crop(img, center, scale, output_size, rot=0):
+    trans = get_affine_transform(center, scale, rot, output_size)
+    dst_img = cv2.warpAffine(
+        img,
+        trans,
+        (int(output_size[0]), int(output_size[1])),
+        flags=cv2.INTER_LINEAR)
+    return dst_img
+
+
+def get_3rd_point(a, b):
+    direct = a - b
+    return b + np.array([-direct[1], direct[0]], dtype=np.float32)
+
+
+def get_affine_transform(center,
+                         scale,
+                         rot,
+                         output_size,
+                         shift=np.array([0, 0], dtype=np.float32),
+                         inv=0):
+    if not isinstance(scale, np.ndarray) and not isinstance(scale, list):
+        scale = np.array([scale, scale])
+
+    scale_tmp = scale
+    src_w = scale_tmp[0]
+    dst_w = output_size[0]
+    dst_h = output_size[1]
+
+    rot_rad = np.pi * rot / 180
+    src_dir = get_dir([0, src_w * -0.5], rot_rad)
+    dst_dir = np.array([0, dst_w * -0.5], np.float32)
+
+    src = np.zeros((3, 2), dtype=np.float32)
+    dst = np.zeros((3, 2), dtype=np.float32)
+    src[0, :] = center + scale_tmp * shift
+    src[1, :] = center + src_dir + scale_tmp * shift
+    dst[0, :] = [dst_w * 0.5, dst_h * 0.5]
+    dst[1, :] = np.array([dst_w * 0.5, dst_h * 0.5]) + dst_dir
+
+    src[2:, :] = get_3rd_point(src[0, :], src[1, :])
+    dst[2:, :] = get_3rd_point(dst[0, :], dst[1, :])
+
+    if inv:
+        trans = cv2.getAffineTransform(np.float32(dst), np.float32(src))
     else:
-        raise TypeError("Expect input xywh a list, tuple or numpy.ndarray, given {}".format(type(xyxy)))
+        trans = cv2.getAffineTransform(np.float32(src), np.float32(dst))
 
-
-def bbox_xywh_to_xyxy(xywh):
-    """
-    Convert bounding boxes from format (xmin, ymin, w, h) to (xmin, ymin, xmax, ymax)
-
-    Parameters
-    ----------
-    xywh : list, tuple or numpy.ndarray
-        The bbox in format (x, y, w, h).
-        If numpy.ndarray is provided, we expect multiple bounding boxes with
-        shape `(N, 4)`.
-
-    Returns
-    -------
-    tuple or np.ndarray
-        The converted bboxes in format (xmin, ymin, xmax, ymax).
-        If input is numpy.ndarray, return is numpy.ndarray correspondingly.
-
-    """
-    if isinstance(xywh, (tuple, list)):
-        if not len(xywh) == 4:
-            raise IndexError("Bounding boxes must have 4 elements, given {}".format(len(xywh)))
-        w, h = np.maximum(xywh[2] - 1, 0), np.maximum(xywh[3] - 1, 0)
-        return xywh[0], xywh[1], xywh[0] + w, xywh[1] + h
-    elif isinstance(xywh, np.ndarray):
-        if not xywh.size % 4 == 0:
-            raise IndexError("Bounding boxes must have n * 4 elements, given {}".format(xywh.shape))
-        xyxy = np.hstack((xywh[:, :2], xywh[:, :2] + np.maximum(0, xywh[:, 2:4] - 1)))
-        return xyxy
-    else:
-        raise TypeError("Expect input xywh a list, tuple or numpy.ndarray, given {}".format(type(xywh)))
+    return trans
 
 
 class CocoHpeMetaInfo(DatasetMetaInfo):
@@ -336,47 +445,33 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.num_training_samples = None
         self.in_channels = 3
         self.num_classes = CocoHpeDataset.classes
-        self.input_image_size = (480, 480)
+        self.input_image_size = (256, 256)
         self.train_metric_capts = None
         self.train_metric_names = None
         self.train_metric_extra_kwargs = None
         self.val_metric_capts = None
         self.val_metric_names = None
-        self.test_metric_extra_kwargs = [{}, {}]
-        self.test_metric_capts = ["Val.PixAcc", "Val.IoU"]
-        self.test_metric_names = ["PixelAccuracyMetric", "MeanIoUMetric"]
-        self.test_metric_extra_kwargs = []
-        self.saver_acc_ind = 1
+        self.test_metric_capts = ["Val.CocoOksAp"]
+        self.test_metric_names = ["CocoHpeOksApMetric"]
+        self.test_metric_extra_kwargs = [
+            {"name": "OksAp",
+             "coco": None}]
+        self.saver_acc_ind = 0
         self.do_transform = True
-        self.train_transform = None
-        self.val_transform = None
-        self.test_transform = None
+        self.val_transform = CocoHpeValTransform
+        self.test_transform = CocoHpeValTransform
         self.ml_type = "hpe"
-        self.allow_hybridize = False
-        self.net_extra_kwargs = {"aux": False, "fixed_size": False}
-        self.load_ignore_extra = True
-        self.image_base_size = 520
-        self.image_crop_size = 480
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
 
-    def add_dataset_parser_arguments(self,
-                                     parser,
-                                     work_dir_path):
-        super(CocoHpeMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
-        parser.add_argument(
-            "--image-base-size",
-            type=int,
-            default=520,
-            help="base image size")
-        parser.add_argument(
-            "--image-crop-size",
-            type=int,
-            default=480,
-            help="crop image size")
+    def update_from_dataset(self,
+                            dataset):
+        """
+        Update dataset metainfo after a dataset class instance creation.
 
-    def update(self,
-               args):
-        super(CocoHpeMetaInfo, self).update(args)
-        self.image_base_size = args.image_base_size
-        self.image_crop_size = args.image_crop_size
+        Parameters:
+        ----------
+        args : obj
+            A dataset class instance.
+        """
+        self.test_metric_extra_kwargs[0]["coco"] = dataset.coco

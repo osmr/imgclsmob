@@ -5,13 +5,133 @@ __all__ = ['oth_simple_pose_resnet18_v1b', 'oth_simple_pose_resnet50_v1b', 'oth_
            'oth_simple_pose_resnet152_v1d', 'oth_resnet50_v1d', 'oth_resnet101_v1d',
            'oth_resnet152_v1d']
 
+import cv2
+import numpy as np
 import mxnet as mx
 from mxnet.context import cpu
 from mxnet.gluon.block import HybridBlock
 from mxnet.gluon import nn
 from mxnet import initializer
 import gluoncv as gcv
-from gluoncv.data.transforms.pose import get_final_preds
+
+
+def get_max_pred(batch_heatmaps):
+    batch_size = batch_heatmaps.shape[0]
+    num_joints = batch_heatmaps.shape[1]
+    width = batch_heatmaps.shape[3]
+    heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
+    idx = mx.nd.argmax(heatmaps_reshaped, 2)
+    maxvals = mx.nd.max(heatmaps_reshaped, 2)
+
+    maxvals = maxvals.reshape((batch_size, num_joints, 1))
+    idx = idx.reshape((batch_size, num_joints, 1))
+
+    preds = mx.nd.tile(idx, (1, 1, 2)).astype(np.float32)
+
+    preds[:, :, 0] = (preds[:, :, 0]) % width
+    preds[:, :, 1] = mx.nd.floor((preds[:, :, 1]) / width)
+
+    pred_mask = mx.nd.tile(mx.nd.greater(maxvals, 0.0), (1, 1, 2))
+    pred_mask = pred_mask.astype(np.float32)
+
+    preds *= pred_mask
+    return preds, maxvals
+
+
+def affine_transform(pt, t):
+    new_pt = np.array([pt[0], pt[1], 1.]).T
+    new_pt = np.dot(t, new_pt)
+    return new_pt[:2]
+
+
+def get_3rd_point(a, b):
+    direct = a - b
+    return b + np.array([-direct[1], direct[0]], dtype=np.float32)
+
+
+def get_dir(src_point, rot_rad):
+    sn, cs = np.sin(rot_rad), np.cos(rot_rad)
+
+    src_result = [0, 0]
+    src_result[0] = src_point[0] * cs - src_point[1] * sn
+    src_result[1] = src_point[0] * sn + src_point[1] * cs
+
+    return src_result
+
+
+def get_affine_transform(center,
+                         scale,
+                         rot,
+                         output_size,
+                         shift=np.array([0, 0], dtype=np.float32),
+                         inv=0):
+    if not isinstance(scale, np.ndarray) and not isinstance(scale, list):
+        scale = np.array([scale, scale])
+
+    scale_tmp = scale
+    src_w = scale_tmp[0]
+    dst_w = output_size[0]
+    dst_h = output_size[1]
+
+    rot_rad = np.pi * rot / 180
+    src_dir = get_dir([0, src_w * -0.5], rot_rad)
+    dst_dir = np.array([0, dst_w * -0.5], np.float32)
+
+    src = np.zeros((3, 2), dtype=np.float32)
+    dst = np.zeros((3, 2), dtype=np.float32)
+    src[0, :] = center + scale_tmp * shift
+    src[1, :] = center + src_dir + scale_tmp * shift
+    dst[0, :] = [dst_w * 0.5, dst_h * 0.5]
+    dst[1, :] = np.array([dst_w * 0.5, dst_h * 0.5]) + dst_dir
+
+    src[2:, :] = get_3rd_point(src[0, :], src[1, :])
+    dst[2:, :] = get_3rd_point(dst[0, :], dst[1, :])
+
+    if inv:
+        trans = cv2.getAffineTransform(np.float32(dst), np.float32(src))
+    else:
+        trans = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+
+    return trans
+
+
+def transform_preds(coords, center, scale, output_size):
+    target_coords = mx.nd.zeros(coords.shape)
+    trans = get_affine_transform(center, scale, 0, output_size, inv=1)
+    for p in range(coords.shape[0]):
+        target_coords[p, 0:2] = affine_transform(coords[p, 0:2].asnumpy(), trans)
+    return target_coords
+
+
+def _get_final_preds(batch_heatmaps, center, scale):
+    center_ = center.asnumpy()
+    scale_ = scale.asnumpy()
+
+    coords, maxvals = get_max_pred(batch_heatmaps)
+
+    heatmap_height = batch_heatmaps.shape[2]
+    heatmap_width = batch_heatmaps.shape[3]
+
+    # post-processing
+    for n in range(coords.shape[0]):
+        for p in range(coords.shape[1]):
+            hm = batch_heatmaps[n][p]
+            px = int(mx.nd.floor(coords[n][p][0] + 0.5).asscalar())
+            py = int(mx.nd.floor(coords[n][p][1] + 0.5).asscalar())
+            if 1 < px < heatmap_width-1 and 1 < py < heatmap_height-1:
+                diff = mx.nd.concat(hm[py][px+1] - hm[py][px-1],
+                                 hm[py+1][px] - hm[py-1][px],
+                                 dim=0)
+                coords[n][p] += mx.nd.sign(diff) * .25
+
+    preds = mx.nd.zeros_like(coords)
+
+    # Transform back
+    for i in range(coords.shape[0]):
+        preds[i] = transform_preds(coords[i], center_[i], scale_[i],
+                                   [heatmap_width, heatmap_height])
+
+    return preds, maxvals
 
 
 class SimplePoseResNet(HybridBlock):
@@ -119,10 +239,20 @@ class SimplePoseResNet(HybridBlock):
         x = self.final_layer(x)
 
         if center is not None:
-            y, maxvals = get_final_preds(x.as_in_context(mx.cpu()), center.asnumpy(), scale.asnumpy())
+            batch_heatmaps = x.as_in_context(mx.cpu())
+            center_ = center.as_in_context(mx.cpu())
+            scale_ = scale.as_in_context(mx.cpu())
+            y, maxvals = _get_final_preds(
+                batch_heatmaps=batch_heatmaps,
+                center=center_,
+                scale=scale_)
             return y, maxvals
         else:
             return x
+
+    @staticmethod
+    def calc_pose(batch_heatmaps, center, scale):
+        return _get_final_preds(batch_heatmaps, center, scale)
 
 
 def get_simple_pose_resnet(base_name,

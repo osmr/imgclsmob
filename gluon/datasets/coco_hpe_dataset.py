@@ -445,7 +445,7 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.num_training_samples = None
         self.in_channels = 3
         self.num_classes = CocoHpeDataset.classes
-        self.input_image_size = (256, 256)
+        self.input_image_size = (256, 192)
         self.train_metric_capts = None
         self.train_metric_names = None
         self.train_metric_extra_kwargs = None
@@ -455,7 +455,8 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoHpeOksApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "OksAp",
-             "coco": None}]
+             "coco": None,
+             "in_vis_thresh": 0.0}]
         self.saver_acc_ind = 0
         self.do_transform = True
         self.val_transform = CocoHpeValTransform

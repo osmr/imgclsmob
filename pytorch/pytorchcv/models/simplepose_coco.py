@@ -1,5 +1,5 @@
 """
-    SimplePose for COCO Keypoint, implemented in Gluon.
+    SimplePose for COCO Keypoint, implemented in PyTorch.
     Original paper: 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 """
 
@@ -9,33 +9,43 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 
 import os
 import numpy as np
-import mxnet as mx
 import cv2
-from mxnet import cpu
-from mxnet.gluon import nn, HybridBlock
-from .common import get_activation_layer, BatchNormExtra, conv1x1
+import torch
+import torch.nn as nn
+from .common import get_activation_layer, conv1x1
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
 
 def calc_keypoints_with_max_scores(heatmap):
+    batch = heatmap.shape[0]
+    num_keypoints = heatmap.shape[1]
+    height = heatmap.shape[2]
     width = heatmap.shape[3]
 
-    heatmap_vector = heatmap.reshape((0, 0, -3))
+    heatmap_vector = heatmap.view(batch, num_keypoints, -1)
 
-    indices = heatmap_vector.argmax(axis=2, keepdims=True)
-    scores = heatmap_vector.max(axis=2, keepdims=True)
+    vector_dim = 2
+    scores, indices = heatmap_vector.max(dim=vector_dim, keepdims=True)
 
-    keypoints = indices.tile((1, 1, 2))
+    scores_mask = (scores > 0.0).int()
 
-    keypoints[:, :, 0] = keypoints[:, :, 0] % width
-    keypoints[:, :, 1] = mx.nd.floor((keypoints[:, :, 1]) / width)
+    keys_x = (indices % width) * scores_mask
+    keys_y = (indices // width) * scores_mask
 
-    pred_mask = mx.nd.tile(mx.nd.greater(scores, 0.0), (1, 1, 2))
-    pred_mask = pred_mask.astype(np.float32)
+    keypoints = torch.cat((keys_x, keys_y), dim=vector_dim).float().cpu().detach().numpy()
+    for b in range(batch):
+        for k in range(num_keypoints):
+            hm = heatmap[b, k, :, :]
+            px = int(keys_x[b, k])
+            py = int(keys_y[b, k])
+            if (1 < px < width - 1) and (1 < py < height - 1):
+                diff_x = float(hm[py, px + 1] - hm[py, px - 1])
+                diff_y = float(hm[py + 1, px] - hm[py - 1, px])
+                keypoints[b, k, 0] += np.sign(diff_x) * 0.25
+                keypoints[b, k, 1] += np.sign(diff_y) * 0.25
 
-    keypoints *= pred_mask
-    return keypoints, scores
+    return keypoints, scores, batch, height, width
 
 
 def affine_transform(pt, t):
@@ -96,42 +106,29 @@ def get_affine_transform(center,
 
 
 def transform_preds(coords, center, scale, output_size):
-    target_coords = mx.nd.zeros(coords.shape)
+    target_coords = np.zeros(coords.shape, np.float32)
     trans = get_affine_transform(center, scale, 0, output_size, inv=1)
     for p in range(coords.shape[0]):
-        target_coords[p, 0:2] = affine_transform(coords[p, 0:2].asnumpy(), trans)
+        target_coords[p, 0:2] = affine_transform(coords[p, 0:2], trans)
     return target_coords
 
 
 def _calc_pose(heatmap, center, scale):
-    center_ = center.asnumpy()
-    scale_ = scale.asnumpy()
+    center_ = center.cpu().detach().numpy()
+    scale_ = scale.cpu().detach().numpy()
 
-    keypoints, scores = calc_keypoints_with_max_scores(heatmap)
+    keypoints, scores, batch, height, width = calc_keypoints_with_max_scores(heatmap)
 
-    heatmap_height = heatmap.shape[2]
-    heatmap_width = heatmap.shape[3]
-
-    # post-processing
-    for n in range(keypoints.shape[0]):
-        for p in range(keypoints.shape[1]):
-            hm = heatmap[n][p]
-            px = int(mx.nd.floor(keypoints[n][p][0] + 0.5).asscalar())
-            py = int(mx.nd.floor(keypoints[n][p][1] + 0.5).asscalar())
-            if 1 < px < heatmap_width - 1 and 1 < py < heatmap_height - 1:
-                diff = mx.nd.concat(hm[py][px + 1] - hm[py][px - 1], hm[py + 1][px] - hm[py - 1][px], dim=0)
-                keypoints[n][p] += mx.nd.sign(diff) * .25
-
-    preds = mx.nd.zeros_like(keypoints)
+    preds = np.zeros_like(keypoints)
 
     # Transform back
     for i in range(keypoints.shape[0]):
-        preds[i] = transform_preds(keypoints[i], center_[i], scale_[i], [heatmap_width, heatmap_height])
+        preds[i] = transform_preds(keypoints[i], center_[i], scale_[i], [width, height])
 
     return preds, scores
 
 
-class DeconvBlock(HybridBlock):
+class DeconvBlock(nn.Module):
     """
     Deconvolution block with batch normalization and activation.
 
@@ -143,7 +140,7 @@ class DeconvBlock(HybridBlock):
         Number of output channels.
     kernel_size : int or tuple/list of 2 int
         Convolution window size.
-    strides : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int
         Strides of the deconvolution.
     padding : int or tuple/list of 2 int
         Padding value for deconvolution layer.
@@ -153,60 +150,50 @@ class DeconvBlock(HybridBlock):
         Dilation value for deconvolution layer.
     groups : int, default 1
         Number of groups.
-    use_bias : bool, default False
+    bias : bool, default False
         Whether the layer uses a bias vector.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
-    bn_epsilon : float, default 1e-5
+    bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bn_cudnn_off : bool, default False
-        Whether to disable CUDNN batch normalization operator.
-    activation : function or str or None, default nn.Activation('relu')
+    activation : function or str or None, default nn.ReLU(inplace=True)
         Activation function or name of activation function.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  kernel_size,
-                 strides,
+                 stride,
                  padding,
                  out_padding=0,
                  dilation=1,
                  groups=1,
-                 use_bias=False,
+                 bias=False,
                  use_bn=True,
-                 bn_epsilon=1e-5,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=False,
-                 activation=(lambda: nn.Activation("relu")),
-                 **kwargs):
-        super(DeconvBlock, self).__init__(**kwargs)
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(DeconvBlock, self).__init__()
         self.activate = (activation is not None)
         self.use_bn = use_bn
 
-        with self.name_scope():
-            self.conv = nn.Conv2DTranspose(
-                channels=out_channels,
-                kernel_size=kernel_size,
-                strides=strides,
-                padding=padding,
-                output_padding=out_padding,
-                dilation=dilation,
-                groups=groups,
-                use_bias=use_bias,
-                in_channels=in_channels)
-            if self.use_bn:
-                self.bn = BatchNormExtra(
-                    in_channels=out_channels,
-                    epsilon=bn_epsilon,
-                    use_global_stats=bn_use_global_stats,
-                    cudnn_off=bn_cudnn_off)
-            if self.activate:
-                self.activ = get_activation_layer(activation)
+        self.conv = nn.ConvTranspose2d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            output_padding=out_padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        if self.use_bn:
+            self.bn = nn.BatchNorm2d(
+                num_features=out_channels,
+                eps=bn_eps)
+        if self.activate:
+            self.activ = get_activation_layer(activation)
 
-    def hybrid_forward(self, F, x):
+    def forward(self, x):
         x = self.conv(x)
         if self.use_bn:
             x = self.bn(x)
@@ -215,7 +202,7 @@ class DeconvBlock(HybridBlock):
         return x
 
 
-class SimplePose(HybridBlock):
+class SimplePose(nn.Module):
     """
     SimplePose model from 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
@@ -227,11 +214,6 @@ class SimplePose(HybridBlock):
         Number of output channels for the backbone.
     channels : list of int
         Number of output channels for each decoder unit.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-        Useful for fine-tuning.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     return_heatmap_only : bool, default False
         Whether to return only heatmap.
     in_channels : int, default 3
@@ -245,42 +227,45 @@ class SimplePose(HybridBlock):
                  backbone,
                  backbone_out_channels,
                  channels,
-                 bn_use_global_stats=False,
-                 bn_cudnn_off=True,
                  return_heatmap_only=False,
                  in_channels=3,
                  in_size=(256, 192),
-                 keypoints=17,
-                 **kwargs):
-        super(SimplePose, self).__init__(**kwargs)
+                 keypoints=17):
+        super(SimplePose, self).__init__()
         assert (in_channels == 3)
         self.in_size = in_size
         self.keypoints = keypoints
         self.return_heatmap_only = return_heatmap_only
         self.out_size = (in_size[0] // 4, in_size[1] // 4)
 
-        with self.name_scope():
-            self.backbone = backbone
+        self.backbone = backbone
 
-            self.decoder = nn.HybridSequential(prefix="")
-            in_channels = backbone_out_channels
-            for out_channels in channels:
-                self.decoder.add(DeconvBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=4,
-                    strides=2,
-                    padding=1,
-                    bn_use_global_stats=bn_use_global_stats,
-                    bn_cudnn_off=bn_cudnn_off))
-                in_channels = out_channels
-
-            self.final_block = conv1x1(
+        self.decoder = nn.Sequential()
+        in_channels = backbone_out_channels
+        for i, out_channels in enumerate(channels):
+            self.decoder.add_module("unit{}".format(i + 1), DeconvBlock(
                 in_channels=in_channels,
-                out_channels=keypoints,
-                use_bias=True)
+                out_channels=out_channels,
+                kernel_size=4,
+                stride=2,
+                padding=1))
+            in_channels = out_channels
 
-    def hybrid_forward(self, F, x):
+        self.final_block = conv1x1(
+            in_channels=in_channels,
+            out_channels=keypoints,
+            bias=True)
+
+        self._init_params()
+
+    def _init_params(self):
+        for name, module in self.named_modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_uniform_(module.weight)
+                if module.bias is not None:
+                    nn.init.constant_(module.bias, 0)
+
+    def forward(self, x):
         x = self.backbone(x)
         x = self.decoder(x)
         heatmap = self.final_block(x)
@@ -306,11 +291,9 @@ class SimplePose(HybridBlock):
 def get_simplepose(backbone,
                    backbone_out_channels,
                    keypoints,
-                   bn_cudnn_off,
                    model_name=None,
                    pretrained=False,
-                   ctx=cpu(),
-                   root=os.path.join("~", ".mxnet", "models"),
+                   root=os.path.join("~", ".torch", "models"),
                    **kwargs):
     """
     Create SimplePose model with specific parameters.
@@ -323,15 +306,11 @@ def get_simplepose(backbone,
         Number of output channels for the backbone.
     keypoints : int
         Number of keypoints.
-    bn_cudnn_off : bool
-        Whether to disable CUDNN batch normalization operator.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
     channels = [256, 256, 256]
@@ -339,7 +318,6 @@ def get_simplepose(backbone,
     net = SimplePose(
         backbone=backbone,
         backbone_out_channels=backbone_out_channels,
-        bn_cudnn_off=bn_cudnn_off,
         channels=channels,
         keypoints=keypoints,
         **kwargs)
@@ -347,17 +325,16 @@ def get_simplepose(backbone,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
-        net.load_parameters(
-            filename=get_model_file(
-                model_name=model_name,
-                local_model_store_dir_path=root),
-            ctx=ctx)
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
 
     return net
 
 
-def simplepose_resnet18_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resnet18_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet-18 for COCO Keypoint from 'Simple Baselines for Human Pose Estimation and
     Tracking,' https://arxiv.org/abs/1804.06208.
@@ -368,21 +345,18 @@ def simplepose_resnet18_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_o
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet18(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=512, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resnet18(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=512, keypoints=keypoints,
                           model_name="simplepose_resnet18_coco", **kwargs)
 
 
-def simplepose_resnet50b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resnet50b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet-50b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation and
     Tracking,' https://arxiv.org/abs/1804.06208.
@@ -393,21 +367,18 @@ def simplepose_resnet50b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet50b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resnet50b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet50b_coco", **kwargs)
 
 
-def simplepose_resnet101b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resnet101b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet-101b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -418,21 +389,18 @@ def simplepose_resnet101b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet101b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resnet101b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet101b_coco", **kwargs)
 
 
-def simplepose_resnet152b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resnet152b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet-152b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -443,21 +411,18 @@ def simplepose_resnet152b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnet152b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resnet152b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resnet152b_coco", **kwargs)
 
 
-def simplepose_resneta50b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resneta50b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet(A)-50b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -468,21 +433,18 @@ def simplepose_resneta50b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resneta50b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resneta50b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta50b_coco", **kwargs)
 
 
-def simplepose_resneta101b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resneta101b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet(A)-101b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -493,21 +455,18 @@ def simplepose_resneta101b_coco(pretrained_backbone=False, keypoints=17, bn_cudn
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resneta101b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resneta101b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta101b_coco", **kwargs)
 
 
-def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, bn_cudnn_off=True, **kwargs):
+def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
     SimplePose model on the base of ResNet(A)-152b for COCO Keypoint from 'Simple Baselines for Human Pose Estimation
     and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -518,23 +477,28 @@ def simplepose_resneta152b_coco(pretrained_backbone=False, keypoints=17, bn_cudn
         Whether to load the pretrained weights for feature extractor.
     keypoints : int, default 17
         Number of keypoints.
-    bn_cudnn_off : bool, default True
-        Whether to disable CUDNN batch normalization operator.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resneta152b(pretrained=pretrained_backbone, bn_cudnn_off=bn_cudnn_off).features[:-1]
-    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints, bn_cudnn_off=bn_cudnn_off,
+    backbone = resneta152b(pretrained=pretrained_backbone).features
+    del backbone[-1]
+    return get_simplepose(backbone=backbone, backbone_out_channels=2048, keypoints=keypoints,
                           model_name="simplepose_resneta152b_coco", **kwargs)
 
 
-def _test():
+def _calc_width(net):
     import numpy as np
-    import mxnet as mx
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
+
+
+def _test():
+    import torch
 
     in_size = (256, 192)
     keypoints = 17
@@ -554,17 +518,9 @@ def _test():
 
         net = model(pretrained=pretrained, in_size=in_size)
 
-        ctx = mx.cpu()
-        if not pretrained:
-            net.initialize(ctx=ctx)
-
-        net.hybridize()
-        net_params = net.collect_params()
-        weight_count = 0
-        for param in net_params.values():
-            if (param.shape is None) or (not param._differentiable):
-                continue
-            weight_count += np.prod(param.shape)
+        # net.train()
+        net.eval()
+        weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != simplepose_resnet18_coco or weight_count == 15376721)
         assert (model != simplepose_resnet50b_coco or weight_count == 33999697)
@@ -575,13 +531,13 @@ def _test():
         assert (model != simplepose_resneta152b_coco or weight_count == 68654705)
 
         batch = 14
-        x = mx.nd.zeros((batch, 3, 256, 192), ctx=ctx)
+        x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
         assert ((y.shape[0] == batch) and (y.shape[1] == keypoints) and (y.shape[2] == x.shape[2] // 4) and
                 (y.shape[3] == x.shape[3] // 4))
 
-        center = mx.nd.zeros((batch, 2), ctx=ctx)
-        scale = mx.nd.ones((batch, 2), ctx=ctx)
+        center = torch.zeros((batch, 2))
+        scale = torch.ones((batch, 2))
         z, _ = net.calc_pose(y, center, scale)
         assert (z.shape[0] == batch)
 

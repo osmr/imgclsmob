@@ -13,6 +13,7 @@ from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import CocoSegMetaInfo
+from .datasets.coco_hpe_dataset import CocoHpeMetaInfo
 from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import WeightedRandomSampler
@@ -42,6 +43,7 @@ def get_dataset_metainfo(dataset_name):
         "ADE20K": ADE20KMetaInfo,
         "Cityscapes": CityscapesMetaInfo,
         "CocoSeg": CocoSegMetaInfo,
+        "CocoHpe": CocoHpeMetaInfo,
         "HPatches": HPatchesMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
@@ -77,6 +79,7 @@ def get_train_data_source(ds_metainfo,
         mode="train",
         transform=transform_train,
         **kwargs)
+    ds_metainfo.update_from_dataset(dataset)
     if not ds_metainfo.train_use_weighted_sampler:
         return DataLoader(
             dataset=dataset,
@@ -124,6 +127,7 @@ def get_val_data_source(ds_metainfo,
         mode="val",
         transform=transform_val,
         **kwargs)
+    ds_metainfo.update_from_dataset(dataset)
     return DataLoader(
         dataset=dataset,
         batch_size=batch_size,
@@ -159,6 +163,7 @@ def get_test_data_source(ds_metainfo,
         mode="test",
         transform=transform_test,
         **kwargs)
+    ds_metainfo.update_from_dataset(dataset)
     return DataLoader(
         dataset=dataset,
         batch_size=batch_size,

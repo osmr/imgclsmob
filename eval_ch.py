@@ -148,7 +148,8 @@ def calc_model_accuracy(net,
                         metric,
                         calc_weight_count=False,
                         calc_flops_only=True,
-                        extended_log=False):
+                        extended_log=False,
+                        ml_type="imgcls"):
     """
     Main test routine.
 
@@ -164,12 +165,16 @@ def calc_model_accuracy(net,
         Whether to calculate count of weights.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+    ml_type : str, default 'imgcls'
+        Machine learning type.
 
     Returns
     -------
     list of floats
         Accuracy values.
     """
+    assert (ml_type is not None)
+
     tic = time.time()
 
     predictor = Predictor(
@@ -246,25 +251,24 @@ def test_model(args):
         pretrained_model_file_path=args.resume.strip(),
         use_gpus=use_gpus,
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
-        num_classes=args.num_classes,
+        num_classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels)
     assert (hasattr(net, "classes"))
     assert (hasattr(net, "in_size"))
 
-    if args.data_subset == "val":
-        get_test_data_source_class = get_val_data_source
-        test_metric = get_composite_metric(
-            metric_names=ds_metainfo.val_metric_names,
-            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
-    else:
-        get_test_data_source_class = get_test_data_source
-        test_metric = get_composite_metric(
-            metric_names=ds_metainfo.test_metric_names,
-            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+    get_test_data_source_class = get_val_data_source if args.data_subset == "val" else get_test_data_source
     test_data = get_test_data_source_class(
         ds_metainfo=ds_metainfo,
         batch_size=args.batch_size,
         num_workers=args.num_workers)
+    if args.data_subset == "val":
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.val_metric_names,
+            metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+    else:
+        test_metric = get_composite_metric(
+            metric_names=ds_metainfo.test_metric_names,
+            metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
 
     assert (args.use_pretrained or args.resume.strip())
     acc_values = calc_model_accuracy(
@@ -273,7 +277,8 @@ def test_model(args):
         metric=test_metric,
         calc_weight_count=True,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        ml_type=ds_metainfo.ml_type)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

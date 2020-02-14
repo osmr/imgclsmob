@@ -102,6 +102,8 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.sinet import *
 
+from .models.simplepose_coco import *
+
 __all__ = ['get_model']
 
 
@@ -911,6 +913,14 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'sinet_cityscapes': sinet_cityscapes,
+
+    'simplepose_resnet18_coco': simplepose_resnet18_coco,
+    'simplepose_resnet50b_coco': simplepose_resnet50b_coco,
+    'simplepose_resnet101b_coco': simplepose_resnet101b_coco,
+    'simplepose_resnet152b_coco': simplepose_resnet152b_coco,
+    'simplepose_resneta50b_coco': simplepose_resneta50b_coco,
+    'simplepose_resneta101b_coco': simplepose_resneta101b_coco,
+    'simplepose_resneta152b_coco': simplepose_resneta152b_coco,
 }
 
 

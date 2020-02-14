@@ -14,6 +14,7 @@ from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import CocoSegMetaInfo
+from .datasets.coco_hpe_dataset import CocoHpeMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -40,6 +41,7 @@ def get_dataset_metainfo(dataset_name):
         "ADE20K": ADE20KMetaInfo,
         "Cityscapes": CityscapesMetaInfo,
         "CocoSeg": CocoSegMetaInfo,
+        "CocoHpe": CocoHpeMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -55,6 +57,7 @@ def get_train_data_source(ds_metainfo,
         root=ds_metainfo.root_dir_path,
         mode="train",
         transform=transform)
+    ds_metainfo.update_from_dataset(dataset)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
@@ -77,6 +80,7 @@ def get_val_data_source(ds_metainfo,
         root=ds_metainfo.root_dir_path,
         mode="val",
         transform=transform)
+    ds_metainfo.update_from_dataset(dataset)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,
@@ -99,6 +103,7 @@ def get_test_data_source(ds_metainfo,
         root=ds_metainfo.root_dir_path,
         mode="test",
         transform=transform)
+    ds_metainfo.update_from_dataset(dataset)
     iterator = MultiprocessIterator(
         dataset=dataset,
         batch_size=batch_size,

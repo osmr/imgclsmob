@@ -111,6 +111,8 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.sinet import *
 
+from .models.simplepose_coco import *
+
 # from .models.others.oth_sinet import *
 
 from .models.superpointnet import *
@@ -960,6 +962,14 @@ _models = {
 
     'sinet_cityscapes': sinet_cityscapes,
     # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
+
+    'simplepose_resnet18_coco': simplepose_resnet18_coco,
+    'simplepose_resnet50b_coco': simplepose_resnet50b_coco,
+    'simplepose_resnet101b_coco': simplepose_resnet101b_coco,
+    'simplepose_resnet152b_coco': simplepose_resnet152b_coco,
+    'simplepose_resneta50b_coco': simplepose_resneta50b_coco,
+    'simplepose_resneta101b_coco': simplepose_resneta101b_coco,
+    'simplepose_resneta152b_coco': simplepose_resneta152b_coco,
 
     'superpointnet': superpointnet,
 }

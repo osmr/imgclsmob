@@ -9,7 +9,7 @@ import argparse
 from sys import version_info
 from common.logger_utils import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
-from pytorch.utils import calc_net_weight_count, validate
+from pytorch.utils import calc_net_weight_count, validate, validate_hpe
 from pytorch.utils import get_composite_metric
 from pytorch.utils import report_accuracy
 from pytorch.dataset_utils import get_dataset_metainfo
@@ -269,7 +269,8 @@ def calc_model_accuracy(net,
                         calc_weight_count=False,
                         calc_flops=False,
                         calc_flops_only=True,
-                        extended_log=False):
+                        extended_log=False,
+                        ml_type="imgcls"):
     """
     Estimating particular model accuracy.
 
@@ -295,6 +296,8 @@ def calc_model_accuracy(net,
         Whether to only calculate FLOPs without testing.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
+    ml_type : str, default 'imgcls'
+        Machine learning type.
 
     Returns
     -------
@@ -303,7 +306,8 @@ def calc_model_accuracy(net,
     """
     if not calc_flops_only:
         tic = time.time()
-        validate(
+        validate_fn = validate if ml_type != "hpe" else validate_hpe
+        validate_fn(
             metric=metric,
             net=net,
             val_data=test_data,
@@ -368,7 +372,7 @@ def test_model(args):
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
-        num_classes=args.num_classes,
+        num_classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels,
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,
@@ -390,7 +394,8 @@ def test_model(args):
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True)
+        extended_log=True,
+        ml_type=ds_metainfo.ml_type)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 
@@ -421,7 +426,8 @@ def main():
             "voc": "VOC",
             "ade20k": "ADE20K",
             "cs": "Cityscapes",
-            "coco": "COCO",
+            "cocoseg": "CocoSeg",
+            "cocohpe": "CocoHpe",
             "hp": "HPatches",
         }
         for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):

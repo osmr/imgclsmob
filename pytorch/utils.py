@@ -10,6 +10,7 @@ from .pytorchcv.model_provider import get_model
 from .metrics.metric import EvalMetric, CompositeEvalMetric
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.hpe_metrics import CocoHpeOksApMetric
 
 
 def prepare_pt_context(num_gpus,
@@ -177,6 +178,45 @@ def validate(metric,
     return metric
 
 
+def validate_hpe(metric,
+                 net,
+                 val_data,
+                 use_cuda):
+    """
+    Core validation/testing routine for HPE task.
+
+    Parameters:
+    ----------
+    metric : EvalMetric
+        Metric object instance.
+    net : Module
+        Model.
+    val_data : DataLoader
+        Data loader.
+    use_cuda : bool
+        Whether to use CUDA.
+
+    Returns
+    -------
+    EvalMetric
+        Metric object instance.
+    """
+    net.eval()
+    metric.reset()
+    with torch.no_grad():
+        for data, target in val_data:
+            if use_cuda:
+                target = target.cuda(non_blocking=True)
+            scale = target[:, :2]
+            center = target[:, 2:4]
+            score = target[:, 4]
+            img_id = target[:, 5]
+            output = net(data)
+            preds, maxvals = net.module.calc_pose(output, center, scale)
+            metric.update(preds, maxvals, score, img_id)
+    return metric
+
+
 def report_accuracy(metric,
                     extended_log=False):
     """
@@ -236,6 +276,8 @@ def get_metric(metric_name, metric_extra_kwargs):
         return PixelAccuracyMetric(**metric_extra_kwargs)
     elif metric_name == "MeanIoUMetric":
         return MeanIoUMetric(**metric_extra_kwargs)
+    elif metric_name == "CocoHpeOksApMetric":
+        return CocoHpeOksApMetric(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 

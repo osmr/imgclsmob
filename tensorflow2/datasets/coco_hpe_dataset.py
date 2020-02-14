@@ -3,15 +3,15 @@
 """
 
 import os
+import threading
 import copy
 import cv2
 import numpy as np
-import mxnet as mx
-from mxnet.gluon.data import dataset
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpeDataset(dataset.Dataset):
+class CocoHpeDataset(object):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
@@ -64,13 +64,12 @@ class CocoHpeDataset(dataset.Dataset):
                  splits=("person_keypoints_val2017",),
                  check_centers=False,
                  skip_empty=True):
-        super(CocoHpeDataset, self).__init__()
         self._root = os.path.expanduser(root)
         self.mode = mode
         self.transform = transform
         self.num_class = len(self.CLASSES)
 
-        if isinstance(splits, mx.base.string_types):
+        if isinstance(splits, str):
             splits = [splits]
         self._splits = splits
         self._coco = []
@@ -128,11 +127,16 @@ class CocoHpeDataset(dataset.Dataset):
         img_id = int(os.path.splitext(os.path.basename(img_path))[0])
 
         label = copy.deepcopy(self._labels[idx])
-        img = mx.image.imread(img_path, 1)
+        # img = mx.image.imread(img_path, 1)
+        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
 
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
-        return img, scale, center, score, img_id
+
+        res_label = np.array(list(scale) + list(center) + [float(score)] + [float(img_id)], np.float32)
+
+        return img, res_label
 
     def _load_jsons(self):
         """
@@ -349,10 +353,13 @@ class CocoHpeValTransform(object):
 
         h, w = self.image_size
         trans = get_affine_transform(center, scale, 0, [w, h])
-        img = cv2.warpAffine(src.asnumpy(), trans, (int(w), int(h)), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(src, trans, (int(w), int(h)), flags=cv2.INTER_LINEAR)
 
-        img = mx.nd.image.to_tensor(mx.nd.array(img))
-        img = mx.nd.image.normalize(img, mean=self.mean, std=self.std)
+        # img = mx.nd.image.to_tensor(mx.nd.array(img))
+        # img = mx.nd.image.normalize(img, mean=self.mean, std=self.std)
+        img = img.astype(np.float32)
+        img = img / 255.0
+        img = (img - np.array(self.mean, np.float32)) / np.array(self.std, np.float32)
 
         return img, scale, center, score
 
@@ -459,8 +466,9 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
              "in_vis_thresh": 0.0}]
         self.saver_acc_ind = 0
         self.do_transform = True
-        self.val_transform = CocoHpeValTransform
-        self.test_transform = CocoHpeValTransform
+        self.test_transform = cocohpe_val_transform
+        self.test_transform2 = CocoHpeValTransform
+        self.test_generator = cocohpe_test_generator
         self.ml_type = "hpe"
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
@@ -476,3 +484,208 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
             A dataset class instance.
         """
         self.test_metric_extra_kwargs[0]["coco"] = dataset.coco
+
+
+class CocoHpeDirectoryIterator(DirectoryIterator):
+    allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
+
+    def __init__(self,
+                 directory,
+                 image_data_generator,
+                 target_size=(256, 256),
+                 color_mode='rgb',
+                 classes=None,
+                 class_mode='categorical',
+                 batch_size=32,
+                 shuffle=True,
+                 seed=None,
+                 data_format='channels_last',
+                 save_to_dir=None,
+                 save_prefix='',
+                 save_format='png',
+                 follow_links=False,
+                 subset=None,
+                 interpolation='nearest',
+                 dtype='float32',
+                 hpe_dataset=None):
+        super(CocoHpeDirectoryIterator, self).set_processing_attrs(
+            image_data_generator,
+            target_size,
+            color_mode,
+            data_format,
+            save_to_dir,
+            save_prefix,
+            save_format,
+            subset,
+            interpolation)
+
+        self.hpe_dataset = hpe_dataset
+        self.class_mode = class_mode
+        self.dtype = dtype
+
+        self.n = len(self.hpe_dataset)
+        self.batch_size = batch_size
+        self.seed = seed
+        self.shuffle = shuffle
+        self.batch_index = 0
+        self.total_batches_seen = 0
+        self.lock = threading.Lock()
+        self.index_array = None
+        self.index_generator = self._flow_index()
+
+    def _get_batches_of_transformed_samples(self, index_array):
+        """Gets a batch of transformed samples.
+
+        # Arguments
+            index_array: Array of sample indices to include in batch.
+
+        # Returns
+            A batch of transformed samples.
+        """
+        batch_x = None
+        batch_y = None
+        for i, j in enumerate(index_array):
+            x, y = self.hpe_dataset[j]
+            if batch_x is None:
+                batch_x = np.zeros((len(index_array),) + x.shape, dtype=self.dtype)
+                batch_y = np.zeros((len(index_array),) + y.shape, dtype=np.float32)
+            batch_x[i] = x
+            batch_y[i] = y
+        return batch_x, batch_y
+
+
+class CocoHpeImageDataGenerator(ImageDataGenerator):
+
+    def flow_from_directory(self,
+                            directory,
+                            target_size=(256, 256),
+                            color_mode='rgb',
+                            classes=None,
+                            class_mode='categorical',
+                            batch_size=32,
+                            shuffle=True,
+                            seed=None,
+                            save_to_dir=None,
+                            save_prefix='',
+                            save_format='png',
+                            follow_links=False,
+                            subset=None,
+                            interpolation='nearest',
+                            hpe_dataset=None):
+        return CocoHpeDirectoryIterator(
+            directory,
+            self,
+            target_size=target_size,
+            color_mode=color_mode,
+            classes=classes,
+            class_mode=class_mode,
+            data_format=self.data_format,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            seed=seed,
+            save_to_dir=save_to_dir,
+            save_prefix=save_prefix,
+            save_format=save_format,
+            follow_links=follow_links,
+            subset=subset,
+            interpolation=interpolation,
+            hpe_dataset=hpe_dataset)
+
+
+def cocohpe_val_transform(ds_metainfo,
+                          data_format="channels_last"):
+    """
+    Create image transform sequence for validation subset.
+
+    Parameters:
+    ----------
+    ds_metainfo : DatasetMetaInfo
+        Pascal VOC2012 dataset metainfo.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+
+    Returns
+    -------
+    ImageDataGenerator
+        Image transform sequence.
+    """
+    data_generator = CocoHpeImageDataGenerator(
+        preprocessing_function=(lambda img: CocoHpeValTransform(ds_metainfo=ds_metainfo)(img)),
+        data_format=data_format)
+    return data_generator
+
+
+def cocohpe_val_generator(data_generator,
+                          ds_metainfo,
+                          batch_size):
+    """
+    Create image generator for validation subset.
+
+    Parameters:
+    ----------
+    data_generator : ImageDataGenerator
+        Image transform sequence.
+    ds_metainfo : DatasetMetaInfo
+        Pascal VOC2012 dataset metainfo.
+    batch_size : int
+        Batch size.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
+    split = "val"
+    root = ds_metainfo.root_dir_path
+    root = os.path.join(root, split)
+    generator = data_generator.flow_from_directory(
+        directory=root,
+        target_size=ds_metainfo.input_image_size,
+        class_mode="binary",
+        batch_size=batch_size,
+        shuffle=False,
+        interpolation="bilinear",
+        hpe_dataset=ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            mode="val",
+            transform=CocoHpeValTransform(
+                ds_metainfo=ds_metainfo)))
+    return generator
+
+
+def cocohpe_test_generator(data_generator,
+                           ds_metainfo,
+                           batch_size):
+    """
+    Create image generator for testing subset.
+
+    Parameters:
+    ----------
+    data_generator : ImageDataGenerator
+        Image transform sequence.
+    ds_metainfo : DatasetMetaInfo
+        Pascal VOC2012 dataset metainfo.
+    batch_size : int
+        Batch size.
+
+    Returns
+    -------
+    Sequential
+        Image transform sequence.
+    """
+    split = "val"
+    root = ds_metainfo.root_dir_path
+    root = os.path.join(root, split)
+    generator = data_generator.flow_from_directory(
+        directory=root,
+        target_size=ds_metainfo.input_image_size,
+        class_mode="binary",
+        batch_size=batch_size,
+        shuffle=False,
+        interpolation="bilinear",
+        hpe_dataset=ds_metainfo.dataset_class(
+            root=ds_metainfo.root_dir_path,
+            mode="test",
+            transform=CocoHpeValTransform(
+                ds_metainfo=ds_metainfo)))
+    return generator

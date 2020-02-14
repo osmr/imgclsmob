@@ -180,29 +180,44 @@ def test_model(args,
     if not args.calc_flops_only:
         tic = time.time()
 
-        if args.data_subset == "val":
-            get_test_data_source_class = get_val_data_source
-            test_metric = get_composite_metric(
-                metric_names=ds_metainfo.val_metric_names,
-                metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
-        else:
-            get_test_data_source_class = get_test_data_source
-            test_metric = get_composite_metric(
-                metric_names=ds_metainfo.test_metric_names,
-                metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+        get_test_data_source_class = get_val_data_source if args.data_subset == "val" else get_test_data_source
         test_data, total_img_count = get_test_data_source_class(
             ds_metainfo=ds_metainfo,
             batch_size=args.batch_size,
             data_format=data_format)
+        if args.data_subset == "val":
+            test_metric = get_composite_metric(
+                metric_names=ds_metainfo.val_metric_names,
+                metric_extra_kwargs=ds_metainfo.val_metric_extra_kwargs)
+        else:
+            test_metric = get_composite_metric(
+                metric_names=ds_metainfo.test_metric_names,
+                metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
+
+        if args.show_progress:
+            from tqdm import tqdm
+            test_data = tqdm(test_data)
 
         processed_img_count = 0
-        for test_images, test_labels in test_data:
-
-            predictions = net(test_images)
-            test_metric.update(test_labels, predictions)
-            processed_img_count += len(test_images)
-            if processed_img_count >= total_img_count:
-                break
+        if ds_metainfo.ml_type != "hpe":
+            for test_images, test_labels in test_data:
+                predictions = net(test_images)
+                test_metric.update(test_labels, predictions)
+                processed_img_count += len(test_images)
+                if processed_img_count >= total_img_count:
+                    break
+        else:
+            for test_images, test_labels in test_data:
+                scale = test_labels[:, :2]
+                center = test_labels[:, 2:4]
+                score = test_labels[:, 4]
+                img_id = test_labels[:, 5]
+                output = net(test_images)
+                preds, maxvals = net.calc_pose(output, center, scale, data_format)
+                test_metric.update(preds, maxvals, score, img_id)
+                processed_img_count += len(test_images)
+                if processed_img_count >= total_img_count:
+                    break
 
         accuracy_msg = report_accuracy(
             metric=test_metric,
@@ -252,7 +267,8 @@ def main():
             "voc": "VOC",
             "ade20k": "ADE20K",
             "cs": "Cityscapes",
-            "coco": "COCO",
+            "cocoseg": "CocoSeg",
+            "cocohpe": "CocoHpe",
             "hp": "HPatches",
         }
         for model_name, model_metainfo in (_model_sha1.items() if version_info[0] >= 3 else _model_sha1.iteritems()):

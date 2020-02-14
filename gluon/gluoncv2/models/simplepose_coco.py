@@ -576,13 +576,13 @@ def _test():
 
         batch = 14
         x = mx.nd.zeros((batch, 3, 256, 192), ctx=ctx)
-        y, _, _ = net(x)
+        y = net(x)
         assert ((y.shape[0] == batch) and (y.shape[1] == keypoints) and (y.shape[2] == x.shape[2] // 4) and
                 (y.shape[3] == x.shape[3] // 4))
 
         center = mx.nd.zeros((batch, 2), ctx=ctx)
         scale = mx.nd.ones((batch, 2), ctx=ctx)
-        z = net.calc_pose(y, center, scale)
+        z, _ = net.calc_pose(y, center, scale)
         assert (z.shape[0] == batch)
 
 

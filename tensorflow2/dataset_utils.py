@@ -14,6 +14,7 @@ from .datasets.voc_seg_dataset import VOCMetaInfo
 from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import CocoSegMetaInfo
+from .datasets.coco_hpe_dataset import CocoHpeMetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -40,6 +41,7 @@ def get_dataset_metainfo(dataset_name):
         "ADE20K": ADE20KMetaInfo,
         "Cityscapes": CityscapesMetaInfo,
         "CocoSeg": CocoSegMetaInfo,
+        "CocoHpe": CocoHpeMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()
@@ -111,6 +113,7 @@ def get_val_data_source(ds_metainfo,
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)
+    ds_metainfo.update_from_dataset(generator.hpe_dataset)
     return tf.data.Dataset.from_generator(
         generator=lambda: generator,
         output_types=(tf.float32, tf.float32)),\
@@ -146,6 +149,7 @@ def get_test_data_source(ds_metainfo,
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)
+    ds_metainfo.update_from_dataset(generator.hpe_dataset)
     return tf.data.Dataset.from_generator(
         generator=lambda: generator,
         output_types=(tf.float32, tf.float32)),\

@@ -9,7 +9,7 @@ import argparse
 from sys import version_info
 from common.logger_utils import initialize_logging
 from pytorch.utils import prepare_pt_context, prepare_model
-from pytorch.utils import calc_net_weight_count, validate, validate_hpe
+from pytorch.utils import calc_net_weight_count, validate
 from pytorch.utils import get_composite_metric
 from pytorch.utils import report_accuracy
 from pytorch.dataset_utils import get_dataset_metainfo
@@ -306,8 +306,7 @@ def calc_model_accuracy(net,
     """
     if not calc_flops_only:
         tic = time.time()
-        validate_fn = validate if ml_type != "hpe" else validate_hpe
-        validate_fn(
+        validate(
             metric=metric,
             net=net,
             val_data=test_data,
@@ -394,8 +393,7 @@ def test_model(args):
         calc_weight_count=True,
         calc_flops=args.calc_flops,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True,
-        ml_type=ds_metainfo.ml_type)
+        extended_log=True)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

@@ -9,7 +9,6 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 
 import os
 import numpy as np
-import cv2
 import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
@@ -17,118 +16,6 @@ from chainer.serializers import load_npz
 from .common import get_activation_layer, conv1x1, SimpleSequential
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
-
-
-def calc_keypoints_with_max_scores(heatmap):
-    batch = heatmap.shape[0]
-    num_keypoints = heatmap.shape[1]
-    height = heatmap.shape[2]
-    width = heatmap.shape[3]
-
-    heatmap_vector = F.reshape(heatmap, shape=(batch, num_keypoints, -1))
-
-    vector_dim = 2
-    indices = F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim)
-    scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
-
-    scores_mask = (scores.array > 0.0).astype(np.int32)
-
-    keys_x = (indices.array % width) * scores_mask
-    keys_y = (indices.array // width) * scores_mask
-
-    keypoints = np.concatenate([keys_x, keys_y], axis=vector_dim).astype(np.float32)
-    for b in range(batch):
-        for k in range(num_keypoints):
-            hm = heatmap[b, k, :, :]
-            px = int(keys_x[b, k])
-            py = int(keys_y[b, k])
-            if (1 < px < width - 1) and (1 < py < height - 1):
-                diff_x = float(hm[py, px + 1] - hm[py, px - 1])
-                diff_y = float(hm[py + 1, px] - hm[py - 1, px])
-                keypoints[b, k, 0] += np.sign(diff_x) * 0.25
-                keypoints[b, k, 1] += np.sign(diff_y) * 0.25
-
-    return keypoints, scores, batch, height, width
-
-
-def affine_transform(pt, t):
-    new_pt = np.array([pt[0], pt[1], 1.]).T
-    new_pt = np.dot(t, new_pt)
-    return new_pt[:2]
-
-
-def get_3rd_point(a, b):
-    direct = a - b
-    return b + np.array([-direct[1], direct[0]], dtype=np.float32)
-
-
-def get_dir(src_point, rot_rad):
-    sn, cs = np.sin(rot_rad), np.cos(rot_rad)
-
-    src_result = [0, 0]
-    src_result[0] = src_point[0] * cs - src_point[1] * sn
-    src_result[1] = src_point[0] * sn + src_point[1] * cs
-
-    return src_result
-
-
-def get_affine_transform(center,
-                         scale,
-                         rot,
-                         output_size,
-                         shift=np.array([0, 0], dtype=np.float32),
-                         inv=0):
-    if not isinstance(scale, np.ndarray) and not isinstance(scale, list):
-        scale = np.array([scale, scale])
-
-    scale_tmp = scale
-    src_w = scale_tmp[0]
-    dst_w = output_size[0]
-    dst_h = output_size[1]
-
-    rot_rad = np.pi * rot / 180
-    src_dir = get_dir([0, src_w * -0.5], rot_rad)
-    dst_dir = np.array([0, dst_w * -0.5], np.float32)
-
-    src = np.zeros((3, 2), dtype=np.float32)
-    dst = np.zeros((3, 2), dtype=np.float32)
-    src[0, :] = center + scale_tmp * shift
-    src[1, :] = center + src_dir + scale_tmp * shift
-    dst[0, :] = [dst_w * 0.5, dst_h * 0.5]
-    dst[1, :] = np.array([dst_w * 0.5, dst_h * 0.5]) + dst_dir
-
-    src[2:, :] = get_3rd_point(src[0, :], src[1, :])
-    dst[2:, :] = get_3rd_point(dst[0, :], dst[1, :])
-
-    if inv:
-        trans = cv2.getAffineTransform(np.float32(dst), np.float32(src))
-    else:
-        trans = cv2.getAffineTransform(np.float32(src), np.float32(dst))
-
-    return trans
-
-
-def transform_preds(coords, center, scale, output_size):
-    target_coords = np.zeros(coords.shape, np.float32)
-    trans = get_affine_transform(center, scale, 0, output_size, inv=1)
-    for p in range(coords.shape[0]):
-        target_coords[p, 0:2] = affine_transform(coords[p, 0:2], trans)
-    return target_coords
-
-
-def _calc_pose(heatmap, center, scale):
-    center_ = center
-    scale_ = scale
-
-    keypoints, scores, batch, height, width = calc_keypoints_with_max_scores(heatmap)
-
-    preds = np.zeros_like(keypoints)
-
-    # Transform back
-    for i in range(keypoints.shape[0]):
-        preds[i] = transform_preds(keypoints[i], center_[i], scale_[i], [width, height])
-
-    return preds, scores
 
 
 class DeconvBlock(Chain):
@@ -215,7 +102,7 @@ class SimplePose(Chain):
         Number of output channels for the backbone.
     channels : list of int
         Number of output channels for each decoder unit.
-    return_heatmap_only : bool, default False
+    return_heatmap : bool, default False
         Whether to return only heatmap.
     in_channels : int, default 3
         Number of input channels.
@@ -228,7 +115,7 @@ class SimplePose(Chain):
                  backbone,
                  backbone_out_channels,
                  channels,
-                 return_heatmap_only=False,
+                 return_heatmap=False,
                  in_channels=3,
                  in_size=(256, 192),
                  keypoints=17,
@@ -237,7 +124,7 @@ class SimplePose(Chain):
         assert (in_channels == 3)
         self.in_size = in_size
         self.keypoints = keypoints
-        self.return_heatmap_only = return_heatmap_only
+        self.return_heatmap = return_heatmap
         self.out_size = (in_size[0] // 4, in_size[1] // 4)
 
         with self.init_scope():
@@ -264,23 +151,27 @@ class SimplePose(Chain):
         x = self.backbone(x)
         x = self.decoder(x)
         heatmap = self.final_block(x)
-        if self.return_heatmap_only:
+        if self.return_heatmap:
             return heatmap
 
-        return heatmap
-        # heatmap_vector = heatmap.reshape((0, 0, -3))
-        # indices = heatmap_vector.argmax(axis=2, keepdims=True)
-        # scores = heatmap_vector.max(axis=2, keepdims=True)
-        # keys_x = indices % self.out_size[1]
-        # keys_y = (indices / self.out_size[1]).floor()
-        # keypoints = F.concat(keys_x, keys_y, dim=2)
-        # keypoints = F.broadcast_mul(keypoints, scores.clip(0.0, 1.0e5))
-        #
-        # return heatmap, keypoints, scores
-
-    @staticmethod
-    def calc_pose(heatmap, center, scale):
-        return _calc_pose(heatmap, center, scale)
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        heatmap_vector = F.reshape(heatmap, shape=(batch, self.keypoints, -1))
+        indices = F.cast(F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim), np.float32)
+        scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
+        scores_mask = (scores.array > 0.0).astype(np.float32)
+        keys_x = (indices.array % self.out_size[1]) * scores_mask
+        keys_y = (indices.array // self.out_size[1]) * scores_mask
+        keypoints = F.concat((keys_x, keys_y, scores), axis=vector_dim).array
+        for b in range(batch):
+            for k in range(self.keypoints):
+                hm = heatmap[b, k, :, :].array
+                px = int(keys_x[b, k])
+                py = int(keys_y[b, k])
+                if (1 < px < self.out_size[1] - 1) and (1 < py < self.out_size[0] - 1):
+                    keypoints[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                    keypoints[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+        return keypoints
 
 
 def get_simplepose(backbone,
@@ -492,6 +383,7 @@ def _test():
 
     in_size = (256, 192)
     keypoints = 17
+    return_heatmap = False
     pretrained = False
 
     models = [
@@ -506,7 +398,7 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, in_size=in_size)
+        net = model(pretrained=pretrained, in_size=in_size, return_heatmap=return_heatmap)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != simplepose_resnet18_coco or weight_count == 15376721)
@@ -518,15 +410,13 @@ def _test():
         assert (model != simplepose_resneta152b_coco or weight_count == 68654705)
 
         batch = 14
-        x = np.zeros((batch, 3, in_size[0], in_size[1]), np.float32)
+        x = np.random.rand(batch, 3, in_size[0], in_size[1]).astype(np.float32)
         y = net(x)
-        assert ((y.shape[0] == batch) and (y.shape[1] == keypoints) and (y.shape[2] == x.shape[2] // 4) and
-                (y.shape[3] == x.shape[3] // 4))
-
-        center = np.zeros((batch, 2), np.float32)
-        scale = np.ones((batch, 2), np.float32)
-        z, _ = net.calc_pose(y, center, scale)
-        assert (z.shape[0] == batch)
+        assert ((y.shape[0] == batch) and (y.shape[1] == keypoints))
+        if return_heatmap:
+            assert ((y.shape[2] == x.shape[2] // 4) and (y.shape[3] == x.shape[3] // 4))
+        else:
+            assert (y.shape[2] == 3)
 
 
 if __name__ == "__main__":

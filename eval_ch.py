@@ -148,8 +148,7 @@ def calc_model_accuracy(net,
                         metric,
                         calc_weight_count=False,
                         calc_flops_only=True,
-                        extended_log=False,
-                        ml_type="imgcls"):
+                        extended_log=False):
     """
     Main test routine.
 
@@ -173,8 +172,6 @@ def calc_model_accuracy(net,
     list of floats
         Accuracy values.
     """
-    assert (ml_type is not None)
-
     tic = time.time()
 
     predictor = Predictor(
@@ -253,7 +250,7 @@ def test_model(args):
         net_extra_kwargs=ds_metainfo.net_extra_kwargs,
         num_classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels)
-    assert (hasattr(net, "classes"))
+    assert (hasattr(net, "classes") or (ds_metainfo.ml_type == "hpe"))
     assert (hasattr(net, "in_size"))
 
     get_test_data_source_class = get_val_data_source if args.data_subset == "val" else get_test_data_source
@@ -277,8 +274,7 @@ def test_model(args):
         metric=test_metric,
         calc_weight_count=True,
         calc_flops_only=args.calc_flops_only,
-        extended_log=True,
-        ml_type=ds_metainfo.ml_type)
+        extended_log=True)
     return acc_values[ds_metainfo.saver_acc_ind] if len(acc_values) > 0 else None
 
 

@@ -117,6 +117,7 @@ from .models.superpointnet import *
 
 from .models.simplepose_coco import *
 from .models.others.oth_simple_pose_resnet import *
+from .models.others.oth_mobile_pose import *
 
 __all__ = ['get_model']
 
@@ -1041,6 +1042,13 @@ _models = {
     'oth_simple_pose_resnet50_v1d': oth_simple_pose_resnet50_v1d,
     'oth_simple_pose_resnet101_v1d': oth_simple_pose_resnet101_v1d,
     'oth_simple_pose_resnet152_v1d': oth_simple_pose_resnet152_v1d,
+
+    'oth_mobile_pose_resnet18_v1b': oth_mobile_pose_resnet18_v1b,
+    'oth_mobile_pose_resnet50_v1b': oth_mobile_pose_resnet50_v1b,
+    'oth_mobile_pose_mobilenet1_0': oth_mobile_pose_mobilenet1_0,
+    'oth_mobile_pose_mobilenetv2_1_0': oth_mobile_pose_mobilenetv2_1_0,
+    'oth_mobile_pose_mobilenetv3_small': oth_mobile_pose_mobilenetv3_small,
+    'oth_mobile_pose_mobilenetv3_large': oth_mobile_pose_mobilenetv3_large,
 
     # 'oth_resnet50_v1d': oth_resnet50_v1d,
     # 'oth_resnet101_v1d': oth_resnet101_v1d,

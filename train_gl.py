@@ -803,7 +803,7 @@ def main():
         ds_metainfo=ds_metainfo,
         batch_size=batch_size,
         num_workers=args.num_workers)
-    batch_fn = get_batch_fn(use_imgrec=ds_metainfo.use_imgrec)
+    batch_fn = get_batch_fn(ds_metainfo=ds_metainfo)
 
     num_training_samples = len(train_data._dataset) if not ds_metainfo.use_imgrec else ds_metainfo.num_training_samples
     trainer, lr_scheduler = prepare_trainer(

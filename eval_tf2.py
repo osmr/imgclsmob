@@ -199,25 +199,12 @@ def test_model(args,
             test_data = tqdm(test_data)
 
         processed_img_count = 0
-        if ds_metainfo.ml_type != "hpe":
-            for test_images, test_labels in test_data:
-                predictions = net(test_images)
-                test_metric.update(test_labels, predictions)
-                processed_img_count += len(test_images)
-                if processed_img_count >= total_img_count:
-                    break
-        else:
-            for test_images, test_labels in test_data:
-                scale = test_labels[:, :2]
-                center = test_labels[:, 2:4]
-                score = test_labels[:, 4]
-                img_id = test_labels[:, 5]
-                output = net(test_images)
-                preds, maxvals = net.calc_pose(output, center, scale, data_format)
-                test_metric.update(preds, maxvals, score, img_id)
-                processed_img_count += len(test_images)
-                if processed_img_count >= total_img_count:
-                    break
+        for test_images, test_labels in test_data:
+            predictions = net(test_images)
+            test_metric.update(test_labels, predictions)
+            processed_img_count += len(test_images)
+            if processed_img_count >= total_img_count:
+                break
 
         accuracy_msg = report_accuracy(
             metric=test_metric,

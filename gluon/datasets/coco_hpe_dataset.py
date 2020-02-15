@@ -132,7 +132,10 @@ class CocoHpeDataset(dataset.Dataset):
 
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
-        return img, scale, center, score, img_id
+
+        res_label = np.array([float(score)] + [float(img_id)] + list(center) + list(scale), np.float32)
+
+        return img, res_label
 
     def _load_jsons(self):
         """

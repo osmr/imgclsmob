@@ -206,25 +206,17 @@ def get_batch_fn(ds_metainfo):
     func
         Desired function.
     """
-    if ds_metainfo.ml_type == "hpe":
+    if ds_metainfo.use_imgrec:
         def batch_fn(batch, ctx):
-            data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-            scale = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-            center = split_and_load(batch[2], ctx_list=ctx, batch_axis=0)
-            score = split_and_load(batch[3], ctx_list=ctx, batch_axis=0)
-            img_id = split_and_load(batch[4], ctx_list=ctx, batch_axis=0)
-            return data, scale, center, score, img_id
+            data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+            return data, label
+
         return batch_fn
     else:
-        if ds_metainfo.use_imgrec:
-            def batch_fn(batch, ctx):
-                data = split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-                label = split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-                return data, label
-            return batch_fn
-        else:
-            def batch_fn(batch, ctx):
-                data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
-                label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
-                return data, label
-            return batch_fn
+        def batch_fn(batch, ctx):
+            data = split_and_load(batch[0], ctx_list=ctx, batch_axis=0)
+            label = split_and_load(batch[1], ctx_list=ctx, batch_axis=0)
+            return data, label
+
+        return batch_fn

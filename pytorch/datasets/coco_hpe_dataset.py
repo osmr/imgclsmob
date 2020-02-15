@@ -136,7 +136,7 @@ class CocoHpeDataset(data.Dataset):
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
 
-        res_label = np.array(list(scale) + list(center) + [float(score)] + [float(img_id)], np.float32)
+        res_label = np.array([float(score)] + [float(img_id)] + list(center) + list(scale), np.float32)
 
         img = torch.from_numpy(img)
         res_label = torch.from_numpy(res_label)

@@ -1,5 +1,6 @@
 import logging
 import os
+import cupy
 from chainer import cuda
 from chainer import using_config, Variable
 from chainer.function import no_backprop_mode
@@ -50,7 +51,7 @@ class Predictor(object):
             imgs = Variable(imgs)
             predictions = self.model(imgs)
 
-        output = to_cpu(predictions.array)
+        output = to_cpu(predictions.array if hasattr(predictions, "array") else cupy.asnumpy(predictions))
         return output
 
 

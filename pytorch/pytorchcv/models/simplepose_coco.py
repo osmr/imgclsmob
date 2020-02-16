@@ -5,7 +5,7 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco']
+           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
 
 import os
 import torch
@@ -89,6 +89,43 @@ class DeconvBlock(nn.Module):
         return x
 
 
+class HeatmapMaxDetBlock(nn.Module):
+    """
+    Heatmap maximum detector block.
+    """
+    def __init__(self):
+        super(HeatmapMaxDetBlock, self).__init__()
+
+    def forward(self, x):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        channels = heatmap.shape[1]
+        in_size = x.shape[2:]
+        heatmap_vector = heatmap.view(batch, channels, -1)
+        scores, indices = heatmap_vector.max(dim=vector_dim, keepdims=True)
+        scores_mask = (scores > 0.0).float()
+        pts_x = (indices % in_size[1]) * scores_mask
+        pts_y = (indices // in_size[1]) * scores_mask
+        pts = torch.cat((pts_x, pts_y, scores), dim=vector_dim)
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :]
+                px = int(pts[b, k, 0])
+                py = int(pts[b, k, 1])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
+                    pts[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
+        return pts
+
+    @staticmethod
+    def calc_flops(x):
+        assert (x.shape[0] == 1)
+        num_flops = x.numel() + 26 * x.shape[1]
+        num_macs = 0
+        return num_flops, num_macs
+
+
 class SimplePose(nn.Module):
     """
     SimplePose model from 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -123,7 +160,6 @@ class SimplePose(nn.Module):
         self.in_size = in_size
         self.keypoints = keypoints
         self.return_heatmap = return_heatmap
-        self.out_size = (in_size[0] // 4, in_size[1] // 4)
 
         self.backbone = backbone
 
@@ -137,11 +173,12 @@ class SimplePose(nn.Module):
                 stride=2,
                 padding=1))
             in_channels = out_channels
-
-        self.final_block = conv1x1(
+        self.decoder.add_module("final_block", conv1x1(
             in_channels=in_channels,
             out_channels=keypoints,
-            bias=True)
+            bias=True))
+
+        self.heatmap_max_det = HeatmapMaxDetBlock()
 
         self._init_params()
 
@@ -154,28 +191,12 @@ class SimplePose(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        x = self.decoder(x)
-        heatmap = self.final_block(x)
+        heatmap = self.decoder(x)
         if self.return_heatmap:
             return heatmap
-
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        heatmap_vector = heatmap.view(batch, self.keypoints, -1)
-        scores, indices = heatmap_vector.max(dim=vector_dim, keepdims=True)
-        scores_mask = (scores > 0.0).float()
-        keys_x = (indices % self.out_size[1]) * scores_mask
-        keys_y = (indices // self.out_size[1]) * scores_mask
-        keypoints = torch.cat((keys_x, keys_y, scores), dim=vector_dim)
-        for b in range(batch):
-            for k in range(self.keypoints):
-                hm = heatmap[b, k, :, :]
-                px = int(keypoints[b, k, 0])
-                py = int(keypoints[b, k, 1])
-                if (1 < px < self.out_size[1] - 1) and (1 < py < self.out_size[0] - 1):
-                    keypoints[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
-                    keypoints[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
-        return keypoints
+        else:
+            keypoints = self.heatmap_max_det(heatmap)
+            return keypoints
 
 
 def get_simplepose(backbone,

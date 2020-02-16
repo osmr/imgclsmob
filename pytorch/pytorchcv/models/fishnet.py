@@ -4,13 +4,12 @@
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 """
 
-__all__ = ['FishNet', 'fishnet99', 'fishnet150', 'InterpolationBlock', 'ChannelSqueeze']
+__all__ = ['FishNet', 'fishnet99', 'fishnet150', 'ChannelSqueeze']
 
 import os
 import torch.nn as nn
-import torch.nn.functional as F
 import torch.nn.init as init
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass, Identity
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass, Identity, InterpolationBlock
 from .preresnet import PreResActivation
 from .senet import SEInitBlock
 
@@ -59,36 +58,6 @@ class ChannelSqueeze(nn.Module):
 
     def forward(self, x):
         return channel_squeeze(x, self.groups)
-
-
-class InterpolationBlock(nn.Module):
-    """
-    Interpolation block.
-
-    Parameters:
-    ----------
-    scale_factor : float
-        Multiplier for spatial size.
-    mode : str, default 'nearest'
-        Algorithm used for upsampling.
-    align_corners : bool, default None
-        Whether to align the corner pixels of the input and output tensors
-    """
-    def __init__(self,
-                 scale_factor,
-                 mode="nearest",
-                 align_corners=None):
-        super(InterpolationBlock, self).__init__()
-        self.scale_factor = scale_factor
-        self.mode = mode
-        self.align_corners = align_corners
-
-    def forward(self, x):
-        return F.interpolate(
-            input=x,
-            scale_factor=self.scale_factor,
-            mode=self.mode,
-            align_corners=self.align_corners)
 
 
 class PreSEAttBlock(nn.Module):
@@ -292,7 +261,7 @@ class UpUnit(nn.Module):
                 dilation=dilation,
                 squeeze=squeeze))
             in_channels = out_channels
-        self.upsample = InterpolationBlock(scale_factor=2)
+        self.upsample = InterpolationBlock(scale_factor=2, mode="nearest", align_corners=None)
 
     def forward(self, x):
         x = self.blocks(x)

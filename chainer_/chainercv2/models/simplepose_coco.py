@@ -5,7 +5,7 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco']
+           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
 
 import os
 import numpy as np
@@ -90,6 +90,38 @@ class DeconvBlock(Chain):
         return x
 
 
+class HeatmapMaxDetBlock(Chain):
+    """
+    Heatmap maximum detector block.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+
+    def __call__(self, x):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        channels = heatmap.shape[1]
+        in_size = x.shape[2:]
+        heatmap_vector = F.reshape(heatmap, shape=(batch, channels, -1))
+        indices = F.cast(F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim), np.float32)
+        scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
+        scores_mask = (scores.array > 0.0).astype(np.float32)
+        pts_x = (indices.array % in_size[1]) * scores_mask
+        pts_y = (indices.array // in_size[1]) * scores_mask
+        pts = F.concat((pts_x, pts_y, scores), axis=vector_dim).array
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :].array
+                px = int(pts_x[b, k])
+                py = int(pts_y[b, k])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+        return pts
+
+
 class SimplePose(Chain):
     """
     SimplePose model from 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -125,7 +157,6 @@ class SimplePose(Chain):
         self.in_size = in_size
         self.keypoints = keypoints
         self.return_heatmap = return_heatmap
-        self.out_size = (in_size[0] // 4, in_size[1] // 4)
 
         with self.init_scope():
             self.backbone = backbone
@@ -141,37 +172,21 @@ class SimplePose(Chain):
                         stride=2,
                         pad=1))
                     in_channels = out_channels
+                setattr(self.decoder, "final_block", conv1x1(
+                    in_channels=in_channels,
+                    out_channels=keypoints,
+                    use_bias=True))
 
-            self.final_block = conv1x1(
-                in_channels=in_channels,
-                out_channels=keypoints,
-                use_bias=True)
+            self.heatmap_max_det = HeatmapMaxDetBlock()
 
     def __call__(self, x):
         x = self.backbone(x)
-        x = self.decoder(x)
-        heatmap = self.final_block(x)
+        heatmap = self.decoder(x)
         if self.return_heatmap:
             return heatmap
-
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        heatmap_vector = F.reshape(heatmap, shape=(batch, self.keypoints, -1))
-        indices = F.cast(F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim), np.float32)
-        scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
-        scores_mask = (scores.array > 0.0).astype(np.float32)
-        keys_x = (indices.array % self.out_size[1]) * scores_mask
-        keys_y = (indices.array // self.out_size[1]) * scores_mask
-        keypoints = F.concat((keys_x, keys_y, scores), axis=vector_dim).array
-        for b in range(batch):
-            for k in range(self.keypoints):
-                hm = heatmap[b, k, :, :].array
-                px = int(keys_x[b, k])
-                py = int(keys_y[b, k])
-                if (1 < px < self.out_size[1] - 1) and (1 < py < self.out_size[0] - 1):
-                    keypoints[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
-                    keypoints[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
-        return keypoints
+        else:
+            keypoints = self.heatmap_max_det(heatmap)
+            return keypoints
 
 
 def get_simplepose(backbone,

@@ -5,9 +5,10 @@
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'BatchNormExtra', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'split', 'IBN',
-           'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential']
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2',
+           'SEBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent',
+           'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential']
 
 import math
 from inspect import isfunction
@@ -48,6 +49,9 @@ class ReLU6(HybridBlock):
     def hybrid_forward(self, F, x):
         return F.clip(x, 0.0, 6.0, name="relu6")
 
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
+
 
 class PReLU2(HybridBlock):
     """
@@ -83,6 +87,9 @@ class HSigmoid(HybridBlock):
     def hybrid_forward(self, F, x):
         return F.clip(x + 3.0, 0.0, 6.0, name="relu6") / 6.0
 
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
+
 
 class HSwish(HybridBlock):
     """
@@ -93,6 +100,9 @@ class HSwish(HybridBlock):
 
     def hybrid_forward(self, F, x):
         return x * F.clip(x + 3.0, 0.0, 6.0, name="relu6") / 6.0
+
+    def __repr__(self):
+        return '{name}()'.format(name=self.__class__.__name__)
 
 
 def get_activation_layer(activation):
@@ -965,6 +975,55 @@ def pre_conv3x3_block(in_channels,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
         activate=activate)
+
+
+class InterpolationBlock(HybridBlock):
+    """
+    Interpolation upsampling block.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear upsampling operation.
+    fixed_size : bool, default True
+        Whether to use bilinear interpolation.
+    """
+    def __init__(self,
+                 scale_factor,
+                 out_size=None,
+                 bilinear=True,
+                 **kwargs):
+        super(InterpolationBlock, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+        self.out_size = out_size
+        self.bilinear = bilinear
+
+    def hybrid_forward(self, F, x):
+        if self.bilinear:
+            out_size = self.out_size if (self.out_size is not None) else\
+                (x.shape[2] * self.scale_factor, x.shape[3] * self.scale_factor)
+            return F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
+        else:
+            return F.UpSampling(x, scale=self.scale_factor, sample_type="nearest")
+
+    def __repr__(self):
+        s = '{name}(scale_factor={scale_factor}, out_size={out_size}, bilinear={bilinear})'
+        return s.format(
+            name=self.__class__.__name__,
+            scale_factor=self.scale_factor,
+            out_size=self.out_size,
+            bilinear=self.bilinear)
+
+    def calc_flops(self, x):
+        assert (x.shape[0] == 1)
+        if self.bilinear:
+            num_flops = 9 * x.size
+        else:
+            num_flops = 4 * x.size
+        num_macs = 0
+        return num_flops, num_macs
 
 
 def channel_shuffle(x,

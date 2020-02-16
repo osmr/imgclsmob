@@ -11,39 +11,7 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import HybridConcurrent
 from .common import PReLU2, conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,\
-    ChannelShuffle
-
-
-class InterpolationBlock(HybridBlock):
-    """
-    Interpolation block.
-
-    Parameters:
-    ----------
-    scale_factor : int
-        Multiplier for spatial size.
-    out_size : tuple of 2 int, default None
-        Spatial size of the output tensor for the bilinear upsampling operation.
-    """
-    def __init__(self,
-                 scale_factor,
-                 out_size=None,
-                 **kwargs):
-        super(InterpolationBlock, self).__init__(**kwargs)
-        self.scale_factor = scale_factor
-        self.out_size = out_size
-
-    def hybrid_forward(self, F, x):
-        out_size = self.out_size if (self.out_size is not None) else\
-            (x.shape[2] * self.scale_factor, x.shape[3] * self.scale_factor)
-        return F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
-
-    def __repr__(self):
-        s = '{name}(scale_factor={scale_factor}, out_size={out_size})'
-        return s.format(
-            name=self.__class__.__name__,
-            scale_factor=self.scale_factor,
-            out_size=self.out_size)
+    InterpolationBlock, ChannelShuffle
 
 
 class SEBlock(HybridBlock):

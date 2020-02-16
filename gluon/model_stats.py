@@ -6,13 +6,13 @@ import logging
 import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
-from mxnet.gluon.contrib.nn import Identity
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish
-from .gluoncv2.models.fishnet import InterpolationBlock, ChannelSqueeze
+from mxnet.gluon.contrib.nn import Identity, PixelShuffle2D
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish, InterpolationBlock
+from .gluoncv2.models.fishnet import ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock
 from .gluoncv2.models.proxylessnas import ProxylessUnit
-from .gluoncv2.models.sinet import InterpolationBlock as InterpolationBlock2
+from .gluoncv2.models.simplepose_coco import HeatmapMaxDetBlock
 
 __all__ = ['measure_model']
 
@@ -195,7 +195,7 @@ def measure_model(model,
         elif isinstance(block, Identity):
             extra_num_flops = 0
             extra_num_macs = 0
-        elif type(block) in [InterpolationBlock, InterpolationBlock2]:
+        elif isinstance(block, PixelShuffle2D):
             extra_num_flops = x[0].size
             extra_num_macs = 0
         elif isinstance(block, ChannelSqueeze):
@@ -216,6 +216,8 @@ def measure_model(model,
         elif isinstance(block, ProxylessUnit):
             extra_num_flops = x[0].size
             extra_num_macs = 0
+        elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock]:
+            extra_num_flops, extra_num_macs = block.calc_flops(x[0])
         else:
             raise TypeError("Unknown layer type: {}".format(type(block)))
 

@@ -7,12 +7,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish
-from .pytorchcv.models.fishnet import InterpolationBlock, ChannelSqueeze
+from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish,\
+    InterpolationBlock
+from .pytorchcv.models.fishnet import ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
 from .pytorchcv.models.proxylessnas import ProxylessUnit
-from .pytorchcv.models.sinet import InterpolationBlock as InterpolationBlock2
+from .pytorchcv.models.simplepose_coco import HeatmapMaxDetBlock
 
 __all__ = ['measure_model']
 
@@ -206,11 +207,11 @@ def measure_model(model,
         elif isinstance(module, Identity):
             extra_num_flops = 0
             extra_num_macs = 0
+        elif isinstance(module, nn.PixelShuffle):
+            extra_num_flops = x[0].numel()
+            extra_num_macs = 0
         elif isinstance(module, Flatten):
             extra_num_flops = 0
-            extra_num_macs = 0
-        elif type(module) in [InterpolationBlock, InterpolationBlock2]:
-            extra_num_flops = x[0].numel()
             extra_num_macs = 0
         elif isinstance(module, nn.Upsample):
             extra_num_flops = 4 * x[0].numel()
@@ -236,6 +237,8 @@ def measure_model(model,
         elif isinstance(module, nn.Softmax2d):
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
+        elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock]:
+            extra_num_flops, extra_num_macs = module.calc_flops(x[0])
         else:
             raise TypeError("Unknown layer type: {}".format(type(module)))
 

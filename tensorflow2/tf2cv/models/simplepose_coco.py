@@ -5,7 +5,7 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco']
+           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
 
 import os
 import numpy as np
@@ -67,7 +67,8 @@ class Deconv2d(nn.Layer):
         if self.use_crop:
             self.crop = nn.Cropping2D(
                 cropping=padding,
-                data_format=data_format)
+                data_format=data_format,
+                name="crop")
 
         self.conv = nn.Conv2DTranspose(
             filters=out_channels,
@@ -169,6 +170,48 @@ class DeconvBlock(nn.Layer):
         return x
 
 
+class HeatmapMaxDetBlock(nn.Layer):
+    """
+    Heatmap maximum detector block.
+    """
+    def __init__(self,
+                 data_format="channels_last",
+                 **kwargs):
+        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+        self.data_format = data_format
+
+    def call(self, x, training=None):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        if is_channels_first(self.data_format):
+            channels = heatmap.shape[1]
+            in_size = x.shape[2:]
+            heatmap_vector = tf.reshape(heatmap, shape=(batch, channels, -1))
+        else:
+            channels = heatmap.shape[3]
+            in_size = x.shape[1:3]
+            heatmap_vector = tf.reshape(heatmap, shape=(batch, -1, channels))
+            heatmap_vector = tf.transpose(heatmap_vector, perm=(0, 2, 1))
+        indices = tf.cast(tf.expand_dims(tf.cast(tf.math.argmax(heatmap_vector, axis=vector_dim), np.int32),
+                                         axis=vector_dim), np.float32)
+        scores = tf.math.reduce_max(heatmap_vector, axis=vector_dim, keepdims=True)
+        scores_mask = tf.cast(tf.math.greater(scores, 0.0), np.float32)
+        pts_x = (indices % in_size[1]) * scores_mask
+        pts_y = (indices // in_size[1]) * scores_mask
+        pts = tf.concat([pts_x, pts_y, scores], axis=vector_dim).numpy()
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :] if is_channels_first(self.data_format) else heatmap[b, :, :, k]
+                px = int(pts[b, k, 0])
+                py = int(pts[b, k, 1])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+        pts = tf.convert_to_tensor(pts)
+        return pts
+
+
 class SimplePose(tf.keras.Model):
     """
     SimplePose model from 'Simple Baselines for Human Pose Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
@@ -208,7 +251,6 @@ class SimplePose(tf.keras.Model):
         self.keypoints = keypoints
         self.return_heatmap = return_heatmap
         self.data_format = data_format
-        self.out_size = (in_size[0] // 4, in_size[1] // 4)
 
         self.backbone = backbone
         self.backbone._name = "backbone"
@@ -225,45 +267,25 @@ class SimplePose(tf.keras.Model):
                 data_format=data_format,
                 name="unit{}".format(i + 1)))
             in_channels = out_channels
-
-        self.final_block = conv1x1(
+        self.decoder.add(conv1x1(
             in_channels=in_channels,
             out_channels=keypoints,
             use_bias=True,
             data_format=data_format,
-            name="final_block")
+            name="final_block"))
+
+        self.heatmap_max_det = HeatmapMaxDetBlock(
+            data_format=data_format,
+            name="heatmap_max_det")
 
     def call(self, x, training=None):
         x = self.backbone(x, training=training)
-        x = self.decoder(x, training=training)
-        heatmap = self.final_block(x)
+        heatmap = self.decoder(x, training=training)
         if self.return_heatmap or not tf.executing_eagerly():
             return heatmap
-
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        if is_channels_first(self.data_format):
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, self.keypoints, -1))
         else:
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, -1, self.keypoints))
-            heatmap_vector = tf.transpose(heatmap_vector, perm=(0, 2, 1))
-        indices = tf.cast(tf.expand_dims(tf.cast(tf.math.argmax(heatmap_vector, axis=vector_dim), np.int32),
-                                         axis=vector_dim), np.float32)
-        scores = tf.math.reduce_max(heatmap_vector, axis=vector_dim, keepdims=True)
-        scores_mask = tf.cast(tf.math.greater(scores, 0.0), np.float32)
-        keys_x = (indices % self.out_size[1]) * scores_mask
-        keys_y = (indices // self.out_size[1]) * scores_mask
-        keypoints = tf.concat([keys_x, keys_y, scores], axis=vector_dim).numpy()
-        for b in range(batch):
-            for k in range(self.keypoints):
-                hm = heatmap[b, k, :, :] if is_channels_first(self.data_format) else heatmap[b, :, :, k]
-                px = int(keypoints[b, k, 0])
-                py = int(keypoints[b, k, 1])
-                if (1 < px < self.out_size[1] - 1) and (1 < py < self.out_size[0] - 1):
-                    keypoints[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
-                    keypoints[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
-        keypoints = tf.convert_to_tensor(keypoints)
-        return keypoints
+            keypoints = self.heatmap_max_det(heatmap)
+            return keypoints
 
 
 def get_simplepose(backbone,

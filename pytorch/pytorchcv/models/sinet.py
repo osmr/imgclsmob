@@ -9,35 +9,8 @@ __all__ = ['SINet', 'sinet_cityscapes']
 import os
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from .common import conv1x1, get_activation_layer, conv1x1_block, conv3x3_block, round_channels, dwconv_block,\
-    Concurrent, ChannelShuffle
-
-
-class InterpolationBlock(nn.Module):
-    """
-    Interpolation block.
-
-    Parameters:
-    ----------
-    scale_factor : float
-        Multiplier for spatial size.
-    align_corners : bool, default True
-        Whether to use corners alignment.
-    """
-    def __init__(self,
-                 scale_factor,
-                 align_corners=True):
-        super(InterpolationBlock, self).__init__()
-        self.scale_factor = scale_factor
-        self.align_corners = align_corners
-
-    def forward(self, x):
-        return F.interpolate(
-            input=x,
-            scale_factor=self.scale_factor,
-            mode="bilinear",
-            align_corners=self.align_corners)
+    Concurrent, InterpolationBlock, ChannelShuffle
 
 
 class SEBlock(nn.Module):

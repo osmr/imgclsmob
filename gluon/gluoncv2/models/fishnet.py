@@ -4,13 +4,13 @@
     http://papers.nips.cc/paper/7356-fishnet-a-versatile-backbone-for-image-region-and-pixel-level-prediction.pdf.
 """
 
-__all__ = ['FishNet', 'fishnet99', 'fishnet150', 'InterpolationBlock', 'ChannelSqueeze']
+__all__ = ['FishNet', 'fishnet99', 'fishnet150', 'ChannelSqueeze']
 
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import Identity
-from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass
+from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1, SesquialteralHourglass, InterpolationBlock
 from .preresnet import PreResActivation
 from .senet import SEInitBlock
 
@@ -56,25 +56,6 @@ class ChannelSqueeze(HybridBlock):
 
     def hybrid_forward(self, F, x):
         return channel_squeeze(x, self.channels_per_group)
-
-
-class InterpolationBlock(HybridBlock):
-    """
-    Interpolation block.
-
-    Parameters:
-    ----------
-    scale_factor : int
-        Multiplier for spatial size.
-    """
-    def __init__(self,
-                 scale_factor,
-                 **kwargs):
-        super(InterpolationBlock, self).__init__(**kwargs)
-        self.scale_factor = scale_factor
-
-    def hybrid_forward(self, F, x):
-        return F.UpSampling(x, scale=self.scale_factor, sample_type="nearest")
 
 
 class PreSEAttBlock(HybridBlock):
@@ -311,7 +292,7 @@ class UpUnit(HybridBlock):
                     bn_use_global_stats=bn_use_global_stats,
                     squeeze=squeeze))
                 in_channels = out_channels
-            self.upsample = InterpolationBlock(scale_factor=2)
+            self.upsample = InterpolationBlock(scale_factor=2, bilinear=False)
 
     def hybrid_forward(self, F, x):
         x = self.blocks(x)

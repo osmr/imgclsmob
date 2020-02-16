@@ -3,12 +3,58 @@ from __future__ import division
 __all__ = ['oth_mobile_pose_resnet18_v1b', 'oth_mobile_pose_resnet50_v1b', 'oth_mobile_pose_mobilenet1_0',
            'oth_mobile_pose_mobilenetv2_1_0', 'oth_mobile_pose_mobilenetv3_small', 'oth_mobile_pose_mobilenetv3_large']
 
+import numpy as np
+import mxnet as mx
 from mxnet import initializer
 from mxnet.gluon import nn
 from mxnet.gluon import contrib
 from mxnet.gluon.block import HybridBlock
 from mxnet.context import cpu
 import gluoncv as gcv
+
+
+def get_max_pred(batch_heatmaps):
+    batch_size = batch_heatmaps.shape[0]
+    num_joints = batch_heatmaps.shape[1]
+    width = batch_heatmaps.shape[3]
+    heatmaps_reshaped = batch_heatmaps.reshape((batch_size, num_joints, -1))
+    idx = mx.nd.argmax(heatmaps_reshaped, 2)
+    maxvals = mx.nd.max(heatmaps_reshaped, 2)
+
+    maxvals = maxvals.reshape((batch_size, num_joints, 1))
+    idx = idx.reshape((batch_size, num_joints, 1))
+
+    preds = mx.nd.tile(idx, (1, 1, 2)).astype(np.float32)
+
+    preds[:, :, 0] = (preds[:, :, 0]) % width
+    preds[:, :, 1] = mx.nd.floor((preds[:, :, 1]) / width)
+
+    pred_mask = mx.nd.tile(mx.nd.greater(maxvals, 0.0), (1, 1, 2))
+    pred_mask = pred_mask.astype(np.float32)
+
+    preds *= pred_mask
+    return preds, maxvals
+
+
+def _get_final_preds(batch_heatmaps):
+    coords, maxvals = get_max_pred(batch_heatmaps)
+
+    heatmap_height = batch_heatmaps.shape[2]
+    heatmap_width = batch_heatmaps.shape[3]
+
+    # post-processing
+    for n in range(coords.shape[0]):
+        for p in range(coords.shape[1]):
+            hm = batch_heatmaps[n][p]
+            px = int(mx.nd.floor(coords[n][p][0] + 0.5).asscalar())
+            py = int(mx.nd.floor(coords[n][p][1] + 0.5).asscalar())
+            if 1 < px < heatmap_width-1 and 1 < py < heatmap_height-1:
+                diff = mx.nd.concat(hm[py][px+1] - hm[py][px-1],
+                                 hm[py+1][px] - hm[py-1][px],
+                                 dim=0)
+                coords[n][p] += mx.nd.sign(diff) * .25
+
+    return coords, maxvals
 
 
 class DUC(HybridBlock):
@@ -41,8 +87,12 @@ class MobilePose(HybridBlock):
                  num_joints=17,
                  pretrained_base=False,
                  pretrained_ctx=cpu(),
+                 in_channels=3,
+                 in_size=(256, 192),
                  **kwargs):
         super(MobilePose, self).__init__(**kwargs)
+        assert (in_channels == 3)
+        self.in_size = in_size
 
         with self.name_scope():
             from gluoncv.model_zoo import get_model
@@ -71,9 +121,12 @@ class MobilePose(HybridBlock):
 
     def hybrid_forward(self, F, x):
         x = self.features(x)
-        hm = self.upsampling(x)
+        x = self.upsampling(x)
 
-        return hm
+        batch_heatmaps = x.as_in_context(mx.cpu())
+        y, maxvals = _get_final_preds(batch_heatmaps=batch_heatmaps)
+        keypoints = F.concat(y, maxvals, dim=2)
+        return keypoints
 
 
 def get_mobile_pose(base_name, ctx=cpu(), pretrained=False,
@@ -88,32 +141,34 @@ def get_mobile_pose(base_name, ctx=cpu(), pretrained=False,
     return net
 
 
-def oth_mobile_pose_resnet18_v1b(**kwargs):
+def oth_mobile_pose_resnet18_v1b(pretrained=False, **kwargs):
     return get_mobile_pose('resnet18_v1b', base_attrs=['conv1', 'bn1', 'relu', 'maxpool',
                                                        'layer1', 'layer2', 'layer3', 'layer4'],
+                           pretrained=pretrained,
                            **kwargs)
 
 
-def oth_mobile_pose_resnet50_v1b(**kwargs):
+def oth_mobile_pose_resnet50_v1b(pretrained=False, **kwargs):
     return get_mobile_pose('resnet50_v1b', base_attrs=['conv1', 'bn1', 'relu', 'maxpool',
                                                        'layer1', 'layer2', 'layer3', 'layer4'],
+                           pretrained=pretrained,
                            **kwargs)
 
 
-def oth_mobile_pose_mobilenet1_0(**kwargs):
-    return get_mobile_pose('mobilenet1.0', base_attrs=['features'], **kwargs)
+def oth_mobile_pose_mobilenet1_0(pretrained=False, **kwargs):
+    return get_mobile_pose('mobilenet1.0', base_attrs=['features'], pretrained=pretrained, **kwargs)
 
 
-def oth_mobile_pose_mobilenetv2_1_0(**kwargs):
-    return get_mobile_pose('mobilenetv2_1.0', base_attrs=['features'], **kwargs)
+def oth_mobile_pose_mobilenetv2_1_0(pretrained=False, **kwargs):
+    return get_mobile_pose('mobilenetv2_1.0', base_attrs=['features'], pretrained=pretrained, **kwargs)
 
 
-def oth_mobile_pose_mobilenetv3_small(**kwargs):
-    return get_mobile_pose('mobilenetv3_small', base_attrs=['features'], **kwargs)
+def oth_mobile_pose_mobilenetv3_small(pretrained=False, **kwargs):
+    return get_mobile_pose('mobilenetv3_small', base_attrs=['features'], pretrained=pretrained, **kwargs)
 
 
-def oth_mobile_pose_mobilenetv3_large(**kwargs):
-    return get_mobile_pose('mobilenetv3_large', base_attrs=['features'], **kwargs)
+def oth_mobile_pose_mobilenetv3_large(pretrained=False, **kwargs):
+    return get_mobile_pose('mobilenetv3_large', base_attrs=['features'], pretrained=pretrained, **kwargs)
 
 
 def _test():
@@ -123,9 +178,9 @@ def _test():
     pretrained = False
 
     models = [
-        oth_mobile_pose_resnet18_v1b,
-        oth_mobile_pose_resnet50_v1b,
-        oth_mobile_pose_mobilenet1_0,
+        # oth_mobile_pose_resnet18_v1b,
+        # oth_mobile_pose_resnet50_v1b,
+        # oth_mobile_pose_mobilenet1_0,
         oth_mobile_pose_mobilenetv2_1_0,
         oth_mobile_pose_mobilenetv3_small,
         oth_mobile_pose_mobilenetv3_large,

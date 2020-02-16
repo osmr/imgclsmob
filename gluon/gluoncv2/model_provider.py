@@ -116,6 +116,8 @@ from .models.sinet import *
 from .models.superpointnet import *
 
 from .models.simplepose_coco import *
+from .models.simpleposemobile_coco import *
+
 from .models.others.oth_simple_pose_resnet import *
 from .models.others.oth_mobile_pose import *
 
@@ -1034,6 +1036,13 @@ _models = {
     'simplepose_resneta50b_coco': simplepose_resneta50b_coco,
     'simplepose_resneta101b_coco': simplepose_resneta101b_coco,
     'simplepose_resneta152b_coco': simplepose_resneta152b_coco,
+
+    'simplepose_mobile_resnet18_coco': simplepose_mobile_resnet18_coco,
+    'simplepose_mobile_resnet50b_coco': simplepose_mobile_resnet50b_coco,
+    'simplepose_mobile_mobilenet_w1_coco': simplepose_mobile_mobilenet_w1_coco,
+    'simplepose_mobile_mobilenetv2_w1_coco': simplepose_mobile_mobilenetv2_w1_coco,
+    'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
+    'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 
     'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
     'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,

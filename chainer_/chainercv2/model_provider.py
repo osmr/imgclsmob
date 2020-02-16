@@ -103,6 +103,7 @@ from .models.deeplabv3 import *
 from .models.sinet import *
 
 from .models.simplepose_coco import *
+from .models.simpleposemobile_coco import *
 
 __all__ = ['get_model']
 
@@ -921,6 +922,13 @@ _models = {
     'simplepose_resneta50b_coco': simplepose_resneta50b_coco,
     'simplepose_resneta101b_coco': simplepose_resneta101b_coco,
     'simplepose_resneta152b_coco': simplepose_resneta152b_coco,
+
+    'simplepose_mobile_resnet18_coco': simplepose_mobile_resnet18_coco,
+    'simplepose_mobile_resnet50b_coco': simplepose_mobile_resnet50b_coco,
+    'simplepose_mobile_mobilenet_w1_coco': simplepose_mobile_mobilenet_w1_coco,
+    'simplepose_mobile_mobilenetv2_w1_coco': simplepose_mobile_mobilenetv2_w1_coco,
+    'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
+    'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 }
 
 

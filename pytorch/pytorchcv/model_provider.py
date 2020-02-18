@@ -99,6 +99,7 @@ from .models.octresnet import *
 
 from .models.resneta import *
 from .models.resnetd import *
+from .models.fastseresnet import *
 
 from .models.resnet_cub import *
 from .models.seresnet_cub import *
@@ -113,6 +114,7 @@ from .models.sinet import *
 
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
+from .models.alphapose_coco import *
 
 # from .models.others.oth_sinet import *
 
@@ -507,6 +509,10 @@ _models = {
     'mobilenetv2_w3d4': mobilenetv2_w3d4,
     'mobilenetv2_wd2': mobilenetv2_wd2,
     'mobilenetv2_wd4': mobilenetv2_wd4,
+    'mobilenetv2b_w1': mobilenetv2b_w1,
+    'mobilenetv2b_w3d4': mobilenetv2b_w3d4,
+    'mobilenetv2b_wd2': mobilenetv2b_wd2,
+    'mobilenetv2b_wd4': mobilenetv2b_wd4,
 
     'mobilenetv3_small_w7d20': mobilenetv3_small_w7d20,
     'mobilenetv3_small_wd2': mobilenetv3_small_wd2,
@@ -874,6 +880,8 @@ _models = {
     'resnetd101b': resnetd101b,
     'resnetd152b': resnetd152b,
 
+    'fastseresnet101b': fastseresnet101b,
+
     'octresnet10_ad2': octresnet10_ad2,
     'octresnet50b_ad2': octresnet50b_ad2,
 
@@ -975,9 +983,11 @@ _models = {
     'simplepose_mobile_resnet18_coco': simplepose_mobile_resnet18_coco,
     'simplepose_mobile_resnet50b_coco': simplepose_mobile_resnet50b_coco,
     'simplepose_mobile_mobilenet_w1_coco': simplepose_mobile_mobilenet_w1_coco,
-    'simplepose_mobile_mobilenetv2_w1_coco': simplepose_mobile_mobilenetv2_w1_coco,
+    'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
+
+    'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 
     'superpointnet': superpointnet,
 }

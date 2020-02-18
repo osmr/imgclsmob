@@ -5,11 +5,13 @@
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalAvgPool2D', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
            'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SimpleSequential',
-           'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
-           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D']
+           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock',
+           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential',
+           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten',
+           'AdaptiveAvgPool2D', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
+import numpy as np
 from chainer import Chain
 import chainer.functions as F
 import chainer.links as L
@@ -953,6 +955,8 @@ class SEBlock(Chain):
         Squeeze reduction value.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
     activation : function or str, default F.relu
         Activation function after the first convolution.
     out_activation : function or str, default F.sigmoid
@@ -962,30 +966,114 @@ class SEBlock(Chain):
                  channels,
                  reduction=16,
                  round_mid=False,
+                 use_conv=True,
                  mid_activation=(lambda: F.relu),
                  out_activation=(lambda: F.sigmoid)):
         super(SEBlock, self).__init__()
+        self.use_conv = use_conv
         mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         with self.init_scope():
-            self.conv1 = conv1x1(
-                in_channels=channels,
-                out_channels=mid_channels,
-                use_bias=True)
+            if use_conv:
+                self.conv1 = conv1x1(
+                    in_channels=channels,
+                    out_channels=mid_channels,
+                    use_bias=True)
+            else:
+                self.fc1 = L.Linear(
+                    in_size=channels,
+                    out_size=mid_channels)
             self.activ = get_activation_layer(mid_activation)
-            self.conv2 = conv1x1(
-                in_channels=mid_channels,
-                out_channels=channels,
-                use_bias=True)
+            if use_conv:
+                self.conv2 = conv1x1(
+                    in_channels=mid_channels,
+                    out_channels=channels,
+                    use_bias=True)
+            else:
+                self.fc2 = L.Linear(
+                    in_size=mid_channels,
+                    out_size=channels)
             self.sigmoid = get_activation_layer(out_activation)
 
     def __call__(self, x):
         w = F.average_pooling_2d(x, ksize=x.shape[2:])
-        w = self.conv1(w)
+        if not self.use_conv:
+            w = F.reshape(w, shape=(w.shape[0], -1))
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
         w = self.activ(w)
-        w = self.conv2(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
         w = self.sigmoid(w)
+        if not self.use_conv:
+            w = F.expand_dims(F.expand_dims(w, axis=2), axis=3)
         x = x * w
+        return x
+
+
+class PixelShuffle(Chain):
+    """
+    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
+    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    """
+    def __init__(self,
+                 scale_factor,
+                 **kwargs):
+        super(PixelShuffle, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+
+    def __call__(self, x):
+        f1 = self.scale_factor
+        f2 = self.scale_factor
+
+        batch, channels, height, width = x.shape
+
+        assert (channels % f1 % f2 == 0)
+        new_channels = channels // f1 // f2
+
+        x = F.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
+        x = F.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
+        x = F.swapaxes(x, axis1=2, axis2=3)
+        x = F.swapaxes(x, axis1=4, axis2=5)
+        x = F.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
+
+        return x
+
+
+class DucBlock(Chain):
+    """
+    Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
+    https://arxiv.org/abs/1702.08502.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    scale_factor : int
+        Multiplier for spatial size.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 scale_factor,
+                 **kwargs):
+        super(DucBlock, self).__init__(**kwargs)
+        mid_channels = 4 * out_channels
+
+        with self.init_scope():
+            self.conv = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels)
+            self.pix_shuffle = PixelShuffle(scale_factor=scale_factor)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        x = self.pix_shuffle(x)
         return x
 
 
@@ -1332,3 +1420,35 @@ class AdaptiveAvgPool2D(Chain):
     """
     def __call__(self, x):
         return F.average_pooling_2d(x, ksize=x.shape[2:])
+
+
+class HeatmapMaxDetBlock(Chain):
+    """
+    Heatmap maximum detector block (for human pose estimation task).
+    """
+    def __init__(self,
+                 **kwargs):
+        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+
+    def __call__(self, x):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        channels = heatmap.shape[1]
+        in_size = x.shape[2:]
+        heatmap_vector = F.reshape(heatmap, shape=(batch, channels, -1))
+        indices = F.cast(F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim), np.float32)
+        scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
+        scores_mask = (scores.array > 0.0).astype(np.float32)
+        pts_x = (indices.array % in_size[1]) * scores_mask
+        pts_y = (indices.array // in_size[1]) * scores_mask
+        pts = F.concat((pts_x, pts_y, scores), axis=vector_dim).array
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :].array
+                px = int(pts_x[b, k])
+                py = int(pts_y[b, k])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+        return pts

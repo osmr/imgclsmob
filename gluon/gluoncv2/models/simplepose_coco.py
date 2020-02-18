@@ -10,7 +10,7 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import get_activation_layer, BatchNormExtra, conv1x1
+from .common import get_activation_layer, BatchNormExtra, conv1x1, HeatmapMaxDetBlock
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -97,66 +97,6 @@ class DeconvBlock(HybridBlock):
         if self.activate:
             x = self.activ(x)
         return x
-
-
-class HeatmapMaxDetBlock(HybridBlock):
-    """
-    Heatmap maximum detector block.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of channels.
-    in_size : tuple of 2 int
-        Spatial size of the input heatmap tensor.
-    fixed_size : bool, default True
-        Whether to expect fixed spatial size of input image.
-    """
-    def __init__(self,
-                 channels,
-                 in_size,
-                 fixed_size,
-                 **kwargs):
-        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
-        self.channels = channels
-        self.in_size = in_size
-        self.fixed_size = fixed_size
-
-    def hybrid_forward(self, F, x):
-        heatmap = x
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        in_size = self.in_size if self.fixed_size else heatmap[2:]
-        heatmap_vector = heatmap.reshape((0, 0, -3))
-        indices = heatmap_vector.argmax(axis=vector_dim, keepdims=True)
-        scores = heatmap_vector.max(axis=vector_dim, keepdims=True)
-        scores_mask = (scores > 0.0)
-        pts_x = (indices % in_size[1]) * scores_mask
-        pts_y = (indices / in_size[1]).floor() * scores_mask
-        pts = F.concat(pts_x, pts_y, scores, dim=vector_dim)
-        for b in range(batch):
-            for k in range(self.channels):
-                hm = heatmap[b, k, :, :]
-                px = int(pts[b, k, 0].asscalar())
-                py = int(pts[b, k, 1].asscalar())
-                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
-                    pts[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
-                    pts[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
-        return pts
-
-    def __repr__(self):
-        s = '{name}(channels={channels}, in_size={in_size}, fixed_size={fixed_size})'
-        return s.format(
-            name=self.__class__.__name__,
-            channels=self.channels,
-            in_size=self.in_size,
-            fixed_size=self.fixed_size)
-
-    def calc_flops(self, x):
-        assert (x.shape[0] == 1)
-        num_flops = x.size + 26 * self.channels
-        num_macs = 0
-        return num_flops, num_macs
 
 
 class SimplePose(HybridBlock):

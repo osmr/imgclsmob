@@ -4,110 +4,16 @@
 """
 
 __all__ = ['SimplePoseMobile', 'simplepose_mobile_resnet18_coco', 'simplepose_mobile_resnet50b_coco',
-           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2_w1_coco',
+           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2b_w1_coco',
            'simplepose_mobile_mobilenetv3_small_w1_coco', 'simplepose_mobile_mobilenetv3_large_w1_coco']
 
 import os
 import tensorflow as tf
-import tensorflow.keras.layers as nn
-from .common import conv1x1, conv3x3_block, is_channels_first
-from .simplepose_coco import HeatmapMaxDetBlock
+from .common import conv1x1, DucBlock, HeatmapMaxDetBlock, is_channels_first
 from .resnet import resnet18, resnet50b
 from .mobilenet import mobilenet_w1
-from .mobilenetv2 import mobilenetv2_w1
+from .mobilenetv2 import mobilenetv2b_w1
 from .mobilenetv3 import mobilenetv3_small_w1, mobilenetv3_large_w1
-
-
-class PixelShuffle(nn.Layer):
-    """
-    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
-    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
-
-    Parameters:
-    ----------
-    scale_factor : int
-        Multiplier for spatial size.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 scale_factor,
-                 data_format="channels_last",
-                 **kwargs):
-        super(PixelShuffle, self).__init__(**kwargs)
-        self.scale_factor = scale_factor
-        self.data_format = data_format
-
-    def call(self, x, training=None):
-        f1 = self.scale_factor
-        f2 = self.scale_factor
-
-        x_shape = x.get_shape().as_list()
-        batch = x_shape[0]
-        if is_channels_first(self.data_format):
-            channels = x_shape[1]
-            height = x_shape[2]
-            width = x_shape[3]
-        else:
-            height = x_shape[1]
-            width = x_shape[2]
-            channels = x_shape[3]
-
-        assert (channels % f1 % f2 == 0)
-        new_channels = channels // f1 // f2
-
-        if is_channels_first(self.data_format):
-            x = tf.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
-            x = tf.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
-            x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
-            x = tf.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
-        else:
-            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1 * f2))
-            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1, f2))
-            x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
-            x = tf.reshape(x, shape=(batch, height * f1, width * f2, new_channels))
-
-        return x
-
-
-class DucBlock(nn.Layer):
-    """
-    DUC block (convolutional block + pixel-shuffle upscale).
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    scale_factor : int
-        Multiplier for spatial size.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 scale_factor,
-                 data_format="channels_last",
-                 **kwargs):
-        super(DucBlock, self).__init__(**kwargs)
-        mid_channels = 4 * out_channels
-
-        self.conv = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            data_format=data_format,
-            name="conv")
-        self.pix_shuffle = PixelShuffle(
-            scale_factor=scale_factor,
-            data_format=data_format,
-            name="pix_shuffle")
-
-    def call(self, x, training=None):
-        x = self.conv(x, training=training)
-        x = self.pix_shuffle(x)
-        return x
 
 
 class SimplePoseMobile(tf.keras.Model):
@@ -186,7 +92,7 @@ class SimplePoseMobile(tf.keras.Model):
     def call(self, x, training=None):
         x = self.backbone(x, training=training)
         heatmap = self.decoder(x, training=training)
-        if self.return_heatmap:
+        if self.return_heatmap or not tf.executing_eagerly():
             return heatmap
         else:
             keypoints = self.heatmap_max_det(heatmap)
@@ -321,10 +227,10 @@ def simplepose_mobile_mobilenet_w1_coco(pretrained_backbone=False, keypoints=17,
                                 model_name="simplepose_mobile_mobilenet_w1_coco", data_format=data_format, **kwargs)
 
 
-def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=17, data_format="channels_last",
-                                          **kwargs):
+def simplepose_mobile_mobilenetv2b_w1_coco(pretrained_backbone=False, keypoints=17, data_format="channels_last",
+                                           **kwargs):
     """
-    SimplePose(Mobile) model on the base of 1.0 MobileNetV2-224 for COCO Keypoint from 'Simple Baselines for Human Pose
+    SimplePose(Mobile) model on the base of 1.0 MobileNetV2b-224 for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
     Parameters:
@@ -340,10 +246,10 @@ def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=1
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = mobilenetv2_w1(pretrained=pretrained_backbone, data_format=data_format).features
+    backbone = mobilenetv2b_w1(pretrained=pretrained_backbone, data_format=data_format).features
     backbone._layers.pop()
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=1280, keypoints=keypoints,
-                                model_name="simplepose_mobile_mobilenetv2_w1_coco", data_format=data_format, **kwargs)
+                                model_name="simplepose_mobile_mobilenetv2b_w1_coco", data_format=data_format, **kwargs)
 
 
 def simplepose_mobile_mobilenetv3_small_w1_coco(pretrained_backbone=False, keypoints=17, data_format="channels_last",
@@ -413,7 +319,7 @@ def _test():
         simplepose_mobile_resnet18_coco,
         simplepose_mobile_resnet50b_coco,
         simplepose_mobile_mobilenet_w1_coco,
-        simplepose_mobile_mobilenetv2_w1_coco,
+        simplepose_mobile_mobilenetv2b_w1_coco,
         simplepose_mobile_mobilenetv3_small_w1_coco,
         simplepose_mobile_mobilenetv3_large_w1_coco,
     ]
@@ -442,7 +348,7 @@ def _test():
         assert (model != simplepose_mobile_resnet18_coco or weight_count == 12858208)
         assert (model != simplepose_mobile_resnet50b_coco or weight_count == 25582944)
         assert (model != simplepose_mobile_mobilenet_w1_coco or weight_count == 5019744)
-        # assert (model != simplepose_mobile_mobilenetv2_w1_coco or weight_count == 4102176)
+        assert (model != simplepose_mobile_mobilenetv2b_w1_coco or weight_count == 4102176)
         assert (model != simplepose_mobile_mobilenetv3_small_w1_coco or weight_count == 2625088)
         assert (model != simplepose_mobile_mobilenetv3_large_w1_coco or weight_count == 4768336)
 

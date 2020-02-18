@@ -85,6 +85,7 @@ class MobilePose(HybridBlock):
                  base_name,
                  base_attrs=('features',),
                  num_joints=17,
+                 fixed_size=True,
                  pretrained_base=False,
                  pretrained_ctx=cpu(),
                  in_channels=3,

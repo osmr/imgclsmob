@@ -5,9 +5,9 @@
 __all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
            'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'IBN',
+           'pre_conv3x3_block', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DucBlock', 'IBN',
            'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
-           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten']
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1007,6 +1007,8 @@ class SEBlock(nn.Module):
         Squeeze reduction value.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
     activation : function, or str, or nn.Module, default 'relu'
         Activation function after the first convolution.
     out_activation : function, or str, or nn.Module, default 'sigmoid'
@@ -1016,30 +1018,78 @@ class SEBlock(nn.Module):
                  channels,
                  reduction=16,
                  round_mid=False,
+                 use_conv=True,
                  mid_activation=(lambda: nn.ReLU(inplace=True)),
                  out_activation=(lambda: nn.Sigmoid())):
         super(SEBlock, self).__init__()
+        self.use_conv = use_conv
         mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         self.pool = nn.AdaptiveAvgPool2d(output_size=1)
-        self.conv1 = conv1x1(
-            in_channels=channels,
-            out_channels=mid_channels,
-            bias=True)
+        if use_conv:
+            self.conv1 = conv1x1(
+                in_channels=channels,
+                out_channels=mid_channels,
+                bias=True)
+        else:
+            self.fc1 = nn.Linear(
+                in_features=channels,
+                out_features=mid_channels)
         self.activ = get_activation_layer(mid_activation)
-        self.conv2 = conv1x1(
-            in_channels=mid_channels,
-            out_channels=channels,
-            bias=True)
+        if use_conv:
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=channels,
+                bias=True)
+        else:
+            self.fc2 = nn.Linear(
+                in_features=mid_channels,
+                out_features=channels)
         self.sigmoid = get_activation_layer(out_activation)
 
     def forward(self, x):
         w = self.pool(x)
-        w = self.conv1(w)
+        if not self.use_conv:
+            w = w.view(x.size(0), -1)
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
         w = self.activ(w)
-        w = self.conv2(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
         w = self.sigmoid(w)
+        if not self.use_conv:
+            w = w.unsqueeze(2).unsqueeze(3)
         x = x * w
+        return x
+
+
+class DucBlock(nn.Module):
+    """
+    Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
+    https://arxiv.org/abs/1702.08502.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    scale_factor : int
+        Multiplier for spatial size.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 scale_factor):
+        super(DucBlock, self).__init__()
+        mid_channels = 4 * out_channels
+
+        self.conv = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=mid_channels)
+        self.pix_shuffle = nn.PixelShuffle(upscale_factor=scale_factor)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.pix_shuffle(x)
         return x
 
 
@@ -1387,3 +1437,40 @@ class Flatten(nn.Module):
 
     def forward(self, x):
         return x.view(x.size(0), -1)
+
+
+class HeatmapMaxDetBlock(nn.Module):
+    """
+    Heatmap maximum detector block (for human pose estimation task).
+    """
+    def __init__(self):
+        super(HeatmapMaxDetBlock, self).__init__()
+
+    def forward(self, x):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        channels = heatmap.shape[1]
+        in_size = x.shape[2:]
+        heatmap_vector = heatmap.view(batch, channels, -1)
+        scores, indices = heatmap_vector.max(dim=vector_dim, keepdims=True)
+        scores_mask = (scores > 0.0).float()
+        pts_x = (indices % in_size[1]) * scores_mask
+        pts_y = (indices // in_size[1]) * scores_mask
+        pts = torch.cat((pts_x, pts_y, scores), dim=vector_dim)
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :]
+                px = int(pts[b, k, 0])
+                py = int(pts[b, k, 1])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
+                    pts[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
+        return pts
+
+    @staticmethod
+    def calc_flops(x):
+        assert (x.shape[0] == 1)
+        num_flops = x.numel() + 26 * x.shape[1]
+        num_macs = 0
+        return num_flops, num_macs

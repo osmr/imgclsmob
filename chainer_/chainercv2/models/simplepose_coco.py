@@ -5,15 +5,14 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
+           'simplepose_resneta152b_coco']
 
 import os
-import numpy as np
 import chainer.functions as F
 import chainer.links as L
 from chainer import Chain
 from chainer.serializers import load_npz
-from .common import get_activation_layer, conv1x1, SimpleSequential
+from .common import get_activation_layer, conv1x1, HeatmapMaxDetBlock, SimpleSequential
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -88,38 +87,6 @@ class DeconvBlock(Chain):
         if self.activate:
             x = self.activ(x)
         return x
-
-
-class HeatmapMaxDetBlock(Chain):
-    """
-    Heatmap maximum detector block.
-    """
-    def __init__(self,
-                 **kwargs):
-        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
-
-    def __call__(self, x):
-        heatmap = x
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        channels = heatmap.shape[1]
-        in_size = x.shape[2:]
-        heatmap_vector = F.reshape(heatmap, shape=(batch, channels, -1))
-        indices = F.cast(F.expand_dims(F.argmax(heatmap_vector, axis=vector_dim), axis=vector_dim), np.float32)
-        scores = F.max(heatmap_vector, axis=vector_dim, keepdims=True)
-        scores_mask = (scores.array > 0.0).astype(np.float32)
-        pts_x = (indices.array % in_size[1]) * scores_mask
-        pts_y = (indices.array // in_size[1]) * scores_mask
-        pts = F.concat((pts_x, pts_y, scores), axis=vector_dim).array
-        for b in range(batch):
-            for k in range(channels):
-                hm = heatmap[b, k, :, :].array
-                px = int(pts_x[b, k])
-                py = int(pts_y[b, k])
-                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
-                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
-                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
-        return pts
 
 
 class SimplePose(Chain):

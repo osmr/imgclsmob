@@ -61,6 +61,7 @@ def _get_final_preds(batch_heatmaps):
 class SimplePoseResNet(HybridBlock):
 
     def __init__(self,
+                 fixed_size=True,
                  base_name='resnet50_v1b',
                  pretrained_base=False,
                  pretrained_ctx=cpu(),

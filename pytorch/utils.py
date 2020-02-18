@@ -195,19 +195,24 @@ def report_accuracy(metric,
     str
         Report string.
     """
+    def create_msg(name, value):
+        if type(value) in [list, tuple]:
+            if extended_log:
+                return "{}={} ({})".format("{}", "/".join(["{:.4f}"] * len(value)), "/".join(["{}"] * len(value))).\
+                    format(name, *(value + value))
+            else:
+                return "{}={}".format("{}", "/".join(["{:.4f}"] * len(value))).format(name, *value)
+        else:
+            if extended_log:
+                return "{name}={value:.4f} ({value})".format(name=name, value=value)
+            else:
+                return "{name}={value:.4f}".format(name=name, value=value)
+
     metric_info = metric.get()
-    if extended_log:
-        msg_pattern = "{name}={value:.4f} ({value})"
-    else:
-        msg_pattern = "{name}={value:.4f}"
     if isinstance(metric, CompositeEvalMetric):
-        msg = ""
-        for m in zip(*metric_info):
-            if msg != "":
-                msg += ", "
-            msg += msg_pattern.format(name=m[0], value=m[1])
+        msg = ", ".join([create_msg(name=m[0], value=m[1]) for m in zip(*metric_info)])
     elif isinstance(metric, EvalMetric):
-        msg = msg_pattern.format(name=metric_info[0], value=metric_info[1])
+        msg = create_msg(name=metric_info[0], value=metric_info[1])
     else:
         raise Exception("Wrong metric type: {}".format(type(metric)))
     return msg

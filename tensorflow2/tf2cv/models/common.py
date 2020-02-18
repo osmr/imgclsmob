@@ -7,8 +7,9 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_si
            'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
            'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block',
            'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'Identity', 'SimpleSequential', 'ParametricSequential', 'DualPathSequential',
-           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'MultiOutputSequential', 'InterpolationBlock']
+           'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
+           'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
+           'MultiOutputSequential', 'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1834,6 +1835,8 @@ class SEBlock(nn.Layer):
         Squeeze reduction value.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
     activation : function, or str, or nn.Layer, default 'relu'
         Activation function after the first convolution.
     out_activation : function, or str, or nn.Layer, default 'sigmoid'
@@ -1845,41 +1848,152 @@ class SEBlock(nn.Layer):
                  channels,
                  reduction=16,
                  round_mid=False,
+                 use_conv=True,
                  mid_activation="relu",
                  out_activation="sigmoid",
                  data_format="channels_last",
                  **kwargs):
         super(SEBlock, self).__init__(**kwargs)
+        self.use_conv = use_conv
         self.data_format = data_format
         mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         self.pool = nn.GlobalAveragePooling2D(
             data_format=data_format,
             name="pool")
-        self.conv1 = conv1x1(
-            in_channels=channels,
-            out_channels=mid_channels,
-            use_bias=True,
-            data_format=data_format,
-            name="conv1")
+        if use_conv:
+            self.conv1 = conv1x1(
+                in_channels=channels,
+                out_channels=mid_channels,
+                use_bias=True,
+                data_format=data_format,
+                name="conv1")
+        else:
+            self.fc1 = nn.Dense(
+                units=mid_channels,
+                input_dim=channels,
+                name="fc1")
         self.activ = get_activation_layer(mid_activation)
-        self.conv2 = conv1x1(
-            in_channels=mid_channels,
-            out_channels=channels,
-            use_bias=True,
-            data_format=data_format,
-            name="conv2")
+        if use_conv:
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=channels,
+                use_bias=True,
+                data_format=data_format,
+                name="conv2")
+        else:
+            self.fc2 = nn.Dense(
+                units=channels,
+                input_dim=mid_channels,
+                name="fc2")
         self.sigmoid = get_activation_layer(out_activation)
 
     def call(self, x, training=None):
         w = self.pool(x)
-        axis = -1 if is_channels_first(self.data_format) else 1
-        w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
-        w = self.conv1(w)
+        if self.use_conv:
+            axis = -1 if is_channels_first(self.data_format) else 1
+            w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
         w = self.activ(w)
-        w = self.conv2(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
         w = self.sigmoid(w)
+        if not self.use_conv:
+            axis = -1 if is_channels_first(self.data_format) else 1
+            w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
         x = x * w
+        return x
+
+
+class PixelShuffle(nn.Layer):
+    """
+    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
+    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 scale_factor,
+                 data_format="channels_last",
+                 **kwargs):
+        super(PixelShuffle, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+        self.data_format = data_format
+
+    def call(self, x, training=None):
+        f1 = self.scale_factor
+        f2 = self.scale_factor
+
+        x_shape = x.get_shape().as_list()
+        batch = x_shape[0]
+        if is_channels_first(self.data_format):
+            channels = x_shape[1]
+            height = x_shape[2]
+            width = x_shape[3]
+        else:
+            height = x_shape[1]
+            width = x_shape[2]
+            channels = x_shape[3]
+
+        assert (channels % f1 % f2 == 0)
+        new_channels = channels // f1 // f2
+
+        if is_channels_first(self.data_format):
+            x = tf.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
+            x = tf.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
+            x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
+            x = tf.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
+        else:
+            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1 * f2))
+            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1, f2))
+            x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
+            x = tf.reshape(x, shape=(batch, height * f1, width * f2, new_channels))
+
+        return x
+
+
+class DucBlock(nn.Layer):
+    """
+    Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
+    https://arxiv.org/abs/1702.08502.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    scale_factor : int
+        Multiplier for spatial size.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 scale_factor,
+                 data_format="channels_last",
+                 **kwargs):
+        super(DucBlock, self).__init__(**kwargs)
+        mid_channels = 4 * out_channels
+
+        self.conv = conv3x3_block(
+            in_channels=in_channels,
+            out_channels=mid_channels,
+            data_format=data_format,
+            name="conv")
+        self.pix_shuffle = PixelShuffle(
+            scale_factor=scale_factor,
+            data_format=data_format,
+            name="pix_shuffle")
+
+    def call(self, x, training=None):
+        x = self.conv(x, training=training)
+        x = self.pix_shuffle(x)
         return x
 
 
@@ -2124,3 +2238,45 @@ class InterpolationBlock(nn.Layer):
         if is_channels_first(self.data_format):
             x = tf.transpose(x, perm=[0, 3, 1, 2])
         return x
+
+
+class HeatmapMaxDetBlock(nn.Layer):
+    """
+    Heatmap maximum detector block (for human pose estimation task).
+    """
+    def __init__(self,
+                 data_format="channels_last",
+                 **kwargs):
+        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+        self.data_format = data_format
+
+    def call(self, x, training=None):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        if is_channels_first(self.data_format):
+            channels = heatmap.shape[1]
+            in_size = x.shape[2:]
+            heatmap_vector = tf.reshape(heatmap, shape=(batch, channels, -1))
+        else:
+            channels = heatmap.shape[3]
+            in_size = x.shape[1:3]
+            heatmap_vector = tf.reshape(heatmap, shape=(batch, -1, channels))
+            heatmap_vector = tf.transpose(heatmap_vector, perm=(0, 2, 1))
+        indices = tf.cast(tf.expand_dims(tf.cast(tf.math.argmax(heatmap_vector, axis=vector_dim), np.int32),
+                                         axis=vector_dim), np.float32)
+        scores = tf.math.reduce_max(heatmap_vector, axis=vector_dim, keepdims=True)
+        scores_mask = tf.cast(tf.math.greater(scores, 0.0), np.float32)
+        pts_x = (indices % in_size[1]) * scores_mask
+        pts_y = (indices // in_size[1]) * scores_mask
+        pts = tf.concat([pts_x, pts_y, scores], axis=vector_dim).numpy()
+        for b in range(batch):
+            for k in range(channels):
+                hm = heatmap[b, k, :, :] if is_channels_first(self.data_format) else heatmap[b, :, :, k]
+                px = int(pts[b, k, 0])
+                py = int(pts[b, k, 1])
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+        pts = tf.convert_to_tensor(pts)
+        return pts

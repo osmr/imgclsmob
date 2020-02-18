@@ -4,49 +4,17 @@
 """
 
 __all__ = ['SimplePoseMobile', 'simplepose_mobile_resnet18_coco', 'simplepose_mobile_resnet50b_coco',
-           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2_w1_coco',
+           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2b_w1_coco',
            'simplepose_mobile_mobilenetv3_small_w1_coco', 'simplepose_mobile_mobilenetv3_large_w1_coco']
 
 import os
 import torch
 import torch.nn as nn
-from .common import conv1x1, conv3x3_block
-from .simplepose_coco import HeatmapMaxDetBlock
+from .common import conv1x1, DucBlock, HeatmapMaxDetBlock
 from .resnet import resnet18, resnet50b
 from .mobilenet import mobilenet_w1
-from .mobilenetv2 import mobilenetv2_w1
+from .mobilenetv2 import mobilenetv2b_w1
 from .mobilenetv3 import mobilenetv3_small_w1, mobilenetv3_large_w1
-
-
-class DucBlock(nn.Module):
-    """
-    DUC block (convolutional block + pixel-shuffle upscale).
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    scale_factor : int
-        Multiplier for spatial size.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 scale_factor):
-        super(DucBlock, self).__init__()
-        mid_channels = 4 * out_channels
-
-        self.conv = conv3x3_block(
-            in_channels=in_channels,
-            out_channels=mid_channels)
-        self.pix_shuffle = nn.PixelShuffle(upscale_factor=scale_factor)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pix_shuffle(x)
-        return x
 
 
 class SimplePoseMobile(nn.Module):
@@ -241,9 +209,9 @@ def simplepose_mobile_mobilenet_w1_coco(pretrained_backbone=False, keypoints=17,
                                 model_name="simplepose_mobile_mobilenet_w1_coco", **kwargs)
 
 
-def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
+def simplepose_mobile_mobilenetv2b_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
-    SimplePose(Mobile) model on the base of 1.0 MobileNetV2-224 for COCO Keypoint from 'Simple Baselines for Human Pose
+    SimplePose(Mobile) model on the base of 1.0 MobileNetV2b-224 for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
     Parameters:
@@ -257,10 +225,10 @@ def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=1
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = mobilenetv2_w1(pretrained=pretrained_backbone).features
+    backbone = mobilenetv2b_w1(pretrained=pretrained_backbone).features
     del backbone[-1]
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=1280, keypoints=keypoints,
-                                model_name="simplepose_mobile_mobilenetv2_w1_coco", **kwargs)
+                                model_name="simplepose_mobile_mobilenetv2b_w1_coco", **kwargs)
 
 
 def simplepose_mobile_mobilenetv3_small_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
@@ -326,7 +294,7 @@ def _test():
         simplepose_mobile_resnet18_coco,
         simplepose_mobile_resnet50b_coco,
         simplepose_mobile_mobilenet_w1_coco,
-        simplepose_mobile_mobilenetv2_w1_coco,
+        simplepose_mobile_mobilenetv2b_w1_coco,
         simplepose_mobile_mobilenetv3_small_w1_coco,
         simplepose_mobile_mobilenetv3_large_w1_coco,
     ]
@@ -342,7 +310,7 @@ def _test():
         assert (model != simplepose_mobile_resnet18_coco or weight_count == 12858208)
         assert (model != simplepose_mobile_resnet50b_coco or weight_count == 25582944)
         assert (model != simplepose_mobile_mobilenet_w1_coco or weight_count == 5019744)
-        # assert (model != simplepose_mobile_mobilenetv2_w1_coco or weight_count == 4102176)
+        assert (model != simplepose_mobile_mobilenetv2b_w1_coco or weight_count == 4102176)
         assert (model != simplepose_mobile_mobilenetv3_small_w1_coco or weight_count == 2625088)
         assert (model != simplepose_mobile_mobilenetv3_large_w1_coco or weight_count == 4768336)
 

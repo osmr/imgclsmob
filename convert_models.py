@@ -515,6 +515,7 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('/features/body/', '/features/zbody/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/final_postactiv/', 'features/stageN/final_postactiv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/final_block/', 'features/stageN/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/final_block/', '/zfinal_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/final_conv/', 'features/stageN/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
@@ -532,6 +533,7 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/final_postactiv/', '/final_postactiv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/zfinal_block/', '/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/features/zbody/', '/features/body/') for key in dst_param_keys]
     dst_param_keys = [key.replace('features/stageN/final_conv/', 'features/final_conv/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
@@ -615,6 +617,8 @@ def convert_gl2ch(dst_net,
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].array.shape)
         dst_params[dst_key].array = src_params[src_key]._data[0].asnumpy()
+        # print("src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+        #         src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].array.shape))
 
     from chainer.serializers import save_npz
     save_npz(
@@ -822,8 +826,10 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/depthwise_kernel:', '/weight_depthwise:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
 
-    if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")):
+    if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
+            (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")):
         dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/final_block/', '/zfinal_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):
@@ -839,8 +845,10 @@ def convert_gl2tf2(dst_net,
     dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/weight_depthwise:', '/depthwise_kernel:') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
-    if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")):
+    if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
+            (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")):
         dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
+    dst_param_keys = [key.replace('/zfinal_block/', '/final_block/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
     dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
     if src_model.startswith("hrnet"):

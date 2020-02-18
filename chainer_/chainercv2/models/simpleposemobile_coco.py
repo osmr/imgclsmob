@@ -4,86 +4,17 @@
 """
 
 __all__ = ['SimplePoseMobile', 'simplepose_mobile_resnet18_coco', 'simplepose_mobile_resnet50b_coco',
-           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2_w1_coco',
+           'simplepose_mobile_mobilenet_w1_coco', 'simplepose_mobile_mobilenetv2b_w1_coco',
            'simplepose_mobile_mobilenetv3_small_w1_coco', 'simplepose_mobile_mobilenetv3_large_w1_coco']
 
 import os
 from chainer import Chain
-import chainer.functions as F
 from chainer.serializers import load_npz
-from .common import conv1x1, conv3x3_block, SimpleSequential
-from .simplepose_coco import HeatmapMaxDetBlock
+from .common import conv1x1, DucBlock, HeatmapMaxDetBlock, SimpleSequential
 from .resnet import resnet18, resnet50b
 from .mobilenet import mobilenet_w1
-from .mobilenetv2 import mobilenetv2_w1
+from .mobilenetv2 import mobilenetv2b_w1
 from .mobilenetv3 import mobilenetv3_small_w1, mobilenetv3_large_w1
-
-
-class PixelShuffle(Chain):
-    """
-    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
-    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
-
-    Parameters:
-    ----------
-    scale_factor : int
-        Multiplier for spatial size.
-    """
-    def __init__(self,
-                 scale_factor,
-                 **kwargs):
-        super(PixelShuffle, self).__init__(**kwargs)
-        self.scale_factor = scale_factor
-
-    def __call__(self, x):
-        f1 = self.scale_factor
-        f2 = self.scale_factor
-
-        batch, channels, height, width = x.shape
-
-        assert (channels % f1 % f2 == 0)
-        new_channels = channels // f1 // f2
-
-        x = F.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
-        x = F.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
-        x = F.swapaxes(x, axis1=2, axis2=3)
-        x = F.swapaxes(x, axis1=4, axis2=5)
-        x = F.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
-
-        return x
-
-
-class DucBlock(Chain):
-    """
-    DUC block (convolutional block + pixel-shuffle upscale).
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    scale_factor : int
-        Multiplier for spatial size.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 scale_factor,
-                 **kwargs):
-        super(DucBlock, self).__init__(**kwargs)
-        mid_channels = 4 * out_channels
-
-        with self.init_scope():
-            self.conv = conv3x3_block(
-                in_channels=in_channels,
-                out_channels=mid_channels)
-            self.pix_shuffle = PixelShuffle(scale_factor=scale_factor)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        x = self.pix_shuffle(x)
-        return x
 
 
 class SimplePoseMobile(Chain):
@@ -273,9 +204,9 @@ def simplepose_mobile_mobilenet_w1_coco(pretrained_backbone=False, keypoints=17,
                                 model_name="simplepose_mobile_mobilenet_w1_coco", **kwargs)
 
 
-def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
+def simplepose_mobile_mobilenetv2b_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
     """
-    SimplePose(Mobile) model on the base of 1.0 MobileNetV2-224 for COCO Keypoint from 'Simple Baselines for Human Pose
+    SimplePose(Mobile) model on the base of 1.0 MobileNetV2b-224 for COCO Keypoint from 'Simple Baselines for Human Pose
     Estimation and Tracking,' https://arxiv.org/abs/1804.06208.
 
     Parameters:
@@ -289,10 +220,10 @@ def simplepose_mobile_mobilenetv2_w1_coco(pretrained_backbone=False, keypoints=1
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    backbone = mobilenetv2_w1(pretrained=pretrained_backbone).features
+    backbone = mobilenetv2b_w1(pretrained=pretrained_backbone).features
     del backbone.final_pool
     return get_simpleposemobile(backbone=backbone, backbone_out_channels=1280, keypoints=keypoints,
-                                model_name="simplepose_mobile_mobilenetv2_w1_coco", **kwargs)
+                                model_name="simplepose_mobile_mobilenetv2b_w1_coco", **kwargs)
 
 
 def simplepose_mobile_mobilenetv3_small_w1_coco(pretrained_backbone=False, keypoints=17, **kwargs):
@@ -354,7 +285,7 @@ def _test():
         simplepose_mobile_resnet18_coco,
         simplepose_mobile_resnet50b_coco,
         simplepose_mobile_mobilenet_w1_coco,
-        simplepose_mobile_mobilenetv2_w1_coco,
+        simplepose_mobile_mobilenetv2b_w1_coco,
         simplepose_mobile_mobilenetv3_small_w1_coco,
         simplepose_mobile_mobilenetv3_large_w1_coco,
     ]
@@ -367,7 +298,7 @@ def _test():
         assert (model != simplepose_mobile_resnet18_coco or weight_count == 12858208)
         assert (model != simplepose_mobile_resnet50b_coco or weight_count == 25582944)
         assert (model != simplepose_mobile_mobilenet_w1_coco or weight_count == 5019744)
-        # assert (model != simplepose_mobile_mobilenetv2_w1_coco or weight_count == 4102176)
+        assert (model != simplepose_mobile_mobilenetv2b_w1_coco or weight_count == 4102176)
         assert (model != simplepose_mobile_mobilenetv3_small_w1_coco or weight_count == 2625088)
         assert (model != simplepose_mobile_mobilenetv3_large_w1_coco or weight_count == 4768336)
 

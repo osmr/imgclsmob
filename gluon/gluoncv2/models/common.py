@@ -6,14 +6,15 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'depthwise_conv3x3', 'BatchNormExtra', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2',
-           'SEBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent',
+           'SEBlock', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent',
            'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential']
+           'MultiOutputSequential', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
 import mxnet as mx
 from mxnet.gluon import nn, HybridBlock
+from mxnet.gluon.contrib.nn import PixelShuffle2D
 
 
 def round_channels(channels,
@@ -1127,6 +1128,8 @@ class SEBlock(HybridBlock):
         Squeeze reduction value.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
     activation : function, or str, or HybridBlock, default 'relu'
         Activation function after the first convolution.
     out_activation : function, or str, or HybridBlock, default 'sigmoid'
@@ -1136,31 +1139,89 @@ class SEBlock(HybridBlock):
                  channels,
                  reduction=16,
                  round_mid=False,
+                 use_conv=True,
                  mid_activation=(lambda: nn.Activation("relu")),
                  out_activation=(lambda: nn.Activation("sigmoid")),
                  **kwargs):
         super(SEBlock, self).__init__(**kwargs)
+        self.use_conv = use_conv
         mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         with self.name_scope():
-            self.conv1 = conv1x1(
-                in_channels=channels,
-                out_channels=mid_channels,
-                use_bias=True)
+            if use_conv:
+                self.conv1 = conv1x1(
+                    in_channels=channels,
+                    out_channels=mid_channels,
+                    use_bias=True)
+            else:
+                self.fc1 = nn.Dense(
+                    in_units=channels,
+                    units=mid_channels)
             self.activ = get_activation_layer(mid_activation)
-            self.conv2 = conv1x1(
-                in_channels=mid_channels,
-                out_channels=channels,
-                use_bias=True)
+            if use_conv:
+                self.conv2 = conv1x1(
+                    in_channels=mid_channels,
+                    out_channels=channels,
+                    use_bias=True)
+            else:
+                self.fc2 = nn.Dense(
+                    in_units=mid_channels,
+                    units=channels)
             self.sigmoid = get_activation_layer(out_activation)
 
     def hybrid_forward(self, F, x):
         w = F.contrib.AdaptiveAvgPooling2D(x, output_size=1)
-        w = self.conv1(w)
+        if not self.use_conv:
+            w = F.Flatten(w)
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
         w = self.activ(w)
-        w = self.conv2(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
         w = self.sigmoid(w)
+        if not self.use_conv:
+            w = w.expand_dims(2).expand_dims(3)
         x = F.broadcast_mul(x, w)
+        return x
+
+
+class DucBlock(HybridBlock):
+    """
+    Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
+    https://arxiv.org/abs/1702.08502.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    scale_factor : int
+        Multiplier for spatial size.
+    bn_use_global_stats : bool
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool
+        Whether to disable CUDNN batch normalization operator.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 scale_factor,
+                 bn_use_global_stats,
+                 bn_cudnn_off,
+                 **kwargs):
+        super(DucBlock, self).__init__(**kwargs)
+        mid_channels = 4 * out_channels
+
+        with self.name_scope():
+            self.conv = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
+            self.pix_shuffle = PixelShuffle2D(factor=scale_factor)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.pix_shuffle(x)
         return x
 
 
@@ -1548,3 +1609,63 @@ class MultiOutputSequential(nn.HybridSequential):
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
         return [x] + outs
+
+
+class HeatmapMaxDetBlock(HybridBlock):
+    """
+    Heatmap maximum detector block (for human pose estimation task).
+
+    Parameters:
+    ----------
+    channels : int
+        Number of channels.
+    in_size : tuple of 2 int
+        Spatial size of the input heatmap tensor.
+    fixed_size : bool, default True
+        Whether to expect fixed spatial size of input image.
+    """
+    def __init__(self,
+                 channels,
+                 in_size,
+                 fixed_size,
+                 **kwargs):
+        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+        self.channels = channels
+        self.in_size = in_size
+        self.fixed_size = fixed_size
+
+    def hybrid_forward(self, F, x):
+        heatmap = x
+        vector_dim = 2
+        batch = heatmap.shape[0]
+        in_size = self.in_size if self.fixed_size else heatmap.shape[2:]
+        heatmap_vector = heatmap.reshape((0, 0, -3))
+        indices = heatmap_vector.argmax(axis=vector_dim, keepdims=True)
+        scores = heatmap_vector.max(axis=vector_dim, keepdims=True)
+        scores_mask = (scores > 0.0)
+        pts_x = (indices % in_size[1]) * scores_mask
+        pts_y = (indices / in_size[1]).floor() * scores_mask
+        pts = F.concat(pts_x, pts_y, scores, dim=vector_dim)
+        for b in range(batch):
+            for k in range(self.channels):
+                hm = heatmap[b, k, :, :]
+                px = int(pts[b, k, 0].asscalar())
+                py = int(pts[b, k, 1].asscalar())
+                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                    pts[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
+                    pts[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
+        return pts
+
+    def __repr__(self):
+        s = '{name}(channels={channels}, in_size={in_size}, fixed_size={fixed_size})'
+        return s.format(
+            name=self.__class__.__name__,
+            channels=self.channels,
+            in_size=self.in_size,
+            fixed_size=self.fixed_size)
+
+    def calc_flops(self, x):
+        assert (x.shape[0] == 1)
+        num_flops = x.size + 26 * self.channels
+        num_macs = 0
+        return num_flops, num_macs

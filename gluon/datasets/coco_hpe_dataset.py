@@ -331,8 +331,10 @@ class CocoHpeDataset(dataset.Dataset):
         else:
             raise TypeError("Expect input xywh a list, tuple or numpy.ndarray, given {}".format(type(xywh)))
 
+# ---------------------------------------------------------------------------------------------------------------------
 
-class CocoHpeValTransform(object):
+
+class CocoHpeValTransform1(object):
     def __init__(self,
                  ds_metainfo):
         self.ds_metainfo = ds_metainfo
@@ -437,6 +439,245 @@ def get_affine_transform(center,
 
     return trans
 
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+class CocoHpeValTransform2(object):
+    def __init__(self,
+                 ds_metainfo):
+        self.ds_metainfo = ds_metainfo
+        self.image_size = self.ds_metainfo.input_image_size
+        height = self.image_size[0]
+        width = self.image_size[1]
+        self.aspect_ratio = float(width / height)
+        self.mean = ds_metainfo.mean_rgb
+        self.std = ds_metainfo.std_rgb
+
+    def __call__(self, src, label):
+        # print(src.shape)
+        src = src.asnumpy()
+        bbox = label["bbox"]
+        assert len(bbox) == 4
+        score = label.get('score', 1)
+        img, scale_box = detector_to_alpha_pose(
+            src,
+            class_ids=mx.nd.array([[0.]]),
+            scores=mx.nd.array([[1.]]),
+            bounding_boxs=mx.nd.array(np.array([bbox])),
+            output_shape=self.image_size)
+
+        if scale_box.shape[0] == 1:
+            pt1 = np.array(scale_box[0, (0, 1)], dtype=np.float32)
+            pt2 = np.array(scale_box[0, (2, 3)], dtype=np.float32)
+        else:
+            assert scale_box.shape[0] == 4
+            pt1 = np.array(scale_box[(0, 1)], dtype=np.float32)
+            pt2 = np.array(scale_box[(2, 3)], dtype=np.float32)
+
+        return img[0], pt1, pt2, score
+
+
+def detector_to_alpha_pose(img,
+                           class_ids,
+                           scores,
+                           bounding_boxs,
+                           output_shape=(256, 192),
+                           thr=0.5):
+    boxes, scores = alpha_pose_detection_processor(
+        img=img,
+        boxes=bounding_boxs,
+        class_idxs=class_ids,
+        scores=scores,
+        thr=thr)
+    pose_input, upscale_bbox = alpha_pose_image_cropper(
+        source_img=img,
+        boxes=boxes,
+        output_shape=output_shape)
+    return pose_input, upscale_bbox
+
+
+def alpha_pose_detection_processor(img,
+                                   boxes,
+                                   class_idxs,
+                                   scores,
+                                   thr=0.5):
+    if len(boxes.shape) == 3:
+        boxes = boxes.squeeze(axis=0)
+    if len(class_idxs.shape) == 3:
+        class_idxs = class_idxs.squeeze(axis=0)
+    if len(scores.shape) == 3:
+        scores = scores.squeeze(axis=0)
+
+    # cilp coordinates
+    boxes[:, [0, 2]] = mx.nd.clip(boxes[:, [0, 2]], 0., img.shape[1] - 1)
+    boxes[:, [1, 3]] = mx.nd.clip(boxes[:, [1, 3]], 0., img.shape[0] - 1)
+
+    # select boxes
+    mask1 = (class_idxs == 0).asnumpy()
+    mask2 = (scores > thr).asnumpy()
+    picked_idxs = np.where((mask1 + mask2) > 1)[0]
+    if picked_idxs.shape[0] == 0:
+        return None, None
+    else:
+        return boxes[picked_idxs], scores[picked_idxs]
+
+
+def alpha_pose_image_cropper(source_img,
+                             boxes,
+                             output_shape=(256, 192)):
+    if boxes is None:
+        return None, boxes
+
+    # crop person poses
+    img_width, img_height = source_img.shape[1], source_img.shape[0]
+
+    tensors = mx.nd.zeros([boxes.shape[0], 3, output_shape[0], output_shape[1]])
+    out_boxes = np.zeros([boxes.shape[0], 4])
+
+    for i, box in enumerate(boxes.asnumpy()):
+        img = source_img.copy()
+        box_width = box[2] - box[0]
+        box_height = box[3] - box[1]
+        if box_width > 100:
+            scale_rate = 0.2
+        else:
+            scale_rate = 0.3
+
+        # crop image
+        left = int(max(0, box[0] - box_width * scale_rate / 2))
+        up = int(max(0, box[1] - box_height * scale_rate / 2))
+        right = int(min(img_width - 1, max(left + 5, box[2] + box_width * scale_rate / 2)))
+        bottom = int(min(img_height - 1, max(up + 5, box[3] + box_height * scale_rate / 2)))
+        crop_width = right - left
+        if crop_width < 1:
+            continue
+        crop_height = bottom - up
+        if crop_height < 1:
+            continue
+        ul = np.array((left, up))
+        br = np.array((right, bottom))
+        img = cv_cropBox(img, ul, br, output_shape[0], output_shape[1])
+
+        img = mx.nd.image.to_tensor(mx.nd.array(img))
+        # img = img.transpose((2, 0, 1))
+        img[0] = img[0] - 0.406
+        img[1] = img[1] - 0.457
+        img[2] = img[2] - 0.480
+        assert (img.shape[0] == 3)
+        tensors[i] = img
+        out_boxes[i] = (left, up, right, bottom)
+
+    return tensors, out_boxes
+
+
+def cv_cropBox(img, ul, br, resH, resW, pad_val=0):
+    ul = ul
+    br = (br - 1)
+    # br = br.int()
+    lenH = max((br[1] - ul[1]).item(), (br[0] - ul[0]).item() * resH / resW)
+    lenW = lenH * resW / resH
+    if img.ndim == 2:
+        img = img[:, np.newaxis]
+
+    box_shape = [br[1] - ul[1], br[0] - ul[0]]
+    pad_size = [(lenH - box_shape[0]) // 2, (lenW - box_shape[1]) // 2]
+    # Padding Zeros
+    img[:ul[1], :, :], img[:, :ul[0], :] = pad_val, pad_val
+    img[br[1] + 1:, :, :], img[:, br[0] + 1:, :] = pad_val, pad_val
+
+    src = np.zeros((3, 2), dtype=np.float32)
+    dst = np.zeros((3, 2), dtype=np.float32)
+
+    src[0, :] = np.array([ul[0] - pad_size[1], ul[1] - pad_size[0]], np.float32)
+    src[1, :] = np.array([br[0] + pad_size[1], br[1] + pad_size[0]], np.float32)
+    dst[0, :] = 0
+    dst[1, :] = np.array([resW - 1, resH - 1], np.float32)
+
+    src[2:, :] = get_3rd_point(src[0, :], src[1, :])
+    dst[2:, :] = get_3rd_point(dst[0, :], dst[1, :])
+
+    trans = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+
+    dst_img = cv2.warpAffine(img, trans, (resW, resH), flags=cv2.INTER_LINEAR)
+
+    return dst_img
+
+# ---------------------------------------------------------------------------------------------------------------------
+
+
+def recalc_pose1(keypoints,
+                 bbs,
+                 image_size):
+
+    def transform_preds(coords, center, scale, output_size):
+
+        def affine_transform(pt, t):
+            new_pt = np.array([pt[0], pt[1], 1.]).T
+            new_pt = np.dot(t, new_pt)
+            return new_pt[:2]
+
+        target_coords = np.zeros(coords.shape)
+        trans = get_affine_transform(center, scale, 0, output_size, inv=1)
+        for p in range(coords.shape[0]):
+            target_coords[p, 0:2] = affine_transform(coords[p, 0:2], trans)
+        return target_coords
+
+    center = bbs[:, :2]
+    scale = bbs[:, 2:4]
+
+    heatmap_height = image_size[0] // 4
+    heatmap_width = image_size[1] // 4
+    output_size = [heatmap_width, heatmap_height]
+
+    preds = np.zeros_like(keypoints)
+
+    for i in range(keypoints.shape[0]):
+        preds[i] = transform_preds(keypoints[i], center[i], scale[i], output_size)
+
+    return preds
+
+
+def recalc_pose2(keypoints,
+                 bbs,
+                 image_size):
+
+    def transformBoxInvert(pt, ul, br, resH, resW):
+        center = np.zeros(2)
+        center[0] = (br[0] - 1 - ul[0]) / 2
+        center[1] = (br[1] - 1 - ul[1]) / 2
+
+        lenH = max(br[1] - ul[1], (br[0] - ul[0]) * resH / resW)
+        lenW = lenH * resW / resH
+
+        _pt = (pt * lenH) / resH
+
+        if bool(((lenW - 1) / 2 - center[0]) > 0):
+            _pt[0] = _pt[0] - ((lenW - 1) / 2 - center[0])
+        if bool(((lenH - 1) / 2 - center[1]) > 0):
+            _pt[1] = _pt[1] - ((lenH - 1) / 2 - center[1])
+
+        new_point = np.zeros(2)
+        new_point[0] = _pt[0] + ul[0]
+        new_point[1] = _pt[1] + ul[1]
+        return new_point
+
+    pt2 = bbs[:, :2]
+    pt1 = bbs[:, 2:4]
+
+    heatmap_height = image_size[0] // 4
+    heatmap_width = image_size[1] // 4
+
+    preds = np.zeros_like(keypoints)
+
+    for i in range(keypoints.shape[0]):
+        for j in range(keypoints.shape[1]):
+            preds[i, j] = transformBoxInvert(keypoints[i, j], pt1[i], pt2[i], heatmap_height, heatmap_width)
+
+    return preds
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+
 
 class CocoHpeMetaInfo(DatasetMetaInfo):
     def __init__(self):
@@ -459,14 +700,66 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.test_metric_extra_kwargs = [
             {"name": "OksAp",
              "coco": None,
+             "recalc_pose_fn": lambda x, y: recalc_pose1(x, y, self.input_image_size),
              "in_vis_thresh": 0.0}]
         self.saver_acc_ind = 0
         self.do_transform = True
-        self.val_transform = CocoHpeValTransform
-        self.test_transform = CocoHpeValTransform
+        self.val_transform = CocoHpeValTransform1
+        self.test_transform = CocoHpeValTransform1
         self.ml_type = "hpe"
+        self.allow_hybridize = False
+        self.net_extra_kwargs = {"fixed_size": False}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
+        self.model_type = 1
+
+    def add_dataset_parser_arguments(self,
+                                     parser,
+                                     work_dir_path):
+        """
+        Create python script parameters (for ImageNet-1K dataset metainfo).
+
+        Parameters:
+        ----------
+        parser : ArgumentParser
+            ArgumentParser instance.
+        work_dir_path : str
+            Path to working directory.
+        """
+        super(CocoHpeMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        parser.add_argument(
+            "--input-size",
+            type=int,
+            nargs=2,
+            default=self.input_image_size,
+            help="size of the input for model")
+        parser.add_argument(
+            "--model-type",
+            type=int,
+            default=self.model_type,
+            help="model type (1=SimplePose, 2=AlphaPose)")
+
+    def update(self,
+               args):
+        """
+        Update ImageNet-1K dataset metainfo after user customizing.
+
+        Parameters:
+        ----------
+        args : ArgumentParser
+            Main script arguments.
+        """
+        super(CocoHpeMetaInfo, self).update(args)
+        self.input_image_size = args.input_size
+        self.model_type = args.model_type
+        if self.model_type == 1:
+            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose1(x, y, self.input_image_size)
+            self.val_transform = CocoHpeValTransform1
+            self.test_transform = CocoHpeValTransform1
+        else:
+            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose2(x, y, self.input_image_size)
+            self.val_transform = CocoHpeValTransform2
+            self.test_transform = CocoHpeValTransform2
 
     def update_from_dataset(self,
                             dataset):

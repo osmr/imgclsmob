@@ -3,7 +3,8 @@
     Original paper: 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,' https://arxiv.org/abs/1801.04381.
 """
 
-__all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4']
+__all__ = ['MobileNetV2', 'mobilenetv2_w1', 'mobilenetv2_w3d4', 'mobilenetv2_wd2', 'mobilenetv2_wd4', 'mobilenetv2b_w1',
+           'mobilenetv2b_w3d4', 'mobilenetv2b_wd2', 'mobilenetv2b_wd4']
 
 import os
 import chainer.functions as F
@@ -27,21 +28,26 @@ class LinearBottleneck(Chain):
         Stride of the second convolution layer.
     expansion : bool
         Whether do expansion of channels.
+    remove_exp_conv : bool
+        Whether to remove expansion convolution.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 expansion):
+                 expansion,
+                 remove_exp_conv):
         super(LinearBottleneck, self).__init__()
         self.residual = (in_channels == out_channels) and (stride == 1)
         mid_channels = in_channels * 6 if expansion else in_channels
+        self.use_exp_conv = (expansion or (not remove_exp_conv))
 
         with self.init_scope():
-            self.conv1 = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=mid_channels,
-                activation=ReLU6())
+            if self.use_exp_conv:
+                self.conv1 = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=mid_channels,
+                    activation=ReLU6())
             self.conv2 = dwconv3x3_block(
                 in_channels=mid_channels,
                 out_channels=mid_channels,
@@ -55,7 +61,8 @@ class LinearBottleneck(Chain):
     def __call__(self, x):
         if self.residual:
             identity = x
-        x = self.conv1(x)
+        if self.use_exp_conv:
+            x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         if self.residual:
@@ -75,6 +82,8 @@ class MobileNetV2(Chain):
         Number of output channels for the initial unit.
     final_block_channels : int
         Number of output channels for the final block of the feature extractor.
+    remove_exp_conv : bool
+        Whether to remove expansion convolution.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -86,6 +95,7 @@ class MobileNetV2(Chain):
                  channels,
                  init_block_channels,
                  final_block_channels,
+                 remove_exp_conv,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -112,7 +122,8 @@ class MobileNetV2(Chain):
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 stride=stride,
-                                expansion=expansion))
+                                expansion=expansion,
+                                remove_exp_conv=remove_exp_conv))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
                 setattr(self.features, "final_block", conv1x1_block(
@@ -142,6 +153,7 @@ class MobileNetV2(Chain):
 
 
 def get_mobilenetv2(width_scale,
+                    remove_exp_conv=False,
                     model_name=None,
                     pretrained=False,
                     root=os.path.join("~", ".chainer", "models"),
@@ -153,6 +165,8 @@ def get_mobilenetv2(width_scale,
     ----------
     width_scale : float
         Scale factor for width of layers.
+    remove_exp_conv : bool, default False
+        Whether to remove expansion convolution.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -181,6 +195,7 @@ def get_mobilenetv2(width_scale,
         channels=channels,
         init_block_channels=init_block_channels,
         final_block_channels=final_block_channels,
+        remove_exp_conv=remove_exp_conv,
         **kwargs)
 
     if pretrained:
@@ -256,6 +271,66 @@ def mobilenetv2_wd4(**kwargs):
     return get_mobilenetv2(width_scale=0.25, model_name="mobilenetv2_wd4", **kwargs)
 
 
+def mobilenetv2b_w1(**kwargs):
+    """
+    1.0 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenetv2(width_scale=1.0, remove_exp_conv=True, model_name="mobilenetv2b_w1", **kwargs)
+
+
+def mobilenetv2b_w3d4(**kwargs):
+    """
+    0.75 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenetv2(width_scale=0.75, remove_exp_conv=True, model_name="mobilenetv2b_w3d4", **kwargs)
+
+
+def mobilenetv2b_wd2(**kwargs):
+    """
+    0.5 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenetv2(width_scale=0.5, remove_exp_conv=True, model_name="mobilenetv2b_wd2", **kwargs)
+
+
+def mobilenetv2b_wd4(**kwargs):
+    """
+    0.25 MobileNetV2b-224 model from 'MobileNetV2: Inverted Residuals and Linear Bottlenecks,'
+    https://arxiv.org/abs/1801.04381.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenetv2(width_scale=0.25, remove_exp_conv=True, model_name="mobilenetv2b_wd4", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -269,6 +344,10 @@ def _test():
         mobilenetv2_w3d4,
         mobilenetv2_wd2,
         mobilenetv2_wd4,
+        mobilenetv2b_w1,
+        mobilenetv2b_w3d4,
+        mobilenetv2b_wd2,
+        mobilenetv2b_wd4,
     ]
 
     for model in models:
@@ -280,6 +359,10 @@ def _test():
         assert (model != mobilenetv2_w3d4 or weight_count == 2627592)
         assert (model != mobilenetv2_wd2 or weight_count == 1964736)
         assert (model != mobilenetv2_wd4 or weight_count == 1516392)
+        assert (model != mobilenetv2b_w1 or weight_count == 3503872)
+        assert (model != mobilenetv2b_w3d4 or weight_count == 2626968)
+        assert (model != mobilenetv2b_wd2 or weight_count == 1964448)
+        assert (model != mobilenetv2b_wd4 or weight_count == 1516312)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

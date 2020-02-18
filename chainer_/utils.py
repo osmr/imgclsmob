@@ -87,25 +87,60 @@ def prepare_model(model_name,
 
 def report_accuracy(metric,
                     extended_log=False):
+    """
+    Make report string for composite metric.
+
+    Parameters:
+    ----------
+    metric : EvalMetric
+        Metric object instance.
+    extended_log : bool, default False
+        Whether to log more precise accuracy values.
+
+    Returns
+    -------
+    str
+        Report string.
+    """
+    def create_msg(name, value):
+        if type(value) in [list, tuple]:
+            if extended_log:
+                return "{}={} ({})".format("{}", "/".join(["{:.4f}"] * len(value)), "/".join(["{}"] * len(value))).\
+                    format(name, *(value + value))
+            else:
+                return "{}={}".format("{}", "/".join(["{:.4f}"] * len(value))).format(name, *value)
+        else:
+            if extended_log:
+                return "{name}={value:.4f} ({value})".format(name=name, value=value)
+            else:
+                return "{name}={value:.4f}".format(name=name, value=value)
+
     metric_info = metric.get()
-    if extended_log:
-        msg_pattern = "{name}={value:.4f} ({value})"
-    else:
-        msg_pattern = "{name}={value:.4f}"
     if isinstance(metric, CompositeEvalMetric):
-        msg = ""
-        for m in zip(*metric_info):
-            if msg != "":
-                msg += ", "
-            msg += msg_pattern.format(name=m[0], value=m[1])
+        msg = ", ".join([create_msg(name=m[0], value=m[1]) for m in zip(*metric_info)])
     elif isinstance(metric, EvalMetric):
-        msg = msg_pattern.format(name=metric_info[0], value=metric_info[1])
+        msg = create_msg(name=metric_info[0], value=metric_info[1])
     else:
         raise Exception("Wrong metric type: {}".format(type(metric)))
     return msg
 
 
 def get_metric(metric_name, metric_extra_kwargs):
+    """
+    Get metric by name.
+
+    Parameters:
+    ----------
+    metric_name : str
+        Metric name.
+    metric_extra_kwargs : dict
+        Metric extra parameters.
+
+    Returns
+    -------
+    EvalMetric
+        Metric object instance.
+    """
     if metric_name == "Top1Error":
         return Top1Error(**metric_extra_kwargs)
     elif metric_name == "TopKError":
@@ -121,6 +156,21 @@ def get_metric(metric_name, metric_extra_kwargs):
 
 
 def get_composite_metric(metric_names, metric_extra_kwargs):
+    """
+    Get composite metric by list of metric names.
+
+    Parameters:
+    ----------
+    metric_names : list of str
+        Metric name list.
+    metric_extra_kwargs : list of dict
+        Metric extra parameters list.
+
+    Returns
+    -------
+    CompositeEvalMetric
+        Metric object instance.
+    """
     if len(metric_names) == 1:
         metric = get_metric(metric_names[0], metric_extra_kwargs[0])
     else:
@@ -131,6 +181,21 @@ def get_composite_metric(metric_names, metric_extra_kwargs):
 
 
 def get_metric_name(metric, index):
+    """
+    Get metric name by index in the composite metric.
+
+    Parameters:
+    ----------
+    metric : CompositeEvalMetric or EvalMetric
+        Metric object instance.
+    index : int
+        Index.
+
+    Returns
+    -------
+    str
+        Metric name.
+    """
     if isinstance(metric, CompositeEvalMetric):
         return metric.metrics[index].name
     elif isinstance(metric, EvalMetric):

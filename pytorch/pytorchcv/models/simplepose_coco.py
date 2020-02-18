@@ -5,12 +5,12 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
+           'simplepose_resneta152b_coco']
 
 import os
 import torch
 import torch.nn as nn
-from .common import get_activation_layer, conv1x1
+from .common import get_activation_layer, conv1x1, HeatmapMaxDetBlock
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -87,43 +87,6 @@ class DeconvBlock(nn.Module):
         if self.activate:
             x = self.activ(x)
         return x
-
-
-class HeatmapMaxDetBlock(nn.Module):
-    """
-    Heatmap maximum detector block.
-    """
-    def __init__(self):
-        super(HeatmapMaxDetBlock, self).__init__()
-
-    def forward(self, x):
-        heatmap = x
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        channels = heatmap.shape[1]
-        in_size = x.shape[2:]
-        heatmap_vector = heatmap.view(batch, channels, -1)
-        scores, indices = heatmap_vector.max(dim=vector_dim, keepdims=True)
-        scores_mask = (scores > 0.0).float()
-        pts_x = (indices % in_size[1]) * scores_mask
-        pts_y = (indices // in_size[1]) * scores_mask
-        pts = torch.cat((pts_x, pts_y, scores), dim=vector_dim)
-        for b in range(batch):
-            for k in range(channels):
-                hm = heatmap[b, k, :, :]
-                px = int(pts[b, k, 0])
-                py = int(pts[b, k, 1])
-                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
-                    pts[b, k, 0] += (hm[py, px + 1] - hm[py, px - 1]).sign() * 0.25
-                    pts[b, k, 1] += (hm[py + 1, px] - hm[py - 1, px]).sign() * 0.25
-        return pts
-
-    @staticmethod
-    def calc_flops(x):
-        assert (x.shape[0] == 1)
-        num_flops = x.numel() + 26 * x.shape[1]
-        num_macs = 0
-        return num_flops, num_macs
 
 
 class SimplePose(nn.Module):

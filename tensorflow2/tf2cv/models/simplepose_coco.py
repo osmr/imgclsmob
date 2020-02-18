@@ -5,13 +5,12 @@
 
 __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco', 'simplepose_resnet101b_coco',
            'simplepose_resnet152b_coco', 'simplepose_resneta50b_coco', 'simplepose_resneta101b_coco',
-           'simplepose_resneta152b_coco', 'HeatmapMaxDetBlock']
+           'simplepose_resneta152b_coco']
 
 import os
-import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import get_activation_layer, BatchNorm, conv1x1, is_channels_first
+from .common import get_activation_layer, BatchNorm, conv1x1, HeatmapMaxDetBlock, is_channels_first
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
 
@@ -168,48 +167,6 @@ class DeconvBlock(nn.Layer):
         if self.activate:
             x = self.activ(x)
         return x
-
-
-class HeatmapMaxDetBlock(nn.Layer):
-    """
-    Heatmap maximum detector block.
-    """
-    def __init__(self,
-                 data_format="channels_last",
-                 **kwargs):
-        super(HeatmapMaxDetBlock, self).__init__(**kwargs)
-        self.data_format = data_format
-
-    def call(self, x, training=None):
-        heatmap = x
-        vector_dim = 2
-        batch = heatmap.shape[0]
-        if is_channels_first(self.data_format):
-            channels = heatmap.shape[1]
-            in_size = x.shape[2:]
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, channels, -1))
-        else:
-            channels = heatmap.shape[3]
-            in_size = x.shape[1:3]
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, -1, channels))
-            heatmap_vector = tf.transpose(heatmap_vector, perm=(0, 2, 1))
-        indices = tf.cast(tf.expand_dims(tf.cast(tf.math.argmax(heatmap_vector, axis=vector_dim), np.int32),
-                                         axis=vector_dim), np.float32)
-        scores = tf.math.reduce_max(heatmap_vector, axis=vector_dim, keepdims=True)
-        scores_mask = tf.cast(tf.math.greater(scores, 0.0), np.float32)
-        pts_x = (indices % in_size[1]) * scores_mask
-        pts_y = (indices // in_size[1]) * scores_mask
-        pts = tf.concat([pts_x, pts_y, scores], axis=vector_dim).numpy()
-        for b in range(batch):
-            for k in range(channels):
-                hm = heatmap[b, k, :, :] if is_channels_first(self.data_format) else heatmap[b, :, :, k]
-                px = int(pts[b, k, 0])
-                py = int(pts[b, k, 1])
-                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
-                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
-                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
-        pts = tf.convert_to_tensor(pts)
-        return pts
 
 
 class SimplePose(tf.keras.Model):

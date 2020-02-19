@@ -3,7 +3,8 @@ from __future__ import division
 __all__ = ['oth_simple_pose_resnet18_v1b', 'oth_simple_pose_resnet50_v1b', 'oth_simple_pose_resnet101_v1b',
            'oth_simple_pose_resnet152_v1b', 'oth_simple_pose_resnet50_v1d', 'oth_simple_pose_resnet101_v1d',
            'oth_simple_pose_resnet152_v1d', 'oth_resnet50_v1d', 'oth_resnet101_v1d',
-           'oth_resnet152_v1d']
+           'oth_resnet152_v1d', 'oth_mobilenet_v2_1_0', 'oth_mobilenet_v2_0_75', 'oth_mobilenet_v2_0_5',
+           'oth_mobilenet_v2_0_25']
 
 import numpy as np
 import mxnet as mx
@@ -61,7 +62,6 @@ def _get_final_preds(batch_heatmaps):
 class SimplePoseResNet(HybridBlock):
 
     def __init__(self,
-                 fixed_size=True,
                  base_name='resnet50_v1b',
                  pretrained_base=False,
                  pretrained_ctx=cpu(),
@@ -174,7 +174,8 @@ def get_simple_pose_resnet(base_name,
                            ctx=cpu(),
                            root='~/.mxnet/models',
                            **kwargs):
-
+    if "fixed_size" in kwargs:
+        del kwargs["fixed_size"]
     net = SimplePoseResNet(base_name, **kwargs)
 
     if pretrained:
@@ -325,11 +326,59 @@ def oth_resnet152_v1d(pretrained=False, **kwargs):
     return net
 
 
+def oth_mobilenet_v2_1_0(pretrained=False, **kwargs):
+    if "in_channels" in kwargs:
+        del kwargs["in_channels"]
+    from gluoncv.model_zoo import get_model
+    net = get_model(
+        'mobilenetv2_1.0',
+        pretrained=pretrained,
+        **kwargs)
+    net.in_size = (224, 224)
+    return net
+
+
+def oth_mobilenet_v2_0_75(pretrained=False, **kwargs):
+    if "in_channels" in kwargs:
+        del kwargs["in_channels"]
+    from gluoncv.model_zoo import get_model
+    net = get_model(
+        'mobilenetv2_0.75',
+        pretrained=pretrained,
+        **kwargs)
+    net.in_size = (224, 224)
+    return net
+
+
+def oth_mobilenet_v2_0_5(pretrained=False, **kwargs):
+    if "in_channels" in kwargs:
+        del kwargs["in_channels"]
+    from gluoncv.model_zoo import get_model
+    net = get_model(
+        'mobilenetv2_0.5',
+        pretrained=pretrained,
+        **kwargs)
+    net.in_size = (224, 224)
+    return net
+
+
+def oth_mobilenet_v2_0_25(pretrained=False, **kwargs):
+    if "in_channels" in kwargs:
+        del kwargs["in_channels"]
+    from gluoncv.model_zoo import get_model
+    net = get_model(
+        'mobilenetv2_0.25',
+        pretrained=pretrained,
+        **kwargs)
+    net.in_size = (224, 224)
+    return net
+
+
 def _test():
     import numpy as np
     import mxnet as mx
 
-    pretrained = False
+    pretrained = True
 
     models = [
         oth_simple_pose_resnet18_v1b,
@@ -342,6 +391,11 @@ def _test():
         oth_resnet50_v1d,
         oth_resnet101_v1d,
         oth_resnet152_v1d,
+
+        oth_mobilenet_v2_1_0,
+        oth_mobilenet_v2_0_75,
+        oth_mobilenet_v2_0_5,
+        oth_mobilenet_v2_0_25,
     ]
 
     for model in models:

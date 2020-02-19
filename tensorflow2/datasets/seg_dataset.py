@@ -128,7 +128,7 @@ class SegDirectoryIterator(DirectoryIterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 seg_dataset=None):
+                 dataset=None):
         super(SegDirectoryIterator, self).set_processing_attrs(
             image_data_generator,
             target_size,
@@ -140,11 +140,11 @@ class SegDirectoryIterator(DirectoryIterator):
             subset,
             interpolation)
 
-        self.seg_dataset = seg_dataset
+        self.dataset = dataset
         self.class_mode = class_mode
         self.dtype = dtype
 
-        self.n = len(self.seg_dataset)
+        self.n = len(self.dataset)
         self.batch_size = batch_size
         self.seed = seed
         self.shuffle = shuffle
@@ -168,7 +168,7 @@ class SegDirectoryIterator(DirectoryIterator):
         batch_x = None
         batch_y = None
         for i, j in enumerate(index_array):
-            x, y = self.seg_dataset[j]
+            x, y = self.dataset[j]
             if batch_x is None:
                 batch_x = np.zeros((len(index_array),) + x.shape, dtype=self.dtype)
                 batch_y = np.zeros((len(index_array),) + y.shape, dtype=np.int32)
@@ -200,7 +200,7 @@ class SegImageDataGenerator(ImageDataGenerator):
                             follow_links=False,
                             subset=None,
                             interpolation='nearest',
-                            seg_dataset=None):
+                            dataset=None):
         return SegDirectoryIterator(
             directory,
             self,
@@ -218,4 +218,4 @@ class SegImageDataGenerator(ImageDataGenerator):
             follow_links=follow_links,
             subset=subset,
             interpolation=interpolation,
-            seg_dataset=seg_dataset)
+            dataset=dataset)

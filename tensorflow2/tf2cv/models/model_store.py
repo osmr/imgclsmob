@@ -208,6 +208,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('mobilenetv2_wd2', '1446', 'b0c9a98b85b579ba77c17d228ace399809c6ab43', 'v0.0.422', 'in1k', 0.875),
     ('mobilenetv2_w3d4', '1044', 'e122c73eae885d204bc2ba46fb013a9da5cb282f', 'v0.0.422', 'in1k', 0.875),
     ('mobilenetv2_w1', '0863', 'b32cede3b68f40f2ed0552dcdf238c70f82e5705', 'v0.0.422', 'in1k', 0.875),
+    ('mobilenetv2b_wd4', '2505', '4079f654160fcd7ce37212c2d2da424f22913a70', 'v0.0.453', 'in1k', 0.875),
+    ('mobilenetv2b_wd2', '1473', '129cfd918a4c4ab1b2544bc9ae24ed03f97f00ee', 'v0.0.453', 'in1k', 0.875),
+    ('mobilenetv2b_w3d4', '1152', 'fa93741abc02bf3feb9e276d26dcfc6249a7b0a4', 'v0.0.453', 'in1k', 0.875),
+    ('mobilenetv2b_w1', '0943', '97f1b6763b054d821e3422c7b4faf990005ec2c0', 'v0.0.453', 'in1k', 0.875),
     ('mobilenetv3_large_w1', '0769', 'f66596ae10c8eaa1ea3cb79b2645bd93f946b059', 'v0.0.422', 'in1k', 0.875),
     ('igcv3_wd4', '2828', '309359dc5a0cd0439f2be5f629534aa3bdf2b4f9', 'v0.0.422', 'in1k', 0.875),
     ('igcv3_wd2', '1701', 'b952333ab2024f879d4bb9895331a617f2b957b5', 'v0.0.422', 'in1k', 0.875),
@@ -484,6 +488,20 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('fcn8sd_resnetd50b_ade20k', '3310', 'd440f859bad1c84790aa1c3e1c0addc21b171d4a', 'v0.0.450', 'voc', 0.0),
     ('fcn8sd_resnetd101b_ade20k', '3550', '970d968a1fb44670993b065c1603a6a7c0bd57a1', 'v0.0.450', 'voc', 0.0),
     ('fcn8sd_resnetd101b_coco', '5968', '69c001b3875c5399dfc1281eb5a051bafef40e4b', 'v0.0.451', 'voc', 0.0),
+    ('alphapose_fastseresnet101b_coco', '7415', 'd1f0464a0f2c520d8690d49d09fe1426b0ab3eab', 'v0.0.454', 'cocohpe', 0.0),
+    ('simplepose_resnet18_coco', '6631', '4d907c70a6f3ccaba321c05406ce038351e0c67f', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resnet50b_coco', '7102', '74506b66735333e3deab5908d309d3ec04c94861', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resnet101b_coco', '7244', '6f9e08d6afa08e83176e8e04f7566e255265e080', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resnet152b_coco', '7253', 'c018fb87bb8e5f5d8d6daa6a922869b2f36481cf', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resneta50b_coco', '7170', 'c9ddc1c90ddac88b1f64eb962e1bda87887668a5', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resneta101b_coco', '7297', '6db62b714be632359020c972bedb459e5210820f', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_resneta152b_coco', '7344', 'f65954b9df20bf9fa64a9791563729fa51983cf5', 'v0.0.455', 'cocohpe', 0.0),
+    ('simplepose_mobile_resnet18_coco', '6625', '8f3e5cc4c6af306c23f0882887d7b36ee0b1079a', 'v0.0.456', 'cocohpe', 0.0),  # noqa
+    ('simplepose_mobile_resnet50b_coco', '7110', 'e8f61fdaf7aacbe58d006129943988ae95c9aef3', 'v0.0.456', 'cocohpe', 0.0),  # noqa
+    ('simplepose_mobile_mobilenet_w1_coco', '6410', '27c918b95148b87944eec36ac422bf18792513ae', 'v0.0.456', 'cocohpe', 0.0),  # noqa
+    ('simplepose_mobile_mobilenetv2b_w1_coco', '6374', '4bcc3462fb2af46ed6daed78d15920a274e58051', 'v0.0.456', 'cocohpe', 0.0),  # noqa
+    ('simplepose_mobile_mobilenetv3_small_w1_coco', '5434', '1cfee871467e99e7af23e5135bb9a4765f010a05', 'v0.0.456', 'cocohpe', 0.0),  # noqa
+    ('simplepose_mobile_mobilenetv3_large_w1_coco', '6367', '8c8583fbe6d60355c232a10b5de8a455a38ba073', 'v0.0.456', 'cocohpe', 0.0),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

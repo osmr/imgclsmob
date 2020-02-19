@@ -1080,7 +1080,7 @@ class DucBlock(nn.Module):
                  out_channels,
                  scale_factor):
         super(DucBlock, self).__init__()
-        mid_channels = 4 * out_channels
+        mid_channels = (scale_factor * scale_factor) * out_channels
 
         self.conv = conv3x3_block(
             in_channels=in_channels,

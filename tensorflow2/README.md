@@ -65,6 +65,8 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - FCN-8s (['Fully Convolutional Networks for Semantic Segmentation'](https://arxiv.org/abs/1411.4038))
 - PSPNet (['Pyramid Scene Parsing Network'](https://arxiv.org/abs/1612.01105))
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
+- AlphaPose (['RMPE: Regional Multi-person Pose Estimation'](https://arxiv.org/abs/1612.00137))
+- SimplePose (['Simple Baselines for Human Pose Estimation and Tracking'](https://arxiv.org/abs/1804.06208))
 
 ## Installation
 
@@ -295,6 +297,10 @@ Some remarks:
 | MobileNetV2 x0.5 | 35.62 | 14.46 | 1,964,736 | 100.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_wd2-1446-b0c9a98b.tf2.h5.log)) |
 | MobileNetV2 x0.75 | 29.75 | 10.44 | 2,627,592 | 198.50M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w3d4-1044-e122c73e.tf2.h5.log)) |
 | MobileNetV2 x1.0 | 26.80 | 8.63 | 3,504,960 | 329.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w1-0863-b32cede3.tf2.h5.log)) |
+| MobileNetV2 x0.25 | 48.25 | 25.05 | 1,516,312 | 33.18M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_wd4-2505-4079f654.tf2.h5.log)) |
+| MobileNetV2 x0.5 | 35.64 | 14.73 | 1,964,448 | 96.42M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_wd2-1473-129cfd91.tf2.h5.log)) |
+| MobileNetV2 x0.75 | 30.63 | 11.52 | 2,626,968 | 190.52M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_w3d4-1152-fa93741a.tf2.h5.log)) |
+| MobileNetV2 x1.0 | 27.94 | 943 | 3,503,872 | 315.51M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_w1-0943-97f1b676.tf2.h5.log)) |
 | MobileNetV3 L/224/1.0 | 24.65 | 7.69 | 5,481,752 | 226.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0769-f66596ae.tf2.h5.log)) |
 | IGCV3 x0.25 | 53.38 | 28.28 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd4-2828-309359dc.tf2.h5.log)) |
 | IGCV3 x0.5 | 39.36 | 17.01 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd2-1701-b952333a.tf2.h5.log)) |
@@ -603,7 +609,7 @@ Some remarks:
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.80 | 57.60 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.449/pspnet_resnetd101b_cityscapes-5760-6dc20af6.tf2.h5.log)) |
 
-### COCO
+### COCO Semantic Segmentation
 
 | Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
@@ -611,6 +617,25 @@ Some remarks:
 | DeepLabv3 | ResNet(D)-101b | 89.98 | 58.65 | 58,754,773 | 47,625.34M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.451/deeplabv3_resnetd101b_coco-5865-39525a13.tf2.h5.log)) |
 | DeepLabv3 | ResNet(D)-152b | 90.40 | 60.67 | 74,398,421 | 275,087.91M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.451/deeplabv3_resnetd152b_coco-6067-f4dabc62.tf2.h5.log)) |
 | FCN-8s(d) | ResNet(D)-101b | 91.36 | 59.68 | 52,072,917 | 196,562.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.451/fcn8sd_resnetd101b_coco-5968-69c001b3.tf2.h5.log)) |
+
+### COCO Keypoints Detection
+
+| Model | Extractor | OKS AP,% | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | ---: | ---: | --- |
+| AlphaPose | Fast-SE-ResNet-101b | 74.15/91.59/80.68 | 59,569,873 | 9,553.89M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.454/alphapose_fastseresnet101b_coco-7415-d1f0464a.tf2.h5.log)) |
+| SimplePose | ResNet-18 | 66.31/89.20/73.41 | 15,376,721 | 1,799.25M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resnet18_coco-6631-4d907c70.tf2.h5.log)) |
+| SimplePose | ResNet-50b | 71.02/91.23/78.57 | 33,999,697 | 4,041.06M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resnet50b_coco-7102-74506b66.tf2.h5.log)) |
+| SimplePose | ResNet-101b | 72.44/92.18/79.76 | 52,991,825 | 7,685.04M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resnet101b_coco-7244-6f9e08d6.tf2.h5.log)) |
+| SimplePose | ResNet-152b | 72.53/92.14/79.61 | 68,635,473 | 11,332.86M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resnet152b_coco-7253-c018fb87.tf2.h5.log)) |
+| SimplePose | ResNet(A)-50b | 71.70/91.31/78.66 | 34,018,929 | 4,278.56M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resneta50b_coco-7170-c9ddc1c9.tf2.h5.log)) |
+| SimplePose | ResNet(A)-101b | 72.97/92.24/80.81 | 53,011,057 | 7,922.54M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resneta101b_coco-7297-6db62b71.tf2.h5.log)) |
+| SimplePose | ResNet(A)-152b | 73.44/92.27/80.72 | 68,654,705 | 11,570.36M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resneta152b_coco-7344-f65954b9.tf2.h5.log)) |
+| SimplePose(Mobile) | ResNet-18 | 66.25/89.17/74.32 | 12,858,208 | 1,960.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_resnet18_coco-6625-8f3e5cc4.tf2.h5.log)) |
+| SimplePose(Mobile) | ResNet-50b | 71.10/91.28/78.67 | 25,582,944 | 4,221.30M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_resnet50b_coco-7110-e8f61fda.tf2.h5.log)) |
+| SimplePose(Mobile) | 1.0 MobileNet-224 | 64.10/88.06/71.23 | 5,019,744 | 751.36M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_mobilenet_w1_coco-6410-27c918b9.tf2.h5.log)) |
+| SimplePose(Mobile) | 1.0 MobileNetV2b-224 | 63.74/88.12/71.06 | 4,102,176 | 495.95M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_mobilenetv2b_w1_coco-6374-4bcc3462.tf2.h5.log)) |
+| SimplePose(Mobile) | MobileNetV3 Small 224/1.0 | 54.34/83.67/59.35 | 2,625,088 | 236.51M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_mobilenetv3_small_w1_coco-5434-1cfee871.tf2.h5.log)) |
+| SimplePose(Mobile) | MobileNetV3 Large 224/1.0 | 63.67/88.91/70.82 | 4,768336 | 403.97M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.456/simplepose_mobile_mobilenetv3_large_w1_coco-6367-8c8583fb.tf2.h5.log)) |
 
 [dmlc/gluon-cv]: https://github.com/dmlc/gluon-cv
 [tornadomeet/ResNet]: https://github.com/tornadomeet/ResNet

@@ -1209,7 +1209,7 @@ class DucBlock(HybridBlock):
                  bn_cudnn_off,
                  **kwargs):
         super(DucBlock, self).__init__(**kwargs)
-        mid_channels = 4 * out_channels
+        mid_channels = (scale_factor * scale_factor) * out_channels
 
         with self.name_scope():
             self.conv = conv3x3_block(

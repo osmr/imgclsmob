@@ -850,7 +850,7 @@ class CocoHpeDirectoryIterator(DirectoryIterator):
                  subset=None,
                  interpolation='nearest',
                  dtype='float32',
-                 hpe_dataset=None):
+                 dataset=None):
         super(CocoHpeDirectoryIterator, self).set_processing_attrs(
             image_data_generator,
             target_size,
@@ -862,11 +862,11 @@ class CocoHpeDirectoryIterator(DirectoryIterator):
             subset,
             interpolation)
 
-        self.hpe_dataset = hpe_dataset
+        self.dataset = dataset
         self.class_mode = class_mode
         self.dtype = dtype
 
-        self.n = len(self.hpe_dataset)
+        self.n = len(self.dataset)
         self.batch_size = batch_size
         self.seed = seed
         self.shuffle = shuffle
@@ -888,7 +888,7 @@ class CocoHpeDirectoryIterator(DirectoryIterator):
         batch_x = None
         batch_y = None
         for i, j in enumerate(index_array):
-            x, y = self.hpe_dataset[j]
+            x, y = self.dataset[j]
             if batch_x is None:
                 batch_x = np.zeros((len(index_array),) + x.shape, dtype=self.dtype)
                 batch_y = np.zeros((len(index_array),) + y.shape, dtype=np.float32)
@@ -914,7 +914,7 @@ class CocoHpeImageDataGenerator(ImageDataGenerator):
                             follow_links=False,
                             subset=None,
                             interpolation='nearest',
-                            hpe_dataset=None):
+                            dataset=None):
         return CocoHpeDirectoryIterator(
             directory,
             self,
@@ -932,7 +932,7 @@ class CocoHpeImageDataGenerator(ImageDataGenerator):
             follow_links=follow_links,
             subset=subset,
             interpolation=interpolation,
-            hpe_dataset=hpe_dataset)
+            dataset=dataset)
 
 
 def cocohpe_val_transform(ds_metainfo,
@@ -988,7 +988,7 @@ def cocohpe_val_generator(data_generator,
         batch_size=batch_size,
         shuffle=False,
         interpolation="bilinear",
-        hpe_dataset=ds_metainfo.dataset_class(
+        dataset=ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="val",
             transform=ds_metainfo.val_transform2(
@@ -1026,7 +1026,7 @@ def cocohpe_test_generator(data_generator,
         batch_size=batch_size,
         shuffle=False,
         interpolation="bilinear",
-        hpe_dataset=ds_metainfo.dataset_class(
+        dataset=ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="test",
             transform=ds_metainfo.test_transform2(

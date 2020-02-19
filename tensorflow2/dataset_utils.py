@@ -113,7 +113,8 @@ def get_val_data_source(ds_metainfo,
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)
-    ds_metainfo.update_from_dataset(generator.hpe_dataset)
+    if hasattr(generator, "dataset"):
+        ds_metainfo.update_from_dataset(generator.dataset)
     return tf.data.Dataset.from_generator(
         generator=lambda: generator,
         output_types=(tf.float32, tf.float32)),\
@@ -149,7 +150,8 @@ def get_test_data_source(ds_metainfo,
         data_generator=data_generator,
         ds_metainfo=ds_metainfo,
         batch_size=batch_size)
-    ds_metainfo.update_from_dataset(generator.hpe_dataset)
+    if hasattr(generator, "dataset"):
+        ds_metainfo.update_from_dataset(generator.dataset)
     return tf.data.Dataset.from_generator(
         generator=lambda: generator,
         output_types=(tf.float32, tf.float32)),\

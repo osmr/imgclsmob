@@ -217,6 +217,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2_wd2', '1493', 'b82d79f6730eac625e6b55b0618bff8f7a1ed86d', 'v0.0.170', 'MobileNetV2 x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w3d4', '1082', '8656de5a8d90b29779c35c5ce521267c841fd717', 'v0.0.230', 'MobileNetV2 x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w1', '0887', '13a021bca5b679b76156829743f7182da42e8bb6', 'v0.0.213', 'MobileNetV2 x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_wd4', '2530', 'f0e9b1208ebe0a83181b47c58b16f7bb7593674a', 'v0.0.453', 'MobileNetV2b x0.25', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_wd2', '1498', '489399099f540d61b00f99e3ed07df0eddb6325e', 'v0.0.453', 'MobileNetV2b x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_w3d4', '1178', '0cba52d7f9ce6bbef34049339dcf0f5f94dd57e2', 'v0.0.453', 'MobileNetV2b x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_w1', '0975', 'c123d420973d53880164a67288704c1ac1153486', 'v0.0.453', 'MobileNetV2b x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv3_large_w1', '0779', '38e392f58bdf99b2832b26341bc9704ac63a3672', 'v0.0.411', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('igcv3_wd4', '2871', 'c9f28301391601e5e8ae93139431a9e0d467317c', 'v0.0.142', 'IGCV3 x0.25', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_wd2', '1732', '8c504f443283d8a32787275b23771082fcaab61b', 'v0.0.132', 'IGCV3 x0.5', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -490,18 +494,32 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('pspnet_resnetd50b_ade20k', '3687', '13f22137d7dd06c6de2ffc47e6ed33403d3dd2cf', 'v0.0.297', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('pspnet_resnetd101b_ade20k', '3797', '115d62bf66477221b83337208aefe0f2f0266da2', 'v0.0.297', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('pspnet_resnetd101b_cityscapes', '7172', '0a6efb497bd4fc763d27e2121211e06f72ada7ed', 'v0.0.297', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
-    ('pspnet_resnetd101b_coco', '6741', 'c8b13be65cb43402fce8bae945f6e0d0a3246b92', 'v0.0.297', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
+    ('pspnet_resnetd101b_coco', '6741', 'c8b13be65cb43402fce8bae945f6e0d0a3246b92', 'v0.0.297', '', '', 'cocoseg', 0, 0.0, 0, ''),  # noqa
     ('deeplabv3_resnetd101b_voc', '8024', 'fd8bf74ffc96c97b30bcd3b6ce194a2daed68098', 'v0.0.298', '', '', 'voc', 0, 0.0, 0, ''),  # noqa
     ('deeplabv3_resnetd152b_voc', '8120', 'f2dae198b3cdc41920ea04f674b665987c68d7dc', 'v0.0.298', '', '', 'voc', 0, 0.0, 0, ''),  # noqa
     ('deeplabv3_resnetd50b_ade20k', '3713', 'bddbb458e362e18f5812c2307b322840394314bc', 'v0.0.298', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('deeplabv3_resnetd101b_ade20k', '3784', '977446a5fb32b33f168f2240fb6b7ef9f561fc1e', 'v0.0.298', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
-    ('deeplabv3_resnetd101b_coco', '6773', 'e59c1d8f7ed5bcb83f927d2820580a2f4970e46f', 'v0.0.298', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
-    ('deeplabv3_resnetd152b_coco', '6899', '7e946d7a63ed255dd38afacebb0a0525e735da64', 'v0.0.298', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
+    ('deeplabv3_resnetd101b_coco', '6773', 'e59c1d8f7ed5bcb83f927d2820580a2f4970e46f', 'v0.0.298', '', '', 'cocoseg', 0, 0.0, 0, ''),  # noqa
+    ('deeplabv3_resnetd152b_coco', '6899', '7e946d7a63ed255dd38afacebb0a0525e735da64', 'v0.0.298', '', '', 'cocoseg', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_voc', '8040', '66edc0b073f0dec66c18bb163c7d6de1ddbc32a3', 'v0.0.299', '', '', 'voc', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd50b_ade20k', '3339', 'e1dad8a15c2a1be1138bd3ec51ba1b100bb8d9c9', 'v0.0.299', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_ade20k', '3588', '30d05ca42392a164ea7c93a9cbd7f33911d3c1af', 'v0.0.299', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_coco', '6011', 'ebe2ad0bc1de5b4cecade61d17d269aa8bf6df7f', 'v0.0.299', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
     ('sinet_cityscapes', '6172', '8ecd14141b85a682c2cc1c74e13077fee4746d87', 'v0.0.437', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
+    ('alphapose_fastseresnet101b_coco', '7415', 'b9e3f64a9fe44198b23e7278cc3a94fd94247e20', 'v0.0.454', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resnet18_coco', '6631', '7c3656b35607805bdb877e7134938fd4510b2c8c', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resnet50b_coco', '7102', '621d2545c8b39793a0fe3a48054684f8b982a978', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resnet101b_coco', '7244', '540c29ec1794535fe9ee319cdb5527ed3a6d3eb5', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resnet152b_coco', '7253', '3a358d7de566d51e90b9d3a1f44a1c9c948769ed', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resneta50b_coco', '7170', '2d973dc512d02f24d0de5a98008898c0a03a2c99', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resneta101b_coco', '7297', '08175610ce24a4e476b49030c1c1378d74158f70', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_resneta152b_coco', '7344', 'dacb65cfe1261e5f2013cde18f2d5753c6453568', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_resnet18_coco', '6625', '1e27b206737a33678b67b638bba8a4d024ec2dc3', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_resnet50b_coco', '7110', '023f910cab8c0750bb24e6a14aecdeb42fcc5561', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_mobilenet_w1_coco', '6410', '0ca46de0f31cb3d700ce1310f2eba19a3308a3f0', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_mobilenetv2b_w1_coco', '6374', '94f86097959d1acca6605d0d6487fd2d0899dfeb', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_mobilenetv3_small_w1_coco', '5434', '5cedb749e09a30c779073fba0e71546ad8b022d5', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
+    ('simplepose_mobile_mobilenetv3_large_w1_coco', '6367', '9515de071e264aa95514b9b85ab60a5da23f5f69', 'v0.0.456', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

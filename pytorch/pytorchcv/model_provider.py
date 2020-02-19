@@ -112,9 +112,9 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.sinet import *
 
+from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
-from .models.alphapose_coco import *
 
 # from .models.others.oth_sinet import *
 
@@ -972,6 +972,8 @@ _models = {
     'sinet_cityscapes': sinet_cityscapes,
     # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
 
+    'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
+
     'simplepose_resnet18_coco': simplepose_resnet18_coco,
     'simplepose_resnet50b_coco': simplepose_resnet50b_coco,
     'simplepose_resnet101b_coco': simplepose_resnet101b_coco,
@@ -986,8 +988,6 @@ _models = {
     'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
-
-    'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 
     'superpointnet': superpointnet,
 }

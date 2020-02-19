@@ -1979,7 +1979,7 @@ class DucBlock(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(DucBlock, self).__init__(**kwargs)
-        mid_channels = 4 * out_channels
+        mid_channels = (scale_factor * scale_factor) * out_channels
 
         self.conv = conv3x3_block(
             in_channels=in_channels,

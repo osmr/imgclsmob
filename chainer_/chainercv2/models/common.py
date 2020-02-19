@@ -1036,8 +1036,7 @@ class PixelShuffle(Chain):
 
         x = F.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
         x = F.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
-        x = F.swapaxes(x, axis1=2, axis2=3)
-        x = F.swapaxes(x, axis1=4, axis2=5)
+        x = F.transpose(x, axes=(0, 1, 4, 2, 5, 3))
         x = F.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
 
         return x
@@ -1063,7 +1062,7 @@ class DucBlock(Chain):
                  scale_factor,
                  **kwargs):
         super(DucBlock, self).__init__(**kwargs)
-        mid_channels = 4 * out_channels
+        mid_channels = (scale_factor * scale_factor) * out_channels
 
         with self.init_scope():
             self.conv = conv3x3_block(

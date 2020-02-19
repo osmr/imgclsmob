@@ -287,7 +287,7 @@ def voc_train_generator(data_generator,
         batch_size=batch_size,
         shuffle=False,
         interpolation=ds_metainfo.interpolation_msg,
-        seg_dataset=None)
+        dataset=None)
     return generator
 
 
@@ -321,7 +321,7 @@ def voc_val_generator(data_generator,
         batch_size=batch_size,
         shuffle=False,
         interpolation="bilinear",
-        seg_dataset=ds_metainfo.dataset_class(
+        dataset=ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="val",
             transform=VOCSegTestTransform(
@@ -359,7 +359,7 @@ def voc_test_generator(data_generator,
         batch_size=batch_size,
         shuffle=False,
         interpolation="bilinear",
-        seg_dataset=ds_metainfo.dataset_class(
+        dataset=ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="test",
             transform=VOCSegTestTransform(

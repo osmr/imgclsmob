@@ -159,3 +159,14 @@ Some remarks:
 | DeepLabv3 | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
 | FCN-8s(d) | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
 | SINet | C | C | C | - | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |
+
+## Table of implemented human pose estimation models
+
+Some remarks:
+- `a/A` corresponds to COCO.
+
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| AlphaPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1612.00137) | [link](https://github.com/MVIG-SJTU/AlphaPose) | 2016 |
+| SimplePose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | [link](https://github.com/microsoft/human-pose-estimation.pytorch) | 2018 |
+| SimplePose(Mobile) | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | - | 2018 |

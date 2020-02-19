@@ -116,13 +116,13 @@ from .models.sinet import *
 
 from .models.superpointnet import *
 
+from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
-from .models.alphapose_coco import *
 
-from .models.others.oth_simple_pose_resnet import *
-from .models.others.oth_mobile_pose import *
-from .models.others.oth_alpha_pose import *
+# from .models.others.oth_simple_pose_resnet import *
+# from .models.others.oth_mobile_pose import *
+# from .models.others.oth_alpha_pose import *
 
 __all__ = ['get_model']
 
@@ -1038,6 +1038,8 @@ _models = {
 
     'superpointnet': superpointnet,
 
+    'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
+
     'simplepose_resnet18_coco': simplepose_resnet18_coco,
     'simplepose_resnet50b_coco': simplepose_resnet50b_coco,
     'simplepose_resnet101b_coco': simplepose_resnet101b_coco,
@@ -1053,28 +1055,31 @@ _models = {
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 
-    'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
-
-    'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
-    'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,
-    'oth_simple_pose_resnet101_v1b': oth_simple_pose_resnet101_v1b,
-    'oth_simple_pose_resnet152_v1b': oth_simple_pose_resnet152_v1b,
-    'oth_simple_pose_resnet50_v1d': oth_simple_pose_resnet50_v1d,
-    'oth_simple_pose_resnet101_v1d': oth_simple_pose_resnet101_v1d,
-    'oth_simple_pose_resnet152_v1d': oth_simple_pose_resnet152_v1d,
-
-    'oth_mobile_pose_resnet18_v1b': oth_mobile_pose_resnet18_v1b,
-    'oth_mobile_pose_resnet50_v1b': oth_mobile_pose_resnet50_v1b,
-    'oth_mobile_pose_mobilenet1_0': oth_mobile_pose_mobilenet1_0,
-    'oth_mobile_pose_mobilenetv2_1_0': oth_mobile_pose_mobilenetv2_1_0,
-    'oth_mobile_pose_mobilenetv3_small': oth_mobile_pose_mobilenetv3_small,
-    'oth_mobile_pose_mobilenetv3_large': oth_mobile_pose_mobilenetv3_large,
-
-    'oth_alpha_pose_resnet101_v1b_coco': oth_alpha_pose_resnet101_v1b_coco,
+    # 'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
+    # 'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,
+    # 'oth_simple_pose_resnet101_v1b': oth_simple_pose_resnet101_v1b,
+    # 'oth_simple_pose_resnet152_v1b': oth_simple_pose_resnet152_v1b,
+    # 'oth_simple_pose_resnet50_v1d': oth_simple_pose_resnet50_v1d,
+    # 'oth_simple_pose_resnet101_v1d': oth_simple_pose_resnet101_v1d,
+    # 'oth_simple_pose_resnet152_v1d': oth_simple_pose_resnet152_v1d,
+    #
+    # 'oth_mobile_pose_resnet18_v1b': oth_mobile_pose_resnet18_v1b,
+    # 'oth_mobile_pose_resnet50_v1b': oth_mobile_pose_resnet50_v1b,
+    # 'oth_mobile_pose_mobilenet1_0': oth_mobile_pose_mobilenet1_0,
+    # 'oth_mobile_pose_mobilenetv2_1_0': oth_mobile_pose_mobilenetv2_1_0,
+    # 'oth_mobile_pose_mobilenetv3_small': oth_mobile_pose_mobilenetv3_small,
+    # 'oth_mobile_pose_mobilenetv3_large': oth_mobile_pose_mobilenetv3_large,
+    #
+    # 'oth_alpha_pose_resnet101_v1b_coco': oth_alpha_pose_resnet101_v1b_coco,
 
     # 'oth_resnet50_v1d': oth_resnet50_v1d,
     # 'oth_resnet101_v1d': oth_resnet101_v1d,
     # 'oth_resnet152_v1d': oth_resnet152_v1d,
+
+    # 'oth_mobilenet_v2_1_0': oth_mobilenet_v2_1_0,
+    # 'oth_mobilenet_v2_0_75': oth_mobilenet_v2_0_75,
+    # 'oth_mobilenet_v2_0_5': oth_mobilenet_v2_0_5,
+    # 'oth_mobilenet_v2_0_25': oth_mobilenet_v2_0_25,
 }
 
 

@@ -671,7 +671,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 
 ### COCO Keypoints Detection
 
-| Model | Extractor | OKS AP,% | Params | FLOPs/2 | Remarks |
+| Model | Extractor | OKS AP, % | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | --- |
 | AlphaPose | Fast-SE-ResNet-101b | 74.15/91.59/80.68 | 59,569,873 | 9,553.89M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.454/alphapose_fastseresnet101b_coco-7415-b9e3f64a.pth.log)) |
 | SimplePose | ResNet-18 | 66.31/89.20/73.41 | 15,376,721 | 1,799.25M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.455/simplepose_resnet18_coco-6631-7c3656b3.pth.log)) |

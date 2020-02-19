@@ -5,7 +5,8 @@
 [![Python Version](https://img.shields.io/badge/python-2.7%2C3.6%2C3.7-lightgrey.svg)](https://github.com/osmr/imgclsmob)
 
 This repo is used to research convolutional networks for task of computer vision. For this purpose, the repo contains
-(re)implementations of various classification and segmentation models and scripts for training/evaluating/converting.
+(re)implementations of various classification, segmentation, and pose estimation models and scripts for
+training/evaluating/converting.
 
 The following frameworks are used:
 - MXNet/Gluon ([info](https://mxnet.apache.org)),

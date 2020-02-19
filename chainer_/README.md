@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/chainercv2.svg)](https://pypi.python.org/pypi/chainercv2)
 [![Downloads](https://pepy.tech/badge/chainercv2)](https://pepy.tech/project/chainercv2)
 
-This is a collection of image classification and segmentation models. Many of them are pretrained on
+This is a collection of image classification, segmentation, and pose estimation models. Many of them are pretrained on
 [ImageNet-1K](http://www.image-net.org), [CIFAR-10/100](https://www.cs.toronto.edu/~kriz/cifar.html),
 [SVHN](http://ufldl.stanford.edu/housenumbers), [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html),
 [Pascal VOC2012](http://host.robots.ox.ac.uk/pascal/VOC/voc2012), [ADE20K](http://groups.csail.mit.edu/vision/datasets/ADE20K),

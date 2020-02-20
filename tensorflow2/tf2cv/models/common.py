@@ -2221,25 +2221,25 @@ class InterpolationBlock(nn.Layer):
         Multiplier for spatial size.
     out_size : tuple of 2 int, default None
         Spatial size of the output tensor for the bilinear upsampling operation.
+    up : bool, default True
+        Whether to upsample or downsample.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  scale_factor=1,
                  out_size=None,
+                 up=True,
                  data_format="channels_last",
                  **kwargs):
         super(InterpolationBlock, self).__init__(**kwargs)
         self.scale_factor = scale_factor
         self.out_size = out_size
+        self.up = up
         self.data_format = data_format
 
     def call(self, x, training=None):
-        if self.out_size is not None:
-            out_size = self.out_size
-        else:
-            in_size = get_im_size(x, data_format=self.data_format)
-            out_size = tuple(i * self.scale_factor for i in in_size)
+        out_size = self.calc_out_size(x)
         if is_channels_first(self.data_format):
             x = tf.transpose(x, perm=[0, 2, 3, 1])
         x = tf.image.resize(
@@ -2248,6 +2248,15 @@ class InterpolationBlock(nn.Layer):
         if is_channels_first(self.data_format):
             x = tf.transpose(x, perm=[0, 3, 1, 2])
         return x
+
+    def calc_out_size(self, x):
+        if self.out_size is not None:
+            return self.out_size
+        in_size = get_im_size(x, data_format=self.data_format)
+        if self.up:
+            return tuple(s * self.scale_factor for s in in_size)
+        else:
+            return tuple(s // self.scale_factor for s in in_size)
 
 
 class HeatmapMaxDetBlock(nn.Layer):

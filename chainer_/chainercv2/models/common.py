@@ -8,7 +8,7 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalA
            'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock',
            'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential',
            'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten',
-           'AdaptiveAvgPool2D', 'HeatmapMaxDetBlock']
+           'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 import numpy as np
@@ -1429,6 +1429,50 @@ class AdaptiveAvgPool2D(Chain):
     """
     def __call__(self, x):
         return F.average_pooling_2d(x, ksize=x.shape[2:])
+
+
+class InterpolationBlock(Chain):
+    """
+    Interpolation block.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear interpolation operation.
+    up : bool, default True
+        Whether to upsample or downsample.
+    mode : str, default 'bilinear'
+        Algorithm used for upsampling.
+    align_corners : bool, default True
+        Whether to align the corner pixels of the input and output tensors.
+    """
+    def __init__(self,
+                 scale_factor,
+                 out_size=None,
+                 up=True,
+                 mode="bilinear",
+                 align_corners=True,
+                 **kwargs):
+        super(InterpolationBlock, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+        self.out_size = out_size
+        self.up = up
+        self.mode = mode
+        self.align_corners = align_corners
+
+    def __call__(self, x):
+        out_size = self.calc_out_size(x)
+        return F.resize_images(x, output_shape=out_size, mode=self.mode, align_corners=self.align_corners)
+
+    def calc_out_size(self, x):
+        if self.out_size is not None:
+            return self.out_size
+        if self.up:
+            return tuple(s * self.scale_factor for s in x.shape[2:])
+        else:
+            return tuple(s // self.scale_factor for s in x.shape[2:])
 
 
 class HeatmapMaxDetBlock(Chain):

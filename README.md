@@ -159,6 +159,7 @@ Some remarks:
 | PSPNet | ABCD | ABCD | ABCD | - | - | ABCD | [link](https://arxiv.org/abs/1612.01105) | - | 2016 |
 | DeepLabv3 | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1706.05587) | - | 2017 |
 | FCN-8s(d) | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
+| ICNet | c | c | - | - | - | - | [link](https://arxiv.org/abs/1704.08545) | [link](https://github.com/hszhao/ICNet) | 2017 |
 | SINet | C | C | C | - | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |
 
 ## Table of implemented human pose estimation models

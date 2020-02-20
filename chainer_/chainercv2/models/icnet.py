@@ -11,9 +11,9 @@ import chainer.functions as F
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from chainer_.chainercv2.models.common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential
-from chainer_.chainercv2.models.pspnet import PyramidPooling
-from chainer_.chainercv2.models.resnetd import resnetd50b
+from .common import conv1x1, conv1x1_block, conv3x3_block, InterpolationBlock, MultiOutputSequential
+from .pspnet import PyramidPooling
+from .resnetd import resnetd50b
 
 
 class ICInitBlock(Chain):
@@ -240,12 +240,16 @@ class ICNet(Chain):
                 out_channels=channels[0])
 
             self.branch2 = MultiOutputSequential()
-            with self.features.init_scope():
-                setattr(self.branch2, "down1", InterpolationBlock(scale_factor=0.5))
+            with self.branch2.init_scope():
+                setattr(self.branch2, "down1", InterpolationBlock(
+                    scale_factor=2,
+                    up=False))
                 backbones[0].do_output = True
                 setattr(self.branch2, "backbones1", backbones[0])
 
-                setattr(self.branch2, "down2", InterpolationBlock(scale_factor=0.5))
+                setattr(self.branch2, "down2", InterpolationBlock(
+                    scale_factor=2,
+                    up=False))
                 setattr(self.branch2, "backbones2", backbones[1])
                 setattr(self.branch2, "psp", PSPBlock(
                     in_channels=backbones_out_channels[1],
@@ -346,11 +350,11 @@ def icnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     """
     backbone1 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None).features
     for i in range(len(backbone1) - 3):
-        del backbone1[-1]
+        backbone1.layer_names.remove(backbone1.layer_names[-1])
     backbone2 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None).features
-    del backbone2[-1]
+    del backbone2.final_pool
     for i in range(3):
-        del backbone2[0]
+        backbone2.layer_names.remove(backbone2.layer_names[0])
     backbones = (backbone1, backbone2)
     backbones_out_channels = (512, 2048)
     return get_icnet(backbones=backbones, backbones_out_channels=backbones_out_channels, classes=classes,

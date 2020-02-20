@@ -84,6 +84,8 @@ from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
 
+from .models.icnet import *
+
 __all__ = ['get_model']
 
 
@@ -803,6 +805,8 @@ _models = {
     'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
+
+    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 }
 
 

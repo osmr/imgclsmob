@@ -38,19 +38,19 @@ class ICInitBlock(nn.Layer):
         self.conv1 = conv3x3_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            stride=2,
+            strides=2,
             data_format=data_format,
             name="conv1")
         self.conv2 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=mid_channels,
-            stride=2,
+            strides=2,
             data_format=data_format,
             name="conv2")
         self.conv3 = conv3x3_block(
             in_channels=mid_channels,
             out_channels=out_channels,
-            stride=2,
+            strides=2,
             data_format=data_format,
             name="conv3")
 
@@ -285,26 +285,28 @@ class ICNet(tf.keras.Model):
             data_format=data_format,
             name="branch1")
 
-        self.branch2 = MultiOutputSequential()
-        self.branch2.add_module("down1", InterpolationBlock(
-            scale_factor=0.5,
+        self.branch2 = MultiOutputSequential(name="branch2")
+        self.branch2.add(InterpolationBlock(
+            scale_factor=2,
+            up=False,
             data_format=data_format,
             name="down1"))
         backbones[0].do_output = True
-        self.branch2.add_module("backbones1", backbones[0])
+        self.branch2.add(backbones[0])
 
-        self.branch2.add_module("down2", InterpolationBlock(
-            scale_factor=0.5,
+        self.branch2.add(InterpolationBlock(
+            scale_factor=2,
+            up=False,
             data_format=data_format,
             name="down2"))
-        self.branch2.add_module("backbones2", backbones[1])
-        self.branch2.add_module("psp", PSPBlock(
+        self.branch2.add(backbones[1])
+        self.branch2.add(PSPBlock(
             in_channels=backbones_out_channels[1],
             upscale_out_size=psp_pool_out_size,
             bottleneck_factor=4,
             data_format=data_format,
             name="psp"))
-        self.branch2.add_module("final_block", conv1x1_block(
+        self.branch2.add(conv1x1_block(
             in_channels=psp_head_out_channels,
             out_channels=channels[2],
             data_format=data_format,
@@ -418,12 +420,12 @@ def icnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     backbone1 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None,
                            data_format=data_format).features
     for i in range(len(backbone1) - 3):
-        del backbone1[-1]
+        backbone1.children.pop()
     backbone2 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None,
                            data_format=data_format).features
-    del backbone2[-1]
+    backbone2.children.pop()
     for i in range(3):
-        del backbone2[0]
+        backbone2.children.pop(0)
     backbones = (backbone1, backbone2)
     backbones_out_channels = (512, 2048)
     return get_icnet(backbones=backbones, backbones_out_channels=backbones_out_channels, classes=classes,

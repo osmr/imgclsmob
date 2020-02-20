@@ -5,7 +5,7 @@
 
 __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_resnetd50b_coco',
            'pspnet_resnetd101b_coco', 'pspnet_resnetd50b_ade20k', 'pspnet_resnetd101b_ade20k',
-           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes']
+           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes', 'PyramidPooling']
 
 import os
 from mxnet import cpu
@@ -225,7 +225,6 @@ def get_pspnet(backbone,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     net = PSPNet(
         backbone=backbone,
         classes=classes,
@@ -266,7 +265,7 @@ def pspnet_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, **kwa
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_voc", **kwargs)
 
 
@@ -290,7 +289,7 @@ def pspnet_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, **kw
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_voc", **kwargs)
 
 
@@ -314,7 +313,7 @@ def pspnet_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, **kw
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_coco", **kwargs)
 
 
@@ -338,7 +337,7 @@ def pspnet_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, **k
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_coco", **kwargs)
 
 
@@ -362,7 +361,7 @@ def pspnet_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, *
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_ade20k", **kwargs)
 
 
@@ -386,7 +385,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_ade20k", **kwargs)
 
 
@@ -410,7 +409,7 @@ def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_cityscapes", **kwargs)
 
 
@@ -434,7 +433,7 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=Tru
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features[:-1]
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features[:-1]
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes", **kwargs)
 
 
@@ -447,14 +446,14 @@ def _test():
     pretrained = False
 
     models = [
-        (pspnet_resnetd50b_voc, 21),
-        (pspnet_resnetd101b_voc, 21),
-        (pspnet_resnetd50b_coco, 21),
-        (pspnet_resnetd101b_coco, 21),
-        (pspnet_resnetd50b_ade20k, 150),
-        (pspnet_resnetd101b_ade20k, 150),
+        # (pspnet_resnetd50b_voc, 21),
+        # (pspnet_resnetd101b_voc, 21),
+        # (pspnet_resnetd50b_coco, 21),
+        # (pspnet_resnetd101b_coco, 21),
+        # (pspnet_resnetd50b_ade20k, 150),
+        # (pspnet_resnetd101b_ade20k, 150),
         (pspnet_resnetd50b_cityscapes, 19),
-        (pspnet_resnetd101b_cityscapes, 19),
+        # (pspnet_resnetd101b_cityscapes, 19),
     ]
 
     for model, classes in models:

@@ -1391,9 +1391,16 @@ class MultiOutputSequential(SimpleSequential):
     """
     A sequential container with multiple outputs.
     Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    multi_output : bool, default True
+        Whether to return multiple output.
     """
-    def __init__(self):
+    def __init__(self,
+                 multi_output=True):
         super(MultiOutputSequential, self).__init__()
+        self.multi_output = multi_output
 
     def __call__(self, x):
         outs = []
@@ -1402,7 +1409,10 @@ class MultiOutputSequential(SimpleSequential):
             x = block(x)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
-        return [x] + outs
+        if self.multi_output:
+            return [x] + outs
+        else:
+            return x
 
 
 class Flatten(Chain):

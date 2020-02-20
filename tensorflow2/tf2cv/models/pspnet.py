@@ -5,7 +5,7 @@
 
 __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_resnetd50b_coco',
            'pspnet_resnetd101b_coco', 'pspnet_resnetd50b_ade20k', 'pspnet_resnetd101b_ade20k',
-           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes']
+           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes', 'PyramidPooling']
 
 import os
 import tensorflow as tf
@@ -303,7 +303,7 @@ def pspnet_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, data_
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_voc",
@@ -330,7 +330,7 @@ def pspnet_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, data
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_voc",
@@ -357,7 +357,7 @@ def pspnet_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, data
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_coco",
@@ -384,7 +384,7 @@ def pspnet_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, dat
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_coco",
@@ -411,7 +411,7 @@ def pspnet_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True, d
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_ade20k",
@@ -438,7 +438,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=True, 
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_ade20k",
@@ -466,7 +466,7 @@ def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd50b_cityscapes",
@@ -494,7 +494,7 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=Tru
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_pspnet(backbone=backbone, classes=classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes",

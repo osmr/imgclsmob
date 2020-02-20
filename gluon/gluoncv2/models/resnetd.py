@@ -34,8 +34,8 @@ class ResNetD(HybridBlock):
         Whether to disable CUDNN batch normalization operator.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
-    multi_output : bool, default False
-        Whether to return intermediate outputs.
+    bends : tuple of int, default None
+        Numbers of bends for multiple output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -51,7 +51,7 @@ class ResNetD(HybridBlock):
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  ordinary_init=False,
-                 multi_output=False,
+                 bends=None,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -59,7 +59,7 @@ class ResNetD(HybridBlock):
         super(ResNetD, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
-        self.multi_output = multi_output
+        self.multi_output = (bends is not None)
 
         with self.name_scope():
             self.features = MultiOutputSequential(prefix="")
@@ -94,7 +94,7 @@ class ResNetD(HybridBlock):
                             bottleneck=bottleneck,
                             conv1_stride=conv1_stride))
                         in_channels = out_channels
-                if i == 2:
+                if self.multi_output and ((i + 1) in bends):
                     stage.do_output = True
                 self.features.add(stage)
             self.features.add(nn.GlobalAvgPool2D())
@@ -258,7 +258,7 @@ def _test():
     import mxnet as mx
 
     ordinary_init = False
-    multi_output = False
+    bends = None
     pretrained = False
 
     models = [
@@ -272,7 +272,7 @@ def _test():
         net = model(
             pretrained=pretrained,
             ordinary_init=ordinary_init,
-            multi_output=multi_output)
+            bends=bends)
 
         ctx = mx.cpu()
         if not pretrained:
@@ -297,7 +297,7 @@ def _test():
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)
-        if multi_output:
+        if bends is not None:
             y = y[0]
         assert (y.shape == (1, 1000))
 

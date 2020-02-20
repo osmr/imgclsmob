@@ -856,7 +856,7 @@ class InterpolationBlock(nn.Module):
     mode : str, default 'bilinear'
         Algorithm used for upsampling.
     align_corners : bool, default True
-        Whether to align the corner pixels of the input and output tensors
+        Whether to align the corner pixels of the input and output tensors.
     """
     def __init__(self,
                  scale_factor,
@@ -1417,9 +1417,16 @@ class MultiOutputSequential(nn.Sequential):
     """
     A sequential container with multiple outputs.
     Modules will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    multi_output : bool, default True
+        Whether to return multiple output.
     """
-    def __init__(self):
+    def __init__(self,
+                 multi_output=True):
         super(MultiOutputSequential, self).__init__()
+        self.multi_output = multi_output
 
     def forward(self, x):
         outs = []
@@ -1427,7 +1434,10 @@ class MultiOutputSequential(nn.Sequential):
             x = module(x)
             if hasattr(module, "do_output") and module.do_output:
                 outs.append(x)
-        return [x] + outs
+        if self.multi_output:
+            return [x] + outs
+        else:
+            return x
 
 
 class Flatten(nn.Module):

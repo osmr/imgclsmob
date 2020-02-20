@@ -2187,10 +2187,17 @@ class MultiOutputSequential(SimpleSequential):
     """
     A sequential container with multiple outputs.
     Layers will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    multi_output : bool, default True
+        Whether to return multiple output.
     """
     def __init__(self,
+                 multi_output=True,
                  **kwargs):
         super(MultiOutputSequential, self).__init__(**kwargs)
+        self.multi_output = multi_output
 
     def call(self, x, **kwargs):
         outs = []
@@ -2198,7 +2205,10 @@ class MultiOutputSequential(SimpleSequential):
             x = block(x, **kwargs)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
-        return [x] + outs
+        if self.multi_output:
+            return [x] + outs
+        else:
+            return x
 
 
 class InterpolationBlock(nn.Layer):

@@ -980,42 +980,54 @@ def pre_conv3x3_block(in_channels,
 
 class InterpolationBlock(HybridBlock):
     """
-    Interpolation upsampling block.
+    Interpolation block.
 
     Parameters:
     ----------
     scale_factor : int
         Multiplier for spatial size.
     out_size : tuple of 2 int, default None
-        Spatial size of the output tensor for the bilinear upsampling operation.
-    fixed_size : bool, default True
+        Spatial size of the output tensor for the bilinear interpolation operation.
+    bilinear : bool, default True
         Whether to use bilinear interpolation.
+    up : bool, default True
+        Whether to upsample or downsample.
     """
     def __init__(self,
                  scale_factor,
                  out_size=None,
                  bilinear=True,
+                 up=True,
                  **kwargs):
         super(InterpolationBlock, self).__init__(**kwargs)
         self.scale_factor = scale_factor
         self.out_size = out_size
         self.bilinear = bilinear
+        self.up = up
 
     def hybrid_forward(self, F, x):
         if self.bilinear:
-            out_size = self.out_size if (self.out_size is not None) else\
-                (x.shape[2] * self.scale_factor, x.shape[3] * self.scale_factor)
+            out_size = self.calc_out_size(x)
             return F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
         else:
             return F.UpSampling(x, scale=self.scale_factor, sample_type="nearest")
 
+    def calc_out_size(self, x):
+        if self.out_size is not None:
+            return self.out_size
+        if self.up:
+            return tuple(s * self.scale_factor for s in x.shape[2:])
+        else:
+            return tuple(s // self.scale_factor for s in x.shape[2:])
+
     def __repr__(self):
-        s = '{name}(scale_factor={scale_factor}, out_size={out_size}, bilinear={bilinear})'
+        s = '{name}(scale_factor={scale_factor}, out_size={out_size}, bilinear={bilinear}, up={up})'
         return s.format(
             name=self.__class__.__name__,
             scale_factor=self.scale_factor,
             out_size=self.out_size,
-            bilinear=self.bilinear)
+            bilinear=self.bilinear,
+            up=self.up)
 
     def calc_flops(self, x):
         assert (x.shape[0] == 1)
@@ -1597,10 +1609,17 @@ class MultiOutputSequential(nn.HybridSequential):
     """
     A sequential container with multiple outputs.
     Blocks will be executed in the order they are added.
+
+    Parameters:
+    ----------
+    multi_output : bool, default True
+        Whether to return multiple output.
     """
     def __init__(self,
+                 multi_output=True,
                  **kwargs):
         super(MultiOutputSequential, self).__init__(**kwargs)
+        self.multi_output = multi_output
 
     def hybrid_forward(self, F, x):
         outs = []
@@ -1608,7 +1627,10 @@ class MultiOutputSequential(nn.HybridSequential):
             x = block(x)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
-        return [x] + outs
+        if self.multi_output:
+            return [x] + outs
+        else:
+            return x
 
 
 class HeatmapMaxDetBlock(HybridBlock):

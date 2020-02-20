@@ -124,6 +124,9 @@ from .models.simpleposemobile_coco import *
 # from .models.others.oth_mobile_pose import *
 # from .models.others.oth_alpha_pose import *
 
+from .models.icnet import *
+from .models.others.oth_icnet import *
+
 __all__ = ['get_model']
 
 
@@ -1054,6 +1057,9 @@ _models = {
     'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
+
+    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
+    'oth_icnet_resnet50_citys': oth_icnet_resnet50_citys,
 
     # 'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
     # 'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,

@@ -29,8 +29,8 @@ class ResNetD(tf.keras.Model):
         Whether to use stride in the first or the second convolution layer in units.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
-    multi_output : bool, default False
-        Whether to return intermediate outputs.
+    bends : tuple of int, default None
+        Numbers of bends for multiple output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -46,7 +46,7 @@ class ResNetD(tf.keras.Model):
                  bottleneck,
                  conv1_stride,
                  ordinary_init=False,
-                 multi_output=False,
+                 bends=None,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -55,7 +55,7 @@ class ResNetD(tf.keras.Model):
         super(ResNetD, self).__init__(**kwargs)
         self.in_size = in_size
         self.classes = classes
-        self.multi_output = multi_output
+        self.multi_output = (bends is not None)
         self.data_format = data_format
 
         self.features = MultiOutputSequential(name="features")
@@ -89,7 +89,7 @@ class ResNetD(tf.keras.Model):
                     data_format=data_format,
                     name="unit{}".format(j + 1)))
                 in_channels = out_channels
-            if i == 2:
+            if self.multi_output and ((i + 1) in bends):
                 stage.do_output = True
             self.features.add(stage)
         self.features.add(nn.GlobalAvgPool2D(
@@ -250,7 +250,7 @@ def _test():
     data_format = "channels_last"
     # data_format = "channels_first"
     ordinary_init = False
-    multi_output = False
+    bends = None
     pretrained = False
 
     models = [
@@ -264,13 +264,13 @@ def _test():
         net = model(
             pretrained=pretrained,
             ordinary_init=ordinary_init,
-            multi_output=multi_output,
+            bends=bends,
             data_format=data_format)
 
         batch_saze = 14
         x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
         y = net(x)
-        if multi_output:
+        if bends is not None:
             y = y[0]
         assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
 

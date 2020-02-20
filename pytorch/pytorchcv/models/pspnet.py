@@ -5,12 +5,11 @@
 
 __all__ = ['PSPNet', 'pspnet_resnetd50b_voc', 'pspnet_resnetd101b_voc', 'pspnet_resnetd50b_coco',
            'pspnet_resnetd101b_coco', 'pspnet_resnetd50b_ade20k', 'pspnet_resnetd101b_ade20k',
-           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes']
+           'pspnet_resnetd50b_cityscapes', 'pspnet_resnetd101b_cityscapes', 'PyramidPooling']
 
 import os
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.init as init
 from .common import conv1x1, conv1x1_block, conv3x3_block, Concurrent, Identity
 from .resnetd import resnetd50b, resnetd101b
 
@@ -182,9 +181,9 @@ class PSPNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         in_size = self.in_size if self.fixed_size else x.shape[2:]
@@ -223,7 +222,6 @@ def get_pspnet(backbone,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     net = PSPNet(
         backbone=backbone,
         num_classes=num_classes,
@@ -260,7 +258,7 @@ def pspnet_resnetd50b_voc(pretrained_backbone=False, num_classes=21, aux=True, *
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd50b_voc", **kwargs)
 
@@ -283,7 +281,7 @@ def pspnet_resnetd101b_voc(pretrained_backbone=False, num_classes=21, aux=True, 
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd101b_voc",
                       **kwargs)
@@ -307,7 +305,7 @@ def pspnet_resnetd50b_coco(pretrained_backbone=False, num_classes=21, aux=True, 
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd50b_coco",
                       **kwargs)
@@ -331,7 +329,7 @@ def pspnet_resnetd101b_coco(pretrained_backbone=False, num_classes=21, aux=True,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd101b_coco",
                       **kwargs)
@@ -355,7 +353,7 @@ def pspnet_resnetd50b_ade20k(pretrained_backbone=False, num_classes=150, aux=Tru
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd50b_ade20k",
                       **kwargs)
@@ -379,7 +377,7 @@ def pspnet_resnetd101b_ade20k(pretrained_backbone=False, num_classes=150, aux=Tr
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd101b_ade20k",
                       **kwargs)
@@ -403,7 +401,7 @@ def pspnet_resnetd50b_cityscapes(pretrained_backbone=False, num_classes=19, aux=
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd50b_cityscapes",
                       **kwargs)
@@ -427,7 +425,7 @@ def pspnet_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, aux
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True).features
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
     return get_pspnet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="pspnet_resnetd101b_cityscapes",
                       **kwargs)

@@ -322,7 +322,7 @@ def deeplabv3_resnetd50b_voc(pretrained_backbone=False, classes=21, aux=True, da
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_voc",
@@ -349,7 +349,7 @@ def deeplabv3_resnetd101b_voc(pretrained_backbone=False, classes=21, aux=True, d
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_voc",
@@ -376,7 +376,7 @@ def deeplabv3_resnetd152b_voc(pretrained_backbone=False, classes=21, aux=True, d
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_voc",
@@ -403,7 +403,7 @@ def deeplabv3_resnetd50b_coco(pretrained_backbone=False, classes=21, aux=True, d
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_coco",
@@ -430,7 +430,7 @@ def deeplabv3_resnetd101b_coco(pretrained_backbone=False, classes=21, aux=True, 
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_coco",
@@ -457,7 +457,7 @@ def deeplabv3_resnetd152b_coco(pretrained_backbone=False, classes=21, aux=True, 
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd152b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd152b_coco",
@@ -485,7 +485,7 @@ def deeplabv3_resnetd50b_ade20k(pretrained_backbone=False, classes=150, aux=True
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_ade20k",
@@ -513,7 +513,7 @@ def deeplabv3_resnetd101b_ade20k(pretrained_backbone=False, classes=150, aux=Tru
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_ade20k",
@@ -541,7 +541,7 @@ def deeplabv3_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=T
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                           data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd50b_cityscapes",
@@ -569,7 +569,7 @@ def deeplabv3_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, multi_output=True,
+    backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,),
                            data_format=data_format).features
     backbone.children.pop()
     return get_deeplabv3(backbone=backbone, classes=classes, aux=aux, model_name="deeplabv3_resnetd101b_cityscapes",

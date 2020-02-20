@@ -120,6 +120,8 @@ from .models.simpleposemobile_coco import *
 
 from .models.superpointnet import *
 
+from .models.icnet import *
+
 __all__ = ['get_model']
 
 
@@ -990,6 +992,8 @@ _models = {
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 
     'superpointnet': superpointnet,
+
+    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 }
 
 

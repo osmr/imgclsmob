@@ -633,7 +633,17 @@ def convert_gl2gl(dst_net,
                   src_params,
                   src_param_keys,
                   finetune,
+                  src_model,
                   ctx):
+    if src_model.startswith("oth_icnet_resnet50_citys"):
+        src1 = list(filter(re.compile("^conv_sub1").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1 + src1n
+
+        src2 = list(filter(re.compile("^head").search, src_param_keys))
+        src2n = [key for key in src_param_keys if key not in src2]
+        src_param_keys = src2n + src2
+
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if dst_params[dst_key].shape != src_params[src_key].shape:
             logging.warning(
@@ -700,6 +710,8 @@ def convert_gl2ke(dst_net,
         assert (dst_weight._keras_shape == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                 src_key, dst_key, src_weight.shape, dst_weight._keras_shape)
+        # print("src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+        #     src_key, dst_key, src_weight.shape, dst_weight._keras_shape))
         dst_weight.bind(mx.nd.array(src_weight))
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
@@ -1256,6 +1268,7 @@ def main():
             src_params=src_params,
             src_param_keys=src_param_keys,
             finetune=((args.src_num_classes != args.dst_num_classes) or (args.src_in_channels != args.dst_in_channels)),
+            src_model=args.src_model,
             ctx=ctx)
     elif args.src_fwk == "pytorch" and args.dst_fwk == "pytorch":
         convert_pt2pt(

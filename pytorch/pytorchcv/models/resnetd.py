@@ -29,8 +29,8 @@ class ResNetD(nn.Module):
         Whether to use stride in the first or the second convolution layer in units.
     ordinary_init : bool, default False
         Whether to use original initial block or SENet one.
-    multi_output : bool, default False
-        Whether to return intermediate outputs.
+    bends : tuple of int, default None
+        Numbers of bends for multiple output.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -44,14 +44,14 @@ class ResNetD(nn.Module):
                  bottleneck,
                  conv1_stride,
                  ordinary_init=False,
-                 multi_output=False,
+                 bends=None,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
         super(ResNetD, self).__init__()
         self.in_size = in_size
         self.num_classes = num_classes
-        self.multi_output = multi_output
+        self.multi_output = (bends is not None)
 
         self.features = MultiOutputSequential()
         if ordinary_init:
@@ -78,7 +78,7 @@ class ResNetD(nn.Module):
                     bottleneck=bottleneck,
                     conv1_stride=conv1_stride))
                 in_channels = out_channels
-            if i == 2:
+            if self.multi_output and ((i + 1) in bends):
                 stage.do_output = True
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
@@ -132,7 +132,6 @@ def get_resnetd(blocks,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:
@@ -249,7 +248,7 @@ def _test():
     import torch
 
     ordinary_init = False
-    multi_output = False
+    bends = None
     pretrained = False
 
     models = [
@@ -263,7 +262,7 @@ def _test():
         net = model(
             pretrained=pretrained,
             ordinary_init=ordinary_init,
-            multi_output=multi_output)
+            bends=bends)
 
         # net.train()
         net.eval()
@@ -280,7 +279,7 @@ def _test():
 
         x = torch.randn(1, 3, 224, 224)
         y = net(x)
-        if multi_output:
+        if bends is not None:
             y = y[0]
         y.sum().backward()
         assert (tuple(y.size()) == (1, 1000))

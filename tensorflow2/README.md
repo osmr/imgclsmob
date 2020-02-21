@@ -67,6 +67,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
 - AlphaPose (['RMPE: Regional Multi-person Pose Estimation'](https://arxiv.org/abs/1612.00137))
 - SimplePose (['Simple Baselines for Human Pose Estimation and Tracking'](https://arxiv.org/abs/1804.06208))
+- ICNet (['ICNet for Real-Time Semantic Segmentation on High-Resolution Images'](https://arxiv.org/abs/1704.08545))
 
 ## Installation
 
@@ -608,6 +609,7 @@ Some remarks:
 | Model | Extractor | Pix.Acc.,% | mIoU,% | Params | FLOPs/2 | Remarks |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.80 | 57.60 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.449/pspnet_resnetd101b_cityscapes-5760-6dc20af6.tf2.h5.log)) |
+| ICNet | ResNet(D)-50b | 95.37 | 60.60 | 47,489,184 | 14,253.43M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.457/icnet_resnetd50b_cityscapes-6060-1e53e1d1.tf2.h5.log)) |
 
 ### COCO Semantic Segmentation
 

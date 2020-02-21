@@ -79,12 +79,11 @@ from .models.proxylessnas_cub import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
+from .models.icnet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
-
-from .models.icnet import *
 
 __all__ = ['get_model']
 
@@ -789,6 +788,8 @@ _models = {
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
+    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
+
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 
     'simplepose_resnet18_coco': simplepose_resnet18_coco,
@@ -805,8 +806,6 @@ _models = {
     'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
-
-    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 }
 
 

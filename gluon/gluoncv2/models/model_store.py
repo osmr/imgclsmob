@@ -565,6 +565,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('fcn8sd_resnetd50b_ade20k', '3339', '9856c5ee8186d1ac4b0eb5177c73e76c4cd63bb0', 'v0.0.299'),
     ('fcn8sd_resnetd101b_ade20k', '3588', '081774b2fb373d7b759cda2160fa0d2599b1c5f1', 'v0.0.299'),
     ('fcn8sd_resnetd101b_coco', '6011', '05e97cc5f5fcdf1c5ec5c617062d43adfe150d88', 'v0.0.299'),
+    ('icnet_resnetd50b_cityscapes', '6402', '6c8f86a53526ae107e58d5f645bc4de0da9c1bb1', 'v0.0.457'),
     ('sinet_cityscapes', '6031', '47d8ae7824bd297bbf25c2f33e3d4a86a503aefa', 'v0.0.437'),
     ('alphapose_fastseresnet101b_coco', '7415', '70082a53d3cdeb7ebe4c7d8c16a6a39830f1ed23', 'v0.0.454'),
     ('simplepose_resnet18_coco', '6631', '5a6198e5103a28faab4e49c687121634c7f7d196', 'v0.0.455'),

@@ -110,6 +110,7 @@ from .models.ntsnet_cub import *
 from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
+from .models.icnet import *
 from .models.sinet import *
 
 from .models.alphapose_coco import *
@@ -118,9 +119,9 @@ from .models.simpleposemobile_coco import *
 
 # from .models.others.oth_sinet import *
 
-from .models.superpointnet import *
+from .models.others.oth_pose_resnet import *
 
-from .models.icnet import *
+from .models.superpointnet import *
 
 __all__ = ['get_model']
 
@@ -971,8 +972,9 @@ _models = {
     'deeplabv3_resnetd50b_cityscapes': deeplabv3_resnetd50b_cityscapes,
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
+    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
+
     'sinet_cityscapes': sinet_cityscapes,
-    # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 
@@ -993,7 +995,14 @@ _models = {
 
     'superpointnet': superpointnet,
 
-    'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
+    # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
+
+    'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
+    'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,
+    'oth_pose_coco_resnet_101_256x192': oth_pose_coco_resnet_101_256x192,
+    'oth_pose_coco_resnet_101_384x288': oth_pose_coco_resnet_101_384x288,
+    'oth_pose_coco_resnet_152_256x192': oth_pose_coco_resnet_152_256x192,
+    'oth_pose_coco_resnet_152_384x288': oth_pose_coco_resnet_152_384x288,
 }
 
 

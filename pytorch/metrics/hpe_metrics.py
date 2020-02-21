@@ -5,7 +5,7 @@ Evaluation Metrics for Human Pose Estimationn.
 import numpy as np
 from .metric import EvalMetric
 
-__all__ = ['CocoHpeOksApMetric']
+__all__ = ['CocoHpeOksApMetric', 'MpiiHpePckhMetric']
 
 
 class CocoHpeOksApMetric(EvalMetric):
@@ -123,3 +123,35 @@ class CocoHpeOksApMetric(EvalMetric):
                 "category_id": 1,
                 "keypoints": kpt,
                 "score": rescore})
+
+
+class MpiiHpePckhMetric(EvalMetric):
+    """
+    Detection metric for MPII bbox task.
+
+    Parameters
+    ----------
+    recalc_pose_fn : func
+        An function for pose recalculation.
+    name : str, default 'MpiiPCKh'
+        Name of this metric instance for display.
+    """
+    def __init__(self,
+                 recalc_pose_fn,
+                 name="MpiiPCKh"):
+        super(MpiiHpePckhMetric, self).__init__(name=name)
+        self.recalc_pose_fn = recalc_pose_fn
+        self._results = []
+
+    def reset(self):
+        self._results = []
+
+    def get(self):
+        """
+        Get evaluation metrics.
+        """
+
+        return self.name, None
+
+    def update(self, labels, preds):
+        pass

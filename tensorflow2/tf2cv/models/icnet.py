@@ -149,7 +149,7 @@ class CFFBlock(nn.Layer):
             out_channels=out_channels,
             activation=None,
             data_format=data_format,
-            name="conv1")
+            name="conv_hign")
         self.activ = nn.ReLU()
         self.conv_cls = conv1x1(
             in_channels=out_channels,
@@ -276,6 +276,7 @@ class ICNet(tf.keras.Model):
         self.classes = classes
         self.aux = aux
         self.fixed_size = fixed_size
+        self.data_format = data_format
         psp_pool_out_size = (self.in_size[0] // 32, self.in_size[1] // 32) if fixed_size else None
         psp_head_out_channels = 512
 

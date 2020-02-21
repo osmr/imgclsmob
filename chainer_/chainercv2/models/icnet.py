@@ -350,11 +350,11 @@ def icnet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     """
     backbone1 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None).features
     for i in range(len(backbone1) - 3):
-        backbone1.layer_names.remove(backbone1.layer_names[-1])
+        delattr(backbone1, backbone1.layer_names[-1])
     backbone2 = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=None).features
     del backbone2.final_pool
     for i in range(3):
-        backbone2.layer_names.remove(backbone2.layer_names[0])
+        delattr(backbone2, backbone2.layer_names[0])
     backbones = (backbone1, backbone2)
     backbones_out_channels = (512, 2048)
     return get_icnet(backbones=backbones, backbones_out_channels=backbones_out_channels, classes=classes,

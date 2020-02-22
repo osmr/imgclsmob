@@ -27,8 +27,12 @@ class resBlock(nn.Module):
             nn.ReLU(inplace=True),
         ]
 
+        main_layers += list(
+            padding_same_conv2d(input_size, out_c // 2, out_c // 2, kernel_size=kernel_size, stride=stride).
+                _modules.values())
+
         main_layers.extend([
-            *padding_same_conv2d(input_size, out_c // 2, out_c // 2, kernel_size=kernel_size, stride=stride),
+            # *padding_same_conv2d(input_size, out_c // 2, out_c // 2, kernel_size=kernel_size, stride=stride),
             nn.BatchNorm2d(out_c // 2, eps=0.001, momentum=0.001),
             nn.ReLU(inplace=True)])
 

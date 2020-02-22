@@ -10,83 +10,9 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
 import os
 import torch
 import torch.nn as nn
-from .common import get_activation_layer, conv1x1, HeatmapMaxDetBlock
+from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
-
-
-class DeconvBlock(nn.Module):
-    """
-    Deconvolution block with batch normalization and activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    kernel_size : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Strides of the deconvolution.
-    padding : int or tuple/list of 2 int
-        Padding value for deconvolution layer.
-    out_padding : int or tuple/list of 2 int
-        Output padding value for deconvolution layer.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for deconvolution layer.
-    groups : int, default 1
-        Number of groups.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    activation : function or str or None, default nn.ReLU(inplace=True)
-        Activation function or name of activation function.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 kernel_size,
-                 stride,
-                 padding,
-                 out_padding=0,
-                 dilation=1,
-                 groups=1,
-                 bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: nn.ReLU(inplace=True))):
-        super(DeconvBlock, self).__init__()
-        self.activate = (activation is not None)
-        self.use_bn = use_bn
-
-        self.conv = nn.ConvTranspose2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            output_padding=out_padding,
-            dilation=dilation,
-            groups=groups,
-            bias=bias)
-        if self.use_bn:
-            self.bn = nn.BatchNorm2d(
-                num_features=out_channels,
-                eps=bn_eps)
-        if self.activate:
-            self.activ = get_activation_layer(activation)
-
-    def forward(self, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
 
 
 class SimplePose(nn.Module):

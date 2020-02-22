@@ -121,6 +121,9 @@ from .models.simpleposemobile_coco import *
 
 from .models.others.oth_pose_resnet import *
 
+from .models.prnet import *
+from .models.others.oth_prnet import *
+
 from .models.superpointnet import *
 
 __all__ = ['get_model']
@@ -1003,6 +1006,9 @@ _models = {
     'oth_pose_coco_resnet_101_384x288': oth_pose_coco_resnet_101_384x288,
     'oth_pose_coco_resnet_152_256x192': oth_pose_coco_resnet_152_256x192,
     'oth_pose_coco_resnet_152_384x288': oth_pose_coco_resnet_152_384x288,
+
+    'prnet': prnet,
+    'oth_prnet': oth_prnet,
 }
 
 

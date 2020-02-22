@@ -82,9 +82,10 @@ class PRNet(nn.Module):
         super().__init__()
         size = 16
         self.input_conv = nn.Sequential( #*[
-            *padding_same_conv2d(256, in_channel, size, kernel_size=4, stride=1),  # 256x256x16
-            nn.BatchNorm2d(size, eps=0.001, momentum=0.001),
-            nn.ReLU(inplace=True)
+            *(list(padding_same_conv2d(256, in_channel, size, kernel_size=4, stride=1)._modules.values()) + [
+                nn.BatchNorm2d(size, eps=0.001, momentum=0.001),
+                nn.ReLU(inplace=True)])
+            # *padding_same_conv2d(256, in_channel, size, kernel_size=4, stride=1),  # 256x256x16
             # ]
         ) 
         self.down_conv_1 = resBlock(size, size * 2, kernel_size=4, stride=2, input_size=256)  # 128x128x32

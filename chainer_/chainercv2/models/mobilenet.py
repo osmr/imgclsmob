@@ -15,41 +15,7 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block, SimpleSequential
-
-
-class DwsConvBlock(Chain):
-    """
-    Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
-    a MobileNet unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Stride of the convolution.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride):
-        super(DwsConvBlock, self).__init__()
-        with self.init_scope():
-            self.dw_conv = dwconv3x3_block(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                stride=stride)
-            self.pw_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels)
-
-    def __call__(self, x):
-        x = self.dw_conv(x)
-        x = self.pw_conv(x)
-        return x
+from .common import conv3x3_block, dwsconv3x3_block, SimpleSequential
 
 
 class MobileNet(Chain):
@@ -95,7 +61,7 @@ class MobileNet(Chain):
                     with stage.init_scope():
                         for j, out_channels in enumerate(channels_per_stage):
                             stride = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
-                            setattr(stage, "unit{}".format(j + 1), DwsConvBlock(
+                            setattr(stage, "unit{}".format(j + 1), dwsconv3x3_block(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
                                 stride=stride))
@@ -143,7 +109,6 @@ def get_mobilenet(version,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-
     if version == 'orig':
         channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 512], [1024, 1024]]
         first_stage_stride = False

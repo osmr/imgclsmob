@@ -11,41 +11,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
-
-
-class DwsConvBlock(nn.Module):
-    """
-    Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
-    a MobileNet unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride):
-        super(DwsConvBlock, self).__init__()
-        self.dw_conv = dwconv3x3_block(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            stride=stride)
-        self.pw_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels)
-
-    def forward(self, x):
-        x = self.dw_conv(x)
-        x = self.pw_conv(x)
-        return x
+from .common import conv3x3_block, dwsconv3x3_block
 
 
 class MobileNet(nn.Module):
@@ -88,7 +54,7 @@ class MobileNet(nn.Module):
             stage = nn.Sequential()
             for j, out_channels in enumerate(channels_per_stage):
                 stride = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
-                stage.add_module("unit{}".format(j + 1), DwsConvBlock(
+                stage.add_module("unit{}".format(j + 1), dwsconv3x3_block(
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride))
@@ -107,15 +73,15 @@ class MobileNet(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if 'dw_conv.conv' in name:
-                init.kaiming_normal_(module.weight, mode='fan_in')
+                nn.init.kaiming_normal_(module.weight, mode='fan_in')
             elif name == 'init_block.conv' or 'pw_conv.conv' in name:
-                init.kaiming_normal_(module.weight, mode='fan_out')
+                nn.init.kaiming_normal_(module.weight, mode='fan_out')
             elif 'bn' in name:
-                init.constant_(module.weight, 1)
-                init.constant_(module.bias, 0)
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
             elif 'output' in name:
-                init.kaiming_normal_(module.weight, mode='fan_out')
-                init.constant_(module.bias, 0)
+                nn.init.kaiming_normal_(module.weight, mode='fan_out')
+                nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)

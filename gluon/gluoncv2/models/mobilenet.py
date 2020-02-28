@@ -12,47 +12,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, dwconv3x3_block
-
-
-class DwsConvBlock(HybridBlock):
-    """
-    Depthwise separable convolution block with BatchNorms and activations at each convolution layers. It is used as
-    a MobileNet unit.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    strides : int or tuple/list of 2 int
-        Strides of the convolution.
-    bn_use_global_stats : bool
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 strides,
-                 bn_use_global_stats,
-                 **kwargs):
-        super(DwsConvBlock, self).__init__(**kwargs)
-        with self.name_scope():
-            self.dw_conv = dwconv3x3_block(
-                in_channels=in_channels,
-                out_channels=in_channels,
-                strides=strides,
-                bn_use_global_stats=bn_use_global_stats)
-            self.pw_conv = conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats)
-
-    def hybrid_forward(self, F, x):
-        x = self.dw_conv(x)
-        x = self.pw_conv(x)
-        return x
+from .common import conv3x3_block, dwsconv3x3_block
 
 
 class MobileNet(HybridBlock):
@@ -103,7 +63,7 @@ class MobileNet(HybridBlock):
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
                         strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
-                        stage.add(DwsConvBlock(
+                        stage.add(dwsconv3x3_block(
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,

@@ -1,4 +1,4 @@
-__all__ = ['oth_lwopenpose']
+__all__ = ['oth_lwopenpose3d']
 
 import torch
 from torch import nn
@@ -225,7 +225,7 @@ class PoseEstimationWithMobileNet(nn.Module):
         return out, keypoints2d_maps, paf_maps
 
 
-def oth_lwopenpose(pretrained=False, num_classes=3, in_channels=3, **kwargs):
+def oth_lwopenpose3d(pretrained=False, num_classes=3, in_channels=3, **kwargs):
     model = PoseEstimationWithMobileNet(**kwargs)
     return model
 
@@ -245,7 +245,7 @@ def _test():
     pretrained = False
 
     models = [
-        oth_lwopenpose,
+        oth_lwopenpose3d,
     ]
 
     for model in models:
@@ -256,7 +256,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_lwopenpose or weight_count == 5085983)
+        assert (model != oth_lwopenpose3d or weight_count == 5085983)
 
         x = torch.randn(1, 3, 256, 256)
         y = net(x)

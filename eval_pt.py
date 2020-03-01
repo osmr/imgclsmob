@@ -256,7 +256,8 @@ def update_input_image_size(net,
         Spatial size of the expected input image.
     """
     real_net = net.module if hasattr(net, "module") else net
-    input_image_size = real_net.in_size if hasattr(real_net, "in_size") else (input_size, input_size)
+    input_image_size = real_net.in_size if hasattr(real_net, "in_size") else\
+        ((input_size, input_size) if type(input_size) == int else input_size)
     return input_image_size
 
 
@@ -269,8 +270,7 @@ def calc_model_accuracy(net,
                         calc_weight_count=False,
                         calc_flops=False,
                         calc_flops_only=True,
-                        extended_log=False,
-                        ml_type="imgcls"):
+                        extended_log=False):
     """
     Estimating particular model accuracy.
 
@@ -296,8 +296,6 @@ def calc_model_accuracy(net,
         Whether to only calculate FLOPs without testing.
     extended_log : bool, default False
         Whether to log more precise accuracy values.
-    ml_type : str, default 'imgcls'
-        Machine learning type.
 
     Returns
     -------

@@ -10,74 +10,78 @@ from common.logger_utils import initialize_logging
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Convert models (Gluon/PyTorch/Chainer/MXNet/Keras/TF/TF2)',
+    parser = argparse.ArgumentParser(description="Convert models (Gluon/PyTorch/Chainer/MXNet/Keras/TF/TF2)",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        '--src-fwk',
+        "--src-fwk",
         type=str,
         required=True,
-        help='source model framework name')
+        help="source model framework name")
     parser.add_argument(
-        '--dst-fwk',
+        "--dst-fwk",
         type=str,
         required=True,
-        help='destination model framework name')
+        help="destination model framework name")
     parser.add_argument(
-        '--src-model',
+        "--src-model",
         type=str,
         required=True,
-        help='source model name')
+        help="source model name")
     parser.add_argument(
-        '--dst-model',
+        "--dst-model",
         type=str,
         required=True,
-        help='destination model name')
+        help="destination model name")
     parser.add_argument(
-        '--src-params',
+        "--src-params",
         type=str,
-        default='',
-        help='source model parameter file path')
+        default="",
+        help="source model parameter file path")
     parser.add_argument(
-        '--dst-params',
+        "--dst-params",
         type=str,
-        default='',
-        help='destination model parameter file path')
+        default="",
+        help="destination model parameter file path")
     parser.add_argument(
-        '--remove-module',
-        action='store_true',
-        help='enable if stored PyTorch model has module')
+        "--load-ignore-extra",
+        action="store_true",
+        help="ignore extra layers in the source PyTroch model")
+    parser.add_argument(
+        "--remove-module",
+        action="store_true",
+        help="enable if stored PyTorch model has module")
 
     parser.add_argument(
-        '--src-num-classes',
+        "--src-num-classes",
         type=int,
         default=1000,
-        help='number of classes for source model')
+        help="number of classes for source model")
     parser.add_argument(
-        '--src-in-channels',
+        "--src-in-channels",
         type=int,
         default=3,
-        help='number of input channels for source model')
+        help="number of input channels for source model")
     parser.add_argument(
-        '--dst-num-classes',
+        "--dst-num-classes",
         type=int,
         default=1000,
-        help='number of classes for destination model')
+        help="number of classes for destination model")
     parser.add_argument(
-        '--dst-in-channels',
+        "--dst-in-channels",
         type=int,
         default=3,
-        help='number of input channels for destination model')
+        help="number of input channels for destination model")
 
     parser.add_argument(
-        '--save-dir',
+        "--save-dir",
         type=str,
-        default='',
-        help='directory of saved models and log-files')
+        default="",
+        help="directory of saved models and log-files")
     parser.add_argument(
-        '--logging-file-name',
+        "--logging-file-name",
         type=str,
-        default='train.log',
-        help='filename of training log')
+        default="train.log",
+        help="filename of training log")
     args = parser.parse_args()
     return args
 
@@ -88,6 +92,7 @@ def prepare_src_model(src_fwk,
                       dst_fwk,
                       ctx,
                       use_cuda,
+                      load_ignore_extra=False,
                       remove_module=False,
                       num_classes=None,
                       in_channels=None):
@@ -147,6 +152,7 @@ def prepare_src_model(src_fwk,
             pretrained_model_file_path=src_params_file_path,
             use_cuda=use_cuda,
             use_data_parallel=False,
+            load_ignore_extra=load_ignore_extra,
             num_classes=(num_classes if num_classes > 0 else None),
             in_channels=in_channels,
             remove_module=remove_module)
@@ -302,8 +308,8 @@ def convert_mx2gl(dst_net,
         src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub('^conv', 'features.', key) for key in src_param_keys]
-        src_param_keys = [re.sub('^fc6', 'output.1.', key) for key in src_param_keys]
+        src_param_keys = [re.sub("^conv", "features.", key) for key in src_param_keys]
+        src_param_keys = [re.sub("^fc6", "output.1.", key) for key in src_param_keys]
         src_param_keys = [re.sub('_c1x1-a', '.body.conv1.', key) for key in src_param_keys]
         src_param_keys = [re.sub('_c3x3-b', '.body.conv2A.', key) for key in src_param_keys]
         src_param_keys = [re.sub('_c1x1-b', '.body.conv2B.', key) for key in src_param_keys]
@@ -343,7 +349,7 @@ def convert_mx2gl(dst_net,
         dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub('^features\.', 'conv', key) for key in src_param_keys]
+        src_param_keys = [re.sub("^features\.", "conv", key) for key in src_param_keys]
         src_param_keys = [re.sub('^output\.1\.', 'fc6', key) for key in src_param_keys]
         src_param_keys = [re.sub('_x__1\.body\.conv1\.convT\.weight$', '_x__x_1x1_bases[dim3]_weight', key)
                           for key in src_param_keys]
@@ -396,7 +402,7 @@ def convert_mx2gl(dst_net,
         for param in dst_net.collect_params().values():
             if param._data is not None:
                 continue
-            print('param={}'.format(param))
+            print("param={}".format(param))
             param.initialize(ctx=ctx)
 
         dst_net.save_parameters(dst_params_file_path)
@@ -404,8 +410,8 @@ def convert_mx2gl(dst_net,
         return
 
     elif src_model in ["igcv3_w1"]:
-        src_param_keys = [key.replace('seq-', 'features.') for key in src_param_keys]
-        src_param_keys = [key.replace('fc_', 'output.1.') for key in src_param_keys]
+        src_param_keys = [key.replace("seq-", "features.") for key in src_param_keys]
+        src_param_keys = [key.replace("fc_", "output.1.") for key in src_param_keys]
         src_param_keys = [key.replace('-batchnorm_beta', '.bn.beta') for key in src_param_keys]
         src_param_keys = [key.replace('-batchnorm_gamma', '.bn.gamma') for key in src_param_keys]
         src_param_keys = [key.replace('-batchnorm_moving_mean', '.bn.running_mean') for key in src_param_keys]
@@ -416,7 +422,7 @@ def convert_mx2gl(dst_net,
         src_param_keys = [key.replace('-exp', '.conv1') for key in src_param_keys]
         src_param_keys = [key.replace('-depthwise', '.conv2') for key in src_param_keys]
         src_param_keys = [key.replace('-linear', '.conv3') for key in src_param_keys]
-        src_param_keys = [key.replace('-block', '.block') for key in src_param_keys]
+        src_param_keys = [key.replace("-block", ".block") for key in src_param_keys]
 
         dst_param_keys = [key.replace('features.0.', 'features.A.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.6.', 'features.B.') for key in dst_param_keys]
@@ -439,9 +445,9 @@ def convert_mx2gl(dst_net,
         src_param_keys = [key.replace('.conv1', '-exp') for key in src_param_keys]
         src_param_keys = [key.replace('.conv2', '-depthwise', ) for key in src_param_keys]
         src_param_keys = [key.replace('.conv3', '-linear') for key in src_param_keys]
-        src_param_keys = [key.replace('features.', 'seq-') for key in src_param_keys]
-        src_param_keys = [key.replace('output.1.', 'fc_') for key in src_param_keys]
-        src_param_keys = [key.replace('.block', '-block') for key in src_param_keys]
+        src_param_keys = [key.replace("features.", "seq-") for key in src_param_keys]
+        src_param_keys = [key.replace("output.1.", "fc_") for key in src_param_keys]
+        src_param_keys = [key.replace(".block", "-block") for key in src_param_keys]
 
         dst_param_keys = [key.replace('features.A.', 'features.0.') for key in dst_param_keys]
         dst_param_keys = [key.replace('features.B.', 'features.6.') for key in dst_param_keys]
@@ -456,8 +462,8 @@ def convert_mx2gl(dst_net,
         src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub('^classifier_', 'output.', key) for key in src_param_keys]
-        src_param_keys = [re.sub('^res', 'features.', key) for key in src_param_keys]
+        src_param_keys = [re.sub('^classifier_', "output.", key) for key in src_param_keys]
+        src_param_keys = [re.sub('^res', "features.", key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv1_weight$', '_conv1_aweight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv2_weight$', '_conv2_aweight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv3_weight$', '_conv3_aweight', key) for key in src_param_keys]
@@ -470,8 +476,8 @@ def convert_mx2gl(dst_net,
         dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                              x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-        src_param_keys = [re.sub('^output\.', 'classifier_', key) for key in src_param_keys]
-        src_param_keys = [re.sub('^features\.', 'res', key) for key in src_param_keys]
+        src_param_keys = [re.sub("^output\.", "classifier_", key) for key in src_param_keys]
+        src_param_keys = [re.sub("^features\.", "res", key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv1_aweight$', '_conv1_weight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv2_aweight$', '_conv2_weight', key) for key in src_param_keys]
         src_param_keys = [re.sub('_conv3_aweight$', '_conv3_weight', key) for key in src_param_keys]
@@ -488,7 +494,7 @@ def convert_mx2gl(dst_net,
     for param in dst_net.collect_params().values():
         if param._data is not None:
             continue
-        print('param={}'.format(param))
+        print("param={}".format(param))
         param.initialize(ctx=ctx)
 
     dst_net.save_parameters(dst_params_file_path)
@@ -510,16 +516,16 @@ def convert_gl2ch(dst_net,
         src_param_keys = src1n
         assert (len(src_param_keys) == len(dst_param_keys))
 
-    dst_param_keys = [key.replace('/W', '/weight') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/features/body/', '/features/zbody/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('features/final_postactiv/', 'features/stageN/final_postactiv/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('features/final_block/', 'features/stageN/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/final_block/', '/zfinal_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('features/final_conv/', 'features/stageN/final_conv/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/hg/', '/stage1_hg/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/W", "/weight") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/features/body/", "/features/zbody/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("features/final_postactiv/", "features/stageN/final_postactiv/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("features/final_block/", "features/stageN/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/final_block/", "/zfinal_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("features/final_conv/", "features/stageN/final_conv/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/hg/", "/stage1_hg/") for key in dst_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -529,30 +535,30 @@ def convert_gl2ch(dst_net,
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    dst_param_keys = [key.replace('/weight', '/W') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/zfinal_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/final_postactiv/', '/final_postactiv/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/features/zbody/', '/features/body/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('features/stageN/final_conv/', 'features/final_conv/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage1_hg/', '/hg/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/weight", "/W") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/zfinal_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/final_postactiv/", "/final_postactiv/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/features/zbody/", "/features/body/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("features/stageN/final_conv/", "features/final_conv/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage1_hg/", "/hg/") for key in dst_param_keys]
 
     if src_model.startswith("wrn20_10_1bit") or src_model.startswith("wrn20_10_32bit"):
         ext2_src_param_keys = [key.replace('.conv.weight', '.bn.beta') for key in src_param_keys if
                                key.endswith(".conv.weight")]
         ext2_src_param_keys.append("features.4.bn.beta")
-        ext2_dst_param_keys = [key.replace('/conv/W', '/bn/beta') for key in dst_param_keys if key.endswith("/conv/W")]
+        ext2_dst_param_keys = [key.replace("/conv/W", "/bn/beta") for key in dst_param_keys if key.endswith("/conv/W")]
         ext2_dst_param_keys.append("/features/post_activ/bn/beta")
         ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
-        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
+        ext3_dst_param_keys = list(map(lambda x: x.split("/")[1:-1], ext2_dst_param_keys))
     else:
         ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".beta")]
         ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/beta")]
         ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
-        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
+        ext3_dst_param_keys = list(map(lambda x: x.split("/")[1:-1], ext2_dst_param_keys))
 
     for i, src_key in enumerate(ext_src_param_keys):
         src_key1 = src_key.split(".")[-1]
@@ -579,7 +585,7 @@ def convert_gl2ch(dst_net,
         ext2_src_param_keys = [key for key in src_param_keys if key.endswith(".conv1.conv.weight")]
         ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/conv1/conv/W")]
         ext3_src_param_keys = {".".join(v.split(".")[:-2]): i for i, v in enumerate(ext2_src_param_keys)}
-        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-2], ext2_dst_param_keys))
+        ext3_dst_param_keys = list(map(lambda x: x.split("/")[1:-2], ext2_dst_param_keys))
 
         for i, src_key in enumerate(ext_src_param_keys2):
             src_key2 = ".".join(src_key.split(".")[:-1])
@@ -598,7 +604,7 @@ def convert_gl2ch(dst_net,
         ext2_dst_param_keys = [key for key in dst_param_keys if key.endswith("/conv1/conv/W")] +\
                               [key for key in dst_param_keys if key.endswith("/conv2/conv/W")]
         ext3_src_param_keys = {".".join(v.split(".")[:-1]): i for i, v in enumerate(ext2_src_param_keys)}
-        ext3_dst_param_keys = list(map(lambda x: x.split('/')[1:-1], ext2_dst_param_keys))
+        ext3_dst_param_keys = list(map(lambda x: x.split("/")[1:-1], ext2_dst_param_keys))
 
         for i, src_key in enumerate(ext_src_param_keys2):
             src_key2 = ".".join(src_key.split(".")[:-1])
@@ -647,7 +653,7 @@ def convert_gl2gl(dst_net,
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if dst_params[dst_key].shape != src_params[src_key].shape:
             logging.warning(
-                'dst_param.shape != src_param.shape, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.format(
+                "dst_param.shape != src_param.shape, src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                     src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
             if finetune:
                 continue
@@ -655,7 +661,7 @@ def convert_gl2gl(dst_net,
                 raise ValueError
         if dst_key.split('.')[-1] != src_key.split('.')[-1]:
             logging.warning(
-                'dst_key.suff != src_key.suff, src_key={}, dst_key={}, src_shape={}, dst_shape={}'.format(
+                "dst_key.suff != src_key.suff, src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                     src_key, dst_key, src_params[src_key].shape, dst_params[dst_key].shape))
         dst_params[dst_key]._load_init(src_params[src_key]._data[0], ctx)
     dst_net.save_parameters(dst_params_file_path)
@@ -669,10 +675,10 @@ def convert_gl2ke(dst_net,
                   src_param_keys):
     import mxnet as mx
 
-    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/final_block/", "/stageN/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in dst_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -682,13 +688,13 @@ def convert_gl2ke(dst_net,
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
-    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split("/")[-1] if s.find("convgroup") >= 0 else s
                       for s in dst_param_keys]
     dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
     dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
@@ -699,13 +705,13 @@ def convert_gl2ke(dst_net,
     def process_width(src_key, dst_key, src_weight):
         dst_layer = dst_params[dst_key][0]
         dst_weight = dst_params[dst_key][1]
-        if (dst_layer.__class__.__name__ in ['Conv2D']) and dst_key.endswith("kernel1") and\
-                (dst_layer.data_format == 'channels_last'):
+        if (dst_layer.__class__.__name__ in ["Conv2D"]) and dst_key.endswith("kernel1") and\
+                (dst_layer.data_format == "channels_last"):
             src_weight = np.transpose(src_weight, (2, 3, 1, 0))
-        if (dst_layer.__class__.__name__ in ['DepthwiseConv2D']) and dst_key.endswith("kernel1") and\
-                (dst_layer.data_format == 'channels_last'):
+        if (dst_layer.__class__.__name__ in ["DepthwiseConv2D"]) and dst_key.endswith("kernel1") and\
+                (dst_layer.data_format == "channels_last"):
             src_weight = np.transpose(src_weight, (2, 3, 0, 1))
-        if (dst_layer.__class__.__name__ in ['Dense']) and dst_key.endswith("kernel1"):
+        if (dst_layer.__class__.__name__ in ["Dense"]) and dst_key.endswith("kernel1"):
             src_weight = np.transpose(src_weight, (1, 0))
         assert (dst_weight._keras_shape == src_weight.shape), \
             "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
@@ -743,12 +749,12 @@ def convert_gl2tf(dst_params_file_path,
                   src_param_keys):
     import mxnet as mx
 
-    dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/dw_kernel:', '/weight_dw:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/kernel:", "/weight:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/dw_kernel:", "/weight_dw:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/final_block/", "/stageN/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in dst_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -758,15 +764,15 @@ def convert_gl2tf(dst_params_file_path,
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/weight_dw:', '/dw_kernel:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/weight:", "/kernel:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/weight_dw:", "/dw_kernel:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
-    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split("/")[-1] if s.find("convgroup") >= 0 else s
                       for s in dst_param_keys]
     dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
     dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
@@ -825,52 +831,52 @@ def convert_gl2tf2(dst_net,
                    src_param_keys,
                    src_model):
     if src_model.startswith("hrnet"):
-        src_param_keys = [key.replace('.transition.', '.atransition.') for key in src_param_keys]
+        src_param_keys = [key.replace(".transition.", ".atransition.") for key in src_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
     if src_model.startswith("hrnet"):
-        src_param_keys = [key.replace('.atransition.', '.transition.') for key in src_param_keys]
+        src_param_keys = [key.replace(".atransition.", ".transition.") for key in src_param_keys]
 
-    dst_param_keys = [key.replace('/kernel:', '/weight:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/depthwise_kernel:', '/weight_depthwise:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/kernel:", "/weight:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/depthwise_kernel:", "/weight_depthwise:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in dst_param_keys]
 
     if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
             (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")):
-        dst_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/final_block/', '/zfinal_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in dst_param_keys]
+        dst_param_keys = [key.replace("/final_block/", "/stageN/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/final_block/", "/zfinal_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in dst_param_keys]
     if src_model.startswith("hrnet"):
-        dst_param_keys = [key.replace('/transition/', '/atransition/') for key in dst_param_keys]
+        dst_param_keys = [key.replace("/transition/", "/atransition/") for key in dst_param_keys]
     if src_model.startswith("hardnet"):
         # dst_param_keys = [key.replace('/dw_conv/', '/z_dw_conv/') for key in dst_param_keys]
-        dst_param_keys = [key.replace('features/down', 'features/z_down') for key in dst_param_keys]
+        dst_param_keys = [key.replace("features/down", "features/z_down") for key in dst_param_keys]
 
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    dst_param_keys = [key.replace('/weight:', '/kernel:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/weight_depthwise:', '/depthwise_kernel:') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/zfinal_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in dst_param_keys]
+    dst_param_keys = [key.replace("/weight:", "/kernel:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/weight_depthwise:", "/depthwise_kernel:") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/zfinal_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in dst_param_keys]
     if (not src_model.startswith("pspnet_")) and (not src_model.startswith("deeplabv3_")) and\
             (not src_model.startswith("simplepose_")) and (not src_model.startswith("alphapose_")):
-        dst_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in dst_param_keys]
-    dst_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in dst_param_keys]
+        dst_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
+    dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
     if src_model.startswith("hrnet"):
-        dst_param_keys = [key.replace('/atransition/', '/transition/') for key in dst_param_keys]
+        dst_param_keys = [key.replace("/atransition/", "/transition/") for key in dst_param_keys]
     if src_model.startswith("hardnet"):
         # dst_param_keys = [key.replace('/z_dw_conv/', '/dw_conv/') for key in dst_param_keys]
-        dst_param_keys = [key.replace('features/z_down', 'features/down') for key in dst_param_keys]
+        dst_param_keys = [key.replace("features/z_down", "features/down") for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
-    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split('/')[-1] if s.find("convgroup") >= 0 else s
+    dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split("/")[-1] if s.find("convgroup") >= 0 else s
                       for s in dst_param_keys]
     dst_param_keys_uniq, dst_param_keys_index = np.unique(dst_param_keys, return_index=True)
     dst_param_keys = list(dst_param_keys_uniq[dst_param_keys_index.argsort()])
@@ -1072,12 +1078,12 @@ def convert_tf2tf(dst_params_file_path,
                   src_param_keys):
     import re
 
-    src_param_keys = [key.replace('/W:', '/kernel:') for key in src_param_keys]
-    src_param_keys = [key.replace('/b:', '/bias:') for key in src_param_keys]
-    src_param_keys = [key.replace('linear/', 'output/') for key in src_param_keys]
-    src_param_keys = [key.replace('stage', 'features/stage') for key in src_param_keys]
-    src_param_keys = [re.sub('^conv1/', 'features/init_block/conv/', key) for key in src_param_keys]
-    src_param_keys = [re.sub('^conv5/', 'features/final_block/conv/', key) for key in src_param_keys]
+    src_param_keys = [key.replace("/W:", "/kernel:") for key in src_param_keys]
+    src_param_keys = [key.replace("/b:", "/bias:") for key in src_param_keys]
+    src_param_keys = [key.replace("linear/", "output/") for key in src_param_keys]
+    src_param_keys = [key.replace("stage", "features/stage") for key in src_param_keys]
+    src_param_keys = [re.sub("^conv1/", "features/init_block/conv/", key) for key in src_param_keys]
+    src_param_keys = [re.sub("^conv5/", "features/final_block/conv/", key) for key in src_param_keys]
     src_param_keys = [key.replace('/dconv_bn/', '/dconv/bn/') for key in src_param_keys]
     src_param_keys = [key.replace('/shortcut_dconv_bn/', '/shortcut_dconv/bn/') for key in src_param_keys]
 
@@ -1089,12 +1095,12 @@ def convert_tf2tf(dst_params_file_path,
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    src_param_keys = [key.replace('/kernel:', '/W:') for key in src_param_keys]
-    src_param_keys = [key.replace('/bias:', '/b:') for key in src_param_keys]
-    src_param_keys = [key.replace('output/', 'linear/') for key in src_param_keys]
-    src_param_keys = [key.replace('features/stage', 'stage') for key in src_param_keys]
-    src_param_keys = [key.replace('features/init_block/conv/', 'conv1/') for key in src_param_keys]
-    src_param_keys = [key.replace('features/final_block/conv/', 'conv5/') for key in src_param_keys]
+    src_param_keys = [key.replace("/kernel:", "/W:") for key in src_param_keys]
+    src_param_keys = [key.replace("/bias:", "/b:") for key in src_param_keys]
+    src_param_keys = [key.replace("output/", "linear/") for key in src_param_keys]
+    src_param_keys = [key.replace("features/stage", "stage") for key in src_param_keys]
+    src_param_keys = [key.replace("features/init_block/conv/", 'conv1/') for key in src_param_keys]
+    src_param_keys = [key.replace("features/final_block/conv/", 'conv5/') for key in src_param_keys]
     src_param_keys = [key.replace('/dconv/bn/', '/dconv_bn/') for key in src_param_keys]
     src_param_keys = [key.replace('/shortcut_dconv/bn/', '/shortcut_dconv_bn/') for key in src_param_keys]
 
@@ -1122,12 +1128,12 @@ def convert_tf2gl(dst_net,
                   ctx):
     import mxnet as mx
 
-    src_param_keys = [key.replace('/kernel:', '/weight:') for key in src_param_keys]
-    src_param_keys = [key.replace('/dw_kernel:', '/weight_dw:') for key in src_param_keys]
-    src_param_keys = [key.replace('/post_activ/', '/stageN/post_activ/') for key in src_param_keys]
-    src_param_keys = [key.replace('/final_block/', '/stageN/final_block/') for key in src_param_keys]
-    src_param_keys = [key.replace('/stem1_unit/', '/stage0/stem1_unit/') for key in src_param_keys]
-    src_param_keys = [key.replace('/stem2_unit/', '/stage0/stem2_unit/') for key in src_param_keys]
+    src_param_keys = [key.replace("/kernel:", "/weight:") for key in src_param_keys]
+    src_param_keys = [key.replace("/dw_kernel:", "/weight_dw:") for key in src_param_keys]
+    src_param_keys = [key.replace("/post_activ/", "/stageN/post_activ/") for key in src_param_keys]
+    src_param_keys = [key.replace("/final_block/", "/stageN/final_block/") for key in src_param_keys]
+    src_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in src_param_keys]
+    src_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in src_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -1137,12 +1143,12 @@ def convert_tf2gl(dst_net,
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
 
-    src_param_keys = [key.replace('/weight:', '/kernel:') for key in src_param_keys]
-    src_param_keys = [key.replace('/weight_dw:', '/dw_kernel:') for key in src_param_keys]
-    src_param_keys = [key.replace('/stageN/post_activ/', '/post_activ/') for key in src_param_keys]
-    src_param_keys = [key.replace('/stageN/final_block/', '/final_block/') for key in src_param_keys]
-    src_param_keys = [key.replace('/stage0/stem1_unit/', '/stem1_unit/') for key in src_param_keys]
-    src_param_keys = [key.replace('/stage0/stem2_unit/', '/stem2_unit/') for key in src_param_keys]
+    src_param_keys = [key.replace("/weight:", "/kernel:") for key in src_param_keys]
+    src_param_keys = [key.replace("/weight_dw:", "/dw_kernel:") for key in src_param_keys]
+    src_param_keys = [key.replace("/stageN/post_activ/", "/post_activ/") for key in src_param_keys]
+    src_param_keys = [key.replace("/stageN/final_block/", "/final_block/") for key in src_param_keys]
+    src_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in src_param_keys]
+    src_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in src_param_keys]
 
     assert (len(src_param_keys) == len(dst_param_keys))
 
@@ -1181,6 +1187,7 @@ def _prepare_src_model(args, ctx, use_cuda):
         dst_fwk=args.dst_fwk,
         ctx=ctx,
         use_cuda=use_cuda,
+        load_ignore_extra=args.load_ignore_extra,
         remove_module=args.remove_module,
         num_classes=args.src_num_classes,
         in_channels=args.src_in_channels)
@@ -1359,7 +1366,7 @@ def main():
     else:
         raise NotImplementedError
 
-    logging.info('Convert {}-model {} into {}-model {}'.format(
+    logging.info("Convert {}-model {} into {}-model {}".format(
         args.src_fwk, args.src_model, args.dst_fwk, args.dst_model))
 
 

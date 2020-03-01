@@ -1,264 +1,15 @@
 """
-    Lightweight OpenPose 3D for CMU Panoptic, implemented in PyTorch.
+    Lightweight OpenPose 2D/3D for CMU Panoptic, implemented in PyTorch.
     Original paper: 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
     https://arxiv.org/abs/1811.12004.
 """
 
-__all__ = ['LwOpenPose', 'lwopenpose3d_mobilenet_cmupan']
+__all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan', 'lwopenpose3d_mobilenet_cmupan']
 
 import os
-import math
-import numpy as np
-from operator import itemgetter
 import torch
 from torch import nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block, InterpolationBlock
-
-
-class Heatmap2dMaxDetBlock(nn.Module):
-    """
-    Heatmap 2D maximum detector block (for 2D human pose estimation task).
-    """
-    def __init__(self):
-        super(Heatmap2dMaxDetBlock, self).__init__()
-
-    def forward(self, heatmap2d, paf2d):
-        batch = heatmap2d.shape[0]
-        keypoints = heatmap2d.shape[1]
-
-        pts = []
-        for batch_i in range(batch):
-            heatmap = np.transpose(heatmap2d[batch_i].cpu().data.numpy(), (1, 2, 0))
-            paf = np.transpose(paf2d[batch_i].cpu().data.numpy(), (1, 2, 0))
-            total_keypoints_num = 0
-            all_keypoints_by_type = []
-            for kpt_idx in range(keypoints):
-                total_keypoints_num += self.extract_keypoints(
-                    heatmap=heatmap[:, :, kpt_idx],
-                    all_keypoints=all_keypoints_by_type,
-                    total_keypoint_num=total_keypoints_num)
-
-            pose_entries, all_keypoints = self.group_keypoints(
-                all_keypoints_by_type=all_keypoints_by_type,
-                pafs=paf)
-            for kpt_id in range(all_keypoints.shape[0]):
-                all_keypoints[kpt_id, 0] = all_keypoints[kpt_id, 0] * 2.0
-                all_keypoints[kpt_id, 1] = all_keypoints[kpt_id, 1] * 2.0
-            poses_batch_i = []
-            for n in range(len(pose_entries)):
-                if len(pose_entries[n]) == 0:
-                    continue
-                pose_keypoints = np.ones((keypoints, 2), dtype=np.int32) * -1
-                for kpt_id in range(keypoints):
-                    if pose_entries[n][kpt_id] != -1.0:
-                        pose_keypoints[kpt_id, 0] = int(all_keypoints[int(pose_entries[n][kpt_id]), 0])
-                        pose_keypoints[kpt_id, 1] = int(all_keypoints[int(pose_entries[n][kpt_id]), 1])
-                pose = (pose_keypoints, pose_entries[n][18])
-                poses_batch_i.append(pose)
-            pts.append(poses_batch_i)
-        return pts
-
-    @staticmethod
-    def extract_keypoints(heatmap,
-                          all_keypoints,
-                          total_keypoint_num):
-        heatmap[heatmap < 0.1] = 0
-        heatmap_with_borders = np.pad(heatmap, [(2, 2), (2, 2)], mode="constant")
-        heatmap_center = heatmap_with_borders[1:heatmap_with_borders.shape[0] - 1, 1:heatmap_with_borders.shape[1] - 1]
-        heatmap_left = heatmap_with_borders[1:heatmap_with_borders.shape[0] - 1, 2:heatmap_with_borders.shape[1]]
-        heatmap_right = heatmap_with_borders[1:heatmap_with_borders.shape[0] - 1, 0:heatmap_with_borders.shape[1] - 2]
-        heatmap_up = heatmap_with_borders[2:heatmap_with_borders.shape[0], 1:heatmap_with_borders.shape[1] - 1]
-        heatmap_down = heatmap_with_borders[0:heatmap_with_borders.shape[0] - 2, 1:heatmap_with_borders.shape[1] - 1]
-
-        heatmap_peaks = (heatmap_center > heatmap_left) &\
-                        (heatmap_center > heatmap_right) &\
-                        (heatmap_center > heatmap_up) &\
-                        (heatmap_center > heatmap_down)
-        heatmap_peaks = heatmap_peaks[1:heatmap_center.shape[0] - 1, 1:heatmap_center.shape[1] - 1]
-        keypoints = list(zip(np.nonzero(heatmap_peaks)[1], np.nonzero(heatmap_peaks)[0]))  # (w, h)
-        keypoints = sorted(keypoints, key=itemgetter(0))
-
-        suppressed = np.zeros(len(keypoints), np.uint8)
-        keypoints_with_score_and_id = []
-        keypoint_num = 0
-        for i in range(len(keypoints)):
-            if suppressed[i]:
-                continue
-            for j in range(i + 1, len(keypoints)):
-                if math.sqrt((keypoints[i][0] - keypoints[j][0]) ** 2 + (keypoints[i][1] - keypoints[j][1]) ** 2) < 6:
-                    suppressed[j] = 1
-            keypoint_with_score_and_id = (
-                keypoints[i][0],
-                keypoints[i][1],
-                heatmap[keypoints[i][1], keypoints[i][0]],
-                total_keypoint_num + keypoint_num)
-            keypoints_with_score_and_id.append(keypoint_with_score_and_id)
-            keypoint_num += 1
-        all_keypoints.append(keypoints_with_score_and_id)
-        return keypoint_num
-
-    @staticmethod
-    def group_keypoints(all_keypoints_by_type,
-                        pafs,
-                        pose_entry_size=20,
-                        min_paf_score=0.05):
-
-        def linspace2d(start, stop, n=10):
-            points = 1 / (n - 1) * (stop - start)
-            return points[:, None] * np.arange(n) + start[:, None]
-
-        BODY_PARTS_KPT_IDS = [[1, 2], [1, 5], [2, 3], [3, 4], [5, 6], [6, 7], [1, 8], [8, 9], [9, 10], [1, 11],
-                              [11, 12], [12, 13], [1, 0], [0, 14], [14, 16], [0, 15], [15, 17], [2, 16], [5, 17]]
-        BODY_PARTS_PAF_IDS = ([12, 13], [20, 21], [14, 15], [16, 17], [22, 23], [24, 25], [0, 1], [2, 3], [4, 5],
-                              [6, 7], [8, 9], [10, 11], [28, 29], [30, 31], [34, 35], [32, 33], [36, 37], [18, 19],
-                              [26, 27])
-
-        pose_entries = []
-        all_keypoints = np.array([item for sublist in all_keypoints_by_type for item in sublist])
-        for part_id in range(len(BODY_PARTS_PAF_IDS)):
-            part_pafs = pafs[:, :, BODY_PARTS_PAF_IDS[part_id]]
-            kpts_a = all_keypoints_by_type[BODY_PARTS_KPT_IDS[part_id][0]]
-            kpts_b = all_keypoints_by_type[BODY_PARTS_KPT_IDS[part_id][1]]
-            num_kpts_a = len(kpts_a)
-            num_kpts_b = len(kpts_b)
-            kpt_a_id = BODY_PARTS_KPT_IDS[part_id][0]
-            kpt_b_id = BODY_PARTS_KPT_IDS[part_id][1]
-
-            if num_kpts_a == 0 and num_kpts_b == 0:  # no keypoints for such body part
-                continue
-            elif num_kpts_a == 0:  # body part has just 'b' keypoints
-                for i in range(num_kpts_b):
-                    num = 0
-                    for j in range(len(pose_entries)):  # check if already in some pose, was added by another body part
-                        if pose_entries[j][kpt_b_id] == kpts_b[i][3]:
-                            num += 1
-                            continue
-                    if num == 0:
-                        pose_entry = np.ones(pose_entry_size) * -1
-                        pose_entry[kpt_b_id] = kpts_b[i][3]  # keypoint idx
-                        pose_entry[-1] = 1                   # num keypoints in pose
-                        pose_entry[-2] = kpts_b[i][2]        # pose score
-                        pose_entries.append(pose_entry)
-                continue
-            elif num_kpts_b == 0:  # body part has just 'a' keypoints
-                for i in range(num_kpts_a):
-                    num = 0
-                    for j in range(len(pose_entries)):
-                        if pose_entries[j][kpt_a_id] == kpts_a[i][3]:
-                            num += 1
-                            continue
-                    if num == 0:
-                        pose_entry = np.ones(pose_entry_size) * -1
-                        pose_entry[kpt_a_id] = kpts_a[i][3]
-                        pose_entry[-1] = 1
-                        pose_entry[-2] = kpts_a[i][2]
-                        pose_entries.append(pose_entry)
-                continue
-
-            connections = []
-            for i in range(num_kpts_a):
-                kpt_a = np.array(kpts_a[i][0:2])
-                for j in range(num_kpts_b):
-                    kpt_b = np.array(kpts_b[j][0:2])
-                    mid_point = [(), ()]
-                    mid_point[0] = (int(round((kpt_a[0] + kpt_b[0]) * 0.5)),
-                                    int(round((kpt_a[1] + kpt_b[1]) * 0.5)))
-                    mid_point[1] = mid_point[0]
-
-                    vec = [kpt_b[0] - kpt_a[0], kpt_b[1] - kpt_a[1]]
-                    vec_norm = math.sqrt(vec[0] ** 2 + vec[1] ** 2)
-                    if vec_norm == 0:
-                        continue
-                    vec[0] /= vec_norm
-                    vec[1] /= vec_norm
-                    cur_point_score = (vec[0] * part_pafs[mid_point[0][1], mid_point[0][0], 0] +
-                                       vec[1] * part_pafs[mid_point[1][1], mid_point[1][0], 1])
-
-                    height_n = pafs.shape[0] // 2
-                    success_ratio = 0
-                    point_num = 10  # number of points to integration over paf
-                    if cur_point_score > -100:
-                        passed_point_score = 0
-                        passed_point_num = 0
-                        x, y = linspace2d(kpt_a, kpt_b)
-                        for point_idx in range(point_num):
-                            px = int(round(x[point_idx]))
-                            py = int(round(y[point_idx]))
-                            paf = part_pafs[py, px, 0:2]
-                            cur_point_score = vec[0] * paf[0] + vec[1] * paf[1]
-                            if cur_point_score > min_paf_score:
-                                passed_point_score += cur_point_score
-                                passed_point_num += 1
-                        success_ratio = passed_point_num / point_num
-                        ratio = 0
-                        if passed_point_num > 0:
-                            ratio = passed_point_score / passed_point_num
-                        ratio += min(height_n / vec_norm - 1, 0)
-                    if ratio > 0 and success_ratio > 0.8:
-                        score_all = ratio + kpts_a[i][2] + kpts_b[j][2]
-                        connections.append([i, j, ratio, score_all])
-            if len(connections) > 0:
-                connections = sorted(connections, key=itemgetter(2), reverse=True)
-
-            num_connections = min(num_kpts_a, num_kpts_b)
-            has_kpt_a = np.zeros(num_kpts_a, dtype=np.int32)
-            has_kpt_b = np.zeros(num_kpts_b, dtype=np.int32)
-            filtered_connections = []
-            for row in range(len(connections)):
-                if len(filtered_connections) == num_connections:
-                    break
-                i, j, cur_point_score = connections[row][0:3]
-                if not has_kpt_a[i] and not has_kpt_b[j]:
-                    filtered_connections.append([kpts_a[i][3], kpts_b[j][3], cur_point_score])
-                    has_kpt_a[i] = 1
-                    has_kpt_b[j] = 1
-            connections = filtered_connections
-            if len(connections) == 0:
-                continue
-
-            if part_id == 0:
-                pose_entries = [np.ones(pose_entry_size) * -1 for _ in range(len(connections))]
-                for i in range(len(connections)):
-                    pose_entries[i][BODY_PARTS_KPT_IDS[0][0]] = connections[i][0]
-                    pose_entries[i][BODY_PARTS_KPT_IDS[0][1]] = connections[i][1]
-                    pose_entries[i][-1] = 2
-                    pose_entries[i][-2] = np.sum(all_keypoints[connections[i][0:2], 2]) + connections[i][2]
-            elif part_id == 17 or part_id == 18:
-                kpt_a_id = BODY_PARTS_KPT_IDS[part_id][0]
-                kpt_b_id = BODY_PARTS_KPT_IDS[part_id][1]
-                for i in range(len(connections)):
-                    for j in range(len(pose_entries)):
-                        if pose_entries[j][kpt_a_id] == connections[i][0] and pose_entries[j][kpt_b_id] == -1:
-                            pose_entries[j][kpt_b_id] = connections[i][1]
-                        elif pose_entries[j][kpt_b_id] == connections[i][1] and pose_entries[j][kpt_a_id] == -1:
-                            pose_entries[j][kpt_a_id] = connections[i][0]
-                continue
-            else:
-                kpt_a_id = BODY_PARTS_KPT_IDS[part_id][0]
-                kpt_b_id = BODY_PARTS_KPT_IDS[part_id][1]
-                for i in range(len(connections)):
-                    num = 0
-                    for j in range(len(pose_entries)):
-                        if pose_entries[j][kpt_a_id] == connections[i][0]:
-                            pose_entries[j][kpt_b_id] = connections[i][1]
-                            num += 1
-                            pose_entries[j][-1] += 1
-                            pose_entries[j][-2] += all_keypoints[connections[i][1], 2] + connections[i][2]
-                    if num == 0:
-                        pose_entry = np.ones(pose_entry_size) * -1
-                        pose_entry[kpt_a_id] = connections[i][0]
-                        pose_entry[kpt_b_id] = connections[i][1]
-                        pose_entry[-1] = 2
-                        pose_entry[-2] = np.sum(all_keypoints[connections[i][0:2], 2]) + connections[i][2]
-                        pose_entries.append(pose_entry)
-
-        filtered_entries = []
-        for i in range(len(pose_entries)):
-            if pose_entries[i][-1] < 3 or (pose_entries[i][-2] / pose_entries[i][-1] < 0.2):
-                continue
-            filtered_entries.append(pose_entries[i])
-        pose_entries = np.asarray(filtered_entries)
-        return pose_entries, all_keypoints
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block
 
 
 class LwopResBottleneck(nn.Module):
@@ -376,7 +127,7 @@ class LwopResUnit(nn.Module):
 
 class LwopEncoderFinalBlock(nn.Module):
     """
-    Lightweight OpenPose 3D specific encoder final block.
+    Lightweight OpenPose 2D/3D specific encoder final block.
 
     Parameters:
     ----------
@@ -417,7 +168,7 @@ class LwopEncoderFinalBlock(nn.Module):
 
 class LwopRefinementBlock(nn.Module):
     """
-    Lightweight OpenPose 3D specific refinement block for decoder units.
+    Lightweight OpenPose 2D/3D specific refinement block for decoder units.
 
     Parameters:
     ----------
@@ -455,7 +206,7 @@ class LwopRefinementBlock(nn.Module):
 
 class LwopDecoderBend(nn.Module):
     """
-    Lightweight OpenPose 3D specific decoder bend block.
+    Lightweight OpenPose 2D/3D specific decoder bend block.
 
     Parameters:
     ----------
@@ -489,7 +240,7 @@ class LwopDecoderBend(nn.Module):
 
 class LwopDecoderInitBlock(nn.Module):
     """
-    Lightweight OpenPose 3D specific decoder init block.
+    Lightweight OpenPose 2D/3D specific decoder init block.
 
     Parameters:
     ----------
@@ -533,7 +284,7 @@ class LwopDecoderInitBlock(nn.Module):
 
 class LwopDecoderUnit(nn.Module):
     """
-    Lightweight OpenPose 3D specific decoder init.
+    Lightweight OpenPose 2D/3D specific decoder init.
 
     Parameters:
     ----------
@@ -576,7 +327,7 @@ class LwopDecoderUnit(nn.Module):
 
 class LwopDecoderFeaturesBend(nn.Module):
     """
-    Lightweight OpenPose 3D specific decoder 3D features bend.
+    Lightweight OpenPose 2D/3D specific decoder 3D features bend.
 
     Parameters:
     ----------
@@ -611,7 +362,7 @@ class LwopDecoderFeaturesBend(nn.Module):
 
 class LwopDecoderFinalBlock(nn.Module):
     """
-    Lightweight OpenPose 3D specific decoder final block for calcualation 3D poses.
+    Lightweight OpenPose 2D/3D specific decoder final block for calcualation 3D poses.
 
     Parameters:
     ----------
@@ -623,41 +374,48 @@ class LwopDecoderFinalBlock(nn.Module):
         Number of PAFs.
     bottleneck_factor : int
         Bottleneck factor.
+    calc_3d_features : bool
+        Whether to calculate 3D features.
     """
     def __init__(self,
                  in_channels,
                  num_heatmap,
                  num_paf,
-                 bottleneck_factor):
+                 bottleneck_factor,
+                 calc_3d_features):
         super(LwopDecoderFinalBlock, self).__init__()
         self.num_heatmap = num_heatmap
         self.num_paf = num_paf
+        self.calc_3d_features = calc_3d_features
         features_out_channels = num_heatmap + num_paf
         features_in_channels = in_channels - features_out_channels
 
-        self.body = nn.Sequential()
-        for i in range(5):
-            self.body.add_module("block{}".format(i + 1), LwopResUnit(
-                in_channels=in_channels,
-                out_channels=features_in_channels,
-                bottleneck_factor=bottleneck_factor))
-            in_channels = features_in_channels
-        self.features_bend = LwopDecoderFeaturesBend(
-            in_channels=features_in_channels,
-            mid_channels=features_in_channels,
-            out_channels=features_out_channels)
+        if self.calc_3d_features:
+            self.body = nn.Sequential()
+            for i in range(5):
+                self.body.add_module("block{}".format(i + 1), LwopResUnit(
+                    in_channels=in_channels,
+                    out_channels=features_in_channels,
+                    bottleneck_factor=bottleneck_factor))
+                in_channels = features_in_channels
+            self.features_bend = LwopDecoderFeaturesBend(
+                in_channels=features_in_channels,
+                mid_channels=features_in_channels,
+                out_channels=features_out_channels)
 
     def forward(self, x):
         heatmap_paf_2d = x[:, -self.num_paf - self.num_heatmap:]
+        if not self.calc_3d_features:
+            return heatmap_paf_2d
         x = self.body(x)
         x = self.features_bend(x)
-        y = torch.cat((x, heatmap_paf_2d), dim=1)
+        y = torch.cat((heatmap_paf_2d, x), dim=1)
         return y
 
 
 class LwOpenPose(nn.Module):
     """
-    Lightweight OpenPose 3D model from 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
+    Lightweight OpenPose 2D/3D model from 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
     https://arxiv.org/abs/1811.12004.
 
     Parameters:
@@ -672,7 +430,9 @@ class LwOpenPose(nn.Module):
         Number of output channels for the encoder final unit.
     refinement_units : int
         Number of refinement blocks in the decoder.
-    return_heatmap : bool, default False
+    calc_3d_features : bool
+        Whether to calculate 3D features.
+    return_heatmap : bool, default True
         Whether to return only heatmap.
     in_channels : int, default 3
         Number of input channels.
@@ -687,7 +447,8 @@ class LwOpenPose(nn.Module):
                  encoder_init_block_channels,
                  encoder_final_block_channels,
                  refinement_units,
-                 return_heatmap=False,
+                 calc_3d_features,
+                 return_heatmap=True,
                  in_channels=3,
                  in_size=(256, 256),
                  keypoints=19):
@@ -696,6 +457,7 @@ class LwOpenPose(nn.Module):
         self.in_size = in_size
         self.keypoints = keypoints
         self.return_heatmap = return_heatmap
+        self.calc_3d_features = calc_3d_features
         num_heatmap = keypoints
         num_paf = 2 * keypoints
 
@@ -740,10 +502,8 @@ class LwOpenPose(nn.Module):
             in_channels=in_channels,
             num_heatmap=num_heatmap,
             num_paf=num_paf,
-            bottleneck_factor=2))
-
-        self.up = InterpolationBlock(scale_factor=4)
-        self.heatmap_max_det_2d = Heatmap2dMaxDetBlock()
+            bottleneck_factor=2,
+            calc_3d_features=calc_3d_features))
 
         self._init_params()
 
@@ -756,30 +516,26 @@ class LwOpenPose(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
-        heatmap_paf = self.decoder(x)
+        x = self.decoder(x)
         if self.return_heatmap:
-            return heatmap_paf
+            return x
         else:
-            num_heatmap = self.keypoints
-            num_paf = 2 * self.keypoints
-            heatmap2d = x[:, -num_paf - num_heatmap:-num_paf]
-            paf2d = x[:, -num_paf:]
-            heatmap2d = self.up(heatmap2d)
-            paf2d = self.up(paf2d)
-            pts = self.heatmap_max_det_2d(heatmap2d, paf2d)
-            return pts
+            return x
 
 
-def get_lwopenpose3d(keypoints,
-                     model_name=None,
-                     pretrained=False,
-                     root=os.path.join("~", ".torch", "models"),
-                     **kwargs):
+def get_lwopenpose(calc_3d_features,
+                   keypoints,
+                   model_name=None,
+                   pretrained=False,
+                   root=os.path.join("~", ".torch", "models"),
+                   **kwargs):
     """
-    Create Lightweight OpenPose 3D model with specific parameters.
+    Create Lightweight OpenPose 2D/3D model with specific parameters.
 
     Parameters:
     ----------
+    calc_3d_features : bool, default False
+        Whether to calculate 3D features.
     keypoints : int
         Number of keypoints.
     model_name : str or None, default None
@@ -801,6 +557,7 @@ def get_lwopenpose3d(keypoints,
         encoder_init_block_channels=encoder_init_block_channels,
         encoder_final_block_channels=encoder_final_block_channels,
         refinement_units=refinement_units,
+        calc_3d_features=calc_3d_features,
         keypoints=keypoints,
         **kwargs)
 
@@ -816,6 +573,22 @@ def get_lwopenpose3d(keypoints,
     return net
 
 
+def lwopenpose2d_mobilenet_cmupan(keypoints=19, **kwargs):
+    """
+    Lightweight OpenPose 2D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
+    Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan",
+                          **kwargs)
+
+
 def lwopenpose3d_mobilenet_cmupan(keypoints=19, **kwargs):
     """
     Lightweight OpenPose 3D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
@@ -828,7 +601,8 @@ def lwopenpose3d_mobilenet_cmupan(keypoints=19, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_lwopenpose3d(keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan", **kwargs)
+    return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan",
+                          **kwargs)
 
 
 def _calc_width(net):
@@ -847,10 +621,11 @@ def _test():
     pretrained = False
 
     models = [
-        lwopenpose3d_mobilenet_cmupan,
+        (lwopenpose2d_mobilenet_cmupan, "2d"),
+        (lwopenpose3d_mobilenet_cmupan, "3d"),
     ]
 
-    for model in models:
+    for model, model_dim in models:
 
         net = model(pretrained=pretrained, in_size=in_size, return_heatmap=return_heatmap)
 
@@ -858,13 +633,17 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != lwopenpose2d_mobilenet_cmupan or weight_count == 4091698)
         assert (model != lwopenpose3d_mobilenet_cmupan or weight_count == 5085983)
 
         batch = 1
         x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
         # y.sum().backward()
-        assert (tuple(y.size()) == (batch, 6 * keypoints, in_size[0] // 8, in_size[0] // 8))
+        if model_dim == "2d":
+            assert (tuple(y.size()) == (batch, 3 * keypoints, in_size[0] // 8, in_size[0] // 8))
+        else:
+            assert (tuple(y.size()) == (batch, 6 * keypoints, in_size[0] // 8, in_size[0] // 8))
 
 
 if __name__ == "__main__":

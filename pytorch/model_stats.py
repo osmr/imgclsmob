@@ -105,6 +105,9 @@ def measure_model(model,
         elif isinstance(module, nn.ReLU):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
+        elif isinstance(module, nn.ELU):
+            extra_num_flops = 3 * x[0].numel()
+            extra_num_macs = 0
         elif isinstance(module, nn.Sigmoid):
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0

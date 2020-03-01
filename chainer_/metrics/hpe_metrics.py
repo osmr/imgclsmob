@@ -1,5 +1,5 @@
 """
-Evaluation Metrics for Human Pose Estimationn.
+Evaluation Metrics for Human Pose Estimation.
 """
 
 import numpy as np

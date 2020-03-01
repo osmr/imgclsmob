@@ -250,7 +250,7 @@ def main():
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)
     assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
-    assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
+    # assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
     batch_size = args.batch_size
 

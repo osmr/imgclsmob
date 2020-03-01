@@ -114,6 +114,9 @@ def measure_model(model,
                 extra_num_macs = 0
             else:
                 raise TypeError("Unknown activation type: {}".format(block._act_type))
+        elif isinstance(block, nn.ELU):
+            extra_num_flops = 3 * x[0].size
+            extra_num_macs = 0
         elif isinstance(block, nn.LeakyReLU):
             extra_num_flops = 2 * x[0].size
             extra_num_macs = 0

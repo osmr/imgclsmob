@@ -1,5 +1,5 @@
 """
-    Lightweight OpenPose 2D/3D for CMU Panoptic, implemented in PyTorch.
+    Lightweight OpenPose 2D/3D for CMU Panoptic, implemented in Chainer.
     Original paper: 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
     https://arxiv.org/abs/1811.12004.
 """
@@ -7,12 +7,13 @@
 __all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan', 'lwopenpose3d_mobilenet_cmupan', 'LwopDecoderFinalBlock']
 
 import os
-import torch
-from torch import nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block
+import chainer.functions as F
+from chainer import Chain
+from chainer.serializers import load_npz
+from .common import conv1x1, conv1x1_block, conv3x3_block, dwsconv3x3_block, SimpleSequential
 
 
-class LwopResBottleneck(nn.Module):
+class LwopResBottleneck(Chain):
     """
     Bottleneck block for residual path in the residual unit.
 
@@ -23,8 +24,8 @@ class LwopResBottleneck(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    bias : bool, default True
+        Stride of the convolution.
+    use_bias : bool, default True
         Whether the layer uses a bias vector.
     bottleneck_factor : int, default 2
         Bottleneck factor.
@@ -35,35 +36,36 @@ class LwopResBottleneck(nn.Module):
                  in_channels,
                  out_channels,
                  stride,
-                 bias=True,
+                 use_bias=True,
                  bottleneck_factor=2,
                  squeeze_out=False):
         super(LwopResBottleneck, self).__init__()
         mid_channels = out_channels // bottleneck_factor if squeeze_out else in_channels // bottleneck_factor
 
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            bias=bias)
-        self.conv2 = conv3x3_block(
-            in_channels=mid_channels,
-            out_channels=mid_channels,
-            stride=stride,
-            bias=bias)
-        self.conv3 = conv1x1_block(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bias=bias,
-            activation=None)
+        with self.init_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                use_bias=use_bias)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=mid_channels,
+                stride=stride,
+                use_bias=use_bias)
+            self.conv3 = conv1x1_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                use_bias=use_bias,
+                activation=None)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         return x
 
 
-class LwopResUnit(nn.Module):
+class LwopResUnit(Chain):
     """
     ResNet-like residual unit with residual connection.
 
@@ -74,8 +76,8 @@ class LwopResUnit(nn.Module):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int, default 1
-        Strides of the convolution.
-    bias : bool, default True
+        Stride of the convolution.
+    use_bias : bool, default True
         Whether the layer uses a bias vector.
     bottleneck_factor : int, default 2
         Bottleneck factor.
@@ -88,7 +90,7 @@ class LwopResUnit(nn.Module):
                  in_channels,
                  out_channels,
                  stride=1,
-                 bias=True,
+                 use_bias=True,
                  bottleneck_factor=2,
                  squeeze_out=False,
                  activate=False):
@@ -96,24 +98,25 @@ class LwopResUnit(nn.Module):
         self.activate = activate
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
-        self.body = LwopResBottleneck(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            bias=bias,
-            bottleneck_factor=bottleneck_factor,
-            squeeze_out=squeeze_out)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
+        with self.init_scope():
+            self.body = LwopResBottleneck(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
-                bias=bias,
-                activation=None)
-        if self.activate:
-            self.activ = nn.ReLU(inplace=True)
+                use_bias=use_bias,
+                bottleneck_factor=bottleneck_factor,
+                squeeze_out=squeeze_out)
+            if self.resize_identity:
+                self.identity_conv = conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    use_bias=use_bias,
+                    activation=None)
+            if self.activate:
+                self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -125,7 +128,7 @@ class LwopResUnit(nn.Module):
         return x
 
 
-class LwopEncoderFinalBlock(nn.Module):
+class LwopEncoderFinalBlock(Chain):
     """
     Lightweight OpenPose 2D/3D specific encoder final block.
 
@@ -140,33 +143,35 @@ class LwopEncoderFinalBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(LwopEncoderFinalBlock, self).__init__()
-        self.pre_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bias=True,
-            use_bn=False)
-        self.body = nn.Sequential()
-        for i in range(3):
-            self.body.add_module("block{}".format(i + 1), dwsconv3x3_block(
+        with self.init_scope():
+            self.pre_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                use_bias=True,
+                use_bn=False)
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                for i in range(3):
+                    setattr(self.body, "block{}".format(i + 1), dwsconv3x3_block(
+                        in_channels=out_channels,
+                        out_channels=out_channels,
+                        use_bn=False,
+                        dw_activation=(lambda: F.elu),
+                        pw_activation=(lambda: F.elu)))
+            self.post_conv = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                use_bn=False,
-                dw_activation=(lambda: nn.ELU(inplace=True)),
-                pw_activation=(lambda: nn.ELU(inplace=True))))
-        self.post_conv = conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            bias=True,
-            use_bn=False)
+                use_bias=True,
+                use_bn=False)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.pre_conv(x)
         x = x + self.body(x)
         x = self.post_conv(x)
         return x
 
 
-class LwopRefinementBlock(nn.Module):
+class LwopRefinementBlock(Chain):
     """
     Lightweight OpenPose 2D/3D specific refinement block for decoder units.
 
@@ -181,30 +186,32 @@ class LwopRefinementBlock(nn.Module):
                  in_channels,
                  out_channels):
         super(LwopRefinementBlock, self).__init__()
-        self.pre_conv = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            bias=True,
-            use_bn=False)
-        self.body = nn.Sequential()
-        self.body.add_module("block1", conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            bias=True))
-        self.body.add_module("block2", conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            padding=2,
-            dilation=2,
-            bias=True))
+        with self.init_scope():
+            self.pre_conv = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                use_bias=True,
+                use_bn=False)
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                setattr(self.body, "block1", conv3x3_block(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    use_bias=True))
+                setattr(self.body, "block2", conv3x3_block(
+                    in_channels=out_channels,
+                    out_channels=out_channels,
+                    pad=2,
+                    dilate=2,
+                    use_bias=True))
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.pre_conv(x)
         x = x + self.body(x)
         return x
 
 
-class LwopDecoderBend(nn.Module):
+class LwopDecoderBend(Chain):
     """
     Lightweight OpenPose 2D/3D specific decoder bend block.
 
@@ -222,23 +229,24 @@ class LwopDecoderBend(nn.Module):
                  mid_channels,
                  out_channels):
         super(LwopDecoderBend, self).__init__()
-        self.conv1 = conv1x1_block(
-            in_channels=in_channels,
-            out_channels=mid_channels,
-            bias=True,
-            use_bn=False)
-        self.conv2 = conv1x1(
-            in_channels=mid_channels,
-            out_channels=out_channels,
-            bias=True)
+        with self.init_scope():
+            self.conv1 = conv1x1_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                use_bias=True,
+                use_bn=False)
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                use_bias=True)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         return x
 
 
-class LwopDecoderInitBlock(nn.Module):
+class LwopDecoderInitBlock(Chain):
     """
     Lightweight OpenPose 2D/3D specific decoder init block.
 
@@ -257,31 +265,33 @@ class LwopDecoderInitBlock(nn.Module):
         num_paf = 2 * keypoints
         bend_mid_channels = 512
 
-        self.body = nn.Sequential()
-        for i in range(3):
-            self.body.add_module("block{}".format(i + 1), conv3x3_block(
+        with self.init_scope():
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                for i in range(3):
+                    setattr(self.body, "block{}".format(i + 1), conv3x3_block(
+                        in_channels=in_channels,
+                        out_channels=in_channels,
+                        use_bias=True,
+                        use_bn=False))
+            self.heatmap_bend = LwopDecoderBend(
                 in_channels=in_channels,
-                out_channels=in_channels,
-                bias=True,
-                use_bn=False))
-        self.heatmap_bend = LwopDecoderBend(
-            in_channels=in_channels,
-            mid_channels=bend_mid_channels,
-            out_channels=num_heatmap)
-        self.paf_bend = LwopDecoderBend(
-            in_channels=in_channels,
-            mid_channels=bend_mid_channels,
-            out_channels=num_paf)
+                mid_channels=bend_mid_channels,
+                out_channels=num_heatmap)
+            self.paf_bend = LwopDecoderBend(
+                in_channels=in_channels,
+                mid_channels=bend_mid_channels,
+                out_channels=num_paf)
 
-    def forward(self, x):
+    def __call__(self, x):
         y = self.body(x)
         heatmap = self.heatmap_bend(y)
         paf = self.paf_bend(y)
-        y = torch.cat((x, heatmap, paf), dim=1)
+        y = F.concat((x, heatmap, paf), axis=1)
         return y
 
 
-class LwopDecoderUnit(nn.Module):
+class LwopDecoderUnit(Chain):
     """
     Lightweight OpenPose 2D/3D specific decoder init.
 
@@ -300,31 +310,33 @@ class LwopDecoderUnit(nn.Module):
         num_paf = 2 * keypoints
         self.features_channels = in_channels - num_heatmap - num_paf
 
-        self.body = nn.Sequential()
-        for i in range(5):
-            self.body.add_module("block{}".format(i + 1), LwopRefinementBlock(
-                in_channels=in_channels,
-                out_channels=self.features_channels))
-            in_channels = self.features_channels
-        self.heatmap_bend = LwopDecoderBend(
-            in_channels=self.features_channels,
-            mid_channels=self.features_channels,
-            out_channels=num_heatmap)
-        self.paf_bend = LwopDecoderBend(
-            in_channels=self.features_channels,
-            mid_channels=self.features_channels,
-            out_channels=num_paf)
+        with self.init_scope():
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                for i in range(5):
+                    setattr(self.body, "block{}".format(i + 1), LwopRefinementBlock(
+                        in_channels=in_channels,
+                        out_channels=self.features_channels))
+                    in_channels = self.features_channels
+            self.heatmap_bend = LwopDecoderBend(
+                in_channels=self.features_channels,
+                mid_channels=self.features_channels,
+                out_channels=num_heatmap)
+            self.paf_bend = LwopDecoderBend(
+                in_channels=self.features_channels,
+                mid_channels=self.features_channels,
+                out_channels=num_paf)
 
-    def forward(self, x):
+    def __call__(self, x):
         features = x[:, :self.features_channels]
         y = self.body(x)
         heatmap = self.heatmap_bend(y)
         paf = self.paf_bend(y)
-        y = torch.cat((features, heatmap, paf), dim=1)
+        y = F.concat((features, heatmap, paf), axis=1)
         return y
 
 
-class LwopDecoderFeaturesBend(nn.Module):
+class LwopDecoderFeaturesBend(Chain):
     """
     Lightweight OpenPose 2D/3D specific decoder 3D features bend.
 
@@ -342,24 +354,26 @@ class LwopDecoderFeaturesBend(nn.Module):
                  mid_channels,
                  out_channels):
         super(LwopDecoderFeaturesBend, self).__init__()
-        self.body = nn.Sequential()
-        for i in range(2):
-            self.body.add_module("block{}".format(i + 1), LwopRefinementBlock(
-                in_channels=in_channels,
-                out_channels=mid_channels))
-            in_channels = mid_channels
-        self.features_bend = LwopDecoderBend(
-            in_channels=mid_channels,
-            mid_channels=mid_channels,
-            out_channels=out_channels)
+        with self.init_scope():
+            self.body = SimpleSequential()
+            with self.body.init_scope():
+                for i in range(2):
+                    setattr(self.body, "block{}".format(i + 1), LwopRefinementBlock(
+                        in_channels=in_channels,
+                        out_channels=mid_channels))
+                    in_channels = mid_channels
+            self.features_bend = LwopDecoderBend(
+                in_channels=mid_channels,
+                mid_channels=mid_channels,
+                out_channels=out_channels)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.body(x)
         x = self.features_bend(x)
         return x
 
 
-class LwopDecoderFinalBlock(nn.Module):
+class LwopDecoderFinalBlock(Chain):
     """
     Lightweight OpenPose 2D/3D specific decoder final block for calcualation 3D poses.
 
@@ -386,29 +400,31 @@ class LwopDecoderFinalBlock(nn.Module):
         features_in_channels = in_channels - features_out_channels
 
         if self.calc_3d_features:
-            self.body = nn.Sequential()
-            for i in range(5):
-                self.body.add_module("block{}".format(i + 1), LwopResUnit(
-                    in_channels=in_channels,
-                    out_channels=features_in_channels,
-                    bottleneck_factor=bottleneck_factor))
-                in_channels = features_in_channels
-            self.features_bend = LwopDecoderFeaturesBend(
-                in_channels=features_in_channels,
-                mid_channels=features_in_channels,
-                out_channels=features_out_channels)
+            with self.init_scope():
+                self.body = SimpleSequential()
+                with self.body.init_scope():
+                    for i in range(5):
+                        setattr(self.body, "block{}".format(i + 1), LwopResUnit(
+                            in_channels=in_channels,
+                            out_channels=features_in_channels,
+                            bottleneck_factor=bottleneck_factor))
+                        in_channels = features_in_channels
+                self.features_bend = LwopDecoderFeaturesBend(
+                    in_channels=features_in_channels,
+                    mid_channels=features_in_channels,
+                    out_channels=features_out_channels)
 
-    def forward(self, x):
+    def __call__(self, x):
         heatmap_paf_2d = x[:, -self.num_heatmap_paf:]
         if not self.calc_3d_features:
             return heatmap_paf_2d
         x = self.body(x)
         x = self.features_bend(x)
-        y = torch.cat((heatmap_paf_2d, x), dim=1)
+        y = F.concat((heatmap_paf_2d, x), axis=1)
         return y
 
 
-class LwOpenPose(nn.Module):
+class LwOpenPose(Chain):
     """
     Lightweight OpenPose 2D/3D model from 'Real-time 2D Multi-Person Pose Estimation on CPU: Lightweight OpenPose,'
     https://arxiv.org/abs/1811.12004.
@@ -455,57 +471,53 @@ class LwOpenPose(nn.Module):
         self.calc_3d_features = calc_3d_features
         num_heatmap_paf = 3 * keypoints
 
-        self.encoder = nn.Sequential()
-        backbone = nn.Sequential()
-        backbone.add_module("init_block", conv3x3_block(
-            in_channels=in_channels,
-            out_channels=encoder_init_block_channels,
-            stride=2))
-        in_channels = encoder_init_block_channels
-        for i, channels_per_stage in enumerate(encoder_channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                padding = encoder_paddings[i][j]
-                stage.add_module("unit{}".format(j + 1), dwsconv3x3_block(
+        with self.init_scope():
+            self.encoder = SimpleSequential()
+            with self.encoder.init_scope():
+                backbone = SimpleSequential()
+                with backbone.init_scope():
+                    setattr(backbone, "init_block", conv3x3_block(
+                        in_channels=in_channels,
+                        out_channels=encoder_init_block_channels,
+                        stride=2))
+                    in_channels = encoder_init_block_channels
+                    for i, channels_per_stage in enumerate(encoder_channels):
+                        stage = SimpleSequential()
+                        with stage.init_scope():
+                            for j, out_channels in enumerate(channels_per_stage):
+                                stride = 2 if (j == 0) and (i != 0) else 1
+                                pad = encoder_paddings[i][j]
+                                setattr(stage, "unit{}".format(j + 1), dwsconv3x3_block(
+                                    in_channels=in_channels,
+                                    out_channels=out_channels,
+                                    stride=stride,
+                                    pad=pad,
+                                    dilate=pad))
+                                in_channels = out_channels
+                        setattr(backbone, "stage{}".format(i + 1), stage)
+                setattr(self.encoder, "backbone", backbone)
+                setattr(self.encoder, "final_block", LwopEncoderFinalBlock(
                     in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride,
-                    padding=padding,
-                    dilation=padding))
-                in_channels = out_channels
-            backbone.add_module("stage{}".format(i + 1), stage)
-        self.encoder.add_module("backbone", backbone)
-        self.encoder.add_module("final_block", LwopEncoderFinalBlock(
-            in_channels=in_channels,
-            out_channels=encoder_final_block_channels))
-        in_channels = encoder_final_block_channels
+                    out_channels=encoder_final_block_channels))
+                in_channels = encoder_final_block_channels
 
-        self.decoder = nn.Sequential()
-        self.decoder.add_module("init_block", LwopDecoderInitBlock(
-            in_channels=in_channels,
-            keypoints=keypoints))
-        in_channels = encoder_final_block_channels + num_heatmap_paf
-        for i in range(refinement_units):
-            self.decoder.add_module("unit{}".format(i + 1), LwopDecoderUnit(
-                in_channels=in_channels,
-                keypoints=keypoints))
-        self.decoder.add_module("final_block", LwopDecoderFinalBlock(
-            in_channels=in_channels,
-            keypoints=keypoints,
-            bottleneck_factor=2,
-            calc_3d_features=calc_3d_features))
+            self.decoder = SimpleSequential()
+            with self.decoder.init_scope():
+                setattr(self.decoder, "init_block", LwopDecoderInitBlock(
+                    in_channels=in_channels,
+                    keypoints=keypoints))
+                in_channels = encoder_final_block_channels + num_heatmap_paf
+                for i in range(refinement_units):
+                    setattr(self.decoder, "unit{}".format(i + 1), LwopDecoderUnit(
+                        in_channels=in_channels,
+                        keypoints=keypoints))
+                setattr(self.decoder, "final_block", LwopDecoderFinalBlock(
+                    in_channels=in_channels,
+                    keypoints=keypoints,
+                    bottleneck_factor=2,
+                    calc_3d_features=calc_3d_features))
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
+    def __call__(self, x):
         x = self.encoder(x)
         x = self.decoder(x)
         if self.return_heatmap:
@@ -518,7 +530,7 @@ def get_lwopenpose(calc_3d_features,
                    keypoints,
                    model_name=None,
                    pretrained=False,
-                   root=os.path.join("~", ".torch", "models"),
+                   root=os.path.join("~", ".chainer", "models"),
                    **kwargs):
     """
     Create Lightweight OpenPose 2D/3D model with specific parameters.
@@ -533,7 +545,7 @@ def get_lwopenpose(calc_3d_features,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     encoder_channels = [[64], [128, 128], [256, 256, 512, 512, 512, 512, 512, 512]]
@@ -555,11 +567,12 @@ def get_lwopenpose(calc_3d_features,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        load_npz(
+            file=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root),
+            obj=net)
 
     return net
 
@@ -575,7 +588,7 @@ def lwopenpose2d_mobilenet_cmupan(keypoints=19, **kwargs):
         Number of keypoints.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan",
@@ -593,23 +606,19 @@ def lwopenpose3d_mobilenet_cmupan(keypoints=19, **kwargs):
         Number of keypoints.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
     return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan",
                           **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
+    import numpy as np
+    import chainer
+
+    chainer.global_config.train = False
+
     in_size = (368, 368)
     keypoints = 19
     return_heatmap = True
@@ -623,22 +632,18 @@ def _test():
     for model, model_dim in models:
 
         net = model(pretrained=pretrained, in_size=in_size, return_heatmap=return_heatmap)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != lwopenpose2d_mobilenet_cmupan or weight_count == 4091698)
         assert (model != lwopenpose3d_mobilenet_cmupan or weight_count == 5085983)
 
-        batch = 1
-        x = torch.randn(batch, 3, in_size[0], in_size[1])
+        batch = 14
+        x = np.random.rand(batch, 3, in_size[0], in_size[1]).astype(np.float32)
         y = net(x)
-        # y.sum().backward()
         if model_dim == "2d":
-            assert (tuple(y.size()) == (batch, 3 * keypoints, in_size[0] // 8, in_size[0] // 8))
+            assert (y.shape == (batch, 3 * keypoints, in_size[0] // 8, in_size[0] // 8))
         else:
-            assert (tuple(y.size()) == (batch, 6 * keypoints, in_size[0] // 8, in_size[0] // 8))
+            assert (y.shape == (batch, 6 * keypoints, in_size[0] // 8, in_size[0] // 8))
 
 
 if __name__ == "__main__":

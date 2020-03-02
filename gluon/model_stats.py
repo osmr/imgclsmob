@@ -7,12 +7,13 @@ import numpy as np
 import mxnet as mx
 from mxnet.gluon import nn
 from mxnet.gluon.contrib.nn import Identity, PixelShuffle2D
-from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish, InterpolationBlock
+from .gluoncv2.models.common import ReLU6, ChannelShuffle, ChannelShuffle2, PReLU2, HSigmoid, HSwish,\
+    InterpolationBlock, HeatmapMaxDetBlock
 from .gluoncv2.models.fishnet import ChannelSqueeze
 from .gluoncv2.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .gluoncv2.models.rir_cifar import RiRFinalBlock
 from .gluoncv2.models.proxylessnas import ProxylessUnit
-from .gluoncv2.models.simplepose_coco import HeatmapMaxDetBlock
+from .gluoncv2.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 
 __all__ = ['measure_model']
 
@@ -221,6 +222,12 @@ def measure_model(model,
             extra_num_macs = 0
         elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock]:
             extra_num_flops, extra_num_macs = block.calc_flops(x[0])
+        elif isinstance(block, LwopDecoderFinalBlock):
+            if not block.calc_3d_features:
+                extra_num_flops = 0
+                extra_num_macs = 0
+            else:
+                raise TypeError("LwopDecoderFinalBlock!")
         else:
             raise TypeError("Unknown layer type: {}".format(type(block)))
 

@@ -116,12 +116,12 @@ from .models.sinet import *
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
+from .models.lwopenpose_cmupan import *
 
 # from .models.others.oth_sinet import *
 
 from .models.others.oth_pose_resnet import *
 
-from .models.lwopenpose_cmupan import *
 from .models.others.oth_lwopenpose2d import *
 from .models.others.oth_lwopenpose3d import *
 
@@ -1000,6 +1000,9 @@ _models = {
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 
+    'lwopenpose2d_mobilenet_cmupan': lwopenpose2d_mobilenet_cmupan,
+    'lwopenpose3d_mobilenet_cmupan': lwopenpose3d_mobilenet_cmupan,
+
     'superpointnet': superpointnet,
 
     # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
@@ -1011,8 +1014,6 @@ _models = {
     'oth_pose_coco_resnet_152_256x192': oth_pose_coco_resnet_152_256x192,
     'oth_pose_coco_resnet_152_384x288': oth_pose_coco_resnet_152_384x288,
 
-    'lwopenpose2d_mobilenet_cmupan': lwopenpose2d_mobilenet_cmupan,
-    'lwopenpose3d_mobilenet_cmupan': lwopenpose3d_mobilenet_cmupan,
     'oth_lwopenpose2d': oth_lwopenpose2d,
     'oth_lwopenpose3d': oth_lwopenpose3d,
 

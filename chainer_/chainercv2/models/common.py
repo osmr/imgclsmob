@@ -666,6 +666,7 @@ def dwsconv3x3_block(in_channels,
                      pad=1,
                      dilate=1,
                      use_bias=False,
+                     use_bn=True,
                      bn_eps=1e-5,
                      dw_activation=(lambda: F.relu),
                      pw_activation=(lambda: F.relu)):
@@ -686,6 +687,8 @@ def dwsconv3x3_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     dw_activation : function or str or None, default F.relu
@@ -701,6 +704,7 @@ def dwsconv3x3_block(in_channels,
         pad=pad,
         dilate=dilate,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_eps=bn_eps,
         dw_activation=dw_activation,
         pw_activation=pw_activation)

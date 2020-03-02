@@ -8,12 +8,12 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from .pytorchcv.models.common import ChannelShuffle, ChannelShuffle2, Identity, Flatten, Swish, HSigmoid, HSwish,\
-    InterpolationBlock
+    InterpolationBlock, HeatmapMaxDetBlock
 from .pytorchcv.models.fishnet import ChannelSqueeze
 from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBlock
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
 from .pytorchcv.models.proxylessnas import ProxylessUnit
-from .pytorchcv.models.simplepose_coco import HeatmapMaxDetBlock
+from .pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 
 __all__ = ['measure_model']
 
@@ -242,6 +242,12 @@ def measure_model(model,
             extra_num_macs = 0
         elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock]:
             extra_num_flops, extra_num_macs = module.calc_flops(x[0])
+        elif isinstance(module, LwopDecoderFinalBlock):
+            if not module.calc_3d_features:
+                extra_num_flops = 0
+                extra_num_macs = 0
+            else:
+                raise TypeError("LwopDecoderFinalBlock!")
         else:
             raise TypeError("Unknown layer type: {}".format(type(module)))
 

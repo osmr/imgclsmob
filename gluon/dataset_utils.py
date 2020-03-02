@@ -16,6 +16,7 @@ from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import CocoSegMetaInfo
 from .datasets.coco_hpe_dataset import CocoHpeMetaInfo
+from .datasets.coco_hpe2_dataset import CocoHpe2MetaInfo
 from .datasets.hpatches_mch_dataset import HPatchesMetaInfo
 from .weighted_random_sampler import WeightedRandomSampler
 from mxnet.gluon.data import DataLoader
@@ -48,6 +49,7 @@ def get_dataset_metainfo(dataset_name):
         "Cityscapes": CityscapesMetaInfo,
         "CocoSeg": CocoSegMetaInfo,
         "CocoHpe": CocoHpeMetaInfo,
+        "CocoHpe2": CocoHpe2MetaInfo,
         "HPatches": HPatchesMetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():

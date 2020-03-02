@@ -7,12 +7,11 @@ import json
 import math
 import cv2
 import numpy as np
-import torch
-import torch.utils.data as data
+from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpe2Dataset(data.Dataset):
+class CocoHpe2Dataset(GetterDataset):
     """
     COCO keypoint detection (2D multiple human pose estimation) dataset.
 
@@ -72,7 +71,7 @@ class CocoHpe2Dataset(data.Dataset):
             min_dims)
         image = image.astype(np.float32)
         image = image.transpose((2, 0, 1))
-        image = torch.from_numpy(image)
+        # image = torch.from_numpy(image)
 
         # if self.transform is not None:
         #     image = self.transform(image)
@@ -80,9 +79,17 @@ class CocoHpe2Dataset(data.Dataset):
         image_id = int(os.path.splitext(os.path.basename(file_name))[0])
 
         label = np.array([image_id] + pad + [height, width], np.float32)
-        label = torch.from_numpy(label)
+        # label = torch.from_numpy(label)
 
         return image, label
+
+    def _get_image(self, idx):
+        image, label = self[idx]
+        return image
+
+    def _get_label(self, idx):
+        image, label = self[idx]
+        return label
 
     @staticmethod
     def normalize(img,

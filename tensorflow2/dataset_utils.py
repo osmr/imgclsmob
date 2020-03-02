@@ -15,6 +15,7 @@ from .datasets.ade20k_seg_dataset import ADE20KMetaInfo
 from .datasets.cityscapes_seg_dataset import CityscapesMetaInfo
 from .datasets.coco_seg_dataset import CocoSegMetaInfo
 from .datasets.coco_hpe_dataset import CocoHpeMetaInfo
+from .datasets.coco_hpe2_dataset import CocoHpe2MetaInfo
 
 
 def get_dataset_metainfo(dataset_name):
@@ -42,6 +43,7 @@ def get_dataset_metainfo(dataset_name):
         "Cityscapes": CityscapesMetaInfo,
         "CocoSeg": CocoSegMetaInfo,
         "CocoHpe": CocoHpeMetaInfo,
+        "CocoHpe2": CocoHpe2MetaInfo,
     }
     if dataset_name in dataset_metainfo_map.keys():
         return dataset_metainfo_map[dataset_name]()

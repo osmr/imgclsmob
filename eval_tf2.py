@@ -226,6 +226,11 @@ def main():
     """
     args = parse_args()
 
+    if args.disable_cudnn_autotune:
+        os.environ["TF_CUDNN_USE_AUTOTUNE"] = "0"
+        # os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
+        # os.environ["TF_DETERMINISTIC_OPS"] = "1"
+
     gpus = tf.config.experimental.list_physical_devices("GPU")
     if gpus:
         for gpu in gpus:

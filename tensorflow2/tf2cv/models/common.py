@@ -828,6 +828,9 @@ class Conv2d(nn.Layer):
             x = self.pad(x)
             # x = tf.pad(x, paddings=self.paddings_tf)
         if self.use_conv:
+            # if self.conv.dilation_rate == (2, 2):
+            #     print("x.shape={}".format(x.shape))
+            #     print("self.conv.padding={}".format(self.conv.padding))
             x = self.conv(x)
         elif self.use_dw_conv:
             x = self.dw_conv(x)

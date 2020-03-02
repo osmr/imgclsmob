@@ -120,6 +120,7 @@ from .models.superpointnet import *
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
+from .models.lwopenpose_cmupan import *
 
 # from .models.others.oth_simple_pose_resnet import *
 # from .models.others.oth_mobile_pose import *
@@ -1058,6 +1059,9 @@ _models = {
     'simplepose_mobile_mobilenetv2b_w1_coco': simplepose_mobile_mobilenetv2b_w1_coco,
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
+
+    'lwopenpose2d_mobilenet_cmupan': lwopenpose2d_mobilenet_cmupan,
+    'lwopenpose3d_mobilenet_cmupan': lwopenpose3d_mobilenet_cmupan,
 
     # 'oth_icnet_resnet50_citys': oth_icnet_resnet50_citys,
 

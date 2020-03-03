@@ -247,7 +247,7 @@ class SELayer(nn.Module):
         :param reduction: channel compression ratio
         :return output the tensor with the same shape of input
         """
-        assert inp_dim > reduction, f"Make sure your input channel bigger than reduction which equals to {reduction}"
+        # assert inp_dim > reduction, f"Make sure your input channel bigger than reduction which equals to {reduction}"
         super(SELayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(

@@ -828,10 +828,27 @@ class Conv2d(nn.Layer):
             x = self.pad(x)
             # x = tf.pad(x, paddings=self.paddings_tf)
         if self.use_conv:
-            # if self.conv.dilation_rate == (2, 2):
-            #     print("x.shape={}".format(x.shape))
-            #     print("self.conv.padding={}".format(self.conv.padding))
-            x = self.conv(x)
+            try:
+                x = self.conv(x)
+            except tf.errors.InvalidArgumentError as ex:
+                if self.conv.dilation_rate != (1, 1):
+                    conv_ = nn.Conv2D(
+                        filters=self.conv.filters,
+                        kernel_size=self.conv.kernel_size,
+                        strides=self.conv.strides,
+                        padding="valid",
+                        data_format=self.data_format,
+                        dilation_rate=self.conv.dilation_rate,
+                        use_bias=self.conv.use_bias,
+                        name="conv_")
+                    _ = conv_(x)
+                    conv_.weights[0].assign(self.conv.weights[0])
+                    if len(self.conv.weights) > 1:
+                        conv_.weights[1].assign(self.conv.weights[1])
+                    x = conv_(x)
+                else:
+                    raise ex
+            # x = self.conv(x)
         elif self.use_dw_conv:
             x = self.dw_conv(x)
         else:

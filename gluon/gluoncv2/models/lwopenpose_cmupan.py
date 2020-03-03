@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1811.12004.
 """
 
-__all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan', 'lwopenpose3d_mobilenet_cmupan', 'LwopDecoderFinalBlock']
+__all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan_coco', 'lwopenpose3d_mobilenet_cmupan_coco',
+           'LwopDecoderFinalBlock']
 
 import os
 from mxnet import cpu
@@ -639,7 +640,7 @@ def get_lwopenpose(calc_3d_features,
     return net
 
 
-def lwopenpose2d_mobilenet_cmupan(keypoints=19, **kwargs):
+def lwopenpose2d_mobilenet_cmupan_coco(keypoints=19, **kwargs):
     """
     Lightweight OpenPose 2D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
@@ -655,11 +656,11 @@ def lwopenpose2d_mobilenet_cmupan(keypoints=19, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan",
+    return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan_coco",
                           **kwargs)
 
 
-def lwopenpose3d_mobilenet_cmupan(keypoints=19, **kwargs):
+def lwopenpose3d_mobilenet_cmupan_coco(keypoints=19, **kwargs):
     """
     Lightweight OpenPose 3D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
@@ -675,7 +676,7 @@ def lwopenpose3d_mobilenet_cmupan(keypoints=19, **kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan",
+    return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan_coco",
                           **kwargs)
 
 
@@ -689,8 +690,8 @@ def _test():
     pretrained = False
 
     models = [
-        (lwopenpose2d_mobilenet_cmupan, "2d"),
-        (lwopenpose3d_mobilenet_cmupan, "3d"),
+        (lwopenpose2d_mobilenet_cmupan_coco, "2d"),
+        (lwopenpose3d_mobilenet_cmupan_coco, "3d"),
     ]
 
     for model, model_dim in models:
@@ -709,8 +710,8 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != lwopenpose2d_mobilenet_cmupan or weight_count == 4091698)
-        assert (model != lwopenpose3d_mobilenet_cmupan or weight_count == 5085983)
+        assert (model != lwopenpose2d_mobilenet_cmupan_coco or weight_count == 4091698)
+        assert (model != lwopenpose3d_mobilenet_cmupan_coco or weight_count == 5085983)
 
         batch = 14
         x = mx.nd.random.normal(shape=(batch, 3, in_size[0], in_size[1]), ctx=ctx)

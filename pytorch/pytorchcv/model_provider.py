@@ -1000,8 +1000,8 @@ _models = {
     'simplepose_mobile_mobilenetv3_small_w1_coco': simplepose_mobile_mobilenetv3_small_w1_coco,
     'simplepose_mobile_mobilenetv3_large_w1_coco': simplepose_mobile_mobilenetv3_large_w1_coco,
 
-    'lwopenpose2d_mobilenet_cmupan': lwopenpose2d_mobilenet_cmupan,
-    'lwopenpose3d_mobilenet_cmupan': lwopenpose3d_mobilenet_cmupan,
+    'lwopenpose2d_mobilenet_cmupan_coco': lwopenpose2d_mobilenet_cmupan_coco,
+    'lwopenpose3d_mobilenet_cmupan_coco': lwopenpose3d_mobilenet_cmupan_coco,
 
     'superpointnet': superpointnet,
 

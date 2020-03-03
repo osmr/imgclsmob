@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1811.12004.
 """
 
-__all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan', 'lwopenpose3d_mobilenet_cmupan', 'LwopDecoderFinalBlock']
+__all__ = ['LwOpenPose', 'lwopenpose2d_mobilenet_cmupan_coco', 'lwopenpose3d_mobilenet_cmupan_coco',
+           'LwopDecoderFinalBlock']
 
 import os
 import tensorflow as tf
@@ -668,7 +669,7 @@ def get_lwopenpose(calc_3d_features,
     return net
 
 
-def lwopenpose2d_mobilenet_cmupan(keypoints=19, data_format="channels_last", **kwargs):
+def lwopenpose2d_mobilenet_cmupan_coco(keypoints=19, data_format="channels_last", **kwargs):
     """
     Lightweight OpenPose 2D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
@@ -684,11 +685,11 @@ def lwopenpose2d_mobilenet_cmupan(keypoints=19, data_format="channels_last", **k
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan",
+    return get_lwopenpose(calc_3d_features=False, keypoints=keypoints, model_name="lwopenpose2d_mobilenet_cmupan_coco",
                           data_format=data_format, **kwargs)
 
 
-def lwopenpose3d_mobilenet_cmupan(keypoints=19, data_format="channels_last", **kwargs):
+def lwopenpose3d_mobilenet_cmupan_coco(keypoints=19, data_format="channels_last", **kwargs):
     """
     Lightweight OpenPose 3D model on the base of MobileNet for CMU Panoptic from 'Real-time 2D Multi-Person Pose
     Estimation on CPU: Lightweight OpenPose,' https://arxiv.org/abs/1811.12004.
@@ -704,7 +705,7 @@ def lwopenpose3d_mobilenet_cmupan(keypoints=19, data_format="channels_last", **k
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan",
+    return get_lwopenpose(calc_3d_features=True, keypoints=keypoints, model_name="lwopenpose3d_mobilenet_cmupan_coco",
                           data_format=data_format, **kwargs)
 
 
@@ -717,17 +718,17 @@ def _test():
 
     data_format = "channels_last"
     # data_format = "channels_first"
-    in_size = (368, 368)
+    in_size_ = (368, 368)
     keypoints = 19
     return_heatmap = True
     pretrained = False
 
     models = [
-        (lwopenpose2d_mobilenet_cmupan, "2d"),
-        (lwopenpose3d_mobilenet_cmupan, "3d"),
+        (lwopenpose2d_mobilenet_cmupan_coco, "2d", in_size_),
+        (lwopenpose3d_mobilenet_cmupan_coco, "3d", in_size_),
     ]
 
-    for model, model_dim in models:
+    for model, model_dim, in_size in models:
 
         net = model(pretrained=pretrained, in_size=in_size, return_heatmap=return_heatmap, data_format=data_format)
 
@@ -746,8 +747,8 @@ def _test():
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != lwopenpose2d_mobilenet_cmupan or weight_count == 4091698)
-        assert (model != lwopenpose3d_mobilenet_cmupan or weight_count == 5085983)
+        assert (model != lwopenpose2d_mobilenet_cmupan_coco or weight_count == 4091698)
+        assert (model != lwopenpose3d_mobilenet_cmupan_coco or weight_count == 5085983)
 
 
 if __name__ == "__main__":

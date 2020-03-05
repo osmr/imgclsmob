@@ -9,7 +9,7 @@ __all__ = ['IbpPose', 'ibppose_coco']
 import os
 import torch
 from torch import nn
-from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
+from common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
 
 
 class IbpResBottleneck(nn.Module):
@@ -413,7 +413,7 @@ class IbpPose(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        pred = []
+        y = None
         for i in range(self.stacks):
             preds_instack = []
             hourglass_feature = self.hourglass[i](x)
@@ -437,9 +437,10 @@ class IbpPose(nn.Module):
                     else:
                         features_cache[j] = self.merge_preds[i][j](preds_instack[j]) +\
                                             self.merge_features[i][j](features_instack[j])
-            pred.append(preds_instack)
+                else:
+                    break
+            y = preds_instack[0]
 
-        y = pred[-1][0]
         return y
 
 

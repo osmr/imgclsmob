@@ -660,11 +660,15 @@ def get_lwopenpose(calc_3d_features,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
+        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
+            (1,) + net.in_size + (in_channels,)
+        net.build(input_shape=input_shape)
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 

@@ -1949,7 +1949,7 @@ class PixelShuffle(nn.Layer):
         f2 = self.scale_factor
 
         x_shape = x.get_shape().as_list()
-        batch = x_shape[0]
+        # batch = x_shape[0]
         if is_channels_first(self.data_format):
             channels = x_shape[1]
             height = x_shape[2]
@@ -1963,15 +1963,15 @@ class PixelShuffle(nn.Layer):
         new_channels = channels // f1 // f2
 
         if is_channels_first(self.data_format):
-            x = tf.reshape(x, shape=(batch, new_channels, f1 * f2, height, width))
-            x = tf.reshape(x, shape=(batch, new_channels, f1, f2, height, width))
+            x = tf.reshape(x, shape=(-1, new_channels, f1 * f2, height, width))
+            x = tf.reshape(x, shape=(-1, new_channels, f1, f2, height, width))
             x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
-            x = tf.reshape(x, shape=(batch, new_channels, height * f1, width * f2))
+            x = tf.reshape(x, shape=(-1, new_channels, height * f1, width * f2))
         else:
-            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1 * f2))
-            x = tf.reshape(x, shape=(batch, height, width, new_channels, f1, f2))
+            x = tf.reshape(x, shape=(-1, height, width, new_channels, f1 * f2))
+            x = tf.reshape(x, shape=(-1, height, width, new_channels, f1, f2))
             x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
-            x = tf.reshape(x, shape=(batch, height * f1, width * f2, new_channels))
+            x = tf.reshape(x, shape=(-1, height * f1, width * f2, new_channels))
 
         return x
 

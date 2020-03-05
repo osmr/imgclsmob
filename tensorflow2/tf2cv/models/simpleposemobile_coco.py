@@ -312,6 +312,7 @@ def _test():
     # data_format = "channels_first"
     in_size = (256, 192)
     keypoints = 17
+    pretrained_backbone = False
     return_heatmap = False
     pretrained = False
 
@@ -326,7 +327,8 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained, in_size=in_size, return_heatmap=return_heatmap, data_format=data_format)
+        net = model(pretrained_backbone=pretrained_backbone, keypoints=keypoints, pretrained=pretrained,
+                    in_size=in_size, return_heatmap=return_heatmap, data_format=data_format)
 
         batch = 14
         x = tf.random.normal((batch, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else

@@ -4,11 +4,12 @@
     https://arxiv.org/abs/1911.10529.
 """
 
-__all__ = ['ibppose_coco']
+__all__ = ['IbpPose', 'ibppose_coco']
 
+import os
 import torch
 from torch import nn
-from common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
 
 
 class IbpResBottleneck(nn.Module):
@@ -177,22 +178,27 @@ class IbpBackbone(nn.Module):
 
 class Hourglass(nn.Module):
     """
-    Instantiate an n order Hourglass Network block using recursive trick.
+    IBPPose hourglass block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    depth : int
+        Depth of hourglass.
+    growth_rate : int
+        Addition for number of channel for each level.
+    activation : function or str or None
+        Activation function or name of activation function.
     """
     def __init__(self,
-                 channels,  # input and output channels
-                 depth,  # oder number
-                 increase,  # increased channels while the depth grows
+                 in_channels,
+                 depth,
+                 growth_rate,
                  use_bn,
                  activation):
         super(Hourglass, self).__init__()
-        self.channels = channels
         self.depth = depth
-        self.increase = increase
-        self.use_bn = use_bn
-        self.activation = activation
-
-        self.hg = self._make_hour_glass()
 
         self.down = nn.MaxPool2d(
             kernel_size=2,
@@ -201,103 +207,77 @@ class Hourglass(nn.Module):
             scale_factor=2,
             mode="nearest")
 
-    def _make_lower_residual(self,
-                             depth_id):
-        pack_layers = [
-            IbpResUnit(
-                in_channels=self.channels + self.increase * depth_id,
-                out_channels=self.channels + self.increase * depth_id,
-                activation=self.activation),
-            IbpResUnit(
-                in_channels=self.channels + self.increase * depth_id,
-                out_channels=self.channels + self.increase * (depth_id + 1),
-                activation=self.activation),
-            IbpResUnit(
-                in_channels=self.channels + self.increase * (depth_id + 1),
-                out_channels=self.channels + self.increase * depth_id,
-                activation=self.activation),
-            conv3x3_block(
-                in_channels=self.channels + self.increase * depth_id,
-                out_channels=self.channels + self.increase * depth_id,
-                bias=(not self.use_bn),
-                use_bn=self.use_bn,
-                activation=self.activation),
-        ]
-        return pack_layers
-
-    def _make_single_residual(self, depth_id):
-        # the innermost conve layer, return as a layer item
-        # ###########  Index: 4
-        return IbpResUnit(
-            in_channels=self.channels + self.increase * (depth_id + 1),
-            out_channels=self.channels + self.increase * (depth_id + 1),
-            activation=self.activation)
-
-    def _make_hour_glass(self):
-        """
-        pack conve layers modules of hourglass block
-        :return: conve layers packed in n hourglass blocks
-        """
         hg = []
-        for i in range(self.depth):
-            res = self._make_lower_residual(i)
+        for i in range(depth):
+            res = [
+                IbpResUnit(
+                    in_channels=in_channels + growth_rate * i,
+                    out_channels=in_channels + growth_rate * i,
+                    activation=activation),
+                IbpResUnit(
+                    in_channels=in_channels + growth_rate * i,
+                    out_channels=in_channels + growth_rate * (i + 1),
+                    activation=activation),
+                IbpResUnit(
+                    in_channels=in_channels + growth_rate * (i + 1),
+                    out_channels=in_channels + growth_rate * i,
+                    activation=activation),
+                conv3x3_block(
+                    in_channels=in_channels + growth_rate * i,
+                    out_channels=in_channels + growth_rate * i,
+                    bias=(not use_bn),
+                    use_bn=use_bn,
+                    activation=activation),
+            ]
             if i == (self.depth - 1):
-                res.append(self._make_single_residual(i))
+                res.append(IbpResUnit(
+                    in_channels=in_channels + growth_rate * (i + 1),
+                    out_channels=in_channels + growth_rate * (i + 1),
+                    activation=activation))
             hg.append(nn.ModuleList(res))
-        return nn.ModuleList(hg)
+        self.hg = nn.ModuleList(hg)
 
     def _hour_glass_forward(self,
-                            depth_id,
+                            depth,
                             x,
-                            up_fms):
-        """
-        built an hourglass block whose order is depth_id
-        :param depth_id: oder number of hourglass block
-        :param x: input tensor
-        :return: output tensor through an hourglass block
-        """
-        up1 = self.hg[depth_id][0](x)
+                            ups):
+        up1 = self.hg[depth][0](x)
         low1 = self.down(x)
-        low1 = self.hg[depth_id][1](low1)
-        if depth_id == (self.depth - 1):  # except for the highest-order hourglass block
-            low2 = self.hg[depth_id][4](low1)
-        else:
-            # call the lower-order hourglass block recursively
-            low2 = self._hour_glass_forward(depth_id + 1, low1, up_fms)
-        low3 = self.hg[depth_id][2](low2)
-        up_fms.append(low2)
-        # ######################## # if we don't consider 8*8 scale
-        # if depth_id < self.depth - 1:
-        #     self.up_fms.append(low2)
+        low1 = self.hg[depth][1](low1)
+        low2 = self.hg[depth][4](low1) if depth == (self.depth - 1) else self._hour_glass_forward(depth + 1, low1, ups)
+        low3 = self.hg[depth][2](low2)
+        ups.append(low2)
         up2 = self.up(low3)
-        deconv1 = self.hg[depth_id][3](up2)
-        # deconv2 = self.hg[depth_id][4](deconv1)
-        # up1 += deconv2
-        # out = self.hg[depth_id][5](up1)  # relu after residual add
+        deconv1 = self.hg[depth][3](up2)
         return up1 + deconv1
 
     def forward(self, x):
-        """
-        :param: x a input tensor warpped wrapped as a list
-        :return: 5 different scales of feature maps, 128*128, 64*64, 32*32, 16*16, 8*8
-        """
-        up_fms = []  # collect feature maps produced by low2 at every scale
-        feature_map = self._hour_glass_forward(0, x, up_fms)
-        return [feature_map] + up_fms[::-1]
+        ups = []
+        feature_map = self._hour_glass_forward(0, x, ups)
+        return [feature_map] + ups[::-1]
 
 
-class Merge(nn.Module):
+class MergeBlock(nn.Module):
     """
-    Change the channel dimension of the input tensor
+    IBPPose merge block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    use_bn : bool
+        Whether to use BatchNorm layer.
     """
     def __init__(self,
-                 x_dim,
-                 y_dim,
+                 in_channels,
+                 out_channels,
                  use_bn):
-        super(Merge, self).__init__()
+        super(MergeBlock, self).__init__()
         self.conv = conv1x1_block(
-            in_channels=x_dim,
-            out_channels=y_dim,
+            in_channels=in_channels,
+            out_channels=out_channels,
             bias=(not use_bn),
             use_bn=use_bn,
             activation=None)
@@ -306,61 +286,80 @@ class Merge(nn.Module):
         return self.conv(x)
 
 
-class Features(nn.Module):
+class FeaturesBlock(nn.Module):
     """
-    Input: feature maps produced by hourglass block
-    Return: 5 different scales of feature maps, 128*128, 64*64, 32*32, 16*16, 8*8
+    IBPPose features block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    use_bn : bool
+        Whether to use BatchNorm layer.
     """
     def __init__(self,
                  out_channels,
                  use_bn,
                  increase,
                  scales):
-        super(Features, self).__init__()
+        super(FeaturesBlock, self).__init__()
         self.scales = scales
-        # Regress 5 different scales of heatmaps per stack
-        self.before_regress = nn.ModuleList(
-            [nn.Sequential(
-                conv3x3_block(
-                    in_channels=(out_channels + i * increase),
-                    out_channels=out_channels,
-                    bias=(not use_bn),
-                    use_bn=use_bn),
-                conv3x3_block(
-                    in_channels=out_channels,
-                    out_channels=out_channels,
-                    bias=(not use_bn),
-                    use_bn=use_bn),
-                SEBlock(channels=out_channels),
-            ) for i in range(scales)])
+
+        self.before_regress = nn.ModuleList([nn.Sequential(
+            conv3x3_block(
+                in_channels=(out_channels + i * increase),
+                out_channels=out_channels,
+                bias=(not use_bn),
+                use_bn=use_bn),
+            conv3x3_block(
+                in_channels=out_channels,
+                out_channels=out_channels,
+                bias=(not use_bn),
+                use_bn=use_bn),
+            SEBlock(channels=out_channels),
+        ) for i in range(scales)])
 
     def forward(self, fms):
         return [self.before_regress[i](fms[i]) for i in range(self.scales)]
 
 
 class IbpPose(nn.Module):
+    """
+    IBPPose model from 'Simple Pose: Rethinking and Improving a Bottom-up Approach for Multi-Person Pose Estimation,'
+    https://arxiv.org/abs/1911.10529.
+
+    Parameters:
+    ----------
+    stacks : int
+        Number of stacks.
+    backbone_out_channels : int
+        Number of output channels for the backbone.
+    outs_channels : int
+        Number of output channels for the backbone.
+    growth_rate : int
+        Addition for number of channel for each level.
+    use_bn : bool
+        Whether to use BatchNorm layer.
+    in_channels : int, default 3
+        Number of input channels.
+    in_size : tuple of two ints, default (256, 256)
+        Spatial size of the expected input image.
+    """
     def __init__(self,
-                 nstack,
+                 stacks,
                  backbone_out_channels,
-                 oup_dim,
-                 bn=False,
-                 increase=128,
-                 init_weights=True,
+                 outs_channels,
+                 growth_rate,
+                 use_bn,
                  in_channels=3,
-                 **kwargs):
-        """
-        Pack or initialize the trainable parameters of the network
-        :param nstack: number of stack
-        :param backbone_out_channels: input tensor channels fed into the hourglass block
-        :param oup_dim: channels of regressed feature maps
-        :param bn: use batch normalization
-        :param increase: increased channels once down-sampling
-        :param kwargs:
-        """
+                 in_size=(256, 256)):
         super(IbpPose, self).__init__()
+        assert (in_size is not None)
         activation = (lambda: nn.LeakyReLU(inplace=True))
         self.scales = 5
-        self.nstack = nstack
+        self.stacks = stacks
 
         self.backbone = IbpBackbone(
             in_channels=in_channels,
@@ -368,41 +367,36 @@ class IbpPose(nn.Module):
             activation=activation)
 
         self.hourglass = nn.ModuleList([Hourglass(
-            channels=backbone_out_channels,
+            in_channels=backbone_out_channels,
             depth=4,
-            increase=increase,
-            use_bn=bn,
-            activation=activation) for _ in range(nstack)])
+            growth_rate=growth_rate,
+            use_bn=use_bn,
+            activation=activation) for _ in range(stacks)])
 
-        self.features = nn.ModuleList([Features(
+        self.features = nn.ModuleList([FeaturesBlock(
             out_channels=backbone_out_channels,
-            use_bn=bn,
-            increase=increase,
-            scales=self.scales) for _ in range(nstack)])
+            use_bn=use_bn,
+            increase=growth_rate,
+            scales=self.scales) for _ in range(stacks)])
 
-        self.outs = nn.ModuleList(
-            [nn.ModuleList([conv1x1_block(
-                in_channels=backbone_out_channels,
-                out_channels=oup_dim,
-                bias=True,
-                use_bn=False,
-                activation=None) for j in range(self.scales)]) for i in
-             range(nstack)])
+        self.outs = nn.ModuleList([nn.ModuleList([conv1x1_block(
+            in_channels=backbone_out_channels,
+            out_channels=outs_channels,
+            bias=True,
+            use_bn=False,
+            activation=None) for j in range(self.scales)]) for i in range(stacks)])
 
-        self.merge_features = nn.ModuleList(
-            [nn.ModuleList([Merge(
-                backbone_out_channels,
-                backbone_out_channels + j * increase,
-                use_bn=bn) for j in range(self.scales)]) for i in range(nstack - 1)])
+        self.merge_features = nn.ModuleList([nn.ModuleList([MergeBlock(
+            in_channels=backbone_out_channels,
+            out_channels=backbone_out_channels + j * growth_rate,
+            use_bn=use_bn) for j in range(self.scales)]) for i in range(stacks - 1)])
 
-        self.merge_preds = nn.ModuleList(
-            [nn.ModuleList([Merge(
-                oup_dim,
-                backbone_out_channels + j * increase,
-                use_bn=bn) for j in range(self.scales)]) for i in range(nstack - 1)])
+        self.merge_preds = nn.ModuleList([nn.ModuleList([MergeBlock(
+            in_channels=outs_channels,
+            out_channels=backbone_out_channels + j * growth_rate,
+            use_bn=use_bn) for j in range(self.scales)]) for i in range(stacks - 1)])
 
-        if init_weights:
-            self._initialize_weights()
+        self._initialize_weights()
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -417,11 +411,10 @@ class IbpPose(nn.Module):
                 torch.nn.init.normal_(m.weight.data, 0, 0.01)
                 m.bias.data.zero_()
 
-    def forward(self, imgs):
-        x = imgs
+    def forward(self, x):
         x = self.backbone(x)
         pred = []
-        for i in range(self.nstack):
+        for i in range(self.stacks):
             preds_instack = []
             hourglass_feature = self.hourglass[i](x)
 
@@ -434,7 +427,7 @@ class IbpPose(nn.Module):
 
             for j in range(self.scales):
                 preds_instack.append(self.outs[i][j](features_instack[j]))
-                if i != self.nstack - 1:
+                if i != self.stacks - 1:
                     if j == 0:
                         x = x + self.merge_preds[i][j](preds_instack[j]) +\
                             self.merge_features[i][j](features_instack[j])
@@ -442,7 +435,6 @@ class IbpPose(nn.Module):
                                             self.merge_features[i][j](features_instack[j])
 
                     else:
-                        # reset the res caches
                         features_cache[j] = self.merge_preds[i][j](preds_instack[j]) +\
                                             self.merge_features[i][j](features_instack[j])
             pred.append(preds_instack)
@@ -451,9 +443,65 @@ class IbpPose(nn.Module):
         return y
 
 
-def ibppose_coco(pretrained=False, num_classes=3, in_channels=3, **kwargs):
-    model = IbpPose(4, 256, 54, bn=True, **kwargs)
-    return model
+def get_ibppose(model_name=None,
+                pretrained=False,
+                root=os.path.join("~", ".torch", "models"),
+                **kwargs):
+    """
+    Create IBPPose model with specific parameters.
+
+    Parameters:
+    ----------
+    calc_3d_features : bool, default False
+        Whether to calculate 3D features.
+    keypoints : int
+        Number of keypoints.
+    model_name : str or None, default None
+        Model name for loading pretrained model.
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    stacks = 4
+    backbone_out_channels = 256
+    outs_channels = 54
+    growth_rate = 128
+    use_bn = True
+
+    net = IbpPose(
+        stacks=stacks,
+        backbone_out_channels=backbone_out_channels,
+        outs_channels=outs_channels,
+        growth_rate=growth_rate,
+        use_bn=use_bn,
+        **kwargs)
+
+    if pretrained:
+        if (model_name is None) or (not model_name):
+            raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
+        from .model_store import download_model
+        download_model(
+            net=net,
+            model_name=model_name,
+            local_model_store_dir_path=root)
+
+    return net
+
+
+def ibppose_coco(**kwargs):
+    """
+    IBPPose model for COCO Keypoint from 'Simple Pose: Rethinking and Improving a Bottom-up Approach for Multi-Person
+    Pose Estimation,' https://arxiv.org/abs/1911.10529.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.torch/models'
+        Location for keeping the model parameters.
+    """
+    return get_ibppose(model_name="ibppose_coco", **kwargs)
 
 
 def _calc_width(net):
@@ -466,8 +514,7 @@ def _calc_width(net):
 
 
 def _test():
-    import torch
-
+    in_size = (256, 256)
     pretrained = False
 
     models = [
@@ -484,10 +531,11 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != ibppose_coco or weight_count == 129050040)
 
-        x = torch.randn(14, 3, 256, 256)
+        batch = 14
+        x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (14, 54, 64, 64))
+        assert ((y.shape[0] == batch) and (y.shape[1] == 54))
+        assert ((y.shape[2] == x.shape[2] // 4) and (y.shape[3] == x.shape[3] // 4))
 
 
 if __name__ == "__main__":

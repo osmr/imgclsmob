@@ -11,7 +11,7 @@ import torch.utils.data as data
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpeDataset(data.Dataset):
+class CocoHpe1Dataset(data.Dataset):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
@@ -64,7 +64,7 @@ class CocoHpeDataset(data.Dataset):
                  splits=("person_keypoints_val2017",),
                  check_centers=False,
                  skip_empty=True):
-        super(CocoHpeDataset, self).__init__()
+        super(CocoHpe1Dataset, self).__init__()
         self._root = os.path.expanduser(root)
         self.mode = mode
         self.transform = transform
@@ -80,6 +80,11 @@ class CocoHpeDataset(data.Dataset):
         self.json_id_to_contiguous = None
         self.contiguous_id_to_json = None
         self._items, self._labels = self._load_jsons()
+
+        mode_name = "train" if mode == "train" else "val"
+        annotations_dir_path = os.path.join(root, "annotations")
+        annotations_file_path = os.path.join(annotations_dir_path, "person_keypoints_" + mode_name + "2017.json")
+        self.annotations_file_path = annotations_file_path
 
     def __str__(self):
         detail = ",".join([str(s) for s in self._splits])
@@ -135,7 +140,7 @@ class CocoHpeDataset(data.Dataset):
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
 
-        res_label = np.array([float(score)] + [float(img_id)] + list(center) + list(scale), np.float32)
+        res_label = np.array([float(img_id)] + [float(score)] + list(center) + list(scale), np.float32)
 
         img = torch.from_numpy(img)
         res_label = torch.from_numpy(res_label)
@@ -649,6 +654,41 @@ def recalc_pose1(keypoints,
     return preds
 
 
+def recalc_pose1b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose1(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
+
 def recalc_pose2(keypoints,
                  bbs,
                  image_size):
@@ -687,19 +727,54 @@ def recalc_pose2(keypoints,
 
     return preds
 
+
+def recalc_pose2b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose2(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-class CocoHpeMetaInfo(DatasetMetaInfo):
+class CocoHpe1MetaInfo(DatasetMetaInfo):
     def __init__(self):
-        super(CocoHpeMetaInfo, self).__init__()
+        super(CocoHpe1MetaInfo, self).__init__()
         self.label = "COCO"
         self.short_label = "coco"
         self.root_dir_name = "coco"
-        self.dataset_class = CocoHpeDataset
+        self.dataset_class = CocoHpe1Dataset
         self.num_training_samples = None
         self.in_channels = 3
-        self.num_classes = CocoHpeDataset.classes
+        self.num_classes = CocoHpe1Dataset.classes
         self.input_image_size = (256, 192)
         self.train_metric_capts = None
         self.train_metric_names = None
@@ -710,9 +785,9 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoHpeOksApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "OksAp",
-             "coco": None,
-             "recalc_pose_fn": lambda x, y: recalc_pose1(x, y, self.input_image_size),
-             "in_vis_thresh": 0.0}]
+             "coco_annotations_file_path": None,
+             "use_file": False,
+             "pose_postprocessing_fn": lambda x, y: recalc_pose1b(x, y, self.input_image_size)}]
         self.saver_acc_ind = 0
         self.do_transform = True
         self.val_transform = CocoHpeValTransform1
@@ -736,7 +811,7 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         work_dir_path : str
             Path to working directory.
         """
-        super(CocoHpeMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        super(CocoHpe1MetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
         parser.add_argument(
             "--input-size",
             type=int,
@@ -759,15 +834,17 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : ArgumentParser
             Main script arguments.
         """
-        super(CocoHpeMetaInfo, self).update(args)
+        super(CocoHpe1MetaInfo, self).update(args)
         self.input_image_size = args.input_size
         self.model_type = args.model_type
         if self.model_type == 1:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose1(x, y, self.input_image_size)
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose1b(x, y, self.input_image_size)
             self.val_transform = CocoHpeValTransform1
             self.test_transform = CocoHpeValTransform1
         else:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose2(x, y, self.input_image_size)
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose2b(x, y, self.input_image_size)
             self.val_transform = CocoHpeValTransform2
             self.test_transform = CocoHpeValTransform2
 
@@ -781,4 +858,4 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        self.test_metric_extra_kwargs[0]["coco"] = dataset.coco
+        self.test_metric_extra_kwargs[0]["coco_annotations_file_path"] = dataset.annotations_file_path

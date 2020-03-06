@@ -4,12 +4,12 @@
     https://arxiv.org/abs/1911.10529.
 """
 
-__all__ = ['IbpPose', 'ibppose_coco']
+__all__ = ['IbpPose', 'ibppose_coco1']
 
 import os
 import torch
 from torch import nn
-from common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, conv7x7_block, SEBlock
 
 
 class IbpResBottleneck(nn.Module):
@@ -188,6 +188,8 @@ class Hourglass(nn.Module):
         Depth of hourglass.
     growth_rate : int
         Addition for number of channel for each level.
+    use_bn : bool
+        Whether to use BatchNorm layer.
     activation : function or str or None
         Activation function or name of activation function.
     """
@@ -239,22 +241,19 @@ class Hourglass(nn.Module):
 
     def _hour_glass_forward(self,
                             depth,
-                            x,
-                            ups):
+                            x):
         up1 = self.hg[depth][0](x)
         low1 = self.down(x)
         low1 = self.hg[depth][1](low1)
-        low2 = self.hg[depth][4](low1) if depth == (self.depth - 1) else self._hour_glass_forward(depth + 1, low1, ups)
+        low2 = self.hg[depth][4](low1) if depth == (self.depth - 1) else self._hour_glass_forward(depth + 1, low1)
         low3 = self.hg[depth][2](low2)
-        ups.append(low2)
         up2 = self.up(low3)
         deconv1 = self.hg[depth][3](up2)
         return up1 + deconv1
 
     def forward(self, x):
-        ups = []
-        feature_map = self._hour_glass_forward(0, x, ups)
-        return [feature_map] + ups[::-1]
+        feature_map = self._hour_glass_forward(0, x)
+        return feature_map
 
 
 class MergeBlock(nn.Module):
@@ -286,14 +285,12 @@ class MergeBlock(nn.Module):
         return self.conv(x)
 
 
-class FeaturesBlock(nn.Module):
+class IbpPreBlock(nn.Module):
     """
-    IBPPose features block.
+    IBPPose preliminary decoder block.
 
     Parameters:
     ----------
-    in_channels : int
-        Number of input channels.
     out_channels : int
         Number of output channels.
     use_bn : bool
@@ -301,28 +298,93 @@ class FeaturesBlock(nn.Module):
     """
     def __init__(self,
                  out_channels,
+                 use_bn):
+        super(IbpPreBlock, self).__init__()
+
+        self.conv1 = conv3x3_block(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            bias=(not use_bn),
+            use_bn=use_bn)
+        self.conv2 = conv3x3_block(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            bias=(not use_bn),
+            use_bn=use_bn)
+        self.se = SEBlock(channels=out_channels)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.se(x)
+        return x
+
+
+class IbpPass(nn.Module):
+    """
+    IBPPose single pass decoder block.
+
+    Parameters:
+    ----------
+    channels : int
+        Number of input/output channels.
+    mid_channels : int
+        Number of middle channels.
+    depth : int
+        Depth of hourglass.
+    growth_rate : int
+        Addition for number of channel for each level.
+    use_bn : bool
+        Whether to use BatchNorm layer.
+    activation : function or str or None
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 channels,
+                 mid_channels,
+                 depth,
+                 growth_rate,
+                 merge,
                  use_bn,
-                 increase,
-                 scales):
-        super(FeaturesBlock, self).__init__()
-        self.scales = scales
+                 activation):
+        super(IbpPass, self).__init__()
+        self.merge = merge
 
-        self.before_regress = nn.ModuleList([nn.Sequential(
-            conv3x3_block(
-                in_channels=(out_channels + i * increase),
-                out_channels=out_channels,
-                bias=(not use_bn),
-                use_bn=use_bn),
-            conv3x3_block(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                bias=(not use_bn),
-                use_bn=use_bn),
-            SEBlock(channels=out_channels),
-        ) for i in range(scales)])
+        self.hg = Hourglass(
+            in_channels=channels,
+            depth=depth,
+            growth_rate=growth_rate,
+            use_bn=use_bn,
+            activation=activation)
+        self.pre_block = IbpPreBlock(
+            out_channels=channels,
+            use_bn=use_bn)
+        self.post_block = conv1x1_block(
+            in_channels=channels,
+            out_channels=mid_channels,
+            bias=True,
+            use_bn=False,
+            activation=None)
 
-    def forward(self, fms):
-        return [self.before_regress[i](fms[i]) for i in range(self.scales)]
+        if self.merge:
+            self.pre_merge_block = MergeBlock(
+                in_channels=channels,
+                out_channels=channels,
+                use_bn=use_bn)
+            self.post_merge_block = MergeBlock(
+                in_channels=mid_channels,
+                out_channels=channels,
+                use_bn=use_bn)
+
+    def forward(self, x, x_prev):
+        x = self.hg(x)
+        if x_prev is not None:
+            x = x + x_prev
+        y = self.pre_block(x)
+        z = self.post_block(y)
+        if self.merge:
+            z = self.post_merge_block(z) + self.pre_merge_block(y)
+        return z
 
 
 class IbpPose(nn.Module):
@@ -332,12 +394,14 @@ class IbpPose(nn.Module):
 
     Parameters:
     ----------
-    stacks : int
-        Number of stacks.
+    passes : int
+        Number of passes.
     backbone_out_channels : int
         Number of output channels for the backbone.
     outs_channels : int
         Number of output channels for the backbone.
+    depth : int
+        Depth of hourglass.
     growth_rate : int
         Addition for number of channel for each level.
     use_bn : bool
@@ -348,9 +412,10 @@ class IbpPose(nn.Module):
         Spatial size of the expected input image.
     """
     def __init__(self,
-                 stacks,
+                 passes,
                  backbone_out_channels,
                  outs_channels,
+                 depth,
                  growth_rate,
                  use_bn,
                  in_channels=3,
@@ -358,43 +423,23 @@ class IbpPose(nn.Module):
         super(IbpPose, self).__init__()
         assert (in_size is not None)
         activation = (lambda: nn.LeakyReLU(inplace=True))
-        self.scales = 5
-        self.stacks = stacks
 
         self.backbone = IbpBackbone(
             in_channels=in_channels,
             out_channels=backbone_out_channels,
             activation=activation)
 
-        self.hourglass = nn.ModuleList([Hourglass(
-            in_channels=backbone_out_channels,
-            depth=4,
-            growth_rate=growth_rate,
-            use_bn=use_bn,
-            activation=activation) for _ in range(stacks)])
-
-        self.features = nn.ModuleList([FeaturesBlock(
-            out_channels=backbone_out_channels,
-            use_bn=use_bn,
-            increase=growth_rate,
-            scales=self.scales) for _ in range(stacks)])
-
-        self.outs = nn.ModuleList([nn.ModuleList([conv1x1_block(
-            in_channels=backbone_out_channels,
-            out_channels=outs_channels,
-            bias=True,
-            use_bn=False,
-            activation=None) for j in range(self.scales)]) for i in range(stacks)])
-
-        self.merge_features = nn.ModuleList([nn.ModuleList([MergeBlock(
-            in_channels=backbone_out_channels,
-            out_channels=backbone_out_channels + j * growth_rate,
-            use_bn=use_bn) for j in range(self.scales)]) for i in range(stacks - 1)])
-
-        self.merge_preds = nn.ModuleList([nn.ModuleList([MergeBlock(
-            in_channels=outs_channels,
-            out_channels=backbone_out_channels + j * growth_rate,
-            use_bn=use_bn) for j in range(self.scales)]) for i in range(stacks - 1)])
+        self.decoder = nn.Sequential()
+        for i in range(passes):
+            merge = (i != passes - 1)
+            self.decoder.add_module("pass{}".format(i + 1), IbpPass(
+                channels=backbone_out_channels,
+                mid_channels=outs_channels,
+                depth=depth,
+                growth_rate=growth_rate,
+                merge=merge,
+                use_bn=use_bn,
+                activation=activation))
 
         self._initialize_weights()
 
@@ -413,35 +458,12 @@ class IbpPose(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        y = None
-        for i in range(self.stacks):
-            preds_instack = []
-            hourglass_feature = self.hourglass[i](x)
-
-            if i == 0:
-                features_cache = [torch.zeros_like(hourglass_feature[scale]) for scale in range(self.scales)]
-            else:
-                hourglass_feature = [hourglass_feature[scale] + features_cache[scale] for scale in range(self.scales)]
-
-            features_instack = self.features[i](hourglass_feature)
-
-            for j in range(self.scales):
-                preds_instack.append(self.outs[i][j](features_instack[j]))
-                if i != self.stacks - 1:
-                    if j == 0:
-                        x = x + self.merge_preds[i][j](preds_instack[j]) +\
-                            self.merge_features[i][j](features_instack[j])
-                        features_cache[j] = self.merge_preds[i][j](preds_instack[j]) +\
-                                            self.merge_features[i][j](features_instack[j])
-
-                    else:
-                        features_cache[j] = self.merge_preds[i][j](preds_instack[j]) +\
-                                            self.merge_features[i][j](features_instack[j])
-                else:
-                    break
-            y = preds_instack[0]
-
-        return y
+        x_prev = None
+        for module in self.decoder._modules.values():
+            if x_prev is not None:
+                x = x + x_prev
+            x_prev = module(x, x_prev)
+        return x_prev
 
 
 def get_ibppose(model_name=None,
@@ -453,10 +475,6 @@ def get_ibppose(model_name=None,
 
     Parameters:
     ----------
-    calc_3d_features : bool, default False
-        Whether to calculate 3D features.
-    keypoints : int
-        Number of keypoints.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -464,16 +482,18 @@ def get_ibppose(model_name=None,
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    stacks = 4
+    passes = 4
     backbone_out_channels = 256
     outs_channels = 54
+    depth = 4
     growth_rate = 128
     use_bn = True
 
     net = IbpPose(
-        stacks=stacks,
+        passes=passes,
         backbone_out_channels=backbone_out_channels,
         outs_channels=outs_channels,
+        depth=depth,
         growth_rate=growth_rate,
         use_bn=use_bn,
         **kwargs)
@@ -490,7 +510,7 @@ def get_ibppose(model_name=None,
     return net
 
 
-def ibppose_coco(**kwargs):
+def ibppose_coco1(**kwargs):
     """
     IBPPose model for COCO Keypoint from 'Simple Pose: Rethinking and Improving a Bottom-up Approach for Multi-Person
     Pose Estimation,' https://arxiv.org/abs/1911.10529.
@@ -519,7 +539,7 @@ def _test():
     pretrained = False
 
     models = [
-        ibppose_coco,
+        ibppose_coco1,
     ]
 
     for model in models:
@@ -530,7 +550,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ibppose_coco or weight_count == 129050040)
+        assert (model != ibppose_coco1 or weight_count == 95834968)
 
         batch = 14
         x = torch.randn(batch, 3, in_size[0], in_size[1])

@@ -130,6 +130,9 @@ from .models.others.oth_prnet import *
 
 from .models.superpointnet import *
 
+from .models.ibppose_coco1 import *
+from .models.others.oth_ibppose import *
+
 __all__ = ['get_model']
 
 
@@ -1019,6 +1022,9 @@ _models = {
 
     'prnet': prnet,
     'oth_prnet': oth_prnet,
+
+    'ibppose_coco1': ibppose_coco1,
+    'oth_ibppose': oth_ibppose,
 }
 
 

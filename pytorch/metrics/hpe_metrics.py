@@ -40,6 +40,7 @@ class CocoHpeOksApMetric(EvalMetric):
         """
         Get evaluation metrics.
         """
+        import copy
         from pycocotools.coco import COCO
         gt = COCO(self.coco_annotations_file_path)
 
@@ -74,7 +75,7 @@ class CocoHpeOksApMetric(EvalMetric):
                 pred.dataset["annotations"] = anns
                 pred.createIndex()
                 return pred
-            pred = calc_pred(gt, self.coco_result)
+            pred = calc_pred(gt, copy.deepcopy(self.coco_result))
 
         from pycocotools.cocoeval import COCOeval
         coco_eval = COCOeval(gt, pred, "keypoints")

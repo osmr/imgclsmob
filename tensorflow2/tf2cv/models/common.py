@@ -1949,7 +1949,6 @@ class PixelShuffle(nn.Layer):
         f2 = self.scale_factor
 
         x_shape = x.get_shape().as_list()
-        # batch = x_shape[0]
         if is_channels_first(self.data_format):
             channels = x_shape[1]
             height = x_shape[2]
@@ -1973,6 +1972,34 @@ class PixelShuffle(nn.Layer):
             x = tf.transpose(x, perm=(0, 1, 4, 2, 5, 3))
             x = tf.reshape(x, shape=(-1, height * f1, width * f2, new_channels))
 
+        return x
+
+
+class PixelShuffle2(nn.Layer):
+    """
+    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
+    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158. Alternative implementation.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 scale_factor,
+                 data_format="channels_last",
+                 **kwargs):
+        super(PixelShuffle2, self).__init__(**kwargs)
+        self.scale_factor = scale_factor
+        self.data_format = data_format
+
+    def call(self, x, training=None):
+        if is_channels_first(self.data_format):
+            x = tf.nn.depth_to_space(input=x, block_size=self.scale_factor, data_format="NCHW")
+        else:
+            x = tf.nn.depth_to_space(input=x, block_size=self.scale_factor, data_format="NHWC")
         return x
 
 

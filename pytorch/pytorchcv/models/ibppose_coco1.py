@@ -484,7 +484,7 @@ def get_ibppose(model_name=None,
     """
     passes = 4
     backbone_out_channels = 256
-    outs_channels = 54
+    outs_channels = 50
     depth = 4
     growth_rate = 128
     use_bn = True
@@ -550,12 +550,12 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != ibppose_coco1 or weight_count == 95834968)
+        assert (model != ibppose_coco1 or weight_count == 95827784)
 
         batch = 14
         x = torch.randn(batch, 3, in_size[0], in_size[1])
         y = net(x)
-        assert ((y.shape[0] == batch) and (y.shape[1] == 54))
+        assert ((y.shape[0] == batch) and (y.shape[1] == 50))
         assert ((y.shape[2] == x.shape[2] // 4) and (y.shape[3] == x.shape[3] // 4))
 
 

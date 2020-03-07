@@ -396,7 +396,7 @@ class PoseNet(nn.Module):
 
 
 def oth_ibppose(pretrained=False, num_classes=3, in_channels=3, **kwargs):
-    model = PoseNet(4, 256, 54, bn=True, **kwargs)
+    model = PoseNet(4, 256, 50, bn=True, **kwargs)
     return model
 
 
@@ -426,12 +426,12 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_ibppose or weight_count == 129050040)
+        assert (model != oth_ibppose or weight_count == 128998760)
 
         x = torch.randn(14, 3, 256, 256)
         y = net(x)
         y.sum().backward()
-        assert (tuple(y.size()) == (14, 54, 64, 64))
+        assert (tuple(y.size()) == (14, 50, 64, 64))
 
 
 if __name__ == "__main__":

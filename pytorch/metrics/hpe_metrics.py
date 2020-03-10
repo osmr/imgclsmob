@@ -19,12 +19,15 @@ class CocoHpeOksApMetric(EvalMetric):
         An function for pose post-processing.
     use_file : bool, default False
         Whether to use temporary file for estimation.
+    validation_ids : bool, default False
+        Whether to use temporary file for estimation.
     name : str, default 'CocoOksAp'
         Name of this metric instance for display.
     """
     def __init__(self,
                  coco_annotations_file_path,
                  pose_postprocessing_fn,
+                 validation_ids=None,
                  use_file=False,
                  name="CocoOksAp"):
         super(CocoHpeOksApMetric, self).__init__(name=name)
@@ -103,9 +106,9 @@ class CocoHpeOksApMetric(EvalMetric):
         pred_pts_score, pred_person_score, label_img_id = self.pose_postprocessing_fn(pred, label)
 
         for idx in range(len(pred_pts_score)):
-            image_id = label_img_id[idx]
+            image_id = int(label_img_id[idx])
             kpt = pred_pts_score[idx].flatten().tolist()
-            score = pred_person_score[idx]
+            score = float(pred_person_score[idx])
             self.coco_result.append({
                 "image_id": image_id,
                 "category_id": 1,

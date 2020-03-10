@@ -130,7 +130,7 @@ from .models.others.oth_prnet import *
 
 from .models.superpointnet import *
 
-from .models.ibppose_coco1 import *
+from .models.ibppose_coco2 import *
 from .models.others.oth_ibppose import *
 
 __all__ = ['get_model']

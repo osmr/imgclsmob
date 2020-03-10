@@ -297,7 +297,14 @@ class Features(nn.Module):
 
 
 class PoseNet(nn.Module):
-    def __init__(self, nstack, inp_dim, oup_dim, bn=False, increase=128, init_weights=True, **kwargs):
+    def __init__(self,
+                 nstack,
+                 inp_dim,
+                 oup_dim,
+                 bn=False,
+                 increase=128,
+                 init_weights=True,
+                 **kwargs):
         """
         Pack or initialize the trainable parameters of the network
         :param nstack: number of stack
@@ -336,8 +343,6 @@ class PoseNet(nn.Module):
             self._initialize_weights()
 
     def forward(self, imgs):
-        # Input Tensor: a batch of images within [0,1], shape=(N, H, W, C). Pre-processing was done in data generator
-        # x = imgs.permute(0, 3, 1, 2)  # Permute the dimensions of images to (N, C, H, W)
         x = imgs
         x = self.pre(x)
         pred = []
@@ -372,28 +377,21 @@ class PoseNet(nn.Module):
             pred.append(preds_instack)
         # returned list shape: [nstack * [batch*128*128, batch*64*64, batch*32*32, batch*16*16, batch*8*8]]z
         # return pred
-        return pred[-1][0]
+
+        y = pred[-1][0]
+        return y
 
     def _initialize_weights(self):
         for m in self.modules():
-            # 卷积的初始化方法
             if isinstance(m, nn.Conv2d):
-                # TODO: 使用正态分布进行初始化（0, 0.01) 网络权重看看
-                # n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                # He kaiming 初始化, 方差为2/n. math.sqrt(2. / n) 或者直接使用现成的nn.init中的函数。在这里会梯度爆炸
-                m.weight.data.normal_(0, 0.001)    # # math.sqrt(2. / n)
-                # torch.nn.init.kaiming_normal_(m.weight)
-                # bias都初始化为0
-                if m.bias is not None:  # 当有BN层时，卷积层Con不加bias！
+                m.weight.data.normal_(0, 0.001)
+                if m.bias is not None:
                     m.bias.data.zero_()
-            # batchnorm使用全1初始化 bias全0
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
-
             elif isinstance(m, nn.Linear):
-                torch.nn.init.normal_(m.weight.data, 0, 0.01)  # todo: 0.001?
-                # m.weight.data.normal_(0, 0.01)
+                torch.nn.init.normal_(m.weight.data, 0, 0.01)
                 m.bias.data.zero_()
 
 
@@ -409,32 +407,6 @@ def _calc_width(net):
     for param in net_params:
         weight_count += np.prod(param.size())
     return weight_count
-
-
-def load_model(net,
-               file_path,
-               ignore_extra=True):
-    """
-    Load model state dictionary from a file.
-
-    Parameters
-    ----------
-    net : Module
-        Network in which weights are loaded.
-    file_path : str
-        Path to the file.
-    ignore_extra : bool, default True
-        Whether to silently ignore parameters from the file that are not present in this Module.
-    """
-    import torch
-
-    if ignore_extra:
-        pretrained_state = torch.load(file_path)
-        model_dict = net.state_dict()
-        pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
-    else:
-        net.load_state_dict(torch.load(file_path))
 
 
 def _test():
@@ -457,14 +429,7 @@ def _test():
         assert (model != oth_ibppose or weight_count == 128998760)
 
         x = torch.randn(14, 3, 256, 256)
-
-        import numpy as np
-        x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x_sp.npy"))
-        load_model(net, file_path="/home/osemery/projects/imgclsmob_data/pt-ibppose_coco1/oth_ibppose.pth")
-
         y = net(x)
-        np.save("/home/osemery/projects/imgclsmob_data/test/y_sp.npy", y.cpu().detach().numpy())
-
         y.sum().backward()
         assert (tuple(y.size()) == (14, 50, 64, 64))
 

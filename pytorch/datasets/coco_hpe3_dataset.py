@@ -276,7 +276,7 @@ def refine_centroid(scorefmp, anchor, radius):
 
 
 def find_connections(all_peaks, paf_avg, image_width, limb_seq):
-    mid_num_ = 2
+    mid_num_ = 20
     thre2 = 0.1
     connect_ration = 0.8
 

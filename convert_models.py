@@ -938,6 +938,7 @@ def convert_pt2pt(dst_params_file_path,
         src2 = src_param_keys[-3]
         del src_param_keys[-3]
         src_param_keys.insert(-7, src2)
+
     elif src_model.startswith("oth_dla"):
         src1 = list(filter(re.compile("\.project").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
@@ -1027,11 +1028,83 @@ def convert_pt2pt(dst_params_file_path,
         dst6n = [key for key in dst_param_keys if key not in dst6]
         dst_param_keys = dst6n + dst6
 
+    elif src_model.startswith("oth_ibppose"):
+        def sort_hg(src2):
+            src2b1 = list(filter(re.compile("^hourglass.[0-9].hg.0.0.").search, src2))
+            src2b2 = list(filter(re.compile("^hourglass.[0-9].hg.0.1.").search, src2))
+            src2b3 = list(filter(re.compile("^hourglass.[0-9].hg.1.0.").search, src2))
+            src2b4 = list(filter(re.compile("^hourglass.[0-9].hg.1.1.").search, src2))
+            src2b5 = list(filter(re.compile("^hourglass.[0-9].hg.2.0.").search, src2))
+            src2b6 = list(filter(re.compile("^hourglass.[0-9].hg.2.1.").search, src2))
+            src2b7 = list(filter(re.compile("^hourglass.[0-9].hg.3.0.").search, src2))
+            src2b8 = list(filter(re.compile("^hourglass.[0-9].hg.3.1.").search, src2))
+            src2b9 = list(filter(re.compile("^hourglass.[0-9].hg.3.4.").search, src2))
+            src2b10 = list(filter(re.compile("^hourglass.[0-9].hg.3.2.").search, src2))
+            src2b11 = list(filter(re.compile("^hourglass.[0-9].hg.3.3.").search, src2))
+            src2b12 = list(filter(re.compile("^hourglass.[0-9].hg.2.2.").search, src2))
+            src2b13 = list(filter(re.compile("^hourglass.[0-9].hg.2.3.").search, src2))
+            src2b14 = list(filter(re.compile("^hourglass.[0-9].hg.1.2.").search, src2))
+            src2b15 = list(filter(re.compile("^hourglass.[0-9].hg.1.3.").search, src2))
+            src2b16 = list(filter(re.compile("^hourglass.[0-9].hg.0.2.").search, src2))
+            src2b17 = list(filter(re.compile("^hourglass.[0-9].hg.0.3.").search, src2))
+            return src2b1 + src2b2 + src2b3 + src2b4 + src2b5 + src2b6 + src2b7 + src2b8 + src2b9 + src2b16 + src2b17 +\
+                   src2b14 + src2b15 + src2b12 + src2b13 + src2b10 + src2b11
+
+        src1 = list(filter(re.compile("^pre.").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n + src1
+        src2 = list(filter(re.compile("^hourglass.").search, src_param_keys))
+        src2n = [key for key in src_param_keys if key not in src2]
+        src2b1 = sort_hg(list(filter(re.compile("^hourglass.0.hg.").search, src2)))
+        src2b2 = sort_hg(list(filter(re.compile("^hourglass.1.hg.").search, src2)))
+        src2b3 = sort_hg(list(filter(re.compile("^hourglass.2.hg.").search, src2)))
+        src2b4 = sort_hg(list(filter(re.compile("^hourglass.3.hg.").search, src2)))
+        src_param_keys = src2n + src2b1 + src2b2 + src2b3 + src2b4
+        src3 = list(filter(re.compile("^features.[0-9].before_regress").search, src_param_keys))
+        src3n = [key for key in src_param_keys if key not in src3]
+        src3b = list(filter(re.compile("^features.[0-9].before_regress.0.").search, src3))
+        src_param_keys = src3n + src3b
+        src4 = list(filter(re.compile("^outs.[0-9].").search, src_param_keys))
+        src4n = [key for key in src_param_keys if key not in src4]
+        src4b = list(filter(re.compile("^outs.[0-9].0.").search, src4))
+        src_param_keys = src4n + src4b
+        src5 = list(filter(re.compile("^merge_features.[0-9].").search, src_param_keys))
+        src5n = [key for key in src_param_keys if key not in src5]
+        src5b = list(filter(re.compile("^merge_features.[0-9].0.").search, src5))
+        src_param_keys = src5n + src5b
+        src6 = list(filter(re.compile("^merge_preds.[0-9].").search, src_param_keys))
+        src6n = [key for key in src_param_keys if key not in src6]
+        src6b = list(filter(re.compile("^merge_preds.[0-9].0.").search, src6))
+        src_param_keys = src6n + src6b
+
+        dst1 = list(filter(re.compile("^backbone.").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst_param_keys = dst1n + dst1
+        dst2 = list(filter(re.compile("^decoder.pass[1-9].hg.").search, dst_param_keys))
+        dst2n = [key for key in dst_param_keys if key not in dst2]
+        dst_param_keys = dst2n + dst2
+        dst3 = list(filter(re.compile("^decoder.pass[1-9].pre_block.").search, dst_param_keys))
+        dst3n = [key for key in dst_param_keys if key not in dst3]
+        dst_param_keys = dst3n + dst3
+        dst4 = list(filter(re.compile("^decoder.pass[1-9].post_block.").search, dst_param_keys))
+        dst4n = [key for key in dst_param_keys if key not in dst4]
+        dst_param_keys = dst4n + dst4
+        dst5 = list(filter(re.compile("^decoder.pass[1-9].pre_merge_block.").search, dst_param_keys))
+        dst5n = [key for key in dst_param_keys if key not in dst5]
+        dst_param_keys = dst5n + dst5
+        dst6 = list(filter(re.compile("^decoder.pass[1-9].post_merge_block.").search, dst_param_keys))
+        dst6n = [key for key in dst_param_keys if key not in dst6]
+        dst_param_keys = dst6n + dst6
+
+    assert (len(src_param_keys) == len(dst_param_keys))
+
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if (src_model == "oth_shufflenetv2_wd2" and dst_model == "shufflenetv2_wd2") and \
                 (src_key == "network.8.weight"):
             dst_params[dst_key] = torch.from_numpy(src_params[src_key].numpy()[:, :, 0, 0])
         else:
+            # print("src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
+            #         src_key, dst_key, tuple(src_params[src_key].size()), tuple(dst_params[dst_key].size())))
             assert (tuple(dst_params[dst_key].size()) == tuple(src_params[src_key].size())), \
                 "src_key={}, dst_key={}, src_shape={}, dst_shape={}".format(
                     src_key, dst_key, tuple(src_params[src_key].size()), tuple(dst_params[dst_key].size()))
@@ -1262,8 +1335,9 @@ def main():
     if ((args.dst_fwk in ["keras", "tensorflow", "tf2"]) and any([s.find("convgroup") >= 0 for s in dst_param_keys]))\
             or ((args.src_fwk == "mxnet") and (args.src_model in ["crunet56", "crunet116", "preresnet269b"])):
         assert (len(src_param_keys) <= len(dst_param_keys))
-    elif (args.dst_fwk == "chainer") and (args.src_model.startswith("diaresnet") or
-                                          args.src_model.startswith("diapreresnet")):
+    elif ((args.dst_fwk == "chainer") and
+          (args.src_model.startswith("diaresnet") or args.src_model.startswith("diapreresnet"))) or\
+            args.src_model.startswith("oth_ibppose"):
         assert (len(src_param_keys) >= len(dst_param_keys))
     else:
         assert (len(src_param_keys) == len(dst_param_keys))

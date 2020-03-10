@@ -1945,6 +1945,9 @@ class PixelShuffle(nn.Layer):
         self.data_format = data_format
 
     def call(self, x, training=None):
+        if not tf.executing_eagerly():
+            return PixelShuffle2(scale_factor=self.scale_factor, data_format=self.data_format)(x)
+
         f1 = self.scale_factor
         f2 = self.scale_factor
 

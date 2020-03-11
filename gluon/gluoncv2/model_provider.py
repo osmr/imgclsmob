@@ -121,6 +121,7 @@ from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
+from .models.ibppose_coco import *
 
 # from .models.others.oth_simple_pose_resnet import *
 # from .models.others.oth_mobile_pose import *
@@ -1062,6 +1063,8 @@ _models = {
 
     'lwopenpose2d_mobilenet_cmupan_coco': lwopenpose2d_mobilenet_cmupan_coco,
     'lwopenpose3d_mobilenet_cmupan_coco': lwopenpose3d_mobilenet_cmupan_coco,
+
+    'ibppose_coco': ibppose_coco,
 
     # 'oth_icnet_resnet50_citys': oth_icnet_resnet50_citys,
 

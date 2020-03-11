@@ -11,7 +11,6 @@ from .gluoncv2.model_provider import get_model
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 from .metrics.hpe_metrics import CocoHpeOksApMetric
-from .metrics.hpe2_metrics import CocoHpe2OksApMetric
 
 
 def prepare_mx_context(num_gpus,
@@ -292,8 +291,6 @@ def get_metric(metric_name, metric_extra_kwargs):
         return MeanIoUMetric(**metric_extra_kwargs)
     elif metric_name == "CocoHpeOksApMetric":
         return CocoHpeOksApMetric(**metric_extra_kwargs)
-    elif metric_name == "CocoHpe2OksApMetric":
-        return CocoHpe2OksApMetric(**metric_extra_kwargs)
     else:
         raise Exception("Wrong metric name: {}".format(metric_name))
 

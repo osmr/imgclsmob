@@ -457,14 +457,7 @@ def _test():
         assert (model != oth_ibppose or weight_count == 128998760)
 
         x = torch.randn(14, 3, 256, 256)
-
-        import numpy as np
-        x = torch.from_numpy(np.load("/home/osemery/projects/imgclsmob_data/test/x_sp.npy"))
-        load_model(net, file_path="/home/osemery/projects/imgclsmob_data/pt-ibppose_coco1/oth_ibppose.pth")
-
         y = net(x)
-        np.save("/home/osemery/projects/imgclsmob_data/test/y_sp.npy", y.cpu().detach().numpy())
-
         y.sum().backward()
         assert (tuple(y.size()) == (14, 50, 64, 64))
 

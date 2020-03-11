@@ -3,15 +3,14 @@
 """
 
 import os
-import threading
 import copy
 import cv2
 import numpy as np
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, DirectoryIterator
+from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpeDataset(object):
+class CocoHpe1Dataset(GetterDataset):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
@@ -64,6 +63,7 @@ class CocoHpeDataset(object):
                  splits=("person_keypoints_val2017",),
                  check_centers=False,
                  skip_empty=True):
+        super(CocoHpe1Dataset, self).__init__()
         self._root = os.path.expanduser(root)
         self.mode = mode
         self.transform = transform
@@ -79,6 +79,11 @@ class CocoHpeDataset(object):
         self.json_id_to_contiguous = None
         self.contiguous_id_to_json = None
         self._items, self._labels = self._load_jsons()
+
+        mode_name = "train" if mode == "train" else "val"
+        annotations_dir_path = os.path.join(root, "annotations")
+        annotations_file_path = os.path.join(annotations_dir_path, "person_keypoints_" + mode_name + "2017.json")
+        self.annotations_file_path = annotations_file_path
 
     def __str__(self):
         detail = ",".join([str(s) for s in self._splits])
@@ -134,9 +139,38 @@ class CocoHpeDataset(object):
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
 
-        res_label = np.array([float(score)] + [float(img_id)] + list(center) + list(scale), np.float32)
+        res_label = np.array([float(img_id)] + [float(score)] + list(center) + list(scale), np.float32)
 
         return img, res_label
+
+    def _get_image(self, idx):
+        img_path = self._items[idx]
+
+        label = copy.deepcopy(self._labels[idx])
+        # img = mx.image.imread(img_path, 1)
+        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
+
+        if self.transform is not None:
+            img, scale, center, score = self.transform(img, label)
+
+        return img
+
+    def _get_label(self, idx):
+        img_path = self._items[idx]
+        img_id = int(os.path.splitext(os.path.basename(img_path))[0])
+
+        label = copy.deepcopy(self._labels[idx])
+        # img = mx.image.imread(img_path, 1)
+        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
+        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
+
+        if self.transform is not None:
+            img, scale, center, score = self.transform(img, label)
+
+        res_label = np.array(list(scale) + list(center) + [float(score)] + [float(img_id)], np.float32)
+
+        return res_label
 
     def _load_jsons(self):
         """
@@ -362,6 +396,7 @@ class CocoHpeValTransform1(object):
         img = img.astype(np.float32)
         img = img / 255.0
         img = (img - np.array(self.mean, np.float32)) / np.array(self.std, np.float32)
+        img = img.transpose((2, 0, 1))
 
         return img, scale, center, score
 
@@ -477,9 +512,7 @@ class CocoHpeValTransform2(object):
             pt1 = np.array(scale_box[(0, 1)], dtype=np.float32)
             pt2 = np.array(scale_box[(2, 3)], dtype=np.float32)
 
-        res_img = img[0].astype(np.float32)
-        res_img = res_img.transpose((1, 2, 0))
-        return res_img, pt1, pt2, score
+        return img[0].astype(np.float32), pt1, pt2, score
 
 
 def detector_to_alpha_pose(img,
@@ -645,6 +678,41 @@ def recalc_pose1(keypoints,
     return preds
 
 
+def recalc_pose1b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose1(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
+
 def recalc_pose2(keypoints,
                  bbs,
                  image_size):
@@ -683,19 +751,54 @@ def recalc_pose2(keypoints,
 
     return preds
 
+
+def recalc_pose2b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose2(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-class CocoHpeMetaInfo(DatasetMetaInfo):
+class CocoHpe1MetaInfo(DatasetMetaInfo):
     def __init__(self):
-        super(CocoHpeMetaInfo, self).__init__()
+        super(CocoHpe1MetaInfo, self).__init__()
         self.label = "COCO"
         self.short_label = "coco"
         self.root_dir_name = "coco"
-        self.dataset_class = CocoHpeDataset
+        self.dataset_class = CocoHpe1Dataset
         self.num_training_samples = None
         self.in_channels = 3
-        self.num_classes = CocoHpeDataset.classes
+        self.num_classes = CocoHpe1Dataset.classes
         self.input_image_size = (256, 192)
         self.train_metric_capts = None
         self.train_metric_names = None
@@ -706,16 +809,14 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoHpeOksApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "OksAp",
-             "coco": None,
-             "recalc_pose_fn": lambda x, y: recalc_pose1(x, y, self.input_image_size),
-             "in_vis_thresh": 0.0}]
+             "coco_annotations_file_path": None,
+             "use_file": False,
+             "pose_postprocessing_fn": lambda x, y: recalc_pose1b(x, y, self.input_image_size)}]
         self.saver_acc_ind = 0
         self.do_transform = True
-        self.test_transform = cocohpe_val_transform
-        self.test_transform2 = CocoHpeValTransform1
-        self.test_generator = cocohpe_test_generator
+        self.val_transform = CocoHpeValTransform1
+        self.test_transform = CocoHpeValTransform1
         self.ml_type = "hpe"
-        self.allow_hybridize = False
         self.net_extra_kwargs = {}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
@@ -734,7 +835,7 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         work_dir_path : str
             Path to working directory.
         """
-        super(CocoHpeMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        super(CocoHpe1MetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
         parser.add_argument(
             "--input-size",
             type=int,
@@ -757,17 +858,19 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : ArgumentParser
             Main script arguments.
         """
-        super(CocoHpeMetaInfo, self).update(args)
+        super(CocoHpe1MetaInfo, self).update(args)
         self.input_image_size = args.input_size
         self.model_type = args.model_type
         if self.model_type == 1:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose1(x, y, self.input_image_size)
-            self.val_transform2 = CocoHpeValTransform1
-            self.test_transform2 = CocoHpeValTransform1
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose1b(x, y, self.input_image_size)
+            self.val_transform = CocoHpeValTransform1
+            self.test_transform = CocoHpeValTransform1
         else:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose2(x, y, self.input_image_size)
-            self.val_transform2 = CocoHpeValTransform2
-            self.test_transform2 = CocoHpeValTransform2
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose2b(x, y, self.input_image_size)
+            self.val_transform = CocoHpeValTransform2
+            self.test_transform = CocoHpeValTransform2
 
     def update_from_dataset(self,
                             dataset):
@@ -779,256 +882,4 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        self.test_metric_extra_kwargs[0]["coco"] = dataset.coco
-
-
-# class CocoHpeMetaInfo(DatasetMetaInfo):
-#     def __init__(self):
-#         super(CocoHpeMetaInfo, self).__init__()
-#         self.label = "COCO"
-#         self.short_label = "coco"
-#         self.root_dir_name = "coco"
-#         self.dataset_class = CocoHpeDataset
-#         self.num_training_samples = None
-#         self.in_channels = 3
-#         self.num_classes = CocoHpeDataset.classes
-#         self.input_image_size = (256, 192)
-#         self.train_metric_capts = None
-#         self.train_metric_names = None
-#         self.train_metric_extra_kwargs = None
-#         self.val_metric_capts = None
-#         self.val_metric_names = None
-#         self.test_metric_capts = ["Val.CocoOksAp"]
-#         self.test_metric_names = ["CocoHpeOksApMetric"]
-#         self.test_metric_extra_kwargs = [
-#             {"name": "OksAp",
-#              "coco": None,
-#              "recalc_pose_fn": lambda x, y: recalc_pose1(x, y, self.input_image_size),
-#              "in_vis_thresh": 0.0}]
-#         self.saver_acc_ind = 0
-#         self.do_transform = True
-#         self.test_transform = cocohpe_val_transform
-#         self.test_transform2 = CocoHpeValTransform1
-#         self.test_generator = cocohpe_test_generator
-#         self.ml_type = "hpe"
-#         self.mean_rgb = (0.485, 0.456, 0.406)
-#         self.std_rgb = (0.229, 0.224, 0.225)
-#
-#     def update_from_dataset(self,
-#                             dataset):
-#         """
-#         Update dataset metainfo after a dataset class instance creation.
-#
-#         Parameters:
-#         ----------
-#         args : obj
-#             A dataset class instance.
-#         """
-#         self.test_metric_extra_kwargs[0]["coco"] = dataset.coco
-
-# ---------------------------------------------------------------------------------------------------------------------
-
-
-class CocoHpeDirectoryIterator(DirectoryIterator):
-    allowed_class_modes = {'categorical', 'binary', 'sparse', 'input', None}
-
-    def __init__(self,
-                 directory,
-                 image_data_generator,
-                 target_size=(256, 256),
-                 color_mode='rgb',
-                 classes=None,
-                 class_mode='categorical',
-                 batch_size=32,
-                 shuffle=True,
-                 seed=None,
-                 data_format='channels_last',
-                 save_to_dir=None,
-                 save_prefix='',
-                 save_format='png',
-                 follow_links=False,
-                 subset=None,
-                 interpolation='nearest',
-                 dtype='float32',
-                 dataset=None):
-        super(CocoHpeDirectoryIterator, self).set_processing_attrs(
-            image_data_generator,
-            target_size,
-            color_mode,
-            data_format,
-            save_to_dir,
-            save_prefix,
-            save_format,
-            subset,
-            interpolation)
-
-        self.dataset = dataset
-        self.class_mode = class_mode
-        self.dtype = dtype
-
-        self.n = len(self.dataset)
-        self.batch_size = batch_size
-        self.seed = seed
-        self.shuffle = shuffle
-        self.batch_index = 0
-        self.total_batches_seen = 0
-        self.lock = threading.Lock()
-        self.index_array = None
-        self.index_generator = self._flow_index()
-
-    def _get_batches_of_transformed_samples(self, index_array):
-        """Gets a batch of transformed samples.
-
-        # Arguments
-            index_array: Array of sample indices to include in batch.
-
-        # Returns
-            A batch of transformed samples.
-        """
-        batch_x = None
-        batch_y = None
-        for i, j in enumerate(index_array):
-            x, y = self.dataset[j]
-            if batch_x is None:
-                batch_x = np.zeros((len(index_array),) + x.shape, dtype=self.dtype)
-                batch_y = np.zeros((len(index_array),) + y.shape, dtype=np.float32)
-            batch_x[i] = x
-            batch_y[i] = y
-        return batch_x, batch_y
-
-
-class CocoHpeImageDataGenerator(ImageDataGenerator):
-
-    def flow_from_directory(self,
-                            directory,
-                            target_size=(256, 256),
-                            color_mode='rgb',
-                            classes=None,
-                            class_mode='categorical',
-                            batch_size=32,
-                            shuffle=True,
-                            seed=None,
-                            save_to_dir=None,
-                            save_prefix='',
-                            save_format='png',
-                            follow_links=False,
-                            subset=None,
-                            interpolation='nearest',
-                            dataset=None):
-        return CocoHpeDirectoryIterator(
-            directory,
-            self,
-            target_size=target_size,
-            color_mode=color_mode,
-            classes=classes,
-            class_mode=class_mode,
-            data_format=self.data_format,
-            batch_size=batch_size,
-            shuffle=shuffle,
-            seed=seed,
-            save_to_dir=save_to_dir,
-            save_prefix=save_prefix,
-            save_format=save_format,
-            follow_links=follow_links,
-            subset=subset,
-            interpolation=interpolation,
-            dataset=dataset)
-
-
-def cocohpe_val_transform(ds_metainfo,
-                          data_format="channels_last"):
-    """
-    Create image transform sequence for validation subset.
-
-    Parameters:
-    ----------
-    ds_metainfo : DatasetMetaInfo
-        Pascal VOC2012 dataset metainfo.
-    data_format : str, default 'channels_last'
-        The ordering of the dimensions in tensors.
-
-    Returns
-    -------
-    ImageDataGenerator
-        Image transform sequence.
-    """
-    data_generator = CocoHpeImageDataGenerator(
-        preprocessing_function=(lambda img: ds_metainfo.val_transform2(ds_metainfo=ds_metainfo)(img)),
-        data_format=data_format)
-    return data_generator
-
-
-def cocohpe_val_generator(data_generator,
-                          ds_metainfo,
-                          batch_size):
-    """
-    Create image generator for validation subset.
-
-    Parameters:
-    ----------
-    data_generator : ImageDataGenerator
-        Image transform sequence.
-    ds_metainfo : DatasetMetaInfo
-        Pascal VOC2012 dataset metainfo.
-    batch_size : int
-        Batch size.
-
-    Returns
-    -------
-    Sequential
-        Image transform sequence.
-    """
-    split = "val"
-    root = ds_metainfo.root_dir_path
-    root = os.path.join(root, split)
-    generator = data_generator.flow_from_directory(
-        directory=root,
-        target_size=ds_metainfo.input_image_size,
-        class_mode="binary",
-        batch_size=batch_size,
-        shuffle=False,
-        interpolation="bilinear",
-        dataset=ds_metainfo.dataset_class(
-            root=ds_metainfo.root_dir_path,
-            mode="val",
-            transform=ds_metainfo.val_transform2(
-                ds_metainfo=ds_metainfo)))
-    return generator
-
-
-def cocohpe_test_generator(data_generator,
-                           ds_metainfo,
-                           batch_size):
-    """
-    Create image generator for testing subset.
-
-    Parameters:
-    ----------
-    data_generator : ImageDataGenerator
-        Image transform sequence.
-    ds_metainfo : DatasetMetaInfo
-        Pascal VOC2012 dataset metainfo.
-    batch_size : int
-        Batch size.
-
-    Returns
-    -------
-    Sequential
-        Image transform sequence.
-    """
-    split = "val"
-    root = ds_metainfo.root_dir_path
-    root = os.path.join(root, split)
-    generator = data_generator.flow_from_directory(
-        directory=root,
-        target_size=ds_metainfo.input_image_size,
-        class_mode="binary",
-        batch_size=batch_size,
-        shuffle=False,
-        interpolation="bilinear",
-        dataset=ds_metainfo.dataset_class(
-            root=ds_metainfo.root_dir_path,
-            mode="test",
-            transform=ds_metainfo.test_transform2(
-                ds_metainfo=ds_metainfo)))
-    return generator
+        self.test_metric_extra_kwargs[0]["coco_annotations_file_path"] = dataset.annotations_file_path

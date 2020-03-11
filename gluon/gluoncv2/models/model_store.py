@@ -583,6 +583,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('simplepose_mobile_mobilenetv3_large_w1_coco', '6367', '7ba036a5ade736042531a0fe500ecec368dbf157', 'v0.0.456'),
     ('lwopenpose2d_mobilenet_cmupan_coco', '3999', 'b4a22e7c2a05e53fe22185002c48e81f76c2d918', 'v0.0.458'),
     ('lwopenpose3d_mobilenet_cmupan_coco', '3999', '4658738ec27d46ee01f2cad4aa975914e9f7108c', 'v0.0.458'),
+    ('ibppose_coco', '6486', '024d1fafb7471572129ccbb07d662f6d8ccdc758', 'v0.0.459'),
 ]}
 
 imgclsmob_repo_url = 'https://github.com/osmr/imgclsmob'

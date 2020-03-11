@@ -9,7 +9,7 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_si
            'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
            'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'MultiOutputSequential', 'InterpolationBlock', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -2270,9 +2270,11 @@ class InterpolationBlock(nn.Layer):
     scale_factor : int, default 1
         Multiplier for spatial size.
     out_size : tuple of 2 int, default None
-        Spatial size of the output tensor for the bilinear upsampling operation.
+        Spatial size of the output tensor for the interpolation operation.
     up : bool, default True
         Whether to upsample or downsample.
+    interpolation : str, default 'bilinear'
+        Interpolation mode.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -2280,6 +2282,7 @@ class InterpolationBlock(nn.Layer):
                  scale_factor=1,
                  out_size=None,
                  up=True,
+                 interpolation="bilinear",
                  data_format="channels_last",
                  **kwargs):
         super(InterpolationBlock, self).__init__(**kwargs)
@@ -2287,6 +2290,8 @@ class InterpolationBlock(nn.Layer):
         self.out_size = out_size
         self.up = up
         self.data_format = data_format
+        self.method = tf.image.ResizeMethod.BILINEAR if interpolation == "bilinear" else\
+            tf.image.ResizeMethod.NEAREST_NEIGHBOR
 
     def call(self, x, training=None):
         out_size = self.calc_out_size(x)
@@ -2294,7 +2299,8 @@ class InterpolationBlock(nn.Layer):
             x = tf.transpose(x, perm=[0, 2, 3, 1])
         x = tf.image.resize(
             images=x,
-            size=out_size)
+            size=out_size,
+            method=self.method)
         if is_channels_first(self.data_format):
             x = tf.transpose(x, perm=[0, 3, 1, 2])
         return x
@@ -2307,6 +2313,68 @@ class InterpolationBlock(nn.Layer):
             return tuple(s * self.scale_factor for s in in_size)
         else:
             return tuple(s // self.scale_factor for s in in_size)
+
+
+class Hourglass(nn.Layer):
+    """
+    A hourglass block.
+
+    Parameters:
+    ----------
+    down_seq : nn.HybridSequential
+        Down modules as sequential.
+    up_seq : nn.HybridSequential
+        Up modules as sequential.
+    skip_seq : nn.HybridSequential
+        Skip connection modules as sequential.
+    merge_type : str, default 'add'
+        Type of concatenation of up and skip outputs.
+    return_first_skip : bool, default False
+        Whether return the first skip connection output. Used in ResAttNet.
+    """
+    def __init__(self,
+                 down_seq,
+                 up_seq,
+                 skip_seq,
+                 merge_type="add",
+                 return_first_skip=False,
+                 **kwargs):
+        super(Hourglass, self).__init__(**kwargs)
+        self.depth = len(down_seq)
+        assert (merge_type in ["add"])
+        assert (len(up_seq) == self.depth)
+        assert (len(skip_seq) in (self.depth, self.depth + 1))
+        self.merge_type = merge_type
+        self.return_first_skip = return_first_skip
+        self.extra_skip = (len(skip_seq) == self.depth + 1)
+
+        self.down_seq = down_seq
+        self.up_seq = up_seq
+        self.skip_seq = skip_seq
+
+    def call(self, x, training=None):
+        y = None
+        down_outs = [x]
+        for down_module in self.down_seq.children:
+            x = down_module(x, training=training)
+            down_outs.append(x)
+        for i in range(len(down_outs)):
+            if i != 0:
+                y = down_outs[self.depth - i]
+                skip_module = self.skip_seq[self.depth - i]
+                y = skip_module(y, training=training)
+                if (y is not None) and (self.merge_type == "add"):
+                    x = x + y
+            if i != len(down_outs) - 1:
+                if (i == 0) and self.extra_skip:
+                    skip_module = self.skip_seq[self.depth]
+                    x = skip_module(x, training=training)
+                up_module = self.up_seq[self.depth - 1 - i]
+                x = up_module(x, training=training)
+        if self.return_first_skip:
+            return x, y
+        else:
+            return x
 
 
 class HeatmapMaxDetBlock(nn.Layer):

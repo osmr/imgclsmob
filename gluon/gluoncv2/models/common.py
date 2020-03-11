@@ -1496,12 +1496,13 @@ class Hourglass(HybridBlock):
                  return_first_skip=False,
                  **kwargs):
         super(Hourglass, self).__init__(**kwargs)
-        assert (len(up_seq) == len(down_seq))
-        assert (len(skip_seq) == len(down_seq))
+        self.depth = len(down_seq)
         assert (merge_type in ["add"])
+        assert (len(up_seq) == self.depth)
+        assert (len(skip_seq) in (self.depth, self.depth + 1))
         self.merge_type = merge_type
         self.return_first_skip = return_first_skip
-        self.depth = len(down_seq)
+        self.extra_skip = (len(skip_seq) == self.depth + 1)
 
         with self.name_scope():
             self.down_seq = down_seq
@@ -1522,6 +1523,9 @@ class Hourglass(HybridBlock):
                 if (y is not None) and (self.merge_type == "add"):
                     x = x + y
             if i != len(down_outs) - 1:
+                if (i == 0) and self.extra_skip:
+                    skip_module = self.skip_seq[self.depth]
+                    x = skip_module(x)
                 up_module = self.up_seq[self.depth - 1 - i]
                 x = up_module(x)
         if self.return_first_skip:
@@ -1657,6 +1661,7 @@ class HeatmapMaxDetBlock(HybridBlock):
         self.fixed_size = fixed_size
 
     def hybrid_forward(self, F, x):
+        assert (not self.fixed_size) or (self.in_size == x.shape[2:])
         heatmap = x
         vector_dim = 2
         batch = heatmap.shape[0]

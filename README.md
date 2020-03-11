@@ -173,3 +173,4 @@ Some remarks:
 | SimplePose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | [link](https://github.com/microsoft/human-pose-estimation.pytorch) | 2018 |
 | SimplePose(Mobile) | A | A | A | - | - | A | [link](https://arxiv.org/abs/1804.06208) | - | 2018 |
 | Lightweight OpenPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1811.12004) | [link](https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch) | 2018 |
+| IBPPose | A | A | A | - | - | A | [link](https://arxiv.org/abs/1911.10529) | [link](https://github.com/jialee93/Improved-Body-Parts) | 2019 |

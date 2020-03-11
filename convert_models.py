@@ -525,7 +525,8 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace("features/final_conv/", "features/stageN/final_conv/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stem1_unit/", "/stage0/stem1_unit/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stem2_unit/", "/stage0/stem2_unit/") for key in dst_param_keys]
-    dst_param_keys = [key.replace("/hg/", "/stage1_hg/") for key in dst_param_keys]
+    if not src_model.startswith("ibppose_coco"):
+        dst_param_keys = [key.replace("/hg/", "/stage1_hg/") for key in dst_param_keys]
 
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
@@ -544,7 +545,8 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace("features/stageN/final_conv/", "features/final_conv/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem1_unit/", "/stem1_unit/") for key in dst_param_keys]
     dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
-    dst_param_keys = [key.replace("/stage1_hg/", "/hg/") for key in dst_param_keys]
+    if not src_model.startswith("ibppose_coco"):
+        dst_param_keys = [key.replace("/stage1_hg/", "/hg/") for key in dst_param_keys]
 
     if src_model.startswith("wrn20_10_1bit") or src_model.startswith("wrn20_10_32bit"):
         ext2_src_param_keys = [key.replace('.conv.weight', '.bn.beta') for key in src_param_keys if
@@ -1030,25 +1032,28 @@ def convert_pt2pt(dst_params_file_path,
 
     elif src_model.startswith("oth_ibppose"):
         def sort_hg(src2):
-            src2b1 = list(filter(re.compile("^hourglass.[0-9].hg.0.0.").search, src2))
-            src2b2 = list(filter(re.compile("^hourglass.[0-9].hg.0.1.").search, src2))
-            src2b3 = list(filter(re.compile("^hourglass.[0-9].hg.1.0.").search, src2))
-            src2b4 = list(filter(re.compile("^hourglass.[0-9].hg.1.1.").search, src2))
-            src2b5 = list(filter(re.compile("^hourglass.[0-9].hg.2.0.").search, src2))
-            src2b6 = list(filter(re.compile("^hourglass.[0-9].hg.2.1.").search, src2))
-            src2b7 = list(filter(re.compile("^hourglass.[0-9].hg.3.0.").search, src2))
-            src2b8 = list(filter(re.compile("^hourglass.[0-9].hg.3.1.").search, src2))
-            src2b9 = list(filter(re.compile("^hourglass.[0-9].hg.3.4.").search, src2))
-            src2b10 = list(filter(re.compile("^hourglass.[0-9].hg.3.2.").search, src2))
-            src2b11 = list(filter(re.compile("^hourglass.[0-9].hg.3.3.").search, src2))
-            src2b12 = list(filter(re.compile("^hourglass.[0-9].hg.2.2.").search, src2))
-            src2b13 = list(filter(re.compile("^hourglass.[0-9].hg.2.3.").search, src2))
-            src2b14 = list(filter(re.compile("^hourglass.[0-9].hg.1.2.").search, src2))
-            src2b15 = list(filter(re.compile("^hourglass.[0-9].hg.1.3.").search, src2))
-            src2b16 = list(filter(re.compile("^hourglass.[0-9].hg.0.2.").search, src2))
-            src2b17 = list(filter(re.compile("^hourglass.[0-9].hg.0.3.").search, src2))
-            return src2b1 + src2b2 + src2b3 + src2b4 + src2b5 + src2b6 + src2b7 + src2b8 + src2b9 + src2b16 + src2b17 +\
-                   src2b14 + src2b15 + src2b12 + src2b13 + src2b10 + src2b11
+            src2b1 = list(filter(re.compile("^hourglass.[0-9].hg.0.1.").search, src2))
+            src2b2 = list(filter(re.compile("^hourglass.[0-9].hg.1.1.").search, src2))
+            src2b3 = list(filter(re.compile("^hourglass.[0-9].hg.2.1.").search, src2))
+            src2b4 = list(filter(re.compile("^hourglass.[0-9].hg.3.1.").search, src2))
+
+            src2b5 = list(filter(re.compile("^hourglass.[0-9].hg.3.2.").search, src2))
+            src2b6 = list(filter(re.compile("^hourglass.[0-9].hg.3.3.").search, src2))
+            src2b7 = list(filter(re.compile("^hourglass.[0-9].hg.2.2.").search, src2))
+            src2b8 = list(filter(re.compile("^hourglass.[0-9].hg.2.3.").search, src2))
+            src2b9 = list(filter(re.compile("^hourglass.[0-9].hg.1.2.").search, src2))
+            src2b10 = list(filter(re.compile("^hourglass.[0-9].hg.1.3.").search, src2))
+            src2b11 = list(filter(re.compile("^hourglass.[0-9].hg.0.2.").search, src2))
+            src2b12 = list(filter(re.compile("^hourglass.[0-9].hg.0.3.").search, src2))
+
+            src2b13 = list(filter(re.compile("^hourglass.[0-9].hg.0.0.").search, src2))
+            src2b14 = list(filter(re.compile("^hourglass.[0-9].hg.1.0.").search, src2))
+            src2b15 = list(filter(re.compile("^hourglass.[0-9].hg.2.0.").search, src2))
+            src2b16 = list(filter(re.compile("^hourglass.[0-9].hg.3.0.").search, src2))
+            src2b17 = list(filter(re.compile("^hourglass.[0-9].hg.3.4.").search, src2))
+            return src2b1 + src2b2 + src2b3 + src2b4 +\
+                   src2b11 + src2b12 + src2b9 + src2b10 + src2b7 + src2b8 + src2b5 + src2b6 +\
+                   src2b13 + src2b14 + src2b15 + src2b16 + src2b17
 
         src1 = list(filter(re.compile("^pre.").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]

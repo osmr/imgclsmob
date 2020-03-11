@@ -3,17 +3,14 @@
 """
 
 import os
-# import json
 import math
 import cv2
 import numpy as np
-import torch
-from torch.nn import functional as F
-import torch.utils.data as data
+from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpe3Dataset(data.Dataset):
+class CocoHpe3Dataset(GetterDataset):
     """
     COCO keypoint detection (2D multiple human pose estimation) dataset.
 
@@ -73,14 +70,20 @@ class CocoHpe3Dataset(data.Dataset):
         image, pad = self.pad_right_down_corner(image, max_downsample, pad_value)
         image = np.float32(image / 255)
         image = image.transpose((2, 0, 1))
-        image = torch.from_numpy(image)
 
         # image_id = int(os.path.splitext(os.path.basename(file_name))[0])
 
         label = np.array([image_id, 1.0] + pad + list(image_src_shape), np.float32)
-        label = torch.from_numpy(label)
 
         return image, label
+
+    def _get_image(self, idx):
+        image, label = self[idx]
+        return image
+
+    def _get_label(self, idx):
+        image, label = self[idx]
+        return label
 
     @staticmethod
     def pad_right_down_corner(img,
@@ -209,6 +212,8 @@ def recalc_pose(pred,
 
 
 def find_peaks(heatmap_avg):
+    import torch
+
     thre1 = 0.1
     offset_radius = 2
 
@@ -239,6 +244,8 @@ def find_peaks(heatmap_avg):
 
 
 def keypoint_heatmap_nms(heat, kernel=3, thre=0.1):
+    from torch.nn import functional as F
+
     # keypoint NMS on heatmap (score map)
     pad = (kernel - 1) // 2
     pad_heat = F.pad(heat, (pad, pad, pad, pad), mode="reflect")

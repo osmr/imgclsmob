@@ -117,6 +117,7 @@ from .models.alphapose_coco import *
 from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
+from .models.ibppose_coco import *
 
 # from .models.others.oth_sinet import *
 
@@ -130,7 +131,6 @@ from .models.others.oth_prnet import *
 
 from .models.superpointnet import *
 
-from .models.ibppose_coco2 import *
 from .models.others.oth_ibppose import *
 
 __all__ = ['get_model']
@@ -1006,6 +1006,8 @@ _models = {
     'lwopenpose2d_mobilenet_cmupan_coco': lwopenpose2d_mobilenet_cmupan_coco,
     'lwopenpose3d_mobilenet_cmupan_coco': lwopenpose3d_mobilenet_cmupan_coco,
 
+    'ibppose_coco': ibppose_coco,
+
     'superpointnet': superpointnet,
 
     # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
@@ -1023,7 +1025,6 @@ _models = {
     'prnet': prnet,
     'oth_prnet': oth_prnet,
 
-    'ibppose_coco1': ibppose_coco1,
     'oth_ibppose': oth_ibppose,
 }
 

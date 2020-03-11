@@ -6,11 +6,12 @@ import os
 import copy
 import cv2
 import numpy as np
-from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
+import mxnet as mx
+from mxnet.gluon.data import dataset
 from .dataset_metainfo import DatasetMetaInfo
 
 
-class CocoHpeDataset(GetterDataset):
+class CocoHpe1Dataset(dataset.Dataset):
     """
     COCO keypoint detection (2D single human pose estimation) dataset.
 
@@ -63,13 +64,13 @@ class CocoHpeDataset(GetterDataset):
                  splits=("person_keypoints_val2017",),
                  check_centers=False,
                  skip_empty=True):
-        super(CocoHpeDataset, self).__init__()
+        super(CocoHpe1Dataset, self).__init__()
         self._root = os.path.expanduser(root)
         self.mode = mode
         self.transform = transform
         self.num_class = len(self.CLASSES)
 
-        if isinstance(splits, str):
+        if isinstance(splits, mx.base.string_types):
             splits = [splits]
         self._splits = splits
         self._coco = []
@@ -79,6 +80,11 @@ class CocoHpeDataset(GetterDataset):
         self.json_id_to_contiguous = None
         self.contiguous_id_to_json = None
         self._items, self._labels = self._load_jsons()
+
+        mode_name = "train" if mode == "train" else "val"
+        annotations_dir_path = os.path.join(root, "annotations")
+        annotations_file_path = os.path.join(annotations_dir_path, "person_keypoints_" + mode_name + "2017.json")
+        self.annotations_file_path = annotations_file_path
 
     def __str__(self):
         detail = ",".join([str(s) for s in self._splits])
@@ -104,8 +110,7 @@ class CocoHpeDataset(GetterDataset):
         Joint pairs which defines the pairs of joint to be swapped
         when the image is flipped horizontally.
         """
-        return [[1, 2], [3, 4], [5, 6], [7, 8],
-                [9, 10], [11, 12], [13, 14], [15, 16]]
+        return [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16]]
 
     @property
     def coco(self):
@@ -127,45 +132,14 @@ class CocoHpeDataset(GetterDataset):
         img_id = int(os.path.splitext(os.path.basename(img_path))[0])
 
         label = copy.deepcopy(self._labels[idx])
-        # img = mx.image.imread(img_path, 1)
-        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
-        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
+        img = mx.image.imread(img_path, 1)
 
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
 
-        res_label = np.array([float(score)] + [float(img_id)] + list(center) + list(scale), np.float32)
+        res_label = np.array([float(img_id)] + [float(score)] + list(center) + list(scale), np.float32)
 
         return img, res_label
-
-    def _get_image(self, idx):
-        img_path = self._items[idx]
-
-        label = copy.deepcopy(self._labels[idx])
-        # img = mx.image.imread(img_path, 1)
-        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
-        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
-
-        if self.transform is not None:
-            img, scale, center, score = self.transform(img, label)
-
-        return img
-
-    def _get_label(self, idx):
-        img_path = self._items[idx]
-        img_id = int(os.path.splitext(os.path.basename(img_path))[0])
-
-        label = copy.deepcopy(self._labels[idx])
-        # img = mx.image.imread(img_path, 1)
-        img = cv2.imread(img_path, flags=cv2.IMREAD_COLOR)
-        img = cv2.cvtColor(img, code=cv2.COLOR_BGR2RGB)
-
-        if self.transform is not None:
-            img, scale, center, score = self.transform(img, label)
-
-        res_label = np.array(list(scale) + list(center) + [float(score)] + [float(img_id)], np.float32)
-
-        return res_label
 
     def _load_jsons(self):
         """
@@ -384,14 +358,10 @@ class CocoHpeValTransform1(object):
 
         h, w = self.image_size
         trans = get_affine_transform(center, scale, 0, [w, h])
-        img = cv2.warpAffine(src, trans, (int(w), int(h)), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(src.asnumpy(), trans, (int(w), int(h)), flags=cv2.INTER_LINEAR)
 
-        # img = mx.nd.image.to_tensor(mx.nd.array(img))
-        # img = mx.nd.image.normalize(img, mean=self.mean, std=self.std)
-        img = img.astype(np.float32)
-        img = img / 255.0
-        img = (img - np.array(self.mean, np.float32)) / np.array(self.std, np.float32)
-        img = img.transpose((2, 0, 1))
+        img = mx.nd.image.to_tensor(mx.nd.array(img))
+        img = mx.nd.image.normalize(img, mean=self.mean, std=self.std)
 
         return img, scale, center, score
 
@@ -489,14 +459,15 @@ class CocoHpeValTransform2(object):
 
     def __call__(self, src, label):
         # print(src.shape)
+        src = src.asnumpy()
         bbox = label["bbox"]
         assert len(bbox) == 4
         score = label.get('score', 1)
         img, scale_box = detector_to_alpha_pose(
             src,
-            class_ids=np.array([[0.]]),
-            scores=np.array([[1.]]),
-            bounding_boxs=np.array(np.array([bbox])),
+            class_ids=mx.nd.array([[0.]]),
+            scores=mx.nd.array([[1.]]),
+            bounding_boxs=mx.nd.array(np.array([bbox])),
             output_shape=self.image_size)
 
         if scale_box.shape[0] == 1:
@@ -507,7 +478,7 @@ class CocoHpeValTransform2(object):
             pt1 = np.array(scale_box[(0, 1)], dtype=np.float32)
             pt2 = np.array(scale_box[(2, 3)], dtype=np.float32)
 
-        return img[0].astype(np.float32), pt1, pt2, score
+        return img[0], pt1, pt2, score
 
 
 def detector_to_alpha_pose(img,
@@ -542,12 +513,12 @@ def alpha_pose_detection_processor(img,
         scores = scores.squeeze(axis=0)
 
     # cilp coordinates
-    boxes[:, [0, 2]] = np.clip(boxes[:, [0, 2]], 0., img.shape[1] - 1)
-    boxes[:, [1, 3]] = np.clip(boxes[:, [1, 3]], 0., img.shape[0] - 1)
+    boxes[:, [0, 2]] = mx.nd.clip(boxes[:, [0, 2]], 0., img.shape[1] - 1)
+    boxes[:, [1, 3]] = mx.nd.clip(boxes[:, [1, 3]], 0., img.shape[0] - 1)
 
     # select boxes
-    mask1 = (class_idxs == 0).astype(np.int32)
-    mask2 = (scores > thr).astype(np.int32)
+    mask1 = (class_idxs == 0).asnumpy()
+    mask2 = (scores > thr).asnumpy()
     picked_idxs = np.where((mask1 + mask2) > 1)[0]
     if picked_idxs.shape[0] == 0:
         return None, None
@@ -564,10 +535,10 @@ def alpha_pose_image_cropper(source_img,
     # crop person poses
     img_width, img_height = source_img.shape[1], source_img.shape[0]
 
-    tensors = np.zeros([boxes.shape[0], 3, output_shape[0], output_shape[1]])
+    tensors = mx.nd.zeros([boxes.shape[0], 3, output_shape[0], output_shape[1]])
     out_boxes = np.zeros([boxes.shape[0], 4])
 
-    for i, box in enumerate(boxes):
+    for i, box in enumerate(boxes.asnumpy()):
         img = source_img.copy()
         box_width = box[2] - box[0]
         box_height = box[3] - box[1]
@@ -591,10 +562,7 @@ def alpha_pose_image_cropper(source_img,
         br = np.array((right, bottom))
         img = cv_cropBox(img, ul, br, output_shape[0], output_shape[1])
 
-        img = img.astype(np.float32)
-        img = img / 255.0
-        img = img.transpose((2, 0, 1))
-        # img = mx.nd.image.to_tensor(np.array(img))
+        img = mx.nd.image.to_tensor(mx.nd.array(img))
         # img = img.transpose((2, 0, 1))
         img[0] = img[0] - 0.406
         img[1] = img[1] - 0.457
@@ -673,6 +641,41 @@ def recalc_pose1(keypoints,
     return preds
 
 
+def recalc_pose1b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose1(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
+
 def recalc_pose2(keypoints,
                  bbs,
                  image_size):
@@ -711,19 +714,54 @@ def recalc_pose2(keypoints,
 
     return preds
 
+
+def recalc_pose2b(pred,
+                  label,
+                  image_size,
+                  visible_conf_threshold=0.0):
+    label_img_id = label[:, 0].astype(np.int32)
+    label_score = label[:, 1]
+
+    label_bbs = label[:, 2:6]
+    pred_keypoints = pred[:, :, :2]
+    pred_score = pred[:, :, 2]
+
+    pred[:, :, :2] = recalc_pose2(pred_keypoints, label_bbs, image_size)
+    pred_person_score = []
+
+    batch = pred_keypoints.shape[0]
+    num_joints = pred_keypoints.shape[1]
+    for idx in range(batch):
+        kpt_score = 0
+        count = 0
+        for i in range(num_joints):
+            mval = float(pred_score[idx][i])
+            if mval > visible_conf_threshold:
+                kpt_score += mval
+                count += 1
+
+        if count > 0:
+            kpt_score /= count
+
+        kpt_score = kpt_score * float(label_score[idx])
+
+        pred_person_score.append(kpt_score)
+
+    return pred, pred_person_score, label_img_id
+
 # ---------------------------------------------------------------------------------------------------------------------
 
 
-class CocoHpeMetaInfo(DatasetMetaInfo):
+class CocoHpe1MetaInfo(DatasetMetaInfo):
     def __init__(self):
-        super(CocoHpeMetaInfo, self).__init__()
+        super(CocoHpe1MetaInfo, self).__init__()
         self.label = "COCO"
         self.short_label = "coco"
         self.root_dir_name = "coco"
-        self.dataset_class = CocoHpeDataset
+        self.dataset_class = CocoHpe1Dataset
         self.num_training_samples = None
         self.in_channels = 3
-        self.num_classes = CocoHpeDataset.classes
+        self.num_classes = CocoHpe1Dataset.classes
         self.input_image_size = (256, 192)
         self.train_metric_capts = None
         self.train_metric_names = None
@@ -734,15 +772,16 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoHpeOksApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "OksAp",
-             "coco": None,
-             "recalc_pose_fn": lambda x, y: recalc_pose1(x, y, self.input_image_size),
-             "in_vis_thresh": 0.0}]
+             "coco_annotations_file_path": None,
+             "use_file": False,
+             "pose_postprocessing_fn": lambda x, y: recalc_pose1b(x, y, self.input_image_size)}]
         self.saver_acc_ind = 0
         self.do_transform = True
         self.val_transform = CocoHpeValTransform1
         self.test_transform = CocoHpeValTransform1
         self.ml_type = "hpe"
-        self.net_extra_kwargs = {}
+        self.allow_hybridize = False
+        self.net_extra_kwargs = {"fixed_size": False}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
         self.model_type = 1
@@ -760,7 +799,7 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         work_dir_path : str
             Path to working directory.
         """
-        super(CocoHpeMetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
+        super(CocoHpe1MetaInfo, self).add_dataset_parser_arguments(parser, work_dir_path)
         parser.add_argument(
             "--input-size",
             type=int,
@@ -783,15 +822,17 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : ArgumentParser
             Main script arguments.
         """
-        super(CocoHpeMetaInfo, self).update(args)
+        super(CocoHpe1MetaInfo, self).update(args)
         self.input_image_size = args.input_size
         self.model_type = args.model_type
         if self.model_type == 1:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose1(x, y, self.input_image_size)
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose1b(x, y, self.input_image_size)
             self.val_transform = CocoHpeValTransform1
             self.test_transform = CocoHpeValTransform1
         else:
-            self.test_metric_extra_kwargs[0]["recalc_pose_fn"] = lambda x, y: recalc_pose2(x, y, self.input_image_size)
+            self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\
+                lambda x, y: recalc_pose2b(x, y, self.input_image_size)
             self.val_transform = CocoHpeValTransform2
             self.test_transform = CocoHpeValTransform2
 
@@ -805,4 +846,4 @@ class CocoHpeMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        self.test_metric_extra_kwargs[0]["coco"] = dataset.coco
+        self.test_metric_extra_kwargs[0]["coco_annotations_file_path"] = dataset.annotations_file_path

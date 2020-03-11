@@ -1280,12 +1280,13 @@ class Hourglass(Chain):
                  merge_type="add",
                  return_first_skip=False):
         super(Hourglass, self).__init__()
-        assert (len(up_seq) == len(down_seq))
-        assert (len(skip_seq) == len(down_seq))
+        self.depth = len(down_seq)
         assert (merge_type in ["add"])
+        assert (len(up_seq) == self.depth)
+        assert (len(skip_seq) in (self.depth, self.depth + 1))
         self.merge_type = merge_type
         self.return_first_skip = return_first_skip
-        self.depth = len(down_seq)
+        self.extra_skip = (len(skip_seq) == self.depth + 1)
 
         with self.init_scope():
             self.down_seq = down_seq
@@ -1302,14 +1303,15 @@ class Hourglass(Chain):
         for i in range(len(down_outs)):
             if i != 0:
                 y = down_outs[self.depth - i]
-                skip_module_name = self.skip_seq.layer_names[self.depth - i]
-                skip_module = self.skip_seq[skip_module_name]
+                skip_module = self.skip_seq.el(self.depth - i)
                 y = skip_module(y)
                 if (y is not None) and (self.merge_type == "add"):
                     x = x + y
             if i != len(down_outs) - 1:
-                up_module_name = self.up_seq.layer_names[self.depth - 1 - i]
-                up_module = self.up_seq[up_module_name]
+                if (i == 0) and self.extra_skip:
+                    skip_module = self.skip_seq.el(self.depth)
+                    x = skip_module(x)
+                up_module = self.up_seq.el(self.depth - 1 - i)
                 x = up_module(x)
         if self.return_first_skip:
             return x, y

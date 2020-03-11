@@ -33,6 +33,7 @@ class CocoHpeOksApMetric(EvalMetric):
         super(CocoHpeOksApMetric, self).__init__(name=name)
         self.coco_annotations_file_path = coco_annotations_file_path
         self.pose_postprocessing_fn = pose_postprocessing_fn
+        self.validation_ids = validation_ids
         self.use_file = use_file
         self.coco_result = []
 
@@ -82,6 +83,8 @@ class CocoHpeOksApMetric(EvalMetric):
 
         from pycocotools.cocoeval import COCOeval
         coco_eval = COCOeval(gt, pred, "keypoints")
+        if self.validation_ids is not None:
+            coco_eval.params.imgIds = self.validation_ids
         coco_eval.params.useSegm = None
         coco_eval.evaluate()
         coco_eval.accumulate()

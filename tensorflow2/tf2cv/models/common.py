@@ -1999,10 +1999,8 @@ class PixelShuffle2(nn.Layer):
         self.data_format = data_format
 
     def call(self, x, training=None):
-        if is_channels_first(self.data_format):
-            x = tf.nn.depth_to_space(input=x, block_size=self.scale_factor, data_format="NCHW")
-        else:
-            x = tf.nn.depth_to_space(input=x, block_size=self.scale_factor, data_format="NHWC")
+        tf_data_format = "NCHW" if is_channels_first(self.data_format) else "NHWC"
+        x = tf.nn.depth_to_space(input=x, block_size=self.scale_factor, data_format=tf_data_format)
         return x
 
 

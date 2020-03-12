@@ -86,6 +86,7 @@ from .models.simplepose_coco import *
 from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
 from .models.ibppose_coco import *
+from .models.grmiposelite_coco import *
 
 __all__ = ['get_model']
 
@@ -813,6 +814,8 @@ _models = {
     'lwopenpose3d_mobilenet_cmupan_coco': lwopenpose3d_mobilenet_cmupan_coco,
 
     'ibppose_coco': ibppose_coco,
+
+    'grmiposelite_mobilenet_w1_coco': grmiposelite_mobilenet_w1_coco,
 }
 
 

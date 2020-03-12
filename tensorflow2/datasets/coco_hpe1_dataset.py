@@ -109,8 +109,7 @@ class CocoHpe1Dataset(object):
         Joint pairs which defines the pairs of joint to be swapped
         when the image is flipped horizontally.
         """
-        return [[1, 2], [3, 4], [5, 6], [7, 8],
-                [9, 10], [11, 12], [13, 14], [15, 16]]
+        return [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16]]
 
     @property
     def coco(self):
@@ -816,6 +815,18 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
             default=self.input_image_size,
             help="size of the input for model")
         parser.add_argument(
+            "--mean-rgb",
+            nargs=3,
+            type=float,
+            default=self.mean_rgb,
+            help="Mean of RGB channels in the dataset")
+        parser.add_argument(
+            "--std-rgb",
+            nargs=3,
+            type=float,
+            default=self.std_rgb,
+            help="STD of RGB channels in the dataset")
+        parser.add_argument(
             "--model-type",
             type=int,
             default=self.model_type,
@@ -833,6 +844,8 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         """
         super(CocoHpe1MetaInfo, self).update(args)
         self.input_image_size = args.input_size
+        self.mean_rgb = args.mean_rgb
+        self.std_rgb = args.std_rgb
         self.model_type = args.model_type
         if self.model_type == 1:
             self.test_metric_extra_kwargs[0]["pose_postprocessing_fn"] =\

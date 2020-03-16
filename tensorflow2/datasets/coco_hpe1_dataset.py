@@ -138,6 +138,8 @@ class CocoHpe1Dataset(object):
         if self.transform is not None:
             img, scale, center, score = self.transform(img, label)
 
+        # print("center={}".format(center))
+        # print("scale={}".format(scale))
         res_label = np.array([float(img_id)] + [float(score)] + list(center) + list(scale), np.float32)
 
         return img, res_label
@@ -342,6 +344,8 @@ class CocoHpe1Dataset(object):
 class CocoHpeValTransform1(object):
     def __init__(self,
                  ds_metainfo):
+        # print("ds_metainfo.mean_rgb={}".format(ds_metainfo.mean_rgb))
+        # print("ds_metainfo.std_rgb={}".format(ds_metainfo.std_rgb))
         self.ds_metainfo = ds_metainfo
         self.image_size = self.ds_metainfo.input_image_size
         height = self.image_size[0]
@@ -453,6 +457,8 @@ def get_affine_transform(center,
 class CocoHpeValTransform2(object):
     def __init__(self,
                  ds_metainfo):
+        # print("ds_metainfo.mean_rgb={}".format(ds_metainfo.mean_rgb))
+        # print("ds_metainfo.std_rgb={}".format(ds_metainfo.std_rgb))
         self.ds_metainfo = ds_metainfo
         self.image_size = self.ds_metainfo.input_image_size
         height = self.image_size[0]

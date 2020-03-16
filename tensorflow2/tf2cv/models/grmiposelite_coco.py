@@ -51,6 +51,12 @@ class GRMIPoseLite(tf.keras.Model):
 
     def call(self, x, training=None):
         x_np = x.numpy()
+
+        # import cv2
+        # cv2.imshow("x_np", x_np[0])
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
         assert (x_np.shape == self.in_shape)
         self.interpreter.set_tensor(self.input_tensor_index, x_np)
         self.interpreter.invoke()
@@ -74,7 +80,35 @@ class GRMIPoseLite(tf.keras.Model):
             pts[k, 0] = max_i * fh + offsets[0, max_i, max_j, k]
             pts[k, 1] = max_j * fw + offsets[0, max_i, max_j, k + self.keypoints]
             pts[k, 2] = self.sigmoid(max_h)
-        y = tf.convert_to_tensor(pts)
+
+        pts1 = pts.copy()
+        for k in range(self.keypoints):
+            pts1[k, 0] = 0.25 * pts[k, 1]
+            pts1[k, 1] = 0.25 * pts[k, 0]
+        y = tf.convert_to_tensor(np.expand_dims(pts1, axis=0))
+
+        # import cv2
+        # canvas = x_np[0]
+        # canvas = cv2.cvtColor(canvas, code=cv2.COLOR_BGR2RGB)
+        # for k in range(self.keypoints):
+        #     cv2.circle(
+        #         canvas,
+        #         (pts[k, 1], pts[k, 0]),
+        #         3,
+        #         (0, 0, 255),
+        #         -1)
+        # scale_factor = 3
+        # cv2.imshow(
+        #     winname="canvas",
+        #     mat=cv2.resize(
+        #         src=canvas,
+        #         dsize=None,
+        #         fx=scale_factor,
+        #         fy=scale_factor,
+        #         interpolation=cv2.INTER_NEAREST))
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
         return y
 
     @staticmethod
@@ -138,8 +172,8 @@ def grmiposelite_mobilenet_w1_coco(model_path, keypoints=17, data_format="channe
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_grmiposelite(model_path=model_path, keypoints=keypoints, data_format=data_format, pretrained=pretrained,
-                            **kwargs)
+    return get_grmiposelite(model_path=model_path, keypoints=keypoints, model_name="grmiposelite_mobilenet_w1_coco",
+                            data_format=data_format, pretrained=pretrained, **kwargs)
 
 
 def _test():

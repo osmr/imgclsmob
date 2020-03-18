@@ -43,7 +43,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
     """
     def __init__(self,
                  dataset,
-                 save_prefix,
+                 save_prefix="coco_det",
                  use_time=True,
                  cleanup=False,
                  score_thresh=0.05,
@@ -327,7 +327,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
             else:
                 return self.name, self.sum_metric / self.num_inst
         else:
-            names = ['%s' % self.name[i] for i in range(self.num)]
+            names = ["%s" % self.name[i] for i in range(self.num)]
             values = [x / y if y != 0 else float("nan") for x, y in zip(self.sum_metric, self.num_inst)]
             return names, values
 
@@ -360,7 +360,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
         """
         def as_numpy(a):
             """
-            Convert a (list of) mx.NDArray into numpy.ndarray
+            Convert a (list of) mx.NDArray into numpy.ndarray.
             """
             if isinstance(a, (list, tuple)):
                 out = [x.asnumpy() if isinstance(x, mx.nd.NDArray) else x for x in a]
@@ -377,7 +377,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
             gt_difficults = [None for _ in as_numpy(gt_labels)]
 
         if isinstance(gt_labels, list):
-            gt_diff_shape = gt_difficults[0].shape[0] if hasattr(gt_difficults[0], 'shape') else 0
+            gt_diff_shape = gt_difficults[0].shape[0] if hasattr(gt_difficults[0], "shape") else 0
             if len(gt_difficults) * gt_diff_shape != \
                     len(gt_labels) * gt_labels[0].shape[0]:
                 gt_difficults = [None] * len(gt_labels) * gt_labels[0].shape[0]
@@ -497,7 +497,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
                            rec,
                            prec):
         """
-        calculate average precision
+        Calculate average precision.
 
         Params:
         ----------
@@ -505,9 +505,11 @@ class VOCMApMetric(mx.metric.EvalMetric):
             cumulated recall
         prec : numpy.array
             cumulated precision
+
         Returns:
         ----------
-        ap as float
+        float
+            AP
         """
         if rec is None or prec is None:
             return np.nan
@@ -586,9 +588,11 @@ class VOC07MApMetric(VOCMApMetric):
             cumulated recall
         prec : numpy.array
             cumulated precision
+
         Returns:
         ----------
-        ap as float
+        float
+            AP
         """
         if rec is None or prec is None:
             return np.nan

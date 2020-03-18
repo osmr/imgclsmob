@@ -2,6 +2,7 @@
 MS COCO object detection dataset.
 """
 import os
+import cv2
 import mxnet as mx
 import numpy as np
 from PIL import Image
@@ -156,11 +157,11 @@ class CocoDetDataset(dataset.Dataset):
         """
         items = []
         labels = []
+        im_aspect_ratios = []
 
         from pycocotools.coco import COCO
-
         for split in self._splits:
-            anno = os.path.join(self._root, "annotations", split) + ".json"
+            anno = os.path.join(self._root, self.annotation_dir, split) + ".json"
             _coco = COCO(anno)
             self._coco.append(_coco)
             classes = [c["name"] for c in _coco.loadCats(_coco.getCatIds())]
@@ -175,100 +176,52 @@ class CocoDetDataset(dataset.Dataset):
                     v: k for k, v in self.json_id_to_contiguous.items()}
             else:
                 assert self.json_id_to_contiguous == json_id_to_contiguous
+
             # iterate through the annotations
             image_ids = sorted(_coco.getImgIds())
             for entry in _coco.loadImgs(image_ids):
-                dirname, filename = entry["coco_url"].split("/")[-2:]
-                abs_path = os.path.join(self._root, dirname, filename)
+                abs_path = self._parse_image_path(entry)
                 if not os.path.exists(abs_path):
                     raise IOError("Image: {} not exists.".format(abs_path))
-                label = self._check_load_keypoints(_coco, entry)
+                label = self._check_load_bbox(_coco, entry)
                 if not label:
                     continue
+                im_aspect_ratios.append(float(entry["width"]) / entry["height"])
+                items.append(abs_path)
+                labels.append(label)
+        return items, labels, im_aspect_ratios
 
-                # num of items are relative to person, not image
-                for obj in label:
-                    items.append(abs_path)
-                    labels.append(obj)
-        return items, labels
-
-    def _check_load_keypoints(self, coco, entry):
+    def _check_load_bbox(self, coco, entry):
         """
-        Check and load ground-truth keypoints.
+        Check and load ground-truth labels.
         """
-        ann_ids = coco.getAnnIds(imgIds=entry["id"], iscrowd=False)
+        entry_id = entry['id']
+        # fix pycocotools _isArrayLike which don't work for str in python3
+        entry_id = [entry_id] if not isinstance(entry_id, (list, tuple)) else entry_id
+        ann_ids = coco.getAnnIds(imgIds=entry_id, iscrowd=None)
         objs = coco.loadAnns(ann_ids)
         # check valid bboxes
         valid_objs = []
         width = entry["width"]
         height = entry["height"]
-
         for obj in objs:
-            contiguous_cid = self.json_id_to_contiguous[obj["category_id"]]
-            if contiguous_cid >= self.num_class:
-                # not class of interest
+            if obj["area"] < self._min_object_area:
                 continue
-            if max(obj["keypoints"]) == 0:
+            if obj.get("ignore", 0) == 1:
+                continue
+            if not self._use_crowd and obj.get("iscrowd", 0):
                 continue
             # convert from (x, y, w, h) to (xmin, ymin, xmax, ymax) and clip bound
             xmin, ymin, xmax, ymax = self.bbox_clip_xyxy(self.bbox_xywh_to_xyxy(obj["bbox"]), width, height)
             # require non-zero box area
-            if obj['area'] <= 0 or xmax <= xmin or ymax <= ymin:
-                continue
-
-            # joints 3d: (num_joints, 3, 2); 3 is for x, y, z; 2 is for position, visibility
-            joints_3d = np.zeros((self.num_joints, 3, 2), dtype=np.float32)
-            for i in range(self.num_joints):
-                joints_3d[i, 0, 0] = obj["keypoints"][i * 3 + 0]
-                joints_3d[i, 1, 0] = obj["keypoints"][i * 3 + 1]
-                # joints_3d[i, 2, 0] = 0
-                visible = min(1, obj["keypoints"][i * 3 + 2])
-                joints_3d[i, :2, 1] = visible
-                # joints_3d[i, 2, 1] = 0
-
-            if np.sum(joints_3d[:, 0, 1]) < 1:
-                # no visible keypoint
-                continue
-
-            if self._check_centers:
-                bbox_center, bbox_area = self._get_box_center_area((xmin, ymin, xmax, ymax))
-                kp_center, num_vis = self._get_keypoints_center_count(joints_3d)
-                ks = np.exp(-2 * np.sum(np.square(bbox_center - kp_center)) / bbox_area)
-                if (num_vis / 80.0 + 47 / 80.0) > ks:
-                    continue
-
-            valid_objs.append({
-                "bbox": (xmin, ymin, xmax, ymax),
-                "joints_3d": joints_3d
-            })
-
+            if obj["area"] > 0 and xmax > xmin and ymax > ymin:
+                contiguous_cid = self.json_id_to_contiguous[obj["category_id"]]
+                valid_objs.append([xmin, ymin, xmax, ymax, contiguous_cid])
         if not valid_objs:
             if not self._skip_empty:
                 # dummy invalid labels if no valid objects are found
-                valid_objs.append({
-                    "bbox": np.array([-1, -1, 0, 0]),
-                    "joints_3d": np.zeros((self.num_joints, 3, 2), dtype=np.float32)
-                })
+                valid_objs.append([-1, -1, -1, -1, -1])
         return valid_objs
-
-    @staticmethod
-    def _get_box_center_area(bbox):
-        """
-        Get bbox center.
-        """
-        c = np.array([(bbox[0] + bbox[2]) / 2.0, (bbox[1] + bbox[3]) / 2.0])
-        area = (bbox[3] - bbox[1]) * (bbox[2] - bbox[0])
-        return c, area
-
-    @staticmethod
-    def _get_keypoints_center_count(keypoints):
-        """
-        Get geometric center of all keypoints.
-        """
-        keypoint_x = np.sum(keypoints[:, 0, 0] * (keypoints[:, 0, 1] > 0))
-        keypoint_y = np.sum(keypoints[:, 1, 0] * (keypoints[:, 1, 1] > 0))
-        num = float(np.sum(keypoints[:, 0, 1]))
-        return np.array([keypoint_x / num, keypoint_y / num]), num
 
     @staticmethod
     def bbox_clip_xyxy(xyxy, width, height):
@@ -351,9 +304,161 @@ class CocoDetValTransform(object):
     def __init__(self,
                  ds_metainfo):
         self.ds_metainfo = ds_metainfo
+        self.image_size = self.ds_metainfo.input_image_size
+        self._height = self.image_size[0]
+        self._width = self.image_size[1]
+        self._mean = np.array(ds_metainfo.mean_rgb, dtype=np.float32).reshape(1, 1, 3)
+        self._std = np.array(ds_metainfo.std_rgb, dtype=np.float32).reshape(1, 1, 3)
 
     def __call__(self, src, label):
-        return src, label
+        # resize
+        img, bbox = src.asnumpy(), label
+        input_h, input_w = self._height, self._width
+        h, w, _ = src.shape
+        s = max(h, w) * 1.0
+        c = np.array([w / 2., h / 2.], dtype=np.float32)
+        trans_input = self.get_affine_transform(c, s, 0, [input_w, input_h])
+        inp = cv2.warpAffine(img, trans_input, (input_w, input_h), flags=cv2.INTER_LINEAR)
+        output_w = input_w
+        output_h = input_h
+        trans_output = self.get_affine_transform(c, s, 0, [output_w, output_h])
+        for i in range(bbox.shape[0]):
+            bbox[i, :2] = self.affine_transform(bbox[i, :2], trans_output)
+            bbox[i, 2:4] = self.affine_transform(bbox[i, 2:4], trans_output)
+        bbox[:, :2] = np.clip(bbox[:, :2], 0, output_w - 1)
+        bbox[:, 2:4] = np.clip(bbox[:, 2:4], 0, output_h - 1)
+        img = inp
+
+        # to tensor
+        img = img.astype(np.float32) / 255.
+        img = (img - self._mean) / self._std
+        img = img.transpose(2, 0, 1).astype(np.float32)
+        img = mx.nd.array(img)
+        return img, bbox.astype(img.dtype)
+
+    @staticmethod
+    def get_affine_transform(center,
+                             scale,
+                             rot,
+                             output_size,
+                             shift=np.array([0, 0], dtype=np.float32),
+                             inv=0):
+        """
+        Get affine transform matrix given center, scale and rotation.
+
+        Parameters
+        ----------
+        center : tuple of float
+            Center point.
+        scale : float
+            Scaling factor.
+        rot : float
+            Rotation degree.
+        output_size : tuple of int
+            (width, height) of the output size.
+        shift : float
+            Shift factor.
+        inv : bool
+            Whether inverse the computation.
+
+        Returns
+        -------
+        numpy.ndarray
+            Affine matrix.
+        """
+        if not isinstance(scale, np.ndarray) and not isinstance(scale, list):
+            scale = np.array([scale, scale], dtype=np.float32)
+
+        scale_tmp = scale
+        src_w = scale_tmp[0]
+        dst_w = output_size[0]
+        dst_h = output_size[1]
+
+        rot_rad = np.pi * rot / 180
+        src_dir = CocoDetValTransform.get_rot_dir([0, src_w * -0.5], rot_rad)
+        dst_dir = np.array([0, dst_w * -0.5], np.float32)
+
+        src = np.zeros((3, 2), dtype=np.float32)
+        dst = np.zeros((3, 2), dtype=np.float32)
+        src[0, :] = center + scale_tmp * shift
+        src[1, :] = center + src_dir + scale_tmp * shift
+        dst[0, :] = [dst_w * 0.5, dst_h * 0.5]
+        dst[1, :] = np.array([dst_w * 0.5, dst_h * 0.5], np.float32) + dst_dir
+
+        src[2:, :] = CocoDetValTransform.get_3rd_point(src[0, :], src[1, :])
+        dst[2:, :] = CocoDetValTransform.get_3rd_point(dst[0, :], dst[1, :])
+
+        if inv:
+            trans = cv2.getAffineTransform(np.float32(dst), np.float32(src))
+        else:
+            trans = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+        return trans
+
+    @staticmethod
+    def get_rot_dir(src_point, rot_rad):
+        """
+        Get rotation direction.
+
+        Parameters
+        ----------
+        src_point : tuple of float
+            Original point.
+        rot_rad : float
+            Rotation radian.
+
+        Returns
+        -------
+        tuple of float
+            Rotation.
+        """
+        sn, cs = np.sin(rot_rad), np.cos(rot_rad)
+
+        src_result = [0, 0]
+        src_result[0] = src_point[0] * cs - src_point[1] * sn
+        src_result[1] = src_point[0] * sn + src_point[1] * cs
+
+        return src_result
+
+    @staticmethod
+    def get_3rd_point(a, b):
+        """
+        Get the 3rd point position given first two points.
+
+        Parameters
+        ----------
+        a : tuple of float
+            First point.
+        b : tuple of float
+            Second point.
+
+        Returns
+        -------
+        tuple of float
+            Third point.
+        """
+        direct = a - b
+        return b + np.array([-direct[1], direct[0]], dtype=np.float32)
+
+    @staticmethod
+    def affine_transform(pt, t):
+        """
+        Apply affine transform to a bounding box given transform matrix t.
+
+        Parameters
+        ----------
+        pt : numpy.ndarray
+            Bounding box with shape (1, 2).
+        t : numpy.ndarray
+            Transformation matrix with shape (2, 3).
+
+        Returns
+        -------
+        numpy.ndarray
+            New bounding box with shape (1, 2).
+        """
+        new_pt = np.array([pt[0], pt[1], 1.], dtype=np.float32).T
+        new_pt = np.dot(t, new_pt)
+        return new_pt[:2]
 
 
 class CocoDetMetaInfo(DatasetMetaInfo):
@@ -376,15 +481,14 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoDetMApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "mAP",
-             "coco_annotations_file_path": None,
-             "use_file": False}]
+             "dataset": None}]
         self.saver_acc_ind = 0
         self.do_transform = True
         self.val_transform = CocoDetValTransform
         self.test_transform = CocoDetValTransform
         self.ml_type = "hpe"
         self.allow_hybridize = False
-        self.net_extra_kwargs = {"fixed_size": False}
+        self.net_extra_kwargs = {}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
         self.model_type = 1
@@ -439,4 +543,4 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        self.test_metric_extra_kwargs[0]["coco_annotations_file_path"] = dataset.annotations_file_path
+        self.test_metric_extra_kwargs[0]["dataset"] = dataset

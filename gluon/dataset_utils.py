@@ -94,7 +94,10 @@ def get_train_data_source(ds_metainfo,
             mode="train",
             transform=(transform_train if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
-            dataset = dataset.transform_first(fn=transform_train)
+            if ds_metainfo.do_transform_first:
+                dataset = dataset.transform_first(fn=transform_train)
+            else:
+                dataset = dataset.transform(fn=transform_train)
         ds_metainfo.update_from_dataset(dataset)
         if not ds_metainfo.train_use_weighted_sampler:
             return DataLoader(
@@ -113,6 +116,7 @@ def get_train_data_source(ds_metainfo,
                 # shuffle=True,
                 sampler=sampler,
                 last_batch="discard",
+                batchify_fn=ds_metainfo.batchify_fn,
                 num_workers=num_workers)
 
 
@@ -148,12 +152,17 @@ def get_val_data_source(ds_metainfo,
             mode="val",
             transform=(transform_val if ds_metainfo.do_transform else None))
         if not ds_metainfo.do_transform:
-            dataset = dataset.transform_first(fn=transform_val)
+            if ds_metainfo.do_transform_first:
+                dataset = dataset.transform_first(fn=transform_val)
+            else:
+                dataset = dataset.transform(fn=transform_val)
         ds_metainfo.update_from_dataset(dataset)
         return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
+            last_batch=ds_metainfo.batchify_fn,
+            batchify_fn=ds_metainfo.batchify_fn,
             num_workers=num_workers)
 
 
@@ -187,14 +196,20 @@ def get_test_data_source(ds_metainfo,
         dataset = ds_metainfo.dataset_class(
             root=ds_metainfo.root_dir_path,
             mode="test",
-            transform=(transform_test if ds_metainfo.do_transform else None))
+            transform=(transform_test if ds_metainfo.do_transform else None),
+            **ds_metainfo.test_dataset_extra_kwargs)
         if not ds_metainfo.do_transform:
-            dataset = dataset.transform_first(fn=transform_test)
+            if ds_metainfo.do_transform_first:
+                dataset = dataset.transform_first(fn=transform_test)
+            else:
+                dataset = dataset.transform(fn=transform_test)
         ds_metainfo.update_from_dataset(dataset)
         return DataLoader(
             dataset=dataset,
             batch_size=batch_size,
             shuffle=False,
+            last_batch=ds_metainfo.last_batch,
+            batchify_fn=ds_metainfo.batchify_fn,
             num_workers=num_workers)
 
 

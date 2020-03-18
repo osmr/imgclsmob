@@ -13,6 +13,9 @@ class DatasetMetaInfo(object):
     def __init__(self):
         self.use_imgrec = False
         self.do_transform = False
+        self.do_transform_first = True
+        self.last_batch = None
+        self.batchify_fn = None
         self.label = None
         self.root_dir_name = None
         self.root_dir_path = None
@@ -36,6 +39,7 @@ class DatasetMetaInfo(object):
         self.allow_hybridize = True
         self.net_extra_kwargs = None
         self.load_ignore_extra = False
+        self.test_dataset_extra_kwargs = {}
 
     def add_dataset_parser_arguments(self,
                                      parser,

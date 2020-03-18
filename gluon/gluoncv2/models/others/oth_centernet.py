@@ -473,6 +473,11 @@ class CenterNet(nn.HybridBlock):
         heatmap = out[0]
         keep = F.broadcast_equal(self.heatmap_nms(heatmap), heatmap)
         results = self.decoder(keep * heatmap, out[1], out[2])
+
+        a, b, c = results
+        a = a.expand_dims(2)
+        b = b.expand_dims(2)
+        results = F.concat(a, b, c, dim=2)
         return results
 
 

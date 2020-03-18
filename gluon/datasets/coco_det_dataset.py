@@ -3,6 +3,7 @@ MS COCO object detection dataset.
 """
 import os
 import cv2
+import logging
 import mxnet as mx
 import numpy as np
 from PIL import Image
@@ -61,7 +62,7 @@ class CocoDetDataset(dataset.Dataset):
         super(CocoDetDataset, self).__init__()
         self._root = os.path.expanduser(root)
         self.mode = mode
-        self.transform = transform
+        self._transform = transform
         self.num_class = len(self.CLASSES)
 
         self._min_object_area = min_object_area
@@ -75,6 +76,11 @@ class CocoDetDataset(dataset.Dataset):
         self.contiguous_id_to_json = None
         self._coco = []
         self._items, self._labels, self._im_aspect_ratios = self._load_jsons()
+
+        mode_name = "train" if mode == "train" else "val"
+        annotations_dir_path = os.path.join(root, "annotations")
+        annotations_file_path = os.path.join(annotations_dir_path, "instances_" + mode_name + "2017.json")
+        self.annotations_file_path = annotations_file_path
 
     def __str__(self):
         detail = ','.join([str(s) for s in self._splits])
@@ -136,7 +142,7 @@ class CocoDetDataset(dataset.Dataset):
             Absolute path for corresponding image.
 
         """
-        dirname, filename = entry['coco_url'].split('/')[-2:]
+        dirname, filename = entry["coco_url"].split("/")[-2:]
         abs_path = os.path.join(self._root, dirname, filename)
         return abs_path
 
@@ -147,9 +153,10 @@ class CocoDetDataset(dataset.Dataset):
         img_path = self._items[idx]
         label = self._labels[idx]
         img = mx.image.imread(img_path, 1)
-        if self.transform is not None:
-            return self.transform(img, label)
-        return img, np.array(label).copy()
+        label = np.array(label).copy()
+        if self._transform is not None:
+            img, label = self._transform(img, label)
+        return img, label
 
     def _load_jsons(self):
         """
@@ -330,7 +337,7 @@ class CocoDetValTransform(object):
         img = inp
 
         # to tensor
-        img = img.astype(np.float32) / 255.
+        img = img.astype(np.float32) / 255.0
         img = (img - self._mean) / self._std
         img = img.transpose(2, 0, 1).astype(np.float32)
         img = mx.nd.array(img)
@@ -461,6 +468,187 @@ class CocoDetValTransform(object):
         return new_pt[:2]
 
 
+class Tuple(object):
+    """
+    Wrap multiple batchify functions to form a function apply each input function on each
+    input fields respectively.
+    """
+    def __init__(self, fn, *args):
+        if isinstance(fn, (list, tuple)):
+            self._fn = fn
+        else:
+            self._fn = (fn,) + args
+
+    def __call__(self, data):
+        """
+        Batchify the input data.
+
+        Parameters
+        ----------
+        data : list
+            The samples to batchfy. Each sample should contain N attributes.
+        Returns
+        -------
+        tuple
+            A tuple of length N. Contains the batchified result of each attribute in the input.
+        """
+        ret = []
+        for i, ele_fn in enumerate(self._fn):
+            ret.append(ele_fn([ele[i] for ele in data]))
+        return tuple(ret)
+
+
+class Stack(object):
+    """
+    Stack the input data samples to construct the batch.
+    """
+    def __call__(self, data):
+        """
+        Batchify the input data.
+
+        Parameters
+        ----------
+        data : list
+            The input data samples
+
+        Returns
+        -------
+        NDArray
+            Result.
+        """
+        return self._stack_arrs(data, True)
+
+    @staticmethod
+    def _stack_arrs(arrs, use_shared_mem=False):
+        """
+        Internal imple for stacking arrays.
+        """
+        if isinstance(arrs[0], mx.nd.NDArray):
+            if use_shared_mem:
+                out = mx.nd.empty((len(arrs),) + arrs[0].shape, dtype=arrs[0].dtype,
+                                  ctx=mx.Context("cpu_shared", 0))
+                return mx.nd.stack(*arrs, out=out)
+            else:
+                return mx.nd.stack(*arrs)
+        else:
+            out = np.asarray(arrs)
+            if use_shared_mem:
+                return mx.nd.array(out, ctx=mx.Context("cpu_shared", 0))
+            else:
+                return mx.nd.array(out)
+
+
+class Pad(object):
+    """
+    Pad the input ndarrays along the specific padding axis and stack them to get the output.
+    """
+    def __init__(self, axis=0, pad_val=0, num_shards=1, ret_length=False):
+        self._axis = axis
+        self._pad_val = pad_val
+        self._num_shards = num_shards
+        self._ret_length = ret_length
+
+    def __call__(self, data):
+        """
+        Batchify the input data.
+
+        Parameters
+        ----------
+        data : list
+            A list of N samples. Each sample can be 1) ndarray or
+             2) a list/tuple of ndarrays
+        Returns
+        -------
+        NDArray
+            Data in the minibatch. Shape is (N, ...)
+        NDArray, optional
+            The sequences' original lengths at the padded axis. Shape is (N,). This will only be
+            returned in `ret_length` is True.
+        """
+        if isinstance(data[0], (mx.nd.NDArray, np.ndarray, list)):
+            padded_arr, original_length = self._pad_arrs_to_max_length(
+                data, self._axis, self._pad_val, self._num_shards, True)
+            if self._ret_length:
+                return padded_arr, original_length
+            else:
+                return padded_arr
+
+        else:
+            raise NotImplementedError
+
+    @staticmethod
+    def _pad_arrs_to_max_length(arrs, pad_axis, pad_val, num_shards=1, use_shared_mem=False):
+        """
+        Inner Implementation of the Pad batchify.
+        """
+        if not isinstance(arrs[0], (mx.nd.NDArray, np.ndarray)):
+            arrs = [np.asarray(ele) for ele in arrs]
+        if isinstance(pad_axis, tuple):
+            original_length = []
+            for axis in pad_axis:
+                original_length.append(np.array([ele.shape[axis] for ele in arrs]))
+            original_length = np.stack(original_length).T
+        else:
+            original_length = np.array([ele.shape[pad_axis] for ele in arrs])
+            pad_axis = [pad_axis]
+        if len(original_length) % num_shards != 0:
+            logging.warning(
+                'Batch size cannot be evenly split. Trying to shard %d items into %d shards',
+                len(original_length), num_shards)
+        original_length = np.array_split(original_length, num_shards)
+        max_lengths = [np.max(l, axis=0, keepdims=len(pad_axis) == 1) for l in original_length]
+        # add batch dimension
+        ret_shape = [[l.shape[0], ] + list(arrs[0].shape) for l in original_length]
+        for i, shape in enumerate(ret_shape):
+            for j, axis in enumerate(pad_axis):
+                shape[1 + axis] = max_lengths[i][j]
+        if use_shared_mem:
+            ret = [mx.nd.full(shape=tuple(shape), val=pad_val, ctx=mx.Context('cpu_shared', 0),
+                              dtype=arrs[0].dtype) for shape in ret_shape]
+            original_length = [mx.nd.array(l, ctx=mx.Context('cpu_shared', 0),
+                                           dtype=np.int32) for l in original_length]
+        else:
+            ret = [mx.nd.full(shape=tuple(shape), val=pad_val, dtype=arrs[0].dtype) for shape in
+                   ret_shape]
+            original_length = [mx.nd.array(l, dtype=np.int32) for l in original_length]
+        for i, arr in enumerate(arrs):
+            if ret[i // ret[0].shape[0]].shape[1:] == arr.shape:
+                ret[i // ret[0].shape[0]][i % ret[0].shape[0]] = arr
+            else:
+                slices = [slice(0, l) for l in arr.shape]
+                ret[i // ret[0].shape[0]][i % ret[0].shape[0]][tuple(slices)] = arr
+        if len(ret) == len(original_length) == 1:
+            return ret[0], original_length[0]
+        return ret, original_length
+
+
+def get_post_transform(orig_w, orig_h, out_w, out_h):
+    """Get the post prediction affine transforms. This will be used to adjust the prediction results
+    according to original coco image resolutions.
+
+    Parameters
+    ----------
+    orig_w : int
+        Original width of the image.
+    orig_h : int
+        Original height of the image.
+    out_w : int
+        Width of the output image after prediction.
+    out_h : int
+        Height of the output image after prediction.
+
+    Returns
+    -------
+    numpy.ndarray
+        Affine transform matrix 3x2.
+
+    """
+    s = max(orig_w, orig_h) * 1.0
+    c = np.array([orig_w / 2., orig_h / 2.], dtype=np.float32)
+    trans_output = CocoDetValTransform.get_affine_transform(c, s, 0, [out_w, out_h], inv=True)
+    return trans_output
+
+
 class CocoDetMetaInfo(DatasetMetaInfo):
     def __init__(self):
         super(CocoDetMetaInfo, self).__init__()
@@ -471,7 +659,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.num_training_samples = None
         self.in_channels = 3
         self.num_classes = CocoDetDataset.classes
-        self.input_image_size = (256, 192)
+        self.input_image_size = (512, 512)
         self.train_metric_capts = None
         self.train_metric_names = None
         self.train_metric_extra_kwargs = None
@@ -481,9 +669,18 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["CocoDetMApMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "mAP",
-             "dataset": None}]
+             "img_height": 512,
+             "coco_annotations_file_path": None,
+             "contiguous_id_to_json": None,
+             "data_shape": None,
+             "post_affine": get_post_transform}]
+        self.test_dataset_extra_kwargs =\
+            {"skip_empty": False}
         self.saver_acc_ind = 0
         self.do_transform = True
+        self.do_transform_first = False
+        self.last_batch = "keep"
+        self.batchify_fn = Tuple(Stack(), Pad(pad_val=-1))
         self.val_transform = CocoDetValTransform
         self.test_transform = CocoDetValTransform
         self.ml_type = "hpe"
@@ -491,7 +688,6 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.net_extra_kwargs = {}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
-        self.model_type = 1
 
     def add_dataset_parser_arguments(self,
                                      parser,
@@ -513,11 +709,6 @@ class CocoDetMetaInfo(DatasetMetaInfo):
             nargs=2,
             default=self.input_image_size,
             help="size of the input for model")
-        parser.add_argument(
-            "--model-type",
-            type=int,
-            default=self.model_type,
-            help="model type (1=SimplePose, 2=AlphaPose)")
 
     def update(self,
                args):
@@ -531,7 +722,8 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         """
         super(CocoDetMetaInfo, self).update(args)
         self.input_image_size = args.input_size
-        self.model_type = args.model_type
+        self.test_metric_extra_kwargs[0]["img_height"] = self.input_image_size[0]
+        self.test_metric_extra_kwargs[0]["data_shape"] = self.input_image_size
 
     def update_from_dataset(self,
                             dataset):
@@ -543,4 +735,5 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         args : obj
             A dataset class instance.
         """
-        self.test_metric_extra_kwargs[0]["dataset"] = dataset
+        self.test_metric_extra_kwargs[0]["coco_annotations_file_path"] = dataset.annotations_file_path
+        self.test_metric_extra_kwargs[0]["contiguous_id_to_json"] = dataset.contiguous_id_to_json

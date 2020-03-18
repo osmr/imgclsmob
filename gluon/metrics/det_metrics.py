@@ -2,16 +2,10 @@
 Evaluation Metrics for Object Detection.
 """
 
-import os
-import sys
 import warnings
 import numpy as np
 import mxnet as mx
 from collections import defaultdict
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 
 __all__ = ['CocoDetMApMetric', 'VOC07MApMetric']
 
@@ -22,14 +16,14 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
 
     Parameters
     ----------
-    dataset : instance of gluoncv.data.COCODetection
-        The validation dataset.
+    coco_annotations_file_path : str
+        COCO anotation file path.
+    validation_ids : bool, default False
+        Whether to use temporary file for estimation.
+    use_file : bool, default False
+        Whether to use temporary file for estimation.
     save_prefix : str
         Prefix for the saved JSON results.
-    use_time : bool
-        Append unique datetime string to created JSON file name if `True`.
-    cleanup : bool
-        Remove created JSON file if `True`.
     score_thresh : float, default 0.05
         Detection results with confident scores smaller than `score_thresh` will be discarded before saving to results.
     data_shape : tuple of int, default is None
@@ -42,20 +36,29 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         Name of this metric instance for display.
     """
     def __init__(self,
-                 dataset,
-                 save_prefix="coco_det",
-                 use_time=True,
-                 cleanup=False,
+                 img_height,
+                 coco_annotations_file_path,
+                 contiguous_id_to_json,
+                 validation_ids=None,
+                 use_file=False,
+                 cleanup=True,
                  score_thresh=0.05,
                  data_shape=None,
                  post_affine=None,
                  name="mAP"):
         super(CocoDetMApMetric, self).__init__(name=name)
-        self.dataset = dataset
-        self._img_ids = sorted(dataset.coco.getImgIds())
-        self._current_id = 0
+        self.img_height = img_height
+        self.coco_annotations_file_path = coco_annotations_file_path
+        self.contiguous_id_to_json = contiguous_id_to_json
+        self.validation_ids = validation_ids
+        self.use_file = use_file
+
         self._cleanup = cleanup
-        self._results = []
+        self._filename = None
+        # self.dataset = dataset
+        # self._img_ids = sorted(dataset.coco.getImgIds())
+        self._current_id = 0
+        self.coco_result = []
         self._score_thresh = score_thresh
         if isinstance(data_shape, (tuple, list)):
             assert len(data_shape) == 2, "Data shape must be (height, width)"
@@ -70,112 +73,46 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         else:
             self._post_affine = None
 
-        if use_time:
-            import datetime
-            t = datetime.datetime.now().strftime("_%Y_%m_%d_%H_%M_%S")
-        else:
-            t = ""
-        self._filename = os.path.abspath(os.path.expanduser(save_prefix) + t + ".json")
-        try:
-            f = open(self._filename, "w")
-        except IOError as e:
-            raise RuntimeError("Unable to open json file to dump. What(): {}".format(str(e)))
-        else:
-            f.close()
-
-    def __del__(self):
-        if self._cleanup:
-            try:
-                os.remove(self._filename)
-            except IOError as err:
-                warnings.warn(str(err))
+        from pycocotools.coco import COCO
+        self.gt = COCO(self.coco_annotations_file_path)
+        self._img_ids = sorted(self.gt.getImgIds())
 
     def reset(self):
         self._current_id = 0
-        self._results = []
-
-    def _update(self):
-        """
-        Use coco to get real scores.
-        """
-        if not self._current_id == len(self._img_ids):
-            warnings.warn("Recorded {} out of {} validation images, incomplete results".format(
-                self._current_id, len(self._img_ids)))
-        if not self._results:
-            # in case of empty results, push a dummy result
-            self._results.append({"image_id": self._img_ids[0],
-                                  "category_id": 0,
-                                  "bbox": [0, 0, 0, 0],
-                                  "score": 0})
-        import json
-        try:
-            with open(self._filename, "w") as f:
-                json.dump(self._results, f)
-        except IOError as e:
-            raise RuntimeError("Unable to dump json file, ignored. What(): {}".format(str(e)))
-
-        pred = self.dataset.coco.loadRes(self._filename)
-        gt = self.dataset.coco
-        from pycocotools.cocoeval import COCOeval
-        coco_eval = COCOeval(gt, pred, "bbox")
-        coco_eval.evaluate()
-        coco_eval.accumulate()
-        self._coco_eval = coco_eval
-        return coco_eval
+        self.coco_result = []
 
     def get(self):
         """
         Get evaluation metrics.
         """
-        # Metric printing adapted from detectron/json_dataset_evaluator.
-        def _get_thr_ind(coco_eval, thr):
-            ind = np.where((coco_eval.params.iouThrs > thr - 1e-5) &
-                           (coco_eval.params.iouThrs < thr + 1e-5))[0][0]
-            iou_thr = coco_eval.params.iouThrs[ind]
-            assert np.isclose(iou_thr, thr)
-            return ind
+        if self._current_id != len(self._img_ids):
+            warnings.warn("Recorded {} out of {} validation images, incomplete results".format(
+                self._current_id, len(self._img_ids)))
 
-        # call real update
-        try:
-            coco_eval = self._update()
-        except IndexError:
-            # invalid model may result in empty JSON results, skip it
-            return ("mAP",), ("0.0",)
+        from pycocotools.coco import COCO
+        gt = COCO(self.coco_annotations_file_path)
 
-        IoU_lo_thresh = 0.5
-        IoU_hi_thresh = 0.95
-        ind_lo = _get_thr_ind(coco_eval, IoU_lo_thresh)
-        ind_hi = _get_thr_ind(coco_eval, IoU_hi_thresh)
-        # precision has dims (iou, recall, cls, area range, max dets)
-        # area range index 0: all area ranges
-        # max dets index 2: 100 per image
-        precision = coco_eval.eval["precision"][ind_lo:(ind_hi + 1), :, :, 0, 2]
-        ap_default = np.mean(precision[precision > -1])
-        names, values = [], []
-        names.append("~~~~ Summary metrics ~~~~\n")
-        # catch coco print string, don't want directly print here
-        _stdout = sys.stdout
-        sys.stdout = StringIO()
+        import tempfile
+        import json
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json") as f:
+            json.dump(self.coco_result, f)
+            f.flush()
+            pred = gt.loadRes(f.name)
+
+        from pycocotools.cocoeval import COCOeval
+        coco_eval = COCOeval(gt, pred, "bbox")
+        if self.validation_ids is not None:
+            coco_eval.params.imgIds = self.validation_ids
+        coco_eval.evaluate()
+        coco_eval.accumulate()
         coco_eval.summarize()
-        coco_summary = sys.stdout.getvalue()
-        sys.stdout = _stdout
-        values.append(str(coco_summary).strip())
-        for cls_ind, cls_name in enumerate(self.dataset.classes):
-            precision = coco_eval.eval["precision"][ind_lo:(ind_hi + 1), :, cls_ind, 0, 2]
-            ap = np.mean(precision[precision > -1])
-            names.append(cls_name)
-            values.append("{:.1f}".format(100 * ap))
-        # put mean AP at last, for comparing perf
-        names.append("~~~~ MeanAP @ IoU=[{:.2f},{:.2f}] ~~~~\n".format(IoU_lo_thresh, IoU_hi_thresh))
-        values.append("{:.1f}".format(100 * ap_default))
-        return names, values
 
-    def update(self,
-               pred_bboxes,
-               pred_labels,
-               pred_scores,
-               *args,
-               **kwargs):
+        return self.name, tuple(coco_eval.stats[:3])
+
+    def update2(self,
+                pred_bboxes,
+                pred_labels,
+                pred_scores):
         """
         Update internal buffer with latest predictions. Note that the statistics are not available until you call
         self.get() to return the metrics.
@@ -211,7 +148,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
             self._current_id += 1
             affine_mat = None
             if self._data_shape is not None:
-                entry = self.dataset.coco.loadImgs(imgid)[0]
+                entry = self.gt.loadImgs(imgid)[0]
                 orig_height = entry["height"]
                 orig_width = entry["width"]
                 height_scale = float(orig_height) / self._data_shape[0]
@@ -219,15 +156,15 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
                 if self._post_affine is not None:
                     affine_mat = self._post_affine(orig_width, orig_height, self._data_shape[1], self._data_shape[0])
             else:
-                height_scale, width_scale = (1., 1.)
+                height_scale, width_scale = (1.0, 1.0)
             # for each bbox detection in each image
             for bbox, label, score in zip(pred_bbox, pred_label, pred_score):
-                if label not in self.dataset.contiguous_id_to_json:
+                if label not in self.contiguous_id_to_json:
                     # ignore non-exist class
                     continue
                 if score < self._score_thresh:
                     continue
-                category_id = self.dataset.contiguous_id_to_json[label]
+                category_id = self.contiguous_id_to_json[label]
                 # rescale bboxes/affine transform bboxes
                 if affine_mat is not None:
                     bbox[0:2] = self.affine_transform(bbox[0:2], affine_mat)
@@ -237,10 +174,24 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
                     bbox[[1, 3]] *= height_scale
                 # convert [xmin, ymin, xmax, ymax]  to [xmin, ymin, w, h]
                 bbox[2:4] -= (bbox[:2] - 1)
-                self._results.append({"image_id": imgid,
-                                      "category_id": category_id,
-                                      "bbox": bbox[:4].tolist(),
-                                      "score": score})
+                self.coco_result.append({"image_id": imgid,
+                                         "category_id": category_id,
+                                         "bbox": bbox[:4].tolist(),
+                                         "score": score})
+
+    def update(self, labels, preds):
+        det_bboxes = []
+        det_ids = []
+        det_scores = []
+        for x_rr, y in zip(preds, labels):
+            ids = x_rr.slice_axis(axis=-1, begin=0, end=1).squeeze(axis=2)
+            scores = x_rr.slice_axis(axis=-1, begin=1, end=2).squeeze(axis=2)
+            bboxes = x_rr.slice_axis(axis=-1, begin=2, end=6)
+            det_ids.append(ids)
+            det_scores.append(scores)
+            # clip to image size
+            det_bboxes.append(bboxes.clip(0, self.img_height))
+        self.update2(det_bboxes, det_ids, det_scores)
 
     @staticmethod
     def affine_transform(pt, t):

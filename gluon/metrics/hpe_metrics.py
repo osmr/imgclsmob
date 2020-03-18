@@ -17,9 +17,9 @@ class CocoHpeOksApMetric(mx.metric.EvalMetric):
         COCO anotation file path.
     pose_postprocessing_fn : func
         An function for pose post-processing.
-    use_file : bool, default False
-        Whether to use temporary file for estimation.
     validation_ids : bool, default False
+        Whether to use temporary file for estimation.
+    use_file : bool, default False
         Whether to use temporary file for estimation.
     name : str, default 'CocoOksAp'
         Name of this metric instance for display.

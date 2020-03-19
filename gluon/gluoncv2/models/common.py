@@ -5,9 +5,9 @@
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'BatchNormExtra', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block',
            'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
-           'pre_conv1x1_block', 'pre_conv3x3_block', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2',
-           'SEBlock', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent',
-           'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle',
+           'ChannelShuffle2', 'SEBlock', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
+           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
            'MultiOutputSequential', 'HeatmapMaxDetBlock']
 
 import math
@@ -978,6 +978,90 @@ def pre_conv3x3_block(in_channels,
         activate=activate)
 
 
+class DeconvBlock(HybridBlock):
+    """
+    Deconvolution block with batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the deconvolution.
+    padding : int or tuple/list of 2 int
+        Padding value for deconvolution layer.
+    out_padding : int or tuple/list of 2 int
+        Output padding value for deconvolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for deconvolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
+    activation : function or str or None, default nn.Activation('relu')
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 out_padding=0,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_epsilon=1e-5,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 activation=(lambda: nn.Activation("relu")),
+                 **kwargs):
+        super(DeconvBlock, self).__init__(**kwargs)
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        with self.name_scope():
+            self.conv = nn.Conv2DTranspose(
+                channels=out_channels,
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                output_padding=out_padding,
+                dilation=dilation,
+                groups=groups,
+                use_bias=use_bias,
+                in_channels=in_channels)
+            if self.use_bn:
+                self.bn = BatchNormExtra(
+                    in_channels=out_channels,
+                    epsilon=bn_epsilon,
+                    use_global_stats=bn_use_global_stats,
+                    cudnn_off=bn_cudnn_off)
+            if self.activate:
+                self.activ = get_activation_layer(activation)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
 class InterpolationBlock(HybridBlock):
     """
     Interpolation block.
@@ -1684,7 +1768,7 @@ class HeatmapMaxDetBlock(HybridBlock):
         return pts
 
     def __repr__(self):
-        s = '{name}(channels={channels}, in_size={in_size}, fixed_size={fixed_size})'
+        s = "{name}(channels={channels}, in_size={in_size}, fixed_size={fixed_size})"
         return s.format(
             name=self.__class__.__name__,
             channels=self.channels,

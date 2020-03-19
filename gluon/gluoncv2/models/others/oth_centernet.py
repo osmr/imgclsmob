@@ -70,6 +70,7 @@ class DeconvResnet(nn.HybridBlock):
                  norm_kwargs=None,
                  use_dcnv2=False,
                  in_channels=3,
+                 classes=1000,
                  **kwargs):
         super(DeconvResnet, self).__init__(**kwargs)
         assert 'resnet' in base_network
@@ -477,7 +478,7 @@ class CenterNet(nn.HybridBlock):
         a, b, c = results
         a = a.expand_dims(2)
         b = b.expand_dims(2)
-        results = F.concat(a, b, c, dim=2)
+        results = F.concat(c, a, b, dim=2)
         return results
 
 

@@ -184,9 +184,9 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         det_ids = []
         det_scores = []
         for x_rr, y in zip(preds, labels):
-            ids = x_rr.slice_axis(axis=-1, begin=0, end=1).squeeze(axis=2)
-            scores = x_rr.slice_axis(axis=-1, begin=1, end=2).squeeze(axis=2)
-            bboxes = x_rr.slice_axis(axis=-1, begin=2, end=6)
+            bboxes = x_rr.slice_axis(axis=-1, begin=0, end=4)
+            ids = x_rr.slice_axis(axis=-1, begin=4, end=5).squeeze(axis=2)
+            scores = x_rr.slice_axis(axis=-1, begin=5, end=6).squeeze(axis=2)
             det_ids.append(ids)
             det_scores.append(scores)
             # clip to image size

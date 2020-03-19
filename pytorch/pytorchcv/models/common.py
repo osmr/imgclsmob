@@ -994,7 +994,7 @@ class InterpolationBlock(nn.Module):
             align_corners=self.align_corners)
 
     def __repr__(self):
-        s = '{name}(scale_factor={scale_factor}, mode={mode}, align_corners={align_corners})'
+        s = "{name}(scale_factor={scale_factor}, mode={mode}, align_corners={align_corners})"
         return s.format(
             name=self.__class__.__name__,
             scale_factor=self.scale_factor,

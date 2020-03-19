@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-2.7%2C3.6%2C3.7-lightgrey.svg)](https://github.com/osmr/imgclsmob)
 
 This repo is used to research convolutional networks for task of computer vision. For this purpose, the repo contains
-(re)implementations of various classification, segmentation, and pose estimation models and scripts for
+(re)implementations of various classification, segmentation, detection, and pose estimation models and scripts for
 training/evaluating/converting.
 
 The following frameworks are used:
@@ -161,6 +161,15 @@ Some remarks:
 | FCN-8s(d) | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
 | ICNet | C | C | C | - | - | C | [link](https://arxiv.org/abs/1704.08545) | [link](https://github.com/hszhao/ICNet) | 2017 |
 | SINet | C | C | C | - | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |
+
+## Table of implemented object detection models
+
+Some remarks:
+- `a/A` corresponds to COCO.
+
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CenterNet | a | - | - | - | - | - | [link](https://arxiv.org/abs/1904.07850) | [link](https://github.com/xingyizhou/CenterNet) | 2019 |
 
 ## Table of implemented human pose estimation models
 

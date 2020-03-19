@@ -127,6 +127,8 @@ from .models.ibppose_coco import *
 # from .models.others.oth_mobile_pose import *
 # from .models.others.oth_alpha_pose import *
 # from .models.others.oth_icnet import *
+
+from .models.centernet import *
 from .models.others.oth_centernet import *
 
 __all__ = ['get_model']
@@ -1094,6 +1096,13 @@ _models = {
     # 'oth_mobilenet_v2_0_75': oth_mobilenet_v2_0_75,
     # 'oth_mobilenet_v2_0_5': oth_mobilenet_v2_0_5,
     # 'oth_mobilenet_v2_0_25': oth_mobilenet_v2_0_25,
+
+    'centernet_resnet18_voc': centernet_resnet18_voc,
+    'centernet_resnet18_coco': centernet_resnet18_coco,
+    'centernet_resnet50b_voc': centernet_resnet50b_voc,
+    'centernet_resnet50b_coco': centernet_resnet50b_coco,
+    'centernet_resnet101b_voc': centernet_resnet101b_voc,
+    'centernet_resnet101b_coco': centernet_resnet101b_coco,
 
     'center_net_resnet18_v1b_voc': center_net_resnet18_v1b_voc,
     'center_net_resnet18_v1b_coco': center_net_resnet18_v1b_coco,

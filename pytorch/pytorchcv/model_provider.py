@@ -133,6 +133,8 @@ from .models.superpointnet import *
 
 from .models.others.oth_ibppose import *
 
+from .models.centernet import *
+
 __all__ = ['get_model']
 
 
@@ -1026,6 +1028,13 @@ _models = {
     'oth_prnet': oth_prnet,
 
     'oth_ibppose': oth_ibppose,
+
+    'centernet_resnet18_voc': centernet_resnet18_voc,
+    'centernet_resnet18_coco': centernet_resnet18_coco,
+    'centernet_resnet50b_voc': centernet_resnet50b_voc,
+    'centernet_resnet50b_coco': centernet_resnet50b_coco,
+    'centernet_resnet101b_voc': centernet_resnet101b_voc,
+    'centernet_resnet101b_coco': centernet_resnet101b_coco,
 }
 
 

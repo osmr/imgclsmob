@@ -10,6 +10,7 @@ from .chainercv2.model_provider import get_model
 from .metrics.metric import EvalMetric, CompositeEvalMetric
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
+from .metrics.det_metrics import CocoDetMApMetric
 from .metrics.hpe_metrics import CocoHpeOksApMetric
 
 
@@ -149,6 +150,8 @@ def get_metric(metric_name, metric_extra_kwargs):
         return PixelAccuracyMetric(**metric_extra_kwargs)
     elif metric_name == "MeanIoUMetric":
         return MeanIoUMetric(**metric_extra_kwargs)
+    elif metric_name == "CocoDetMApMetric":
+        return CocoDetMApMetric(**metric_extra_kwargs)
     elif metric_name == "CocoHpeOksApMetric":
         return CocoHpeOksApMetric(**metric_extra_kwargs)
     else:

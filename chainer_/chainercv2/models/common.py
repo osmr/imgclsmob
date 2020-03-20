@@ -5,10 +5,10 @@
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalAvgPool2D', 'conv1x1', 'conv3x3',
            'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
            'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock',
-           'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'Flatten',
-           'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
+           'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle',
+           'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
+           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 import numpy as np
@@ -848,6 +848,78 @@ def pre_conv3x3_block(in_channels,
         dilate=dilate,
         return_preact=return_preact,
         activate=activate)
+
+
+class DeconvBlock(Chain):
+    """
+    Deconvolution block with batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    ksize : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Stride of the deconvolution.
+    pad : int or tuple/list of 2 int
+        Padding value for deconvolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for deconvolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 ksize,
+                 stride,
+                 pad,
+                 dilate=1,
+                 groups=1,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu),
+                 **kwargs):
+        super(DeconvBlock, self).__init__(**kwargs)
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        with self.init_scope():
+            self.conv = L.Deconvolution2D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=(not use_bias),
+                dilate=dilate,
+                groups=groups)
+            if self.use_bn:
+                self.bn = L.BatchNormalization(
+                    size=out_channels,
+                    eps=bn_eps)
+            if self.activate:
+                self.activ = get_activation_layer(activation)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
 
 
 def channel_shuffle(x,

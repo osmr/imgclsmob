@@ -528,6 +528,10 @@ def convert_gl2ch(dst_net,
     if not src_model.startswith("ibppose_coco"):
         dst_param_keys = [key.replace("/hg/", "/stage1_hg/") for key in dst_param_keys]
 
+    if src_model.startswith("centernet"):
+        dst_param_keys = [key.replace("/unit", "/a_unit") for key in dst_param_keys]
+        dst_param_keys = [key.replace("/reg_block/", "/z_reg_block/") for key in dst_param_keys]
+
     src_param_keys.sort()
     src_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
@@ -547,6 +551,10 @@ def convert_gl2ch(dst_net,
     dst_param_keys = [key.replace("/stage0/stem2_unit/", "/stem2_unit/") for key in dst_param_keys]
     if not src_model.startswith("ibppose_coco"):
         dst_param_keys = [key.replace("/stage1_hg/", "/hg/") for key in dst_param_keys]
+
+    if src_model.startswith("centernet"):
+        dst_param_keys = [key.replace("/a_unit", "/unit") for key in dst_param_keys]
+        dst_param_keys = [key.replace("/z_reg_block/", "/reg_block/") for key in dst_param_keys]
 
     if src_model.startswith("wrn20_10_1bit") or src_model.startswith("wrn20_10_32bit"):
         ext2_src_param_keys = [key.replace('.conv.weight', '.bn.beta') for key in src_param_keys if
@@ -859,6 +867,10 @@ def convert_gl2tf2(dst_net,
         # dst_param_keys = [key.replace('/dw_conv/', '/z_dw_conv/') for key in dst_param_keys]
         dst_param_keys = [key.replace("features/down", "features/z_down") for key in dst_param_keys]
 
+    if src_model.startswith("centernet"):
+        dst_param_keys = [key.replace("/unit", "/a_unit") for key in dst_param_keys]
+        dst_param_keys = [key.replace("/reg_block/", "/z_reg_block/") for key in dst_param_keys]
+
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
@@ -878,6 +890,10 @@ def convert_gl2tf2(dst_net,
     if src_model.startswith("hardnet"):
         # dst_param_keys = [key.replace('/z_dw_conv/', '/dw_conv/') for key in dst_param_keys]
         dst_param_keys = [key.replace("features/z_down", "features/down") for key in dst_param_keys]
+
+    if src_model.startswith("centernet"):
+        dst_param_keys = [key.replace("/a_unit", "/unit") for key in dst_param_keys]
+        dst_param_keys = [key.replace("/z_reg_block/", "/reg_block/") for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
     dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split("/")[-1] if s.find("convgroup") >= 0 else s

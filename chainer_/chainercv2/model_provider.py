@@ -110,6 +110,8 @@ from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
 from .models.ibppose_coco import *
 
+from .models.centernet import *
+
 __all__ = ['get_model']
 
 
@@ -949,6 +951,13 @@ _models = {
     'lwopenpose3d_mobilenet_cmupan_coco': lwopenpose3d_mobilenet_cmupan_coco,
 
     'ibppose_coco': ibppose_coco,
+
+    'centernet_resnet18_voc': centernet_resnet18_voc,
+    'centernet_resnet18_coco': centernet_resnet18_coco,
+    'centernet_resnet50b_voc': centernet_resnet50b_voc,
+    'centernet_resnet50b_coco': centernet_resnet50b_coco,
+    'centernet_resnet101b_voc': centernet_resnet101b_voc,
+    'centernet_resnet101b_coco': centernet_resnet101b_coco,
 }
 
 

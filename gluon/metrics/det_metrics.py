@@ -16,14 +16,16 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
 
     Parameters
     ----------
+    img_height : int
+        Processed image height.
     coco_annotations_file_path : str
         COCO anotation file path.
+    contiguous_id_to_json : list of int
+        Processed IDs.
     validation_ids : bool, default False
         Whether to use temporary file for estimation.
     use_file : bool, default False
         Whether to use temporary file for estimation.
-    save_prefix : str
-        Prefix for the saved JSON results.
     score_thresh : float, default 0.05
         Detection results with confident scores smaller than `score_thresh` will be discarded before saving to results.
     data_shape : tuple of int, default is None
@@ -41,7 +43,6 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
                  contiguous_id_to_json,
                  validation_ids=None,
                  use_file=False,
-                 cleanup=True,
                  score_thresh=0.05,
                  data_shape=None,
                  post_affine=None,
@@ -52,14 +53,11 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         self.contiguous_id_to_json = contiguous_id_to_json
         self.validation_ids = validation_ids
         self.use_file = use_file
+        self.score_thresh = score_thresh
 
-        self._cleanup = cleanup
-        self._filename = None
-        # self.dataset = dataset
-        # self._img_ids = sorted(dataset.coco.getImgIds())
-        self._current_id = 0
+        self.current_idx = 0
         self.coco_result = []
-        self._score_thresh = score_thresh
+
         if isinstance(data_shape, (tuple, list)):
             assert len(data_shape) == 2, "Data shape must be (height, width)"
         elif not data_shape:
@@ -67,6 +65,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         else:
             raise ValueError("data_shape must be None or tuple of int as (height, width)")
         self._data_shape = data_shape
+
         if post_affine is not None:
             assert self._data_shape is not None, "Using post affine transform requires data_shape"
             self._post_affine = post_affine
@@ -78,16 +77,16 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
         self._img_ids = sorted(self.gt.getImgIds())
 
     def reset(self):
-        self._current_id = 0
+        self.current_idx = 0
         self.coco_result = []
 
     def get(self):
         """
         Get evaluation metrics.
         """
-        if self._current_id != len(self._img_ids):
+        if self.current_idx != len(self._img_ids):
             warnings.warn("Recorded {} out of {} validation images, incomplete results".format(
-                self._current_id, len(self._img_ids)))
+                self.current_idx, len(self._img_ids)))
 
         from pycocotools.coco import COCO
         gt = COCO(self.coco_annotations_file_path)
@@ -144,8 +143,8 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
             pred_label = pred_label.flat[valid_pred].astype(int)
             pred_score = pred_score.flat[valid_pred].astype(np.float)
 
-            imgid = self._img_ids[self._current_id]
-            self._current_id += 1
+            imgid = self._img_ids[self.current_idx]
+            self.current_idx += 1
             affine_mat = None
             if self._data_shape is not None:
                 entry = self.gt.loadImgs(imgid)[0]
@@ -162,7 +161,7 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
                 if label not in self.contiguous_id_to_json:
                     # ignore non-exist class
                     continue
-                if score < self._score_thresh:
+                if score < self.score_thresh:
                     continue
                 category_id = self.contiguous_id_to_json[label]
                 # rescale bboxes/affine transform bboxes
@@ -180,6 +179,16 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
                                          "score": score})
 
     def update(self, labels, preds):
+        """
+        Updates the internal evaluation result.
+
+        Parameters
+        ----------
+        labels : list of `NDArray`
+            The labels of the data.
+        preds : list of `NDArray`
+            Predicted values.
+        """
         det_bboxes = []
         det_ids = []
         det_scores = []

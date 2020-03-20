@@ -14,6 +14,7 @@ from .pytorchcv.models.irevnet import IRevDownscale, IRevSplitBlock, IRevMergeBl
 from .pytorchcv.models.rir_cifar import RiRFinalBlock
 from .pytorchcv.models.proxylessnas import ProxylessUnit
 from .pytorchcv.models.lwopenpose_cmupan import LwopDecoderFinalBlock
+from .pytorchcv.models.centernet import CenterNetHeatmapMaxDet
 
 __all__ = ['measure_model']
 
@@ -240,7 +241,7 @@ def measure_model(model,
         elif isinstance(module, nn.Softmax2d):
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
-        elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock]:
+        elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet]:
             extra_num_flops, extra_num_macs = module.calc_flops(x[0])
         elif isinstance(module, LwopDecoderFinalBlock):
             if not module.calc_3d_features:

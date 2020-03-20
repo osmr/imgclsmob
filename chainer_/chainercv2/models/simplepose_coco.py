@@ -8,85 +8,11 @@ __all__ = ['SimplePose', 'simplepose_resnet18_coco', 'simplepose_resnet50b_coco'
            'simplepose_resneta152b_coco']
 
 import os
-import chainer.functions as F
-import chainer.links as L
 from chainer import Chain
 from chainer.serializers import load_npz
-from .common import get_activation_layer, conv1x1, HeatmapMaxDetBlock, SimpleSequential
+from .common import DeconvBlock, conv1x1, HeatmapMaxDetBlock, SimpleSequential
 from .resnet import resnet18, resnet50b, resnet101b, resnet152b
 from .resneta import resneta50b, resneta101b, resneta152b
-
-
-class DeconvBlock(Chain):
-    """
-    Deconvolution block with batch normalization and activation.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    ksize : int or tuple/list of 2 int
-        Convolution window size.
-    stride : int or tuple/list of 2 int
-        Stride of the deconvolution.
-    pad : int or tuple/list of 2 int
-        Padding value for deconvolution layer.
-    dilate : int or tuple/list of 2 int, default 1
-        Dilation value for deconvolution layer.
-    groups : int, default 1
-        Number of groups.
-    use_bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
-    bn_eps : float, default 1e-5
-        Small float added to variance in Batch norm.
-    activation : function or str or None, default F.relu
-        Activation function or name of activation function.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 ksize,
-                 stride,
-                 pad,
-                 dilate=1,
-                 groups=1,
-                 use_bias=False,
-                 use_bn=True,
-                 bn_eps=1e-5,
-                 activation=(lambda: F.relu),
-                 **kwargs):
-        super(DeconvBlock, self).__init__(**kwargs)
-        self.activate = (activation is not None)
-        self.use_bn = use_bn
-
-        with self.init_scope():
-            self.conv = L.Deconvolution2D(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                ksize=ksize,
-                stride=stride,
-                pad=pad,
-                nobias=(not use_bias),
-                dilate=dilate,
-                groups=groups)
-            if self.use_bn:
-                self.bn = L.BatchNormalization(
-                    size=out_channels,
-                    eps=bn_eps)
-            if self.activate:
-                self.activ = get_activation_layer(activation)
-
-    def __call__(self, x):
-        x = self.conv(x)
-        if self.use_bn:
-            x = self.bn(x)
-        if self.activate:
-            x = self.activ(x)
-        return x
 
 
 class SimplePose(Chain):

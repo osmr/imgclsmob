@@ -169,7 +169,7 @@ Some remarks:
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CenterNet | a | - | - | - | - | - | [link](https://arxiv.org/abs/1904.07850) | [link](https://github.com/xingyizhou/CenterNet) | 2019 |
+| CenterNet | a | a | a | - | - | a | [link](https://arxiv.org/abs/1904.07850) | [link](https://github.com/xingyizhou/CenterNet) | 2019 |
 
 ## Table of implemented human pose estimation models
 

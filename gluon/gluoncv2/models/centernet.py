@@ -4,7 +4,8 @@
 """
 
 __all__ = ['CenterNet', 'centernet_resnet18_voc', 'centernet_resnet18_coco', 'centernet_resnet50b_voc',
-           'centernet_resnet50b_coco', 'centernet_resnet101b_voc', 'centernet_resnet101b_coco']
+           'centernet_resnet50b_coco', 'centernet_resnet101b_voc', 'centernet_resnet101b_coco',
+           'CenterNetHeatmapMaxDet']
 
 import os
 from mxnet import cpu
@@ -140,13 +141,18 @@ class CenterNetHeatmapMaxDet(HybridBlock):
         Keep only `topk` detections.
     scale : int, default is 4
         Downsampling scale factor.
+    max_batch : int, default is 256
+        Maximal batch size.
     """
     def __init__(self,
                  topk=40,
-                 scale=4):
-        super(CenterNetHeatmapMaxDet, self).__init__()
+                 scale=4,
+                 max_batch=256,
+                 **kwargs):
+        super(CenterNetHeatmapMaxDet, self).__init__(**kwargs)
         self.topk = topk
         self.scale = scale
+        self.max_batch = max_batch
 
     def hybrid_forward(self, F, x):
         heatmap = x.slice_axis(axis=1, begin=0, end=-4)
@@ -154,34 +160,33 @@ class CenterNetHeatmapMaxDet(HybridBlock):
         reg = x.slice_axis(axis=1, begin=-2, end=None)
         _, _, out_h, out_w = heatmap.shape_array().split(num_outputs=4, axis=0)
         scores, indices = heatmap.reshape((0, -1)).topk(k=self.topk, ret_typ="both")
-        indices = F.cast(indices, dtype="int64")
-        topk_classes = F.cast(F.broadcast_div(indices, (out_h * out_w)), dtype="float32")
+        indices = indices.astype(dtype="int64")
+        topk_classes = F.broadcast_div(indices, (out_h * out_w)).astype(dtype="float32")
         topk_indices = F.broadcast_mod(indices, (out_h * out_w))
-        topk_ys = F.broadcast_div(topk_indices, out_w)
-        topk_xs = F.broadcast_mod(topk_indices, out_w)
+        topk_ys = F.broadcast_div(topk_indices, out_w).astype(dtype="float32")
+        topk_xs = F.broadcast_mod(topk_indices, out_w).astype(dtype="float32")
         center = reg.transpose((0, 2, 3, 1)).reshape((0, -1, 2))
         wh = wh.transpose((0, 2, 3, 1)).reshape((0, -1, 2))
-        batch_indices = F.cast(F.arange(256).slice_like(
-            center, axes=(0,)).expand_dims(-1).tile(reps=(1, self.topk)), dtype="int64")
+        batch_indices = F.arange(self.max_batch).slice_like(center, axes=0).expand_dims(-1).repeat(self.topk, 1).\
+            astype(dtype="int64")
         reg_xs_indices = F.zeros_like(batch_indices, dtype="int64")
         reg_ys_indices = F.ones_like(batch_indices, dtype="int64")
         reg_xs = F.concat(batch_indices, topk_indices, reg_xs_indices, dim=0).reshape((3, -1))
         reg_ys = F.concat(batch_indices, topk_indices, reg_ys_indices, dim=0).reshape((3, -1))
-        xs = F.cast(F.gather_nd(center, reg_xs).reshape((-1, self.topk)), dtype="float32")
-        ys = F.cast(F.gather_nd(center, reg_ys).reshape((-1, self.topk)), dtype="float32")
-        topk_xs = F.cast(topk_xs, dtype="float32") + xs
-        topk_ys = F.cast(topk_ys, dtype="float32") + ys
-        w = F.cast(F.gather_nd(wh, reg_xs).reshape((-1, self.topk)), dtype="float32")
-        h = F.cast(F.gather_nd(wh, reg_ys).reshape((-1, self.topk)), dtype="float32")
-        half_w = w / 2
-        half_h = h / 2
-        bboxes = [topk_xs - half_w, topk_ys - half_h, topk_xs + half_w, topk_ys + half_h]
-        bboxes = F.concat(*[tmp.expand_dims(-1) for tmp in bboxes], dim=-1)
+        xs = F.gather_nd(center, reg_xs).reshape((-1, self.topk))
+        ys = F.gather_nd(center, reg_ys).reshape((-1, self.topk))
+        topk_xs = topk_xs + xs
+        topk_ys = topk_ys + ys
+        w = F.gather_nd(wh, reg_xs).reshape((-1, self.topk))
+        h = F.gather_nd(wh, reg_ys).reshape((-1, self.topk))
+        half_w = 0.5 * w
+        half_h = 0.5 * h
+        bboxes = F.stack(topk_xs - half_w, topk_ys - half_h, topk_xs + half_w, topk_ys + half_h, axis=-1)
 
         bboxes = bboxes * self.scale
-        topk_classes = topk_classes.expand_dims(axis=2)
-        scores = scores.expand_dims(axis=2)
-        result = F.concat(bboxes, topk_classes, scores, dim=2)
+        topk_classes = topk_classes.expand_dims(axis=-1)
+        scores = scores.expand_dims(axis=-1)
+        result = F.concat(bboxes, topk_classes, scores, dim=-1)
         return result
 
     def __repr__(self):
@@ -353,7 +358,7 @@ def centernet_resnet18_voc(pretrained_backbone=False, classes=20, **kwargs):
     """
     backbone = resnet18(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=512, classes=classes,
-                         model_name='centernet_resnet18_voc', **kwargs)
+                         model_name="centernet_resnet18_voc", **kwargs)
 
 
 def centernet_resnet18_coco(pretrained_backbone=False, classes=80, **kwargs):
@@ -376,7 +381,7 @@ def centernet_resnet18_coco(pretrained_backbone=False, classes=80, **kwargs):
     """
     backbone = resnet18(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=512, classes=classes,
-                         model_name='centernet_resnet18_coco', **kwargs)
+                         model_name="centernet_resnet18_coco", **kwargs)
 
 
 def centernet_resnet50b_voc(pretrained_backbone=False, classes=20, **kwargs):
@@ -399,7 +404,7 @@ def centernet_resnet50b_voc(pretrained_backbone=False, classes=20, **kwargs):
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
-                         model_name='centernet_resnet50b_voc', **kwargs)
+                         model_name="centernet_resnet50b_voc", **kwargs)
 
 
 def centernet_resnet50b_coco(pretrained_backbone=False, classes=80, **kwargs):
@@ -422,7 +427,7 @@ def centernet_resnet50b_coco(pretrained_backbone=False, classes=80, **kwargs):
     """
     backbone = resnet50b(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
-                         model_name='centernet_resnet50b_coco', **kwargs)
+                         model_name="centernet_resnet50b_coco", **kwargs)
 
 
 def centernet_resnet101b_voc(pretrained_backbone=False, classes=20, **kwargs):
@@ -445,7 +450,7 @@ def centernet_resnet101b_voc(pretrained_backbone=False, classes=20, **kwargs):
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
-                         model_name='centernet_resnet101b_voc', **kwargs)
+                         model_name="centernet_resnet101b_voc", **kwargs)
 
 
 def centernet_resnet101b_coco(pretrained_backbone=False, classes=80, **kwargs):
@@ -468,7 +473,7 @@ def centernet_resnet101b_coco(pretrained_backbone=False, classes=80, **kwargs):
     """
     backbone = resnet101b(pretrained=pretrained_backbone).features[:-1]
     return get_centernet(backbone=backbone, backbone_out_channels=2048, classes=classes,
-                         model_name='centernet_resnet101b_coco', **kwargs)
+                         model_name="centernet_resnet101b_coco", **kwargs)
 
 
 def _test():

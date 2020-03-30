@@ -17,7 +17,7 @@ from .common import pre_conv1x1_block, pre_conv3x3_block, conv1x1
 
 class PreResBlock(nn.Module):
     """
-    Simple PreResNet block for residual path in ResNet unit.
+    Simple PreResNet block for residual path in PreResNet unit.
 
     Parameters:
     ----------

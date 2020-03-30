@@ -8,7 +8,7 @@ __all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_act
            'pre_conv3x3_block', 'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
            'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -739,6 +739,8 @@ class PreConvBlock(nn.Module):
         Dilation value for convolution layer.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     activate : bool, default True
@@ -752,13 +754,16 @@ class PreConvBlock(nn.Module):
                  padding,
                  dilation=1,
                  bias=False,
+                 use_bn=True,
                  return_preact=False,
                  activate=True):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
         self.activate = activate
+        self.use_bn = use_bn
 
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
+        if self.use_bn:
+            self.bn = nn.BatchNorm2d(num_features=in_channels)
         if self.activate:
             self.activ = nn.ReLU(inplace=True)
         self.conv = nn.Conv2d(
@@ -771,7 +776,8 @@ class PreConvBlock(nn.Module):
             bias=bias)
 
     def forward(self, x):
-        x = self.bn(x)
+        if self.use_bn:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         if self.return_preact:
@@ -787,6 +793,7 @@ def pre_conv1x1_block(in_channels,
                       out_channels,
                       stride=1,
                       bias=False,
+                      use_bn=True,
                       return_preact=False,
                       activate=True):
     """
@@ -802,6 +809,8 @@ def pre_conv1x1_block(in_channels,
         Strides of the convolution.
     bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -814,6 +823,7 @@ def pre_conv1x1_block(in_channels,
         stride=stride,
         padding=0,
         bias=bias,
+        use_bn=use_bn,
         return_preact=return_preact,
         activate=activate)
 
@@ -823,6 +833,8 @@ def pre_conv3x3_block(in_channels,
                       stride=1,
                       padding=1,
                       dilation=1,
+                      bias=False,
+                      use_bn=True,
                       return_preact=False,
                       activate=True):
     """
@@ -840,6 +852,10 @@ def pre_conv3x3_block(in_channels,
         Padding value for convolution layer.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -852,6 +868,8 @@ def pre_conv3x3_block(in_channels,
         stride=stride,
         padding=padding,
         dilation=dilation,
+        bias=bias,
+        use_bn=use_bn,
         return_preact=return_preact,
         activate=activate)
 
@@ -1545,11 +1563,19 @@ class MultiOutputSequential(nn.Sequential):
     ----------
     multi_output : bool, default True
         Whether to return multiple output.
+    dual_output : bool, default False
+        Whether to return dual output.
+    return_last : bool, default True
+        Whether to forcibly return last value.
     """
     def __init__(self,
-                 multi_output=True):
+                 multi_output=True,
+                 dual_output=False,
+                 return_last=True):
         super(MultiOutputSequential, self).__init__()
         self.multi_output = multi_output
+        self.dual_output = dual_output
+        self.return_last = return_last
 
     def forward(self, x):
         outs = []
@@ -1557,10 +1583,31 @@ class MultiOutputSequential(nn.Sequential):
             x = module(x)
             if hasattr(module, "do_output") and module.do_output:
                 outs.append(x)
+            elif hasattr(module, "do_output2") and module.do_output2:
+                assert (type(x) == tuple)
+                outs.extend(x[1])
+                x = x[0]
         if self.multi_output:
-            return [x] + outs
+            return [x] + outs if self.return_last else outs
+        elif self.dual_output:
+            return x, outs
         else:
             return x
+
+
+class ParallelConcurent(nn.Sequential):
+    """
+    A sequential container with multiple inputs and multiple outputs.
+    Modules will be executed in the order they are added.
+    """
+    def __init__(self):
+        super(ParallelConcurent, self).__init__()
+
+    def forward(self, x):
+        out = []
+        for module, xi in zip(self._modules.values(), x):
+            out.append(module(xi))
+        return out
 
 
 class Flatten(nn.Module):

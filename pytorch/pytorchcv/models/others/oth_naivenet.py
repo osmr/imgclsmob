@@ -1,3 +1,7 @@
+
+__all__ = ['oth_naivenet20', 'oth_naivenet25']
+
+
 import torch
 import torch.nn as nn
 
@@ -215,8 +219,7 @@ class NaiveNet(nn.Module):
                 score7, bbox7 = self.branch7(b7)
                 x = b8 = self.stage4_4_branch8(x)
                 score8, bbox8 = self.branch8(b8)
-
-            if self.block == Resv1Block:
+            elif self.block == Resv1Block:
                 x = self.conv1(x)
                 x = self.relu1(x)
                 x = self.stage1_1(x)
@@ -235,7 +238,8 @@ class NaiveNet(nn.Module):
                 score7, bbox7 = self.branch7(x)
                 x = self.stage4_3(x)
                 score8, bbox8 = self.branch8(x)
-                outs = [score1, bbox1, score2, bbox2, score3, bbox3, score4, bbox4, score5, bbox5, score6, bbox6, score7, bbox7, score8, bbox8]
+            outs = [score1, bbox1, score2, bbox2, score3, bbox3, score4, bbox4, score5, bbox5, score6, bbox6, score7,
+                    bbox7, score8, bbox8]
             return outs
 
             # uncomment to display with torchviz 
@@ -261,63 +265,83 @@ class NaiveNet(nn.Module):
             # return score1, bbox1, score2, bbox2, score3, bbox3, score4, bbox4, score5, bbox5
 
 
-
-def get_naivenet(arch, block, layers):
+def get_naivenet(arch, block, layers, pretrained=False, **kwargs):
     model = NaiveNet(arch, block, layers)
     # model = BackboneNet(arch, block, layers)
     return model
 
 
-def naivenet25():
+def oth_naivenet25(**kwargs):
     r"""NaiveNet-25 model from
     `"LFFD: A Light and Fast Face Detector for Edge Devices" <https://arxiv.org/pdf/1904.10633.pdf>`_
     It corresponds to the network structure built by `symbol_10_560_25L_8scales_v1.py` of mxnet version.
     """
-    return get_naivenet('naivenet25', Resv2Block, [4, 2, 1, 3])
+    return get_naivenet('naivenet25', Resv2Block, [4, 2, 1, 3], **kwargs)
     # return get_naivenet('naivenet25', Resv1Block, [4, 2, 1, 3])
 
 
-def naivenet20():
+def oth_naivenet20(**kwargs):
     r"""NaiveNet-20 model from
     `"LFFD: A Light and Fast Face Detector for Edge Devices" <https://arxiv.org/pdf/1904.10633.pdf>`_
     It corresponds to the network structure built by `symbol_10_320_20L_5scales_v2.py` of mxnet version.
     """
-    return get_naivenet('naivenet20', Resv2Block, [3, 1, 1, 1, 1])
+    return get_naivenet('naivenet20', Resv2Block, [3, 1, 1, 1, 1], **kwargs)
     # return get_naivenet('naivenet20', Resv1Block, [3, 1, 1, 1, 1])
 
 
-if __name__ == '__main__':
-    import os
-    from torch.autograd import Variable
-    from torchsummary import summary
-    from torchviz import make_dot
-    import tensorwatch
+# if __name__ == '__main__':
+#     import os
+#     from torch.autograd import Variable
+#     from torchsummary import summary
+#
+#     os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+#
+#     x_image = Variable(torch.randn(8, 3, 640, 640))
+#
+#     # net = naivenet25()
+#     net = naivenet20()
+#     print(net)
+#     y = net(x_image)
+#     # print(y)
+#
+#     summary(net.to('cuda'), (3, 640, 640))
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 
-    x_image = Variable(torch.randn(8, 3, 640, 640))
+def _calc_width(net):
+    import numpy as np
+    net_params = filter(lambda p: p.requires_grad, net.parameters())
+    weight_count = 0
+    for param in net_params:
+        weight_count += np.prod(param.size())
+    return weight_count
 
-    # net = naivenet25()
-    net = naivenet20()
-    print(net)
-    y = net(x_image)
-    # print(y)
 
-    summary(net.to('cuda'), (3, 640, 640))
+def _test():
+    import torch
 
-    # tensorwatch.draw_model(net, [1, 3, 640, 640])
+    pretrained = False
 
-    """ 
-    If you want to show with torchviz,
-    you need to modify the return format of the network.
-    """
-    # vis_graph = make_dot(y, params=dict(list(net.named_parameters()) + [('x', x_image)]))
+    models = [
+        oth_naivenet20,
+        oth_naivenet25,
+    ]
 
-    # # vis_graph.format = 'png'
-    # # vis_graph.format = 'pdf'
-    # vis_graph.format = 'svg'
-    # # vis_graph.render('naivenet25_resv2.gv')
-    # vis_graph.render('naivenet20_resv2.gv')
-    # # vis_graph.render('naivenet25_resv1.gv')
-    # # vis_graph.render('naivenet20_resv1.gv')
-    # vis_graph.view()
+    for model in models:
+
+        net = model(pretrained=pretrained)
+        # net.train()
+        net.eval()
+
+        x = torch.randn(14, 3, 640, 640)
+        y = net(x)
+        # y.sum().backward()
+        # assert (tuple(y.size()) == (14, 19, 1024, 2048))
+
+        weight_count = _calc_width(net)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_naivenet20 or weight_count == 1520606)
+        assert (model != oth_naivenet25 or weight_count == 2290608)
+
+
+if __name__ == "__main__":
+    _test()

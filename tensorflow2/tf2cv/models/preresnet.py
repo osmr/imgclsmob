@@ -27,6 +27,10 @@ class PreResBlock(nn.Layer):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -34,6 +38,8 @@ class PreResBlock(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
+                 use_bias=False,
+                 use_bn=True,
                  data_format="channels_last",
                  **kwargs):
         super(PreResBlock, self).__init__(**kwargs)
@@ -41,12 +47,16 @@ class PreResBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            use_bias=use_bias,
+            use_bn=use_bn,
             return_preact=True,
             data_format=data_format,
             name="conv1")
         self.conv2 = pre_conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
+            use_bias=use_bias,
+            use_bn=use_bn,
             data_format=data_format,
             name="conv2")
 
@@ -121,9 +131,13 @@ class PreResUnit(nn.Layer):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bottleneck : bool
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
@@ -132,8 +146,10 @@ class PreResUnit(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
-                 bottleneck,
-                 conv1_stride,
+                 use_bias=False,
+                 use_bn=True,
+                 bottleneck=True,
+                 conv1_stride=False,
                  data_format="channels_last",
                  **kwargs):
         super(PreResUnit, self).__init__(**kwargs)
@@ -152,6 +168,8 @@ class PreResUnit(nn.Layer):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 data_format=data_format,
                 name="body")
         if self.resize_identity:
@@ -159,6 +177,7 @@ class PreResUnit(nn.Layer):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
                 data_format=data_format,
                 name="identity_conv")
 

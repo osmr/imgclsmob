@@ -26,6 +26,10 @@ class ResBlock(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
@@ -35,6 +39,8 @@ class ResBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  strides,
+                 use_bias=False,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  **kwargs):
@@ -44,11 +50,15 @@ class ResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)
             self.conv2 = conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off,
                 activation=None)
@@ -143,6 +153,10 @@ class ResUnit(HybridBlock):
         Padding value for the second convolution layer in bottleneck.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for the second convolution layer in bottleneck.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
@@ -158,6 +172,8 @@ class ResUnit(HybridBlock):
                  strides,
                  padding=1,
                  dilation=1,
+                 use_bias=False,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  bottleneck=True,
@@ -182,6 +198,8 @@ class ResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    use_bias=use_bias,
+                    use_bn=use_bn,
                     bn_use_global_stats=bn_use_global_stats,
                     bn_cudnn_off=bn_cudnn_off)
             if self.resize_identity:
@@ -189,6 +207,8 @@ class ResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    use_bias=use_bias,
+                    use_bn=use_bn,
                     bn_use_global_stats=bn_use_global_stats,
                     bn_cudnn_off=bn_cudnn_off,
                     activation=None)

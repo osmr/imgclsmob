@@ -111,6 +111,7 @@ from .models.lwopenpose_cmupan import *
 from .models.ibppose_coco import *
 
 from .models.centernet import *
+from .models.lffd import *
 
 __all__ = ['get_model']
 
@@ -958,6 +959,9 @@ _models = {
     'centernet_resnet50b_coco': centernet_resnet50b_coco,
     'centernet_resnet101b_voc': centernet_resnet101b_voc,
     'centernet_resnet101b_coco': centernet_resnet101b_coco,
+
+    'lffd20x5s320v2_widerface': lffd20x5s320v2_widerface,
+    'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
 }
 
 

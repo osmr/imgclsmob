@@ -1,5 +1,5 @@
 
-__all__ = ['oth_naivenet20', 'oth_naivenet25']
+__all__ = ['oth_naivenet20v2', 'oth_naivenet25v2']
 
 
 import torch
@@ -271,16 +271,23 @@ def get_naivenet(arch, block, layers, pretrained=False, **kwargs):
     return model
 
 
-def oth_naivenet25(**kwargs):
+def oth_naivenet25v1(**kwargs):
+    r"""NaiveNet-25 model from
+    `"LFFD: A Light and Fast Face Detector for Edge Devices" <https://arxiv.org/pdf/1904.10633.pdf>`_
+    It corresponds to the network structure built by `symbol_10_560_25L_8scales_v1.py` of mxnet version.
+    """
+    return get_naivenet('naivenet25', Resv1Block, [4, 2, 1, 3], **kwargs)
+
+
+def oth_naivenet25v2(**kwargs):
     r"""NaiveNet-25 model from
     `"LFFD: A Light and Fast Face Detector for Edge Devices" <https://arxiv.org/pdf/1904.10633.pdf>`_
     It corresponds to the network structure built by `symbol_10_560_25L_8scales_v1.py` of mxnet version.
     """
     return get_naivenet('naivenet25', Resv2Block, [4, 2, 1, 3], **kwargs)
-    # return get_naivenet('naivenet25', Resv1Block, [4, 2, 1, 3])
 
 
-def oth_naivenet20(**kwargs):
+def oth_naivenet20v2(**kwargs):
     r"""NaiveNet-20 model from
     `"LFFD: A Light and Fast Face Detector for Edge Devices" <https://arxiv.org/pdf/1904.10633.pdf>`_
     It corresponds to the network structure built by `symbol_10_320_20L_5scales_v2.py` of mxnet version.
@@ -322,8 +329,9 @@ def _test():
     pretrained = False
 
     models = [
-        oth_naivenet20,
-        oth_naivenet25,
+        oth_naivenet20v2,
+        oth_naivenet25v2,
+        oth_naivenet25v1,
     ]
 
     for model in models:
@@ -339,8 +347,9 @@ def _test():
 
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_naivenet20 or weight_count == 1520606)
-        assert (model != oth_naivenet25 or weight_count == 2290608)
+        assert (model != oth_naivenet20v2 or weight_count == 1520606)
+        assert (model != oth_naivenet25v2 or weight_count == 2290608)
+        assert (model != oth_naivenet25v1 or weight_count == 2290608)
 
 
 if __name__ == "__main__":

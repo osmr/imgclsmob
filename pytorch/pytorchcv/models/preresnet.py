@@ -27,20 +27,30 @@ class PreResBlock(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride):
+                 stride,
+                 bias=False,
+                 use_bn=True):
         super(PreResBlock, self).__init__()
         self.conv1 = pre_conv3x3_block(
             in_channels=in_channels,
             out_channels=out_channels,
             stride=stride,
+            bias=bias,
+            use_bn=use_bn,
             return_preact=True)
         self.conv2 = pre_conv3x3_block(
             in_channels=out_channels,
-            out_channels=out_channels)
+            out_channels=out_channels,
+            bias=bias,
+            use_bn=use_bn)
 
     def forward(self, x):
         x, x_pre_activ = self.conv1(x)
@@ -103,17 +113,23 @@ class PreResUnit(nn.Module):
         Number of output channels.
     stride : int or tuple/list of 2 int
         Strides of the convolution.
-    bottleneck : bool
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  stride,
-                 bottleneck,
-                 conv1_stride):
+                 bias=False,
+                 use_bn=True,
+                 bottleneck=True,
+                 conv1_stride=False):
         super(PreResUnit, self).__init__()
         self.resize_identity = (in_channels != out_channels) or (stride != 1)
 
@@ -127,12 +143,15 @@ class PreResUnit(nn.Module):
             self.body = PreResBlock(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride)
+                stride=stride,
+                bias=bias,
+                use_bn=use_bn)
         if self.resize_identity:
             self.identity_conv = conv1x1(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride)
+                stride=stride,
+                bias=bias)
 
     def forward(self, x):
         identity = x

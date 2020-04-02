@@ -10,7 +10,7 @@ import mxnet as mx
 from .gluoncv2.model_provider import get_model
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
-from .metrics.det_metrics import CocoDetMApMetric, VOC07MApMetric
+from .metrics.det_metrics import CocoDetMApMetric, VOC07MApMetric, WiderfaceDetMetric
 from .metrics.hpe_metrics import CocoHpeOksApMetric
 
 
@@ -294,6 +294,8 @@ def get_metric(metric_name, metric_extra_kwargs):
         return CocoDetMApMetric(**metric_extra_kwargs)
     elif metric_name == "VOC07MApMetric":
         return VOC07MApMetric(**metric_extra_kwargs)
+    elif metric_name == "WiderfaceDetMetric":
+        return WiderfaceDetMetric(**metric_extra_kwargs)
     elif metric_name == "CocoHpeOksApMetric":
         return CocoHpeOksApMetric(**metric_extra_kwargs)
     else:

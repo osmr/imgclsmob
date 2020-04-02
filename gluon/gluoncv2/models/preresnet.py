@@ -27,14 +27,20 @@ class PreResBlock(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_use_global_stats=False,
                  **kwargs):
         super(PreResBlock, self).__init__(**kwargs)
         with self.name_scope():
@@ -42,11 +48,15 @@ class PreResBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats,
                 return_preact=True)
             self.conv2 = pre_conv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 bn_use_global_stats=bn_use_global_stats)
 
     def hybrid_forward(self, F, x):
@@ -118,20 +128,26 @@ class PreResUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
-    bn_use_global_stats : bool
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    bottleneck : bool
+    bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
-    conv1_stride : bool
+    conv1_stride : bool, default False
         Whether to use stride in the first or the second convolution layer of the block.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
                  strides,
-                 bn_use_global_stats,
-                 bottleneck,
-                 conv1_stride,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_use_global_stats=False,
+                 bottleneck=True,
+                 conv1_stride=False,
                  **kwargs):
         super(PreResUnit, self).__init__(**kwargs)
         self.resize_identity = (in_channels != out_channels) or (strides != 1)
@@ -149,12 +165,15 @@ class PreResUnit(HybridBlock):
                     in_channels=in_channels,
                     out_channels=out_channels,
                     strides=strides,
+                    use_bias=use_bias,
+                    use_bn=use_bn,
                     bn_use_global_stats=bn_use_global_stats)
             if self.resize_identity:
                 self.identity_conv = conv1x1(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides)
+                    strides=strides,
+                    use_bias=use_bias)
 
     def hybrid_forward(self, F, x):
         identity = x

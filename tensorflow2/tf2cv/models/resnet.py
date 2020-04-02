@@ -26,6 +26,10 @@ class ResBlock(nn.Layer):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -33,6 +37,8 @@ class ResBlock(nn.Layer):
                  in_channels,
                  out_channels,
                  strides,
+                 use_bias=False,
+                 use_bn=True,
                  data_format="channels_last",
                  **kwargs):
         super(ResBlock, self).__init__(**kwargs)
@@ -40,11 +46,15 @@ class ResBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             strides=strides,
+            use_bias=use_bias,
+            use_bn=use_bn,
             data_format=data_format,
             name="conv1")
         self.conv2 = conv3x3_block(
             in_channels=out_channels,
             out_channels=out_channels,
+            use_bias=use_bias,
+            use_bn=use_bn,
             activation=None,
             data_format=data_format,
             name="conv2")
@@ -135,6 +145,10 @@ class ResUnit(nn.Layer):
         Padding value for the second convolution layer in bottleneck.
     dilation : int or tuple/list of 2 int, default 1
         Dilation value for the second convolution layer in bottleneck.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bottleneck : bool, default True
         Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default False
@@ -148,6 +162,8 @@ class ResUnit(nn.Layer):
                  strides,
                  padding=1,
                  dilation=1,
+                 use_bias=False,
+                 use_bn=True,
                  bottleneck=True,
                  conv1_stride=False,
                  data_format="channels_last",
@@ -170,6 +186,8 @@ class ResUnit(nn.Layer):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 data_format=data_format,
                 name="body")
         if self.resize_identity:
@@ -177,6 +195,8 @@ class ResUnit(nn.Layer):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 strides=strides,
+                use_bias=use_bias,
+                use_bn=use_bn,
                 activation=None,
                 data_format=data_format,
                 name="identity_conv")

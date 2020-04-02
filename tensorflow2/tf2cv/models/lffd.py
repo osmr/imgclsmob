@@ -1,18 +1,20 @@
 """
-    LFFD for face detection, implemented in PyTorch.
+    LFFD for face detection, implemented in TensorFlow.
     Original paper: 'LFFD: A Light and Fast Face Detector for Edge Devices,' https://arxiv.org/abs/1904.10633.
 """
 
 __all__ = ['LFFD', 'lffd20x5s320v2_widerface', 'lffd25x8s560v1_widerface']
 
 import os
-import torch.nn as nn
-from .common import conv3x3, conv1x1_block, conv3x3_block, Concurrent, MultiOutputSequential, ParallelConcurent
+import tensorflow as tf
+import tensorflow.keras.layers as nn
+from .common import conv3x3, conv1x1_block, conv3x3_block, Concurrent, MultiOutputSequential, ParallelConcurent,\
+    is_channels_first
 from .resnet import ResUnit
 from .preresnet import PreResUnit
 
 
-class LffdDetectionBranch(nn.Module):
+class LffdDetectionBranch(nn.Layer):
     """
     LFFD specific detection branch.
 
@@ -22,36 +24,44 @@ class LffdDetectionBranch(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    bias : bool
+    use_bias : bool
         Whether the layer uses a bias vector.
     use_bn : bool
         Whether to use BatchNorm layer.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 bias,
-                 use_bn):
-        super(LffdDetectionBranch, self).__init__()
+                 use_bias,
+                 use_bn,
+                 data_format="channels_last",
+                 **kwargs):
+        super(LffdDetectionBranch, self).__init__(**kwargs)
         self.conv1 = conv1x1_block(
             in_channels=in_channels,
             out_channels=in_channels,
-            bias=bias,
-            use_bn=use_bn)
+            use_bias=use_bias,
+            use_bn=use_bn,
+            data_format=data_format,
+            name="conv1")
         self.conv2 = conv1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            bias=bias,
+            use_bias=use_bias,
             use_bn=use_bn,
-            activation=None)
+            activation=None,
+            data_format=data_format,
+            name="conv2")
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
+    def call(self, x, training=None):
+        x = self.conv1(x, training=training)
+        x = self.conv2(x, training=training)
         return x
 
 
-class LffdDetectionBlock(nn.Module):
+class LffdDetectionBlock(nn.Layer):
     """
     LFFD specific detection block.
 
@@ -61,41 +71,54 @@ class LffdDetectionBlock(nn.Module):
         Number of input channels.
     mid_channels : int
         Number of middle channels.
-    bias : bool
+    use_bias : bool
         Whether the layer uses a bias vector.
     use_bn : bool
         Whether to use BatchNorm layer.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  in_channels,
                  mid_channels,
-                 bias,
-                 use_bn):
-        super(LffdDetectionBlock, self).__init__()
+                 use_bias,
+                 use_bn,
+                 data_format="channels_last",
+                 **kwargs):
+        super(LffdDetectionBlock, self).__init__(**kwargs)
         self.conv = conv1x1_block(
             in_channels=in_channels,
             out_channels=mid_channels,
-            bias=bias,
-            use_bn=use_bn)
-        self.branches = Concurrent()
-        self.branches.add_module("bbox_branch", LffdDetectionBranch(
+            use_bias=use_bias,
+            use_bn=use_bn,
+            data_format=data_format,
+            name="conv")
+
+        self.branches = Concurrent(
+            data_format=data_format,
+            name="branches")
+        self.branches.add(LffdDetectionBranch(
             in_channels=mid_channels,
             out_channels=4,
-            bias=bias,
-            use_bn=use_bn))
-        self.branches.add_module("score_branch", LffdDetectionBranch(
+            use_bias=use_bias,
+            use_bn=use_bn,
+            data_format=data_format,
+            name="bbox_branch"))
+        self.branches.add(LffdDetectionBranch(
             in_channels=mid_channels,
             out_channels=2,
-            bias=bias,
-            use_bn=use_bn))
+            use_bias=use_bias,
+            use_bn=use_bn,
+            data_format=data_format,
+            name="score_branch"))
 
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.branches(x)
+    def call(self, x, training=None):
+        x = self.conv(x, training=training)
+        x = self.branches(x, training=training)
         return x
 
 
-class LFFD(nn.Module):
+class LFFD(tf.keras.Model):
     """
     LFFD model from 'LFFD: A Light and Fast Face Detector for Edge Devices,' https://arxiv.org/abs/1904.10633.
 
@@ -117,6 +140,8 @@ class LFFD(nn.Module):
         Number of input channels.
     in_size : tuple of two ints, default (640, 640)
         Spatial size of the expected input image.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
                  enc_channels,
@@ -126,49 +151,58 @@ class LFFD(nn.Module):
                  int_bends,
                  use_preresnet,
                  in_channels=3,
-                 in_size=(640, 640)):
-        super(LFFD, self).__init__()
+                 in_size=(640, 640),
+                 data_format="channels_last",
+                 **kwargs):
+        super(LFFD, self).__init__(**kwargs)
         self.in_size = in_size
+        self.data_format = data_format
         unit_class = PreResUnit if use_preresnet else ResUnit
-        bias = True
+        use_bias = True
         use_bn = False
 
         self.encoder = MultiOutputSequential(return_last=False)
-        self.encoder.add_module("init_block", conv3x3_block(
+        self.encoder.add(conv3x3_block(
             in_channels=in_channels,
             out_channels=init_block_channels,
-            stride=2,
+            strides=2,
             padding=0,
-            bias=bias,
-            use_bn=use_bn))
+            use_bias=use_bias,
+            use_bn=use_bn,
+            data_format=data_format,
+            name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(enc_channels):
             layers_per_stage = layers[i]
             int_bends_per_stage = int_bends[i]
-            stage = MultiOutputSequential(multi_output=False, dual_output=True)
-            stage.add_module("trans{}".format(i + 1), conv3x3(
+            stage = MultiOutputSequential(multi_output=False, dual_output=True, name="stage{}".format(i + 1))
+            stage.add(conv3x3(
                 in_channels=in_channels,
                 out_channels=channels_per_stage,
-                stride=2,
+                strides=2,
                 padding=0,
-                bias=bias))
+                use_bias=use_bias,
+                data_format=data_format,
+                name="trans{}".format(i + 1)))
             for j in range(layers_per_stage):
                 unit = unit_class(
                     in_channels=channels_per_stage,
                     out_channels=channels_per_stage,
-                    stride=1,
-                    bias=bias,
+                    strides=1,
+                    use_bias=use_bias,
                     use_bn=use_bn,
-                    bottleneck=False)
+                    bottleneck=False,
+                    data_format=data_format,
+                    name="unit{}".format(j + 1))
                 if layers_per_stage - j <= int_bends_per_stage:
                     unit.do_output = True
-                stage.add_module("unit{}".format(j + 1), unit)
-            final_activ = nn.ReLU(inplace=True)
+                stage.add(unit)
+            final_activ = nn.ReLU(name="final_activ")
             final_activ.do_output = True
-            stage.add_module("final_activ", final_activ)
+            stage.add(final_activ)
             stage.do_output2 = True
             in_channels = channels_per_stage
-            self.encoder.add_module("stage{}".format(i + 1), stage)
+            self.encoder.add(stage)
 
         self.decoder = ParallelConcurent()
         k = 0
@@ -177,31 +211,26 @@ class LFFD(nn.Module):
             int_bends_per_stage = int_bends[i]
             for j in range(layers_per_stage):
                 if layers_per_stage - j <= int_bends_per_stage:
-                    self.decoder.add_module("unit{}".format(k + 1), LffdDetectionBlock(
+                    self.decoder.add(LffdDetectionBlock(
                         in_channels=channels_per_stage,
                         mid_channels=dec_channels,
-                        bias=bias,
-                        use_bn=use_bn))
+                        use_bias=use_bias,
+                        use_bn=use_bn,
+                        data_format=data_format,
+                        name="unit{}".format(k + 1)))
                     k += 1
-            self.decoder.add_module("unit{}".format(k + 1), LffdDetectionBlock(
+            self.decoder.add(LffdDetectionBlock(
                 in_channels=channels_per_stage,
                 mid_channels=dec_channels,
-                bias=bias,
-                use_bn=use_bn))
+                use_bias=use_bias,
+                use_bn=use_bn,
+                data_format=data_format,
+                name="unit{}".format(k + 1)))
             k += 1
 
-        self._init_params()
-
-    def _init_params(self):
-        for name, module in self.named_modules():
-            if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_uniform_(module.weight)
-                if module.bias is not None:
-                    nn.init.constant_(module.bias, 0)
-
-    def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
+    def call(self, x, training=None):
+        x = self.encoder(x, training=training)
+        x = self.decoder(x, training=training)
         return x
 
 
@@ -209,7 +238,7 @@ def get_lffd(blocks,
              use_preresnet,
              model_name=None,
              pretrained=False,
-             root=os.path.join("~", ".torch", "models"),
+             root=os.path.join("~", ".tensorflow", "models"),
              **kwargs):
     """
     Create LFFD model with specific parameters.
@@ -224,7 +253,7 @@ def get_lffd(blocks,
         Model name for loading pretrained model.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     if blocks == 20:
@@ -253,11 +282,15 @@ def get_lffd(blocks,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import download_model
-        download_model(
-            net=net,
-            model_name=model_name,
-            local_model_store_dir_path=root)
+        from .model_store import get_model_file
+        in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
+        input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
+            (1,) + net.in_size + (in_channels,)
+        net.build(input_shape=input_shape)
+        net.load_weights(
+            filepath=get_model_file(
+                model_name=model_name,
+                local_model_store_dir_path=root))
 
     return net
 
@@ -271,7 +304,7 @@ def lffd20x5s320v2_widerface(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_lffd(blocks=20, use_preresnet=True, model_name="lffd20x5s320v2_widerface", **kwargs)
@@ -286,24 +319,18 @@ def lffd25x8s560v1_widerface(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.torch/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_lffd(blocks=25, use_preresnet=False, model_name="lffd25x8s560v1_widerface", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
-    import torch
+    import numpy as np
+    import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
+    # data_format = "channels_first"
     in_size = (640, 640)
     pretrained = False
 
@@ -316,17 +343,16 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        batch_saze = 14
+        x = tf.random.normal((batch_saze, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
+                             (batch_saze, in_size[0], in_size[1], 3))
+        y = net(x)
+        assert (len(y) == num_outs)
+
+        weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != lffd20x5s320v2_widerface or weight_count == 1520606)
         assert (model != lffd25x8s560v1_widerface or weight_count == 2290608)
-
-        batch = 14
-        x = torch.randn(batch, 3, in_size[0], in_size[1])
-        y = net(x)
-        assert (len(y) == num_outs)
 
 
 if __name__ == "__main__":

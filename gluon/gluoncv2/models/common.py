@@ -8,7 +8,7 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle',
            'ChannelShuffle2', 'SEBlock', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
            'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -840,6 +840,8 @@ class PreConvBlock(HybridBlock):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -856,6 +858,7 @@ class PreConvBlock(HybridBlock):
                  dilation=1,
                  groups=1,
                  use_bias=False,
+                 use_bn=True,
                  bn_use_global_stats=False,
                  return_preact=False,
                  activate=True,
@@ -863,11 +866,13 @@ class PreConvBlock(HybridBlock):
         super(PreConvBlock, self).__init__(**kwargs)
         self.return_preact = return_preact
         self.activate = activate
+        self.use_bn = use_bn
 
         with self.name_scope():
-            self.bn = nn.BatchNorm(
-                in_channels=in_channels,
-                use_global_stats=bn_use_global_stats)
+            if self.use_bn:
+                self.bn = nn.BatchNorm(
+                    in_channels=in_channels,
+                    use_global_stats=bn_use_global_stats)
             if self.activate:
                 self.activ = nn.Activation("relu")
             self.conv = nn.Conv2D(
@@ -881,7 +886,8 @@ class PreConvBlock(HybridBlock):
                 in_channels=in_channels)
 
     def hybrid_forward(self, F, x):
-        x = self.bn(x)
+        if self.use_bn:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         if self.return_preact:
@@ -897,6 +903,7 @@ def pre_conv1x1_block(in_channels,
                       out_channels,
                       strides=1,
                       use_bias=False,
+                      use_bn=True,
                       bn_use_global_stats=False,
                       return_preact=False,
                       activate=True):
@@ -913,6 +920,8 @@ def pre_conv1x1_block(in_channels,
         Strides of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -927,6 +936,7 @@ def pre_conv1x1_block(in_channels,
         strides=strides,
         padding=0,
         use_bias=use_bias,
+        use_bn=use_bn,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
         activate=activate)
@@ -938,6 +948,8 @@ def pre_conv3x3_block(in_channels,
                       padding=1,
                       dilation=1,
                       groups=1,
+                      use_bias=False,
+                      use_bn=True,
                       bn_use_global_stats=False,
                       return_preact=False,
                       activate=True):
@@ -958,6 +970,10 @@ def pre_conv3x3_block(in_channels,
         Dilation value for convolution layer.
     groups : int, default 1
         Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     return_preact : bool, default False
@@ -973,6 +989,8 @@ def pre_conv3x3_block(in_channels,
         padding=padding,
         dilation=dilation,
         groups=groups,
+        use_bias=use_bias,
+        use_bn=use_bn,
         bn_use_global_stats=bn_use_global_stats,
         return_preact=return_preact,
         activate=activate)
@@ -1702,12 +1720,20 @@ class MultiOutputSequential(nn.HybridSequential):
     ----------
     multi_output : bool, default True
         Whether to return multiple output.
+    dual_output : bool, default False
+        Whether to return dual output.
+    return_last : bool, default True
+        Whether to forcibly return last value.
     """
     def __init__(self,
                  multi_output=True,
+                 dual_output=False,
+                 return_last=True,
                  **kwargs):
         super(MultiOutputSequential, self).__init__(**kwargs)
         self.multi_output = multi_output
+        self.dual_output = dual_output
+        self.return_last = return_last
 
     def hybrid_forward(self, F, x):
         outs = []
@@ -1715,10 +1741,32 @@ class MultiOutputSequential(nn.HybridSequential):
             x = block(x)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
+            elif hasattr(block, "do_output2") and block.do_output2:
+                assert (type(x) == tuple)
+                outs.extend(x[1])
+                x = x[0]
         if self.multi_output:
-            return [x] + outs
+            return [x] + outs if self.return_last else outs
+        elif self.dual_output:
+            return x, outs
         else:
             return x
+
+
+class ParallelConcurent(nn.HybridSequential):
+    """
+    A sequential container with multiple inputs and multiple outputs.
+    Modules will be executed in the order they are added.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(ParallelConcurent, self).__init__(**kwargs)
+
+    def hybrid_forward(self, F, x):
+        out = []
+        for block, xi in zip(self._children.values(), x):
+            out.append(block(xi))
+        return out
 
 
 class HeatmapMaxDetBlock(HybridBlock):

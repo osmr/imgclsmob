@@ -2,12 +2,14 @@
 Evaluation Metrics for Object Detection.
 """
 
+import os
+import math
 import warnings
 import numpy as np
 import mxnet as mx
 from collections import defaultdict
 
-__all__ = ['CocoDetMApMetric', 'VOC07MApMetric']
+__all__ = ['CocoDetMApMetric', 'VOC07MApMetric', 'WiderfaceDetMetric']
 
 
 class CocoDetMApMetric(mx.metric.EvalMetric):
@@ -118,17 +120,17 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
 
         Parameters
         ----------
-        pred_bboxes : mxnet.NDArray or numpy.ndarray
+        pred_bboxes : mxnet.NDArray or np.ndarray
             Prediction bounding boxes with shape `B, N, 4`.
             Where B is the size of mini-batch, N is the number of bboxes.
-        pred_labels : mxnet.NDArray or numpy.ndarray
+        pred_labels : mxnet.NDArray or np.ndarray
             Prediction bounding boxes labels with shape `B, N`.
-        pred_scores : mxnet.NDArray or numpy.ndarray
+        pred_scores : mxnet.NDArray or np.ndarray
             Prediction bounding boxes scores with shape `B, N`.
         """
         def as_numpy(a):
             """
-            Convert a (list of) mx.NDArray into numpy.ndarray
+            Convert a (list of) mx.NDArray into np.ndarray
             """
             if isinstance(a, (list, tuple)):
                 out = [x.asnumpy() if isinstance(x, mx.nd.NDArray) else x for x in a]
@@ -209,14 +211,14 @@ class CocoDetMApMetric(mx.metric.EvalMetric):
 
         Parameters
         ----------
-        pt : numpy.ndarray
+        pt : np.ndarray
             Bounding box with shape (1, 2).
-        t : numpy.ndarray
+        t : np.ndarray
             Transformation matrix with shape (2, 3).
 
         Returns
         -------
-        numpy.ndarray
+        np.ndarray
             New bounding box with shape (1, 2).
         """
         new_pt = np.array([pt[0], pt[1], 1.], dtype=np.float32).T
@@ -303,24 +305,24 @@ class VOCMApMetric(mx.metric.EvalMetric):
 
         Parameters
         ----------
-        pred_bboxes : mxnet.NDArray or numpy.ndarray
+        pred_bboxes : mxnet.NDArray or np.ndarray
             Prediction bounding boxes with shape `B, N, 4`.
             Where B is the size of mini-batch, N is the number of bboxes.
-        pred_labels : mxnet.NDArray or numpy.ndarray
+        pred_labels : mxnet.NDArray or np.ndarray
             Prediction bounding boxes labels with shape `B, N`.
-        pred_scores : mxnet.NDArray or numpy.ndarray
+        pred_scores : mxnet.NDArray or np.ndarray
             Prediction bounding boxes scores with shape `B, N`.
-        gt_bboxes : mxnet.NDArray or numpy.ndarray
+        gt_bboxes : mxnet.NDArray or np.ndarray
             Ground-truth bounding boxes with shape `B, M, 4`.
             Where B is the size of mini-batch, M is the number of ground-truths.
-        gt_labels : mxnet.NDArray or numpy.ndarray
+        gt_labels : mxnet.NDArray or np.ndarray
             Ground-truth bounding boxes labels with shape `B, M`.
-        gt_difficults : mxnet.NDArray or numpy.ndarray, optional, default is None
+        gt_difficults : mxnet.NDArray or np.ndarray, optional, default is None
             Ground-truth bounding boxes difficulty labels with shape `B, M`.
         """
         def as_numpy(a):
             """
-            Convert a (list of) mx.NDArray into numpy.ndarray.
+            Convert a (list of) mx.NDArray into np.ndarray.
             """
             if isinstance(a, (list, tuple)):
                 out = [x.asnumpy() if isinstance(x, mx.nd.NDArray) else x for x in a]
@@ -461,9 +463,9 @@ class VOCMApMetric(mx.metric.EvalMetric):
 
         Params:
         ----------
-        rec : numpy.array
+        rec : np.array
             cumulated recall
-        prec : numpy.array
+        prec : np.array
             cumulated precision
 
         Returns:
@@ -496,9 +498,9 @@ class VOCMApMetric(mx.metric.EvalMetric):
 
         Parameters
         ----------
-        bbox_a : numpy.ndarray
+        bbox_a : np.ndarray
             An ndarray with shape :math:`(N, 4)`.
-        bbox_b : numpy.ndarray
+        bbox_b : np.ndarray
             An ndarray with shape :math:`(M, 4)`.
         offset : float or int, default is 0
             The ``offset`` is used to control the whether the width(or height) is computed as
@@ -507,7 +509,7 @@ class VOCMApMetric(mx.metric.EvalMetric):
 
         Returns
         -------
-        numpy.ndarray
+        np.ndarray
             An ndarray with shape :math:`(N, M)` indicates IOU between each pairs of
             bounding boxes in `bbox_a` and `bbox_b`.
         """
@@ -544,9 +546,9 @@ class VOC07MApMetric(VOCMApMetric):
 
         Params:
         ----------
-        rec : numpy.array
+        rec : np.array
             cumulated recall
-        prec : numpy.array
+        prec : np.array
             cumulated precision
 
         Returns:
@@ -564,3 +566,176 @@ class VOC07MApMetric(VOCMApMetric):
                 p = np.max(np.nan_to_num(prec)[rec >= t])
             ap += p / 11.0
         return ap
+
+
+class WiderfaceDetMetric(mx.metric.EvalMetric):
+    """
+    Detection metric for WIDER FACE detection task.
+
+    Parameters
+    ----------
+    receptive_field_center_starts : list of int
+        The start location of the first receptive field of each scale.
+    receptive_field_strides : list of int
+        Receptive field stride for each scale.
+    bbox_factors : list of float
+        A half of bbox upper bound for each scale.
+    output_dir_path : str
+        Output file path.
+    name : str, default 'WF'
+        Name of this metric instance for display.
+    """
+    def __init__(self,
+                 receptive_field_center_starts,
+                 receptive_field_strides,
+                 bbox_factors,
+                 output_dir_path,
+                 name="WF"):
+        super(WiderfaceDetMetric, self).__init__(name=name)
+        self.receptive_field_center_starts = receptive_field_center_starts
+        self.receptive_field_strides = receptive_field_strides
+        self.bbox_factors = bbox_factors
+        self.output_dir_path = output_dir_path
+        self.num_output_scales = len(self.bbox_factors)
+
+        self.score_threshold = 0.11
+        self.nms_threshold = 0.4
+        self.top_k = 10000
+
+    def reset(self):
+        pass
+
+    def get(self):
+        """
+        Get evaluation metrics.
+        """
+        return self.name, 1.0
+
+    def update(self, labels, preds):
+        """
+        Updates the internal evaluation result.
+
+        Parameters
+        ----------
+        labels : list of `NDArray`
+            The labels of the data.
+        preds : list of `NDArray`
+            Predicted values.
+        """
+        for x_rr, label in zip(preds, labels):
+            outputs = []
+            for output in x_rr:
+                outputs.append(output.asnumpy())
+
+            label_split = label.split("/")
+
+            resize_scale = float(label_split[2])
+            image_size = (int(label_split[3]), int(label_split[4]))
+
+            bboxes, _ = self.predict(outputs, resize_scale, image_size)
+
+            event_name = label_split[0]
+            event_dir_name = os.path.join(self.output_dir_path, event_name)
+            if not os.path.exists(event_dir_name):
+                os.makedirs(event_dir_name)
+            file_stem = label_split[1]
+            fout = open(os.path.join(event_dir_name, file_stem + ".txt"), "w")
+            fout.write(file_stem + "\n")
+            fout.write(str(len(bboxes)) + "\n")
+            for bbox in bboxes:
+                fout.write("%d %d %d %d %.03f" % (math.floor(bbox[0]),
+                                                  math.floor(bbox[1]),
+                                                  math.ceil(bbox[2] - bbox[0]),
+                                                  math.ceil(bbox[3] - bbox[1]),
+                                                  bbox[4] if bbox[4] <= 1 else 1) + "\n")
+            fout.close()
+
+    def predict(self, outputs, resize_scale, image_size):
+
+        bbox_collection = []
+
+        for i in range(self.num_output_scales):
+            score_map = np.squeeze(outputs[i * 2], (0, 1))
+            bbox_map = np.squeeze(outputs[i * 2 + 1], 0)
+
+            RF_center_Xs = np.array(
+                [self.receptive_field_center_starts[i] + self.receptive_field_strides[i] * x for x in
+                 range(score_map.shape[1])])
+            RF_center_Xs_mat = np.tile(RF_center_Xs, [score_map.shape[0], 1])
+            RF_center_Ys = np.array(
+                [self.receptive_field_center_starts[i] + self.receptive_field_strides[i] * y for y in
+                 range(score_map.shape[0])])
+            RF_center_Ys_mat = np.tile(RF_center_Ys, [score_map.shape[1], 1]).T
+
+            x_lt_mat = RF_center_Xs_mat - bbox_map[0, :, :] * self.bbox_factors[i]
+            y_lt_mat = RF_center_Ys_mat - bbox_map[1, :, :] * self.bbox_factors[i]
+            x_rb_mat = RF_center_Xs_mat - bbox_map[2, :, :] * self.bbox_factors[i]
+            y_rb_mat = RF_center_Ys_mat - bbox_map[3, :, :] * self.bbox_factors[i]
+
+            x_lt_mat = x_lt_mat / resize_scale
+            x_lt_mat[x_lt_mat < 0] = 0
+            y_lt_mat = y_lt_mat / resize_scale
+            y_lt_mat[y_lt_mat < 0] = 0
+            x_rb_mat = x_rb_mat / resize_scale
+            x_rb_mat[x_rb_mat > image_size[1]] = image_size[1]
+            y_rb_mat = y_rb_mat / resize_scale
+            y_rb_mat[y_rb_mat > image_size[0]] = image_size[0]
+
+            select_index = np.where(score_map > self.score_threshold)
+            for idx in range(select_index[0].size):
+                bbox_collection.append((x_lt_mat[select_index[0][idx], select_index[1][idx]],
+                                        y_lt_mat[select_index[0][idx], select_index[1][idx]],
+                                        x_rb_mat[select_index[0][idx], select_index[1][idx]],
+                                        y_rb_mat[select_index[0][idx], select_index[1][idx]],
+                                        score_map[select_index[0][idx], select_index[1][idx]]))
+
+        # NMS
+        bbox_collection = sorted(bbox_collection, key=lambda item: item[-1], reverse=True)
+        if len(bbox_collection) > self.top_k:
+            bbox_collection = bbox_collection[0:self.top_k]
+        bbox_collection_numpy = np.array(bbox_collection, dtype=np.float32)
+
+        final_bboxes = self.nms(bbox_collection_numpy, self.nms_threshold)
+        final_bboxes_ = []
+        for i in range(final_bboxes.shape[0]):
+            final_bboxes_.append((final_bboxes[i, 0], final_bboxes[i, 1], final_bboxes[i, 2], final_bboxes[i, 3],
+                                  final_bboxes[i, 4]))
+
+        return final_bboxes_
+
+    @staticmethod
+    def nms(boxes, overlap_threshold):
+        if boxes.shape[0] == 0:
+            return boxes
+
+        if boxes.dtype != np.float32:
+            boxes = boxes.astype(np.float32)
+
+        pick = []
+        x1 = boxes[:, 0]
+        y1 = boxes[:, 1]
+        x2 = boxes[:, 2]
+        y2 = boxes[:, 3]
+        sc = boxes[:, 4]
+        widths = x2 - x1
+        heights = y2 - y1
+
+        area = heights * widths
+        idxs = np.argsort(sc)
+
+        while len(idxs) > 0:
+            last = len(idxs) - 1
+            i = idxs[last]
+            pick.append(i)
+
+            xx1 = np.maximum(x1[i], x1[idxs[:last]])
+            yy1 = np.maximum(y1[i], y1[idxs[:last]])
+            xx2 = np.minimum(x2[i], x2[idxs[:last]])
+            yy2 = np.minimum(y2[i], y2[idxs[:last]])
+
+            w = np.maximum(0, xx2 - xx1 + 1)
+            h = np.maximum(0, yy2 - yy1 + 1)
+            overlap = (w * h) / area[idxs[:last]]
+            idxs = np.delete(idxs, np.concatenate(([last], np.where(overlap > overlap_threshold)[0])))
+
+        return boxes[pick]

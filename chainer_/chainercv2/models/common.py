@@ -8,7 +8,8 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalA
            'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle',
            'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
            'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'Flatten', 'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
+           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'AdaptiveAvgPool2D', 'InterpolationBlock',
+           'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 import numpy as np
@@ -730,6 +731,8 @@ class PreConvBlock(Chain):
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation. It's used by PreResNet.
     activate : bool, default True
@@ -743,16 +746,19 @@ class PreConvBlock(Chain):
                  pad,
                  dilate=1,
                  use_bias=False,
+                 use_bn=True,
                  return_preact=False,
                  activate=True):
         super(PreConvBlock, self).__init__()
         self.return_preact = return_preact
         self.activate = activate
+        self.use_bn = use_bn
 
         with self.init_scope():
-            self.bn = L.BatchNormalization(
-                size=in_channels,
-                eps=1e-5)
+            if self.use_bn:
+                self.bn = L.BatchNormalization(
+                    size=in_channels,
+                    eps=1e-5)
             if self.activate:
                 self.activ = F.relu
             self.conv = L.Convolution2D(
@@ -765,7 +771,8 @@ class PreConvBlock(Chain):
                 dilate=dilate)
 
     def __call__(self, x):
-        x = self.bn(x)
+        if self.use_bn:
+            x = self.bn(x)
         if self.activate:
             x = self.activ(x)
         if self.return_preact:
@@ -781,6 +788,7 @@ def pre_conv1x1_block(in_channels,
                       out_channels,
                       stride=1,
                       use_bias=False,
+                      use_bn=True,
                       return_preact=False,
                       activate=True):
     """
@@ -796,6 +804,8 @@ def pre_conv1x1_block(in_channels,
         Stride of the convolution.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -808,6 +818,7 @@ def pre_conv1x1_block(in_channels,
         stride=stride,
         pad=0,
         use_bias=use_bias,
+        use_bn=use_bn,
         return_preact=return_preact,
         activate=activate)
 
@@ -817,6 +828,8 @@ def pre_conv3x3_block(in_channels,
                       stride=1,
                       pad=1,
                       dilate=1,
+                      use_bias=False,
+                      use_bn=True,
                       return_preact=False,
                       activate=True):
     """
@@ -834,6 +847,10 @@ def pre_conv3x3_block(in_channels,
         Padding value for convolution layer.
     dilate : int or tuple/list of 2 int, default 1
         Dilation value for convolution layer.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
     return_preact : bool, default False
         Whether return pre-activation.
     activate : bool, default True
@@ -846,6 +863,8 @@ def pre_conv3x3_block(in_channels,
         stride=stride,
         pad=pad,
         dilate=dilate,
+        use_bias=use_bias,
+        use_bn=use_bn,
         return_preact=return_preact,
         activate=activate)
 
@@ -1474,11 +1493,19 @@ class MultiOutputSequential(SimpleSequential):
     ----------
     multi_output : bool, default True
         Whether to return multiple output.
+    dual_output : bool, default False
+        Whether to return dual output.
+    return_last : bool, default True
+        Whether to forcibly return last value.
     """
     def __init__(self,
-                 multi_output=True):
+                 multi_output=True,
+                 dual_output=False,
+                 return_last=True):
         super(MultiOutputSequential, self).__init__()
         self.multi_output = multi_output
+        self.dual_output = dual_output
+        self.return_last = return_last
 
     def __call__(self, x):
         outs = []
@@ -1487,10 +1514,31 @@ class MultiOutputSequential(SimpleSequential):
             x = block(x)
             if hasattr(block, "do_output") and block.do_output:
                 outs.append(x)
+            elif hasattr(block, "do_output2") and block.do_output2:
+                assert (type(x) == tuple)
+                outs.extend(x[1])
+                x = x[0]
         if self.multi_output:
-            return [x] + outs
+            return [x] + outs if self.return_last else outs
+        elif self.dual_output:
+            return x, outs
         else:
             return x
+
+
+class ParallelConcurent(SimpleSequential):
+    """
+    A sequential container with multiple inputs and multiple outputs.
+    Modules will be executed in the order they are added.
+    """
+    def __init__(self):
+        super(ParallelConcurent, self).__init__()
+
+    def __call__(self, x):
+        out = []
+        for name, xi in zip(self.layer_names, x):
+            out.append(self[name](xi))
+        return out
 
 
 class Flatten(Chain):

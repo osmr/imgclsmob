@@ -683,7 +683,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.batchify_fn = Tuple(Stack(), Pad(pad_val=-1))
         self.val_transform = CocoDetValTransform
         self.test_transform = CocoDetValTransform
-        self.ml_type = "hpe"
+        self.ml_type = "det"
         self.allow_hybridize = False
         self.net_extra_kwargs = {}
         self.mean_rgb = (0.485, 0.456, 0.406)

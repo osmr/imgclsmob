@@ -131,6 +131,8 @@ from .models.ibppose_coco import *
 from .models.centernet import *
 from .models.lffd import *
 
+from .models.voca import *
+
 from .models.others.oth_centernet import *
 
 __all__ = ['get_model']
@@ -1115,6 +1117,8 @@ _models = {
     'center_net_resnet50_v1b_coco': center_net_resnet50_v1b_coco,
     'center_net_resnet101_v1b_voc': center_net_resnet101_v1b_voc,
     'center_net_resnet101_v1b_coco': center_net_resnet101_v1b_coco,
+
+    'voca8flame': voca8flame,
 }
 
 

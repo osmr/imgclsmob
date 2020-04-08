@@ -136,6 +136,8 @@ from .models.others.oth_ibppose import *
 from .models.centernet import *
 from .models.lffd import *
 
+from .models.voca import *
+
 __all__ = ['get_model']
 
 
@@ -1039,6 +1041,8 @@ _models = {
 
     'lffd20x5s320v2_widerface': lffd20x5s320v2_widerface,
     'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
+
+    'voca8flame': voca8flame,
 }
 
 

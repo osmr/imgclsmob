@@ -123,17 +123,16 @@ from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
 from .models.ibppose_coco import *
 
-# from .models.others.oth_simple_pose_resnet import *
-# from .models.others.oth_mobile_pose import *
-# from .models.others.oth_alpha_pose import *
-# from .models.others.oth_icnet import *
-
 from .models.centernet import *
 from .models.lffd import *
 
 from .models.voca import *
 
-from .models.others.oth_centernet import *
+# from .models.others.oth_simple_pose_resnet import *
+# from .models.others.oth_mobile_pose import *
+# from .models.others.oth_alpha_pose import *
+# from .models.others.oth_icnet import *
+# from .models.others.oth_centernet import *
 
 __all__ = ['get_model']
 
@@ -1073,7 +1072,17 @@ _models = {
 
     'ibppose_coco': ibppose_coco,
 
-    # 'oth_icnet_resnet50_citys': oth_icnet_resnet50_citys,
+    'centernet_resnet18_voc': centernet_resnet18_voc,
+    'centernet_resnet18_coco': centernet_resnet18_coco,
+    'centernet_resnet50b_voc': centernet_resnet50b_voc,
+    'centernet_resnet50b_coco': centernet_resnet50b_coco,
+    'centernet_resnet101b_voc': centernet_resnet101b_voc,
+    'centernet_resnet101b_coco': centernet_resnet101b_coco,
+
+    'lffd20x5s320v2_widerface': lffd20x5s320v2_widerface,
+    'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
+
+    'voca8flame': voca8flame,
 
     # 'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
     # 'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,
@@ -1101,24 +1110,14 @@ _models = {
     # 'oth_mobilenet_v2_0_5': oth_mobilenet_v2_0_5,
     # 'oth_mobilenet_v2_0_25': oth_mobilenet_v2_0_25,
 
-    'centernet_resnet18_voc': centernet_resnet18_voc,
-    'centernet_resnet18_coco': centernet_resnet18_coco,
-    'centernet_resnet50b_voc': centernet_resnet50b_voc,
-    'centernet_resnet50b_coco': centernet_resnet50b_coco,
-    'centernet_resnet101b_voc': centernet_resnet101b_voc,
-    'centernet_resnet101b_coco': centernet_resnet101b_coco,
+    # 'oth_icnet_resnet50_citys': oth_icnet_resnet50_citys,
 
-    'lffd20x5s320v2_widerface': lffd20x5s320v2_widerface,
-    'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
-
-    'center_net_resnet18_v1b_voc': center_net_resnet18_v1b_voc,
-    'center_net_resnet18_v1b_coco': center_net_resnet18_v1b_coco,
-    'center_net_resnet50_v1b_voc': center_net_resnet50_v1b_voc,
-    'center_net_resnet50_v1b_coco': center_net_resnet50_v1b_coco,
-    'center_net_resnet101_v1b_voc': center_net_resnet101_v1b_voc,
-    'center_net_resnet101_v1b_coco': center_net_resnet101_v1b_coco,
-
-    'voca8flame': voca8flame,
+    # 'center_net_resnet18_v1b_voc': center_net_resnet18_v1b_voc,
+    # 'center_net_resnet18_v1b_coco': center_net_resnet18_v1b_coco,
+    # 'center_net_resnet50_v1b_voc': center_net_resnet50_v1b_voc,
+    # 'center_net_resnet50_v1b_coco': center_net_resnet50_v1b_coco,
+    # 'center_net_resnet101_v1b_voc': center_net_resnet101_v1b_voc,
+    # 'center_net_resnet101_v1b_coco': center_net_resnet101_v1b_coco,
 }
 
 

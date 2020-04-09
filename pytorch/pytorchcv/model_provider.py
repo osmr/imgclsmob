@@ -119,24 +119,22 @@ from .models.simpleposemobile_coco import *
 from .models.lwopenpose_cmupan import *
 from .models.ibppose_coco import *
 
-# from .models.others.oth_sinet import *
-
-from .models.others.oth_pose_resnet import *
-
-from .models.others.oth_lwopenpose2d import *
-from .models.others.oth_lwopenpose3d import *
-
 from .models.prnet import *
-from .models.others.oth_prnet import *
-
-from .models.superpointnet import *
-
-from .models.others.oth_ibppose import *
 
 from .models.centernet import *
 from .models.lffd import *
 
 from .models.voca import *
+
+from .models.superpointnet import *
+
+# from .models.others.oth_pose_resnet import *
+# from .models.others.oth_lwopenpose2d import *
+# from .models.others.oth_lwopenpose3d import *
+# from .models.others.oth_prnet import *
+# from .models.others.oth_sinet import *
+# from .models.others.oth_ibppose import *
+
 
 __all__ = ['get_model']
 
@@ -1013,24 +1011,7 @@ _models = {
 
     'ibppose_coco': ibppose_coco,
 
-    'superpointnet': superpointnet,
-
-    # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
-
-    'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
-    'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,
-    'oth_pose_coco_resnet_101_256x192': oth_pose_coco_resnet_101_256x192,
-    'oth_pose_coco_resnet_101_384x288': oth_pose_coco_resnet_101_384x288,
-    'oth_pose_coco_resnet_152_256x192': oth_pose_coco_resnet_152_256x192,
-    'oth_pose_coco_resnet_152_384x288': oth_pose_coco_resnet_152_384x288,
-
-    'oth_lwopenpose2d': oth_lwopenpose2d,
-    'oth_lwopenpose3d': oth_lwopenpose3d,
-
     'prnet': prnet,
-    'oth_prnet': oth_prnet,
-
-    'oth_ibppose': oth_ibppose,
 
     'centernet_resnet18_voc': centernet_resnet18_voc,
     'centernet_resnet18_coco': centernet_resnet18_coco,
@@ -1043,6 +1024,24 @@ _models = {
     'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
 
     'voca8flame': voca8flame,
+
+    'superpointnet': superpointnet,
+
+    # 'oth_pose_coco_resnet_50_256x192': oth_pose_coco_resnet_50_256x192,
+    # 'oth_pose_coco_resnet_50_384x288': oth_pose_coco_resnet_50_384x288,
+    # 'oth_pose_coco_resnet_101_256x192': oth_pose_coco_resnet_101_256x192,
+    # 'oth_pose_coco_resnet_101_384x288': oth_pose_coco_resnet_101_384x288,
+    # 'oth_pose_coco_resnet_152_256x192': oth_pose_coco_resnet_152_256x192,
+    # 'oth_pose_coco_resnet_152_384x288': oth_pose_coco_resnet_152_384x288,
+
+    # 'oth_lwopenpose2d': oth_lwopenpose2d,
+    # 'oth_lwopenpose3d': oth_lwopenpose3d,
+
+    # 'oth_prnet': oth_prnet,
+
+    # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
+
+    # 'oth_ibppose': oth_ibppose,
 }
 
 

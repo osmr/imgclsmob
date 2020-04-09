@@ -10,6 +10,7 @@ __all__ = ['mobilenet_w1_cub', 'mobilenet_w3d4_cub', 'mobilenet_wd2_cub', 'mobil
            'fdmobilenet_w3d4_cub', 'fdmobilenet_wd2_cub', 'fdmobilenet_wd4_cub']
 
 from .mobilenet import get_mobilenet
+from .fdmobilenet import get_fdmobilenet
 
 
 def mobilenet_w1_cub(num_classes=200, **kwargs):
@@ -26,8 +27,7 @@ def mobilenet_w1_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="orig", width_scale=1.0, model_name="mobilenet_w1_cub",
-                         **kwargs)
+    return get_mobilenet(num_classes=num_classes, width_scale=1.0, model_name="mobilenet_w1_cub", **kwargs)
 
 
 def mobilenet_w3d4_cub(num_classes=200, **kwargs):
@@ -44,8 +44,7 @@ def mobilenet_w3d4_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="orig", width_scale=0.75, model_name="mobilenet_w3d4_cub",
-                         **kwargs)
+    return get_mobilenet(num_classes=num_classes, width_scale=0.75, model_name="mobilenet_w3d4_cub", **kwargs)
 
 
 def mobilenet_wd2_cub(num_classes=200, **kwargs):
@@ -62,8 +61,7 @@ def mobilenet_wd2_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="orig", width_scale=0.5, model_name="mobilenet_wd2_cub",
-                         **kwargs)
+    return get_mobilenet(num_classes=num_classes, width_scale=0.5, model_name="mobilenet_wd2_cub", **kwargs)
 
 
 def mobilenet_wd4_cub(num_classes=200, **kwargs):
@@ -80,8 +78,7 @@ def mobilenet_wd4_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="orig", width_scale=0.25, model_name="mobilenet_wd4_cub",
-                         **kwargs)
+    return get_mobilenet(num_classes=num_classes, width_scale=0.25, model_name="mobilenet_wd4_cub", **kwargs)
 
 
 def fdmobilenet_w1_cub(num_classes=200, **kwargs):
@@ -98,8 +95,7 @@ def fdmobilenet_w1_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="fd", width_scale=1.0, model_name="fdmobilenet_w1_cub",
-                         **kwargs)
+    return get_fdmobilenet(num_classes=num_classes, width_scale=1.0, model_name="fdmobilenet_w1_cub", **kwargs)
 
 
 def fdmobilenet_w3d4_cub(num_classes=200, **kwargs):
@@ -116,8 +112,7 @@ def fdmobilenet_w3d4_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="fd", width_scale=0.75, model_name="fdmobilenet_w3d4_cub",
-                         **kwargs)
+    return get_fdmobilenet(num_classes=num_classes, width_scale=0.75, model_name="fdmobilenet_w3d4_cub", **kwargs)
 
 
 def fdmobilenet_wd2_cub(num_classes=200, **kwargs):
@@ -134,8 +129,7 @@ def fdmobilenet_wd2_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="fd", width_scale=0.5, model_name="fdmobilenet_wd2_cub",
-                         **kwargs)
+    return get_fdmobilenet(num_classes=num_classes, width_scale=0.5, model_name="fdmobilenet_wd2_cub", **kwargs)
 
 
 def fdmobilenet_wd4_cub(num_classes=200, **kwargs):
@@ -152,8 +146,7 @@ def fdmobilenet_wd4_cub(num_classes=200, **kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_mobilenet(num_classes=num_classes, version="fd", width_scale=0.25, model_name="fdmobilenet_wd4_cub",
-                         **kwargs)
+    return get_fdmobilenet(num_classes=num_classes, width_scale=0.25, model_name="fdmobilenet_wd4_cub", **kwargs)
 
 
 def _calc_width(net):

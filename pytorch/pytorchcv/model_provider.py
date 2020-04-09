@@ -54,6 +54,7 @@ from .models.shufflenetv2 import *
 from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
+from .models.fdmobilenet import *
 from .models.mobilenetv2 import *
 from .models.mobilenetv3 import *
 from .models.igcv3 import *

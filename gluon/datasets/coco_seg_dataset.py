@@ -36,11 +36,12 @@ class CocoSegDataset(SegDataset):
             transform=transform,
             **kwargs)
 
+        year = "2017"
         mode_name = "train" if mode == "train" else "val"
         annotations_dir_path = os.path.join(root, "annotations")
-        annotations_file_path = os.path.join(annotations_dir_path, "instances_" + mode_name + "2017.json")
+        annotations_file_path = os.path.join(annotations_dir_path, "instances_" + mode_name + year + ".json")
         idx_file_path = os.path.join(annotations_dir_path, mode_name + "_idx.npy")
-        self.image_dir_path = os.path.join(root, mode_name + "2017")
+        self.image_dir_path = os.path.join(root, mode_name + year)
 
         from pycocotools.coco import COCO
         from pycocotools import mask as coco_mask
@@ -52,12 +53,10 @@ class CocoSegDataset(SegDataset):
             idx_list = list(self.coco.imgs.keys())
             self.idx = self._filter_idx(idx_list, idx_file_path)
 
-        self.transform = transform
-
     def __getitem__(self, index):
-        image_idx = int(self.idx[index])
-        img_metadata = self.coco.loadImgs(image_idx)[0]
-        image_file_name = img_metadata["file_name"]
+        image_id = int(self.idx[index])
+        image_metadata = self.coco.loadImgs(image_id)[0]
+        image_file_name = image_metadata["file_name"]
 
         image_file_path = os.path.join(self.image_dir_path, image_file_name)
         image = Image.open(image_file_path).convert("RGB")
@@ -67,14 +66,14 @@ class CocoSegDataset(SegDataset):
                 image = self.transform(image)
             return image, os.path.basename(image_file_path)
 
-        coco_target = self.coco.loadAnns(self.coco.getAnnIds(imgIds=image_idx))
+        coco_target = self.coco.loadAnns(self.coco.getAnnIds(imgIds=image_id))
         mask = Image.fromarray(self._gen_seg_mask(
-            coco_target,
-            img_metadata["height"],
-            img_metadata["width"]))
+            target=coco_target,
+            height=image_metadata["height"],
+            width=image_metadata["width"]))
 
         if self.mode == "train":
-            image, mask = self._sync_transform(image, mask)
+            image, mask = self._train_sync_transform(image, mask)
         elif self.mode == "val":
             image, mask = self._val_sync_transform(image, mask)
         else:
@@ -86,11 +85,11 @@ class CocoSegDataset(SegDataset):
 
         return image, mask
 
-    def _gen_seg_mask(self, target, h, w):
+    def _gen_seg_mask(self, target, height, width):
         cat_list = [0, 5, 2, 16, 9, 44, 6, 3, 17, 62, 21, 67, 18, 19, 4, 1, 64, 20, 63, 7, 72]
-        mask = np.zeros((h, w), dtype=np.uint8)
+        mask = np.zeros((height, width), dtype=np.uint8)
         for instance in target:
-            rle = self.coco_mask.frPyObjects(instance["segmentation"], h, w)
+            rle = self.coco_mask.frPyObjects(instance["segmentation"], height, width)
             m = self.coco_mask.decode(rle)
             cat = instance["category_id"]
             if cat in cat_list:
@@ -104,14 +103,14 @@ class CocoSegDataset(SegDataset):
         return mask
 
     def _filter_idx(self,
-                    idx,
-                    idx_file,
+                    idx_list,
+                    idx_file_path,
                     pixels_thr=1000):
-        logging.info("Filtering mask index")
-        tbar = trange(len(idx))
+        logging.info("Filtering mask index:")
+        tbar = trange(len(idx_list))
         filtered_idx = []
         for i in tbar:
-            img_id = idx[i]
+            img_id = idx_list[i]
             coco_target = self.coco.loadAnns(self.coco.getAnnIds(imgIds=img_id))
             img_metadata = self.coco.loadImgs(img_id)[0]
             mask = self._gen_seg_mask(
@@ -120,9 +119,9 @@ class CocoSegDataset(SegDataset):
                 img_metadata["width"])
             if (mask > 0).sum() > pixels_thr:
                 filtered_idx.append(img_id)
-            tbar.set_description("Doing: {}/{}, got {} qualified images".format(i, len(idx), len(filtered_idx)))
+            tbar.set_description("Doing: {}/{}, got {} qualified images".format(i, len(idx_list), len(filtered_idx)))
         logging.info("Found number of qualified images: {}".format(len(filtered_idx)))
-        np.save(idx_file, np.array(filtered_idx, np.int32))
+        np.save(idx_file_path, np.array(filtered_idx, np.int32))
         return filtered_idx
 
     classes = 21
@@ -132,10 +131,10 @@ class CocoSegDataset(SegDataset):
     ignore_bg = True
 
     @staticmethod
-    def _mask_transform(mask):
+    def _mask_transform(mask, ctx=mx.cpu()):
         np_mask = np.array(mask).astype(np.int32)
         # print("min={}, max={}".format(np_mask.min(), np_mask.max()))
-        return mx.nd.array(np_mask, mx.cpu())
+        return mx.nd.array(np_mask, ctx=ctx)
 
     def __len__(self):
         return len(self.idx)
@@ -149,7 +148,12 @@ class CocoSegMetaInfo(VOCMetaInfo):
         self.root_dir_name = "coco"
         self.dataset_class = CocoSegDataset
         self.num_classes = CocoSegDataset.classes
-        self.test_metric_extra_kwargs = [
+        self.train_metric_extra_kwargs = [
+            {"vague_idx": CocoSegDataset.vague_idx,
+             "use_vague": CocoSegDataset.use_vague,
+             "macro_average": False,
+             "aux": self.train_aux}]
+        self.val_metric_extra_kwargs = [
             {"vague_idx": CocoSegDataset.vague_idx,
              "use_vague": CocoSegDataset.use_vague,
              "macro_average": False},
@@ -159,3 +163,4 @@ class CocoSegMetaInfo(VOCMetaInfo):
              "bg_idx": CocoSegDataset.background_idx,
              "ignore_bg": CocoSegDataset.ignore_bg,
              "macro_average": False}]
+        self.test_metric_extra_kwargs = self.val_metric_extra_kwargs

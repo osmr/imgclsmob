@@ -108,7 +108,7 @@ class HPatchesMetaInfo(DatasetMetaInfo):
         self.val_transform = hpatches_val_transform
         self.test_transform = hpatches_val_transform
         self.allow_hybridize = False
-        self.net_extra_kwargs = {"hybridizable": False, "in_size": None}
+        self.test_net_extra_kwargs = {"hybridizable": False, "in_size": None}
 
 
 def hpatches_val_transform(ds_metainfo):

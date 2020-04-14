@@ -505,7 +505,7 @@ class CocoHpe3MetaInfo(DatasetMetaInfo):
         self.val_transform = CocoHpe2ValTransform
         self.test_transform = CocoHpe2ValTransform
         self.ml_type = "hpe"
-        self.net_extra_kwargs = {}
+        self.test_net_extra_kwargs = None
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
         self.load_ignore_extra = False

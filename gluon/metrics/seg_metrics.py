@@ -2,12 +2,12 @@
 Evaluation Metrics for Semantic Segmentation.
 """
 
+__all__ = ['PixelAccuracyMetric', 'MeanIoUMetric']
+
 import numpy as np
 import mxnet as mx
 from .seg_metrics_np import seg_pixel_accuracy_np, seg_mean_iou_imasks_np
 from .seg_metrics_nd import seg_pixel_accuracy_nd
-
-__all__ = ['PixelAccuracyMetric', 'MeanIoUMetric']
 
 
 class PixelAccuracyMetric(mx.metric.EvalMetric):
@@ -36,6 +36,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         Whether to use pixel masking.
     macro_average : bool, default True
         Whether to use micro or macro averaging.
+    aux : bool, default False
+        Whether to support auxiliary predictions.
     """
     def __init__(self,
                  axis=1,
@@ -46,7 +48,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
                  sparse_label=True,
                  vague_idx=-1,
                  use_vague=False,
-                 macro_average=True):
+                 macro_average=True,
+                 aux=False):
         if name == "pix_acc":
             name = "{}-pix_acc".format("macro" if macro_average else "micro")
         self.macro_average = macro_average
@@ -60,6 +63,7 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         self.sparse_label = sparse_label
         self.vague_idx = vague_idx
         self.use_vague = use_vague
+        self.aux = aux
 
     def update(self, labels, preds):
         """
@@ -72,6 +76,8 @@ class PixelAccuracyMetric(mx.metric.EvalMetric):
         preds : list of `NDArray`
             Predicted values.
         """
+        if self.aux:
+            preds = [p[0] for p in preds]
         assert (len(labels) == len(preds))
         if self.on_cpu:
             for label, pred in zip(labels, preds):

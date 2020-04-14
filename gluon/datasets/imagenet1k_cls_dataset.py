@@ -66,6 +66,7 @@ class ImageNet1KMetaInfo(DatasetMetaInfo):
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
         self.interpolation = 1
+        self.loss_name = "SoftmaxCrossEntropy"
 
     def add_dataset_parser_arguments(self,
                                      parser,

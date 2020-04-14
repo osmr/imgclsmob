@@ -111,7 +111,6 @@ class WiderfaceDetMetaInfo(DatasetMetaInfo):
         self.test_metric_names = ["WiderfaceDetMetric"]
         self.test_metric_extra_kwargs = [
             {"name": "WF"}]
-        self.test_dataset_extra_kwargs = {}
         self.saver_acc_ind = 0
         self.do_transform = True
         self.do_transform_first = False
@@ -120,7 +119,7 @@ class WiderfaceDetMetaInfo(DatasetMetaInfo):
         self.test_transform = WiderfaceDetValTransform
         self.ml_type = "det"
         self.allow_hybridize = False
-        self.net_extra_kwargs = {}
+        self.test_net_extra_kwargs = None
         self.model_type = 1
         self.receptive_field_center_starts = None
         self.receptive_field_strides = None

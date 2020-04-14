@@ -70,7 +70,7 @@ class VOCSegDataset(SegDataset):
         mask = Image.open(self.masks[index])
 
         if self.mode == "train":
-            image, mask = self._sync_transform(image, mask)
+            image, mask = self._train_sync_transform(image, mask)
         elif self.mode == "val":
             image, mask = self._val_sync_transform(image, mask)
         else:
@@ -89,18 +89,18 @@ class VOCSegDataset(SegDataset):
     ignore_bg = True
 
     @staticmethod
-    def _mask_transform(mask):
+    def _mask_transform(mask, ctx=mx.cpu()):
         np_mask = np.array(mask).astype(np.int32)
         # np_mask[np_mask == 255] = VOCSegDataset.vague_idx
-        return mx.nd.array(np_mask, mx.cpu())
+        return mx.nd.array(np_mask, ctx=ctx)
 
     def __len__(self):
         return len(self.images)
 
 
-def voc_test_transform(ds_metainfo,
-                       mean_rgb=(0.485, 0.456, 0.406),
-                       std_rgb=(0.229, 0.224, 0.225)):
+def voc_transform(ds_metainfo,
+                  mean_rgb=(0.485, 0.456, 0.406),
+                  std_rgb=(0.229, 0.224, 0.225)):
     assert (ds_metainfo is not None)
     return transforms.Compose([
         transforms.ToTensor(),
@@ -120,16 +120,18 @@ class VOCMetaInfo(DatasetMetaInfo):
         self.num_training_samples = None
         self.in_channels = 3
         self.num_classes = VOCSegDataset.classes
+        self.train_aux = False
         self.input_image_size = (480, 480)
-        self.train_metric_capts = None
-        self.train_metric_names = None
-        self.train_metric_extra_kwargs = None
-        self.val_metric_capts = None
-        self.val_metric_names = None
-        self.test_metric_extra_kwargs = [{}, {}]
-        self.test_metric_capts = ["Val.PixAcc", "Val.IoU"]
-        self.test_metric_names = ["PixelAccuracyMetric", "MeanIoUMetric"]
-        self.test_metric_extra_kwargs = [
+        self.train_metric_capts = ["Train.PixAcc"]
+        self.train_metric_names = ["PixelAccuracyMetric"]
+        self.train_metric_extra_kwargs = [
+            {"vague_idx": VOCSegDataset.vague_idx,
+             "use_vague": VOCSegDataset.use_vague,
+             "macro_average": False,
+             "aux": self.train_aux}]
+        self.val_metric_capts = ["Val.PixAcc", "Val.IoU"]
+        self.val_metric_names = ["PixelAccuracyMetric", "MeanIoUMetric"]
+        self.val_metric_extra_kwargs = [
             {"vague_idx": VOCSegDataset.vague_idx,
              "use_vague": VOCSegDataset.use_vague,
              "macro_average": False},
@@ -139,17 +141,25 @@ class VOCMetaInfo(DatasetMetaInfo):
              "bg_idx": VOCSegDataset.background_idx,
              "ignore_bg": VOCSegDataset.ignore_bg,
              "macro_average": False}]
+        self.test_metric_capts = ["Test.PixAcc", "Test.IoU"]
+        self.test_metric_names = self.val_metric_names
+        self.test_metric_extra_kwargs = self.val_metric_extra_kwargs
         self.saver_acc_ind = 1
         self.do_transform = True
-        self.train_transform = None
-        self.val_transform = voc_test_transform
-        self.test_transform = voc_test_transform
+        self.train_transform = voc_transform
+        self.val_transform = voc_transform
+        self.test_transform = voc_transform
         self.ml_type = "imgseg"
         self.allow_hybridize = False
-        self.net_extra_kwargs = {"aux": False, "fixed_size": False}
+        self.train_net_extra_kwargs = {"aux": self.train_aux}
+        self.test_net_extra_kwargs = {"aux": False, "fixed_size": False}
         self.load_ignore_extra = True
         self.image_base_size = 520
         self.image_crop_size = 480
+        self.loss_name = "SegSoftmaxCrossEntropy"
+        self.loss_extra_kwargs = None
+        # self.loss_name = "MixSoftmaxCrossEntropy"
+        # self.loss_extra_kwargs = {"aux": self.train_aux, "aux_weight": 0.5}
 
     def add_dataset_parser_arguments(self,
                                      parser,

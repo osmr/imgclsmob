@@ -2,16 +2,21 @@
     Main routines shared between training and evaluation scripts.
 """
 
+__all__ = ['prepare_mx_context', 'get_initializer', 'prepare_model', 'calc_net_weight_count', 'validate',
+           'report_accuracy', 'get_composite_metric', 'get_metric_name', 'get_loss']
+
 import os
 import re
 import logging
 import numpy as np
 import mxnet as mx
+from mxnet.gluon.loss import SoftmaxCrossEntropyLoss
 from .gluoncv2.model_provider import get_model
 from .metrics.cls_metrics import Top1Error, TopKError
 from .metrics.seg_metrics import PixelAccuracyMetric, MeanIoUMetric
 from .metrics.det_metrics import CocoDetMApMetric, VOC07MApMetric, WiderfaceDetMetric
 from .metrics.hpe_metrics import CocoHpeOksApMetric
+from .losses import SegSoftmaxCrossEntropyLoss, MixSoftmaxCrossEntropyLoss
 
 
 def prepare_mx_context(num_gpus,
@@ -350,3 +355,29 @@ def get_metric_name(metric, index):
         return metric.name
     else:
         raise Exception("Wrong metric type: {}".format(type(metric)))
+
+
+def get_loss(loss_name, loss_extra_kwargs):
+    """
+    Get loss by name.
+
+    Parameters:
+    ----------
+    loss_name : str
+        Loss name.
+    loss_extra_kwargs : dict
+        Loss extra parameters.
+
+    Returns
+    -------
+    Loss
+        Loss object instance.
+    """
+    if loss_name == "SoftmaxCrossEntropy":
+        return SoftmaxCrossEntropyLoss(**loss_extra_kwargs)
+    if loss_name == "SegSoftmaxCrossEntropy":
+        return SegSoftmaxCrossEntropyLoss(**loss_extra_kwargs)
+    if loss_name == "MixSoftmaxCrossEntropy":
+        return MixSoftmaxCrossEntropyLoss(**loss_extra_kwargs)
+    else:
+        raise Exception("Wrong loss name: {}".format(loss_name))

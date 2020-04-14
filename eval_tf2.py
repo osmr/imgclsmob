@@ -171,7 +171,7 @@ def test_model(args,
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
-        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
+        net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,
         batch_size=batch_size,
         use_cuda=use_cuda)

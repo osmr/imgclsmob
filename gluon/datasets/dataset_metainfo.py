@@ -37,9 +37,12 @@ class DatasetMetaInfo(object):
         self.saver_acc_ind = None
         self.ml_type = None
         self.allow_hybridize = True
-        self.net_extra_kwargs = None
+        self.train_net_extra_kwargs = None
+        self.test_net_extra_kwargs = None
         self.load_ignore_extra = False
         self.test_dataset_extra_kwargs = {}
+        self.loss_name = None
+        self.loss_extra_kwargs = None
 
     def add_dataset_parser_arguments(self,
                                      parser,

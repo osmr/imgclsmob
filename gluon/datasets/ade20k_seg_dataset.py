@@ -74,7 +74,7 @@ class ADE20KSegDataset(SegDataset):
         # mask = mx.image.imread(self.masks[index])
 
         if self.mode == "train":
-            image, mask = self._sync_transform(image, mask)
+            image, mask = self._train_sync_transform(image, mask)
         elif self.mode == "val":
             image, mask = self._val_sync_transform(image, mask)
         else:

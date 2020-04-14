@@ -57,6 +57,7 @@ class CIFAR10MetaInfo(DatasetMetaInfo):
         self.val_transform = cifar10_val_transform
         self.test_transform = cifar10_val_transform
         self.ml_type = "imgcls"
+        self.loss_name = "SoftmaxCrossEntropy"
 
 
 class RandomCrop(Block):

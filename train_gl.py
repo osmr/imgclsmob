@@ -17,7 +17,7 @@ from common.logger_utils import initialize_logging
 from common.train_log_param_saver import TrainLogParamSaver
 from gluon.lr_scheduler import LRScheduler
 from gluon.utils import prepare_mx_context, prepare_model, validate
-from gluon.utils import report_accuracy, get_composite_metric, get_metric_name, get_initializer
+from gluon.utils import report_accuracy, get_composite_metric, get_metric_name, get_initializer, get_loss
 
 from gluon.dataset_utils import get_dataset_metainfo
 from gluon.dataset_utils import get_train_data_source, get_val_data_source
@@ -593,6 +593,7 @@ def train_epoch(epoch,
             train_accuracy_msg = report_accuracy(metric=train_metric)
             logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\tlr={:.5f}".format(
                 epoch + 1, i, speed, train_accuracy_msg, trainer.learning_rate))
+            print(train_loss / (i + 1))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -632,6 +633,7 @@ def train_net(batch_size,
               batch_size_scale,
               val_metric,
               train_metric,
+              loss_func,
               ctx):
     """
     Main procedure for training model.
@@ -680,6 +682,8 @@ def train_net(batch_size,
         Metric object instance (validation subset).
     train_metric : EvalMetric
         Metric object instance (training subset).
+    loss_func : Loss
+        Loss object instance.
     ctx : Context
         MXNet context.
     """
@@ -690,7 +694,7 @@ def train_net(batch_size,
     if isinstance(ctx, mx.Context):
         ctx = [ctx]
 
-    loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
+    # loss_func = gluon.loss.SoftmaxCrossEntropyLoss(sparse_label=(not (mixup or label_smoothing)))
 
     assert (type(start_epoch1) == int)
     assert (start_epoch1 >= 1)
@@ -778,11 +782,15 @@ def main():
         num_gpus=args.num_gpus,
         batch_size=args.batch_size)
 
+    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
+    ds_metainfo.update(args=args)
+
     net = prepare_model(
         model_name=args.model,
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
+        net_extra_kwargs=ds_metainfo.train_net_extra_kwargs,
         tune_layers=args.tune_layers,
         classes=args.num_classes,
         in_channels=args.in_channels,
@@ -791,9 +799,6 @@ def main():
         ctx=ctx)
     assert (hasattr(net, "classes"))
     num_classes = net.classes
-
-    ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
-    ds_metainfo.update(args=args)
 
     train_data = get_train_data_source(
         ds_metainfo=ds_metainfo,
@@ -854,6 +859,14 @@ def main():
     else:
         lp_saver = None
 
+    val_metric = get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs)
+    train_metric = get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs)
+
+    loss_kwargs = {"sparse_label": not (args.mixup or args.label_smoothing)}
+    if ds_metainfo.loss_extra_kwargs is not None:
+        loss_kwargs.update(ds_metainfo.loss_extra_kwargs)
+    loss_func = get_loss(ds_metainfo.loss_name, loss_kwargs)
+
     train_net(
         batch_size=batch_size,
         num_epochs=args.num_epochs,
@@ -874,8 +887,9 @@ def main():
         num_classes=num_classes,
         grad_clip_value=args.grad_clip,
         batch_size_scale=args.batch_size_scale,
-        val_metric=get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs),
-        train_metric=get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs),
+        val_metric=val_metric,
+        train_metric=train_metric,
+        loss_func=loss_func,
         ctx=ctx)
 
 

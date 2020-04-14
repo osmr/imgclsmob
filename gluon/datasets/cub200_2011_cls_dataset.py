@@ -111,7 +111,7 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
         self.val_metric_names = ["Top1Error"]
         self.val_metric_extra_kwargs = [{"name": "err"}]
         self.saver_acc_ind = 0
-        self.net_extra_kwargs = {"aux": False}
+        self.test_net_extra_kwargs = {"aux": False}
         self.load_ignore_extra = True
 
     def add_dataset_parser_arguments(self,
@@ -128,5 +128,5 @@ class CUB200MetaInfo(ImageNet1KMetaInfo):
                args):
         super(CUB200MetaInfo, self).update(args)
         if args.no_aux:
-            self.net_extra_kwargs = None
+            self.test_net_extra_kwargs = None
             self.load_ignore_extra = False

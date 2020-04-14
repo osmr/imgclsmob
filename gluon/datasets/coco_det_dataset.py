@@ -1,6 +1,9 @@
 """
 MS COCO object detection dataset.
 """
+
+__all__ = ['CocoDetMetaInfo']
+
 import os
 import cv2
 import logging
@@ -9,8 +12,6 @@ import numpy as np
 from PIL import Image
 from mxnet.gluon.data import dataset
 from .dataset_metainfo import DatasetMetaInfo
-
-__all__ = ['CocoDetMetaInfo']
 
 
 class CocoDetDataset(dataset.Dataset):
@@ -674,8 +675,8 @@ class CocoDetMetaInfo(DatasetMetaInfo):
              "contiguous_id_to_json": None,
              "data_shape": None,
              "post_affine": get_post_transform}]
-        self.test_dataset_extra_kwargs =\
-            {"skip_empty": False}
+        self.test_dataset_extra_kwargs = {
+            "skip_empty": False}
         self.saver_acc_ind = 0
         self.do_transform = True
         self.do_transform_first = False
@@ -685,7 +686,7 @@ class CocoDetMetaInfo(DatasetMetaInfo):
         self.test_transform = CocoDetValTransform
         self.ml_type = "det"
         self.allow_hybridize = False
-        self.net_extra_kwargs = {}
+        self.test_net_extra_kwargs = None
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
 

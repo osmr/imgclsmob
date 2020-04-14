@@ -109,9 +109,9 @@ def add_eval_parser_arguments(parser):
         action="store_true",
         help="disable cudnn autotune for segmentation models")
     parser.add_argument(
-        "--show-progress",
+        "--not-show-progress",
         action="store_true",
-        help="show progress bar")
+        help="do not show progress bar")
     parser.add_argument(
         "--all",
         action="store_true",
@@ -259,7 +259,7 @@ def test_model(args):
     """
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)
-    assert (ds_metainfo.ml_type != "imgseg") or (args.batch_size == 1)
+    assert (ds_metainfo.ml_type != "imgseg") or (args.data_subset != "test") or (args.batch_size == 1)
     assert (ds_metainfo.ml_type != "imgseg") or args.disable_cudnn_autotune
 
     ctx, batch_size = prepare_mx_context(
@@ -271,7 +271,7 @@ def test_model(args):
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
-        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
+        net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,
         classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels,
@@ -295,7 +295,7 @@ def test_model(args):
             metric_names=ds_metainfo.test_metric_names,
             metric_extra_kwargs=ds_metainfo.test_metric_extra_kwargs)
 
-    if args.show_progress:
+    if not args.not_show_progress:
         from tqdm import tqdm
         test_data = tqdm(test_data)
 

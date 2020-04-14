@@ -33,30 +33,6 @@ class CocoHpe1Dataset(dataset.Dataset):
         Whether skip entire image if no valid label is found. Use `False` if this dataset is
         for validation to avoid COCO metric error.
     """
-    CLASSES = ["person"]
-    KEYPOINTS = {
-        0: "nose",
-        1: "left_eye",
-        2: "right_eye",
-        3: "left_ear",
-        4: "right_ear",
-        5: "left_shoulder",
-        6: "right_shoulder",
-        7: "left_elbow",
-        8: "right_elbow",
-        9: "left_wrist",
-        10: "right_wrist",
-        11: "left_hip",
-        12: "right_hip",
-        13: "left_knee",
-        14: "right_knee",
-        15: "left_ankle",
-        16: "right_ankle"
-    }
-    SKELETON = [
-        [16, 14], [14, 12], [17, 15], [15, 13], [12, 13], [6, 12], [7, 13], [6, 7], [6, 8],
-        [7, 9], [8, 10], [9, 11], [2, 3], [1, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7]]
-
     def __init__(self,
                  root,
                  mode="train",
@@ -65,10 +41,38 @@ class CocoHpe1Dataset(dataset.Dataset):
                  check_centers=False,
                  skip_empty=True):
         super(CocoHpe1Dataset, self).__init__()
-        self._root = os.path.expanduser(root)
+        self.root = os.path.expanduser(root)
         self.mode = mode
-        self.transform = transform
-        self.num_class = len(self.CLASSES)
+        self._transform = transform
+
+        self.classes = ["person"]
+        self.num_class = len(self.classes)
+
+        self.keypoint_names = {
+            0: "nose",
+            1: "left_eye",
+            2: "right_eye",
+            3: "left_ear",
+            4: "right_ear",
+            5: "left_shoulder",
+            6: "right_shoulder",
+            7: "left_elbow",
+            8: "right_elbow",
+            9: "left_wrist",
+            10: "right_wrist",
+            11: "left_hip",
+            12: "right_hip",
+            13: "left_knee",
+            14: "right_knee",
+            15: "left_ankle",
+            16: "right_ankle"
+        }
+        self.skeleton = [
+            [16, 14], [14, 12], [17, 15], [15, 13], [12, 13], [6, 12], [7, 13], [6, 7], [6, 8],
+            [7, 9], [8, 10], [9, 11], [2, 3], [1, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7]]
+        # Joint pairs which defines the pairs of joint to be swapped when the image is flipped horizontally:
+        self.joint_pairs = [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16]]
+        self.num_joints = 17
 
         if isinstance(splits, mx.base.string_types):
             splits = [splits]
@@ -76,7 +80,7 @@ class CocoHpe1Dataset(dataset.Dataset):
         self._coco = []
         self._check_centers = check_centers
         self._skip_empty = skip_empty
-        self.index_map = dict(zip(type(self).CLASSES, range(self.num_class)))
+        self.index_map = dict(zip(self.classes, range(self.num_class)))
         self.json_id_to_contiguous = None
         self.contiguous_id_to_json = None
         self._items, self._labels = self._load_jsons()
@@ -90,40 +94,6 @@ class CocoHpe1Dataset(dataset.Dataset):
         detail = ",".join([str(s) for s in self._splits])
         return self.__class__.__name__ + "(" + detail + ")"
 
-    @property
-    def classes(self):
-        """
-        Category names.
-        """
-        return type(self).CLASSES
-
-    @property
-    def num_joints(self):
-        """
-        Dataset defined: number of joints provided.
-        """
-        return 17
-
-    @property
-    def joint_pairs(self):
-        """
-        Joint pairs which defines the pairs of joint to be swapped
-        when the image is flipped horizontally.
-        """
-        return [[1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16]]
-
-    @property
-    def coco(self):
-        """
-        Return pycocotools object for evaluation purposes.
-        """
-        if not self._coco:
-            raise ValueError("No coco objects found, dataset not initialized.")
-        if len(self._coco) > 1:
-            raise NotImplementedError(
-                "Currently we don't support evaluating {} JSON files".format(len(self._coco)))
-        return self._coco[0]
-
     def __len__(self):
         return len(self._items)
 
@@ -134,8 +104,8 @@ class CocoHpe1Dataset(dataset.Dataset):
         label = copy.deepcopy(self._labels[idx])
         img = mx.image.imread(img_path, 1)
 
-        if self.transform is not None:
-            img, scale, center, score = self.transform(img, label)
+        if self._transform is not None:
+            img, scale, center, score = self._transform(img, label)
 
         res_label = np.array([float(img_id)] + [float(score)] + list(center) + list(scale), np.float32)
 
@@ -151,7 +121,7 @@ class CocoHpe1Dataset(dataset.Dataset):
         from pycocotools.coco import COCO
 
         for split in self._splits:
-            anno = os.path.join(self._root, "annotations", split) + ".json"
+            anno = os.path.join(self.root, "annotations", split) + ".json"
             _coco = COCO(anno)
             self._coco.append(_coco)
             classes = [c["name"] for c in _coco.loadCats(_coco.getCatIds())]
@@ -170,7 +140,7 @@ class CocoHpe1Dataset(dataset.Dataset):
             image_ids = sorted(_coco.getImgIds())
             for entry in _coco.loadImgs(image_ids):
                 dirname, filename = entry["coco_url"].split("/")[-2:]
-                abs_path = os.path.join(self._root, dirname, filename)
+                abs_path = os.path.join(self.root, dirname, filename)
                 if not os.path.exists(abs_path):
                     raise IOError("Image: {} not exists.".format(abs_path))
                 label = self._check_load_keypoints(_coco, entry)
@@ -761,7 +731,7 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         self.dataset_class = CocoHpe1Dataset
         self.num_training_samples = None
         self.in_channels = 3
-        self.num_classes = CocoHpe1Dataset.classes
+        self.num_classes = 17
         self.input_image_size = (256, 192)
         self.train_metric_capts = None
         self.train_metric_names = None
@@ -781,7 +751,7 @@ class CocoHpe1MetaInfo(DatasetMetaInfo):
         self.test_transform = CocoHpeValTransform1
         self.ml_type = "hpe"
         self.allow_hybridize = False
-        self.net_extra_kwargs = {"fixed_size": False}
+        self.test_net_extra_kwargs = {"fixed_size": False}
         self.mean_rgb = (0.485, 0.456, 0.406)
         self.std_rgb = (0.229, 0.224, 0.225)
         self.model_type = 1

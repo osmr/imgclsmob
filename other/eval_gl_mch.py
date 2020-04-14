@@ -291,7 +291,7 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         dtype=args.dtype,
-        net_extra_kwargs=ds_metainfo.net_extra_kwargs,
+        net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=False,
         classes=args.num_classes,
         in_channels=args.in_channels,

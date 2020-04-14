@@ -4,7 +4,7 @@
 
 __all__ = ['SegSoftmaxCrossEntropyLoss', 'MixSoftmaxCrossEntropyLoss']
 
-from mxnet.gluon.loss import Loss, _reshape_like, _apply_weighting
+from mxnet.gluon.loss import Loss, _reshape_like
 
 
 class SegSoftmaxCrossEntropyLoss(Loss):
@@ -74,58 +74,26 @@ class MixSoftmaxCrossEntropyLoss(SegSoftmaxCrossEntropyLoss):
     """
     def __init__(self,
                  aux=True,
-                 mixup=False,
                  aux_weight=0.2,
                  ignore_label=-1,
                  **kwargs):
         super(MixSoftmaxCrossEntropyLoss, self).__init__(ignore_label=ignore_label, **kwargs)
         self.aux = aux
-        self.mixup = mixup
         self.aux_weight = aux_weight
 
-    def _aux_forward(self, F, pred1, pred2, label, **kwargs):
+    def _aux_forward(self, F, pred1, pred2, label):
         """
         Compute loss including auxiliary output.
         """
-        loss1 = super(MixSoftmaxCrossEntropyLoss, self).hybrid_forward(F, pred1, label, **kwargs)
-        loss2 = super(MixSoftmaxCrossEntropyLoss, self). hybrid_forward(F, pred2, label, **kwargs)
+        loss1 = super(MixSoftmaxCrossEntropyLoss, self).hybrid_forward(F, pred1, label)
+        loss2 = super(MixSoftmaxCrossEntropyLoss, self). hybrid_forward(F, pred2, label)
         return loss1 + self.aux_weight * loss2
-
-    def _aux_mixup_forward(self, F, pred1, pred2, label1, label2, lam):
-        """
-        Compute loss including auxiliary output.
-        """
-        loss1 = self._mixup_forward(F, pred1, label1, label2, lam)
-        loss2 = self._mixup_forward(F, pred2, label1, label2, lam)
-        return loss1 + self.aux_weight * loss2
-
-    def _mixup_forward(self, F, pred, label1, label2, lam, sample_weight=None):
-        if not self._from_logits:
-            pred = F.log_softmax(pred, self._axis)
-        if self._sparse_label:
-            loss1 = -F.pick(pred, label1, axis=self._axis, keepdims=True)
-            loss2 = -F.pick(pred, label2, axis=self._axis, keepdims=True)
-            loss = lam * loss1 + (1 - lam) * loss2
-        else:
-            label1 = _reshape_like(F, label1, pred)
-            label2 = _reshape_like(F, label2, pred)
-            loss1 = -F.sum(pred * label1, axis=self._axis, keepdims=True)
-            loss2 = -F.sum(pred * label2, axis=self._axis, keepdims=True)
-            loss = lam * loss1 + (1 - lam) * loss2
-        loss = _apply_weighting(F, loss, self._weight, sample_weight)
-        return F.mean(loss, axis=self._batch_axis, exclude=True)
 
     def hybrid_forward(self, F, preds, label, **kwargs):
         """
         Compute loss.
         """
         if self.aux:
-            if self.mixup:
-                return self._aux_mixup_forward(F, *preds, label, **kwargs)
-            else:
-                return self._aux_forward(F, *preds, label, **kwargs)
+            return self._aux_forward(F, preds[0], preds[1], label)
         else:
-            if self.mixup:
-                return self._mixup_forward(F, *preds, label, **kwargs)
-            else:
-                return super(MixSoftmaxCrossEntropyLoss, self).hybrid_forward(F, *preds, label, **kwargs)
+            return super(MixSoftmaxCrossEntropyLoss, self).hybrid_forward(F, preds, label)

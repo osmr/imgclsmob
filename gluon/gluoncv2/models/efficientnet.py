@@ -18,6 +18,26 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock
 
+def get_padding():
+    padding_size = [(0, 0, 0, 0, 0, 1, 0, 1),
+     (0, 0, 0, 0, 1, 1, 1, 1),
+     (0, 0, 0, 0, 0, 1, 0, 1),
+     (0, 0, 0, 0, 1, 1, 1, 1),
+     (0, 0, 0, 0, 1, 2, 1, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 0, 1, 0, 1),
+     (0, 0, 0, 0, 1, 1, 1, 1),
+     (0, 0, 0, 0, 1, 1, 1, 1),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 1, 2, 1, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 2, 2, 2, 2),
+     (0, 0, 0, 0, 1, 1, 1, 1),
+    ]
+    return padding_size
 
 def calc_tf_padding(x,
                     kernel_size,
@@ -80,6 +100,7 @@ class EffiDwsConvUnit(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 padding_size,
                  **kwargs):
         super(EffiDwsConvUnit, self).__init__(**kwargs)
         self.tf_mode = tf_mode
@@ -103,12 +124,15 @@ class EffiDwsConvUnit(HybridBlock):
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
+        self.padding_size = padding_size
 
     def hybrid_forward(self, F, x):
         if self.residual:
             identity = x
         if self.tf_mode:
-            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3), constant_value=0)
+            # x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3), constant_value=0)
+            x = F.pad(x, mode="constant", pad_width=self.padding_size, constant_value=0)
+
         x = self.dw_conv(x)
         x = self.se(x)
         x = self.pw_conv(x)
@@ -155,6 +179,7 @@ class EffiInvResUnit(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 padding_size,
                  **kwargs):
         super(EffiInvResUnit, self).__init__(**kwargs)
         self.kernel_size = kernel_size
@@ -192,13 +217,18 @@ class EffiInvResUnit(HybridBlock):
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
 
+        self.padding_size = padding_size
+
     def hybrid_forward(self, F, x):
         if self.residual:
             identity = x
         x = self.conv1(x)
         if self.tf_mode:
+            # x = F.pad(x, mode="constant",
+            #           pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides),
+            #           constant_value=0)
             x = F.pad(x, mode="constant",
-                      pad_width=calc_tf_padding(x, kernel_size=self.kernel_size, strides=self.strides),
+                      pad_width=self.padding_size,
                       constant_value=0)
         x = self.conv2(x)
         if self.use_se:
@@ -236,6 +266,7 @@ class EffiInitBlock(HybridBlock):
                  bn_use_global_stats,
                  activation,
                  tf_mode,
+                 padding_size,
                  **kwargs):
         super(EffiInitBlock, self).__init__(**kwargs)
         self.tf_mode = tf_mode
@@ -249,10 +280,12 @@ class EffiInitBlock(HybridBlock):
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation)
+        self.padding_size = padding_size
 
     def hybrid_forward(self, F, x):
         if self.tf_mode:
-            x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3, strides=2), constant_value=0)
+            # x = F.pad(x, mode="constant", pad_width=calc_tf_padding(x, kernel_size=3, strides=2), constant_value=0)
+            x = F.pad(x, mode="constant", pad_width=self.padding_size, constant_value=0)
         x = self.conv(x)
         return x
 
@@ -312,6 +345,9 @@ class EfficientNet(HybridBlock):
         self.classes = classes
         activation = "swish"
 
+        self.padding_size = get_padding()
+        step = 0
+
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
             self.features.add(EffiInitBlock(
@@ -320,7 +356,10 @@ class EfficientNet(HybridBlock):
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=activation,
-                tf_mode=tf_mode))
+                tf_mode=tf_mode,
+                padding_size=self.padding_size[step]
+                ))
+            step += 1
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels):
                 kernel_sizes_per_stage = kernel_sizes[i]
@@ -339,7 +378,8 @@ class EfficientNet(HybridBlock):
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,
-                                tf_mode=tf_mode))
+                                tf_mode=tf_mode,
+                                padding_size=self.padding_size[step]))
                         else:
                             stage.add(EffiInvResUnit(
                                 in_channels=in_channels,
@@ -351,7 +391,9 @@ class EfficientNet(HybridBlock):
                                 bn_epsilon=bn_epsilon,
                                 bn_use_global_stats=bn_use_global_stats,
                                 activation=activation,
-                                tf_mode=tf_mode))
+                                tf_mode=tf_mode,
+                                padding_size=self.padding_size[step]))
+                        step += 1
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(conv1x1_block(

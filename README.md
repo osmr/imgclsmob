@@ -153,6 +153,7 @@ Some remarks:
 - `b/B` corresponds to ADE20K.
 - `c/C` corresponds to Cityscapes.
 - `d/D` corresponds to COCO.
+- `e/E` corresponds to CelebAMask-HQ.
 
 | Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md)  | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -161,6 +162,7 @@ Some remarks:
 | FCN-8s(d) | ABcD | ABcD | ABcD | - | - | ABcD | [link](https://arxiv.org/abs/1411.4038) | - | 2014 |
 | ICNet | C | C | C | - | - | C | [link](https://arxiv.org/abs/1704.08545) | [link](https://github.com/hszhao/ICNet) | 2017 |
 | SINet | C | C | C | - | - | - | [link](https://arxiv.org/abs/1911.09099) | [link](https://github.com/clovaai/c3_sinet) | 2019 |
+| BiSeNet | e | e | e | - | - | e | [link](https://arxiv.org/abs/1808.00897) | - | 2018 |
 
 ## Table of implemented object detection models
 

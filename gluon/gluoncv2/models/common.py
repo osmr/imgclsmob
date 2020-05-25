@@ -1107,9 +1107,9 @@ class InterpolationBlock(HybridBlock):
         self.bilinear = bilinear
         self.up = up
 
-    def hybrid_forward(self, F, x):
-        if self.bilinear:
-            out_size = self.calc_out_size(x)
+    def hybrid_forward(self, F, x, size=None):
+        if self.bilinear or (size is not None):
+            out_size = self.calc_out_size(x) if size is None else size
             return F.contrib.BilinearResize2D(x, height=out_size[0], width=out_size[1])
         else:
             return F.UpSampling(x, scale=self.scale_factor, sample_type="nearest")
@@ -1652,7 +1652,7 @@ class SesquialteralHourglass(HybridBlock):
         The second skip connection modules as sequential.
     down2_seq : nn.Sequential
         The second down modules as sequential.
-    merge_type : str, default 'con'
+    merge_type : str, default 'cat'
         Type of concatenation of up and skip outputs.
     """
     def __init__(self,

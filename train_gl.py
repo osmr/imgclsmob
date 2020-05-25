@@ -593,7 +593,6 @@ def train_epoch(epoch,
             train_accuracy_msg = report_accuracy(metric=train_metric)
             logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\tlr={:.5f}".format(
                 epoch + 1, i, speed, train_accuracy_msg, trainer.learning_rate))
-            print(train_loss / (i + 1))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)

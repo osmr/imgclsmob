@@ -957,6 +957,27 @@ def convert_pt2pt(dst_params_file_path,
         del src_param_keys[-3]
         src_param_keys.insert(-7, src2)
 
+    elif src_model == "oth_bisenet":
+        src1 = list(filter(re.compile("^cp.conv_avg").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src2 = list(filter(re.compile("^cp.arm32").search, src1n))
+        src2n = [key for key in src1n if key not in src2]
+        src3 = list(filter(re.compile("^cp.conv_head32").search, src2n))
+        src3n = [key for key in src2n if key not in src3]
+        src4 = list(filter(re.compile("^cp.arm16").search, src3n))
+        src4n = [key for key in src3n if key not in src4]
+        src5 = list(filter(re.compile("^cp.conv_head16").search, src4n))
+        src5n = [key for key in src4n if key not in src5]
+        src6 = list(filter(re.compile("^ffm").search, src5n))
+        src6n = [key for key in src5n if key not in src6]
+
+        src_param_keys = src6n + src1 + src2 + src3 + src4 + src5 + src6
+
+        dst1 = list(filter(re.compile("^pool").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+
+        dst_param_keys = dst1n + dst1
+
     elif src_model.startswith("oth_dla"):
         src1 = list(filter(re.compile("\.project").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]

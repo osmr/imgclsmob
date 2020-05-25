@@ -378,7 +378,7 @@ class CRUUnit(HybridBlock):
                     out_channels=out_channels,
                     strides=strides,
                     bn_use_global_stats=bn_use_global_stats,
-                    conv_params=self.input_conv.conv.params)
+                    conv_params=self.input_conv.conv1.params)
 
     def hybrid_forward(self, F, x):
         if self.resize_identity:

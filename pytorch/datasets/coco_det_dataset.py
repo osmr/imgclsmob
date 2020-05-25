@@ -597,26 +597,26 @@ class Pad(object):
                 'Batch size cannot be evenly split. Trying to shard %d items into %d shards',
                 len(original_length), num_shards)
         original_length = np.array_split(original_length, num_shards)
-        max_lengths = [np.max(l, axis=0, keepdims=len(pad_axis) == 1) for l in original_length]
+        max_lengths = [np.max(ll, axis=0, keepdims=len(pad_axis) == 1) for ll in original_length]
         # add batch dimension
-        ret_shape = [[l.shape[0], ] + list(arrs[0].shape) for l in original_length]
+        ret_shape = [[ll.shape[0], ] + list(arrs[0].shape) for ll in original_length]
         for i, shape in enumerate(ret_shape):
             for j, axis in enumerate(pad_axis):
                 shape[1 + axis] = max_lengths[i][j]
         if use_shared_mem:
             ret = [mx.nd.full(shape=tuple(shape), val=pad_val, ctx=mx.Context('cpu_shared', 0),
                               dtype=arrs[0].dtype) for shape in ret_shape]
-            original_length = [mx.nd.array(l, ctx=mx.Context('cpu_shared', 0),
-                                           dtype=np.int32) for l in original_length]
+            original_length = [mx.nd.array(ll, ctx=mx.Context('cpu_shared', 0),
+                                           dtype=np.int32) for ll in original_length]
         else:
             ret = [mx.nd.full(shape=tuple(shape), val=pad_val, dtype=arrs[0].dtype) for shape in
                    ret_shape]
-            original_length = [mx.nd.array(l, dtype=np.int32) for l in original_length]
+            original_length = [mx.nd.array(ll, dtype=np.int32) for ll in original_length]
         for i, arr in enumerate(arrs):
             if ret[i // ret[0].shape[0]].shape[1:] == arr.shape:
                 ret[i // ret[0].shape[0]][i % ret[0].shape[0]] = arr
             else:
-                slices = [slice(0, l) for l in arr.shape]
+                slices = [slice(0, ll) for ll in arr.shape]
                 ret[i // ret[0].shape[0]][i % ret[0].shape[0]][tuple(slices)] = arr
         if len(ret) == len(original_length) == 1:
             return ret[0], original_length[0]

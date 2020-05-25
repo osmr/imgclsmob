@@ -1426,7 +1426,7 @@ class SesquialteralHourglass(Chain):
         The second skip connection modules as sequential.
     down2_seq : SimpleSequential
         The second down modules as sequential.
-    merge_type : str, default 'con'
+    merge_type : str, default 'cat'
         Type of concatenation of up and skip outputs.
     """
     def __init__(self,
@@ -1588,8 +1588,8 @@ class InterpolationBlock(Chain):
         self.mode = mode
         self.align_corners = align_corners
 
-    def __call__(self, x):
-        out_size = self.calc_out_size(x)
+    def __call__(self, x, size=None):
+        out_size = self.calc_out_size(x) if size is None else size
         return F.resize_images(x, output_shape=out_size, mode=self.mode, align_corners=self.align_corners)
 
     def calc_out_size(self, x):

@@ -113,6 +113,7 @@ from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.sinet import *
+from .models.bisenet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
@@ -135,6 +136,7 @@ from .models.superpointnet import *
 # from .models.others.oth_prnet import *
 # from .models.others.oth_sinet import *
 # from .models.others.oth_ibppose import *
+from .models.others.oth_bisenet1 import *
 
 
 __all__ = ['get_model']
@@ -990,6 +992,8 @@ _models = {
 
     'sinet_cityscapes': sinet_cityscapes,
 
+    'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
+
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 
     'simplepose_resnet18_coco': simplepose_resnet18_coco,
@@ -1043,6 +1047,8 @@ _models = {
     # 'oth_sinet_cityscapes': oth_sinet_cityscapes,
 
     # 'oth_ibppose': oth_ibppose,
+
+    'oth_bisenet': oth_bisenet,
 }
 
 

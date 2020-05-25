@@ -360,8 +360,8 @@ class VOCMApMetric(mx.metric.EvalMetric):
             else:
                 gt_difficult = gt_difficult.flat[valid_gt]
 
-            for l in np.unique(np.concatenate((pred_label, gt_label)).astype(int)):
-                pred_mask_l = pred_label == l
+            for ll in np.unique(np.concatenate((pred_label, gt_label)).astype(int)):
+                pred_mask_l = pred_label == ll
                 pred_bbox_l = pred_bbox[pred_mask_l]
                 pred_score_l = pred_score[pred_mask_l]
                 # sort by score
@@ -369,17 +369,17 @@ class VOCMApMetric(mx.metric.EvalMetric):
                 pred_bbox_l = pred_bbox_l[order]
                 pred_score_l = pred_score_l[order]
 
-                gt_mask_l = gt_label == l
+                gt_mask_l = gt_label == ll
                 gt_bbox_l = gt_bbox[gt_mask_l]
                 gt_difficult_l = gt_difficult[gt_mask_l]
 
-                self._n_pos[l] += np.logical_not(gt_difficult_l).sum()
-                self._score[l].extend(pred_score_l)
+                self._n_pos[ll] += np.logical_not(gt_difficult_l).sum()
+                self._score[ll].extend(pred_score_l)
 
                 if len(pred_bbox_l) == 0:
                     continue
                 if len(gt_bbox_l) == 0:
-                    self._match[l].extend((0,) * pred_bbox_l.shape[0])
+                    self._match[ll].extend((0,) * pred_bbox_l.shape[0])
                     continue
 
                 # VOC evaluation follows integer typed bounding boxes.
@@ -398,15 +398,15 @@ class VOCMApMetric(mx.metric.EvalMetric):
                 for gt_idx in gt_index:
                     if gt_idx >= 0:
                         if gt_difficult_l[gt_idx]:
-                            self._match[l].append(-1)
+                            self._match[ll].append(-1)
                         else:
                             if not selec[gt_idx]:
-                                self._match[l].append(1)
+                                self._match[ll].append(1)
                             else:
-                                self._match[l].append(0)
+                                self._match[ll].append(0)
                         selec[gt_idx] = True
                     else:
-                        self._match[l].append(0)
+                        self._match[ll].append(0)
 
     def _update(self):
         """
@@ -414,12 +414,12 @@ class VOCMApMetric(mx.metric.EvalMetric):
         """
         aps = []
         recall, precs = self._recall_prec()
-        for l, rec, prec in zip(range(len(precs)), recall, precs):
+        for ll, rec, prec in zip(range(len(precs)), recall, precs):
             ap = self._average_precision(rec, prec)
             aps.append(ap)
-            if self.num is not None and l < (self.num - 1):
-                self.sum_metric[l] = ap
-                self.num_inst[l] = 1
+            if self.num is not None and ll < (self.num - 1):
+                self.sum_metric[ll] = ap
+                self.num_inst[ll] = 1
         if self.num is None:
             self.num_inst = 1
             self.sum_metric = np.nanmean(aps)
@@ -435,9 +435,9 @@ class VOCMApMetric(mx.metric.EvalMetric):
         prec = [None] * n_fg_class
         rec = [None] * n_fg_class
 
-        for l in self._n_pos.keys():
-            score_l = np.array(self._score[l])
-            match_l = np.array(self._match[l], dtype=np.int32)
+        for ll in self._n_pos.keys():
+            score_l = np.array(self._score[ll])
+            match_l = np.array(self._match[ll], dtype=np.int32)
 
             order = score_l.argsort()[::-1]
             match_l = match_l[order]
@@ -446,12 +446,12 @@ class VOCMApMetric(mx.metric.EvalMetric):
             fp = np.cumsum(match_l == 0)
 
             # If an element of fp + tp is 0,
-            # the corresponding element of prec[l] is nan.
+            # the corresponding element of prec[ll] is nan.
             with np.errstate(divide="ignore", invalid="ignore"):
-                prec[l] = tp / (fp + tp)
-            # If n_pos[l] is 0, rec[l] is None.
-            if self._n_pos[l] > 0:
-                rec[l] = tp / self._n_pos[l]
+                prec[ll] = tp / (fp + tp)
+            # If n_pos[ll] is 0, rec[ll] is None.
+            if self._n_pos[ll] > 0:
+                rec[ll] = tp / self._n_pos[ll]
 
         return rec, prec
 

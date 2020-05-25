@@ -990,34 +990,60 @@ class InterpolationBlock(nn.Module):
     ----------
     scale_factor : float
         Multiplier for spatial size.
+    out_size : tuple of 2 int, default None
+        Spatial size of the output tensor for the bilinear interpolation operation.
     mode : str, default 'bilinear'
         Algorithm used for upsampling.
     align_corners : bool, default True
         Whether to align the corner pixels of the input and output tensors.
+    up : bool, default True
+        Whether to upsample or downsample.
     """
     def __init__(self,
                  scale_factor,
+                 out_size=None,
                  mode="bilinear",
-                 align_corners=True):
+                 align_corners=True,
+                 up=True):
         super(InterpolationBlock, self).__init__()
         self.scale_factor = scale_factor
+        self.out_size = out_size
         self.mode = mode
         self.align_corners = align_corners
+        self.up = up
 
-    def forward(self, x):
-        return F.interpolate(
-            input=x,
-            scale_factor=self.scale_factor,
-            mode=self.mode,
-            align_corners=self.align_corners)
+    def forward(self, x, size=None):
+        if (self.mode == "bilinear") or (size is not None):
+            out_size = self.calc_out_size(x) if size is None else size
+            return F.interpolate(
+                input=x,
+                size=out_size,
+                mode=self.mode,
+                align_corners=self.align_corners)
+        else:
+            return F.interpolate(
+                input=x,
+                scale_factor=self.scale_factor,
+                mode=self.mode,
+                align_corners=self.align_corners)
+
+    def calc_out_size(self, x):
+        if self.out_size is not None:
+            return self.out_size
+        if self.up:
+            return tuple(s * self.scale_factor for s in x.shape[2:])
+        else:
+            return tuple(s // self.scale_factor for s in x.shape[2:])
 
     def __repr__(self):
-        s = "{name}(scale_factor={scale_factor}, mode={mode}, align_corners={align_corners})"
+        s = '{name}(scale_factor={scale_factor}, out_size={out_size}, mode={mode}, align_corners={align_corners}, up={up})' # noqa
         return s.format(
             name=self.__class__.__name__,
             scale_factor=self.scale_factor,
+            out_size=self.out_size,
             mode=self.mode,
-            align_corners=self.align_corners)
+            align_corners=self.align_corners,
+            up=self.up)
 
     def calc_flops(self, x):
         assert (x.shape[0] == 1)
@@ -1497,7 +1523,7 @@ class SesquialteralHourglass(nn.Module):
         The second skip connection modules as sequential.
     down2_seq : nn.Sequential
         The second down modules as sequential.
-    merge_type : str, default 'con'
+    merge_type : str, default 'cat'
         Type of concatenation of up and skip outputs.
     """
     def __init__(self,

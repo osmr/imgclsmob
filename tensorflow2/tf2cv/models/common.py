@@ -2493,8 +2493,8 @@ class InterpolationBlock(nn.Layer):
         self.method = tf.image.ResizeMethod.BILINEAR if interpolation == "bilinear" else\
             tf.image.ResizeMethod.NEAREST_NEIGHBOR
 
-    def call(self, x, training=None):
-        out_size = self.calc_out_size(x)
+    def call(self, x, size=None, training=None):
+        out_size = self.calc_out_size(x) if size is None else size
         if is_channels_first(self.data_format):
             x = tf.transpose(x, perm=[0, 2, 3, 1])
         x = tf.image.resize(

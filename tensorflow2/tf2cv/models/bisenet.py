@@ -49,7 +49,7 @@ class PyramidPoolingZeroBranch(nn.Layer):
             name="conv")
         self.up = InterpolationBlock(
             scale_factor=None,
-            interpolation="nearest",
+            interpolation="bilinear",
             data_format=data_format,
             name="up")
 
@@ -138,7 +138,7 @@ class PyramidPoolingMainBranch(nn.Layer):
             name="att")
         self.up = InterpolationBlock(
             scale_factor=scale_factor,
-            interpolation="nearest",
+            interpolation="bilinear",
             data_format=data_format,
             name="up")
         self.conv = conv3x3_block(

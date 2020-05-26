@@ -667,7 +667,7 @@ Some remarks:
 ### CelebAMask-HQ
 
 | Model | Extractor | Params | FLOPs/2 | Remarks |
-| --- | --- | ---: | | ---: | --- |
+| --- | --- | ---: | ---: | --- |
 | BiSeNet | ResNet-18 | 13,300,416 | - | From [zllrunning/face...Torch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.462/bisenet_resnet18_celebamaskhq-0000-c3bd2251.npz.log)) |
 
 ### COCO Keypoints Detection

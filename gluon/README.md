@@ -224,6 +224,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SE-PreResNet-18 | 27.67 | 9.38 | 11,776,928 | 1,820.66M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.380/sepreresnet18-0938-f9645ed3.params.log)) |
 | SE-PreResNet-BC-26b | 22.95 | 6.36 | 17,388,424 | 2,355.57M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.399/sepreresnetbc26b-0636-33c94c9d.params.log)) |
 | SE-PreResNet-BC-38b | 21.42 | 5.63 | 24,019,064 | 3,233.81M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.409/sepreresnetbc38b-0563-d8f0fbd3.params.log)) |
+| SE-PreResNet-50b | 20.67 | 5.32 | 28,080,472 | 4,110.51M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.461/sepreresnet50b-0532-5b620ff7.params.log)) |
 | SE-ResNeXt-50 (32x4d) | 20.03 | 5.05 | 27,559,896 | 4,258.40M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext50_32x4d-0505-7f3fae1f.params.log)) |
 | SE-ResNeXt-101 (32x4d) | 19.07 | 4.60 | 48,955,416 | 8,008.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_32x4d-0460-6cb1ee64.params.log)) |
 | SE-ResNeXt-101 (64x4d) | 18.98 | 4.66 | 88,232,984 | 15,505.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.418/seresnext101_64x4d-0466-15e16730.params.log)) |
@@ -751,6 +752,12 @@ Some remarks:
 | DeepLabv3 | ResNet(D)-152b | 92.24 | 68.99 | 74,398,421 | 275,084.22M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.298/deeplabv3_resnetd152b_coco-6899-edd79b4c.params.log)) |
 | FCN-8s(d) | ResNet(D)-101b | 91.44 | 60.11 | 52,072,917 | 196,562.96M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.299/fcn8sd_resnetd101b_coco-6011-05e97cc5.params.log)) |
 
+### CelebAMask-HQ
+
+| Model | Extractor | Params | FLOPs/2 | Remarks |
+| --- | --- | ---: | | ---: | --- |
+| BiSeNet | ResNet-18 | 13,300,416 | - | From [zllrunning/face...Torch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.462/bisenet_resnet18_celebamaskhq-0000-d72f0cf3.params.log)) |
+
 ### COCO Keypoints Detection
 
 | Model | Extractor | OKS AP, % | Params | FLOPs/2 | Remarks |
@@ -807,3 +814,4 @@ Some remarks:
 [Daniil-Osokin/lighw...ch]: https://github.com/Daniil-Osokin/lightweight-human-pose-estimation.pytorch
 [Daniil-Osokin/li...3d...ch]: https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch
 [jialee93/Improved...Parts]: https://github.com/jialee93/Improved-Body-Parts
+[zllrunning/face...Torch]: https://github.com/zllrunning/face-parsing.PyTorch

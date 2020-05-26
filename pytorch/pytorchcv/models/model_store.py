@@ -90,6 +90,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('sepreresnet18', '0963', 'c065cd9e1c026d0529526cfc945c137bade6f0c7', 'v0.0.380', 'SE-PreResNet-18', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnetbc26b', '0660', 'f750b2f588a27620b30c86f0060a41422d4a0f75', 'v0.0.399', 'SE-PreResNet-BC-26b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('sepreresnetbc38b', '0578', '12827fcd3c8c1a8c8ba1d109e85ffa67e7ab306a', 'v0.0.409', 'SE-PreResNet-BC-38b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('sepreresnet50b', '0549', '4628a07d7dd92c775868dffd33fd6e3e7522c261', 'v0.0.461', 'SE-PreResNet-50b', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('seresnext50_32x4d', '0521', 'b0ce2520bd87a50b63b1365c74356dba333de68c', 'v0.0.418', 'SE-ResNeXt-50 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('seresnext101_32x4d', '0480', '4f6479f0801a92d35a256a47e5c11a97b3555016', 'v0.0.418', 'SE-ResNeXt-101 (32x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('seresnext101_64x4d', '0476', 'da806109a2346be16f2b3b9aa60aa8f52bc6a1fa', 'v0.0.418', 'SE-ResNeXt-101 (64x4d)', '1709.01507', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
@@ -508,6 +509,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('fcn8sd_resnetd101b_coco', '6011', 'ebe2ad0bc1de5b4cecade61d17d269aa8bf6df7f', 'v0.0.299', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
     ('icnet_resnetd50b_cityscapes', '6402', 'b380f8cc91ffeac29df6c245f34fbc89aa095c53', 'v0.0.457', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('sinet_cityscapes', '6172', '8ecd14141b85a682c2cc1c74e13077fee4746d87', 'v0.0.437', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
+    ('bisenet_resnet18_celebamaskhq', '0000', '98affefd74cc7f87314a96f148dbdbf4055bbfcb', 'v0.0.462', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('alphapose_fastseresnet101b_coco', '7415', 'b9e3f64a9fe44198b23e7278cc3a94fd94247e20', 'v0.0.454', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('simplepose_resnet18_coco', '6631', '7c3656b35607805bdb877e7134938fd4510b2c8c', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('simplepose_resnet50b_coco', '7102', '621d2545c8b39793a0fe3a48054684f8b982a978', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa

@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument(
         "--input-shape",
         type=int,
-        default=(1, 512, 512, 3),
+        default=(1, 640, 480, 3),
         help="input tensor shape")
     parser.add_argument(
         "--output-dir",
@@ -80,6 +80,7 @@ def main():
     # def representative_dataset_gen():
     #     for i in range(len(dataset)):
     #         yield [dataset[i:i + 1]]
+
     # converter.representative_dataset = representative_dataset_gen
     # converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
     # converter.inference_input_type = tf.int8

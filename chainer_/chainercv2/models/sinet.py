@@ -139,7 +139,7 @@ class DwsConvBlock(Chain):
                  pw_activation=(lambda: F.relu),
                  se_reduction=0):
         super(DwsConvBlock, self).__init__()
-        self.use_se = se_reduction > 0
+        self.use_se = (se_reduction > 0)
 
         with self.init_scope():
             self.dw_conv = dwconv_block(
@@ -993,13 +993,12 @@ class SINet(Chain):
         y3, y2, y1 = self.encoder(x)
         x = self.decoder(y3, y2, y1)
         if self.aux:
-            return y3, x
+            return x, y3
         else:
             return x
 
 
-def get_sinet(aux=False,
-              model_name=None,
+def get_sinet(model_name=None,
               pretrained=False,
               root=os.path.join("~", ".chainer", "models"),
               **kwargs):
@@ -1008,8 +1007,6 @@ def get_sinet(aux=False,
 
     Parameters:
     ----------
-    aux : bool, default False
-        Whether to output an auxiliary result.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -1047,7 +1044,6 @@ def get_sinet(aux=False,
         scale_factors_list=scale_factors_list,
         use_residual_list=use_residual_list,
         dim2=dims[1],
-        aux=aux,
         **kwargs)
 
     if pretrained:
@@ -1063,7 +1059,7 @@ def get_sinet(aux=False,
     return net
 
 
-def sinet_cityscapes(classes=19, aux=False, **kwargs):
+def sinet_cityscapes(classes=19, **kwargs):
     """
     SINet model for Cityscapes from 'SINet: Extreme Lightweight Portrait Segmentation Networks with Spatial Squeeze
     Modules and Information Blocking Decoder,' https://arxiv.org/abs/1911.09099.
@@ -1072,14 +1068,12 @@ def sinet_cityscapes(classes=19, aux=False, **kwargs):
     ----------
     classes : int, default 19
         Number of segmentation classes.
-    aux : bool, default True
-        Whether to output an auxiliary result.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
-    return get_sinet(classes=classes, bn_eps=1e-3, aux=aux, model_name="sinet_cityscapes", **kwargs)
+    return get_sinet(classes=classes, bn_eps=1e-3, model_name="sinet_cityscapes", **kwargs)
 
 
 def _test():
@@ -1104,9 +1098,11 @@ def _test():
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != sinet_cityscapes or weight_count == 119418)
 
-        x = np.zeros((14, 3, in_size[0], in_size[1]), np.float32)
-        y = net(x)
-        assert (y.shape == (14, 19, in_size[0], in_size[1]))
+        batch = 14
+        x = np.zeros((batch, 3, in_size[0], in_size[1]), np.float32)
+        ys = net(x)
+        y = ys[0] if aux else ys
+        assert (y.shape == (batch, 19, in_size[0], in_size[1]))
 
 
 if __name__ == "__main__":

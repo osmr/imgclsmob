@@ -252,6 +252,8 @@ class PreResActivation(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(PreResActivation, self).__init__(**kwargs)
+        assert (in_channels is not None)
+
         self.bn = BatchNorm(
             data_format=data_format,
             name="bn")

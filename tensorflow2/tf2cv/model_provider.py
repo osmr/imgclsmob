@@ -81,6 +81,7 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
+from .models.sinet import *
 from .models.bisenet import *
 
 from .models.alphapose_coco import *
@@ -799,6 +800,8 @@ _models = {
     'deeplabv3_resnetd101b_cityscapes': deeplabv3_resnetd101b_cityscapes,
 
     'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
+
+    'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
 

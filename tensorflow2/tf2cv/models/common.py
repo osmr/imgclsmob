@@ -5,11 +5,12 @@
 __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'ReLU6',
            'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
            'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
-           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv3x3_block', 'dwconv5x5_block',
-           'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock',
-           'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
-           'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
-           'MultiOutputSequential', 'ParallelConcurent', 'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
+           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
+           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
+           'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock', 'Identity',
+           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
+           'ParametricConcurrent', 'MultiOutputSequential', 'ParallelConcurent', 'InterpolationBlock', 'Hourglass',
+           'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -174,26 +175,52 @@ class HSwish(nn.Layer):
         return x * tf.nn.relu6(x + 3.0) / 6.0
 
 
-class PReLU2(nn.Layer):
+class PReLU2(nn.PReLU):
     """
     Parametric leaky version of a Rectified Linear Unit (with wide alpha).
 
     Parameters:
     ----------
-    alpha : int, default 0.25
-        Negative slope coefficient.
+    in_channels : int
+        Number of input channels.
+    alpha_initializer : tf.Initializer, default tf.constant_initializer(0.25)
+        Initializer function for the weights.
+    shared_axes : list of int, default None
+        The axes along which to share learnable parameters for the activation function.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
-                 alpha=0.25,
+                 in_channels=1,
+                 alpha_initializer=tf.constant_initializer(0.25),
+                 data_format="channels_last",
                  **kwargs):
-        super(PReLU2, self).__init__(**kwargs)
-        self.active = nn.LeakyReLU(alpha=alpha)
+        self.in_channels = in_channels
+        self.data_format = data_format
+        super(PReLU2, self).__init__(
+            alpha_initializer=alpha_initializer,
+            **kwargs)
 
-    def call(self, x):
-        return self.active(x)
+    def build(self, input_shape):
+        self.alpha = self.add_weight(
+            shape=(self.in_channels,),
+            name='alpha',
+            initializer=self.alpha_initializer,
+            regularizer=self.alpha_regularizer,
+            constraint=self.alpha_constraint)
+        channel_axis = (1 if is_channels_first(self.data_format) else len(input_shape) - 1)
+        assert (self.in_channels == input_shape[channel_axis])
+        axes = {}
+        for i in range(1, len(input_shape)):
+            if i != channel_axis:
+                axes[i] = input_shape[i]
+        from tensorflow.python.keras.engine.input_spec import InputSpec
+        self.input_spec = InputSpec(ndim=len(input_shape), axes=axes)
+        self.built = True
 
 
-def get_activation_layer(activation):
+def get_activation_layer(activation,
+                         **kwargs):
     """
     Create activation layer from string/function.
 
@@ -212,17 +239,19 @@ def get_activation_layer(activation):
         return activation()
     elif isinstance(activation, str):
         if activation == "relu":
-            return nn.ReLU()
+            return nn.ReLU(**kwargs)
         elif activation == "relu6":
-            return ReLU6()
+            return ReLU6(**kwargs)
+        elif activation == "prelu2":
+            return PReLU2(**kwargs)
         elif activation == "swish":
-            return Swish()
+            return Swish(**kwargs)
         elif activation == "hswish":
-            return HSwish()
+            return HSwish(**kwargs)
         elif activation == "sigmoid":
             return tf.nn.sigmoid
         elif activation == "hsigmoid":
-            return HSigmoid()
+            return HSigmoid(**kwargs)
         else:
             raise NotImplementedError()
     else:
@@ -786,6 +815,13 @@ class Conv2d(nn.Layer):
             # else:
             #     self.paddings_tf = [[0, 0], list(padding), list(padding), [0, 0]]
 
+        # self.use_post_pad = (dilation[0] > 1) and (dilation[0] % 2 == 1) and (dilation[0] == dilation[1]) and\
+        #                     (dilation[0] == padding[1]) and (padding[0] == padding[1])
+        # if self.use_post_pad:
+        #     self.post_pad = nn.ZeroPadding2D(
+        #         padding=((1, 0), (1, 0)),
+        #         data_format=data_format)
+
         if self.use_conv:
             self.conv = nn.Conv2D(
                 filters=out_channels,
@@ -857,6 +893,8 @@ class Conv2d(nn.Layer):
             for xi, convi in zip(xx, self.convs):
                 yy.append(convi(xi))
             x = tf.concat(yy, axis=get_channel_axis(self.data_format))
+        # if self.use_post_pad:
+        #     x = self.post_pad(x)
         return x
 
 
@@ -1035,7 +1073,7 @@ class ConvBlock(nn.Layer):
                 data_format=data_format,
                 name="bn")
         if self.activate:
-            self.activ = get_activation_layer(activation)
+            self.activ = get_activation_layer(activation, name="activ")
 
     def call(self, x, training=None):
         x = self.conv(x)
@@ -1858,7 +1896,7 @@ class DeconvBlock(nn.Layer):
                 data_format=data_format,
                 name="bn")
         if self.activate:
-            self.activ = get_activation_layer(activation)
+            self.activ = get_activation_layer(activation, name="activ")
 
     def call(self, x, training=None):
         x = self.conv(x)
@@ -2065,7 +2103,7 @@ class SEBlock(nn.Layer):
                 units=mid_channels,
                 input_dim=channels,
                 name="fc1")
-        self.activ = get_activation_layer(mid_activation)
+        self.activ = get_activation_layer(mid_activation, name="activ")
         if use_conv:
             self.conv2 = conv1x1(
                 in_channels=mid_channels,
@@ -2078,7 +2116,7 @@ class SEBlock(nn.Layer):
                 units=channels,
                 input_dim=mid_channels,
                 name="fc2")
-        self.sigmoid = get_activation_layer(out_activation)
+        self.sigmoid = get_activation_layer(out_activation, name="sigmoid")
 
     def call(self, x, training=None):
         w = self.pool(x)
@@ -2580,25 +2618,37 @@ class Hourglass(nn.Layer):
 class HeatmapMaxDetBlock(nn.Layer):
     """
     Heatmap maximum detector block (for human pose estimation task).
+
+    Parameters:
+    ----------
+    tune : bool, default True
+        Whether to tune point positions.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
     """
     def __init__(self,
+                 tune=True,
                  data_format="channels_last",
                  **kwargs):
         super(HeatmapMaxDetBlock, self).__init__(**kwargs)
+        self.tune = tune
         self.data_format = data_format
 
     def call(self, x, training=None):
-        heatmap = x
+        # if not tf.executing_eagerly():
+        #     channels = x.shape[1] if is_channels_first(self.data_format) else x.shape[3]
+        #     return x[:, :channels, :3, 0]
         vector_dim = 2
-        batch = heatmap.shape[0]
+        x_shape = x.get_shape().as_list()
+        batch = x_shape[0]
         if is_channels_first(self.data_format):
-            channels = heatmap.shape[1]
-            in_size = x.shape[2:]
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, channels, -1))
+            channels = x_shape[1]
+            in_size = x_shape[2:]
+            heatmap_vector = tf.reshape(x, shape=(batch, channels, -1))
         else:
-            channels = heatmap.shape[3]
-            in_size = x.shape[1:3]
-            heatmap_vector = tf.reshape(heatmap, shape=(batch, -1, channels))
+            channels = x_shape[3]
+            in_size = x_shape[1:3]
+            heatmap_vector = tf.reshape(x, shape=(batch, -1, channels))
             heatmap_vector = tf.transpose(heatmap_vector, perm=(0, 2, 1))
         indices = tf.cast(tf.expand_dims(tf.cast(tf.math.argmax(heatmap_vector, axis=vector_dim), np.int32),
                                          axis=vector_dim), np.float32)
@@ -2606,14 +2656,16 @@ class HeatmapMaxDetBlock(nn.Layer):
         scores_mask = tf.cast(tf.math.greater(scores, 0.0), np.float32)
         pts_x = (indices % in_size[1]) * scores_mask
         pts_y = (indices // in_size[1]) * scores_mask
-        pts = tf.concat([pts_x, pts_y, scores], axis=vector_dim).numpy()
-        for b in range(batch):
-            for k in range(channels):
-                hm = heatmap[b, k, :, :] if is_channels_first(self.data_format) else heatmap[b, :, :, k]
-                px = int(pts[b, k, 0])
-                py = int(pts[b, k, 1])
-                if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
-                    pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
-                    pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
-        pts = tf.convert_to_tensor(pts)
+        pts = tf.concat([pts_x, pts_y, scores], axis=vector_dim)
+        if self.tune:
+            pts = pts.numpy()
+            for b in range(batch):
+                for k in range(channels):
+                    hm = x[b, k, :, :] if is_channels_first(self.data_format) else x[b, :, :, k]
+                    px = int(pts[b, k, 0])
+                    py = int(pts[b, k, 1])
+                    if (0 < px < in_size[1] - 1) and (0 < py < in_size[0] - 1):
+                        pts[b, k, 0] += np.sign(hm[py, px + 1] - hm[py, px - 1]) * 0.25
+                        pts[b, k, 1] += np.sign(hm[py + 1, px] - hm[py - 1, px]) * 0.25
+            pts = tf.convert_to_tensor(pts)
         return pts

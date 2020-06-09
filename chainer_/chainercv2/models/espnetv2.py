@@ -147,7 +147,8 @@ class ESPBlock(Chain):
                 groups=num_branches,
                 activation=None)
             self.preactiv = PreActivation(in_channels=out_channels)
-            self.activ = L.PReLU(shape=(out_channels,))
+            if not self.downsample:
+                self.activ = L.PReLU(shape=(out_channels,))
 
     def __call__(self, x, x0):
         y = self.reduce_conv(x)
@@ -531,11 +532,11 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != espnetv2_wd2 or weight_count == 1241332)
-        assert (model != espnetv2_w1 or weight_count == 1670072)
-        assert (model != espnetv2_w5d4 or weight_count == 1965440)
-        assert (model != espnetv2_w3d2 or weight_count == 2314856)
-        assert (model != espnetv2_w2 or weight_count == 3498136)
+        assert (model != espnetv2_wd2 or weight_count == 1241092)
+        assert (model != espnetv2_w1 or weight_count == 1669592)
+        assert (model != espnetv2_w5d4 or weight_count == 1964832)
+        assert (model != espnetv2_w3d2 or weight_count == 2314120)
+        assert (model != espnetv2_w2 or weight_count == 3497144)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

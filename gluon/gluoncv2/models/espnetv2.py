@@ -585,11 +585,11 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != espnetv2_wd2 or weight_count == 1241332)
-        assert (model != espnetv2_w1 or weight_count == 1670072)
-        assert (model != espnetv2_w5d4 or weight_count == 1965440)
-        assert (model != espnetv2_w3d2 or weight_count == 2314856)
-        assert (model != espnetv2_w2 or weight_count == 3498136)
+        assert (model != espnetv2_wd2 or weight_count == 1241092)
+        assert (model != espnetv2_w1 or weight_count == 1669592)
+        assert (model != espnetv2_w5d4 or weight_count == 1964832)
+        assert (model != espnetv2_w3d2 or weight_count == 2314120)
+        assert (model != espnetv2_w2 or weight_count == 3497144)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

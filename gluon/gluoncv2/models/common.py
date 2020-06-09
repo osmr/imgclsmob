@@ -76,6 +76,12 @@ class PReLU2(HybridBlock):
     def hybrid_forward(self, F, x, alpha):
         return F.LeakyReLU(x, gamma=alpha, act_type="prelu", name="fwd")
 
+    def __repr__(self):
+        s = '{name}(in_channels={in_channels})'
+        return s.format(
+            name=self.__class__.__name__,
+            in_channels=self.alpha.shape[0])
+
 
 class HSigmoid(HybridBlock):
     """

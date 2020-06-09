@@ -774,6 +774,8 @@ class Conv2d(nn.Layer):
         Number of groups.
     use_bias : bool, default True
         Whether the layer uses a bias vector.
+    force_same : bool, default False
+        Whether to forcibly set `same` padding.
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
@@ -786,6 +788,7 @@ class Conv2d(nn.Layer):
                  dilation=1,
                  groups=1,
                  use_bias=True,
+                 force_same=False,
                  data_format="channels_last",
                  **kwargs):
         super(Conv2d, self).__init__(**kwargs)
@@ -805,7 +808,7 @@ class Conv2d(nn.Layer):
         if isinstance(dilation, int):
             dilation = (dilation, dilation)
 
-        self.use_pad = (padding[0] > 0) or (padding[1] > 0)
+        self.use_pad = ((padding[0] > 0) or (padding[1] > 0)) and (not force_same)
         if self.use_pad:
             self.pad = nn.ZeroPadding2D(
                 padding=padding,
@@ -822,12 +825,16 @@ class Conv2d(nn.Layer):
         #         padding=((1, 0), (1, 0)),
         #         data_format=data_format)
 
+        assert (not force_same) or ((padding[0] == kernel_size[0] // 2) and (padding[1] == kernel_size[1] // 2) and
+                                    (strides[0] == 1) and (strides[0] == strides[1]) and (dilation[0] == 1) and
+                                    (dilation[0] == dilation[1]))
+
         if self.use_conv:
             self.conv = nn.Conv2D(
                 filters=out_channels,
                 kernel_size=kernel_size,
                 strides=strides,
-                padding="valid",
+                padding=("valid" if not force_same else "same"),
                 data_format=data_format,
                 dilation_rate=dilation,
                 use_bias=use_bias,
@@ -837,7 +844,7 @@ class Conv2d(nn.Layer):
             self.dw_conv = nn.DepthwiseConv2D(
                 kernel_size=kernel_size,
                 strides=strides,
-                padding="valid",
+                padding=("valid" if not force_same else "same"),
                 data_format=data_format,
                 dilation_rate=dilation,
                 use_bias=use_bias,
@@ -1028,6 +1035,8 @@ class ConvBlock(nn.Layer):
         Number of groups.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    force_same : bool, default False
+        Whether to forcibly set `same` padding in convolution.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
@@ -1046,6 +1055,7 @@ class ConvBlock(nn.Layer):
                  dilation=1,
                  groups=1,
                  use_bias=False,
+                 force_same=False,
                  use_bn=True,
                  bn_eps=1e-5,
                  activation="relu",
@@ -1065,6 +1075,7 @@ class ConvBlock(nn.Layer):
             dilation=dilation,
             groups=groups,
             use_bias=use_bias,
+            force_same=force_same,
             data_format=data_format,
             name="conv")
         if self.use_bn:
@@ -1461,6 +1472,10 @@ class DwsConvBlock(nn.Layer):
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
+    dw_force_same : bool, default False
+        Whether to forcibly set `same` padding in depthwise convolution block.
+    pw_force_same : bool, default False
+        Whether to forcibly set `same` padding in pointwise convolution block.
     use_bn : bool, default True
         Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
@@ -1480,6 +1495,8 @@ class DwsConvBlock(nn.Layer):
                  padding,
                  dilation=1,
                  use_bias=False,
+                 dw_force_same=False,
+                 pw_force_same=False,
                  use_bn=True,
                  bn_eps=1e-5,
                  dw_activation="relu",
@@ -1495,6 +1512,7 @@ class DwsConvBlock(nn.Layer):
             padding=padding,
             dilation=dilation,
             use_bias=use_bias,
+            force_same=dw_force_same,
             use_bn=use_bn,
             bn_eps=bn_eps,
             activation=dw_activation,
@@ -1504,6 +1522,7 @@ class DwsConvBlock(nn.Layer):
             in_channels=in_channels,
             out_channels=out_channels,
             use_bias=use_bias,
+            force_same=pw_force_same,
             use_bn=use_bn,
             bn_eps=bn_eps,
             activation=pw_activation,

@@ -135,7 +135,7 @@ class Res2NetUnit(HybridBlock):
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
-            self.preactiv = PreActivation(in_channels=out_channels)
+            self.preactiv = PreActivation(in_channels=mid_channels)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,

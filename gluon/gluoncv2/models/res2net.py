@@ -11,34 +11,7 @@ from mxnet.gluon import nn, HybridBlock
 from mxnet.gluon.contrib.nn import Identity
 from .common import conv1x1, conv3x3, conv1x1_block
 from .resnet import ResInitBlock
-
-
-class PreActivation(HybridBlock):
-    """
-    PreResNet like pure pre-activation block without convolution layer.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    bn_use_global_stats : bool, default False
-        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
-    """
-    def __init__(self,
-                 in_channels,
-                 bn_use_global_stats=False,
-                 **kwargs):
-        super(PreActivation, self).__init__(**kwargs)
-        with self.name_scope():
-            self.bn = nn.BatchNorm(
-                in_channels=in_channels,
-                use_global_stats=bn_use_global_stats)
-            self.activ = nn.Activation("relu")
-
-    def hybrid_forward(self, F, x):
-        x = self.bn(x)
-        x = self.activ(x)
-        return x
+from .preresnet import PreResActivation
 
 
 class HierarchicalConcurrent(nn.HybridSequential):
@@ -130,12 +103,12 @@ class Res2NetUnit(HybridBlock):
                     in_channels=brn_channels,
                     out_channels=brn_channels,
                     strides=strides))
+            self.preactiv = PreResActivation(in_channels=mid_channels)
             self.merge_conv = conv1x1_block(
                 in_channels=mid_channels,
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 activation=None)
-            self.preactiv = PreActivation(in_channels=mid_channels)
             if self.resize_identity:
                 self.identity_conv = conv1x1_block(
                     in_channels=in_channels,
@@ -363,8 +336,8 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != res2net50_w14_s8 or weight_count == 8258356)
-        assert (model != res2net50_w26_s8 or weight_count == 11456212)
+        assert (model != res2net50_w14_s8 or weight_count == 8231732)
+        assert (model != res2net50_w26_s8 or weight_count == 11432660)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

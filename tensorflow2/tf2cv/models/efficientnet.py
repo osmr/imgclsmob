@@ -18,6 +18,7 @@ import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import round_channels, conv1x1_block, conv3x3_block, dwconv3x3_block, dwconv5x5_block, SEBlock,\
     is_channels_first
+from .common import add_get_config
 
 
 def calc_tf_padding(x,
@@ -80,6 +81,7 @@ class EffiDwsConvUnit(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -156,6 +158,7 @@ class EffiInvResUnit(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -244,6 +247,7 @@ class EffiInitBlock(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -307,6 +311,7 @@ class EfficientNet(tf.keras.Model):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  channels,
                  init_block_channels,

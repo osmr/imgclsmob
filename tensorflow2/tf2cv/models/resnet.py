@@ -12,6 +12,7 @@ import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import conv1x1_block, conv3x3_block, conv7x7_block, MaxPool2d, flatten, is_channels_first
+from .common import add_get_config
 
 
 class ResBlock(nn.Layer):
@@ -226,6 +227,7 @@ class ResInitBlock(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,

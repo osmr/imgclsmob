@@ -12,6 +12,7 @@ import math
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from .common import conv1x1_block, conv3x3_block, flatten
+from .common import add_get_config
 from .resnet import ResInitBlock
 
 
@@ -36,6 +37,7 @@ class ResNeXtBottleneck(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -95,6 +97,7 @@ class ResNeXtUnit(nn.Layer):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -158,6 +161,7 @@ class ResNeXt(tf.keras.Model):
     data_format : str, default 'channels_last'
         The ordering of the dimensions in tensors.
     """
+    @add_get_config
     def __init__(self,
                  channels,
                  init_block_channels,

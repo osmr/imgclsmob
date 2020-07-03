@@ -34,7 +34,7 @@ class VGGDense(HybridBlock):
             self.fc = nn.Dense(
                 units=out_channels,
                 in_units=in_channels)
-            self.activ = nn.Activation("V")
+            self.activ = nn.Activation("relu")
             self.dropout = nn.Dropout(rate=0.5)
 
     def hybrid_forward(self, F, x):

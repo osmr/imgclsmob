@@ -2,19 +2,21 @@
     Common routines for models in PyTorch.
 """
 
-__all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
-           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'DeconvBlock', 'NormActivation', 'InterpolationBlock', 'ChannelShuffle',
-           'ChannelShuffle2', 'SEBlock', 'DucBlock', 'IBN', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'HeatmapMaxDetBlock']
+__all__ = ['round_channels', 'Identity', 'Swish', 'HSigmoid', 'HSwish', 'get_activation_layer', 'SelectableDense',
+           'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block',
+           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'NormActivation',
+           'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DucBlock', 'IBN',
+           'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten',
+           'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.parameter import Parameter
 
 
 def round_channels(channels,
@@ -122,6 +124,172 @@ def get_activation_layer(activation):
     else:
         assert (isinstance(activation, nn.Module))
         return activation
+
+
+class SelectableDense(nn.Module):
+    """
+    Selectable dense layer.
+
+    Parameters:
+    ----------
+    in_features : int
+        Number of input features.
+    out_features : int
+        Number of output features.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    num_options : int, default 1
+        Number of selectable options.
+    """
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 bias=False,
+                 num_options=1):
+        super(SelectableDense, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.use_bias = bias
+        self.num_options = num_options
+        self.weight = Parameter(torch.Tensor(num_options, out_features, in_features))
+        if bias:
+            self.bias = Parameter(torch.Tensor(num_options, out_features))
+        else:
+            self.register_parameter("bias", None)
+
+    def forward(self, x, indices):
+        weight = torch.index_select(self.weight, dim=0, index=indices)
+        x = x.unsqueeze(-1)
+        x = weight.bmm(x)
+        x = x.squeeze(dim=-1)
+        if self.use_bias:
+            bias = torch.index_select(self.bias, dim=0, index=indices)
+            x += bias
+        return x
+
+    def extra_repr(self):
+        return "in_features={}, out_features={}, bias={}, num_options={}".format(
+            self.in_features, self.out_features, self.use_bias, self.num_options)
+
+
+class DenseBlock(nn.Module):
+    """
+    Standard dense block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_features : int
+        Number of input features.
+    out_features : int
+        Number of output features.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_features,
+                 out_features,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(DenseBlock, self).__init__()
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        self.fc = nn.Linear(
+            in_features=in_features,
+            out_features=out_features,
+            bias=bias)
+        if self.use_bn:
+            self.bn = nn.BatchNorm1d(
+                num_features=out_features,
+                eps=bn_eps)
+        if self.activate:
+            self.activ = get_activation_layer(activation)
+
+    def forward(self, x):
+        x = self.fc(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+class ConvBlock1d(nn.Module):
+    """
+    Standard 1D convolution block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    stride : int
+        Strides of the convolution.
+    padding : int
+        Padding value for convolution layer.
+    dilation : int
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True))):
+        super(ConvBlock1d, self).__init__()
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        self.conv = nn.Conv1d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        if self.use_bn:
+            self.bn = nn.BatchNorm1d(
+                num_features=out_channels,
+                eps=bn_eps)
+        if self.activate:
+            self.activ = get_activation_layer(activation)
+
+    def forward(self, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
 
 
 def conv1x1(in_channels,

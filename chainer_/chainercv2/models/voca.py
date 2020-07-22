@@ -32,9 +32,8 @@ class VocaEncoder(Chain):
                  audio_features,
                  audio_window_size,
                  base_persons,
-                 encoder_features,
-                 **kwargs):
-        super(VocaEncoder, self).__init__(**kwargs)
+                 encoder_features):
+        super(VocaEncoder, self).__init__()
         self.audio_window_size = audio_window_size
         channels = (32, 32, 64, 64)
         fc1_channels = 128
@@ -103,9 +102,8 @@ class VOCA(Chain):
                  audio_window_size=16,
                  base_persons=8,
                  encoder_features=50,
-                 vertices=5023,
-                 **kwargs):
-        super(VOCA, self).__init__(**kwargs)
+                 vertices=5023):
+        super(VOCA, self).__init__()
         self.base_persons = base_persons
 
         with self.init_scope():

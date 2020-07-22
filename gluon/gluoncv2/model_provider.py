@@ -129,6 +129,7 @@ from .models.centernet import *
 from .models.lffd import *
 
 from .models.voca import *
+from .models.nvpattexp import *
 
 # from .models.others.oth_simple_pose_resnet import *
 # from .models.others.oth_mobile_pose import *
@@ -1087,6 +1088,7 @@ _models = {
     'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
 
     'voca8flame': voca8flame,
+    'nvpattexp116bazel76': nvpattexp116bazel76,
 
     # 'oth_simple_pose_resnet18_v1b': oth_simple_pose_resnet18_v1b,
     # 'oth_simple_pose_resnet50_v1b': oth_simple_pose_resnet50_v1b,

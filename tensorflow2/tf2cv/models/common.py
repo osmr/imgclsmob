@@ -4,19 +4,22 @@
 
 __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_size', 'interpolate_im', 'ReLU6',
            'HSwish', 'PReLU2', 'get_activation_layer', 'flatten', 'MaxPool2d', 'AvgPool2d', 'GlobalAvgPool2d',
-           'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock',
-           'conv1x1_block', 'conv3x3_block', 'conv5x5_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
-           'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle', 'DucBlock', 'Identity',
-           'SimpleSequential', 'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricConcurrent', 'MultiOutputSequential', 'ParallelConcurent', 'InterpolationBlock', 'Hourglass',
-           'HeatmapMaxDetBlock']
+           'BatchNorm', 'InstanceNorm', 'IBN', 'Conv2d', 'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1',
+           'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
+           'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
+           'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
+           'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential', 'ParametricSequential', 'DualPathSequential',
+           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'MultiOutputSequential', 'ParallelConcurent',
+           'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.layers as nn
+from tensorflow.python.framework import tensor_shape
+from tensorflow.python.keras import initializers
+from tensorflow.python.keras.engine.input_spec import InputSpec
 
 
 def is_channels_first(data_format):
@@ -219,6 +222,17 @@ class PReLU2(nn.PReLU):
         self.built = True
 
 
+class Tanh(nn.Layer):
+    """
+    Tanh activation function.
+    """
+    def __init__(self, **kwargs):
+        super(Tanh, self).__init__(**kwargs)
+
+    def call(self, x):
+        return tf.math.tanh(x)
+
+
 def get_activation_layer(activation,
                          **kwargs):
     """
@@ -252,6 +266,8 @@ def get_activation_layer(activation,
             return tf.nn.sigmoid
         elif activation == "hsigmoid":
             return HSigmoid(**kwargs)
+        elif activation == "tanh":
+            return Tanh(**kwargs)
         else:
             raise NotImplementedError()
     else:
@@ -752,6 +768,76 @@ class IBN(nn.Layer):
         return x
 
 
+class Conv1d(nn.Layer):
+    """
+    Standard 1D convolution layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    strides : int, default 1
+        Strides of the convolution.
+    padding : int, default 0
+        Padding value for convolution layer.
+    dilation : int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default True
+        Whether the layer uses a bias vector.
+    force_same : bool, default False
+        Whether to forcibly set `same` padding.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides=1,
+                 padding=0,
+                 dilation=1,
+                 groups=1,
+                 use_bias=True,
+                 force_same=False,
+                 data_format="channels_last",
+                 **kwargs):
+        super(Conv1d, self).__init__(**kwargs)
+        assert (in_channels is not None)
+        assert (groups == 1)
+        assert (not force_same) or ((padding == kernel_size // 2) and (strides == 1) and (dilation == 1))
+        self.data_format = data_format
+
+        self.use_pad = (padding > 0) and (not force_same)
+        if self.use_pad:
+            self.pad = nn.ZeroPadding1D(padding=padding)
+
+        self.conv = nn.Conv1D(
+            filters=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=("valid" if not force_same else "same"),
+            data_format=data_format,
+            dilation_rate=dilation,
+            use_bias=use_bias,
+            name="conv")
+
+    def call(self, x):
+        if self.use_pad:
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 2, 1))
+            x = self.pad(x)
+            if is_channels_first(self.data_format):
+                x = tf.transpose(x, perm=(0, 2, 1))
+        x = self.conv(x)
+        return x
+
+
 class Conv2d(nn.Layer):
     """
     Standard convolution layer.
@@ -902,6 +988,236 @@ class Conv2d(nn.Layer):
             x = tf.concat(yy, axis=get_channel_axis(self.data_format))
         # if self.use_post_pad:
         #     x = self.post_pad(x)
+        return x
+
+
+class SelectableDense(nn.Layer):
+    """
+    Selectable dense layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input features.
+    out_channels : int
+        Number of output features.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    weight_initializer : str or `Initializer`, default 'glorot_uniform'
+        Initializer for the `kernel` weights matrix.
+    bias_initializer: str or `Initializer`
+        Initializer for the bias vector.
+    num_options : int, default 1
+        Number of selectable options.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 use_bias=False,
+                 weight_initializer="glorot_uniform",
+                 bias_initializer="zeros",
+                 num_options=1,
+                 **kwargs):
+        super(SelectableDense, self).__init__(**kwargs)
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.use_bias = use_bias
+        self.num_options = num_options
+
+        self.weight_initializer = initializers.get(weight_initializer)
+        self.bias_initializer = initializers.get(bias_initializer)
+
+        self.supports_masking = True
+        self.input_spec = InputSpec(min_ndim=2)
+
+    def build(self, input_shape):
+        input_shape = tensor_shape.TensorShape(input_shape)
+        last_dim = tensor_shape.dimension_value(input_shape[-1])
+        self.input_spec = InputSpec(min_ndim=2, axes={-1: last_dim})
+        self.weight = self.add_weight(
+            "weight",
+            shape=[self.num_options, self.out_channels, self.in_channels],
+            initializer=self.weight_initializer,
+            regularizer=None,
+            constraint=None,
+            dtype=self.dtype,
+            trainable=True)
+        if self.use_bias:
+            self.bias = self.add_weight(
+                "bias",
+                shape=[self.num_options, self.out_channels],
+                initializer=self.bias_initializer,
+                regularizer=None,
+                constraint=None,
+                dtype=self.dtype,
+                trainable=True)
+        else:
+            self.bias = None
+        self.built = True
+
+    def call(self, x, indices):
+        weight = tf.gather(self.weight.value(), indices=indices, axis=0)
+        x = tf.expand_dims(x, axis=-1)
+        x = tf.keras.backend.batch_dot(weight, x)
+        x = tf.squeeze(x, axis=-1)
+        if self.use_bias:
+            bias = tf.gather(self.bias.value(), indices=indices, axis=0)
+            x += bias
+        return x
+
+    def compute_output_shape(self, input_shape):
+        input_shape = tensor_shape.TensorShape(input_shape)
+        input_shape = input_shape.with_rank_at_least(2)
+        return input_shape[:-1].concatenate(self.out_channels)
+
+    def get_config(self):
+        config = {
+            "in_channels": self.in_channels,
+            "out_channels": self.out_channels,
+            "use_bias": self.use_bias,
+            "num_options": self.num_options,
+            "weight_initializer": initializers.serialize(self.weight_initializer),
+            "bias_initializer": initializers.serialize(self.bias_initializer),
+        }
+        base_config = super(SelectableDense, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class DenseBlock(nn.Layer):
+    """
+    Standard dense block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input features.
+    out_channels : int
+        Number of output features.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation="relu",
+                 data_format="channels_last",
+                 **kwargs):
+        super(DenseBlock, self).__init__(**kwargs)
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        self.fc = nn.Dense(
+            units=out_channels,
+            use_bias=use_bias,
+            input_dim=in_channels,
+            name="fc")
+        if self.use_bn:
+            self.bn = BatchNorm(
+                epsilon=bn_eps,
+                data_format=data_format,
+                name="bn")
+        if self.activate:
+            self.activ = get_activation_layer(activation, name="activ")
+
+    def call(self, x, training=None):
+        x = self.fc(x)
+        if self.use_bn:
+            x = self.bn(x, training=training)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+class ConvBlock1d(nn.Layer):
+    """
+    Standard 1D convolution block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    strides : int or
+        Strides of the convolution.
+    padding : int
+        Padding value for convolution layer.
+    dilation : int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    force_same : bool, default False
+        Whether to forcibly set `same` padding in convolution.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 force_same=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation="relu",
+                 data_format="channels_last",
+                 **kwargs):
+        super(ConvBlock1d, self).__init__(**kwargs)
+        assert (in_channels is not None)
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        self.conv = Conv1d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            use_bias=use_bias,
+            force_same=force_same,
+            data_format=data_format,
+            name="conv")
+        if self.use_bn:
+            self.bn = BatchNorm(
+                epsilon=bn_eps,
+                data_format=data_format,
+                name="bn")
+        if self.activate:
+            self.activ = get_activation_layer(activation, name="activ")
+
+    def call(self, x, training=None):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x, training=training)
+        if self.activate:
+            x = self.activ(x)
         return x
 
 

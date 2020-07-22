@@ -9,7 +9,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .common import ConvBlock
+from common import ConvBlock
 
 
 class VocaEncoder(nn.Module):
@@ -214,7 +214,7 @@ def _test():
         audio_window_size = 16
         vertices = 5023
 
-        x = torch.randn(14, 1, audio_window_size, audio_features)
+        x = torch.randn(batch, 1, audio_window_size, audio_features)
         pid = torch.full(size=(batch,), fill_value=3)
         y = net(x, pid)
         # y.sum().backward()

@@ -2,20 +2,23 @@
     Common routines for models in Chainer.
 """
 
-__all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalAvgPool2D', 'conv1x1', 'conv3x3',
-           'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block',
-           'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block',
-           'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'PixelShuffle',
-           'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricSequential', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
-           'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'AdaptiveAvgPool2D', 'InterpolationBlock',
-           'HeatmapMaxDetBlock']
+__all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalAvgPool2D', 'SelectableDense',
+           'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
+           'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block',
+           'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2',
+           'SEBlock', 'PixelShuffle', 'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
+           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
+           'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'AdaptiveAvgPool2D',
+           'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
 import numpy as np
 from chainer import Chain
 import chainer.functions as F
 import chainer.links as L
+from chainer import link
+from chainer.initializers import _get_initializer
+from chainer.variable import Parameter
 
 
 def round_channels(channels,
@@ -119,6 +122,197 @@ class GlobalAvgPool2D(Chain):
     """
     def __call__(self, x):
         return F.average_pooling_2d(x, ksize=x.shape[2:])
+
+
+class SelectableDense(link.Link):
+    """
+    Selectable dense layer.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input features.
+    out_channels : int
+        Number of output features.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    initial_weight : `types.InitializerSpec`, default None
+        Initializer for the `kernel` weights matrix.
+    initial_bias: `types.InitializerSpec`, default 0
+        Initializer for the bias vector.
+    num_options : int, default 1
+        Number of selectable options.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 use_bias=False,
+                 initial_weight=None,
+                 initial_bias=0,
+                 num_options=1):
+        super(SelectableDense, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.use_bias = use_bias
+        self.num_options = num_options
+
+        with self.init_scope():
+            weight_initializer = _get_initializer(initial_weight)
+            self.weight = Parameter(
+                initializer=weight_initializer,
+                shape=(num_options, out_channels, in_channels),
+                name="weight")
+            if use_bias:
+                bias_initializer = _get_initializer(initial_bias)
+                self.bias = Parameter(
+                    initializer=bias_initializer,
+                    shape=(num_options, out_channels),
+                    name="bias")
+            else:
+                self.bias = None
+
+    def forward(self, x, indices):
+        weight = self.xp.take(self.weight.data, indices=indices, axis=0)
+        x = F.expand_dims(x, axis=-1)
+        x = F.batch_matmul(weight, x)
+        x = F.squeeze(x, axis=-1)
+        if self.use_bias:
+            bias = self.xp.take(self.bias.data, indices=indices, axis=0)
+            x += bias
+        return x
+
+    @property
+    def printable_specs(self):
+        specs = [
+            ('in_channels', self.in_channels),
+            ('out_channels', self.out_channels),
+            ('use_bias', self.use_bias),
+            ('num_options', self.num_options),
+        ]
+        for spec in specs:
+            yield spec
+
+
+class DenseBlock(Chain):
+    """
+    Standard dense block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu)):
+        super(DenseBlock, self).__init__()
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        with self.init_scope():
+            self.fc = L.Linear(
+                in_size=in_channels,
+                out_size=out_channels,
+                nobias=(not use_bias))
+            if self.use_bn:
+                self.bn = L.BatchNormalization(
+                    size=out_channels,
+                    eps=bn_eps)
+            if self.activate:
+                self.activ = get_activation_layer(activation)
+
+    def __call__(self, x):
+        x = self.fc(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
+
+
+class ConvBlock1d(Chain):
+    """
+    Standard 1D convolution block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    ksize : int
+        Convolution window size.
+    stride : int
+        Stride of the convolution.
+    pad : int
+        Padding value for convolution layer.
+    dilate : int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 ksize,
+                 stride,
+                 pad,
+                 dilate=1,
+                 groups=1,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu)):
+        super(ConvBlock1d, self).__init__()
+        self.activate = (activation is not None)
+        self.use_bn = use_bn
+
+        with self.init_scope():
+            self.conv = L.Convolution1D(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                nobias=(not use_bias),
+                dilate=dilate,
+                groups=groups)
+            if self.use_bn:
+                self.bn = L.BatchNormalization(
+                    size=out_channels,
+                    eps=bn_eps)
+            if self.activate:
+                self.activ = get_activation_layer(activation)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        return x
 
 
 def conv1x1(in_channels,

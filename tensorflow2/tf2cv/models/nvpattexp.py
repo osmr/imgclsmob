@@ -8,7 +8,7 @@ __all__ = ['NvpAttExp', 'nvpattexp116bazel76']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from common import DenseBlock, ConvBlock, ConvBlock1d, SelectableDense, SimpleSequential, is_channels_first
+from .common import DenseBlock, ConvBlock, ConvBlock1d, SelectableDense, SimpleSequential, is_channels_first
 
 
 class NvpAttExpEncoder(nn.Layer):

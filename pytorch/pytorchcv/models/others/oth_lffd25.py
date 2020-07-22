@@ -3,7 +3,7 @@ __all__ = ['oth_naivenet25']
 
 
 import torch.nn as nn
-from common import conv1x1_block
+from .common import conv1x1_block
 
 
 def conv3x3(in_channels,

@@ -128,6 +128,7 @@ from .models.ibppose_coco import *
 from .models.centernet import *
 from .models.lffd import *
 
+from .models.visemenet import *
 from .models.voca import *
 from .models.nvpattexp import *
 
@@ -1087,6 +1088,7 @@ _models = {
     'lffd20x5s320v2_widerface': lffd20x5s320v2_widerface,
     'lffd25x8s560v1_widerface': lffd25x8s560v1_widerface,
 
+    'visemenet20': visemenet20,
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
 

@@ -8,7 +8,7 @@ __all__ = ['VisemeNet', 'visemenet20']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, rnn, HybridBlock
-from common import DenseBlock
+from .common import DenseBlock
 
 
 class VisemeDenseBranch(HybridBlock):

@@ -8,7 +8,7 @@ __all__ = ['VisemeNet', 'visemenet20']
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, rnn, HybridBlock
-from .common import DenseBlock
+from common import DenseBlock
 
 
 class VisemeDenseBranch(HybridBlock):
@@ -223,8 +223,8 @@ def get_visemenet(model_name=None,
 
 def visemenet20(**kwargs):
     """
-    VisemeNet model for 20 visemes from 'VisemeNet: Audio-Driven Animator-Centric Speech Animation,'
-    https://arxiv.org/abs/1805.09488.
+    VisemeNet model for 20 visemes (without co-articulation rules) from 'VisemeNet: Audio-Driven Animator-Centric
+    Speech Animation,' https://arxiv.org/abs/1805.09488.
 
     Parameters:
     ----------

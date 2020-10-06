@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNetA', 'resneta50b', 'resneta101b', 'resneta152b']
+__all__ = ['ResNetA', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
 
 import os
 import chainer.functions as F
@@ -210,6 +210,7 @@ class ResNetA(Chain):
 
 
 def get_resnetda(blocks,
+                 bottleneck=None,
                  conv1_stride=True,
                  width_scale=1.0,
                  model_name=None,
@@ -223,6 +224,8 @@ def get_resnetda(blocks,
     ----------
     blocks : int
         Number of blocks.
+    bottleneck : bool, default None
+        Whether to use a bottleneck or simple block in units.
     conv1_stride : bool, default True
         Whether to use stride in the first or the second convolution layer in units.
     width_scale : float, default 1.0
@@ -234,18 +237,29 @@ def get_resnetda(blocks,
     root : str, default '~/.chainer/models'
         Location for keeping the model parameters.
     """
+    if bottleneck is None:
+        bottleneck = (blocks >= 50)
+
     if blocks == 10:
         layers = [1, 1, 1, 1]
     elif blocks == 12:
         layers = [2, 1, 1, 1]
-    elif blocks == 14:
+    elif blocks == 14 and not bottleneck:
         layers = [2, 2, 1, 1]
+    elif (blocks == 14) and bottleneck:
+        layers = [1, 1, 1, 1]
     elif blocks == 16:
         layers = [2, 2, 2, 1]
     elif blocks == 18:
         layers = [2, 2, 2, 2]
+    elif (blocks == 26) and not bottleneck:
+        layers = [3, 3, 3, 3]
+    elif (blocks == 26) and bottleneck:
+        layers = [2, 2, 2, 2]
     elif blocks == 34:
         layers = [3, 4, 6, 3]
+    elif (blocks == 38) and bottleneck:
+        layers = [3, 3, 3, 3]
     elif blocks == 50:
         layers = [3, 4, 6, 3]
     elif blocks == 101:
@@ -257,14 +271,17 @@ def get_resnetda(blocks,
     else:
         raise ValueError("Unsupported ResNet(A) with number of blocks: {}".format(blocks))
 
-    init_block_channels = 64
-
-    if blocks < 50:
-        channels_per_layers = [64, 128, 256, 512]
-        bottleneck = False
+    if bottleneck:
+        assert (sum(layers) * 3 + 2 == blocks)
     else:
-        channels_per_layers = [256, 512, 1024, 2048]
-        bottleneck = True
+        assert (sum(layers) * 2 + 2 == blocks)
+
+    init_block_channels = 64
+    channels_per_layers = [64, 128, 256, 512]
+
+    if bottleneck:
+        bottleneck_factor = 4
+        channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
 
     channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
 
@@ -291,6 +308,21 @@ def get_resnetda(blocks,
             obj=net)
 
     return net
+
+
+def resneta18(**kwargs):
+    """
+    ResNet(A)-18 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_resnetda(blocks=18, model_name="resneta18", **kwargs)
 
 
 def resneta50b(**kwargs):
@@ -347,6 +379,7 @@ def _test():
     pretrained = False
 
     models = [
+        resneta18,
         resneta50b,
         resneta101b,
         resneta152b,
@@ -357,6 +390,7 @@ def _test():
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resneta18 or weight_count == 11708744)
         assert (model != resneta50b or weight_count == 25576264)
         assert (model != resneta101b or weight_count == 44568392)
         assert (model != resneta152b or weight_count == 60212040)

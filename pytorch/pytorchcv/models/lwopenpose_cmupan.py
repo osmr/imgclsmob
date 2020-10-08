@@ -151,7 +151,8 @@ class LwopEncoderFinalBlock(nn.Module):
             self.body.add_module("block{}".format(i + 1), dwsconv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                use_bn=False,
+                dw_use_bn=False,
+                pw_use_bn=False,
                 dw_activation=(lambda: nn.ELU(inplace=True)),
                 pw_activation=(lambda: nn.ELU(inplace=True))))
         self.post_conv = conv3x3_block(

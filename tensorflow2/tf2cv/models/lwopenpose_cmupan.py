@@ -176,7 +176,8 @@ class LwopEncoderFinalBlock(nn.Layer):
             self.body.add(dwsconv3x3_block(
                 in_channels=out_channels,
                 out_channels=out_channels,
-                use_bn=False,
+                dw_use_bn=False,
+                pw_use_bn=False,
                 dw_activation=(lambda: nn.ELU()),
                 pw_activation=(lambda: nn.ELU()),
                 data_format=data_format,

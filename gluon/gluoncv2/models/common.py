@@ -962,8 +962,10 @@ class DwsConvBlock(HybridBlock):
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
+    dw_use_bn : bool, default True
+        Whether to use BatchNorm layer (depthwise convolution block).
+    pw_use_bn : bool, default True
+        Whether to use BatchNorm layer (pointwise convolution block).
     bn_epsilon : float, default 1e-5
         Small float added to variance in Batch norm.
     bn_use_global_stats : bool, default False
@@ -983,7 +985,8 @@ class DwsConvBlock(HybridBlock):
                  padding,
                  dilation=1,
                  use_bias=False,
-                 use_bn=True,
+                 dw_use_bn=True,
+                 pw_use_bn=True,
                  bn_epsilon=1e-5,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
@@ -1000,7 +1003,7 @@ class DwsConvBlock(HybridBlock):
                 padding=padding,
                 dilation=dilation,
                 use_bias=use_bias,
-                use_bn=use_bn,
+                use_bn=dw_use_bn,
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off,
@@ -1009,7 +1012,7 @@ class DwsConvBlock(HybridBlock):
                 in_channels=in_channels,
                 out_channels=out_channels,
                 use_bias=use_bias,
-                use_bn=use_bn,
+                use_bn=pw_use_bn,
                 bn_epsilon=bn_epsilon,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off,

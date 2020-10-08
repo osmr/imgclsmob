@@ -807,8 +807,10 @@ class DwsConvBlock(Chain):
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
+    dw_use_bn : bool, default True
+        Whether to use BatchNorm layer (depthwise convolution block).
+    pw_use_bn : bool, default True
+        Whether to use BatchNorm layer (pointwise convolution block).
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     dw_activation : function or str or None, default F.relu
@@ -824,7 +826,8 @@ class DwsConvBlock(Chain):
                  pad,
                  dilate=1,
                  use_bias=False,
-                 use_bn=True,
+                 dw_use_bn=True,
+                 pw_use_bn=True,
                  bn_eps=1e-5,
                  dw_activation=(lambda: F.relu),
                  pw_activation=(lambda: F.relu)):
@@ -838,14 +841,14 @@ class DwsConvBlock(Chain):
                 pad=pad,
                 dilate=dilate,
                 use_bias=use_bias,
-                use_bn=use_bn,
+                use_bn=dw_use_bn,
                 bn_eps=bn_eps,
                 activation=dw_activation)
             self.pw_conv = conv1x1_block(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 use_bias=use_bias,
-                use_bn=use_bn,
+                use_bn=pw_use_bn,
                 bn_eps=bn_eps,
                 activation=pw_activation)
 
@@ -861,10 +864,10 @@ def dwsconv3x3_block(in_channels,
                      pad=1,
                      dilate=1,
                      use_bias=False,
-                     use_bn=True,
                      bn_eps=1e-5,
                      dw_activation=(lambda: F.relu),
-                     pw_activation=(lambda: F.relu)):
+                     pw_activation=(lambda: F.relu),
+                     **kwargs):
     """
     3x3 depthwise separable version of the standard convolution block.
 
@@ -882,8 +885,6 @@ def dwsconv3x3_block(in_channels,
         Dilation value for convolution layer.
     use_bias : bool, default False
         Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
     bn_eps : float, default 1e-5
         Small float added to variance in Batch norm.
     dw_activation : function or str or None, default F.relu
@@ -899,10 +900,10 @@ def dwsconv3x3_block(in_channels,
         pad=pad,
         dilate=dilate,
         use_bias=use_bias,
-        use_bn=use_bn,
         bn_eps=bn_eps,
         dw_activation=dw_activation,
-        pw_activation=pw_activation)
+        pw_activation=pw_activation,
+        **kwargs)
 
 
 class PreConvBlock(Chain):

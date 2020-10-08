@@ -172,7 +172,8 @@ class LwopEncoderFinalBlock(HybridBlock):
                 self.body.add(dwsconv3x3_block(
                     in_channels=out_channels,
                     out_channels=out_channels,
-                    use_bn=False,
+                    dw_use_bn=False,
+                    pw_use_bn=False,
                     bn_use_global_stats=bn_use_global_stats,
                     dw_activation=(lambda: nn.ELU()),
                     pw_activation=(lambda: nn.ELU())))

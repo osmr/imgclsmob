@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1704.04861.
 """
 
-__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'get_mobilenet']
+__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'mobilenetb_wd2',
+           'get_mobilenet']
 
 import os
 import chainer.functions as F
@@ -26,6 +27,10 @@ class MobileNet(Chain):
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
+    dw_use_bn : bool, default True
+        Whether to use BatchNorm layer (depthwise convolution block).
+    dw_activation : function or str or None, default F.relu
+        Activation function after the depthwise convolution block.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -36,6 +41,8 @@ class MobileNet(Chain):
     def __init__(self,
                  channels,
                  first_stage_stride,
+                 dw_use_bn=True,
+                 dw_activation=(lambda: F.relu),
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000):
@@ -60,7 +67,9 @@ class MobileNet(Chain):
                             setattr(stage, "unit{}".format(j + 1), dwsconv3x3_block(
                                 in_channels=in_channels,
                                 out_channels=out_channels,
-                                stride=stride))
+                                stride=stride,
+                                dw_use_bn=dw_use_bn,
+                                dw_activation=dw_activation))
                             in_channels = out_channels
                     setattr(self.features, "stage{}".format(i + 1), stage)
                 setattr(self.features, "final_pool", partial(
@@ -84,6 +93,7 @@ class MobileNet(Chain):
 
 
 def get_mobilenet(width_scale,
+                  dws_simplified=False,
                   model_name=None,
                   pretrained=False,
                   root=os.path.join("~", ".chainer", "models"),
@@ -95,6 +105,8 @@ def get_mobilenet(width_scale,
     ----------
     width_scale : float
         Scale factor for width of layers.
+    dws_simplified : bool, default False
+        Whether to use simplified depthwise separable convolution block.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -108,9 +120,18 @@ def get_mobilenet(width_scale,
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
+    if dws_simplified:
+        dw_use_bn = False
+        dw_activation = None
+    else:
+        dw_use_bn = True
+        dw_activation = (lambda: F.relu)
+
     net = MobileNet(
         channels=channels,
         first_stage_stride=first_stage_stride,
+        dw_use_bn=dw_use_bn,
+        dw_activation=dw_activation,
         **kwargs)
 
     if pretrained:
@@ -186,6 +207,21 @@ def mobilenet_wd4(**kwargs):
     return get_mobilenet(width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
 
+def mobilenetb_wd2(**kwargs):
+    """
+    0.5 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
+    Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.chainer/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenet(width_scale=0.5, dws_simplified=True, model_name="mobilenetb_wd2", **kwargs)
+
+
 def _test():
     import numpy as np
     import chainer
@@ -199,6 +235,7 @@ def _test():
         mobilenet_w3d4,
         mobilenet_wd2,
         mobilenet_wd4,
+        mobilenetb_wd2,
     ]
 
     for model in models:
@@ -211,6 +248,7 @@ def _test():
         assert (model != mobilenet_w3d4 or weight_count == 2585560)
         assert (model != mobilenet_wd2 or weight_count == 1331592)
         assert (model != mobilenet_wd4 or weight_count == 470072)
+        assert (model != mobilenetb_wd2 or weight_count == 1326632)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

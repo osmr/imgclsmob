@@ -4,7 +4,8 @@
     https://arxiv.org/abs/1704.04861.
 """
 
-__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'get_mobilenet']
+__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'mobilenetb_wd2',
+           'get_mobilenet']
 
 import os
 from mxnet import cpu
@@ -23,9 +24,13 @@ class MobileNet(HybridBlock):
         Number of output channels for each unit.
     first_stage_stride : bool
         Whether stride is used at the first stage.
+    dw_use_bn : bool, default True
+        Whether to use BatchNorm layer (depthwise convolution block).
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    dw_activation : function or str or None, default nn.Activation('relu')
+        Activation function after the depthwise convolution block.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -36,7 +41,9 @@ class MobileNet(HybridBlock):
     def __init__(self,
                  channels,
                  first_stage_stride,
+                 dw_use_bn=True,
                  bn_use_global_stats=False,
+                 dw_activation=(lambda: nn.Activation("relu")),
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -63,7 +70,9 @@ class MobileNet(HybridBlock):
                             in_channels=in_channels,
                             out_channels=out_channels,
                             strides=strides,
-                            bn_use_global_stats=bn_use_global_stats))
+                            dw_use_bn=dw_use_bn,
+                            bn_use_global_stats=bn_use_global_stats,
+                            dw_activation=dw_activation))
                         in_channels = out_channels
                 self.features.add(stage)
             self.features.add(nn.AvgPool2D(
@@ -83,6 +92,7 @@ class MobileNet(HybridBlock):
 
 
 def get_mobilenet(width_scale,
+                  dws_simplified=False,
                   model_name=None,
                   pretrained=False,
                   ctx=cpu(),
@@ -93,10 +103,10 @@ def get_mobilenet(width_scale,
 
     Parameters:
     ----------
-    version : str
-        Version of SqueezeNet ('orig' or 'fd').
     width_scale : float
         Scale factor for width of layers.
+    dws_simplified : bool, default False
+        Whether to use simplified depthwise separable convolution block.
     model_name : str or None, default None
         Model name for loading pretrained model.
     pretrained : bool, default False
@@ -106,16 +116,24 @@ def get_mobilenet(width_scale,
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-
     channels = [[32], [64], [128, 128], [256, 256], [512, 512, 512, 512, 512, 512], [1024, 1024]]
     first_stage_stride = False
 
     if width_scale != 1.0:
         channels = [[int(cij * width_scale) for cij in ci] for ci in channels]
 
+    if dws_simplified:
+        dw_use_bn = False
+        dw_activation = None
+    else:
+        dw_use_bn = True
+        dw_activation = (lambda: nn.Activation("relu"))
+
     net = MobileNet(
         channels=channels,
         first_stage_stride=first_stage_stride,
+        dw_use_bn=dw_use_bn,
+        dw_activation=dw_activation,
         **kwargs)
 
     if pretrained:
@@ -199,6 +217,23 @@ def mobilenet_wd4(**kwargs):
     return get_mobilenet(width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
 
+def mobilenetb_wd2(**kwargs):
+    """
+    0.5 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
+    Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_mobilenet(width_scale=0.5, dws_simplified=True, model_name="mobilenetb_wd2", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -210,6 +245,7 @@ def _test():
         mobilenet_w3d4,
         mobilenet_wd2,
         mobilenet_wd4,
+        mobilenetb_wd2,
     ]
 
     for model in models:
@@ -231,6 +267,7 @@ def _test():
         assert (model != mobilenet_w3d4 or weight_count == 2585560)
         assert (model != mobilenet_wd2 or weight_count == 1331592)
         assert (model != mobilenet_wd4 or weight_count == 470072)
+        assert (model != mobilenetb_wd2 or weight_count == 1326632)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

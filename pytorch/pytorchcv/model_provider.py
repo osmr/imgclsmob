@@ -519,6 +519,7 @@ _models = {
     'mobilenet_w3d4': mobilenet_w3d4,
     'mobilenet_wd2': mobilenet_wd2,
     'mobilenet_wd4': mobilenet_wd4,
+    'mobilenetb_wd2': mobilenetb_wd2,
 
     'fdmobilenet_w1': fdmobilenet_w1,
     'fdmobilenet_w3d4': fdmobilenet_w3d4,

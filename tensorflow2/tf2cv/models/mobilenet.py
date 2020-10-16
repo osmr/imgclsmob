@@ -9,7 +9,7 @@ __all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobi
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv3x3_block, dwsconv3x3_block, flatten
+from .common import conv3x3_block, dwsconv3x3_block, SimpleSequential, flatten
 
 
 class MobileNet(tf.keras.Model):
@@ -51,7 +51,7 @@ class MobileNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         init_block_channels = channels[0][0]
         self.features.add(conv3x3_block(
             in_channels=in_channels,
@@ -61,7 +61,7 @@ class MobileNet(tf.keras.Model):
             name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels[1:]):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if (j == 0) and ((i != 0) or first_stage_stride) else 1
                 stage.add(dwsconv3x3_block(

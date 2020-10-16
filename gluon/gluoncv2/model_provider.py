@@ -55,6 +55,7 @@ from .models.shufflenetv2 import *
 from .models.shufflenetv2b import *
 from .models.menet import *
 from .models.mobilenet import *
+from .models.mobilenetb import *
 from .models.fdmobilenet import *
 from .models.mobilenetv2 import *
 from .models.mobilenetv3 import *
@@ -519,7 +520,11 @@ _models = {
     'mobilenet_w3d4': mobilenet_w3d4,
     'mobilenet_wd2': mobilenet_wd2,
     'mobilenet_wd4': mobilenet_wd4,
+
+    'mobilenetb_w1': mobilenetb_w1,
+    'mobilenetb_w3d4': mobilenetb_w3d4,
     'mobilenetb_wd2': mobilenetb_wd2,
+    'mobilenetb_wd4': mobilenetb_wd4,
 
     'fdmobilenet_w1': fdmobilenet_w1,
     'fdmobilenet_w3d4': fdmobilenet_w3d4,

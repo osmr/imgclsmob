@@ -4,8 +4,7 @@
     https://arxiv.org/abs/1704.04861.
 """
 
-__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'mobilenetb_wd2',
-           'get_mobilenet']
+__all__ = ['MobileNet', 'mobilenet_w1', 'mobilenet_w3d4', 'mobilenet_wd2', 'mobilenet_wd4', 'get_mobilenet']
 
 import os
 import chainer.functions as F
@@ -207,21 +206,6 @@ def mobilenet_wd4(**kwargs):
     return get_mobilenet(width_scale=0.25, model_name="mobilenet_wd4", **kwargs)
 
 
-def mobilenetb_wd2(**kwargs):
-    """
-    0.5 MobileNet(B)-224 model with simplified depthwise separable convolution block from 'MobileNets: Efficient
-    Convolutional Neural Networks for Mobile Vision Applications,' https://arxiv.org/abs/1704.04861.
-
-    Parameters:
-    ----------
-    pretrained : bool, default False
-        Whether to load the pretrained weights for model.
-    root : str, default '~/.chainer/models'
-        Location for keeping the model parameters.
-    """
-    return get_mobilenet(width_scale=0.5, dws_simplified=True, model_name="mobilenetb_wd2", **kwargs)
-
-
 def _test():
     import numpy as np
     import chainer
@@ -235,7 +219,6 @@ def _test():
         mobilenet_w3d4,
         mobilenet_wd2,
         mobilenet_wd4,
-        mobilenetb_wd2,
     ]
 
     for model in models:
@@ -248,7 +231,6 @@ def _test():
         assert (model != mobilenet_w3d4 or weight_count == 2585560)
         assert (model != mobilenet_wd2 or weight_count == 1331592)
         assert (model != mobilenet_wd4 or weight_count == 470072)
-        assert (model != mobilenetb_wd2 or weight_count == 1326632)
 
         x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)

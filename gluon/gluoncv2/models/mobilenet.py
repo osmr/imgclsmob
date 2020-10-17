@@ -28,6 +28,8 @@ class MobileNet(HybridBlock):
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
     dw_activation : function or str or None, default nn.Activation('relu')
         Activation function after the depthwise convolution block.
     in_channels : int, default 3
@@ -42,6 +44,7 @@ class MobileNet(HybridBlock):
                  first_stage_stride,
                  dw_use_bn=True,
                  bn_use_global_stats=False,
+                 bn_cudnn_off=False,
                  dw_activation=(lambda: nn.Activation("relu")),
                  in_channels=3,
                  in_size=(224, 224),
@@ -58,7 +61,8 @@ class MobileNet(HybridBlock):
                 in_channels=in_channels,
                 out_channels=init_block_channels,
                 strides=2,
-                bn_use_global_stats=bn_use_global_stats))
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off))
             in_channels = init_block_channels
             for i, channels_per_stage in enumerate(channels[1:]):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
@@ -71,6 +75,7 @@ class MobileNet(HybridBlock):
                             strides=strides,
                             dw_use_bn=dw_use_bn,
                             bn_use_global_stats=bn_use_global_stats,
+                            bn_cudnn_off=bn_cudnn_off,
                             dw_activation=dw_activation))
                         in_channels = out_channels
                 self.features.add(stage)

@@ -15,7 +15,6 @@ import math
 from inspect import isfunction
 import mxnet as mx
 from mxnet.gluon import nn, HybridBlock
-from mxnet.gluon.contrib.nn import PixelShuffle2D
 
 
 def round_channels(channels,
@@ -1559,6 +1558,52 @@ class SEBlock(HybridBlock):
         return x
 
 
+class PixelShuffle(HybridBlock):
+    """
+    Pixel-shuffle operation from 'Real-Time Single Image and Video Super-Resolution Using an Efficient Sub-Pixel
+    Convolutional Neural Network,' https://arxiv.org/abs/1609.05158.
+
+    Parameters:
+    ----------
+    scale_factor : int
+        Multiplier for spatial size.
+    in_size : tuple of 2 int
+        Spatial size of the input heatmap tensor.
+    fixed_size : bool
+        Whether to expect fixed spatial size of input image.
+    """
+    def __init__(self,
+                 channels,
+                 scale_factor,
+                 in_size,
+                 fixed_size,
+                 **kwargs):
+        super(PixelShuffle, self).__init__(**kwargs)
+        assert (channels % scale_factor % scale_factor == 0)
+        self.channels = channels
+        self.scale_factor = scale_factor
+        self.in_size = in_size
+        self.fixed_size = fixed_size
+
+    def hybrid_forward(self, F, x):
+        f1 = self.scale_factor
+        f2 = self.scale_factor
+
+        if not self.fixed_size:
+            x = x.reshape((0, -4, -1, f1 * f2, 0, 0))
+            x = x.reshape((0, 0, -4, f1, f2, 0, 0))
+            x = x.transpose((0, 1, 4, 2, 5, 3))
+            x = x.reshape((0, 0, -3, -3))
+        else:
+            new_channels = self.channels // f1 // f2
+            h, w = self.in_size
+            x = x.reshape((0, new_channels, f1 * f2, h, w))
+            x = x.reshape((0, new_channels, f1, f2, h, w))
+            x = x.transpose((0, 1, 4, 2, 5, 3))
+            x = x.reshape((0, new_channels, h * f1, w * f2))
+        return x
+
+
 class DucBlock(HybridBlock):
     """
     Dense Upsampling Convolution (DUC) block from 'Understanding Convolution for Semantic Segmentation,'
@@ -1572,6 +1617,10 @@ class DucBlock(HybridBlock):
         Number of output channels.
     scale_factor : int
         Multiplier for spatial size.
+    in_size : tuple of 2 int
+        Spatial size of the input heatmap tensor.
+    fixed_size : bool
+        Whether to expect fixed spatial size of input image.
     bn_use_global_stats : bool
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool
@@ -1581,6 +1630,8 @@ class DucBlock(HybridBlock):
                  in_channels,
                  out_channels,
                  scale_factor,
+                 in_size,
+                 fixed_size,
                  bn_use_global_stats,
                  bn_cudnn_off,
                  **kwargs):
@@ -1593,7 +1644,11 @@ class DucBlock(HybridBlock):
                 out_channels=mid_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)
-            self.pix_shuffle = PixelShuffle2D(factor=scale_factor)
+            self.pix_shuffle = PixelShuffle(
+                channels=mid_channels,
+                scale_factor=scale_factor,
+                in_size=in_size,
+                fixed_size=fixed_size)
 
     def hybrid_forward(self, F, x):
         x = self.conv(x)

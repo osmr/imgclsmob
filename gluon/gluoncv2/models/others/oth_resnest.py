@@ -233,7 +233,11 @@ class ResNeSt(HybridBlock):
                  final_drop=0.0,
                  input_size=224,
                  in_channels=3,
+                 in_size=(224, 244),
                  classes=1000):
+        self.in_size = in_size
+        self.classes = classes
+
         block = Bottleneck
         avg_down = True
         cardinality = 1

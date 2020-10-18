@@ -6,8 +6,8 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'BatchNormExtra',
            'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'DucBlock', 'split',
-           'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent',
+           'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'DucBlock',
+           'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent',
            'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent',
            'HeatmapMaxDetBlock']
 
@@ -1555,6 +1555,93 @@ class SEBlock(HybridBlock):
         if not self.use_conv:
             w = w.expand_dims(2).expand_dims(3)
         x = F.broadcast_mul(x, w)
+        return x
+
+
+class SABlock(HybridBlock):
+    """
+    Split-Attention block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of channel groups (cardinality, without radix).
+    radix : int
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
+    """
+    def __init__(self,
+                 out_channels,
+                 groups,
+                 radix,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True,
+                 bn_epsilon=1e-5,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(SABlock, self).__init__(**kwargs)
+        self.groups = groups
+        self.radix = radix
+        self.use_conv = use_conv
+        in_channels = out_channels * radix
+        mid_channels = max(in_channels // reduction, min_channels)
+
+        with self.name_scope():
+            if use_conv:
+                self.conv1 = conv1x1(
+                    in_channels=out_channels,
+                    out_channels=mid_channels,
+                    use_bias=True)
+            else:
+                self.fc1 = nn.Dense(
+                    in_units=out_channels,
+                    units=mid_channels)
+            self.bn = BatchNormExtra(
+                in_channels=mid_channels,
+                epsilon=bn_epsilon,
+                use_global_stats=bn_use_global_stats,
+                cudnn_off=bn_cudnn_off)
+            self.activ = nn.Activation("relu")
+            if use_conv:
+                self.conv2 = conv1x1(
+                    in_channels=mid_channels,
+                    out_channels=in_channels,
+                    use_bias=True)
+            else:
+                self.fc2 = nn.Dense(
+                    in_units=mid_channels,
+                    units=in_channels)
+
+    def hybrid_forward(self, F, x):
+        x = x.reshape((0, -4, self.radix, -1, -2))
+        w = x.sum(axis=1)
+        w = F.contrib.AdaptiveAvgPooling2D(w, output_size=1)
+        if not self.use_conv:
+            w = F.Flatten(w)
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
+        w = self.bn(w)
+        w = self.activ(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
+        w = w.reshape((0, self.groups, self.radix, -1)).swapaxes(1, 2)
+        w = F.softmax(w, axis=1)
+        w = w.reshape((0, self.radix, -1, 1, 1))
+        x = F.broadcast_mul(x, w)
+        x = x.sum(axis=1)
         return x
 
 

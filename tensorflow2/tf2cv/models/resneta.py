@@ -216,14 +216,14 @@ class ResNetA(tf.keras.Model):
         return x
 
 
-def get_resnetda(blocks,
-                 bottleneck=None,
-                 conv1_stride=True,
-                 width_scale=1.0,
-                 model_name=None,
-                 pretrained=False,
-                 root=os.path.join("~", ".tensorflow", "models"),
-                 **kwargs):
+def get_resneta(blocks,
+                bottleneck=None,
+                conv1_stride=True,
+                width_scale=1.0,
+                model_name=None,
+                pretrained=False,
+                root=os.path.join("~", ".tensorflow", "models"),
+                **kwargs):
     """
     Create ResNet(A) with average downsampling model with specific parameters.
 
@@ -332,7 +332,7 @@ def resneta18(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnetda(blocks=18, model_name="resneta18", **kwargs)
+    return get_resneta(blocks=18, model_name="resneta18", **kwargs)
 
 
 def resneta50b(**kwargs):
@@ -347,7 +347,7 @@ def resneta50b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnetda(blocks=50, conv1_stride=False, model_name="resneta50b", **kwargs)
+    return get_resneta(blocks=50, conv1_stride=False, model_name="resneta50b", **kwargs)
 
 
 def resneta101b(**kwargs):
@@ -362,7 +362,7 @@ def resneta101b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnetda(blocks=101, conv1_stride=False, model_name="resneta101b", **kwargs)
+    return get_resneta(blocks=101, conv1_stride=False, model_name="resneta101b", **kwargs)
 
 
 def resneta152b(**kwargs):
@@ -377,7 +377,7 @@ def resneta152b(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnetda(blocks=152, conv1_stride=False, model_name="resneta152b", **kwargs)
+    return get_resneta(blocks=152, conv1_stride=False, model_name="resneta152b", **kwargs)
 
 
 def _test():

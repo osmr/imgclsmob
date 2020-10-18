@@ -139,7 +139,7 @@ from .models.nvpattexp import *
 # from .models.others.oth_icnet import *
 # from .models.others.oth_centernet import *
 from .models.others.oth_resnest import *
-from .models._resnest2 import *
+from .models.resnesta import *
 
 __all__ = ['get_model']
 
@@ -1143,12 +1143,14 @@ _models = {
     'oth_resnest200': oth_resnest200,
     'oth_resnest269': oth_resnest269,
 
-    'resnestbc14b': resnestbc14b,
-    'resnestbc26b': resnestbc26b,
-    'resnest50b': resnest50b,
-    'resnest101b': resnest101b,
-    'resnest200b': resnest200b,
-    'resnest269b': resnest269b,
+    'resnestabc14': resnestabc14,
+    'resnesta18': resnesta18,
+    'resnestabc26': resnestabc26,
+    'resnesta50': resnesta50,
+    'resnesta101': resnesta101,
+    'resnesta152': resnesta152,
+    'resnesta200': resnesta200,
+    'resnesta269': resnesta269,
 }
 
 

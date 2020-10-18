@@ -7,7 +7,7 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock',
-           "SAConvBlock", "saconv3x3_block", 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
+           'SAConvBlock', 'saconv3x3_block', 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
            'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
            'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
 

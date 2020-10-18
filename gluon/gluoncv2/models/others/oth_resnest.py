@@ -1,19 +1,105 @@
-"""ResNeSt implemented in Gluon."""
-# pylint: disable=arguments-differ,unused-argument,missing-docstring,line-too-long
 from __future__ import division
-
 import math
-
+import mxnet as mx
 from mxnet.context import cpu
 from mxnet.gluon import nn
-from mxnet.gluon.block import HybridBlock
-from mxnet.gluon.nn import BatchNorm
+from mxnet.gluon.nn import Conv2D, HybridBlock, BatchNorm, Activation
 
-from ..nn.dropblock import DropBlock
-from ..nn.splat import SplitAttentionConv
+__all__ = ['oth_resnest14', 'oth_resnest26', 'oth_resnest50', 'oth_resnest101', 'oth_resnest200', 'oth_resnest269']
 
-__all__ = ['ResNeSt', 'Bottleneck', 'resnest14', 'resnest26', 'resnest50', 'resnest101',
-           'resnest200', 'resnest269']
+
+class DropBlock(HybridBlock):
+    def __init__(self, drop_prob, block_size, c, h, w):
+        super(DropBlock, self).__init__()
+        self.drop_prob = drop_prob
+        self.block_size = block_size
+        self.c, self.h, self.w = c, h, w
+        self.numel = c * h * w
+        pad_h = max((block_size - 1), 0)
+        pad_w = max((block_size - 1), 0)
+        self.padding = (pad_h//2, pad_h-pad_h//2, pad_w//2, pad_w-pad_w//2)
+        self.dtype = 'float32'
+
+    def hybrid_forward(self, F, x):
+        if not mx.autograd.is_training() or self.drop_prob <= 0:
+            return x
+        gamma = self.drop_prob * (self.h * self.w) / (self.block_size ** 2) / \
+            ((self.w - self.block_size + 1) * (self.h - self.block_size + 1))
+        # generate mask
+        mask = F.random.uniform(0, 1, shape=(1, self.c, self.h, self.w), dtype=self.dtype) < gamma
+        mask = F.Pooling(mask, pool_type='max',
+                         kernel=(self.block_size, self.block_size), pad=self.padding)
+        mask = 1 - mask
+        y = F.broadcast_mul(F.broadcast_mul(x, mask),
+                            (1.0 * self.numel / mask.sum(axis=0, exclude=True).expand_dims(1).expand_dims(1).expand_dims(1)))
+        return y
+
+    def cast(self, dtype):
+        super(DropBlock, self).cast(dtype)
+        self.dtype = dtype
+
+    def __repr__(self):
+        reprstr = self.__class__.__name__ + '(' + \
+            'drop_prob: {}, block_size{}'.format(self.drop_prob, self.block_size) +')'
+        return reprstr
+
+
+class SplitAttentionConv(HybridBlock):
+    # pylint: disable=keyword-arg-before-vararg
+    def __init__(self, channels, kernel_size, strides=(1, 1), padding=(0, 0),
+                 dilation=(1, 1), groups=1, radix=2, in_channels=None, r=2,
+                 norm_layer=BatchNorm, norm_kwargs=None, drop_ratio=0,
+                 *args, **kwargs):
+        super(SplitAttentionConv, self).__init__()
+        norm_kwargs = norm_kwargs if norm_kwargs is not None else {}
+        inter_channels = max(in_channels*radix//2//r, 32)
+        self.radix = radix
+        self.cardinality = groups
+        self.conv = Conv2D(channels*radix, kernel_size, strides, padding, dilation,
+                           groups=groups*radix, *args, in_channels=in_channels, **kwargs)
+        self.use_bn = norm_layer is not None
+        if self.use_bn:
+            self.bn = norm_layer(in_channels=channels*radix, **norm_kwargs)
+        self.relu = Activation('relu')
+        self.fc1 = Conv2D(inter_channels, 1, in_channels=channels, groups=self.cardinality)
+        if self.use_bn:
+            self.bn1 = norm_layer(in_channels=inter_channels, **norm_kwargs)
+        self.relu1 = Activation('relu')
+        if drop_ratio > 0:
+            self.drop = nn.Dropout(drop_ratio)
+        else:
+            self.drop = None
+        self.fc2 = Conv2D(channels*radix, 1, in_channels=inter_channels, groups=self.cardinality)
+        self.channels = channels
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        x = self.relu(x)
+        if self.radix > 1:
+            splited = F.reshape(x.expand_dims(1), (0, self.radix, self.channels, 0, 0))
+            gap = F.sum(splited, axis=1)
+        else:
+            gap = x
+        gap = F.contrib.AdaptiveAvgPooling2D(gap, 1)
+        gap = self.fc1(gap)
+        if self.use_bn:
+            gap = self.bn1(gap)
+        atten = self.relu1(gap)
+        if self.drop:
+            atten = self.drop(atten)
+        atten = self.fc2(atten).reshape((0, self.cardinality, self.radix, -1)).swapaxes(1, 2)
+        if self.radix > 1:
+            atten = F.softmax(atten, axis=1).reshape((0, self.radix, -1, 1, 1))
+        else:
+            atten = F.sigmoid(atten).reshape((0, -1, 1, 1))
+        if self.radix > 1:
+            outs = F.broadcast_mul(atten, splited)
+            out = F.sum(outs, axis=1)
+        else:
+            out = F.broadcast_mul(atten, x)
+        return out
 
 
 def _update_input_size(input_size, stride):
@@ -345,204 +431,101 @@ class ResNeSt(HybridBlock):
         return x
 
 
-def resnest14(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-14 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest14(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [1, 1, 1, 1],
                     radix=2, cardinality=1, bottleneck_width=64,
                     deep_stem=True, avg_down=True,
                     avd=True, avd_first=False,
                     use_splat=True, dropblock_prob=0.0,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest14', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
 
 
-def resnest26(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-26 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest26(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [2, 2, 2, 2],
                     radix=2, cardinality=1, bottleneck_width=64,
                     deep_stem=True, avg_down=True,
                     avd=True, avd_first=False,
                     use_splat=True, dropblock_prob=0.1,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest26', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
 
 
-def resnest50(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-50 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest50(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [3, 4, 6, 3],
                     radix=2, cardinality=1, bottleneck_width=64,
                     deep_stem=True, avg_down=True,
                     avd=True, avd_first=False,
                     use_splat=True, dropblock_prob=0.1,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest50', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
 
 
-def resnest101(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-101 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest101(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [3, 4, 23, 3],
                     radix=2, cardinality=1, bottleneck_width=64,
                     deep_stem=True, avg_down=True, stem_width=64,
                     avd=True, avd_first=False, use_splat=True, dropblock_prob=0.1,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest101', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
 
 
-def resnest200(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-200 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest200(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [3, 24, 36, 3], deep_stem=True, avg_down=True, stem_width=64,
                     avd=True, use_splat=True, dropblock_prob=0.1, final_drop=0.2,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest200', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
 
 
-def resnest269(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    """Constructs a ResNeSt-269 model.
-
-    Parameters
-    ----------
-    pretrained : bool or str
-        Boolean value controls whether to load the default pretrained weights for model.
-        String value represents the hashtag for a certain version of pretrained weights.
-    root : str, default '~/.mxnet/models'
-        Location for keeping the model parameters.
-    ctx : Context, default CPU
-        The context in which to load the pretrained weights.
-    dilated: bool, default False
-        Whether to apply dilation strategy to ResNeSt, yielding a stride 8 model.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`).
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    """
+def oth_resnest269(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(Bottleneck, [3, 30, 48, 8], deep_stem=True, avg_down=True, stem_width=64,
                     avd=True, use_splat=True, dropblock_prob=0.1, final_drop=0.2,
                     name_prefix='resnest_', **kwargs)
-    if pretrained:
-        from .model_store import get_model_file
-        model.load_parameters(get_model_file('resnest269', root=root), ctx=ctx)
-        from ..data import ImageNet1kAttr
-        attrib = ImageNet1kAttr()
-        model.synset = attrib.synset
-        model.classes = attrib.classes
-        model.classes_long = attrib.classes_long
     return model
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    pretrained = False
+
+    models = [
+        oth_resnest14,
+        oth_resnest26,
+        oth_resnest50,
+        oth_resnest101,
+        oth_resnest200,
+        oth_resnest269,
+    ]
+
+    for model in models:
+
+        net = model(pretrained=pretrained)
+
+        ctx = mx.cpu()
+        if not pretrained:
+            net.initialize(ctx=ctx)
+
+        # net.hybridize()
+        net_params = net.collect_params()
+        weight_count = 0
+        for param in net_params.values():
+            if (param.shape is None) or (not param._differentiable):
+                continue
+            weight_count += np.prod(param.shape)
+        print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != oth_resnest14 or weight_count == 10611688)
+        assert (model != oth_resnest26 or weight_count == 17069448)
+        assert (model != oth_resnest50 or weight_count == 27483240)
+        assert (model != oth_resnest101 or weight_count == 48275016)
+        assert (model != oth_resnest200 or weight_count == 70201544)
+        assert (model != oth_resnest269 or weight_count == 110929480)
+
+        x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
+        y = net(x)
+        assert (y.shape == (1, 1000))
+
+
+if __name__ == "__main__":
+    _test()

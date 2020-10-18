@@ -6,10 +6,10 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoi
            'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'BatchNormExtra',
            'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
-           'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock', 'DucBlock',
-           'split', 'IBN', 'DualPathSequential', 'ParametricSequential', 'Concurrent', 'SequentialConcurrent',
-           'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent',
-           'HeatmapMaxDetBlock']
+           'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock',
+           "SAConvBlock", "saconv3x3_block", 'DucBlock', 'split', 'IBN', 'DualPathSequential', 'ParametricSequential',
+           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'Hourglass', 'SesquialteralHourglass',
+           'MultiOutputSequential', 'ParallelConcurent', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -1643,6 +1643,127 @@ class SABlock(HybridBlock):
         x = F.broadcast_mul(x, w)
         x = x.sum(axis=1)
         return x
+
+
+class SAConvBlock(HybridBlock):
+    """
+    Split-Attention convolution block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_epsilon : float, default 1e-5
+        Small float added to variance in Batch norm.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
+    activation : function or str or None, default nn.Activation('relu')
+        Activation function or name of activation function.
+    radix : int, default 2
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_epsilon=1e-5,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 activation=(lambda: nn.Activation("relu")),
+                 radix=2,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True,
+                 **kwargs):
+        super(SAConvBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.conv = ConvBlock(
+                in_channels=in_channels,
+                out_channels=(out_channels * radix),
+                kernel_size=kernel_size,
+                strides=strides,
+                padding=padding,
+                dilation=dilation,
+                groups=(groups * radix),
+                use_bias=use_bias,
+                use_bn=use_bn,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off,
+                activation=activation)
+            self.att = SABlock(
+                out_channels=out_channels,
+                groups=groups,
+                radix=radix,
+                reduction=reduction,
+                min_channels=min_channels,
+                use_conv=use_conv,
+                bn_epsilon=bn_epsilon,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv(x)
+        x = self.att(x)
+        return x
+
+
+def saconv3x3_block(in_channels,
+                    out_channels,
+                    strides=1,
+                    padding=1,
+                    **kwargs):
+    """
+    3x3 version of the Split-Attention convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    """
+    return SAConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        **kwargs)
 
 
 class PixelShuffle(HybridBlock):

@@ -5,7 +5,7 @@ __all__ = ['resnestbc14b', 'resnestbc26b', 'resnest50b', 'resnest101b', 'resnest
 from mxnet.context import cpu
 from mxnet.gluon import nn
 from mxnet.gluon.nn import Conv2D, HybridBlock, BatchNorm, Activation
-from common import conv1x1_block, conv3x3_block, SABlock
+from common import conv1x1_block, conv3x3_block, SABlock, SAConvBlock, saconv3x3_block
 
 
 class SplitAttentionConv(HybridBlock):
@@ -108,15 +108,9 @@ class Bottleneck(HybridBlock):
             out_channels=mid_channels,
             strides=1)
 
-        self.conv2 = SplitAttentionConv(
-            out_channels=mid_channels,
-            kernel_size=3,
-            strides=1,
-            padding=1,
-            dilation=1,
-            groups=1,
-            use_bias=False,
-            in_channels=mid_channels)
+        self.conv2 = saconv3x3_block(
+            in_channels=mid_channels,
+            out_channels=mid_channels)
 
         self.conv3 = conv1x1_block(
             in_channels=mid_channels,

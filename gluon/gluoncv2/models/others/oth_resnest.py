@@ -219,72 +219,60 @@ class ResNeSt(HybridBlock):
     """ ResNeSt Model
     Parameters
     ----------
-    block : Block
-        Class for the residual block. Options are BasicBlockV1, BottleneckV1.
     layers : list of int
         Numbers of layers in each block
     classes : int, default 1000
         Number of classification classes.
-    dilated : bool, default False
-        Applying dilation strategy to pretrained ResNet yielding a stride-8 model,
-        typically used in Semantic Segmentation.
-    norm_layer : object
-        Normalization layer used (default: :class:`mxnet.gluon.nn.BatchNorm`)
-        Can be :class:`mxnet.gluon.nn.BatchNorm` or :class:`mxnet.gluon.contrib.nn.SyncBatchNorm`.
-    last_gamma : bool, default False
-        Whether to initialize the gamma of the last BatchNorm layer in each bottleneck to zero.
-    deep_stem : bool, default False
-        Whether to replace the 7x7 conv1 with 3 3x3 convolution layers.
-    avg_down : bool, default False
-        Whether to use average pooling for projection skip connection between stages/downsample.
     final_drop : float, default 0.0
         Dropout ratio before the final classification layer.
-    use_global_stats : bool, default False
-        Whether forcing BatchNorm to use global statistics instead of minibatch statistics;
-        optionally set to True if finetuning using ImageNet classification pretrained models.
-    Reference:
-        - He, Kaiming, et al. "Deep residual learning for image recognition."
-        Proceedings of the IEEE conference on computer vision and pattern recognition. 2016.
-        - Yu, Fisher, and Vladlen Koltun. "Multi-scale context aggregation by dilated convolutions."
     """
+    def __init__(self,
+                 layers,
+                 stem_width=32,
+                 dropblock_prob=0.0,
+                 final_drop=0.0,
+                 input_size=224,
+                 classes=1000):
+        block = Bottleneck
+        avg_down = True
+        cardinality = 1
+        avd = True
+        avd_first = False
+        use_splat = True
+        bottleneck_width = 64
+        radix = 2
+        split_drop_ratio = 0
 
-    # pylint: disable=unused-variable
-    def __init__(self, block, layers, cardinality=1, bottleneck_width=64,
-                 classes=1000, dilated=False, dilation=1, norm_layer=BatchNorm,
-                 norm_kwargs=None, last_gamma=False, deep_stem=False, stem_width=32,
-                 avg_down=False, final_drop=0.0, use_global_stats=False,
-                 name_prefix='', dropblock_prob=0, input_size=224,
-                 use_splat=False, radix=2, avd=False, avd_first=False, split_drop_ratio=0):
+        dilated = False
+        dilation = 1
+        norm_layer = BatchNorm
+        norm_kwargs = None
+        last_gamma = False
+
         self.cardinality = cardinality
         self.bottleneck_width = bottleneck_width
-        self.inplanes = stem_width * 2 if deep_stem else 64
+        self.inplanes = stem_width * 2
         self.radix = radix
         self.split_drop_ratio = split_drop_ratio
         self.avd_first = avd_first
-        super(ResNeSt, self).__init__(prefix=name_prefix)
+        super(ResNeSt, self).__init__(prefix='resnest_')
         norm_kwargs = norm_kwargs if norm_kwargs is not None else {}
-        if use_global_stats:
-            norm_kwargs['use_global_stats'] = True
         self.norm_kwargs = norm_kwargs
         with self.name_scope():
-            if not deep_stem:
-                self.conv1 = nn.Conv2D(channels=64, kernel_size=7, strides=2,
-                                       padding=3, use_bias=False, in_channels=3)
-            else:
-                self.conv1 = nn.HybridSequential(prefix='conv1')
-                self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=2,
-                                         padding=1, use_bias=False, in_channels=3))
-                self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
-                self.conv1.add(nn.Activation('relu'))
-                self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=1,
-                                         padding=1, use_bias=False, in_channels=stem_width))
-                self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
-                self.conv1.add(nn.Activation('relu'))
-                self.conv1.add(nn.Conv2D(channels=stem_width * 2, kernel_size=3, strides=1,
-                                         padding=1, use_bias=False, in_channels=stem_width))
+            self.conv1 = nn.HybridSequential(prefix='conv1')
+            self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=2,
+                                     padding=1, use_bias=False, in_channels=3))
+            self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
+            self.conv1.add(nn.Activation('relu'))
+            self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=1,
+                                     padding=1, use_bias=False, in_channels=stem_width))
+            self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
+            self.conv1.add(nn.Activation('relu'))
+            self.conv1.add(nn.Conv2D(channels=stem_width * 2, kernel_size=3, strides=1,
+                                     padding=1, use_bias=False, in_channels=stem_width))
+
             input_size = _update_input_size(input_size, 2)
-            self.bn1 = norm_layer(in_channels=64 if not deep_stem else stem_width * 2,
-                                  **norm_kwargs)
+            self.bn1 = norm_layer(in_channels=stem_width * 2, **norm_kwargs)
             self.relu = nn.Activation('relu')
             self.maxpool = nn.MaxPool2D(pool_size=3, strides=2, padding=1)
             input_size = _update_input_size(input_size, 2)
@@ -432,55 +420,49 @@ class ResNeSt(HybridBlock):
 
 
 def oth_resnest14(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [1, 1, 1, 1],
-                    radix=2, cardinality=1, bottleneck_width=64,
-                    deep_stem=True, avg_down=True,
-                    avd=True, avd_first=False,
-                    use_splat=True, dropblock_prob=0.0,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[1, 1, 1, 1],
+                    dropblock_prob=0.0,
+                    **kwargs)
     return model
 
 
 def oth_resnest26(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [2, 2, 2, 2],
-                    radix=2, cardinality=1, bottleneck_width=64,
-                    deep_stem=True, avg_down=True,
-                    avd=True, avd_first=False,
-                    use_splat=True, dropblock_prob=0.1,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[2, 2, 2, 2],
+                    dropblock_prob=0.1,
+                    **kwargs)
     return model
 
 
 def oth_resnest50(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [3, 4, 6, 3],
-                    radix=2, cardinality=1, bottleneck_width=64,
-                    deep_stem=True, avg_down=True,
-                    avd=True, avd_first=False,
-                    use_splat=True, dropblock_prob=0.1,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[3, 4, 6, 3],
+                    dropblock_prob=0.1,
+                    **kwargs)
     return model
 
 
 def oth_resnest101(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [3, 4, 23, 3],
-                    radix=2, cardinality=1, bottleneck_width=64,
-                    deep_stem=True, avg_down=True, stem_width=64,
-                    avd=True, avd_first=False, use_splat=True, dropblock_prob=0.1,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[3, 4, 23, 3],
+                    stem_width=64,
+                    dropblock_prob=0.1,
+                    **kwargs)
     return model
 
 
 def oth_resnest200(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [3, 24, 36, 3], deep_stem=True, avg_down=True, stem_width=64,
-                    avd=True, use_splat=True, dropblock_prob=0.1, final_drop=0.2,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[3, 24, 36, 3],
+                    stem_width=64,
+                    dropblock_prob=0.1,
+                    final_drop=0.2,
+                    **kwargs)
     return model
 
 
 def oth_resnest269(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
-    model = ResNeSt(Bottleneck, [3, 30, 48, 8], deep_stem=True, avg_down=True, stem_width=64,
-                    avd=True, use_splat=True, dropblock_prob=0.1, final_drop=0.2,
-                    name_prefix='resnest_', **kwargs)
+    model = ResNeSt(layers=[3, 30, 48, 8],
+                    stem_width=64,
+                    dropblock_prob=0.1,
+                    final_drop=0.2,
+                    **kwargs)
     return model
 
 

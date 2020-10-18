@@ -1,11 +1,14 @@
 from __future__ import division
+
+__all__ = ['resnestbc14b', 'resnestbc26b', 'resnest50b', 'resnest101b', 'resnest200b', 'resnest269b']
+
 import math
 import mxnet as mx
 from mxnet.context import cpu
 from mxnet.gluon import nn
 from mxnet.gluon.nn import Conv2D, HybridBlock, BatchNorm, Activation
-
-__all__ = ['oth_resnest14', 'oth_resnest26', 'oth_resnest50', 'oth_resnest101', 'oth_resnest200', 'oth_resnest269']
+# from .common import conv3x3_block
+from .senet import SEInitBlock
 
 
 class DropBlock(HybridBlock):
@@ -111,22 +114,32 @@ def _update_input_size(input_size, stride):
 
 
 class Bottleneck(HybridBlock):
-    """ResNeSt Bottleneck
-    """
-    # pylint: disable=unused-argument
     expansion = 4
 
-    def __init__(self, channels, cardinality=1, bottleneck_width=64, strides=1, dilation=1,
-                 downsample=None, previous_dilation=1, norm_layer=None,
-                 norm_kwargs=None, last_gamma=False,
-                 dropblock_prob=0, input_size=None, use_splat=False,
-                 radix=2, avd=False, avd_first=False, in_channels=None,
-                 split_drop_ratio=0, **kwargs):
+    def __init__(self,
+                 channels,
+                 cardinality=1,
+                 bottleneck_width=64,
+                 strides=1,
+                 dilation=1,
+                 downsample=None,
+                 previous_dilation=1,
+                 norm_layer=None,
+                 norm_kwargs=None,
+                 last_gamma=False,
+                 dropblock_prob=0,
+                 input_size=None,
+                 radix=2,
+                 avd=False,
+                 avd_first=False,
+                 in_channels=None,
+                 split_drop_ratio=0,
+                 **kwargs):
         super(Bottleneck, self).__init__()
+
         group_width = int(channels * (bottleneck_width / 64.)) * cardinality
         norm_kwargs = norm_kwargs if norm_kwargs is not None else {}
         self.dropblock_prob = dropblock_prob
-        self.use_splat = use_splat
         self.avd = avd and (strides > 1 or previous_dilation != dilation)
         self.avd_first = avd_first
         if self.dropblock_prob > 0:
@@ -141,25 +154,29 @@ class Bottleneck(HybridBlock):
                 input_size = _update_input_size(input_size, strides)
                 self.dropblock2 = DropBlock(dropblock_prob, 3, group_width, *input_size)
             self.dropblock3 = DropBlock(dropblock_prob, 3, channels * 4, *input_size)
-        self.conv1 = nn.Conv2D(channels=group_width, kernel_size=1,
-                               use_bias=False, in_channels=in_channels)
+        self.conv1 = nn.Conv2D(
+            channels=group_width,
+            kernel_size=1,
+            use_bias=False,
+            in_channels=in_channels)
         self.bn1 = norm_layer(in_channels=group_width, **norm_kwargs)
         self.relu1 = nn.Activation('relu')
-        if self.use_splat:
-            self.conv2 = SplitAttentionConv(channels=group_width, kernel_size=3,
-                                            strides=1 if self.avd else strides,
-                                            padding=dilation, dilation=dilation, groups=cardinality,
-                                            use_bias=False, in_channels=group_width,
-                                            norm_layer=norm_layer, norm_kwargs=norm_kwargs,
-                                            radix=radix, drop_ratio=split_drop_ratio,
-                                            **kwargs)
-        else:
-            self.conv2 = nn.Conv2D(channels=group_width, kernel_size=3,
-                                   strides=1 if self.avd else strides,
-                                   padding=dilation, dilation=dilation, groups=cardinality,
-                                   use_bias=False, in_channels=group_width, **kwargs)
-            self.bn2 = norm_layer(in_channels=group_width, **norm_kwargs)
-            self.relu2 = nn.Activation('relu')
+
+        self.conv2 = SplitAttentionConv(
+            channels=group_width,
+            kernel_size=3,
+            strides=1 if self.avd else strides,
+            padding=dilation,
+            dilation=dilation,
+            groups=cardinality,
+            use_bias=False,
+            in_channels=group_width,
+            norm_layer=norm_layer,
+            norm_kwargs=norm_kwargs,
+            radix=radix,
+            drop_ratio=split_drop_ratio,
+            **kwargs)
+
         self.conv3 = nn.Conv2D(channels=channels * 4, kernel_size=1, use_bias=False,
                                in_channels=group_width)
         if not last_gamma:
@@ -186,16 +203,9 @@ class Bottleneck(HybridBlock):
         if self.avd and self.avd_first:
             out = self.avd_layer(out)
 
-        if self.use_splat:
-            out = self.conv2(out)
-            if self.dropblock_prob > 0:
-                out = self.dropblock2(out)
-        else:
-            out = self.conv2(out)
-            out = self.bn2(out)
-            if self.dropblock_prob > 0:
-                out = self.dropblock2(out)
-            out = self.relu2(out)
+        out = self.conv2(out)
+        if self.dropblock_prob > 0:
+            out = self.dropblock2(out)
 
         if self.avd and not self.avd_first:
             out = self.avd_layer(out)
@@ -232,6 +242,7 @@ class ResNeSt(HybridBlock):
                  dropblock_prob=0.0,
                  final_drop=0.0,
                  input_size=224,
+                 bn_use_global_stats=False,
                  in_channels=3,
                  classes=1000):
         block = Bottleneck
@@ -239,7 +250,6 @@ class ResNeSt(HybridBlock):
         cardinality = 1
         avd = True
         avd_first = False
-        use_splat = True
         bottleneck_width = 64
         radix = 2
         split_drop_ratio = 0
@@ -260,70 +270,60 @@ class ResNeSt(HybridBlock):
         norm_kwargs = norm_kwargs if norm_kwargs is not None else {}
         self.norm_kwargs = norm_kwargs
         with self.name_scope():
-            self.conv1 = nn.HybridSequential(prefix='conv1')
-            self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=2,
-                                     padding=1, use_bias=False, in_channels=3))
-            self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
-            self.conv1.add(nn.Activation('relu'))
-            self.conv1.add(nn.Conv2D(channels=stem_width, kernel_size=3, strides=1,
-                                     padding=1, use_bias=False, in_channels=stem_width))
-            self.conv1.add(norm_layer(in_channels=stem_width, **norm_kwargs))
-            self.conv1.add(nn.Activation('relu'))
-            self.conv1.add(nn.Conv2D(channels=stem_width * 2, kernel_size=3, strides=1,
-                                     padding=1, use_bias=False, in_channels=stem_width))
+            self.init_block = SEInitBlock(
+                in_channels=in_channels,
+                out_channels=(stem_width * 2),
+                bn_use_global_stats=bn_use_global_stats)
 
             input_size = _update_input_size(input_size, 2)
-            self.bn1 = norm_layer(in_channels=stem_width * 2, **norm_kwargs)
-            self.relu = nn.Activation('relu')
-            self.maxpool = nn.MaxPool2D(pool_size=3, strides=2, padding=1)
             input_size = _update_input_size(input_size, 2)
             self.layer1 = self._make_layer(1, block, 64, layers[0], avg_down=avg_down,
                                            norm_layer=norm_layer, last_gamma=last_gamma,
-                                           use_splat=use_splat, avd=avd)
+                                           avd=avd)
             self.layer2 = self._make_layer(2, block, 128, layers[1], strides=2, avg_down=avg_down,
                                            norm_layer=norm_layer, last_gamma=last_gamma,
-                                           use_splat=use_splat, avd=avd)
+                                           avd=avd)
             input_size = _update_input_size(input_size, 2)
             if dilated or dilation == 4:
                 self.layer3 = self._make_layer(3, block, 256, layers[2], strides=1, dilation=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
                 self.layer4 = self._make_layer(4, block, 512, layers[3], strides=1, dilation=4,
                                                pre_dilation=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
             elif dilation == 3:
                 # special
                 self.layer3 = self._make_layer(3, block, 256, layers[2], strides=1, dilation=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
                 self.layer4 = self._make_layer(4, block, 512, layers[3], strides=2, dilation=2,
                                                pre_dilation=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
             elif dilation == 2:
                 self.layer3 = self._make_layer(3, block, 256, layers[2], strides=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
                 self.layer4 = self._make_layer(4, block, 512, layers[3], strides=1, dilation=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
             else:
                 self.layer3 = self._make_layer(3, block, 256, layers[2], strides=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
                 input_size = _update_input_size(input_size, 2)
                 self.layer4 = self._make_layer(4, block, 512, layers[3], strides=2,
                                                avg_down=avg_down, norm_layer=norm_layer,
                                                last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                               input_size=input_size, use_splat=use_splat, avd=avd)
+                                               input_size=input_size, avd=avd)
                 input_size = _update_input_size(input_size, 2)
             self.avgpool = nn.GlobalAvgPool2D()
             self.flat = nn.Flatten()
@@ -334,7 +334,8 @@ class ResNeSt(HybridBlock):
 
     def _make_layer(self, stage_index, block, planes, blocks, strides=1, dilation=1, pre_dilation=1,
                     avg_down=False, norm_layer=None, last_gamma=False, dropblock_prob=0,
-                    input_size=224, use_splat=False, avd=False):
+                    input_size=224, avd=False):
+        use_splat = True
         downsample = None
         if strides != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.HybridSequential(prefix='down%d_' % stage_index)
@@ -370,7 +371,7 @@ class ResNeSt(HybridBlock):
                                  downsample=downsample, previous_dilation=dilation,
                                  norm_layer=norm_layer, norm_kwargs=self.norm_kwargs,
                                  last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                 input_size=input_size, use_splat=use_splat, avd=avd,
+                                 input_size=input_size, avd=avd,
                                  avd_first=self.avd_first, radix=self.radix,
                                  in_channels=self.inplanes, split_drop_ratio=self.split_drop_ratio))
             elif dilation == 4:
@@ -380,7 +381,7 @@ class ResNeSt(HybridBlock):
                                  downsample=downsample, previous_dilation=dilation,
                                  norm_layer=norm_layer, norm_kwargs=self.norm_kwargs,
                                  last_gamma=last_gamma, dropblock_prob=dropblock_prob,
-                                 input_size=input_size, use_splat=use_splat, avd=avd,
+                                 input_size=input_size, avd=avd,
                                  avd_first=self.avd_first, radix=self.radix,
                                  in_channels=self.inplanes, split_drop_ratio=self.split_drop_ratio))
             else:
@@ -394,17 +395,14 @@ class ResNeSt(HybridBlock):
                                  previous_dilation=dilation, norm_layer=norm_layer,
                                  norm_kwargs=self.norm_kwargs, last_gamma=last_gamma,
                                  dropblock_prob=dropblock_prob, input_size=input_size,
-                                 use_splat=use_splat, avd=avd, avd_first=self.avd_first,
+                                 avd=avd, avd_first=self.avd_first,
                                  radix=self.radix, in_channels=self.inplanes,
                                  split_drop_ratio=self.split_drop_ratio))
 
         return layers
 
     def hybrid_forward(self, F, x):
-        x = self.conv1(x)
-        x = self.bn1(x)
-        x = self.relu(x)
-        x = self.maxpool(x)
+        x = self.init_block(x)
 
         x = self.layer1(x)
         x = self.layer2(x)
@@ -420,28 +418,28 @@ class ResNeSt(HybridBlock):
         return x
 
 
-def oth_resnest14(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnestbc14b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[1, 1, 1, 1],
                     dropblock_prob=0.0,
                     **kwargs)
     return model
 
 
-def oth_resnest26(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnestbc26b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[2, 2, 2, 2],
                     dropblock_prob=0.1,
                     **kwargs)
     return model
 
 
-def oth_resnest50(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnest50b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[3, 4, 6, 3],
                     dropblock_prob=0.1,
                     **kwargs)
     return model
 
 
-def oth_resnest101(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnest101b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[3, 4, 23, 3],
                     stem_width=64,
                     dropblock_prob=0.1,
@@ -449,7 +447,7 @@ def oth_resnest101(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwarg
     return model
 
 
-def oth_resnest200(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnest200b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[3, 24, 36, 3],
                     stem_width=64,
                     dropblock_prob=0.1,
@@ -458,7 +456,7 @@ def oth_resnest200(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwarg
     return model
 
 
-def oth_resnest269(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
+def resnest269b(pretrained=False, root='~/.mxnet/models', ctx=cpu(0), **kwargs):
     model = ResNeSt(layers=[3, 30, 48, 8],
                     stem_width=64,
                     dropblock_prob=0.1,
@@ -474,12 +472,12 @@ def _test():
     pretrained = False
 
     models = [
-        oth_resnest14,
-        oth_resnest26,
-        oth_resnest50,
-        oth_resnest101,
-        oth_resnest200,
-        oth_resnest269,
+        resnestbc14b,
+        resnestbc26b,
+        resnest50b,
+        resnest101b,
+        resnest200b,
+        resnest269b,
     ]
 
     for model in models:
@@ -498,12 +496,12 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != oth_resnest14 or weight_count == 10611688)
-        assert (model != oth_resnest26 or weight_count == 17069448)
-        assert (model != oth_resnest50 or weight_count == 27483240)
-        assert (model != oth_resnest101 or weight_count == 48275016)
-        assert (model != oth_resnest200 or weight_count == 70201544)
-        assert (model != oth_resnest269 or weight_count == 110929480)
+        assert (model != resnestbc14b or weight_count == 10611688)
+        assert (model != resnestbc26b or weight_count == 17069448)
+        assert (model != resnest50b or weight_count == 27483240)
+        assert (model != resnest101b or weight_count == 48275016)
+        assert (model != resnest200b or weight_count == 70201544)
+        assert (model != resnest269b or weight_count == 110929480)
 
         x = mx.nd.zeros((1, 3, 224, 224), ctx=ctx)
         y = net(x)

@@ -138,6 +138,8 @@ from .models.nvpattexp import *
 # from .models.others.oth_alpha_pose import *
 # from .models.others.oth_icnet import *
 # from .models.others.oth_centernet import *
+from .models.others.oth_resnest import *
+from .models._resnest2 import *
 
 __all__ = ['get_model']
 
@@ -1133,6 +1135,20 @@ _models = {
     # 'center_net_resnet50_v1b_coco': center_net_resnet50_v1b_coco,
     # 'center_net_resnet101_v1b_voc': center_net_resnet101_v1b_voc,
     # 'center_net_resnet101_v1b_coco': center_net_resnet101_v1b_coco,
+
+    'oth_resnest14': oth_resnest14,
+    'oth_resnest26': oth_resnest26,
+    'oth_resnest50': oth_resnest50,
+    'oth_resnest101': oth_resnest101,
+    'oth_resnest200': oth_resnest200,
+    'oth_resnest269': oth_resnest269,
+
+    'resnestbc14b': resnestbc14b,
+    'resnestbc26b': resnestbc26b,
+    'resnest50b': resnest50b,
+    'resnest101b': resnest101b,
+    'resnest200b': resnest200b,
+    'resnest269b': resnest269b,
 }
 
 

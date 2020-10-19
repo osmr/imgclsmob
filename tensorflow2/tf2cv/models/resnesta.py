@@ -51,10 +51,10 @@ class ResNeStABlock(nn.Layer):
             data_format=data_format,
             name="conv1")
         if self.resize:
-            self.pool = nn.AveragePooling2D(
+            self.pool = AvgPool2d(
                 pool_size=3,
                 strides=strides,
-                padding="same",
+                padding=1,
                 data_format=data_format,
                 name="pool")
         self.conv2 = saconv3x3_block(
@@ -113,10 +113,10 @@ class ResNeStABottleneck(nn.Layer):
             data_format=data_format,
             name="conv2")
         if self.resize:
-            self.pool = nn.AveragePooling2D(
+            self.pool = AvgPool2d(
                 pool_size=3,
                 strides=strides,
-                padding="same",
+                padding=1,
                 data_format=data_format,
                 name="pool")
         self.conv3 = conv1x1_block(

@@ -97,6 +97,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('senet16', '0805', 'f5f576568d02a572be5276b0b64e71ce4d1c4531', 'v0.0.422', 'in1k', 0.875),
     ('senet28', '0590', '667d56873564cc22b2f10478d5f3d55cda580c61', 'v0.0.422', 'in1k', 0.875),
     ('senet154', '0466', 'f1b79a9bf0f7073bacf534d846c03d1b71dc404b', 'v0.0.422', 'in1k', 0.875),
+
+    ('resnestabc14', '1115', '5f30b7985b5a57d34909f3db08c52dfe1da065ac', 'v0.0.465', 'in1k', 0.875),
+
+
     ('ibn_resnet50', '0668', '4c72a071e13235ccea0db3d932db8ec5f691e155', 'v0.0.427', 'in1k', 0.875),
     ('ibn_resnet101', '0584', '2c2c4993de8b8d79a66a62a1dbf682e552eb16c1', 'v0.0.427', 'in1k', 0.875),
     ('ibnb_resnet50', '0695', '7178cc50d166fa2d2474b5110aaea7fcd41bd8ca', 'v0.0.427', 'in1k', 0.875),

@@ -478,9 +478,9 @@ def _test():
     pretrained = False
 
     models = [
-        oth_resnest14,
-        oth_resnest26,
-        oth_resnest50,
+        # oth_resnest14,
+        # oth_resnest26,
+        # oth_resnest50,
         oth_resnest101,
         oth_resnest200,
         oth_resnest269,

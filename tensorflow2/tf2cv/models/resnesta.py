@@ -377,6 +377,9 @@ def get_resnesta(blocks,
     init_block_channels = 64
     channels_per_layers = [64, 128, 256, 512]
 
+    if blocks >= 101:
+        init_block_channels *= 2
+
     if bottleneck:
         bottleneck_factor = 4
         channels_per_layers = [ci * bottleneck_factor for ci in channels_per_layers]
@@ -564,10 +567,10 @@ def _test():
         assert (model != resnesta18 or weight_count == 12763784)
         assert (model != resnestabc26 or weight_count == 17069448)
         assert (model != resnesta50 or weight_count == 27483240)
-        assert (model != resnesta101 or weight_count == 48170472)
-        assert (model != resnesta152 or weight_count == 65211496)
-        assert (model != resnesta200 or weight_count == 70097000)
-        assert (model != resnesta269 or weight_count == 110824936)
+        assert (model != resnesta101 or weight_count == 48275016)
+        assert (model != resnesta152 or weight_count == 65316040)
+        assert (model != resnesta200 or weight_count == 70201544)
+        assert (model != resnesta269 or weight_count == 110929480)
 
 
 if __name__ == "__main__":

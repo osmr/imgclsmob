@@ -237,7 +237,7 @@ class ResNeStAUnit(nn.Layer):
         return x
 
 
-class ResNeStA(nn.Layer):
+class ResNeStA(tf.keras.Model):
     """
     ResNeSt(A) with average downsampling model from 'ResNeSt: Split-Attention Networks,'
     https://arxiv.org/abs/2004.08955.

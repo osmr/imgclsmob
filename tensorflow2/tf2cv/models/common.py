@@ -2657,7 +2657,8 @@ class SAConvBlock(nn.Layer):
             use_bn=use_bn,
             bn_eps=bn_eps,
             activation=activation,
-            data_format=data_format)
+            data_format=data_format,
+            name="conv")
         self.att = SABlock(
             out_channels=out_channels,
             groups=groups,
@@ -2666,7 +2667,8 @@ class SAConvBlock(nn.Layer):
             min_channels=min_channels,
             use_conv=use_conv,
             bn_eps=bn_eps,
-            data_format=data_format)
+            data_format=data_format,
+            name="att")
 
     def call(self, x, training=None):
         x = self.conv(x, training=training)

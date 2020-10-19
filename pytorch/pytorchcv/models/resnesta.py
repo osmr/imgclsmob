@@ -210,6 +210,8 @@ class ResNeStA(nn.Module):
         Number of output channels for the initial unit.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -221,6 +223,7 @@ class ResNeStA(nn.Module):
                  channels,
                  init_block_channels,
                  bottleneck,
+                 dropout_rate=0.0,
                  in_channels=3,
                  in_size=(224, 224),
                  num_classes=1000):
@@ -246,9 +249,12 @@ class ResNeStA(nn.Module):
             self.features.add_module("stage{}".format(i + 1), stage)
         self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
 
-        self.output = nn.Linear(
+        self.output = nn.Sequential()
+        if dropout_rate > 0.0:
+            self.output.add_module("dropout", nn.Dropout(p=dropout_rate))
+        self.output.add_module("fc", nn.Linear(
             in_features=in_channels,
-            out_features=num_classes)
+            out_features=num_classes))
 
         self._init_params()
 
@@ -469,7 +475,7 @@ def resnesta200(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=200, model_name="resnesta152", **kwargs)
+    return get_resnesta(blocks=200, dropout_rate=0.2, model_name="resnesta200", **kwargs)
 
 
 def resnesta269(**kwargs):
@@ -484,7 +490,7 @@ def resnesta269(**kwargs):
     root : str, default '~/.torch/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=269, model_name="resnesta269", **kwargs)
+    return get_resnesta(blocks=269, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
 def _calc_width(net):

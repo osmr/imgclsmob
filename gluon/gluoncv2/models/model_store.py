@@ -97,7 +97,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('senet28', '0591', 'd5297a35a2e56ecc892499c1bd4373125a40b783', 'v0.0.356'),
     ('senet154', '0465', 'dd2445078c0770c4a52cd22aa1d4077eb26f6132', 'v0.0.13'),
 
-    ('resnestabc14', '1116', 'c4ffed61c1b542e33794f22ab48bce568b9bf7bb', 'v0.0.465'),
+    ('resnestabc14', '0729', 'cba0b049a07ada6ec336e6cdeaf9aefdc0633d4b', 'v0.0.465'),
+    ('resnestabc26', '0562', 'b5edf7c1ebed884afb129f4b7ffc5a480156a044', 'v0.0.465'),
+    ('resnesta50', '0451', '445a013a228b65a3e626fe71710ebd1c8350843a', 'v0.0.465'),
+    ('resnesta101', '0399', 'ab6c6f89407d7b2cf89406f7bb62a48e86d7cabc', 'v0.0.465'),
+    ('resnesta200', '0383', '4d12d96f5cc449c5eb4975d95ad5f4f5a11d5af7', 'v0.0.465'),
+    ('resnesta269', '1116', 'c4ffed61c1b542e33794f22ab48bce568b9bf7bb', 'v0.0.465'),
 
     ('ibn_resnet50', '0668', 'db527596f81f5b4aa1f0c490bf0ef5cfeef5fb76', 'v0.0.127'),
     ('ibn_resnet101', '0587', '946e7f1072a70b19f2bbc9776f73b818473482c3', 'v0.0.127'),

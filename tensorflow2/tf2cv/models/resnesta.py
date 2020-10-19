@@ -250,6 +250,8 @@ class ResNeStA(tf.keras.Model):
         Number of output channels for the initial unit.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     in_channels : int, default 3
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
@@ -263,6 +265,7 @@ class ResNeStA(tf.keras.Model):
                  channels,
                  init_block_channels,
                  bottleneck,
+                 dropout_rate=0.0,
                  in_channels=3,
                  in_size=(224, 224),
                  classes=1000,
@@ -297,10 +300,15 @@ class ResNeStA(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = nn.Dense(
+        self.output1 = SimpleSequential(name="output1")
+        if dropout_rate > 0.0:
+            self.output1.add(nn.Dropout(
+                rate=dropout_rate,
+                name="output1/dropout"))
+        self.output1.add(nn.Dense(
             units=classes,
             input_dim=in_channels,
-            name="output1")
+            name="output1/fc"))
 
     def call(self, x, training=None):
         x = self.features(x, training=training)
@@ -515,7 +523,7 @@ def resnesta200(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=200, model_name="resnesta152", **kwargs)
+    return get_resnesta(blocks=200, dropout_rate=0.2, model_name="resnesta200", **kwargs)
 
 
 def resnesta269(**kwargs):
@@ -530,7 +538,7 @@ def resnesta269(**kwargs):
     root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=269, model_name="resnesta269", **kwargs)
+    return get_resnesta(blocks=269, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
 def _test():

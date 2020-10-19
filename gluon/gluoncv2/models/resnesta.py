@@ -9,8 +9,8 @@ __all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnesta50
 import os
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from .common import conv1x1_block, conv3x3_block, saconv3x3_block
-from .senet import SEInitBlock
+from common import conv1x1_block, conv3x3_block, saconv3x3_block
+from senet import SEInitBlock
 
 
 class ResNeStABlock(HybridBlock):
@@ -261,6 +261,8 @@ class ResNeStA(HybridBlock):
         Number of output channels for the initial unit.
     bottleneck : bool
         Whether to use a bottleneck or simple block in units.
+    dropout_rate : float, default 0.0
+        Fraction of the input units to drop. Must be a number between 0 and 1.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
         Useful for fine-tuning.
@@ -277,6 +279,7 @@ class ResNeStA(HybridBlock):
                  channels,
                  init_block_channels,
                  bottleneck,
+                 dropout_rate=0.0,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  in_channels=3,
@@ -313,6 +316,8 @@ class ResNeStA(HybridBlock):
 
             self.output = nn.HybridSequential(prefix="")
             self.output.add(nn.Flatten())
+            if dropout_rate > 0.0:
+                self.output.add(nn.Dropout(rate=dropout_rate))
             self.output.add(nn.Dense(
                 units=classes,
                 in_units=in_channels))
@@ -544,7 +549,7 @@ def resnesta200(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=200, model_name="resnesta152", **kwargs)
+    return get_resnesta(blocks=200, dropout_rate=0.2, model_name="resnesta200", **kwargs)
 
 
 def resnesta269(**kwargs):
@@ -561,7 +566,7 @@ def resnesta269(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=269, model_name="resnesta269", **kwargs)
+    return get_resnesta(blocks=269, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
 def _test():
@@ -571,12 +576,12 @@ def _test():
     pretrained = False
 
     models = [
-        resnestabc14,
-        resnesta18,
-        resnestabc26,
-        resnesta50,
-        resnesta101,
-        resnesta152,
+        # resnestabc14,
+        # resnesta18,
+        # resnestabc26,
+        # resnesta50,
+        # resnesta101,
+        # resnesta152,
         resnesta200,
         resnesta269,
     ]

@@ -1456,7 +1456,7 @@ class SABlock(nn.Module):
 
     def forward(self, x):
         batch, channels, height, width = x.size()
-        x = x.view(batch, self.radix, self.groups, height, width)
+        x = x.view(batch, self.radix, channels // self.radix, height, width)
         w = x.sum(dim=1)
         w = self.pool(w)
         if not self.use_conv:

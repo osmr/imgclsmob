@@ -2542,19 +2542,24 @@ class SABlock(nn.Layer):
                 units=in_channels,
                 input_dim=mid_channels,
                 name="fc2")
-        self.softmax = nn.Softmax(axis=self.axis)
+        self.softmax = nn.Softmax(axis=1)
 
     def call(self, x, training=None):
         x_shape = x.get_shape().as_list()
         batch = x_shape[0]
         if is_channels_first(self.data_format):
+            channels = x_shape[1]
             height = x_shape[2]
             width = x_shape[3]
+            x = tf.reshape(x, shape=(batch, self.radix, channels // self.radix, height, width))
+            w = tf.math.reduce_sum(x, axis=1)
         else:
             height = x_shape[1]
             width = x_shape[2]
-        x = tf.reshape(x, shape=(batch, self.radix, self.groups, height, width))
-        w = tf.math.reduce_sum(x, axis=self.axis)
+            channels = x_shape[3]
+            x = tf.reshape(x, shape=(batch, height, width, self.radix, channels // self.radix))
+            w = tf.math.reduce_sum(x, axis=-2)
+
         w = self.pool(w)
         if self.use_conv:
             axis = -1 if is_channels_first(self.data_format) else 1
@@ -2563,22 +2568,18 @@ class SABlock(nn.Layer):
         w = self.bn(w, training=training)
         w = self.activ(w)
         w = self.conv2(w) if self.use_conv else self.fc2(w)
-        if not self.use_conv:
-            axis = -1 if is_channels_first(self.data_format) else 1
-            w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
         w = tf.reshape(w, shape=(batch, self.groups, self.radix, -1))
-        w = tf.transpose(w, perm=(0, 2, 1, 3, 4))
-        if is_channels_first(self.data_format):
-            w = tf.transpose(w, perm=(0, 2, 1, 3, 4))
-        else:
-            w = tf.transpose(w, perm=(0, 1, 2, 4, 3))
+        w = tf.transpose(w, perm=(0, 2, 1, 3))
         w = self.softmax(w)
         if is_channels_first(self.data_format):
             w = tf.reshape(w, shape=(batch, self.radix, -1, 1, 1))
         else:
             w = tf.reshape(w, shape=(batch, 1, 1, self.radix, -1))
         x = x * w
-        x = tf.math.reduce_sum(x, axis=self.axis)
+        if is_channels_first(self.data_format):
+            x = tf.math.reduce_sum(x, axis=1)
+        else:
+            x = tf.math.reduce_sum(x, axis=-2)
         return x
 
 

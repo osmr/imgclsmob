@@ -238,7 +238,7 @@ def measure_model(model,
         elif isinstance(module, ProxylessUnit):
             extra_num_flops = x[0].numel()
             extra_num_macs = 0
-        elif isinstance(module, nn.Softmax2d):
+        elif type(module) in [nn.Softmax2d, nn.Softmax]:
             extra_num_flops = 4 * x[0].numel()
             extra_num_macs = 0
         elif type(module) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet]:

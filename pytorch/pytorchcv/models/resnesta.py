@@ -526,10 +526,11 @@ def _test():
         assert (model != resnesta200 or weight_count == 70097000)
         assert (model != resnesta269 or weight_count == 110824936)
 
-        x = torch.randn(1, 3, 224, 224)
+        batch = 14
+        x = torch.randn(batch, 3, 224, 224)
         y = net(x)
         y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (tuple(y.size()) == (batch, 1000))
 
 
 if __name__ == "__main__":

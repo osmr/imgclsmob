@@ -9,7 +9,7 @@ __all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnesta50
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1_block, conv3x3_block, saconv3x3_block, SimpleSequential, is_channels_first
+from .common import conv1x1_block, conv3x3_block, saconv3x3_block, AvgPool2d, SimpleSequential, is_channels_first
 from .senet import SEInitBlock
 
 
@@ -157,11 +157,10 @@ class ResNeStADownBlock(nn.Layer):
                  data_format="channels_last",
                  **kwargs):
         super(ResNeStADownBlock, self).__init__(**kwargs)
-        self.pool = nn.AvgPool2D(
+        self.pool = AvgPool2d(
             pool_size=strides,
             strides=strides,
             ceil_mode=True,
-            count_include_pad=False,
             data_format=data_format,
             name="pool")
         self.conv = conv1x1_block(

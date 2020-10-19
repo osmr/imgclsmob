@@ -1347,7 +1347,7 @@ class SABlock(Chain):
                     in_size=out_channels,
                     out_size=mid_channels)
             self.bn = L.BatchNormalization(
-                size=out_channels,
+                size=mid_channels,
                 eps=bn_eps)
             self.activ = F.relu
             if use_conv:
@@ -1365,9 +1365,9 @@ class SABlock(Chain):
 
     def __call__(self, x):
         batch, channels, height, width = x.shape
-        x = F.reshape(x, shape=(batch, self.radix, self.groups, height, width))
+        x = F.reshape(x, shape=(batch, self.radix, channels // self.radix, height, width))
         w = F.sum(x, axis=1)
-        w = F.average_pooling_2d(w, ksize=x.shape[2:])
+        w = F.average_pooling_2d(w, ksize=w.shape[2:])
         if not self.use_conv:
             w = F.reshape(w, shape=(w.shape[0], -1))
         w = self.conv1(w) if self.use_conv else self.fc1(w)

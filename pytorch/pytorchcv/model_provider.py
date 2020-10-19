@@ -138,8 +138,9 @@ from .models.superpointnet import *
 # from .models.others.oth_prnet import *
 # from .models.others.oth_sinet import *
 # from .models.others.oth_ibppose import *
-from .models.others.oth_bisenet1 import *
+# from .models.others.oth_bisenet1 import *
 
+from .models.resnesta import *
 
 __all__ = ['get_model']
 
@@ -1057,7 +1058,16 @@ _models = {
 
     # 'oth_ibppose': oth_ibppose,
 
-    'oth_bisenet': oth_bisenet,
+    # 'oth_bisenet': oth_bisenet,
+
+    'resnestabc14': resnestabc14,
+    'resnesta18': resnesta18,
+    'resnestabc26': resnestabc26,
+    'resnesta50': resnesta50,
+    'resnesta101': resnesta101,
+    'resnesta152': resnesta152,
+    'resnesta200': resnesta200,
+    'resnesta269': resnesta269,
 }
 
 

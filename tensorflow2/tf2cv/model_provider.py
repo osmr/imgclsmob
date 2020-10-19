@@ -98,6 +98,8 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
+from .models.resnesta import *
+
 __all__ = ['get_model']
 
 
@@ -849,6 +851,15 @@ _models = {
 
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
+
+    'resnestabc14': resnestabc14,
+    'resnesta18': resnesta18,
+    'resnestabc26': resnestabc26,
+    'resnesta50': resnesta50,
+    'resnesta101': resnesta101,
+    'resnesta152': resnesta152,
+    'resnesta200': resnesta200,
+    'resnesta269': resnesta269,
 }
 
 

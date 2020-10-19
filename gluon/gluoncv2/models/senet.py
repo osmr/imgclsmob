@@ -9,7 +9,7 @@ import os
 import math
 from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
-from common import conv1x1_block, conv3x3_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock
 
 
 class SENetBottleneck(HybridBlock):

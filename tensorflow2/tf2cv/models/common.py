@@ -8,9 +8,9 @@ __all__ = ['is_channels_first', 'get_channel_axis', 'round_channels', 'get_im_si
            'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv5x5_block',
            'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock',
            'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock',
-           'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential', 'ParametricSequential', 'DualPathSequential',
-           'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent', 'MultiOutputSequential', 'ParallelConcurent',
-           'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
+           'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'Identity', 'SimpleSequential',
+           'ParametricSequential', 'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricConcurrent',
+           'MultiOutputSequential', 'ParallelConcurent', 'InterpolationBlock', 'Hourglass', 'HeatmapMaxDetBlock']
 
 import math
 from inspect import isfunction
@@ -2466,6 +2466,239 @@ class SEBlock(nn.Layer):
             w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
         x = x * w
         return x
+
+
+class SABlock(nn.Layer):
+    """
+    Split-Attention block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of channel groups (cardinality, without radix).
+    radix : int
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 out_channels,
+                 groups,
+                 radix,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True,
+                 bn_eps=1e-5,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SABlock, self).__init__(**kwargs)
+        self.groups = groups
+        self.radix = radix
+        self.use_conv = use_conv
+        self.data_format = data_format
+        self.axis = get_channel_axis(data_format)
+        in_channels = out_channels * radix
+        mid_channels = max(in_channels // reduction, min_channels)
+
+        self.pool = nn.GlobalAveragePooling2D(
+            data_format=data_format,
+            name="pool")
+        if use_conv:
+            self.conv1 = conv1x1(
+                in_channels=out_channels,
+                out_channels=mid_channels,
+                use_bias=True,
+                data_format=data_format,
+                name="conv1")
+        else:
+            self.fc1 = nn.Dense(
+                units=mid_channels,
+                input_dim=out_channels,
+                name="fc1")
+        self.bn = BatchNorm(
+            epsilon=bn_eps,
+            data_format=data_format,
+            name="bn")
+        self.activ = nn.ReLU()
+        if use_conv:
+            self.conv2 = conv1x1(
+                in_channels=mid_channels,
+                out_channels=in_channels,
+                use_bias=True,
+                data_format=data_format,
+                name="conv2")
+        else:
+            self.fc2 = nn.Dense(
+                units=in_channels,
+                input_dim=mid_channels,
+                name="fc2")
+        self.softmax = nn.Softmax(axis=self.axis)
+
+    def call(self, x, training=None):
+        x_shape = x.get_shape().as_list()
+        batch = x_shape[0]
+        if is_channels_first(self.data_format):
+            height = x_shape[2]
+            width = x_shape[3]
+        else:
+            height = x_shape[1]
+            width = x_shape[2]
+        x = tf.reshape(x, shape=(batch, self.radix, self.groups, height, width))
+        w = tf.math.reduce_sum(x, axis=self.axis)
+        w = self.pool(w)
+        if self.use_conv:
+            axis = -1 if is_channels_first(self.data_format) else 1
+            w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
+        w = self.bn(w, training=training)
+        w = self.activ(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
+        if not self.use_conv:
+            axis = -1 if is_channels_first(self.data_format) else 1
+            w = tf.expand_dims(tf.expand_dims(w, axis=axis), axis=axis)
+        w = tf.reshape(w, shape=(batch, self.groups, self.radix, -1))
+        w = tf.transpose(w, perm=(0, 2, 1, 3, 4))
+        if is_channels_first(self.data_format):
+            w = tf.transpose(w, perm=(0, 2, 1, 3, 4))
+        else:
+            w = tf.transpose(w, perm=(0, 1, 2, 4, 3))
+        w = self.softmax(w)
+        if is_channels_first(self.data_format):
+            w = tf.reshape(w, shape=(batch, self.radix, -1, 1, 1))
+        else:
+            w = tf.reshape(w, shape=(batch, 1, 1, self.radix, -1))
+        x = x * w
+        x = tf.math.reduce_sum(x, axis=self.axis)
+        return x
+
+
+class SAConvBlock(nn.Layer):
+    """
+    Split-Attention convolution block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int or tuple/list of 2 int
+        Convolution window size.
+    strides : int or tuple/list of 2 int
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilation : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    force_same : bool, default False
+        Whether to forcibly set `same` padding in convolution.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default 'relu'
+        Activation function or name of activation function.
+    radix : int, default 2
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    data_format : str, default 'channels_last'
+        The ordering of the dimensions in tensors.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 strides,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 use_bias=False,
+                 force_same=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation="relu",
+                 radix=2,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True,
+                 data_format="channels_last",
+                 **kwargs):
+        super(SAConvBlock, self).__init__(**kwargs)
+        self.conv = ConvBlock(
+            in_channels=in_channels,
+            out_channels=(out_channels * radix),
+            kernel_size=kernel_size,
+            strides=strides,
+            padding=padding,
+            dilation=dilation,
+            groups=(groups * radix),
+            use_bias=use_bias,
+            force_same=force_same,
+            use_bn=use_bn,
+            bn_eps=bn_eps,
+            activation=activation,
+            data_format=data_format)
+        self.att = SABlock(
+            out_channels=out_channels,
+            groups=groups,
+            radix=radix,
+            reduction=reduction,
+            min_channels=min_channels,
+            use_conv=use_conv,
+            bn_eps=bn_eps,
+            data_format=data_format)
+
+    def call(self, x, training=None):
+        x = self.conv(x, training=training)
+        x = self.att(x, training=training)
+        return x
+
+
+def saconv3x3_block(in_channels,
+                    out_channels,
+                    strides=1,
+                    padding=1,
+                    **kwargs):
+    """
+    3x3 version of the Split-Attention convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    strides : int or tuple/list of 2 int, default 1
+        Strides of the convolution.
+    padding : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    """
+    return SAConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=3,
+        strides=strides,
+        padding=padding,
+        **kwargs)
 
 
 class PixelShuffle(nn.Layer):

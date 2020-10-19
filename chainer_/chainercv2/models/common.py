@@ -6,12 +6,13 @@ __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'HSwish', 'GlobalA
            'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'ConvBlock', 'conv1x1_block',
            'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block', 'dwconv5x5_block', 'dwsconv3x3_block',
            'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block', 'DeconvBlock', 'ChannelShuffle', 'ChannelShuffle2',
-           'SEBlock', 'PixelShuffle', 'DucBlock', 'SimpleSequential', 'DualPathSequential', 'Concurrent',
-           'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent', 'Hourglass',
-           'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten', 'AdaptiveAvgPool2D',
-           'InterpolationBlock', 'HeatmapMaxDetBlock']
+           'SEBlock', 'SABlock', 'SAConvBlock', 'saconv3x3_block', 'PixelShuffle', 'DucBlock', 'SimpleSequential',
+           'DualPathSequential', 'Concurrent', 'SequentialConcurrent', 'ParametricSequential', 'ParametricConcurrent',
+           'Hourglass', 'SesquialteralHourglass', 'MultiOutputSequential', 'ParallelConcurent', 'Flatten',
+           'AdaptiveAvgPool2D', 'InterpolationBlock', 'HeatmapMaxDetBlock']
 
 from inspect import isfunction
+from functools import partial
 import numpy as np
 from chainer import Chain
 import chainer.functions as F
@@ -1297,6 +1298,199 @@ class SEBlock(Chain):
             w = F.expand_dims(F.expand_dims(w, axis=2), axis=3)
         x = x * w
         return x
+
+
+class SABlock(Chain):
+    """
+    Split-Attention block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    out_channels : int
+        Number of output channels.
+    groups : int
+        Number of channel groups (cardinality, without radix).
+    radix : int
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    """
+    def __init__(self,
+                 out_channels,
+                 groups,
+                 radix,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True,
+                 bn_eps=1e-5):
+        super(SABlock, self).__init__()
+        self.groups = groups
+        self.radix = radix
+        self.use_conv = use_conv
+        in_channels = out_channels * radix
+        mid_channels = max(in_channels // reduction, min_channels)
+
+        with self.init_scope():
+            if use_conv:
+                self.conv1 = conv1x1(
+                    in_channels=out_channels,
+                    out_channels=mid_channels,
+                    use_bias=True)
+            else:
+                self.fc1 = L.Linear(
+                    in_size=out_channels,
+                    out_size=mid_channels)
+            self.bn = L.BatchNormalization(
+                size=out_channels,
+                eps=bn_eps)
+            self.activ = F.relu
+            if use_conv:
+                self.conv2 = conv1x1(
+                    in_channels=mid_channels,
+                    out_channels=in_channels,
+                    use_bias=True)
+            else:
+                self.fc2 = L.Linear(
+                    in_size=mid_channels,
+                    out_size=in_channels)
+            self.softmax = partial(
+                F.softmax,
+                axis=1)
+
+    def __call__(self, x):
+        batch, channels, height, width = x.shape
+        x = F.reshape(x, shape=(batch, self.radix, self.groups, height, width))
+        w = F.sum(x, axis=1)
+        w = F.average_pooling_2d(w, ksize=x.shape[2:])
+        if not self.use_conv:
+            w = F.reshape(w, shape=(w.shape[0], -1))
+        w = self.conv1(w) if self.use_conv else self.fc1(w)
+        w = self.bn(w)
+        w = self.activ(w)
+        w = self.conv2(w) if self.use_conv else self.fc2(w)
+        w = F.reshape(w, shape=(batch, self.groups, self.radix, -1))
+        w = F.swapaxes(w, axis1=1, axis2=2)
+        w = self.softmax(w)
+        w = F.reshape(w, shape=(batch, self.radix, -1, 1, 1))
+        x = x * w
+        x = F.sum(x, axis=1)
+        return x
+
+
+class SAConvBlock(Chain):
+    """
+    Split-Attention convolution block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    ksize : int or tuple/list of 2 int
+        Convolution window size.
+    stride : int or tuple/list of 2 int
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int
+        Padding value for convolution layer.
+    dilate : int or tuple/list of 2 int, default 1
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    use_bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default F.relu
+        Activation function or name of activation function.
+    radix : int, default 2
+        Number of splits within a cardinal group.
+    reduction : int, default 4
+        Squeeze reduction value.
+    min_channels : int, default 32
+        Minimal number of squeezed channels.
+    use_conv : bool, default True
+        Whether to convolutional layers instead of fully-connected ones.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 ksize,
+                 stride,
+                 pad,
+                 dilate=1,
+                 groups=1,
+                 use_bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: F.relu),
+                 radix=2,
+                 reduction=4,
+                 min_channels=32,
+                 use_conv=True):
+        super(SAConvBlock, self).__init__()
+        with self.init_scope():
+            self.conv = ConvBlock(
+                in_channels=in_channels,
+                out_channels=(out_channels * radix),
+                ksize=ksize,
+                stride=stride,
+                pad=pad,
+                dilate=dilate,
+                groups=(groups * radix),
+                use_bias=use_bias,
+                use_bn=use_bn,
+                bn_eps=bn_eps,
+                activation=activation)
+            self.att = SABlock(
+                out_channels=out_channels,
+                groups=groups,
+                radix=radix,
+                reduction=reduction,
+                min_channels=min_channels,
+                use_conv=use_conv,
+                bn_eps=bn_eps)
+
+    def __call__(self, x):
+        x = self.conv(x)
+        x = self.att(x)
+        return x
+
+
+def saconv3x3_block(in_channels,
+                    out_channels,
+                    stride=1,
+                    pad=1,
+                    **kwargs):
+    """
+    3x3 version of the Split-Attention convolution block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    stride : int or tuple/list of 2 int, default 1
+        Stride of the convolution.
+    pad : int or tuple/list of 2 int, default 1
+        Padding value for convolution layer.
+    """
+    return SAConvBlock(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        ksize=3,
+        stride=stride,
+        pad=pad,
+        **kwargs)
 
 
 class PixelShuffle(Chain):

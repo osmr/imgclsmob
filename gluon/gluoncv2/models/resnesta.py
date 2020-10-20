@@ -535,13 +535,15 @@ def resnesta152(**kwargs):
     return get_resnesta(blocks=152, model_name="resnesta152", **kwargs)
 
 
-def resnesta200(**kwargs):
+def resnesta200(in_size=(256, 256), **kwargs):
     """
     ResNeSt(A)-200 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
     Parameters:
     ----------
+    in_size : tuple of two ints, default (256, 256)
+        Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -549,16 +551,18 @@ def resnesta200(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=200, dropout_rate=0.2, model_name="resnesta200", **kwargs)
+    return get_resnesta(blocks=200, in_size=in_size, dropout_rate=0.2, model_name="resnesta200", **kwargs)
 
 
-def resnesta269(**kwargs):
+def resnesta269(in_size=(320, 320), **kwargs):
     """
     ResNeSt(A)-269 with average downsampling model with stride at the second convolution in bottleneck
     block from 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 
     Parameters:
     ----------
+    in_size : tuple of two ints, default (320, 320)
+        Spatial size of the expected input image.
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
     ctx : Context, default CPU
@@ -566,7 +570,7 @@ def resnesta269(**kwargs):
     root : str, default '~/.mxnet/models'
         Location for keeping the model parameters.
     """
-    return get_resnesta(blocks=269, dropout_rate=0.2, model_name="resnesta269", **kwargs)
+    return get_resnesta(blocks=269, in_size=in_size, dropout_rate=0.2, model_name="resnesta269", **kwargs)
 
 
 def _test():
@@ -576,12 +580,12 @@ def _test():
     pretrained = False
 
     models = [
-        # resnestabc14,
-        # resnesta18,
-        # resnestabc26,
-        # resnesta50,
-        # resnesta101,
-        # resnesta152,
+        resnestabc14,
+        resnesta18,
+        resnestabc26,
+        resnesta50,
+        resnesta101,
+        resnesta152,
         resnesta200,
         resnesta269,
     ]

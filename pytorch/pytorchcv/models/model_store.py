@@ -97,14 +97,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('senet16', '0820', '373aeafdc994c3e03bf483a9fa3ecb152353722a', 'v0.0.341', 'SENet-16', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet28', '0598', '27165b63696061e57c141314d44732aa65f807a8', 'v0.0.356', 'SENet-28', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet154', '0461', '6512228c820897cd09f877527a553ca99d673956', 'v0.0.13', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
-
     ('resnestabc14', '0749', 'f333be9541fff170daa6860a63a3715aa13aa865', 'v0.0.465', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnestabc26', '0571', '0b9e7a2c6e4d8048f5a9599650ba6ba4ce3812ad', 'v0.0.465', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta50', '0462', '0efcd5a2a0239f0b2ba3f9fa8361d2eb1773de80', 'v0.0.465', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta101', '0403', 'abbbae7f4382d82cef5ea6bd2c78e68580fa7e34', 'v0.0.465', 'ResNeSt(A)-101', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnesta200', '0388', '161cb1f11a79ab33f3f088ae7b0aa96108fcafa2', 'v0.0.465', 'ResNeSt(A)-200', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnesta269', '1151', 'ca61209c4052228edad1fe7bb48ad6a19db509d1', 'v0.0.465', 'ResNeSt(A)-269', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
-
+    ('resnesta200', '0339', '6dc300871b186950ee64fd28bb168f7fb4a036e3', 'v0.0.465', 'ResNeSt(A)-200', '2004.08955', 'in1k', 256, 0.875, 150, ''),  # noqa
+    ('resnesta269', '0338', '6a555ce85eb177299eb43747cf019a50d3a143c1', 'v0.0.465', 'ResNeSt(A)-269', '2004.08955', 'in1k', 320, 0.875, 100, ''),  # noqa
     ('ibn_resnet50', '0641', 'e48a1fe5f7e448d4b784ef4dc0f33832f3370a9b', 'v0.0.127', 'IBN-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibn_resnet101', '0561', '5279c78a0dbfc722cfcfb788af479b6133920528', 'v0.0.127', 'IBN-ResNet-101', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa
     ('ibnb_resnet50', '0686', 'e138995e6acda4b496375beac6d01cd7a9f79876', 'v0.0.127', 'IBN(b)-ResNet-50', '1807.09441', 'in1k', 224, 0.875, 200, '[XingangPan/IBN-Net]'),  # noqa

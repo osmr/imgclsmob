@@ -97,14 +97,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('senet16', '0805', 'f5f576568d02a572be5276b0b64e71ce4d1c4531', 'v0.0.422', 'in1k', 0.875),
     ('senet28', '0590', '667d56873564cc22b2f10478d5f3d55cda580c61', 'v0.0.422', 'in1k', 0.875),
     ('senet154', '0466', 'f1b79a9bf0f7073bacf534d846c03d1b71dc404b', 'v0.0.422', 'in1k', 0.875),
-
     ('resnestabc14', '0729', '5f1e1fcd4196fcd511a64531e8714481f0f9c9f7', 'v0.0.465', 'in1k', 0.875),
     ('resnestabc26', '0564', '3085ba16426af8dbc143b21a00307b70dbb91c92', 'v0.0.465', 'in1k', 0.875),
     ('resnesta50', '0452', '28ac82bd68860c9ee081e80a07c062c7fcafd191', 'v0.0.465', 'in1k', 0.875),
     ('resnesta101', '0400', 'bb2a90f59e103c73bdfc75fc8b8d898325444069', 'v0.0.465', 'in1k', 0.875),
-    ('resnesta200', '0382', '432330314ea2e369887e72c50e7752ccb38e9ae9', 'v0.0.465', 'in1k', 0.875),
-    ('resnesta269', '1115', '5f30b7985b5a57d34909f3db08c52dfe1da065ac', 'v0.0.465', 'in1k', 0.875),
-
+    ('resnesta200', '0338', '29a8a7453caee12992f9acc7f8a680a90706c4ed', 'v0.0.465', 'in1k', 0.875),
+    ('resnesta269', '0336', '9a33e31b98b4e2473b17b55d0b19fbbdd415a30d', 'v0.0.465', 'in1k', 0.875),
     ('ibn_resnet50', '0668', '4c72a071e13235ccea0db3d932db8ec5f691e155', 'v0.0.427', 'in1k', 0.875),
     ('ibn_resnet101', '0584', '2c2c4993de8b8d79a66a62a1dbf682e552eb16c1', 'v0.0.427', 'in1k', 0.875),
     ('ibnb_resnet50', '0695', '7178cc50d166fa2d2474b5110aaea7fcd41bd8ca', 'v0.0.427', 'in1k', 0.875),

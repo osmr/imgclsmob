@@ -96,14 +96,12 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('senet16', '0807', 'f45aa3fffb8ea5148c53d031e50a3f93ab00ede0', 'v0.0.341'),
     ('senet28', '0591', '7e7bf250ab1bb4842f6dd32ceb93967a7c02239b', 'v0.0.356'),
     ('senet154', '0463', '381d2494a2ad725f62325188f94cd91c795c9902', 'v0.0.28'),
-
     ('resnestabc14', '0729', 'f57c08ed850afde33e9febe5d0a5062d95dd79a1', 'v0.0.465'),
     ('resnestabc26', '0564', '7f7068e125059a90500cbf16ff91505cfe0d8759', 'v0.0.465'),
     ('resnesta50', '0452', '8cfddfdbc6bee0d0d0c6770e05710d4866513371', 'v0.0.465'),
     ('resnesta101', '0400', 'bd2efb4282ecce70dfb7985a2fbda9a0ee11a955', 'v0.0.465'),
-    ('resnesta200', '0383', '53a016abb59147455c8be3435466c2df3fe3912d', 'v0.0.465'),
-    ('resnesta269', '1118', 'fad718c2f4b5e74b761564ada9be20062b1a99f1', 'v0.0.465'),
-
+    ('resnesta200', '0339', 'b521427b8e168879455118c21ed4d99f2d37a682', 'v0.0.465'),
+    ('resnesta269', '0336', '933dbe64fb27a174752b77980bad3c545582c5e8', 'v0.0.465'),
     ('airnet50_1x64d_r2', '0620', 'b6a9359d735916ff8f6192c631b7c646f489fc41', 'v0.0.120'),
     ('airnet50_1x64d_r16', '0650', '95da530f61ae4b0dda4b52c88f37bbc7cc674a03', 'v0.0.120'),
     ('airnext50_32x4d_r2', '0573', '160860f7a1750d759c36e6000080c839cda7ac56', 'v0.0.120'),

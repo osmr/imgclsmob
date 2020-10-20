@@ -512,17 +512,17 @@ def _test():
     pretrained = False
 
     models = [
-        resnestabc14,
-        resnesta18,
-        resnestabc26,
-        resnesta50,
-        resnesta101,
-        resnesta152,
-        resnesta200,
-        resnesta269,
+        (resnestabc14, 224),
+        (resnesta18, 224),
+        (resnestabc26, 224),
+        (resnesta50, 224),
+        (resnesta101, 224),
+        (resnesta152, 224),
+        (resnesta200, 256),
+        (resnesta269, 320),
     ]
 
-    for model in models:
+    for model, size in models:
 
         net = model(pretrained=pretrained)
 
@@ -540,7 +540,7 @@ def _test():
         assert (model != resnesta269 or weight_count == 110929480)
 
         batch = 14
-        x = torch.randn(batch, 3, 224, 224)
+        x = torch.randn(batch, 3, size, size)
         y = net(x)
         y.sum().backward()
         assert (tuple(y.size()) == (batch, 1000))

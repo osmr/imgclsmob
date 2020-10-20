@@ -523,17 +523,17 @@ def _test():
     pretrained = False
 
     models = [
-        resnestabc14,
-        resnesta18,
-        resnestabc26,
-        resnesta50,
-        resnesta101,
-        resnesta152,
-        resnesta200,
-        resnesta269,
+        (resnestabc14, 224),
+        (resnesta18, 224),
+        (resnestabc26, 224),
+        (resnesta50, 224),
+        (resnesta101, 224),
+        (resnesta152, 224),
+        (resnesta200, 256),
+        (resnesta269, 320),
     ]
 
-    for model in models:
+    for model, size in models:
 
         net = model(pretrained=pretrained)
         weight_count = net.count_params()
@@ -547,9 +547,10 @@ def _test():
         assert (model != resnesta200 or weight_count == 70201544)
         assert (model != resnesta269 or weight_count == 110929480)
 
-        x = np.zeros((1, 3, 224, 224), np.float32)
+        batch = 14
+        x = np.zeros((batch, 3, size, size), np.float32)
         y = net(x)
-        assert (y.shape == (1, 1000))
+        assert (y.shape == (batch, 1000))
 
 
 if __name__ == "__main__":

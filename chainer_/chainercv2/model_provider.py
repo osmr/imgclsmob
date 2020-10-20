@@ -9,6 +9,7 @@ from .models.seresnet import *
 from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
+from .models.resnesta import *
 from .models.airnet import *
 from .models.airnext import *
 from .models.bamresnet import *
@@ -118,8 +119,6 @@ from .models.lffd import *
 
 from .models.voca import *
 from .models.nvpattexp import *
-
-from .models.resnesta import *
 
 __all__ = ['get_model']
 
@@ -248,6 +247,15 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'resnestabc14': resnestabc14,
+    'resnesta18': resnesta18,
+    'resnestabc26': resnestabc26,
+    'resnesta50': resnesta50,
+    'resnesta101': resnesta101,
+    'resnesta152': resnesta152,
+    'resnesta200': resnesta200,
+    'resnesta269': resnesta269,
 
     'airnet50_1x64d_r2': airnet50_1x64d_r2,
     'airnet50_1x64d_r16': airnet50_1x64d_r16,
@@ -981,15 +989,6 @@ _models = {
 
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
-
-    'resnestabc14': resnestabc14,
-    'resnesta18': resnesta18,
-    'resnestabc26': resnestabc26,
-    'resnesta50': resnesta50,
-    'resnesta101': resnesta101,
-    'resnesta152': resnesta152,
-    'resnesta200': resnesta200,
-    'resnesta269': resnesta269,
 }
 
 

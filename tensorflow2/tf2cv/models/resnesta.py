@@ -554,24 +554,24 @@ def _test():
     pretrained = False
 
     models = [
-        resnestabc14,
-        resnesta18,
-        resnestabc26,
-        resnesta50,
-        resnesta101,
-        resnesta152,
-        resnesta200,
-        resnesta269,
+        (resnestabc14, 224),
+        (resnesta18, 224),
+        (resnestabc26, 224),
+        (resnesta50, 224),
+        (resnesta101, 224),
+        (resnesta152, 224),
+        (resnesta200, 256),
+        (resnesta269, 320),
     ]
 
-    for model in models:
+    for model, size in models:
 
         net = model(pretrained=pretrained, data_format=data_format)
 
-        batch_saze = 14
-        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
+        batch = 14
+        x = tf.random.normal((batch, 3, size, size) if is_channels_first(data_format) else (batch, size, size, 3))
         y = net(x)
-        assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
+        assert (tuple(y.shape.as_list()) == (batch, 1000))
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))

@@ -9,6 +9,7 @@ from .models.seresnet import *
 from .models.sepreresnet import *
 from .models.seresnext import *
 from .models.senet import *
+from .models.resnesta import *
 from .models.ibnresnet import *
 from .models.ibnbresnet import *
 from .models.ibnresnext import *
@@ -138,8 +139,7 @@ from .models.nvpattexp import *
 # from .models.others.oth_alpha_pose import *
 # from .models.others.oth_icnet import *
 # from .models.others.oth_centernet import *
-from .models.others.oth_resnest import *
-from .models.resnesta import *
+# from .models.others.oth_resnest import *
 
 __all__ = ['get_model']
 
@@ -268,6 +268,15 @@ _models = {
     'senet52': senet52,
     'senet103': senet103,
     'senet154': senet154,
+
+    'resnestabc14': resnestabc14,
+    'resnesta18': resnesta18,
+    'resnestabc26': resnestabc26,
+    'resnesta50': resnesta50,
+    'resnesta101': resnesta101,
+    'resnesta152': resnesta152,
+    'resnesta200': resnesta200,
+    'resnesta269': resnesta269,
 
     'ibn_resnet50': ibn_resnet50,
     'ibn_resnet101': ibn_resnet101,
@@ -1136,21 +1145,12 @@ _models = {
     # 'center_net_resnet101_v1b_voc': center_net_resnet101_v1b_voc,
     # 'center_net_resnet101_v1b_coco': center_net_resnet101_v1b_coco,
 
-    'oth_resnest14': oth_resnest14,
-    'oth_resnest26': oth_resnest26,
-    'oth_resnest50': oth_resnest50,
-    'oth_resnest101': oth_resnest101,
-    'oth_resnest200': oth_resnest200,
-    'oth_resnest269': oth_resnest269,
-
-    'resnestabc14': resnestabc14,
-    'resnesta18': resnesta18,
-    'resnestabc26': resnestabc26,
-    'resnesta50': resnesta50,
-    'resnesta101': resnesta101,
-    'resnesta152': resnesta152,
-    'resnesta200': resnesta200,
-    'resnesta269': resnesta269,
+    # 'oth_resnest14': oth_resnest14,
+    # 'oth_resnest26': oth_resnest26,
+    # 'oth_resnest50': oth_resnest50,
+    # 'oth_resnest101': oth_resnest101,
+    # 'oth_resnest200': oth_resnest200,
+    # 'oth_resnest269': oth_resnest269,
 }
 
 

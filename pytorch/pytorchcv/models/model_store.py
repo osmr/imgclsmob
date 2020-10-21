@@ -218,6 +218,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenet_w3d4', '1076', 'd801bcaea83885b16a0306b8b77fe314bbc585c3', 'v0.0.130', 'MobileNet x0.75', '1704.04861', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenet_w1', '0895', '7e1d739f0fd4b95c16eef077c5dc0a5bb1da8ad5', 'v0.0.155', 'MobileNet x1.0', '1704.04861', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetb_wd2', '1353', '54408ece78e04c77a5d8b7ac87febce0a77e239e', 'v0.0.464', 'MobileNet(B) x0.5', '1704.04861', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetb_w1', '0926', '856f016c75df2aa33d3e0caf5d62fc5b399d7952', 'v0.0.466', 'MobileNet(B) x1.0', '1704.04861', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fdmobilenet_wd4', '3098', '2b22b709a05d7ca6e43acc6f3a9f27d0eb2e01cd', 'v0.0.177', 'FD-MobileNet x0.25', '1802.03750', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fdmobilenet_wd2', '2015', '414dbeedb2f829dcd8f94cd7fef10aae6829f06f', 'v0.0.83', 'FD-MobileNet x0.5', '1802.03750', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('fdmobilenet_w3d4', '1641', '5561d58aa8889d8d93f2062a2af4e4b35ad7e769', 'v0.0.159', 'FD-MobileNet x0.75', '1802.03750', 'in1k', 224, 0.875, 200, ''),  # noqa

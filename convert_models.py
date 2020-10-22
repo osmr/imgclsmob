@@ -99,6 +99,7 @@ def prepare_src_model(src_fwk,
 
     ext_src_param_keys = None
     ext_src_param_keys2 = None
+    src_net = None
 
     if src_fwk == "gluon":
         from gluon.utils import prepare_model as prepare_model_gl
@@ -199,10 +200,28 @@ def prepare_src_model(src_fwk,
         src_net = None
         src_params = dict(np.load(src_params_file_path))
         src_param_keys = list(src_params.keys())
+    elif (src_fwk == "tf2") and (dst_fwk == "tfl"):
+        import tensorflow as tf
+        from tensorflow2.utils import prepare_model as prepare_model_tf2
+        gpus = tf.config.experimental.list_physical_devices("GPU")
+        if gpus:
+            for gpu in gpus:
+                tf.config.experimental.set_memory_growth(gpu, True)
+        src_net = prepare_model_tf2(
+            model_name=src_model,
+            use_pretrained=True,
+            pretrained_model_file_path="")
+        batch_size = 1
+        input_shape = ((batch_size, 3, src_net.in_size[0], src_net.in_size[1]) if
+                       src_net.data_format == "channels_first" else
+                       (batch_size, src_net.in_size[0], src_net.in_size[1], 3))
+        src_net(tf.random.normal(input_shape))
+        src_params = None
+        src_param_keys = None
     else:
         raise ValueError("Unsupported src fwk: {}".format(src_fwk))
 
-    return src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2
+    return src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2, src_net
 
 
 def prepare_dst_model(dst_fwk,
@@ -289,6 +308,10 @@ def prepare_dst_model(dst_fwk,
         dst_net(tf.random.normal(input_shape))
         dst_param_keys = [v.name for v in dst_net.weights]
         dst_params = {v.name: v for v in dst_net.weights}
+    elif dst_fwk == "tfl":
+        dst_net = None
+        dst_params = None
+        dst_param_keys = None
     else:
         raise ValueError("Unsupported dst fwk: {}".format(dst_fwk))
 
@@ -1288,6 +1311,31 @@ def convert_tf2gl(dst_net,
     dst_net.save_parameters(dst_params_file_path)
 
 
+def convert_tf22tfl(src_net,
+                    dst_params_file_path):
+    import tensorflow as tf
+    converter = tf.lite.TFLiteConverter.from_keras_model(src_net)
+    tflite_model = converter.convert()
+    open(dst_params_file_path, "wb").write(tflite_model)
+
+    # batch_size = 1
+    # input_shape = ((batch_size, 3, src_net.in_size[0], src_net.in_size[1]) if
+    #                src_net.data_format == "channels_first" else
+    #                (batch_size, src_net.in_size[0], src_net.in_size[1], 3))
+    # input_data = tf.random.normal(input_shape)
+    # tf_results = src_net(input_data)
+    # interpreter = tf.lite.Interpreter(model_content=tflite_model)
+    # interpreter.allocate_tensors()
+    # input_details = interpreter.get_input_details()
+    # output_details = interpreter.get_output_details()
+    # input_data = np.array(np.random.random_sample(input_details[0]["shape"]), dtype=np.float32)
+    # interpreter.set_tensor(input_details[0]["index"], input_data)
+    # interpreter.invoke()
+    # tflite_results = interpreter.get_tensor(output_details[0]["index"])
+    # for tf_result, tflite_result in zip(tf_results, tflite_results):
+    #     np.testing.assert_almost_equal(tf_result.numpy(), tflite_result, decimal=5)
+
+
 def _init_ctx(args):
     ctx = None
     if args.src_fwk in ("gluon", "mxnet", "keras") or args.dst_fwk in ("gluon", "mxnet", "keras"):
@@ -1346,7 +1394,7 @@ def update_and_initialize_logging(args):
     if (args.src_fwk == "tensorflow") or (args.dst_fwk == "tensorflow"):
         packages += ["tensorflow-gpu"]
         pip_packages += ["tensorflow", "tensorflow-gpu", "tensorpack"]
-    if (args.src_fwk == "tf2") or (args.dst_fwk == "tf2"):
+    if (args.src_fwk == "tf2") or (args.dst_fwk == "tf2") or (args.dst_fwk == "tfl"):
         packages += ["tensorflow-gpu"]
         pip_packages += ["tensorflow", "tensorflow-gpu"]
 
@@ -1370,7 +1418,8 @@ def main():
     update_and_initialize_logging(args=args)
 
     ctx = _init_ctx(args)
-    src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2 = _prepare_src_model(args, ctx, use_cuda)
+    src_params, src_param_keys, ext_src_param_keys, ext_src_param_keys2, src_net =\
+        _prepare_src_model(args, ctx, use_cuda)
     if args.dst_fwk != "tf2":
         dst_params, dst_param_keys, dst_net = _prepare_dst_model(args, ctx, use_cuda)
 
@@ -1381,6 +1430,8 @@ def main():
           (args.src_model.startswith("diaresnet") or args.src_model.startswith("diapreresnet"))) or\
             args.src_model.startswith("oth_ibppose"):
         assert (len(src_param_keys) >= len(dst_param_keys))
+    elif args.dst_fwk == "tfl":
+        pass
     else:
         assert (len(src_param_keys) == len(dst_param_keys))
 
@@ -1481,6 +1532,10 @@ def main():
             src_params=src_params,
             src_param_keys=src_param_keys,
             ctx=ctx)
+    elif args.src_fwk == "tf2" and args.dst_fwk == "tfl":
+        convert_tf22tfl(
+            src_net=src_net,
+            dst_params_file_path=args.dst_params)
     else:
         raise NotImplementedError
 

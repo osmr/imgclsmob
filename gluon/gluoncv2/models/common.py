@@ -2020,14 +2020,21 @@ class Concurrent(nn.HybridSequential):
         The axis on which to concatenate the outputs.
     stack : bool, default False
         Whether to concatenate tensors along a new dimension.
+    branches : list of HybridBlock, default None
+        Whether to concatenate tensors along a new dimension.
     """
     def __init__(self,
                  axis=1,
                  stack=False,
+                 branches=None,
                  **kwargs):
         super(Concurrent, self).__init__(**kwargs)
         self.axis = axis
         self.stack = stack
+        if branches is not None:
+            with self.name_scope():
+                for branch in branches:
+                    self.add(branch)
 
     def hybrid_forward(self, F, x):
         out = []

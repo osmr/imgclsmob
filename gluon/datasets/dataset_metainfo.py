@@ -37,7 +37,7 @@ class DatasetMetaInfo(object):
         self.saver_acc_ind = None
         self.ml_type = None
         self.allow_hybridize = True
-        self.train_net_extra_kwargs = None
+        self.train_net_extra_kwargs = {"root": os.path.join("~", ".mxnet", "models")}
         self.test_net_extra_kwargs = None
         self.load_ignore_extra = False
         self.test_dataset_extra_kwargs = {}
@@ -72,6 +72,11 @@ class DatasetMetaInfo(object):
             type=int,
             default=self.in_channels,
             help="number of input channels")
+        parser.add_argument(
+            "--net-root",
+            type=str,
+            default=os.path.join("~", ".mxnet", "models"),
+            help="root for pretrained net cache")
 
     def update(self,
                args):
@@ -86,6 +91,7 @@ class DatasetMetaInfo(object):
         self.root_dir_path = args.data_dir
         self.num_classes = args.num_classes
         self.in_channels = args.in_channels
+        self.train_net_extra_kwargs["root"] = args.net_root
 
     def update_from_dataset(self,
                             dataset):

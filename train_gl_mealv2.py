@@ -861,6 +861,7 @@ def main():
                 use_pretrained=True,
                 pretrained_model_file_path="",
                 dtype=args.dtype,
+                net_extra_kwargs=ds_metainfo.train_net_extra_kwargs,
                 do_hybridize=(not args.not_hybridize),
                 ctx=ctx)
             assert (teacher_net.classes == net.classes)

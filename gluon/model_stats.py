@@ -15,6 +15,7 @@ from .gluoncv2.models.rir_cifar import RiRFinalBlock
 from .gluoncv2.models.proxylessnas import ProxylessUnit
 from .gluoncv2.models.lwopenpose_cmupan import LwopDecoderFinalBlock
 from .gluoncv2.models.centernet import CenterNetHeatmapMaxDet
+from .gluoncv2.models.danet import ScaleBlock
 
 __all__ = ['measure_model']
 
@@ -221,7 +222,7 @@ def measure_model(model,
         elif isinstance(block, ProxylessUnit):
             extra_num_flops = x[0].size
             extra_num_macs = 0
-        elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet]:
+        elif type(block) in [InterpolationBlock, HeatmapMaxDetBlock, CenterNetHeatmapMaxDet, ScaleBlock]:
             extra_num_flops, extra_num_macs = block.calc_flops(x[0])
         elif isinstance(block, LwopDecoderFinalBlock):
             if not block.calc_3d_features:

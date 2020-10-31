@@ -3,7 +3,7 @@
     Original paper: 'Dual Attention Network for Scene Segmentation,' https://arxiv.org/abs/1809.02983.
 """
 
-__all__ = ['DANet', 'danet_resnetd50b_cityscapes', 'danet_resnetd101b_cityscapes']
+__all__ = ['DANet', 'danet_resnetd50b_cityscapes', 'danet_resnetd101b_cityscapes', 'ScaleBlock']
 
 
 import os
@@ -12,6 +12,36 @@ from mxnet import cpu
 from mxnet.gluon import nn, HybridBlock
 from .common import conv1x1, conv3x3_block
 from .resnetd import resnetd50b, resnetd101b
+
+
+class ScaleBlock(HybridBlock):
+    """
+    Simple scale block.
+    """
+    def __init__(self,
+                 **kwargs):
+        super(ScaleBlock, self).__init__(**kwargs)
+        with self.name_scope():
+            self.alpha = self.params.get(
+                "alpha",
+                shape=(1,),
+                init=mx.init.Zero(),
+                allow_deferred_init=True)
+
+    def hybrid_forward(self, F, x, alpha):
+        return F.broadcast_mul(alpha, x)
+
+    def __repr__(self):
+        s = '{name}(alpha={alpha})'
+        return s.format(
+            name=self.__class__.__name__,
+            gamma=self.alpha.shape[0])
+
+    def calc_flops(self, x):
+        assert (x.shape[0] == 1)
+        num_flops = x.size
+        num_macs = 0
+        return num_flops, num_macs
 
 
 class PosAttBlock(HybridBlock):
@@ -46,9 +76,9 @@ class PosAttBlock(HybridBlock):
                 in_channels=channels,
                 out_channels=channels,
                 use_bias=True)
-            self.gamma = self.params.get("gamma", shape=(1,), init=mx.init.Zero())
+            self.scale = ScaleBlock()
 
-    def hybrid_forward(self, F, x, gamma):
+    def hybrid_forward(self, F, x):
         proj_query = self.query_conv(x).reshape((0, 0, -1))
         proj_key = self.key_conv(x).reshape((0, 0, -1))
         proj_value = self.value_conv(x).reshape((0, 0, -1))
@@ -58,7 +88,7 @@ class PosAttBlock(HybridBlock):
 
         y = F.batch_dot(proj_value, w, transpose_b=True)
         y = F.reshape_like(y, x, lhs_begin=2, lhs_end=None, rhs_begin=2, rhs_end=None)
-        y = F.broadcast_mul(gamma, y) + x
+        y = self.scale(y) + x
         return y
 
 
@@ -71,9 +101,9 @@ class ChaAttBlock(HybridBlock):
                  **kwargs):
         super(ChaAttBlock, self).__init__(**kwargs)
         with self.name_scope():
-            self.gamma = self.params.get("gamma", shape=(1,), init=mx.init.Zero())
+            self.scale = ScaleBlock()
 
-    def hybrid_forward(self, F, x, gamma):
+    def hybrid_forward(self, F, x):
         proj_query = x.reshape((0, 0, -1))
         proj_key = x.reshape((0, 0, -1))
         proj_value = x.reshape((0, 0, -1))
@@ -84,7 +114,7 @@ class ChaAttBlock(HybridBlock):
 
         y = F.batch_dot(w, proj_value)
         y = F.reshape_like(y, x, lhs_begin=2, lhs_end=None, rhs_begin=2, rhs_end=None)
-        y = F.broadcast_mul(gamma, y) + x
+        y = self.scale(y) + x
         return y
 
 
@@ -386,7 +416,7 @@ def _test():
         if not pretrained:
             net.initialize(ctx=ctx)
 
-        # net.hybridize()
+        net.hybridize()
         net_params = net.collect_params()
         weight_count = 0
         for param in net_params.values():

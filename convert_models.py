@@ -675,6 +675,15 @@ def convert_gl2gl(dst_net,
                   src_model,
                   ctx):
     if src_model.startswith("oth_danet_resnet"):
+        src6 = list(filter(re.compile("^head.sa.gamma").search, src_param_keys))
+        src6n = [key for key in src_param_keys if key not in src6]
+        src_param_keys = src6n + src6
+        src7 = list(filter(re.compile("^head.conv51").search, src_param_keys))
+        src7n = [key for key in src_param_keys if key not in src7]
+        src_param_keys = src7n + src7
+        src8 = list(filter(re.compile("^head.conv6").search, src_param_keys))
+        src8n = [key for key in src_param_keys if key not in src8]
+        src_param_keys = src8n + src8
         src1 = list(filter(re.compile("^head.conv5c").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1n + src1

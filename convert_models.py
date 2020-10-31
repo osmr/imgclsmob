@@ -674,7 +674,23 @@ def convert_gl2gl(dst_net,
                   finetune,
                   src_model,
                   ctx):
-    if src_model.startswith("oth_icnet_resnet50_citys"):
+    if src_model.startswith("oth_danet_resnet"):
+        src1 = list(filter(re.compile("^head.conv5c").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n + src1
+        src2 = list(filter(re.compile("^head.sc").search, src_param_keys))
+        src2n = [key for key in src_param_keys if key not in src2]
+        src_param_keys = src2n + src2
+        src3 = list(filter(re.compile("^head.conv52").search, src_param_keys))
+        src3n = [key for key in src_param_keys if key not in src3]
+        src_param_keys = src3n + src3
+        src4 = list(filter(re.compile("^head.conv7").search, src_param_keys))
+        src4n = [key for key in src_param_keys if key not in src4]
+        src_param_keys = src4n + src4
+        src5 = list(filter(re.compile("^head.conv8").search, src_param_keys))
+        src5n = [key for key in src_param_keys if key not in src5]
+        src_param_keys = src5n + src5
+    elif src_model.startswith("oth_icnet_resnet50_citys"):
         src1 = list(filter(re.compile("^conv_sub1").search, src_param_keys))
         src1n = [key for key in src_param_keys if key not in src1]
         src_param_keys = src1 + src1n

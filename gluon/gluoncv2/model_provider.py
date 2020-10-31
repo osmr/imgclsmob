@@ -118,6 +118,7 @@ from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.sinet import *
 from .models.bisenet import *
+from .models.danet import *
 
 from .models.superpointnet import *
 
@@ -140,6 +141,7 @@ from .models.nvpattexp import *
 # from .models.others.oth_icnet import *
 # from .models.others.oth_centernet import *
 # from .models.others.oth_resnest import *
+from .models.others.oth_danet import *
 
 __all__ = ['get_model']
 
@@ -1151,6 +1153,13 @@ _models = {
     # 'oth_resnest101': oth_resnest101,
     # 'oth_resnest200': oth_resnest200,
     # 'oth_resnest269': oth_resnest269,
+
+    'danet_resnetd50b_cityscapes': danet_resnetd50b_cityscapes,
+    'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
+
+    'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
+    'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
+
 }
 
 

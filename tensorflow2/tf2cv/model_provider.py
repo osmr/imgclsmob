@@ -85,6 +85,7 @@ from .models.deeplabv3 import *
 from .models.icnet import *
 from .models.sinet import *
 from .models.bisenet import *
+from .models.danet import *
 
 from .models.alphapose_coco import *
 from .models.simplepose_coco import *
@@ -822,6 +823,9 @@ _models = {
     'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
+
+    'danet_resnetd50b_cityscapes': danet_resnetd50b_cityscapes,
+    'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
 

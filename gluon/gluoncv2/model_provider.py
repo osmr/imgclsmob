@@ -1074,6 +1074,9 @@ _models = {
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
 
+    'danet_resnetd50b_cityscapes': danet_resnetd50b_cityscapes,
+    'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
+
     'superpointnet': superpointnet,
 
     'alphapose_fastseresnet101b_coco': alphapose_fastseresnet101b_coco,
@@ -1153,9 +1156,6 @@ _models = {
     # 'oth_resnest101': oth_resnest101,
     # 'oth_resnest200': oth_resnest200,
     # 'oth_resnest269': oth_resnest269,
-
-    'danet_resnetd50b_cityscapes': danet_resnetd50b_cityscapes,
-    'danet_resnetd101b_cityscapes': danet_resnetd101b_cityscapes,
 
     'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     'oth_danet_resnet101_citys': oth_danet_resnet101_citys,

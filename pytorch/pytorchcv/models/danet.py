@@ -5,15 +5,14 @@
 
 __all__ = ['DANet', 'danet_resnetd50b_cityscapes', 'danet_resnetd101b_cityscapes', 'ScaleBlock']
 
-
 import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 from torch.nn.parameter import Parameter
-from common import conv1x1, conv3x3_block
-from resnetd import resnetd50b, resnetd101b
+from .common import conv1x1, conv3x3_block
+from .resnetd import resnetd50b, resnetd101b
 
 
 class ScaleBlock(nn.Module):
@@ -79,10 +78,10 @@ class PosAttBlock(nn.Module):
         proj_key = self.key_conv(x).view((batch, -1, height * width))
         proj_value = self.value_conv(x).view((batch, -1, height * width))
 
-        energy = proj_query.transpose(1, 2).bmm(proj_key)
+        energy = proj_query.transpose(1, 2).contiguous().bmm(proj_key)
         w = self.softmax(energy)
 
-        y = proj_value.bmm(w.transpose(1, 2))
+        y = proj_value.bmm(w.transpose(1, 2).contiguous())
         y = y.reshape((batch, -1, height, width))
         y = self.scale(y) + x
         return y
@@ -104,7 +103,7 @@ class ChaAttBlock(nn.Module):
         proj_key = x.view((batch, -1, height * width))
         proj_value = x.view((batch, -1, height * width))
 
-        energy = proj_query.bmm(proj_key.transpose(1, 2))
+        energy = proj_query.bmm(proj_key.transpose(1, 2).contiguous())
         energy_max, _ = energy.max(dim=-1, keepdims=True)
         energy_new = energy_max.expand_as(energy) - energy
         w = self.softmax(energy_new)
@@ -267,7 +266,7 @@ class DANet(nn.Module):
 
 
 def get_danet(backbone,
-              classes,
+              num_classes,
               aux=False,
               model_name=None,
               pretrained=False,
@@ -280,7 +279,7 @@ def get_danet(backbone,
     ----------
     backbone : nn.Sequential
         Feature extractor.
-    classes : int
+    num_classes : int
         Number of segmentation classes.
     aux : bool, default False
         Whether to output an auxiliary result.
@@ -293,7 +292,7 @@ def get_danet(backbone,
     """
     net = DANet(
         backbone=backbone,
-        num_classes=classes,
+        num_classes=num_classes,
         aux=aux,
         **kwargs)
 
@@ -309,7 +308,7 @@ def get_danet(backbone,
     return net
 
 
-def danet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+def danet_resnetd50b_cityscapes(pretrained_backbone=False, num_classes=19, aux=True, **kwargs):
     """
     DANet model on the base of ResNet(D)-50b for Cityscapes from 'Dual Attention Network for Scene Segmentation,'
     https://arxiv.org/abs/1809.02983.
@@ -318,7 +317,7 @@ def danet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    classes : int, default 19
+    num_classes : int, default 19
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
@@ -329,11 +328,11 @@ def danet_resnetd50b_cityscapes(pretrained_backbone=False, classes=19, aux=True,
     """
     backbone = resnetd50b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
-    return get_danet(backbone=backbone, classes=classes, aux=aux, model_name="danet_resnetd50b_cityscapes",
+    return get_danet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="danet_resnetd50b_cityscapes",
                      **kwargs)
 
 
-def danet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True, **kwargs):
+def danet_resnetd101b_cityscapes(pretrained_backbone=False, num_classes=19, aux=True, **kwargs):
     """
     DANet model on the base of ResNet(D)-101b for Cityscapes from 'Dual Attention Network for Scene Segmentation,'
     https://arxiv.org/abs/1809.02983.
@@ -342,7 +341,7 @@ def danet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     ----------
     pretrained_backbone : bool, default False
         Whether to load the pretrained weights for feature extractor.
-    classes : int, default 19
+    num_classes : int, default 19
         Number of segmentation classes.
     aux : bool, default True
         Whether to output an auxiliary result.
@@ -353,7 +352,7 @@ def danet_resnetd101b_cityscapes(pretrained_backbone=False, classes=19, aux=True
     """
     backbone = resnetd101b(pretrained=pretrained_backbone, ordinary_init=False, bends=(3,)).features
     del backbone[-1]
-    return get_danet(backbone=backbone, classes=classes, aux=aux, model_name="danet_resnetd101b_cityscapes",
+    return get_danet(backbone=backbone, num_classes=num_classes, aux=aux, model_name="danet_resnetd101b_cityscapes",
                      **kwargs)
 
 

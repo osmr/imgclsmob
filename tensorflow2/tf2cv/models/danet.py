@@ -3,15 +3,14 @@
     Original paper: 'Dual Attention Network for Scene Segmentation,' https://arxiv.org/abs/1809.02983.
 """
 
-__all__ = ['DANet', 'danet_resnetd50b_cityscapes', 'danet_resnetd101b_cityscapes', 'ScaleBlock']
-
+__all__ = ['DANet', 'danet_resnetd50b_cityscapes', 'danet_resnetd101b_cityscapes']
 
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
 from tensorflow.python.keras import initializers
 from tensorflow.python.keras.engine.input_spec import InputSpec
-from .common import conv1x1, conv3x3_block, is_channels_first, interpolate_im
+from .common import conv1x1, conv3x3_block, is_channels_first, interpolate_im, get_im_size
 from .resnetd import resnetd50b, resnetd101b
 
 
@@ -44,7 +43,6 @@ class ScaleBlock(nn.Layer):
             dtype=self.dtype,
             trainable=True)
         channel_axis = (1 if is_channels_first(self.data_format) else len(input_shape) - 1)
-        assert (self.in_channels == input_shape[channel_axis])
         axes = {}
         for i in range(1, len(input_shape)):
             if i != channel_axis:
@@ -52,7 +50,7 @@ class ScaleBlock(nn.Layer):
         self.input_spec = InputSpec(ndim=len(input_shape), axes=axes)
         self.built = True
 
-    def call(self, x):
+    def call(self, x, training=None):
         return self.alpha * x
 
     def get_config(self):
@@ -111,19 +109,32 @@ class PosAttBlock(nn.Layer):
         self.scale = ScaleBlock(
             data_format=data_format,
             name="scale")
-        self.softmax = nn.Softmax(axis=(-1 if is_channels_first(self.data_format) else -2))
+        self.softmax = nn.Softmax(axis=-1)
 
     def call(self, x, training=None):
-        batch, channels, height, width = x.shape
-        proj_query = tf.reshape(self.query_conv(x), shape=(batch, -1, height * width))
-        proj_key = tf.reshape(self.key_conv(x), shape=(batch, -1, height * width))
-        proj_value = tf.reshape(self.value_conv(x), shape=(batch, -1, height * width))
+        proj_query = self.query_conv(x)
+        proj_key = self.key_conv(x)
+        proj_value = self.value_conv(x)
 
-        energy = tf.keras.backend.batch_dot(proj_query, proj_key, transpose_a=True)
+        if not is_channels_first(self.data_format):
+            proj_query = tf.transpose(proj_query, perm=(0, 3, 1, 2))
+            proj_key = tf.transpose(proj_key, perm=(0, 3, 1, 2))
+            proj_value = tf.transpose(proj_value, perm=(0, 3, 1, 2))
+
+        batch, channels, height, width = proj_query.shape
+        proj_query = tf.reshape(proj_query, shape=(batch, -1, height * width))
+        proj_key = tf.reshape(proj_key, shape=(batch, -1, height * width))
+        proj_value = tf.reshape(proj_value, shape=(batch, -1, height * width))
+
+        energy = tf.keras.backend.batch_dot(tf.transpose(proj_query, perm=(0, 2, 1)), proj_key)
         w = self.softmax(energy)
 
-        y = tf.keras.backend.batch_dot(proj_value, w, transpose_b=True)
-        y = y.reshape((batch, -1, height, width))
+        y = tf.keras.backend.batch_dot(proj_value, tf.transpose(w, perm=(0, 2, 1)))
+        y = tf.reshape(y, shape=(batch, -1, height, width))
+
+        if not is_channels_first(self.data_format):
+            y = tf.transpose(y, perm=(0, 2, 3, 1))
+
         y = self.scale(y, training=training) + x
         return y
 
@@ -150,17 +161,30 @@ class ChaAttBlock(nn.Layer):
         self.softmax = nn.Softmax(axis=-1)
 
     def call(self, x, training=None):
-        batch, channels, height, width = x.shape
-        proj_query = tf.reshape(x, shape=(batch, -1, height * width))
-        proj_key = tf.reshape(x, shape=(batch, -1, height * width))
-        proj_value = tf.reshape(x, shape=(batch, -1, height * width))
+        proj_query = x
+        proj_key = x
+        proj_value = x
 
-        energy = tf.keras.backend.batch_dot(proj_query, proj_key, transpose_b=True)
-        energy_new = energy.max(axis=-1, keepdims=True).broadcast_like(energy) - energy
+        if not is_channels_first(self.data_format):
+            proj_query = tf.transpose(proj_query, perm=(0, 3, 1, 2))
+            proj_key = tf.transpose(proj_key, perm=(0, 3, 1, 2))
+            proj_value = tf.transpose(proj_value, perm=(0, 3, 1, 2))
+
+        batch, channels, height, width = proj_query.shape
+        proj_query = tf.reshape(proj_query, shape=(batch, -1, height * width))
+        proj_key = tf.reshape(proj_key, shape=(batch, -1, height * width))
+        proj_value = tf.reshape(proj_value, shape=(batch, -1, height * width))
+
+        energy = tf.keras.backend.batch_dot(proj_query, tf.transpose(proj_key, perm=(0, 2, 1)))
+        energy_new = tf.broadcast_to(tf.math.reduce_max(energy, axis=-1, keepdims=True), shape=energy.shape) - energy
         w = self.softmax(energy_new)
 
         y = tf.keras.backend.batch_dot(w, proj_value)
-        y = y.reshape((batch, -1, height, width))
+        y = tf.reshape(y, shape=(batch, -1, height, width))
+
+        if not is_channels_first(self.data_format):
+            y = tf.transpose(y, perm=(0, 2, 3, 1))
+
         y = self.scale(y, training=training) + x
         return y
 
@@ -217,7 +241,6 @@ class DANetHeadBranch(nn.Layer):
             name="conv3")
         self.dropout = nn.Dropout(
             rate=dropout_rate,
-            data_format=data_format,
             name="dropout")
 
     def call(self, x, training=None):
@@ -271,7 +294,6 @@ class DANetHead(nn.Layer):
             name="conv")
         self.dropout = nn.Dropout(
             rate=dropout_rate,
-            data_format=data_format,
             name="dropout")
 
     def call(self, x, training=None):
@@ -323,6 +345,7 @@ class DANet(tf.keras.Model):
         self.classes = classes
         self.aux = aux
         self.fixed_size = fixed_size
+        self.data_format = data_format
 
         self.backbone = backbone
         self.head = DANetHead(
@@ -332,7 +355,7 @@ class DANet(tf.keras.Model):
             name="head")
 
     def call(self, x, training=None):
-        in_size = self.in_size if self.fixed_size else x.shape[2:]
+        in_size = self.in_size if self.fixed_size else get_im_size(x, data_format=self.data_format)
         x, _ = self.backbone(x, training=training)
         x, y, z = self.head(x, training=training)
         x = interpolate_im(x, out_size=in_size, data_format=self.data_format)

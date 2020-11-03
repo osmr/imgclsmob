@@ -133,3 +133,4 @@ class CityscapesMetaInfo(VOCMetaInfo):
              "bg_idx": CityscapesSegDataset.background_idx,
              "ignore_bg": CityscapesSegDataset.ignore_bg,
              "macro_average": False}]
+        self.test_net_extra_kwargs = self.net_extra_kwargs

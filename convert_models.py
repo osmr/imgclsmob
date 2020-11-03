@@ -919,6 +919,9 @@ def convert_gl2tf2(dst_net,
         dst_param_keys = [key.replace("/unit", "/a_unit") for key in dst_param_keys]
         dst_param_keys = [key.replace("/reg_block/", "/z_reg_block/") for key in dst_param_keys]
 
+    # if src_model.startswith("danet"):
+    #     dst_param_keys = [key.replace("da_net/head/", "z_da_net/head/") for key in dst_param_keys]
+
     dst_param_keys.sort()
     dst_param_keys.sort(key=lambda var: ["{:10}".format(int(x)) if
                                          x.isdigit() else x for x in re.findall(r"[^0-9]|[0-9]+", var)])
@@ -942,6 +945,9 @@ def convert_gl2tf2(dst_net,
     if src_model.startswith("centernet"):
         dst_param_keys = [key.replace("/a_unit", "/unit") for key in dst_param_keys]
         dst_param_keys = [key.replace("/z_reg_block/", "/reg_block/") for key in dst_param_keys]
+
+    # if src_model.startswith("danet"):
+    #     dst_param_keys = [key.replace("z_da_net/head/", "da_net/head/") for key in dst_param_keys]
 
     dst_param_keys_orig = dst_param_keys.copy()
     dst_param_keys = [s[:(s.find("convgroup") + 9)] + "/" + s.split("/")[-1] if s.find("convgroup") >= 0 else s

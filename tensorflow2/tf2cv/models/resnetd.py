@@ -8,7 +8,7 @@ __all__ = ['ResNetD', 'resnetd50b', 'resnetd101b', 'resnetd152b']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import MultiOutputSequential, is_channels_first
+from .common import MultiOutputSequential, SimpleSequential, is_channels_first
 from .resnet import ResUnit, ResInitBlock
 from .senet import SEInitBlock
 
@@ -74,7 +74,7 @@ class ResNetD(tf.keras.Model):
                 name="init_block"))
         in_channels = init_block_channels
         for i, channels_per_stage in enumerate(channels):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 strides = 2 if ((j == 0) and (i != 0) and (i < 2)) else 1
                 dilation = (2 ** max(0, i - 1 - int(j == 0)))

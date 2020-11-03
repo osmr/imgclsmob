@@ -68,6 +68,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - DeepLabv3 (['Rethinking Atrous Convolution for Semantic Image Segmentation'](https://arxiv.org/abs/1706.05587))
 - ICNet (['ICNet for Real-Time Semantic Segmentation on High-Resolution Images'](https://arxiv.org/abs/1704.08545))
 - BiSeNet (['BiSeNet: Bilateral Segmentation Network for Real-time Semantic Segmentation'](https://arxiv.org/abs/1808.00897))
+- DANet (['Dual Attention Network for Scene Segmentation'](https://arxiv.org/abs/1809.02983))
 - CenterNet (['Objects as Points'](https://arxiv.org/abs/1904.07850))
 - LFFD (['LFFD: A Light and Fast Face Detector for Edge Devices'](https://arxiv.org/abs/1904.10633))
 - AlphaPose (['RMPE: Regional Multi-person Pose Estimation'](https://arxiv.org/abs/1612.00137))
@@ -626,6 +627,8 @@ Some remarks:
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | PSPNet | ResNet(D)-101b | 92.80 | 57.60 | 65,707,475 | 230,767.33M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.449/pspnet_resnetd101b_cityscapes-5760-6dc20af6.tf2.h5.log)) |
 | ICNet | ResNet(D)-50b | 95.37 | 60.60 | 47,489,184 | 14,253.43M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.457/icnet_resnetd50b_cityscapes-6060-1e53e1d1.tf2.h5.log)) |
+| DANet | ResNet(D)-50b | 95.96 | 68.06 | 47,586,427 | 180,397.43M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.468/danet_resnetd50b_cityscapes-6806-c79f5f22.tf2.h5.log)) |
+| DANet | ResNet(D)-101b | 96.01 | 67.90 | 66,578,555 | 248,811.08M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.468/danet_resnetd101b_cityscapes-6790-ebd5eef6.tf2.h5.log)) |
 
 ### COCO Semantic Segmentation
 

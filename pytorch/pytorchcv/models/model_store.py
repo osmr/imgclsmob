@@ -521,6 +521,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('icnet_resnetd50b_cityscapes', '6402', 'b380f8cc91ffeac29df6c245f34fbc89aa095c53', 'v0.0.457', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('sinet_cityscapes', '6172', '8ecd14141b85a682c2cc1c74e13077fee4746d87', 'v0.0.437', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('bisenet_resnet18_celebamaskhq', '0000', '98affefd74cc7f87314a96f148dbdbf4055bbfcb', 'v0.0.462', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
+    ('danet_resnetd50b_cityscapes', '6799', 'c5740c9fd471c141a584455efd2167858dd8cb94', 'v0.0.468', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
+    ('danet_resnetd101b_cityscapes', '6810', 'f1eeb724757bbcdc067de9cdfad6d463fb9fdb90', 'v0.0.468', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('alphapose_fastseresnet101b_coco', '7415', 'b9e3f64a9fe44198b23e7278cc3a94fd94247e20', 'v0.0.454', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('simplepose_resnet18_coco', '6631', '7c3656b35607805bdb877e7134938fd4510b2c8c', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa
     ('simplepose_resnet50b_coco', '7102', '621d2545c8b39793a0fe3a48054684f8b982a978', 'v0.0.455', '', '', 'cocohpe', 0, 0.0, 0, ''),  # noqa

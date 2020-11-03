@@ -141,7 +141,7 @@ from .models.nvpattexp import *
 # from .models.others.oth_icnet import *
 # from .models.others.oth_centernet import *
 # from .models.others.oth_resnest import *
-from .models.others.oth_danet import *
+# from .models.others.oth_danet import *
 
 __all__ = ['get_model']
 
@@ -1157,8 +1157,8 @@ _models = {
     # 'oth_resnest200': oth_resnest200,
     # 'oth_resnest269': oth_resnest269,
 
-    'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
-    'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
+    # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
+    # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
 
 }
 

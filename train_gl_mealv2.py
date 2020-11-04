@@ -128,6 +128,11 @@ def add_train_cls_parser_arguments(parser):
         default=0.1,
         help="learning rate")
     parser.add_argument(
+        "--dlr-factor",
+        type=float,
+        default=0.1,
+        help="discriminator learning rate factor")
+    parser.add_argument(
         "--lr-mode",
         type=str,
         default="cosine",
@@ -880,7 +885,7 @@ def main():
                         static_shape=True)
                 discrim_net.initialize(mx.init.MSRAPrelu(), ctx=ctx)
                 for k, v in discrim_net.collect_params().items():
-                    v.lr_mult = 0.1
+                    v.lr_mult = args.dlr_factor
                 discrim_loss_func = MealAdvLoss()
 
     train_data = get_train_data_source(

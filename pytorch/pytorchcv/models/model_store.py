@@ -36,7 +36,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('resnet18_wd4', '1785', 'fe79b31f56e7becab9c014dbc14ccdb564b5148f', 'v0.0.262', 'ResNet-18 x0.25', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet18_wd2', '1327', '6654f50ad357f4596502b92b3dca2147776089ac', 'v0.0.263', 'ResNet-18 x0.5', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet18_w3d4', '1106', '3636648b504e1ba134947743eb34dd0e78feda02', 'v0.0.266', 'ResNet-18 x0.75', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnet18', '0982', '0126861b4cd7f7b14196b1e01827da688f8bab6d', 'v0.0.153', 'ResNet-18', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnet18', '0941', '8ef01e0510af3cf4dd322996c7ff30634dec8bc5', 'v0.0.469', 'ResNet-18', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet26', '0854', '258347330aefca1c2387583680f812c9d6a8a66c', 'v0.0.305', 'ResNet-26', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnetbc26b', '0797', '7af52a73b234dc56ab4b0757cf3ea772d0699622', 'v0.0.313', 'ResNet-BC-26b', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet34', '0780', '3f775482a327e5fc4850fbb77785bfc55e171e5f', 'v0.0.291', 'ResNet-34', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -98,6 +98,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('senet28', '0598', '27165b63696061e57c141314d44732aa65f807a8', 'v0.0.356', 'SENet-28', '1709.01507', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('senet154', '0461', '6512228c820897cd09f877527a553ca99d673956', 'v0.0.13', 'SENet-154', '1709.01507', 'in1k', 224, 0.875, 200, '[Cadene/pretrained...pytorch]'),  # noqa
     ('resnestabc14', '0749', 'f6d750765b784c2abcc4a527a799a5804d3145ff', 'v0.0.465', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnesta18', '0749', '796b130802d321e0747927e6ceabc6875227645b', 'v0.0.471', 'ResNeSt(A)-BC-14', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnestabc26', '0571', 'd6a8a7ae2f6b1224ff51a6c1ee4b94c4795218db', 'v0.0.465', 'ResNeSt(A)-BC-26', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta50', '0462', 'c98fe61543ea770d120d157eed2030c60a6bc70d', 'v0.0.465', 'ResNeSt(A)-50', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnesta101', '0403', '61e147732069b54ed4da4b342b1b8526a0e9df54', 'v0.0.465', 'ResNeSt(A)-101', '2004.08955', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -280,7 +281,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mixnet_s', '0719', 'aeafe8432c11ffafbe72b9456d0c040151a5465c', 'v0.0.412', 'MixNet-S', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_m', '0660', '5aab9fbd5a1d53cca58cdab4e1c644cacb6e0d8c', 'v0.0.413', 'MixNet-M', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_l', '0582', '6cf2c97538d4173d9f6bc80a6ec299463df2d1f3', 'v0.0.414', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('resneta18', '0989', 'b2ff9be759d701ff90099d2f0b47fc5f2e1648bf', 'v0.0.463', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
+    ('resneta18', '0887', '5402c05130d4fd902c26c805edfbd2a0063d989f', 'v0.0.470', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0563', '1a1cc735a2af26f31fb1207a6bb487f48c23d401', 'v0.0.452', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta101b', '0503', '80d275397837e8f40908cdb4b2cc3e427a1196ee', 'v0.0.452', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta152b', '0482', '9b55f86f63c7402c0093903883e114a9f4809061', 'v0.0.452', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa

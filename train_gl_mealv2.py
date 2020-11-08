@@ -130,7 +130,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--dlr-factor",
         type=float,
-        default=0.1,
+        default=1.0,
         help="discriminator learning rate factor")
     parser.add_argument(
         "--lr-mode",

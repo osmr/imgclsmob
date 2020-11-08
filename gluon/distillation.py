@@ -17,8 +17,6 @@ class MealDiscriminator(HybridBlock):
     ----------
     classes : int, default 1000
         Number of classification classes.
-    down_factor : int, default 10
-        Channel down factor.
     bn_use_global_stats : bool, default False
         Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
     bn_cudnn_off : bool, default False
@@ -26,31 +24,26 @@ class MealDiscriminator(HybridBlock):
     """
     def __init__(self,
                  classes=1000,
-                 down_factor=10,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  **kwargs):
         super(MealDiscriminator, self).__init__(**kwargs)
+        in_channels = classes
+        channels = [200, 40, 8]
+
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            in_channels = classes
-            out_channels = in_channels // down_factor
-            self.features.add(conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
-            in_channels = out_channels
-            out_channels = in_channels // down_factor
-            self.features.add(conv1x1_block(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                bn_use_global_stats=bn_use_global_stats,
-                bn_cudnn_off=bn_cudnn_off))
+            for out_channels in channels:
+                self.features.add(conv1x1_block(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    bn_use_global_stats=bn_use_global_stats,
+                    bn_cudnn_off=bn_cudnn_off))
+                in_channels = out_channels
 
             self.output = nn.HybridSequential(prefix="")
             self.output.add(conv1x1(
-                in_channels=out_channels,
+                in_channels=in_channels,
                 out_channels=2,
                 use_bias=True))
             self.output.add(nn.Flatten())

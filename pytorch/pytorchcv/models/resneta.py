@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNetA', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
+__all__ = ['ResNetA', 'resnetabc14b', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
 
 import os
 import torch.nn as nn
@@ -296,6 +296,21 @@ def get_resneta(blocks,
     return net
 
 
+def resnetabc14b(**kwargs):
+    """
+    ResNet(A)-BC-14b with average downsampling model from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385. It's an experimental model (bottleneck compressed).
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resneta(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetabc14b", **kwargs)
+
+
 def resneta18(**kwargs):
     """
     ResNet(A)-18 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
@@ -371,6 +386,7 @@ def _test():
     pretrained = False
 
     models = [
+        resnetabc14b,
         resneta18,
         resneta50b,
         resneta101b,
@@ -385,6 +401,7 @@ def _test():
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resnetabc14b or weight_count == 10084168)
         assert (model != resneta18 or weight_count == 11708744)
         assert (model != resneta50b or weight_count == 25576264)
         assert (model != resneta101b or weight_count == 44568392)

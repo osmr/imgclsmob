@@ -603,7 +603,7 @@ def train_epoch(epoch,
             loss_list = [loss_func(yhat, y.astype(dtype, copy=False)) for yhat, y in zip(outputs_list, labels_list)]
 
             if discrim_net is not None:
-                d_pred_list = [discrim_net(yhat.astype(dtype, copy=False)) for yhat in outputs_list]
+                d_pred_list = [discrim_net(yhat.astype(dtype, copy=False).softmax()) for yhat in outputs_list]
                 d_label_list = [discrim_net(y.astype(dtype, copy=False)) for y in labels_list]
                 d_loss_list = [discrim_loss_func(yhat, y) for yhat, y in zip(d_pred_list, d_label_list)]
                 loss_list = [z + dz for z, dz in zip(loss_list, d_loss_list)]

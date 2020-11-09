@@ -113,6 +113,7 @@ def _test():
 
     loss = MealAdvLoss()
     z = loss(y, 1-y)
+    print(z)
     pass
 
 

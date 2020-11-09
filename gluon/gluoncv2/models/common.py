@@ -3,7 +3,7 @@
 """
 
 __all__ = ['round_channels', 'get_activation_layer', 'ReLU6', 'PReLU2', 'HSigmoid', 'HSwish', 'Softmax',
-           'SelectableDense', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3', 'BatchNormExtra',
+           'SelectableDense', 'BatchNormExtra', 'DenseBlock', 'ConvBlock1d', 'conv1x1', 'conv3x3', 'depthwise_conv3x3',
            'ConvBlock', 'conv1x1_block', 'conv3x3_block', 'conv7x7_block', 'dwconv_block', 'dwconv3x3_block',
            'dwconv5x5_block', 'dwsconv3x3_block', 'PreConvBlock', 'pre_conv1x1_block', 'pre_conv3x3_block',
            'DeconvBlock', 'InterpolationBlock', 'ChannelShuffle', 'ChannelShuffle2', 'SEBlock', 'SABlock',
@@ -236,6 +236,20 @@ class SelectableDense(HybridBlock):
                         num_options=self.num_options)
 
 
+class BatchNormExtra(nn.BatchNorm):
+    """
+    Batch normalization layer with extra parameters.
+    """
+    def __init__(self, **kwargs):
+        has_cudnn_off = ("cudnn_off" in kwargs)
+        if has_cudnn_off:
+            cudnn_off = kwargs["cudnn_off"]
+            del kwargs["cudnn_off"]
+        super(BatchNormExtra, self).__init__(**kwargs)
+        if has_cudnn_off:
+            self._kwargs["cudnn_off"] = cudnn_off
+
+
 class DenseBlock(HybridBlock):
     """
     Standard dense block with Batch normalization and activation.
@@ -464,20 +478,6 @@ def depthwise_conv3x3(channels,
         groups=channels,
         use_bias=False,
         in_channels=channels)
-
-
-class BatchNormExtra(nn.BatchNorm):
-    """
-    Batch normalization layer with extra parameters.
-    """
-    def __init__(self, **kwargs):
-        has_cudnn_off = ("cudnn_off" in kwargs)
-        if has_cudnn_off:
-            cudnn_off = kwargs["cudnn_off"]
-            del kwargs["cudnn_off"]
-        super(BatchNormExtra, self).__init__(**kwargs)
-        if has_cudnn_off:
-            self._kwargs["cudnn_off"] = cudnn_off
 
 
 class ConvBlock(HybridBlock):

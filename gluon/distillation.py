@@ -44,7 +44,7 @@ class MealDiscriminator(HybridBlock):
             self.output = nn.HybridSequential(prefix="")
             self.output.add(conv1x1(
                 in_channels=in_channels,
-                out_channels=2,
+                out_channels=1,
                 use_bias=True))
             self.output.add(nn.Flatten())
 
@@ -52,6 +52,7 @@ class MealDiscriminator(HybridBlock):
         x = x.expand_dims(-1).expand_dims(-1)
         x = self.features(x)
         x = self.output(x)
+        x = x.squeeze(1)
         return x
 
 
@@ -75,10 +76,45 @@ class MealAdvLoss(SigmoidBinaryCrossEntropyLoss):
         super(MealAdvLoss, self).__init__(**kwargs)
 
     def hybrid_forward(self, F, pred, label, sample_weight=None, pos_weight=None):
-        z_pred = F.zeros_like(pred)[:, 0].one_hot(depth=2)
+        z_pred = F.zeros_like(pred)
         loss_pred = super(MealAdvLoss, self).hybrid_forward(F, pred, z_pred)
 
-        z_label = F.ones_like(label)[:, 0].one_hot(depth=2)
+        z_label = F.ones_like(label)
         loss_label = super(MealAdvLoss, self).hybrid_forward(F, label, z_label)
 
         return loss_pred + loss_label
+
+
+def _test():
+    import numpy as np
+    import mxnet as mx
+
+    model = MealDiscriminator
+    net = model()
+
+    ctx = mx.cpu()
+    net.initialize(ctx=ctx)
+
+    # net.hybridize()
+    net_params = net.collect_params()
+    weight_count = 0
+    for param in net_params.values():
+        if (param.shape is None) or (not param._differentiable):
+            continue
+        weight_count += np.prod(param.shape)
+    print("m={}, {}".format(model.__name__, weight_count))
+    # assert (model != MealDiscriminator or weight_count == 208834)
+
+    batch = 14
+    classes = 1000
+    x = mx.nd.random.normal(shape=(batch, classes), ctx=ctx)
+    y = net(x)
+    assert (y.shape == (batch,))
+
+    loss = MealAdvLoss()
+    z = loss(y, 1-y)
+    pass
+
+
+if __name__ == "__main__":
+    _test()

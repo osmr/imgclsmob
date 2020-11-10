@@ -112,7 +112,7 @@ def _test():
     assert (y.shape == (batch,))
 
     loss = MealAdvLoss()
-    z = loss(y, 1-y)
+    z = loss(y, 1 - y)
     print(z)
     pass
 

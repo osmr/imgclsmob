@@ -481,7 +481,7 @@ def train_epoch(epoch,
                 teacher_net,
                 discrim_net,
                 train_metric,
-                loss_metric,
+                loss_metrics,
                 train_data,
                 batch_fn,
                 data_source_needs_reset,
@@ -515,8 +515,8 @@ def train_epoch(epoch,
         MEALv2 discriminator model.
     train_metric : EvalMetric
         Metric object instance.
-    loss_metric : EvalMetric
-        Metric object instance (loss values).
+    loss_metric : list of EvalMetric
+        Metric object instances (loss values).
     train_data : DataLoader or ImageRecordIter
         Data loader or ImRec-iterator.
     batch_fn : func
@@ -565,7 +565,8 @@ def train_epoch(epoch,
     if data_source_needs_reset:
         train_data.reset()
     train_metric.reset()
-    loss_metric.reset()
+    for m in loss_metrics:
+        m.reset()
 
     i = 0
     btic = time.time()
@@ -630,15 +631,23 @@ def train_epoch(epoch,
         train_metric.update(
             labels=(labels_list if not labels_one_hot else labels_list_inds),
             preds=outputs_list)
-        loss_metric.update(labels=None, preds=loss_list)
+        loss_metrics[0].update(labels=None, preds=loss_list)
+        if (discrim_net is not None) and (len(loss_metrics) > 1):
+            loss_metrics[1].update(labels=None, preds=d_loss_list)
 
         if log_interval and not (i + 1) % log_interval:
             speed = batch_size * log_interval / (time.time() - btic)
             btic = time.time()
             train_accuracy_msg = report_accuracy(metric=train_metric)
-            loss_accuracy_msg = report_accuracy(metric=loss_metric)
-            logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\t{}\tlr={:.5f}".format(
-                epoch + 1, i, speed, train_accuracy_msg, loss_accuracy_msg, trainer.learning_rate))
+            loss_accuracy_msg = report_accuracy(metric=loss_metrics[0])
+            if (discrim_net is not None) and (len(loss_metrics) > 1):
+                dloss_accuracy_msg = report_accuracy(metric=loss_metrics[1])
+                logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\t{}\t{}\tlr={:.5f}".format(
+                    epoch + 1, i, speed, train_accuracy_msg, loss_accuracy_msg, dloss_accuracy_msg,
+                    trainer.learning_rate))
+            else:
+                logging.info("Epoch[{}] Batch [{}]\tSpeed: {:.2f} samples/sec\t{}\t{}\tlr={:.5f}".format(
+                    epoch + 1, i, speed, train_accuracy_msg, loss_accuracy_msg, trainer.learning_rate))
 
     if (batch_size_scale != 1) and (batch_size_extend_count > 0):
         trainer.step(batch_size * batch_size_extend_count)
@@ -650,8 +659,13 @@ def train_epoch(epoch,
         epoch + 1, throughput, time.time() - tic))
 
     train_accuracy_msg = report_accuracy(metric=train_metric)
-    loss_accuracy_msg = report_accuracy(metric=loss_metric)
-    logging.info("[Epoch {}] training: {}\t{}".format(epoch + 1, train_accuracy_msg, loss_accuracy_msg))
+    loss_accuracy_msg = report_accuracy(metric=loss_metrics[0])
+    if (discrim_net is not None) and (len(loss_metrics) > 1):
+        dloss_accuracy_msg = report_accuracy(metric=loss_metrics[1])
+        logging.info("[Epoch {}] training: {}\t{}\t{}".format(epoch + 1, train_accuracy_msg, loss_accuracy_msg,
+                                                              dloss_accuracy_msg))
+    else:
+        logging.info("[Epoch {}] training: {}\t{}".format(epoch + 1, train_accuracy_msg, loss_accuracy_msg))
 
 
 def train_net(batch_size,
@@ -677,7 +691,7 @@ def train_net(batch_size,
               batch_size_scale,
               val_metric,
               train_metric,
-              loss_metric,
+              loss_metrics,
               loss_func,
               discrim_loss_func,
               ctx):
@@ -732,8 +746,8 @@ def train_net(batch_size,
         Metric object instance (validation subset).
     train_metric : EvalMetric
         Metric object instance (training subset).
-    loss_metric : EvalMetric
-        Metric object instance (loss values).
+    loss_metrics : list of EvalMetric
+        Metric object instances (loss values).
     loss_func : Loss
         Loss object instance.
     discrim_loss_func : Loss or None
@@ -773,7 +787,7 @@ def train_net(batch_size,
             teacher_net=teacher_net,
             discrim_net=discrim_net,
             train_metric=train_metric,
-            loss_metric=loss_metric,
+            loss_metrics=loss_metrics,
             train_data=train_data,
             batch_fn=batch_fn,
             data_source_needs_reset=data_source_needs_reset,
@@ -812,7 +826,7 @@ def train_net(batch_size,
             train_acc_values = train_acc_values if type(train_acc_values) == list else [train_acc_values]
             lp_saver.epoch_test_end_callback(
                 epoch1=(epoch + 1),
-                params=(val_acc_values + train_acc_values + [loss_metric.get()[1], trainer.learning_rate]),
+                params=(val_acc_values + train_acc_values + [loss_metrics[0].get()[1], trainer.learning_rate]),
                 **lp_saver_kwargs)
 
     logging.info("Total time cost: {:.2f} sec".format(time.time() - gtic))
@@ -954,7 +968,7 @@ def main():
 
     val_metric = get_composite_metric(ds_metainfo.val_metric_names, ds_metainfo.val_metric_extra_kwargs)
     train_metric = get_composite_metric(ds_metainfo.train_metric_names, ds_metainfo.train_metric_extra_kwargs)
-    loss_metric = LossValue()
+    loss_metrics = [LossValue(name="loss"), LossValue(name="dloss")]
 
     loss_kwargs = {"sparse_label": (not (args.mixup or args.label_smoothing) and
                                     not (use_teacher and (teacher_net is not None)))}
@@ -986,7 +1000,7 @@ def main():
         batch_size_scale=args.batch_size_scale,
         val_metric=val_metric,
         train_metric=train_metric,
-        loss_metric=loss_metric,
+        loss_metrics=loss_metrics,
         loss_func=loss_func,
         discrim_loss_func=discrim_loss_func,
         ctx=ctx)

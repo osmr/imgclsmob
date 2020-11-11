@@ -94,7 +94,7 @@ def measure_model(model,
 
     def call_hook(block, x, y):
         if not (isinstance(block, IRevSplitBlock) or isinstance(block, IRevMergeBlock) or
-                isinstance(block, RiRFinalBlock)):
+                isinstance(block, RiRFinalBlock) or isinstance(block, InterpolationBlock)):
             assert (len(x) == 1)
         assert (len(block._children) == 0)
         if isinstance(block, nn.Dense):

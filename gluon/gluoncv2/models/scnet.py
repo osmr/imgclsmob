@@ -97,7 +97,7 @@ class ScConv(HybridBlock):
                 pool_size=scale_factor,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)
-            self.up = InterpolationBlock(scale_factor=scale_factor)
+            self.up = InterpolationBlock(scale_factor=scale_factor, bilinear=False)
             self.sigmoid = nn.Activation("sigmoid")
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,

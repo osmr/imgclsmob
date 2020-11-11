@@ -12,10 +12,10 @@ import chainer.links as L
 from chainer import Chain
 from functools import partial
 from chainer.serializers import load_npz
-from chainer_.chainercv2.models.common import conv1x1_block, conv3x3_block, InterpolationBlock, SimpleSequential
-from chainer_.chainercv2.models.resnet import ResInitBlock
-from chainer_.chainercv2.models.senet import SEInitBlock
-from chainer_.chainercv2.models.resnesta import ResNeStADownBlock
+from .common import conv1x1_block, conv3x3_block, InterpolationBlock, SimpleSequential
+from .resnet import ResInitBlock
+from .senet import SEInitBlock
+from .resnesta import ResNeStADownBlock
 
 
 class ScDownBlock(Chain):
@@ -48,7 +48,7 @@ class ScDownBlock(Chain):
                 out_channels=out_channels,
                 activation=None)
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.pool(x)
         x = self.conv(x)
         return x
@@ -65,7 +65,7 @@ class ScConv(Chain):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     scale_factor : int
         Scale factor.
     """
@@ -84,8 +84,8 @@ class ScConv(Chain):
             self.up = InterpolationBlock(
                 scale_factor=scale_factor,
                 mode="nearest",
-                align_corners=None)
-            self.sigmoid = nn.Sigmoid()
+                align_corners=False)
+            self.sigmoid = F.sigmoid
             self.conv1 = conv3x3_block(
                 in_channels=in_channels,
                 out_channels=in_channels,
@@ -95,7 +95,7 @@ class ScConv(Chain):
                 out_channels=out_channels,
                 stride=stride)
 
-    def forward(self, x):
+    def __call__(self, x):
         w = self.sigmoid(x + self.up(self.down(x), size=x.shape[2:]))
         x = self.conv1(x) * w
         x = self.conv2(x)
@@ -113,7 +113,7 @@ class ScBottleneck(Chain):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     bottleneck_factor : int, default 4
         Bottleneck factor.
     scale_factor : int, default 4
@@ -152,17 +152,18 @@ class ScBottleneck(Chain):
                 scale_factor=scale_factor)
 
             if self.avg_resize:
-                self.pool = nn.AvgPool2d(
-                    kernel_size=3,
+                self.pool = partial(
+                    F.average_pooling_nd,
+                    ksize=3,
                     stride=stride,
-                    padding=1)
+                    pad=1)
 
             self.conv3 = conv1x1_block(
                 in_channels=(2 * mid_channels),
                 out_channels=out_channels,
                 activation=None)
 
-    def forward(self, x):
+    def __call__(self, x):
         y = self.conv1a(x)
         y = self.conv2a(y)
 
@@ -173,7 +174,7 @@ class ScBottleneck(Chain):
             y = self.pool(y)
             z = self.pool(z)
 
-        x = chainer.cat((y, z), dim=1)
+        x = F.concat((y, z), axis=1)
 
         x = self.conv3(x)
         return x
@@ -190,7 +191,7 @@ class ScUnit(Chain):
     out_channels : int
         Number of output channels.
     stride : int or tuple/list of 2 int
-        Strides of the convolution.
+        Stride of the convolution.
     avg_downsample : bool, default False
         Whether to use average downsampling.
     """
@@ -221,9 +222,9 @@ class ScUnit(Chain):
                         out_channels=out_channels,
                         stride=stride,
                         activation=None)
-            self.activ = nn.ReLU(inplace=True)
+            self.activ = F.relu
 
-    def forward(self, x):
+    def __call__(self, x):
         if self.resize_identity:
             identity = self.identity_block(x)
         else:
@@ -253,7 +254,7 @@ class SCNet(Chain):
         Number of input channels.
     in_size : tuple of two ints, default (224, 224)
         Spatial size of the expected input image.
-    num_classes : int, default 1000
+    classes : int, default 1000
         Number of classification classes.
     """
     def __init__(self,
@@ -263,39 +264,47 @@ class SCNet(Chain):
                  avg_downsample=False,
                  in_channels=3,
                  in_size=(224, 224),
-                 num_classes=1000,
+                 classes=1000,
                  **kwargs):
         super(SCNet, self).__init__(**kwargs)
         self.in_size = in_size
-        self.num_classes = num_classes
+        self.classes = classes
 
         with self.init_scope():
-            self.features = nn.Sequential()
-            init_block_class = SEInitBlock if se_init_block else ResInitBlock
-            self.features.add_module("init_block", init_block_class(
-                in_channels=in_channels,
-                out_channels=init_block_channels))
-            in_channels = init_block_channels
-            for i, channels_per_stage in enumerate(channels):
-                stage = nn.Sequential()
-                for j, out_channels in enumerate(channels_per_stage):
-                    stride = 2 if (j == 0) and (i != 0) else 1
-                    stage.add_module("unit{}".format(j + 1), ScUnit(
-                        in_channels=in_channels,
-                        out_channels=out_channels,
-                        stride=stride,
-                        avg_downsample=avg_downsample))
-                    in_channels = out_channels
-                self.features.add_module("stage{}".format(i + 1), stage)
-            self.features.add_module("final_pool", nn.AdaptiveAvgPool2d(output_size=1))
+            self.features = SimpleSequential()
+            with self.features.init_scope():
+                init_block_class = SEInitBlock if se_init_block else ResInitBlock
+                setattr(self.features, "init_block", init_block_class(
+                    in_channels=in_channels,
+                    out_channels=init_block_channels))
+                in_channels = init_block_channels
+                for i, channels_per_stage in enumerate(channels):
+                    stage = SimpleSequential()
+                    with stage.init_scope():
+                        for j, out_channels in enumerate(channels_per_stage):
+                            stride = 2 if (j == 0) and (i != 0) else 1
+                            setattr(stage, "unit{}".format(j + 1), ScUnit(
+                                in_channels=in_channels,
+                                out_channels=out_channels,
+                                stride=stride,
+                                avg_downsample=avg_downsample))
+                            in_channels = out_channels
+                    setattr(self.features, "stage{}".format(i + 1), stage)
+                setattr(self.features, "final_pool", partial(
+                    F.average_pooling_2d,
+                    ksize=(in_size[0] // 32, in_size[1] // 32)))
 
-            self.output = nn.Linear(
-                in_features=in_channels,
-                out_features=num_classes)
+            self.output = SimpleSequential()
+            with self.output.init_scope():
+                setattr(self.output, "flatten", partial(
+                    F.reshape,
+                    shape=(-1, in_channels)))
+                setattr(self.output, "fc", L.Linear(
+                    in_size=in_channels,
+                    out_size=classes))
 
-    def forward(self, x):
+    def __call__(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -446,17 +455,11 @@ def scneta101(**kwargs):
                      model_name="scneta101", **kwargs)
 
 
-def _calc_width(net):
-    import numpy as np
-    net_params = filter(lambda p: p.requires_grad, net.parameters())
-    weight_count = 0
-    for param in net_params:
-        weight_count += np.prod(param.size())
-    return weight_count
-
-
 def _test():
+    import numpy as np
     import chainer
+
+    chainer.global_config.train = False
 
     pretrained = False
 
@@ -470,20 +473,16 @@ def _test():
     for model in models:
 
         net = model(pretrained=pretrained)
-
-        # net.train()
-        net.eval()
-        weight_count = _calc_width(net)
+        weight_count = net.count_params()
         print("m={}, {}".format(model.__name__, weight_count))
         assert (model != scnet50 or weight_count == 25564584)
         assert (model != scnet101 or weight_count == 44565416)
         assert (model != scneta50 or weight_count == 25583816)
         assert (model != scneta101 or weight_count == 44689192)
 
-        x = chainer.randn(1, 3, 224, 224)
+        x = np.zeros((1, 3, 224, 224), np.float32)
         y = net(x)
-        y.sum().backward()
-        assert (tuple(y.size()) == (1, 1000))
+        assert (y.shape == (1, 1000))
 
 
 if __name__ == "__main__":

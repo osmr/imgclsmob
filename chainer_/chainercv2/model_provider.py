@@ -121,6 +121,8 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
+from .models.scnet import *
+
 __all__ = ['get_model']
 
 
@@ -994,6 +996,11 @@ _models = {
 
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
+
+    'scnet50': scnet50,
+    'scnet101': scnet101,
+    'scneta50': scneta50,
+    'scneta101': scneta101,
 }
 
 

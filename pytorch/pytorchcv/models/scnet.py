@@ -1,5 +1,5 @@
 """
-    SCNet for ImageNet-1K, implemented in Gluon.
+    SCNet for ImageNet-1K, implemented in PyTorch.
     Original paper: 'Improving Convolutional Networks with Self-Calibrated Convolutions,'
     http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf.
 """

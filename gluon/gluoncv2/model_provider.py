@@ -143,6 +143,8 @@ from .models.nvpattexp import *
 # from .models.others.oth_resnest import *
 # from .models.others.oth_danet import *
 
+from .models.scnet import *
+
 __all__ = ['get_model']
 
 
@@ -1161,6 +1163,10 @@ _models = {
     # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
 
+    'scnet50': scnet50,
+    'scnet101': scnet101,
+    'scneta50': scneta50,
+    'scneta101': scneta101,
 }
 
 

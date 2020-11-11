@@ -111,7 +111,7 @@ class SegBaseModel(HybridBlock):
         self.nclass = nclass
         with self.name_scope():
             pretrained = get_backbone(backbone, pretrained=pretrained_base, dilated=True, **kwargs)
-            self.conv1 = pretrained.conv1
+            self.conv1 = pretrained.conv1a
             self.bn1 = pretrained.bn1
             self.relu = pretrained.relu
             self.maxpool = pretrained.maxpool

@@ -141,6 +141,8 @@ from .models.superpointnet import *
 # from .models.others.oth_sinet import *
 # from .models.others.oth_ibppose import *
 # from .models.others.oth_bisenet1 import *
+from .models.others.oth_scnet import *
+from .models.scnet import *
 
 __all__ = ['get_model']
 
@@ -1072,6 +1074,13 @@ _models = {
     # 'oth_ibppose': oth_ibppose,
 
     # 'oth_bisenet': oth_bisenet,
+
+    'oth_scnet50': oth_scnet50,
+    'oth_scnet101': oth_scnet101,
+    'oth_scnet50_v1d': oth_scnet50_v1d,
+
+    'scnet50': scnet50,
+    'scnet101': scnet101,
 }
 
 

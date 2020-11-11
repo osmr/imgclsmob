@@ -477,7 +477,7 @@ def convert_mx2gl(dst_net,
 
     elif src_model in ["preresnet269b"]:
 
-        dst_net.features[1][0].body.conv1.bn.initialize(ctx=ctx, verbose=True, force_reinit=True)
+        dst_net.features[1][0].body.conv1a.bn.initialize(ctx=ctx, verbose=True, force_reinit=True)
         dst1 = list(filter(re.compile("^features.1.0.body.conv1.bn.").search, dst_param_keys))
         dst_param_keys = [key for key in dst_param_keys if key not in dst1]
 
@@ -1010,6 +1010,20 @@ def convert_pt2pt(dst_params_file_path,
         src2 = src_param_keys[-3]
         del src_param_keys[-3]
         src_param_keys.insert(-7, src2)
+
+    elif src_model.startswith("oth_scnet"):
+        pass
+        src1 = list(filter(re.compile(".k1.").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src2 = list(filter(re.compile(".scconv.").search, src1n))
+        src2n = [key for key in src1n if key not in src2]
+        src_param_keys = src2n + src1 + src2
+
+        dst1 = list(filter(re.compile(".conv2a.").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst2 = list(filter(re.compile(".conv2b.").search, dst1n))
+        dst2n = [key for key in dst1n if key not in dst2]
+        dst_param_keys = dst2n + dst1 + dst2
 
     elif src_model == "oth_bisenet":
         src1 = list(filter(re.compile("^cp.conv_avg").search, src_param_keys))

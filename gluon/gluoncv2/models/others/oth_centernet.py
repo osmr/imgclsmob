@@ -81,7 +81,7 @@ class DeconvResnet(nn.HybridBlock):
         self._use_dcnv2 = use_dcnv2
         if 'v1b' in base_network:
             feat = nn.HybridSequential()
-            feat.add(*[net.conv1,
+            feat.add(*[net.conv1a,
                        net.bn1,
                        net.relu,
                        net.maxpool,

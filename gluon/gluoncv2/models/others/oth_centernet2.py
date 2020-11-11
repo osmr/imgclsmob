@@ -65,7 +65,7 @@ class DeconvResnet(nn.HybridBlock):
         from gluoncv.model_zoo import get_model
         net = get_model(base_network, pretrained=pretrained_backbone)
         feat = nn.HybridSequential()
-        feat.add(*[net.conv1,
+        feat.add(*[net.conv1a,
                    net.bn1,
                    net.relu,
                    net.maxpool,

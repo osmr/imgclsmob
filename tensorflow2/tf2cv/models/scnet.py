@@ -39,7 +39,6 @@ class ScDownBlock(nn.Layer):
         self.pool = AvgPool2d(
             pool_size=pool_size,
             strides=pool_size,
-            padding=1,
             data_format=data_format,
             name="pool")
         self.conv = conv3x3_block(

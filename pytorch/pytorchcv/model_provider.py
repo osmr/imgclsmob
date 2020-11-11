@@ -1081,6 +1081,8 @@ _models = {
 
     'scnet50': scnet50,
     'scnet101': scnet101,
+    'scneta50': scneta50,
+    'scneta101': scneta101,
 }
 
 

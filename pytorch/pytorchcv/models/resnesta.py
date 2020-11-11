@@ -4,7 +4,7 @@
 """
 
 __all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnesta50', 'resnesta101', 'resnesta152',
-           'resnesta200', 'resnesta269']
+           'resnesta200', 'resnesta269', 'ResNeStADownBlock']
 
 import os
 import torch.nn as nn

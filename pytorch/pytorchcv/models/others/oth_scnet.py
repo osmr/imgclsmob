@@ -351,7 +351,7 @@ def _calc_width(net):
 def _test():
     import torch
 
-    pretrained = True
+    pretrained = False
 
     models = [
         oth_scnet50,

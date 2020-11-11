@@ -52,7 +52,7 @@ Some remarks:
 - `a`, `b`, `c`, `d`, and `e` means the implementation of a model for ImageNet-1K, CIFAR-10, CIFAR-100, SVHN, and CUB-200-2011, respectively.
 - `A`, `B`, `C`, `D`, and `E` means having a pre-trained model for corresponding datasets.
 
-| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md) | [TF2](tensorflow_/README.md) | Paper | Repo | Year |
+| Model | [Gluon](gluon/README.md) | [PyTorch](pytorch/README.md) | [Chainer](chainer_/README.md) | [Keras](keras_/README.md) | [TF](tensorflow_/README.md) | [TF2](tensorflow2/README.md) | Paper | Repo | Year |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | AlexNet | A | A | A | A | A | A | [link](http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf) | [link](https://code.google.com/archive/p/cuda-convnet2) | 2012 |
 | ZFNet | A | A | A | A | A | A | [link](https://arxiv.org/abs/1311.2901) | - | 2013 |
@@ -76,7 +76,7 @@ Some remarks:
 | CBAM-ResNet | A | A | A | - | - | A | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | a | a | a | - | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | a | a | a | - | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
-| SCNet | a | a | - | - | - | - | [link](http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf) | [link](https://github.com/MCG-NKU/SCNet) | 2020 |
+| SCNet | a | a | a | - | - | a | [link](http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf) | [link](https://github.com/MCG-NKU/SCNet) | 2020 |
 | DIA-ResNet | aBCD | aBCD | aBCD | - | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | DIA-PreResNet | aBCD | aBCD | aBCD | - | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | PyramidNet | ABCD | ABCD | ABCD | - | - | ABCD | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |

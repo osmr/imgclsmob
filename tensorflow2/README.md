@@ -26,6 +26,7 @@ models are in the [`imgclsmob`](https://github.com/osmr/imgclsmob) repo.
 - AirNet/AirNeXt (['Attention Inspiring Receptive-Fields Network for Learning Invariant Representations'](https://ieeexplore.ieee.org/document/8510896))
 - BAM-ResNet (['BAM: Bottleneck Attention Module'](https://arxiv.org/abs/1807.06514))
 - CBAM-ResNet (['CBAM: Convolutional Block Attention Module'](https://arxiv.org/abs/1807.06521))
+- SCNet (['Improving Convolutional Networks with Self-Calibrated Convolutions'](http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf))
 - PyramidNet (['Deep Pyramidal Residual Networks'](https://arxiv.org/abs/1610.02915))
 - DiracNetV2 (['DiracNets: Training Very Deep Neural Networks Without Skip-Connections'](https://arxiv.org/abs/1706.00388))
 - DenseNet (['Densely Connected Convolutional Networks'](https://arxiv.org/abs/1608.06993))

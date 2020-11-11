@@ -1,5 +1,5 @@
 """
-    ResNeSt(A) with average downsampling for ImageNet-1K, implemented in Gluon.
+    ResNeSt(A) with average downsampling for ImageNet-1K, implemented in PyTorch.
     Original paper: 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 """
 

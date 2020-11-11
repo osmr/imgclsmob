@@ -76,6 +76,7 @@ Some remarks:
 | CBAM-ResNet | A | A | A | - | - | A | [link](https://arxiv.org/abs/1807.06521) | [link](https://github.com/Jongchan/attention-module) | 2018 |
 | ResAttNet | a | a | a | - | - | - | [link](https://arxiv.org/abs/1704.06904) | [link](https://github.com/fwang91/residual-attention-network) | 2017 |
 | SKNet | a | a | a | - | - | - | [link](https://arxiv.org/abs/1903.06586) | [link](https://github.com/implus/SKNet) | 2019 |
+| SCNet | a | a | - | - | - | - | [link](http://mftp.mmcheng.net/Papers/20cvprSCNet.pdf) | [link](https://github.com/MCG-NKU/SCNet) | 2020 |
 | DIA-ResNet | aBCD | aBCD | aBCD | - | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | DIA-PreResNet | aBCD | aBCD | aBCD | - | - | - | [link](https://arxiv.org/abs/1905.10671) | [link](https://github.com/gbup-group/DIANet) | 2019 |
 | PyramidNet | ABCD | ABCD | ABCD | - | - | ABCD | [link](https://arxiv.org/abs/1610.02915) | [link](https://github.com/jhkim89/PyramidNet) | 2016 |

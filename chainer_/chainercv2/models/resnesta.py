@@ -1,10 +1,10 @@
 """
-    ResNeSt(A) with average downsampling for ImageNet-1K, implemented in Gluon.
+    ResNeSt(A) with average downsampling for ImageNet-1K, implemented Chainer.
     Original paper: 'ResNeSt: Split-Attention Networks,' https://arxiv.org/abs/2004.08955.
 """
 
 __all__ = ['ResNeStA', 'resnestabc14', 'resnesta18', 'resnestabc26', 'resnesta50', 'resnesta101', 'resnesta152',
-           'resnesta200', 'resnesta269']
+           'resnesta200', 'resnesta269', 'ResNeStADownBlock']
 
 import os
 import chainer.functions as F

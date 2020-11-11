@@ -215,6 +215,9 @@ Some remarks:
 | AirNeXt50-32x4d (r=2) | 21.47 | 5.72 | 27,604,296 | 5,339.58M | From [soeaver/AirNet-PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/airnext50_32x4d_r2-0572-fa8e40ab.tf2.h5.log)) |
 | BAM-ResNet-50 | 23.67 | 6.97 | 25,915,099 | 4,196.09M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.424/bam_resnet50-0697-3a4101c8.tf2.h5.log)) |
 | CBAM-ResNet-50 | 22.96 | 6.39 | 28,089,624 | 4,116.97M | From [Jongchan/attention-module] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/cbam_resnet50-0639-1d0bdb0e.tf2.h5.log)) |
+| SCNet-50 | 22.72 | 6.38 | 25,564,584 | 3,951.06M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet50-0638-dbe0d00d.tf2.h5.log)) |
+| SCNet-101 | 21.67 | 6.04 | 44,565,416 | 7,204.24M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet101-0604-f1a7a36b.tf2.h5.log)) |
+| SCNet(A)-50 | 19.61 | 4.65 | 25,583,816 | 4,715.84M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0465-c1f8f295.tf2.h5.log)) |
 | PyramidNet-101 (a=360) | 22.68 | 6.51 | 42,455,070 | 8,743.54M | From [dyhan0920/Pyramid...PyTorch] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/pyramidnet101_a360-0651-9db84918.tf2.h5.log)) |
 | DiracNetV2-18 | 30.59 | 11.13 | 11,511,784 | 1,796.62M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet18v2-1113-4d687b74.tf2.h5.log)) |
 | DiracNetV2-34 | 27.92 | 9.50 | 21,616,232 | 3,646.93M | From [szagoruyko/diracnets] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.429/diracnet34v2-0950-161d97fd.tf2.h5.log)) |
@@ -693,3 +696,4 @@ Some remarks:
 [Daniil-Osokin/li...3d...ch]: https://github.com/Daniil-Osokin/lightweight-human-pose-estimation-3d-demo.pytorch
 [jialee93/Improved...Parts]: https://github.com/jialee93/Improved-Body-Parts
 [zllrunning/face...Torch]: https://github.com/zllrunning/face-parsing.PyTorch
+[MCG-NKU/SCNet]: https://github.com/MCG-NKU/SCNet

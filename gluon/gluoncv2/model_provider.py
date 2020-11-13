@@ -962,6 +962,7 @@ _models = {
     'isqrtcovresnet101': isqrtcovresnet101,
     'isqrtcovresnet101b': isqrtcovresnet101b,
 
+    'resneta10': resneta10,
     'resnetabc14b': resnetabc14b,
     'resneta18': resneta18,
     'resneta50b': resneta50b,

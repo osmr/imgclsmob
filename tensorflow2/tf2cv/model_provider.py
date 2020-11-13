@@ -727,6 +727,7 @@ _models = {
     'wrn40_8_cifar100': wrn40_8_cifar100,
     'wrn40_8_svhn': wrn40_8_svhn,
 
+    'resneta10': resneta10,
     'resnetabc14b': resnetabc14b,
     'resneta18': resneta18,
     'resneta50b': resneta50b,

@@ -854,6 +854,7 @@ _models = {
     'diapreresnet1202_cifar100': diapreresnet1202_cifar100,
     'diapreresnet1202_svhn': diapreresnet1202_svhn,
 
+    'resneta10': resneta10,
     'resnetabc14b': resnetabc14b,
     'resneta18': resneta18,
     'resneta50b': resneta50b,

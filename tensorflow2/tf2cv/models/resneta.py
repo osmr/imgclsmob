@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNetA', 'resnetabc14b', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
+__all__ = ['ResNetA', 'resneta10', 'resnetabc14b', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
 
 import os
 import tensorflow as tf
@@ -320,6 +320,21 @@ def get_resneta(blocks,
     return net
 
 
+def resneta10(**kwargs):
+    """
+    ResNet(A)-10 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    root : str, default '~/.tensorflow/models'
+        Location for keeping the model parameters.
+    """
+    return get_resneta(blocks=10, model_name="resneta10", **kwargs)
+
+
 def resnetabc14b(**kwargs):
     """
     ResNet(A)-BC-14b with average downsampling model from 'Deep Residual Learning for Image Recognition,'
@@ -329,7 +344,7 @@ def resnetabc14b(**kwargs):
     ----------
     pretrained : bool, default False
         Whether to load the pretrained weights for model.
-    root : str, default '~/.mxnet/models'
+    root : str, default '~/.tensorflow/models'
         Location for keeping the model parameters.
     """
     return get_resneta(blocks=14, bottleneck=True, conv1_stride=False, model_name="resnetabc14b", **kwargs)
@@ -404,6 +419,7 @@ def _test():
     pretrained = False
 
     models = [
+        resneta10,
         resnetabc14b,
         resneta18,
         resneta50b,
@@ -422,6 +438,7 @@ def _test():
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resneta10 or weight_count == 5438024)
         assert (model != resnetabc14b or weight_count == 10084168)
         assert (model != resneta18 or weight_count == 11708744)
         assert (model != resneta50b or weight_count == 25576264)

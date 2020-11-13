@@ -3,7 +3,7 @@
     Original paper: 'Deep Residual Learning for Image Recognition,' https://arxiv.org/abs/1512.03385.
 """
 
-__all__ = ['ResNetA', 'resnetabc14b', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
+__all__ = ['ResNetA', 'resneta10', 'resnetabc14b', 'resneta18', 'resneta50b', 'resneta101b', 'resneta152b']
 
 import os
 from mxnet import cpu
@@ -331,6 +331,23 @@ def get_resneta(blocks,
     return net
 
 
+def resneta10(**kwargs):
+    """
+    ResNet(A)-10 with average downsampling model from 'Deep Residual Learning for Image Recognition,'
+    https://arxiv.org/abs/1512.03385.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_resneta(blocks=10, model_name="resneta10", **kwargs)
+
+
 def resnetabc14b(**kwargs):
     """
     ResNet(A)-BC-14b with average downsampling model from 'Deep Residual Learning for Image Recognition,'
@@ -423,6 +440,7 @@ def _test():
     pretrained = False
 
     models = [
+        resneta10,
         resnetabc14b,
         resneta18,
         resneta50b,
@@ -447,6 +465,7 @@ def _test():
                 continue
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
+        assert (model != resneta10 or weight_count == 5438024)
         assert (model != resnetabc14b or weight_count == 10084168)
         assert (model != resneta18 or weight_count == 11708744)
         assert (model != resneta50b or weight_count == 25576264)

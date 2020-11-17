@@ -54,7 +54,7 @@ class DatasetMetaInfo(object):
     def update(self,
                args):
         self.root_dir_path = args.data_dir
-        self.num_classes = args.classes
+        self.num_classes = args.num_classes
         self.in_channels = args.in_channels
 
     def update_from_dataset(self,

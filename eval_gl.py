@@ -273,7 +273,7 @@ def test_model(args):
         dtype=args.dtype,
         net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,
-        classes=(args.classes if ds_metainfo.ml_type != "hpe" else None),
+        classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels,
         do_hybridize=(ds_metainfo.allow_hybridize and (not args.calc_flops)),
         ctx=ctx)

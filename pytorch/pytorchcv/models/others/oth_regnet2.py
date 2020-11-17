@@ -231,8 +231,8 @@ class RegNet(nn.Module):
             stage_name = "s{}".format(i + 1)
             self.features.add_module(stage_name, RegStage(
                 in_channels=in_channels,
-                **stage_args,
-                se_ratio=se_ratio))
+                se_ratio=se_ratio,
+                **stage_args))
             in_channels = stage_args['out_channels']
 
         self.features.add_module("global_pool", nn.AdaptiveAvgPool2d(output_size=1))
@@ -414,18 +414,18 @@ def _test():
     pretrained = False
 
     models = [
-        regnetx_002,
-        regnetx_004,
-        regnetx_006,
-        regnetx_008,
-        regnetx_016,
-        regnetx_032,
-        regnetx_040,
-        regnetx_064,
-        regnetx_080,
-        regnetx_120,
-        regnetx_160,
-        regnetx_320,
+        # regnetx_002,
+        # regnetx_004,
+        # regnetx_006,
+        # regnetx_008,
+        # regnetx_016,
+        # regnetx_032,
+        # regnetx_040,
+        # regnetx_064,
+        # regnetx_080,
+        # regnetx_120,
+        # regnetx_160,
+        # regnetx_320,
 
         regnety_002,
         regnety_004,

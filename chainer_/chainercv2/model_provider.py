@@ -16,6 +16,7 @@ from .models.bamresnet import *
 from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.sknet import *
+from .models.scnet import *
 from .models.diaresnet import *
 from .models.diapreresnet import *
 from .models.pyramidnet import *
@@ -121,7 +122,7 @@ from .models.lffd import *
 from .models.voca import *
 from .models.nvpattexp import *
 
-from .models.scnet import *
+from .models.regnet import *
 
 __all__ = ['get_model']
 
@@ -291,6 +292,11 @@ _models = {
     'sknet50': sknet50,
     'sknet101': sknet101,
     'sknet152': sknet152,
+
+    'scnet50': scnet50,
+    'scnet101': scnet101,
+    'scneta50': scneta50,
+    'scneta101': scneta101,
 
     'diaresnet10': diaresnet10,
     'diaresnet12': diaresnet12,
@@ -998,10 +1004,31 @@ _models = {
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
 
-    'scnet50': scnet50,
-    'scnet101': scnet101,
-    'scneta50': scneta50,
-    'scneta101': scneta101,
+    'regnetx002': regnetx002,
+    'regnetx004': regnetx004,
+    'regnetx006': regnetx006,
+    'regnetx008': regnetx008,
+    'regnetx016': regnetx016,
+    'regnetx032': regnetx032,
+    'regnetx040': regnetx040,
+    'regnetx064': regnetx064,
+    'regnetx080': regnetx080,
+    'regnetx120': regnetx120,
+    'regnetx160': regnetx160,
+    'regnetx320': regnetx320,
+
+    'regnety002': regnety002,
+    'regnety004': regnety004,
+    'regnety006': regnety006,
+    'regnety008': regnety008,
+    'regnety016': regnety016,
+    'regnety032': regnety032,
+    'regnety040': regnety040,
+    'regnety064': regnety064,
+    'regnety080': regnety080,
+    'regnety120': regnety120,
+    'regnety160': regnety160,
+    'regnety320': regnety320,
 }
 
 

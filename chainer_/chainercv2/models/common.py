@@ -1244,6 +1244,8 @@ class SEBlock(Chain):
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    mid_channels : int or None, default None
+        Number of middle channels.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
     use_conv : bool, default True
@@ -1256,13 +1258,15 @@ class SEBlock(Chain):
     def __init__(self,
                  channels,
                  reduction=16,
+                 mid_channels=None,
                  round_mid=False,
                  use_conv=True,
                  mid_activation=(lambda: F.relu),
                  out_activation=(lambda: F.sigmoid)):
         super(SEBlock, self).__init__()
         self.use_conv = use_conv
-        mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
+        if mid_channels is None:
+            mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         with self.init_scope():
             if use_conv:

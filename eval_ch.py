@@ -248,7 +248,7 @@ def test_model(args):
         pretrained_model_file_path=args.resume.strip(),
         use_gpus=use_gpus,
         net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
-        num_classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
+        num_classes=(args.classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels)
     assert (hasattr(net, "classes") or (ds_metainfo.ml_type == "hpe"))
     assert (hasattr(net, "in_size"))

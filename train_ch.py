@@ -297,7 +297,7 @@ def main():
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_gpus=use_gpus,
-        num_classes=args.num_classes,
+        num_classes=args.classes,
         in_channels=args.in_channels)
     assert (hasattr(net, "classes"))
     assert (hasattr(net, "in_size"))

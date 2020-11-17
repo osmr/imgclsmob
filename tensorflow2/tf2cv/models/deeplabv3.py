@@ -603,9 +603,9 @@ def _test():
 
         net = model(pretrained=pretrained, in_size=in_size, aux=aux, data_format=data_format)
 
-        batch_saze = 14
-        x = tf.random.normal((batch_saze, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
-                             (batch_saze, in_size[0], in_size[1], 3))
+        batch = 14
+        x = tf.random.normal((batch, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
+                             (batch, in_size[0], in_size[1], 3))
         ys = net(x)
         y = ys[0] if aux else ys
         assert (y.shape[0] == x.shape[0])

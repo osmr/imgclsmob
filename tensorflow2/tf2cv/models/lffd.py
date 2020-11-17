@@ -343,9 +343,9 @@ def _test():
 
         net = model(pretrained=pretrained)
 
-        batch_saze = 14
-        x = tf.random.normal((batch_saze, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
-                             (batch_saze, in_size[0], in_size[1], 3))
+        batch = 14
+        x = tf.random.normal((batch, 3, in_size[0], in_size[1]) if is_channels_first(data_format) else
+                             (batch, in_size[0], in_size[1], 3))
         y = net(x)
         assert (len(y) == num_outs)
 

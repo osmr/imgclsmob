@@ -369,7 +369,7 @@ def test_model(args):
         use_pretrained=args.use_pretrained,
         pretrained_model_file_path=args.resume.strip(),
         use_cuda=use_cuda,
-        num_classes=(args.num_classes if ds_metainfo.ml_type != "hpe" else None),
+        num_classes=(args.classes if ds_metainfo.ml_type != "hpe" else None),
         in_channels=args.in_channels,
         net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=ds_metainfo.load_ignore_extra,

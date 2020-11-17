@@ -1501,6 +1501,8 @@ class SEBlock(HybridBlock):
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    mid_channels : int or None, default None
+        Number of middle channels.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
     use_conv : bool, default True
@@ -1513,6 +1515,7 @@ class SEBlock(HybridBlock):
     def __init__(self,
                  channels,
                  reduction=16,
+                 mid_channels=None,
                  round_mid=False,
                  use_conv=True,
                  mid_activation=(lambda: nn.Activation("relu")),
@@ -1520,7 +1523,8 @@ class SEBlock(HybridBlock):
                  **kwargs):
         super(SEBlock, self).__init__(**kwargs)
         self.use_conv = use_conv
-        mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
+        if mid_channels is None:
+            mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         with self.name_scope():
             if use_conv:

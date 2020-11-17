@@ -2397,6 +2397,8 @@ class SEBlock(nn.Layer):
         Number of channels.
     reduction : int, default 16
         Squeeze reduction value.
+    mid_channels : int or None, default None
+        Number of middle channels.
     round_mid : bool, default False
         Whether to round middle channel number (make divisible by 8).
     use_conv : bool, default True
@@ -2411,6 +2413,7 @@ class SEBlock(nn.Layer):
     def __init__(self,
                  channels,
                  reduction=16,
+                 mid_channels=None,
                  round_mid=False,
                  use_conv=True,
                  mid_activation="relu",
@@ -2420,7 +2423,8 @@ class SEBlock(nn.Layer):
         super(SEBlock, self).__init__(**kwargs)
         self.use_conv = use_conv
         self.data_format = data_format
-        mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
+        if mid_channels is None:
+            mid_channels = channels // reduction if not round_mid else round_channels(float(channels) / reduction)
 
         self.pool = nn.GlobalAveragePooling2D(
             data_format=data_format,

@@ -267,12 +267,12 @@ def _test():
             bends=bends,
             data_format=data_format)
 
-        batch_saze = 14
-        x = tf.random.normal((batch_saze, 3, 224, 224) if is_channels_first(data_format) else (batch_saze, 224, 224, 3))
+        batch = 14
+        x = tf.random.normal((batch, 3, 224, 224) if is_channels_first(data_format) else (batch, 224, 224, 3))
         y = net(x)
         if bends is not None:
             y = y[0]
-        assert (tuple(y.shape.as_list()) == (batch_saze, 1000))
+        assert (tuple(y.shape.as_list()) == (batch, 1000))
 
         weight_count = sum([np.prod(K.get_value(w).shape) for w in net.trainable_weights])
         print("m={}, {}".format(model.__name__, weight_count))

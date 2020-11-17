@@ -1133,7 +1133,6 @@ _models = {
     'regnety120': regnety120,
     'regnety160': regnety160,
     'regnety320': regnety320,
-
 }
 
 

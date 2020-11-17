@@ -89,7 +89,7 @@ class DatasetMetaInfo(object):
             Main script arguments.
         """
         self.root_dir_path = args.data_dir
-        self.num_classes = args.num_classes
+        self.num_classes = args.classes
         self.in_channels = args.in_channels
         self.train_net_extra_kwargs["root"] = args.net_root
 

@@ -293,7 +293,7 @@ def main():
         dtype=args.dtype,
         net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=False,
-        classes=args.num_classes,
+        classes=args.classes,
         in_channels=args.in_channels,
         do_hybridize=False,
         ctx=ctx)

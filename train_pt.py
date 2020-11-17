@@ -637,7 +637,7 @@ def main():
         use_cuda=use_cuda)
     real_net = net.module if hasattr(net, "module") else net
     assert (hasattr(real_net, "num_classes"))
-    num_classes = real_net.num_classes
+    num_classes = real_net.classes
 
     ds_metainfo = get_dataset_metainfo(dataset_name=args.dataset)
     ds_metainfo.update(args=args)

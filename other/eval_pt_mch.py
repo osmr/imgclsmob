@@ -517,7 +517,7 @@ def main():
         use_cuda=use_cuda,
         net_extra_kwargs=ds_metainfo.test_net_extra_kwargs,
         load_ignore_extra=False,
-        num_classes=args.num_classes,
+        num_classes=args.classes,
         in_channels=args.in_channels,
         remove_module=False)
 

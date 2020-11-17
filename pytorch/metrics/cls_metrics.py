@@ -123,7 +123,8 @@ class TopKAccuracy(EvalMetric):
                 _, pred = preds.topk(k=self.top_k, dim=1, largest=True, sorted=True)
                 pred = pred.t()
                 correct = pred.eq(labels.view(1, -1).expand_as(pred))
-                num_correct = correct.view(-1).float().sum(dim=0, keepdim=True).item()
+                # num_correct = correct.view(-1).float().sum(dim=0, keepdim=True).item()
+                num_correct = correct.flatten().float().sum(dim=0, keepdim=True).item()
                 num_samples = labels.size(0)
                 assert (num_correct <= num_samples)
                 self.sum_metric += num_correct

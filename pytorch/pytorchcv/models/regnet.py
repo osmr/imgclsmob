@@ -3,12 +3,15 @@
     Original paper: 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
 """
 
-__all__ = ['RegNet', 'regnetx002']
+__all__ = ['RegNet', 'regnetx002', 'regnetx004', 'regnetx006', 'regnetx008', 'regnetx016', 'regnetx032', 'regnetx040',
+           'regnetx064', 'regnetx080', 'regnetx120', 'regnetx160', 'regnetx320', 'regnety002', 'regnety004',
+           'regnety006', 'regnety008', 'regnety016', 'regnety032', 'regnety040', 'regnety064', 'regnety080',
+           'regnety120', 'regnety160', 'regnety320']
 
 import os
 import numpy as np
 import torch.nn as nn
-from common import conv1x1_block, conv3x3_block, SEBlock
+from .common import conv1x1_block, conv3x3_block, SEBlock
 
 
 class RegNetBottleneck(nn.Module):

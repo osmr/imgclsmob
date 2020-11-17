@@ -226,9 +226,10 @@ class RegNet(nn.Module):
     """
 
     def __init__(self, cfg, in_chans=3, num_classes=1000, output_stride=32, global_pool='avg', drop_rate=0.,
-                 drop_path_rate=0., zero_init_last_bn=True):
+                 drop_path_rate=0., zero_init_last_bn=True, in_channels=3, in_size=(224, 224)):
         super().__init__()
         # TODO add drop block, drop path, anti-aliasing, custom bn/act args
+        self.in_size = in_size
         self.num_classes = num_classes
         self.drop_rate = drop_rate
         assert output_stride in (8, 16, 32)
@@ -463,7 +464,7 @@ def _calc_width(net):
 def _test():
     import torch
 
-    pretrained = True
+    pretrained = False
 
     models = [
         regnetx_002,

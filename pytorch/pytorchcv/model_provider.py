@@ -20,6 +20,7 @@ from .models.bamresnet import *
 from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.sknet import *
+from .models.scnet import *
 from .models.diaresnet import *
 from .models.diapreresnet import *
 from .models.pyramidnet import *
@@ -141,8 +142,8 @@ from .models.superpointnet import *
 # from .models.others.oth_sinet import *
 # from .models.others.oth_ibppose import *
 # from .models.others.oth_bisenet1 import *
-from .models.others.oth_scnet import *
-from .models.scnet import *
+from .models.others.oth_regnet import *
+from .models.regnet import *
 
 __all__ = ['get_model']
 
@@ -329,6 +330,11 @@ _models = {
     'sknet50': sknet50,
     'sknet101': sknet101,
     'sknet152': sknet152,
+
+    'scnet50': scnet50,
+    'scnet101': scnet101,
+    'scneta50': scneta50,
+    'scneta101': scneta101,
 
     'diaresnet10': diaresnet10,
     'diaresnet12': diaresnet12,
@@ -1076,14 +1082,58 @@ _models = {
 
     # 'oth_bisenet': oth_bisenet,
 
-    'oth_scnet50': oth_scnet50,
-    'oth_scnet101': oth_scnet101,
-    'oth_scnet50_v1d': oth_scnet50_v1d,
+    'regnetx_002': regnetx_002,
+    'regnetx_004': regnetx_004,
+    'regnetx_006': regnetx_006,
+    'regnetx_008': regnetx_008,
+    'regnetx_016': regnetx_016,
+    'regnetx_032': regnetx_032,
+    'regnetx_040': regnetx_040,
+    'regnetx_064': regnetx_064,
+    'regnetx_080': regnetx_080,
+    'regnetx_120': regnetx_120,
+    'regnetx_160': regnetx_160,
+    'regnetx_320': regnetx_320,
 
-    'scnet50': scnet50,
-    'scnet101': scnet101,
-    'scneta50': scneta50,
-    'scneta101': scneta101,
+    'regnety_002': regnety_002,
+    'regnety_004': regnety_004,
+    'regnety_006': regnety_006,
+    'regnety_008': regnety_008,
+    'regnety_016': regnety_016,
+    'regnety_032': regnety_032,
+    'regnety_040': regnety_040,
+    'regnety_064': regnety_064,
+    'regnety_080': regnety_080,
+    'regnety_120': regnety_120,
+    'regnety_160': regnety_160,
+    'regnety_320': regnety_320,
+
+    'regnetx002': regnetx002,
+    'regnetx004': regnetx004,
+    'regnetx006': regnetx006,
+    'regnetx008': regnetx008,
+    'regnetx016': regnetx016,
+    'regnetx032': regnetx032,
+    'regnetx040': regnetx040,
+    'regnetx064': regnetx064,
+    'regnetx080': regnetx080,
+    'regnetx120': regnetx120,
+    'regnetx160': regnetx160,
+    'regnetx320': regnetx320,
+
+    'regnety002': regnety002,
+    'regnety004': regnety004,
+    'regnety006': regnety006,
+    'regnety008': regnety008,
+    'regnety016': regnety016,
+    'regnety032': regnety032,
+    'regnety040': regnety040,
+    'regnety064': regnety064,
+    'regnety080': regnety080,
+    'regnety120': regnety120,
+    'regnety160': regnety160,
+    'regnety320': regnety320,
+
 }
 
 

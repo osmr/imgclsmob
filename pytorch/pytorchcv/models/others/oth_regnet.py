@@ -246,7 +246,7 @@ class RegNet(nn.Module):
         se_ratio = cfg['se_ratio']
         for i, stage_args in enumerate(stage_params):
             stage_name = "s{}".format(i + 1)
-            self.add_module(stage_name, RegStage(prev_width, **stage_args, se_ratio=se_ratio))
+            self.add_module(stage_name, RegStage(prev_width, se_ratio=se_ratio, **stage_args))
             prev_width = stage_args['out_chs']
             curr_stride *= stage_args['stride']
             self.feature_info += [dict(num_chs=prev_width, reduction=curr_stride, module=stage_name)]

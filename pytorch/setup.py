@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='pytorchcv',
-    version='0.0.58',
+    version='0.0.59',
     description='Image classification and segmentation models for PyTorch',
     license='MIT',
     long_description=long_description,

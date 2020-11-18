@@ -791,7 +791,7 @@ def main():
         dtype=args.dtype,
         net_extra_kwargs=ds_metainfo.train_net_extra_kwargs,
         tune_layers=args.tune_layers,
-        classes=args.classes,
+        classes=args.num_classes,
         in_channels=args.in_channels,
         do_hybridize=(not args.not_hybridize),
         initializer=get_initializer(initializer_name=args.initializer),

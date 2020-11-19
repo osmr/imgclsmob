@@ -145,6 +145,8 @@ from .models.superpointnet import *
 # from .models.others.oth_bisenet1 import *
 # from .models.others.oth_regnet import *
 
+from .models.fastscnn import *
+
 __all__ = ['get_model']
 
 
@@ -1107,6 +1109,8 @@ _models = {
     # 'oth_ibppose': oth_ibppose,
 
     # 'oth_bisenet': oth_bisenet,
+
+    'fastscnn_cityscapes': fastscnn_cityscapes,
 }
 
 

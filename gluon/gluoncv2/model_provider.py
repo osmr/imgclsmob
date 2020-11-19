@@ -144,6 +144,8 @@ from .models.nvpattexp import *
 # from .models.others.oth_centernet import *
 # from .models.others.oth_resnest import *
 # from .models.others.oth_danet import *
+from .models.others.oth_fastscnn import *
+from .models.fastscnn import *
 
 __all__ = ['get_model']
 
@@ -1194,6 +1196,9 @@ _models = {
 
     # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
+
+    'oth_fastscnn_citys': oth_fastscnn_citys,
+    'fastscnn_cityscapes': fastscnn_cityscapes,
 }
 
 

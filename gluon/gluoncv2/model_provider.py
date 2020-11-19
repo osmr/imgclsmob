@@ -21,6 +21,7 @@ from .models.cbamresnet import *
 from .models.resattnet import *
 from .models.sknet import *
 from .models.scnet import *
+from .models.regnet import *
 from .models.diaresnet import *
 from .models.diapreresnet import *
 from .models.pyramidnet import *
@@ -143,8 +144,6 @@ from .models.nvpattexp import *
 # from .models.others.oth_centernet import *
 # from .models.others.oth_resnest import *
 # from .models.others.oth_danet import *
-
-from .models.regnet import *
 
 __all__ = ['get_model']
 
@@ -336,6 +335,32 @@ _models = {
     'scnet101': scnet101,
     'scneta50': scneta50,
     'scneta101': scneta101,
+
+    'regnetx002': regnetx002,
+    'regnetx004': regnetx004,
+    'regnetx006': regnetx006,
+    'regnetx008': regnetx008,
+    'regnetx016': regnetx016,
+    'regnetx032': regnetx032,
+    'regnetx040': regnetx040,
+    'regnetx064': regnetx064,
+    'regnetx080': regnetx080,
+    'regnetx120': regnetx120,
+    'regnetx160': regnetx160,
+    'regnetx320': regnetx320,
+
+    'regnety002': regnety002,
+    'regnety004': regnety004,
+    'regnety006': regnety006,
+    'regnety008': regnety008,
+    'regnety016': regnety016,
+    'regnety032': regnety032,
+    'regnety040': regnety040,
+    'regnety064': regnety064,
+    'regnety080': regnety080,
+    'regnety120': regnety120,
+    'regnety160': regnety160,
+    'regnety320': regnety320,
 
     'diaresnet10': diaresnet10,
     'diaresnet12': diaresnet12,
@@ -1169,32 +1194,6 @@ _models = {
 
     # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
-
-    'regnetx002': regnetx002,
-    'regnetx004': regnetx004,
-    'regnetx006': regnetx006,
-    'regnetx008': regnetx008,
-    'regnetx016': regnetx016,
-    'regnetx032': regnetx032,
-    'regnetx040': regnetx040,
-    'regnetx064': regnetx064,
-    'regnetx080': regnetx080,
-    'regnetx120': regnetx120,
-    'regnetx160': regnetx160,
-    'regnetx320': regnetx320,
-
-    'regnety002': regnety002,
-    'regnety004': regnety004,
-    'regnety006': regnety006,
-    'regnety008': regnety008,
-    'regnety016': regnety016,
-    'regnety032': regnety032,
-    'regnety040': regnety040,
-    'regnety064': regnety064,
-    'regnety080': regnety080,
-    'regnety120': regnety120,
-    'regnety160': regnety160,
-    'regnety320': regnety320,
 }
 
 

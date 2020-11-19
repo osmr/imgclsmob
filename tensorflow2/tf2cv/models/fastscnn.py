@@ -490,7 +490,7 @@ class FastSCNN(tf.keras.Model):
                 name="aux_head")
 
     def call(self, x, training=None):
-        in_size = self.in_size if self.fixed_size is not None else get_im_size(x, data_format=self.data_format)
+        in_size = self.in_size if self.fixed_size else get_im_size(x, data_format=self.data_format)
         x = self.stem(x, training=training)
         y = self.features(x, training=training)
         y = self.pool(y, training=training)

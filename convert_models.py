@@ -707,6 +707,22 @@ def convert_gl2gl(dst_net,
         src2 = list(filter(re.compile("^head").search, src_param_keys))
         src2n = [key for key in src_param_keys if key not in src2]
         src_param_keys = src2n + src2
+    elif src_model.startswith("oth_fastscnn_citys"):
+        src1 = list(filter(re.compile("^feature_fusion").search, src_param_keys))
+        src1n = [key for key in src_param_keys if key not in src1]
+        src_param_keys = src1n + src1
+
+        dst0 = list(filter(re.compile("^fusion").search, dst_param_keys))
+        dst0n = [key for key in dst_param_keys if key not in dst0]
+        dst_param_keys = dst0n + dst0
+
+        dst1 = list(filter(re.compile("^fusion.low_pw_conv.bn").search, dst_param_keys))
+        dst1n = [key for key in dst_param_keys if key not in dst1]
+        dst_param_keys = dst1n + dst1
+
+        dst2 = list(filter(re.compile("^fusion.high_conv.bn").search, dst_param_keys))
+        dst2n = [key for key in dst_param_keys if key not in dst2]
+        dst_param_keys = dst2n + dst2
 
     for i, (src_key, dst_key) in enumerate(zip(src_param_keys, dst_param_keys)):
         if dst_params[dst_key].shape != src_params[src_key].shape:

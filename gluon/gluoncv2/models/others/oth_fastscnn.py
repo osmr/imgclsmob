@@ -27,8 +27,14 @@ class FastSCNN(HybridBlock):
 
     """
     def __init__(self, nclass, aux=True, ctx=cpu(), pretrained_base=False,
-                 height=None, width=None, base_size=2048, crop_size=1024, **kwargs):
+                 height=None, width=None, base_size=2048, crop_size=1024, in_size=(1024, 1024), in_channels=3,
+                 classes=19, fixed_size=True, **kwargs):
         super(FastSCNN, self).__init__()
+        self.in_channels = in_channels
+        self.in_size = in_size
+        self.classes = classes
+        self.aux = aux
+        self.fixed_size = fixed_size
 
         height = height if height is not None else crop_size
         width = width if width is not None else crop_size
@@ -382,7 +388,7 @@ def get_fastscnn(dataset='citys', ctx=cpu(0), pretrained=False,
     model.classes = datasets[dataset].classes
 
     if pretrained:
-        from .model_store import get_model_file
+        from gluoncv.model_zoo.model_store import get_model_file
         model.load_parameters(get_model_file('fastscnn_%s' % (acronyms[dataset]),
                                              tag=pretrained, root=root), ctx=ctx)
     return model
@@ -405,7 +411,7 @@ def _test():
 
     # in_size = (480, 480)
     in_size = (1024, 1024)
-    pretrained = False
+    pretrained = True
 
     models = [
         oth_fastscnn_citys,

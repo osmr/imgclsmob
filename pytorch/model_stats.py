@@ -90,7 +90,7 @@ def measure_model(model,
 
     def call_hook(module, x, y):
         if not (isinstance(module, IRevSplitBlock) or isinstance(module, IRevMergeBlock) or
-                isinstance(module, RiRFinalBlock)):
+                isinstance(module, RiRFinalBlock) or isinstance(module, InterpolationBlock)):
             assert (len(x) == 1)
         assert (len(module._modules) == 0)
         if isinstance(module, nn.Linear):

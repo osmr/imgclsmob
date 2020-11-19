@@ -530,6 +530,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('fcn8sd_resnetd101b_ade20k', '3550', '970d968a1fb44670993b065c1603a6a7c0bd57a1', 'v0.0.450', 'voc', 0.0),
     ('fcn8sd_resnetd101b_coco', '5968', '69c001b3875c5399dfc1281eb5a051bafef40e4b', 'v0.0.451', 'voc', 0.0),
     ('icnet_resnetd50b_cityscapes', '6060', '1e53e1d1724e61cc740cfbc818ca6e14015185ef', 'v0.0.457', 'cs', 0.0),
+
+    ('icnet_resnetd50b_cityscapes', '6505', 'ccc39c9bab2ca751f9ad524a430c4fe8c492ced9', 'v0.0.474', 'cs', 0.0),
+
     ('bisenet_resnet18_celebamaskhq', '0000', 'e8799341e74332932f5d162e3c1c780596caa219', 'v0.0.462', 'cs', 0.0),
     ('danet_resnetd50b_cityscapes', '6806', 'c79f5f22a16ea13d51fa062642e1d16133b4b700', 'v0.0.468', 'cs', 0.0),
     ('danet_resnetd101b_cityscapes', '6790', 'ebd5eef60777545f97f6aebc2be9510fe7e780c4', 'v0.0.468', 'cs', 0.0),

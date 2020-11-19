@@ -540,6 +540,9 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('fcn8sd_resnetd101b_ade20k', '3588', 'ff385e1913bc8c05c6abe9cb19896f477b9b75a7', 'v0.0.299'),
     ('fcn8sd_resnetd101b_coco', '6011', '4a469997cdc3e52c1dee1a2d58578f9df54c419b', 'v0.0.299'),
     ('icnet_resnetd50b_cityscapes', '6078', '04f581dc985f3d2874e8530bb70e529302e9d3dd', 'v0.0.457'),
+
+    ('fastscnn_cityscapes', '6595', '6dca42601bbba8134afa11674ba606231e30f035', 'v0.0.474'),
+
     ('sinet_cityscapes', '6084', 'c0a4e992f64c042ac815b87fe8d37919a693d0ad', 'v0.0.437'),
     ('bisenet_resnet18_celebamaskhq', '0000', 'c3bd2251b86e4fce29a3d1fb7600c6259d4d6523', 'v0.0.462'),
     ('danet_resnetd50b_cityscapes', '6799', 'dcef11be5a3e3984877c9d2b8644a630938eb25a', 'v0.0.468'),

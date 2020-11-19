@@ -459,7 +459,7 @@ class FastSCNN(HybridBlock):
                     classes=classes)
 
     def hybrid_forward(self, F, x):
-        in_size = self.in_size if self.in_size is not None else x.shape[2:]
+        in_size = self.in_size if self.fixed_size else x.shape[2:]
         x = self.stem(x)
         y = self.features(x)
         y = self.pool(y)
@@ -537,7 +537,8 @@ def _test():
     import numpy as np
     import mxnet as mx
 
-    in_size = (1024, 1024)
+    # in_size = (1024, 1024)
+    in_size = (1024, 2048)
     aux = True
     pretrained = False
     fixed_size = False

@@ -411,7 +411,7 @@ def _test():
 
     # in_size = (480, 480)
     in_size = (1024, 1024)
-    pretrained = True
+    pretrained = False
 
     models = [
         oth_fastscnn_citys,

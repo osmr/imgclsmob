@@ -27,7 +27,7 @@ class FastSCNN(HybridBlock):
 
     """
     def __init__(self, nclass, aux=True, ctx=cpu(), pretrained_base=False,
-                 height=None, width=None, base_size=2048, crop_size=1024, in_size=(1024, 1024), in_channels=3,
+                 height=None, width=None, base_size=2048, crop_size=1024, in_size=(1024, 2048), in_channels=3,
                  classes=19, fixed_size=True, **kwargs):
         super(FastSCNN, self).__init__()
         self.in_channels = in_channels
@@ -36,8 +36,8 @@ class FastSCNN(HybridBlock):
         self.aux = aux
         self.fixed_size = fixed_size
 
-        height = height if height is not None else crop_size
-        width = width if width is not None else crop_size
+        height = height if height is not None else in_size[0]
+        width = width if width is not None else in_size[1]
         self._up_kwargs = {'height': height, 'width': width}
         self.base_size = base_size
         self.crop_size = crop_size
@@ -74,7 +74,8 @@ class FastSCNN(HybridBlock):
             auxout = self.auxlayer(higher_res_features)
             auxout = F.contrib.BilinearResize2D(auxout, **self._up_kwargs)
             outputs.append(auxout)
-        return tuple(outputs)
+        # return tuple(outputs)
+        return outputs[0]
 
     def demo(self, x):
         """fastscnn demo"""

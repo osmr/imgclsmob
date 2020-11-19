@@ -547,10 +547,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('fcn8sd_resnetd101b_ade20k', '3588', '30d05ca42392a164ea7c93a9cbd7f33911d3c1af', 'v0.0.299', '', '', 'ade20k', 0, 0.0, 0, ''),  # noqa
     ('fcn8sd_resnetd101b_coco', '6011', 'ebe2ad0bc1de5b4cecade61d17d269aa8bf6df7f', 'v0.0.299', '', '', 'coco', 0, 0.0, 0, ''),  # noqa
     ('icnet_resnetd50b_cityscapes', '6402', 'b380f8cc91ffeac29df6c245f34fbc89aa095c53', 'v0.0.457', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
-
-    ('icnet_resnetd50b_cityscapes', '6576', 'b9859a25c6940383248bf2f53e2a5f02c1727cc8', 'v0.0.474', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
-
-
+    ('fastscnn_cityscapes', '6576', 'b9859a25c6940383248bf2f53e2a5f02c1727cc8', 'v0.0.474', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('sinet_cityscapes', '6172', '8ecd14141b85a682c2cc1c74e13077fee4746d87', 'v0.0.437', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('bisenet_resnet18_celebamaskhq', '0000', '98affefd74cc7f87314a96f148dbdbf4055bbfcb', 'v0.0.462', '', '', 'cs', 0, 0.0, 0, ''),  # noqa
     ('danet_resnetd50b_cityscapes', '6799', 'c5740c9fd471c141a584455efd2167858dd8cb94', 'v0.0.468', '', '', 'cs', 0, 0.0, 0, ''),  # noqa

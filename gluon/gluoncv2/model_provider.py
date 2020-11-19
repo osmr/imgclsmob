@@ -118,6 +118,7 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
+from .models.fastscnn import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
@@ -144,8 +145,7 @@ from .models.nvpattexp import *
 # from .models.others.oth_centernet import *
 # from .models.others.oth_resnest import *
 # from .models.others.oth_danet import *
-from .models.others.oth_fastscnn import *
-from .models.fastscnn import *
+# from .models.others.oth_fastscnn import *
 
 __all__ = ['get_model']
 
@@ -1107,6 +1107,8 @@ _models = {
 
     'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 
+    'fastscnn_cityscapes': fastscnn_cityscapes,
+
     'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
@@ -1196,9 +1198,6 @@ _models = {
 
     # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
-
-    'oth_fastscnn_citys': oth_fastscnn_citys,
-    'fastscnn_cityscapes': fastscnn_cityscapes,
 }
 
 

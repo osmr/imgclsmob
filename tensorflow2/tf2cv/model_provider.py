@@ -85,6 +85,7 @@ from .models.fcn8sd import *
 from .models.pspnet import *
 from .models.deeplabv3 import *
 from .models.icnet import *
+from .models.fastscnn import *
 from .models.sinet import *
 from .models.bisenet import *
 from .models.danet import *
@@ -101,8 +102,6 @@ from .models.lffd import *
 
 from .models.voca import *
 from .models.nvpattexp import *
-
-from .models.fastscnn import *
 
 __all__ = ['get_model']
 
@@ -857,6 +856,8 @@ _models = {
 
     'icnet_resnetd50b_cityscapes': icnet_resnetd50b_cityscapes,
 
+    'fastscnn_cityscapes': fastscnn_cityscapes,
+
     'sinet_cityscapes': sinet_cityscapes,
 
     'bisenet_resnet18_celebamaskhq': bisenet_resnet18_celebamaskhq,
@@ -900,8 +901,6 @@ _models = {
 
     'voca8flame': voca8flame,
     'nvpattexp116bazel76': nvpattexp116bazel76,
-
-    'fastscnn_cityscapes': fastscnn_cityscapes,
 }
 
 

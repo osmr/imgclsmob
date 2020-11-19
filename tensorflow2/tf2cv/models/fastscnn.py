@@ -8,7 +8,7 @@ __all__ = ['FastSCNN', 'fastscnn_cityscapes']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,\
+from common import conv1x1, conv1x1_block, conv3x3_block, dwconv3x3_block, dwsconv3x3_block, Concurrent,\
     InterpolationBlock, SimpleSequential, Identity, get_im_size, is_channels_first
 
 
@@ -527,7 +527,7 @@ def get_fastscnn(model_name=None,
     if pretrained:
         if (model_name is None) or (not model_name):
             raise ValueError("Parameter `model_name` should be properly initialized for loading pretrained model.")
-        from .model_store import get_model_file
+        from model_store import get_model_file
         in_channels = kwargs["in_channels"] if ("in_channels" in kwargs) else 3
         input_shape = (1,) + (in_channels,) + net.in_size if net.data_format == "channels_first" else\
             (1,) + net.in_size + (in_channels,)
@@ -572,7 +572,7 @@ def _test():
     in_size = (1024, 2048)
     aux = True
     fixed_size = False
-    pretrained = False
+    pretrained = True
 
     models = [
         (fastscnn_cityscapes, 19),

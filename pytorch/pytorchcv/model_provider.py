@@ -146,6 +146,9 @@ from .models.superpointnet import *
 # from .models.others.oth_bisenet1 import *
 # from .models.others.oth_regnet import *
 
+# from .models.others.oth_tresnet import *
+# from .models.tresnet import *
+
 __all__ = ['get_model']
 
 
@@ -1110,6 +1113,9 @@ _models = {
     # 'oth_ibppose': oth_ibppose,
 
     # 'oth_bisenet': oth_bisenet,
+
+    # 'oth_tresnet_m': oth_tresnet_m,
+    # 'tresnet_m': tresnet_m,
 }
 
 

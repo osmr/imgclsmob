@@ -118,7 +118,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('scnet50', '0638', 'dbe0d00dac14e69019c945e2542d7067c05be7cf', 'v0.0.472', 'in1k', 0.875),
     ('scnet101', '0604', 'f1a7a36bb0aa71273dfa23efc5d3f29754dbb1f0', 'v0.0.472', 'in1k', 0.875),
     ('scneta50', '0465', 'c1f8f295fc146d71ecfef113eeed16c2fc827f08', 'v0.0.472', 'in1k', 0.875),
-    ('regnetx002', '1136', 'a0183973ed117508c0d381312b5f88df33f354dc', 'v0.0.473', 'in1k', 0.875),
+    ('regnetx002', '1037', '599fc3d48f8a9c6275107ca918bc57b9f73e4de3', 'v0.0.475', 'in1k', 0.875),
     ('regnetx004', '0909', 'ec942dbb06672d521fc91c0391ced67ef9338c15', 'v0.0.473', 'in1k', 0.875),
     ('regnetx006', '0821', 'f29b7f61659906ec8791212ab859c971f4d34aa2', 'v0.0.473', 'in1k', 0.875),
     ('regnetx008', '0762', '99afa975d1fe52914ad509bee5f659d13aa6f95a', 'v0.0.473', 'in1k', 0.875),

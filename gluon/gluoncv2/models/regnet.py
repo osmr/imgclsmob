@@ -6,7 +6,7 @@
 __all__ = ['RegNet', 'regnetx002', 'regnetx004', 'regnetx006', 'regnetx008', 'regnetx016', 'regnetx032', 'regnetx040',
            'regnetx064', 'regnetx080', 'regnetx120', 'regnetx160', 'regnetx320', 'regnety002', 'regnety004',
            'regnety006', 'regnety008', 'regnety016', 'regnety032', 'regnety040', 'regnety064', 'regnety080',
-           'regnety120', 'regnety160', 'regnety320']
+           'regnety120', 'regnety160', 'regnety320', 'regnetz002']
 
 import os
 import numpy as np
@@ -716,6 +716,23 @@ def regnety320(**kwargs):
                       model_name="regnety320", **kwargs)
 
 
+def regnetz002(**kwargs):
+    """
+    RegNetZ-200MF experimental model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_regnet(channels_init=24, channels_slope=36.44, channels_mult=2.49, depth=13, groups=1,
+                      model_name="regnetz002", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -747,6 +764,7 @@ def _test():
         regnety120,
         regnety160,
         regnety320,
+        regnetz002,
     ]
 
     for model in models:
@@ -789,6 +807,7 @@ def _test():
         assert (model != regnety120 or weight_count == 51822544)
         assert (model != regnety160 or weight_count == 83590140)
         assert (model != regnety320 or weight_count == 145046770)
+        assert (model != regnetz002 or weight_count == 2479160)
 
         batch = 14
         size = 224

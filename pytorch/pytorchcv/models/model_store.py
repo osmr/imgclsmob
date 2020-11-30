@@ -308,6 +308,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mixnet_s', '0719', 'aeafe8432c11ffafbe72b9456d0c040151a5465c', 'v0.0.412', 'MixNet-S', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_m', '0660', '5aab9fbd5a1d53cca58cdab4e1c644cacb6e0d8c', 'v0.0.413', 'MixNet-M', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mixnet_l', '0582', '6cf2c97538d4173d9f6bc80a6ec299463df2d1f3', 'v0.0.414', 'MixNet-L', '1907.09595', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('resnetabc14b', '0990', 'bad51cb083aae58479112ad11a3fe9430346e185', 'v0.0.477', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta18', '0887', '5402c05130d4fd902c26c805edfbd2a0063d989f', 'v0.0.470', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta50b', '0563', '1a1cc735a2af26f31fb1207a6bb487f48c23d401', 'v0.0.452', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa
     ('resneta101b', '0503', '80d275397837e8f40908cdb4b2cc3e427a1196ee', 'v0.0.452', '', '', 'in1k', 0, 0.0, 0, ''),  # noqa

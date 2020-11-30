@@ -308,6 +308,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checks
     ('mixnet_s', '0739', '54434771161c33256d67748ad3460556dc4a14d5', 'v0.0.412'),
     ('mixnet_m', '0678', '810b89677e81fafe256c2396ed3984af7740c91d', 'v0.0.413'),
     ('mixnet_l', '0603', '0576f35d60442379df422268e0f3070af82c3b72', 'v0.0.414'),
+    ('resnetabc14b', '0956', '6f8c36067feb2d27b5e0813bf18ef29038db0d70', 'v0.0.477'),
     ('resneta18', '0862', 'e3c0b12d88d9ae9cc9bed642aa2fdb701628335d', 'v0.0.470'),
     ('resneta50b', '0541', '535a978dc0d5f0b26def1bd00e7c63c8cad9a1f2', 'v0.0.452'),
     ('resneta101b', '0487', 'fad05e5777b8a519dc24e2884ed17dffbc8c3dbb', 'v0.0.452'),

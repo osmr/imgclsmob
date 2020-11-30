@@ -298,6 +298,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('mixnet_s', '0737', 'd68d63f1914beeaec4e068c0dbd1defe09c7ffb6', 'v0.0.427', 'in1k', 0.875),
     ('mixnet_m', '0679', 'f74eab6c0ed1bc453453f433bce1cdde2d3e6bda', 'v0.0.427', 'in1k', 0.875),
     ('mixnet_l', '0601', '5c2ccc0c906ae29985043dc590317133c0be3376', 'v0.0.427', 'in1k', 0.875),
+    ('resnetabc14b', '0960', '96153aced03790d2b54ba62c8dce1da95f4f784a', 'v0.0.477', 'in1k', 0.875),
     ('resneta18', '0865', 'a9839f04909a150f96c097e2045778b8a7fa09ac', 'v0.0.470', 'in1k', 0.875),
     ('resneta50b', '0543', 'ba99aca40e3c117e94980b0d6786910eeae7b9ee', 'v0.0.452', 'in1k', 0.875),
     ('resneta101b', '0490', 'd6dfa5240ecfa2c11f851535c9e2dafdc3bf016f', 'v0.0.452', 'in1k', 0.875),

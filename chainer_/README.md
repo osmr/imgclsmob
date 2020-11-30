@@ -424,6 +424,7 @@ Some remarks:
 | MixNet-S | 24.32 | 7.28 | 4,134,606 | 260.76M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.412/mixnet_s-0728-dc6c60c8.npz.log)) |
 | MixNet-M | 23.15 | 6.75 | 5,014,382 | 366.68M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.413/mixnet_m-0675-4979acf0.npz.log)) |
 | MixNet-L | 21.55 | 5.90 | 7,329,252 | 591.34M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.414/mixnet_l-0590-f942b4c5.npz.log)) |
+| ResNet(A)-BC-14 | 27.72 | 9.57 | 10,084,168 | 1,721.57M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.477/resnetabc14b-0957-84e05fea.npz.log)) |
 | ResNet(A)-18 | 26.75 | 8.65 | 11,708,744 | 2,062.24M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.470/resneta18-0865-038c65f9.npz.log)) |
 | ResNet(A)-50b | 20.81 | 5.41 | 25,576,264 | 4,352.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta50b-0541-9c56b041.npz.log)) |
 | ResNet(A)-101b | 19.52 | 4.91 | 44,568,392 | 8,072.93M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.452/resneta101b-0491-5c892558.npz.log)) |

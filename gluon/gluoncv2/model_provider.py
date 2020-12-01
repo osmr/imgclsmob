@@ -147,6 +147,8 @@ from .models.nvpattexp import *
 # from .models.others.oth_danet import *
 # from .models.others.oth_fastscnn import *
 
+from .models.regnetv import *
+
 __all__ = ['get_model']
 
 
@@ -1200,6 +1202,19 @@ _models = {
 
     # 'oth_danet_resnet50_citys': oth_danet_resnet50_citys,
     # 'oth_danet_resnet101_citys': oth_danet_resnet101_citys,
+
+    'regnetv002': regnetv002,
+    'regnetv004': regnetv004,
+    'regnetv006': regnetv006,
+    'regnetv008': regnetv008,
+    'regnetv016': regnetv016,
+    'regnetv032': regnetv032,
+    'regnetv040': regnetv040,
+    'regnetv064': regnetv064,
+    'regnetv080': regnetv080,
+    'regnetv120': regnetv120,
+    'regnetv160': regnetv160,
+    'regnetv320': regnetv320,
 }
 
 

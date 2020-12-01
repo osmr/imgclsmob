@@ -733,6 +733,23 @@ def regnetz002(**kwargs):
                       model_name="regnetz002", **kwargs)
 
 
+def regnetw002(**kwargs):
+    """
+    RegNetW-200MF experimental model from 'Designing Network Design Spaces,' https://arxiv.org/abs/2003.13678.
+
+    Parameters:
+    ----------
+    pretrained : bool, default False
+        Whether to load the pretrained weights for model.
+    ctx : Context, default CPU
+        The context in which to load the pretrained weights.
+    root : str, default '~/.mxnet/models'
+        Location for keeping the model parameters.
+    """
+    return get_regnet(channels_init=24, channels_slope=36.44, channels_mult=2.49, depth=13, groups=1024,
+                      model_name="regnetw002", **kwargs)
+
+
 def _test():
     import numpy as np
     import mxnet as mx
@@ -765,6 +782,7 @@ def _test():
         regnety160,
         regnety320,
         regnetz002,
+        regnetw002,
     ]
 
     for model in models:
@@ -807,7 +825,9 @@ def _test():
         assert (model != regnety120 or weight_count == 51822544)
         assert (model != regnety160 or weight_count == 83590140)
         assert (model != regnety320 or weight_count == 145046770)
+
         assert (model != regnetz002 or weight_count == 2479160)
+        assert (model != regnetw002 or weight_count == 11846648)
 
         batch = 14
         size = 224

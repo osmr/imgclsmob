@@ -69,6 +69,8 @@ class RegNetVUnit(HybridBlock):
         Number of output channels.
     strides : int or tuple/list of 2 int
         Strides of the convolution.
+    downscale : bool
+        Whether to downscale tensor.
     dw_use_bn : bool
         Whether to use BatchNorm layer (depthwise convolution block).
     dw_activation : function or str or None
@@ -81,14 +83,14 @@ class RegNetVUnit(HybridBlock):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 strides,
+                 downscale,
                  dw_use_bn,
                  dw_activation,
                  bn_use_global_stats=False,
                  bn_cudnn_off=False,
                  **kwargs):
         super(RegNetVUnit, self).__init__(**kwargs)
-        self.resize = (strides > 1)
+        self.downscale = downscale
 
         with self.name_scope():
             self.conv1 = conv1x1_block(
@@ -96,10 +98,10 @@ class RegNetVUnit(HybridBlock):
                 out_channels=out_channels,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off)
-            if self.resize:
+            if self.downscale:
                 self.pool = nn.AvgPool2D(
                     pool_size=3,
-                    strides=strides,
+                    strides=2,
                     padding=1)
             self.conv2 = dwsconv3x3_block(
                 in_channels=out_channels,
@@ -109,26 +111,73 @@ class RegNetVUnit(HybridBlock):
                 bn_cudnn_off=bn_cudnn_off,
                 dw_activation=dw_activation,
                 pw_activation=None)
-            if self.resize:
+            if self.downscale:
                 self.identity_block = DownBlock(
                     in_channels=in_channels,
                     out_channels=out_channels,
-                    strides=strides,
+                    strides=2,
                     bn_use_global_stats=bn_use_global_stats,
                     bn_cudnn_off=bn_cudnn_off)
             self.activ = nn.Activation("relu")
 
     def hybrid_forward(self, F, x):
-        if self.resize:
+        if self.downscale:
             identity = self.identity_block(x)
         else:
             identity = x
         x = self.conv1(x)
-        if self.resize:
+        if self.downscale:
             x = self.pool(x)
         x = self.conv2(x)
         x = x + identity
         x = self.activ(x)
+        return x
+
+
+class RegNetVInitBlock(HybridBlock):
+    """
+    RegNetV specific initial block.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    bn_use_global_stats : bool, default False
+        Whether global moving statistics is used instead of local batch-norm for BatchNorm layers.
+    bn_cudnn_off : bool, default False
+        Whether to disable CUDNN batch normalization operator.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 bn_use_global_stats=False,
+                 bn_cudnn_off=False,
+                 **kwargs):
+        super(RegNetVInitBlock, self).__init__(**kwargs)
+        mid_channels = out_channels // 2
+
+        with self.name_scope():
+            self.conv1 = conv3x3_block(
+                in_channels=in_channels,
+                out_channels=mid_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
+            self.pool = nn.MaxPool2D(
+                pool_size=3,
+                strides=2,
+                padding=1)
+            self.conv2 = conv3x3_block(
+                in_channels=mid_channels,
+                out_channels=out_channels,
+                bn_use_global_stats=bn_use_global_stats,
+                bn_cudnn_off=bn_cudnn_off)
+
+    def hybrid_forward(self, F, x):
+        x = self.conv1(x)
+        x = self.pool(x)
+        x = self.conv2(x)
         return x
 
 
@@ -175,11 +224,9 @@ class RegNetV(HybridBlock):
 
         with self.name_scope():
             self.features = nn.HybridSequential(prefix="")
-            self.features.add(conv3x3_block(
+            self.features.add(RegNetVInitBlock(
                 in_channels=in_channels,
                 out_channels=init_block_channels,
-                strides=2,
-                padding=1,
                 bn_use_global_stats=bn_use_global_stats,
                 bn_cudnn_off=bn_cudnn_off))
             in_channels = init_block_channels
@@ -187,11 +234,11 @@ class RegNetV(HybridBlock):
                 stage = nn.HybridSequential(prefix="stage{}_".format(i + 1))
                 with stage.name_scope():
                     for j, out_channels in enumerate(channels_per_stage):
-                        strides = 2 if (j == 0) else 1
+                        downscale = (j == 0)
                         stage.add(RegNetVUnit(
                             in_channels=in_channels,
                             out_channels=out_channels,
-                            strides=strides,
+                            downscale=downscale,
                             dw_use_bn=dw_use_bn,
                             dw_activation=dw_activation,
                             bn_use_global_stats=bn_use_global_stats,
@@ -534,18 +581,18 @@ def _test():
             weight_count += np.prod(param.shape)
         print("m={}, {}".format(model.__name__, weight_count))
         if dws_simplified:
-            assert (model != regnetv002 or weight_count == 2472632)
-            assert (model != regnetv004 or weight_count == 4462872)
-            assert (model != regnetv006 or weight_count == 5238728)
-            assert (model != regnetv008 or weight_count == 6348792)
-            assert (model != regnetv016 or weight_count == 7820232)
-            assert (model != regnetv032 or weight_count == 11536328)
-            assert (model != regnetv040 or weight_count == 18319616)
-            assert (model != regnetv064 or weight_count == 20850472)
-            assert (model != regnetv080 or weight_count == 21926016)
-            assert (model != regnetv120 or weight_count == 32829512)
-            assert (model != regnetv160 or weight_count == 36209152)
-            assert (model != regnetv320 or weight_count == 64655368)
+            assert (model != regnetv002 or weight_count == 2476840)
+            assert (model != regnetv004 or weight_count == 4467080)
+            assert (model != regnetv006 or weight_count == 5242936)
+            assert (model != regnetv008 or weight_count == 6353000)
+            assert (model != regnetv016 or weight_count == 7824440)
+            assert (model != regnetv032 or weight_count == 11540536)
+            assert (model != regnetv040 or weight_count == 18323824)
+            assert (model != regnetv064 or weight_count == 20854680)
+            assert (model != regnetv080 or weight_count == 21930224)
+            assert (model != regnetv120 or weight_count == 32833720)
+            assert (model != regnetv160 or weight_count == 36213360)
+            assert (model != regnetv320 or weight_count == 64659576)
         else:
             assert (model != regnetv002 or weight_count == 2479160)
             assert (model != regnetv004 or weight_count == 4474712)

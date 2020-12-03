@@ -177,7 +177,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | ResNet-18 x0.25 | 39.31 | 17.40 | 3,937,400 | 270.94M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.262/resnet18_wd4-1740-a74ea15d.params.log)) |
 | ResNet-18 x0.5 | 33.41 | 12.84 | 5,804,296 | 608.70M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.263/resnet18_wd2-1284-9a515406.params.log)) |
 | ResNet-18 x0.75 | 30.00 | 10.66 | 8,476,056 | 1,129.45M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.266/resnet18_w3d4-1066-1a574a41.params.log)) |
-| ResNet-18 | 27.79 | 9.21 | 11,689,512 | 1,820.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.469/resnet18-0921-3f8091d8.params.log)) |
+| ResNet-18 | 26.79 | 8.67 | 11,689,512 | 1,820.41M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.478/resnet18-0867-711ed8ab.params.log)) |
 | ResNet-26 | 26.14 | 8.37 | 17,960,232 | 2,746.79M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.305/resnet26-0837-d81d836f.params.log)) |
 | ResNet-BC-26b | 24.86 | 7.58 | 15,995,176 | 2,356.67M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.313/resnetbc26b-0758-2b5e8d08.params.log)) |
 | ResNet-34 | 24.53 | 7.43 | 21,797,672 | 3,672.68M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.291/resnet34-0743-5cdeeccd.params.log)) |

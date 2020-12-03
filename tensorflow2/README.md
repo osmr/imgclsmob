@@ -138,7 +138,7 @@ Some remarks:
 | ResNet-18 x0.25 | 39.30 | 17.45 | 3,937,400 | 270.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet18_wd4-1745-6e800416.tf2.h5.log)) |
 | ResNet-18 x0.5 | 33.40 | 12.83 | 5,804,296 | 608.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet18_wd2-1283-85a7caff.tf2.h5.log)) |
 | ResNet-18 x0.75 | 29.98 | 10.67 | 8,476,056 | 1,129.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet18_w3d4-1067-c1735b7d.tf2.h5.log)) |
-| ResNet-18 | 27.81 | 9.20 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.469/resnet18-0920-05df1294.tf2.h5.log)) |
+| ResNet-18 | 26.80 | 8.70 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.478/resnet18-0870-e1d3f22e.tf2.h5.log)) |
 | ResNet-26 | 26.15 | 8.37 | 17,960,232 | 2,746.79M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet26-0837-a8f20f71.tf2.h5.log)) |
 | ResNet-BC-26b | 24.80 | 7.57 | 15,995,176 | 2,356.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnetbc26b-0757-d70a2cad.tf2.h5.log)) |
 | ResNet-34 | 24.50 | 7.44 | 21,797,672 | 3,672.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet34-0744-7f7d70e7.tf2.h5.log)) |

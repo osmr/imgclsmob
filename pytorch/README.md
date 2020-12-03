@@ -171,7 +171,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | ResNet-18 x0.25 | 39.62 | 17.85 | 3,937,400 | 270.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.262/resnet18_wd4-1785-fe79b31f.pth.log)) |
 | ResNet-18 x0.5 | 33.80 | 13.27 | 5,804,296 | 608.70M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.263/resnet18_wd2-1327-6654f50a.pth.log)) |
 | ResNet-18 x0.75 | 30.40 | 11.06 | 8,476,056 | 1,129.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.266/resnet18_w3d4-1106-3636648b.pth.log)) |
-| ResNet-18 | 28.03 | 9.41 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.469/resnet18-0941-8ef01e05.pth.log)) |
+| ResNet-18 | 26.94 | 8.96 | 11,689,512 | 1,820.41M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.478/resnet18-0896-77a56f15.pth.log)) |
 | ResNet-26 | 26.30 | 8.54 | 17,960,232 | 2,746.79M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.305/resnet26-0854-25834733.pth.log)) |
 | ResNet-BC-26b | 25.09 | 7.97 | 15,995,176 | 2,356.67M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.313/resnetbc26b-0797-7af52a73.pth.log)) |
 | ResNet-34 | 24.84 | 7.80 | 21,797,672 | 3,672.68M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.291/resnet34-0780-3f775482.pth.log)) |

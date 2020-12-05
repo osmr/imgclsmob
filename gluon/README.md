@@ -260,7 +260,7 @@ bottleneck block. Respectively a network without b-suffix has the stride in the 
 | SCNet-101 | 21.65 | 5.99 | 44,565,416 | 7,204.19M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet101-0599-8c30a4c7.params.log)) |
 | SCNet(A)-50 | 19.56 | 4.63 | 25,583,816 | 4,715.79M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0463-4b2031a8.params.log)) |
 | RegNetX-200MF | 29.91 | 10.38 | 2,684,792 | 203.32M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.475/regnetx002-1038-7800b310.params.log)) |
-| RegNetX-400MF | 27.46 | 9.09 | 5,157,512 | 403.44M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx004-0909-f01b9591.params.log)) |
+| RegNetX-400MF | 26.25 | 8.55 | 5,157,512 | 403.44M | Training ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.479/regnetx004-0855-b933a72f.params.log)) |
 | RegNetX-600MF | 25.98 | 8.16 | 6,196,040 | 608.36M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx006-0816-bddeeb9b.params.log)) |
 | RegNetX-800MF | 24.82 | 7.63 | 7,259,656 | 809.47M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx008-0763-1cd8ff65.params.log)) |
 | RegNetX-1.6GF | 23.00 | 6.48 | 9,190,136 | 1,618.97M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx016-0648-a8bd5228.params.log)) |

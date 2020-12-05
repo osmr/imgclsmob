@@ -254,7 +254,7 @@ OpenCV `Resize` transformation instead of PIL one quality evaluation results wil
 | SCNet-101 | 21.06 | 5.75 | 44,565,416 | 7,204.24M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scnet101-0575-40cd4d4c.pth.log)) |
 | SCNet(A)-50 | 19.53 | 4.68 | 25,583,816 | 4,715.84M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0468-eb3c25d6.pth.log)) |
 | RegNetX-200MF | 30.20 | 10.66 | 2,684,792 | 203.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.475/regnetx002-1066-e389d6ce.pth.log)) |
-| RegNetX-400MF | 27.70 | 9.36 | 5,157,512 | 403.45M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx004-0936-03759fd2.pth.log)) |
+| RegNetX-400MF | 26.44 | 8.66 | 5,157,512 | 403.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.479/regnetx004-0866-9584cc0b.pth.log)) |
 | RegNetX-600MF | 26.32 | 8.43 | 6,196,040 | 608.37M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx006-0843-ba05e865.pth.log)) |
 | RegNetX-800MF | 25.21 | 7.81 | 7,259,656 | 809.49M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx008-0781-2197de0c.pth.log)) |
 | RegNetX-1.6GF | 23.32 | 6.72 | 9,190,136 | 1,618.99M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx016-0672-0b4c11fb.pth.log)) |

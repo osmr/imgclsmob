@@ -9,7 +9,7 @@ __all__ = ['AlexNet', 'alexnet', 'alexnetb']
 import os
 import tensorflow as tf
 import tensorflow.keras.layers as nn
-from .common import ConvBlock, MaxPool2d, flatten
+from .common import ConvBlock, MaxPool2d, SimpleSequential, flatten, is_channels_first
 
 
 class AlexConv(ConvBlock):
@@ -173,10 +173,10 @@ class AlexNet(tf.keras.Model):
         self.classes = classes
         self.data_format = data_format
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         for i, channels_per_stage in enumerate(channels):
             use_lrn_i = use_lrn and (i in [0, 1])
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, out_channels in enumerate(channels_per_stage):
                 stage.add(AlexConv(
                     in_channels=in_channels,
@@ -302,6 +302,8 @@ def _test():
     import numpy as np
     import tensorflow.keras.backend as K
 
+    data_format = "channels_last"
+    # data_format = "channels_first"
     pretrained = False
 
     models = [
@@ -314,7 +316,7 @@ def _test():
         net = model(pretrained=pretrained)
 
         batch = 14
-        x = tf.random.normal((batch, 224, 224, 3))
+        x = tf.random.normal((batch, 3, 224, 224) if is_channels_first(data_format) else (batch, 224, 224, 3))
         y = net(x)
         assert (tuple(y.shape.as_list()) == (batch, 1000))
 

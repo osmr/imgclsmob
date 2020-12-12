@@ -240,7 +240,7 @@ def add_train_cls_parser_arguments(parser):
     parser.add_argument(
         "--log-pip-packages",
         type=str,
-        default="mxnet-cu101",
+        default="mxnet-cu101, mxnet-cu102, mxnet-cu110",
         help="list of pip packages for logging")
 
     parser.add_argument(

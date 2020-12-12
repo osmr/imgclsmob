@@ -6,7 +6,7 @@
 __all__ = ['RegNet', 'regnetx002', 'regnetx004', 'regnetx006', 'regnetx008', 'regnetx016', 'regnetx032', 'regnetx040',
            'regnetx064', 'regnetx080', 'regnetx120', 'regnetx160', 'regnetx320', 'regnety002', 'regnety004',
            'regnety006', 'regnety008', 'regnety016', 'regnety032', 'regnety040', 'regnety064', 'regnety080',
-           'regnety120', 'regnety160', 'regnety320', 'regnetz002']
+           'regnety120', 'regnety160', 'regnety320', 'regnetz002', 'regnetw002']
 
 import os
 import numpy as np

@@ -367,6 +367,7 @@ _models = {
     'regnety320': regnety320,
 
     'regnetz002': regnetz002,
+    'regnetw002': regnetw002,
 
     'diaresnet10': diaresnet10,
     'diaresnet12': diaresnet12,

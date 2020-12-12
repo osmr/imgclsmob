@@ -10,7 +10,7 @@ import logging
 import hashlib
 
 _model_sha1 = {name: (error, checksum, repo_release_tag) for name, error, checksum, repo_release_tag in [
-    ('alexnet', '1610', '8ae4618efdb64d4b2b74fc4346ff917b3d51e3b2', 'v0.0.481'),
+    ('alexnet', '1610', 'd666015b6e4e82eccc5d6c47cd35282a8aede469', 'v0.0.481'),
     ('alexnetb', '1858', 'fc907758039a5849093b7d91f22d3ab4e5a80db6', 'v0.0.384'),
     ('zfnet', '1675', '0205a9ab48a3d46407dd6263b1e5e003668ba3e0', 'v0.0.395'),
     ('zfnetb', '1456', '5808c73ebdc868de4da958a3b9b29f9646ecbfbb', 'v0.0.400'),

@@ -222,8 +222,8 @@ Some remarks:
 | SCNet(A)-50 | 19.61 | 4.65 | 25,583,816 | 4,715.84M | From [MCG-NKU/SCNet] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.472/scneta50-0465-c1f8f295.tf2.h5.log)) |
 | RegNetX-200MF | 29.94 | 10.37 | 2,684,792 | 203.33M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.475/regnetx002-1136-a0183973.tf2.h5.log)) |
 | RegNetX-400MF | 26.28 | 8.52 | 5,157,512 | 403.45M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.479/regnetx004-0852-f0707cff.tf2.h5.log)) |
-| RegNetX-600MF | 25.97 | 8.21 | 6,196,040 | 608.37M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx006-0821-f29b7f61.tf2.h5.log)) |
-| RegNetX-800MF | 24.79 | 7.62 | 7,259,656 | 809.49M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx008-0762-99afa975.tf2.h5.log)) |
+| RegNetX-600MF | 24.69 | 7.59 | 6,196,040 | 608.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx006-0759-2e47a916.tf2.h5.log)) |
+| RegNetX-800MF | 24.11 | 7.27 | 7,259,656 | 809.49M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.482/regnetx008-0727-b19816ad.tf2.h5.log)) |
 | RegNetX-1.6GF | 22.96 | 6.49 | 9,190,136 | 1,618.99M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx016-0649-dc27f36a.tf2.h5.log)) |
 | RegNetX-3.2GF | 21.74 | 5.79 | 15,296,552 | 3,199.55M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx032-0579-2dc089c7.tf2.h5.log)) |
 | RegNetX-4.0GF | 21.27 | 5.78 | 22,118,248 | 3,986.29M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx040-0578-58bdb5ac.tf2.h5.log)) |

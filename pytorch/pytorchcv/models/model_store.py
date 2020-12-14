@@ -118,10 +118,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('scnet50', '0608', '61236331bf1b7439f32158f09ff877e5b90b0d03', 'v0.0.472', 'SCNet-50', '', 'in1k', 224, 0.875, 200, '[MCG-NKU/SCNet]'),  # noqa
     ('scnet101', '0575', '40cd4d4ca4407798b569e883eb248a5abfddeb75', 'v0.0.472', 'SCNet-101', '', 'in1k', 224, 0.875, 200, '[MCG-NKU/SCNet]'),  # noqa
     ('scneta50', '0468', 'eb3c25d6c9c8b6c0815a724d798b9b5a2b27ce34', 'v0.0.472', 'SCNet(A)-50', '', 'in1k', 224, 0.875, 200, '[MCG-NKU/SCNet]'),  # noqa
-    ('regnetx002', '1066', 'e389d6ce5846b65a5859152243d821308252e202', 'v0.0.475', 'RegNetX-200MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnetx004', '0866', '9584cc0b8e461f624b3050a59bb36b15e04df980', 'v0.0.479', 'RegNetX-400MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnetx006', '0843', 'ba05e8654138f9a01cdbb714913bf96a9f3f81ac', 'v0.0.473', 'RegNetX-600MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnetx008', '0781', '2197de0c5ca1affa7c071c1a1195ca16ff66930c', 'v0.0.473', 'RegNetX-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnetx002', '1066', 'e389d6ce5846b65a5859152243d821308252e202', 'v0.0.475', 'RegNetX-200MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnetx004', '0866', '9584cc0b8e461f624b3050a59bb36b15e04df980', 'v0.0.479', 'RegNetX-400MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnetx006', '0791', '30ca597ae0506cb588a7fd8d2fecc4be8402b0cf', 'v0.0.482', 'RegNetX-600MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('regnetx008', '0740', '157abf5e7c9244a482bf7655e75bfaea143b4d61', 'v0.0.482', 'RegNetX-800MF', '', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('regnetx016', '0672', '0b4c11fbf514add51d2ebd78f7839167a79930f2', 'v0.0.473', 'RegNetX-1.6GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx032', '0600', 'a32d8fa368a4c3f426588e3d0d58e5624f000a51', 'v0.0.473', 'RegNetX-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnetx040', '0586', '54660c9ceef3013f2bdb4ec0fd4ec404f97d9861', 'v0.0.473', 'RegNetX-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa

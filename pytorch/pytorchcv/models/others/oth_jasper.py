@@ -6,12 +6,6 @@ from torch import nn
 import torch.nn.functional as F
 
 
-def get_same_padding(kernel_size, stride, dilation):
-    if stride > 1 and dilation > 1:
-        raise ValueError("Only stride OR dilation may be greater than 1")
-    return (kernel_size // 2) * dilation
-
-
 class JasperBlock(nn.Module):
     """
     Jasper Block
@@ -19,16 +13,14 @@ class JasperBlock(nn.Module):
     def __init__(self,
                  in_channels,
                  out_channels,
-                 repeat=3,
-                 kernel_size=11,
-                 stride=1,
-                 dilation=1,
-                 dropout=0.2,
-                 residual=True,
-                 residual_panes=[]):
+                 repeat,
+                 kernel_size,
+                 stride,
+                 dropout,
+                 residual,
+                 residual_channels):
         super().__init__()
-        padding_val = get_same_padding(kernel_size[0], stride[0], dilation[0])
-        activation = nn.ReLU()
+        padding_val = (kernel_size[0] // 2)
 
         self.conv = nn.ModuleList()
         inplanes_loop = in_channels
@@ -39,12 +31,10 @@ class JasperBlock(nn.Module):
                     out_channels=out_channels,
                     kernel_size=kernel_size,
                     stride=stride,
-                    padding=padding_val,
-                    dilation=dilation))
+                    padding=padding_val))
             self.conv.extend(
                 self._get_act_dropout_layer(
-                    drop_prob=dropout,
-                    activation=activation))
+                    drop_prob=dropout))
             inplanes_loop = out_channels
         self.conv.extend(
             self._get_conv_bn_layer(
@@ -52,14 +42,13 @@ class JasperBlock(nn.Module):
                 out_channels=out_channels,
                 kernel_size=kernel_size,
                 stride=stride,
-                padding=padding_val,
-                dilation=dilation))
+                padding=padding_val))
 
         self.res = nn.ModuleList() if residual else None
-        res_panes = residual_panes.copy()
+        res_panes = residual_channels.copy()
         self.dense_residual = residual
         if residual:
-            if len(residual_panes) == 0:
+            if len(residual_channels) == 0:
                 res_panes = [in_channels]
                 self.dense_residual = False
             for ip in res_panes:
@@ -73,16 +62,14 @@ class JasperBlock(nn.Module):
 
         self.out = nn.Sequential(
             *self._get_act_dropout_layer(
-                drop_prob=dropout,
-                activation=activation)
+                drop_prob=dropout)
         )
 
-    def _get_conv_bn_layer(self,
-                           in_channels,
+    @staticmethod
+    def _get_conv_bn_layer(in_channels,
                            out_channels,
                            kernel_size,
                            stride=1,
-                           dilation=1,
                            padding=0,
                            bias=False):
         layers = [
@@ -92,7 +79,7 @@ class JasperBlock(nn.Module):
                 kernel_size=kernel_size,
                 stride=stride,
                 padding=padding,
-                dilation=dilation,
+                dilation=1,
                 groups=1,
                 bias=bias),
             nn.BatchNorm1d(
@@ -103,17 +90,14 @@ class JasperBlock(nn.Module):
         return layers
 
     @staticmethod
-    def _get_act_dropout_layer(drop_prob,
-                               activation):
+    def _get_act_dropout_layer(drop_prob):
         layers = [
-            activation,
+            nn.ReLU(),
             nn.Dropout(p=drop_prob)
         ]
         return layers
 
-    def forward(self, input_):
-        xs = input_
-
+    def forward(self, xs):
         # compute forward convolutions
         out = xs[-1]
         for i, l in enumerate(self.conv):
@@ -145,13 +129,13 @@ class JasperEncoder(nn.Module):
                  in_channels,
                  cfg):
         super().__init__()
-        residual_panes = []
+        residual_channels = []
         encoder_layers = []
         for lcfg in cfg:
-            dense_res = []
+            dense_residual_channels = []
             if lcfg.get('residual_dense', False):
-                residual_panes.append(in_channels)
-                dense_res = residual_panes
+                residual_channels.append(in_channels)
+                dense_residual_channels = residual_channels
 
             encoder_layers.append(
                 JasperBlock(
@@ -160,36 +144,15 @@ class JasperEncoder(nn.Module):
                     repeat=lcfg['repeat'],
                     kernel_size=lcfg['kernel'],
                     stride=lcfg['stride'],
-                    dilation=lcfg['dilation'],
                     dropout=lcfg['dropout'],
                     residual=lcfg['residual'],
-                    residual_panes=dense_res))
+                    residual_channels=dense_residual_channels))
             in_channels = lcfg['filters']
 
         self.encoder = nn.Sequential(*encoder_layers)
 
     def forward(self, x):
         return self.encoder([x])
-
-
-class JasperDecoderForCTC(nn.Module):
-    """
-    Jasper decoder
-    """
-    def __init__(self,
-                 in_channels,
-                 num_classes):
-        super().__init__()
-        self.decoder_layers = nn.Sequential(
-            nn.Conv1d(
-                in_channels=in_channels,
-                out_channels=num_classes,
-                kernel_size=1,
-                bias=True), )
-
-    def forward(self, x):
-        x = self.decoder_layers(x[-1]).transpose(1, 2)
-        return F.log_softmax(x, dim=2)
 
 
 class Jasper(nn.Module):
@@ -205,13 +168,16 @@ class Jasper(nn.Module):
         self.encoder = JasperEncoder(
             in_channels=in_channels,
             cfg=config)
-        self.decoder = JasperDecoderForCTC(
+        self.decoder = nn.Conv1d(
             in_channels=encoder_channels,
-            num_classes=num_classes)
+            out_channels=num_classes,
+            kernel_size=1,
+            bias=True)
 
     def forward(self, x):
         x = self.encoder(x)
-        x = self.decoder(x)
+        x = self.decoder(x[-1]).transpose(1, 2)
+        x = F.log_softmax(x, dim=2)
         return x
 
 
@@ -233,7 +199,6 @@ def _test():
             'repeat': 1,
             'kernel': [11],
             'stride': [2],
-            'dilation': [1],
             'dropout': 0.2,
             'residual': False
         },
@@ -242,7 +207,6 @@ def _test():
             'repeat': 5,
             'kernel': [11],
             'stride': [1],
-            'dilation': [1],
             'dropout': 0.2,
             'residual': True,
             'residual_dense': True
@@ -252,7 +216,6 @@ def _test():
             'repeat': 5,
             'kernel': [11],
             'stride': [1],
-            'dilation': [1],
             'dropout': 0.2,
             'residual': True,
             'residual_dense': True
@@ -262,7 +225,6 @@ def _test():
             'repeat': 5,
             'kernel': [11],
             'stride': [1],
-            'dilation': [1],
             'dropout': 0.2,
             'residual': True,
             'residual_dense': True
@@ -272,7 +234,6 @@ def _test():
             'repeat': 1,
             'kernel': [1],
             'stride': [1],
-            'dilation': [1],
             'dropout': 0.4,
             'residual': False
         }

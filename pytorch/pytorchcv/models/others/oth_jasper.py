@@ -6,7 +6,85 @@ from torch import nn
 import torch.nn.functional as F
 
 
-class JasperBlock(nn.Module):
+class ConvBlock1d(nn.Module):
+    """
+    Standard 1D convolution block with Batch normalization and activation.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    stride : int
+        Strides of the convolution.
+    padding : int
+        Padding value for convolution layer.
+    dilation : int
+        Dilation value for convolution layer.
+    groups : int, default 1
+        Number of groups.
+    bias : bool, default False
+        Whether the layer uses a bias vector.
+    use_bn : bool, default True
+        Whether to use BatchNorm layer.
+    bn_eps : float, default 1e-5
+        Small float added to variance in Batch norm.
+    activation : function or str or None, default nn.ReLU(inplace=True)
+        Activation function or name of activation function.
+    dropout_rate : float, default 0.0
+        Parameter of Dropout layer. Faction of the input units to drop.
+    """
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 padding,
+                 dilation=1,
+                 groups=1,
+                 bias=False,
+                 use_bn=True,
+                 bn_eps=1e-5,
+                 activation=(lambda: nn.ReLU(inplace=True)),
+                 dropout_rate=0.0):
+        super(ConvBlock1d, self).__init__()
+        self.activate = (activation is not None)
+        self.use_dropout = (dropout_rate != 0.0)
+        self.use_bn = use_bn
+
+        self.conv = nn.Conv1d(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            dilation=dilation,
+            groups=groups,
+            bias=bias)
+        if self.use_bn:
+            self.bn = nn.BatchNorm1d(
+                num_features=out_channels,
+                eps=bn_eps)
+        if self.activate:
+            self.activ = nn.ReLU(inplace=True)
+        if self.use_dropout:
+            self.dropout = nn.Dropout(p=dropout_rate)
+
+    def forward(self, x):
+        x = self.conv(x)
+        if self.use_bn:
+            x = self.bn(x)
+        if self.activate:
+            x = self.activ(x)
+        if self.use_dropout:
+            x = self.dropout(x)
+        return x
+
+
+class JasperUnit(nn.Module):
     """
     Jasper Block
     """
@@ -121,40 +199,6 @@ class JasperBlock(nn.Module):
         return out
 
 
-class JasperEncoder(nn.Module):
-    """
-    Jasper encoder
-    """
-    def __init__(self,
-                 in_channels,
-                 cfg):
-        super().__init__()
-        residual_channels = []
-        encoder_layers = []
-        for lcfg in cfg:
-            dense_residual_channels = []
-            if lcfg.get('residual_dense', False):
-                residual_channels.append(in_channels)
-                dense_residual_channels = residual_channels
-
-            encoder_layers.append(
-                JasperBlock(
-                    in_channels=in_channels,
-                    out_channels=lcfg['filters'],
-                    repeat=lcfg['repeat'],
-                    kernel_size=lcfg['kernel'],
-                    stride=lcfg['stride'],
-                    dropout=lcfg['dropout'],
-                    residual=lcfg['residual'],
-                    residual_channels=dense_residual_channels))
-            in_channels = lcfg['filters']
-
-        self.encoder = nn.Sequential(*encoder_layers)
-
-    def forward(self, x):
-        return self.encoder([x])
-
-
 class Jasper(nn.Module):
     """
     Contains jasper encoder and decoder
@@ -165,19 +209,47 @@ class Jasper(nn.Module):
                  num_classes,
                  config):
         super().__init__()
-        self.encoder = JasperEncoder(
+
+        residual_channels = []
+        encoder_layers = []
+        for lcfg in config:
+            dense_residual_channels = []
+            if lcfg.get('residual_dense', False):
+                residual_channels.append(in_channels)
+                dense_residual_channels = residual_channels
+            encoder_layers.append(
+                JasperUnit(
+                    in_channels=in_channels,
+                    out_channels=lcfg['filters'],
+                    repeat=lcfg['repeat'],
+                    kernel_size=lcfg['kernel'],
+                    stride=lcfg['stride'],
+                    dropout=lcfg['dropout'],
+                    residual=lcfg['residual'],
+                    residual_channels=dense_residual_channels))
+            in_channels = lcfg['filters']
+        self.features = nn.Sequential(*encoder_layers)
+
+        in_channels = encoder_channels
+        final_block_channels = encoder_channels
+        # self.features.add_module("final_block", ConvBlock1d(
+        #     in_channels=in_channels,
+        #     out_channels=final_block_channels,
+        #     kernel_size=1,
+        #     stride=1,
+        #     padding=0,
+        #     dropout_rate=0.4))
+        in_channels = final_block_channels
+
+        self.output = nn.Conv1d(
             in_channels=in_channels,
-            cfg=config)
-        self.decoder = nn.Conv1d(
-            in_channels=encoder_channels,
             out_channels=num_classes,
             kernel_size=1,
             bias=True)
 
     def forward(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x[-1]).transpose(1, 2)
-        x = F.log_softmax(x, dim=2)
+        x = self.features([x])
+        x = self.output(x[-1])
         return x
 
 
@@ -258,8 +330,8 @@ def _test():
     x = torch.randn(batch, audio_features, seq_len)
     y = net(x)
     # y.sum().backward()
-    assert (tuple(y.size()) == (batch, seq_len // 2, num_classes)) or\
-           (tuple(y.size()) == (batch, seq_len // 2 + 1, num_classes))
+    assert (tuple(y.size()) == (batch, num_classes, seq_len // 2)) or\
+           (tuple(y.size()) == (batch, num_classes, seq_len // 2 + 1))
 
 
 if __name__ == "__main__":

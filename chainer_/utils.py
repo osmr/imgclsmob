@@ -18,6 +18,11 @@ def prepare_ch_context(num_gpus):
     use_gpus = (num_gpus > 0)
     if use_gpus:
         cuda.get_device(0).use()
+        # try:
+        #     import cupy
+        #     cuda.get_device(0).use()
+        # except:
+        #     use_gpus = False
     return use_gpus
 
 
@@ -26,6 +31,7 @@ class Predictor(object):
     Model predictor with preprocessing.
 
     Parameters
+    ----------
     ----------
     model : Chain
         Base model.
@@ -53,6 +59,7 @@ class Predictor(object):
             predictions = self.model(imgs)
 
         output = to_cpu(predictions.array if hasattr(predictions, "array") else cupy.asnumpy(predictions))
+        # output = to_cpu(predictions.array)
         return output
 
 

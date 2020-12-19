@@ -28,7 +28,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bn_vgg16b', '0874', 'af4f2d0bbfda667e6b7b3ad4cda5ca331021cd18', 'v0.0.110', 'BN-VGG-16b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('bn_vgg19b', '0840', 'b6919f7f74b3174a86818062b2d1d4cf5a110b8b', 'v0.0.110', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnet10', '1394', 'a683c0cc36a62aac3ccb2cb700b3a14c65f765a3', 'v0.0.481', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnet10', '1293', 'cedc302c71cfa87c1fb2c52a9c156522187fd929', 'v0.0.483', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet12', '1328', 'd7d2f4d6c7fcf3aff0458533ae5204b7f0eee2d7', 'v0.0.253', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet14', '1246', 'd5b55c113168c02f1b39b65f8908b0db467a2d74', 'v0.0.256', 'ResNet-14', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnetbc14b', '1074', '14b1fd95d8b7964c0e7c6eba22f6f58db03d3df0', 'v0.0.481', 'ResNet-BC-14b', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -132,8 +132,8 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('regnetx320', '0494', '54a1c651c4a248af6fc64f34fce27ede65b32785', 'v0.0.473', 'RegNetX-32GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety002', '0980', '57f04168f284797b799d624d906f5d38dcf23177', 'v0.0.476', 'RegNetY-200MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety004', '0769', '8c36573f17d3ef2ab8770be2593e94d714b035d7', 'v0.0.481', 'RegNetY-400MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety006', '0753', 'd22a5ae6893b3a08a8ae26f0b3d077162d270dbc', 'v0.0.473', 'RegNetY-600MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('regnety008', '0697', 'ee986f628bdcc31c12638792f8ec11cedba25c7a', 'v0.0.473', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety006', '0712', 'd6401a374a2c35ed1b2ac29a885438834c38cd0a', 'v0.0.483', 'RegNetY-600MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
+    ('regnety008', '0660', 'ed298c233ef1ce2e3f82a6d23be1eebd43afdd75', 'v0.0.483', 'RegNetY-800MF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety016', '0630', '2b0b575949b23c6ba7328ddfd72211265a128c8f', 'v0.0.473', 'RegNetY-1.6GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety032', '0404', 'cb3314864b68dfd2e0037928a3b635c81f86ccb2', 'v0.0.473', 'RegNetY-3.2GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('regnety040', '0541', '238ef52bb276368285b3a7b810af4ca78a97c5c9', 'v0.0.473', 'RegNetY-4.0GF', '', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
@@ -257,10 +257,10 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('mobilenetv2_wd2', '1493', 'b82d79f6730eac625e6b55b0618bff8f7a1ed86d', 'v0.0.170', 'MobileNetV2 x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w3d4', '1082', '8656de5a8d90b29779c35c5ce521267c841fd717', 'v0.0.230', 'MobileNetV2 x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2_w1', '0887', '13a021bca5b679b76156829743f7182da42e8bb6', 'v0.0.213', 'MobileNetV2 x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mobilenetv2b_wd4', '2369', '428eac09e2586d5b941e2d5082ca7fd8a7974fbb', 'v0.0.481', 'MobileNetV2b x0.25', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_wd4', '2368', '399f95e6cb3c15d57516c1d328201a0af3de5882', 'v0.0.483', 'MobileNetV2b x0.25', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv2b_wd2', '1459', '757eef4c2bdf7b6f74437ac53a4ed75788587b88', 'v0.0.481', 'MobileNetV2b x0.5', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mobilenetv2b_w3d4', '1178', '0cba52d7f9ce6bbef34049339dcf0f5f94dd57e2', 'v0.0.453', 'MobileNetV2b x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('mobilenetv2b_w1', '0975', 'c123d420973d53880164a67288704c1ac1153486', 'v0.0.453', 'MobileNetV2b x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_w3d4', '1105', '0924efc9ca677d2bccfe3987b1e0e1e47afe69e8', 'v0.0.483', 'MobileNetV2b x0.75', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('mobilenetv2b_w1', '0912', '2bcab1d0cd3be4eb270d65e390ff7c9776e38a04', 'v0.0.483', 'MobileNetV2b x1.0', '1801.04381', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mobilenetv3_large_w1', '0779', '38e392f58bdf99b2832b26341bc9704ac63a3672', 'v0.0.411', 'MobileNetV3 L/224/1.0', '1905.02244', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('igcv3_wd4', '2871', 'c9f28301391601e5e8ae93139431a9e0d467317c', 'v0.0.142', 'IGCV3 x0.25', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('igcv3_wd2', '1732', '8c504f443283d8a32787275b23771082fcaab61b', 'v0.0.132', 'IGCV3 x0.5', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa

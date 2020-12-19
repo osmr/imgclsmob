@@ -7,8 +7,6 @@ __all__ = ['Jasper', 'jasper3x5']
 
 import os
 import torch.nn as nn
-import torch.nn.init as init
-from .common import conv1x1_block, conv3x3_block, conv7x7_block
 
 
 class ConvBlock1d(nn.Module):
@@ -42,7 +40,6 @@ class ConvBlock1d(nn.Module):
     dropout_rate : float, default 0.0
         Parameter of Dropout layer. Faction of the input units to drop.
     """
-
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -90,9 +87,13 @@ class ConvBlock1d(nn.Module):
         return x
 
 
-class ResBlock(nn.Module):
+def conv1d1x1_block(in_channels,
+                    out_channels,
+                    stride=1,
+                    padding=0,
+                    **kwargs):
     """
-    Simple ResNet block for residual path in ResNet unit.
+    1x1 version of the standard 1D convolution block.
 
     Parameters:
     ----------
@@ -100,125 +101,73 @@ class ResBlock(nn.Module):
         Number of input channels.
     out_channels : int
         Number of output channels.
-    stride : int or tuple/list of 2 int
+    stride : int or tuple/list of 2 int, default 1
         Strides of the convolution.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
+    padding : int, or tuple/list of 2 int, or tuple/list of 4 int, default 0
+        Padding value for convolution layer.
+    """
+    return ConvBlock1d(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=1,
+        stride=stride,
+        padding=padding,
+        **kwargs)
+
+
+class JasperUnit(nn.Module):
+    """
+    Jasper unit with residual connection.
+
+    Parameters:
+    ----------
+    in_channels : int
+        Number of input channels.
+    out_channels : int
+        Number of output channels.
+    kernel_size : int
+        Convolution window size.
+    dropout_rate : float
+        Parameter of Dropout layer. Faction of the input units to drop.
+    repeat : int
+        Count of body convolution blocks.
     """
     def __init__(self,
                  in_channels,
                  out_channels,
-                 stride,
-                 bias=False,
-                 use_bn=True):
-        super(ResBlock, self).__init__()
-        self.conv1 = conv3x3_block(
+                 kernel_size,
+                 dropout_rate,
+                 repeat):
+        super(JasperUnit, self).__init__()
+        self.identity_conv = conv1d1x1_block(
             in_channels=in_channels,
             out_channels=out_channels,
-            stride=stride,
-            bias=bias,
-            use_bn=use_bn)
-        self.conv2 = conv3x3_block(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            bias=bias,
-            use_bn=use_bn,
+            dropout_rate=0.0,
             activation=None)
 
-    def forward(self, x):
-        x = self.conv1(x)
-        x = self.conv2(x)
-        return x
-
-
-class ResUnit(nn.Module):
-    """
-    ResNet unit with residual connection.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    stride : int or tuple/list of 2 int
-        Strides of the convolution.
-    padding : int or tuple/list of 2 int, default 1
-        Padding value for the second convolution layer in bottleneck.
-    dilation : int or tuple/list of 2 int, default 1
-        Dilation value for the second convolution layer in bottleneck.
-    bias : bool, default False
-        Whether the layer uses a bias vector.
-    use_bn : bool, default True
-        Whether to use BatchNorm layer.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 stride,
-                 padding=1,
-                 dilation=1,
-                 bias=False,
-                 use_bn=True):
-        super(ResUnit, self).__init__()
-        self.resize_identity = (in_channels != out_channels) or (stride != 1)
-
-        self.body = ResBlock(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=stride,
-            bias=bias,
-            use_bn=use_bn)
-        if self.resize_identity:
-            self.identity_conv = conv1x1_block(
+        self.body = nn.Sequential()
+        for i in range(repeat):
+            activation = (lambda: nn.ReLU(inplace=True)) if i < repeat - 1 else None
+            dropout_rate_i = dropout_rate if i < repeat - 1 else 0.0
+            self.body.add_module("block{}".format(i + 1), ConvBlock1d(
                 in_channels=in_channels,
                 out_channels=out_channels,
-                stride=stride,
-                bias=bias,
-                use_bn=use_bn,
-                activation=None)
+                kernel_size=kernel_size,
+                stride=1,
+                padding=(kernel_size // 2),
+                dropout_rate=dropout_rate_i,
+                activation=activation))
+            in_channels = out_channels
+
         self.activ = nn.ReLU(inplace=True)
+        self.dropout = nn.Dropout(p=dropout_rate)
 
     def forward(self, x):
-        if self.resize_identity:
-            identity = self.identity_conv(x)
-        else:
-            identity = x
+        identity = self.identity_conv(x)
         x = self.body(x)
         x = x + identity
         x = self.activ(x)
-        return x
-
-
-class ResInitBlock(nn.Module):
-    """
-    ResNet specific initial block.
-
-    Parameters:
-    ----------
-    in_channels : int
-        Number of input channels.
-    out_channels : int
-        Number of output channels.
-    """
-    def __init__(self,
-                 in_channels,
-                 out_channels):
-        super(ResInitBlock, self).__init__()
-        self.conv = conv7x7_block(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            stride=2)
-        self.pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.pool(x)
+        x = self.dropout(x)
         return x
 
 
@@ -228,45 +177,56 @@ class Jasper(nn.Module):
 
     Parameters:
     ----------
-    channels : list of list of int
+    channels : list of int
         Number of output channels for each unit.
     init_block_channels : int
         Number of output channels for the initial unit.
-    in_channels : int, default 3
-        Number of input channels.
-    in_size : tuple of two ints, default (224, 224)
-        Spatial size of the expected input image.
-    num_classes : int, default 1000
+    final_block_channels : int
+        Number of output channels for the final unit.
+    dropout_rates : list float
+        Parameter of Dropout layer for each unit.
+    repeat : int
+        Count of body convolution blocks.
+    in_channels : int, default 120
+        Number of input channels (audio features).
+    num_classes : int, default 11
         Number of classification classes.
     """
     def __init__(self,
                  channels,
                  init_block_channels,
-                 in_channels=3,
-                 in_size=(224, 224),
-                 num_classes=1000):
+                 final_block_channels,
+                 dropout_rates,
+                 repeat,
+                 in_channels=120,
+                 num_classes=11):
         super(Jasper, self).__init__()
-        self.in_size = in_size
+        self.in_size = None
         self.num_classes = num_classes
 
         self.features = nn.Sequential()
-        self.features.add_module("init_block", ResInitBlock(
-            in_channels=in_channels,
-            out_channels=init_block_channels))
+        self.features.add_module("init_block", ConvBlock1d(
+                in_channels=in_channels,
+                out_channels=init_block_channels,
+                kernel_size=11,
+                stride=2,
+                padding=5,
+                dropout_rate=0.2))
         in_channels = init_block_channels
-        for i, channels_per_stage in enumerate(channels):
-            stage = nn.Sequential()
-            for j, out_channels in enumerate(channels_per_stage):
-                stride = 2 if (j == 0) and (i != 0) else 1
-                stage.add_module("unit{}".format(j + 1), ResUnit(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    stride=stride))
-                in_channels = out_channels
-            self.features.add_module("stage{}".format(i + 1), stage)
-        self.features.add_module("final_pool", nn.AvgPool2d(
-            kernel_size=7,
-            stride=1))
+        for i, out_channels in enumerate(channels):
+            dropout_rate = dropout_rates[i]
+            self.features.add_module("unit{}".format(i + 1), JasperUnit(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=11,
+                dropout_rate=dropout_rate,
+                repeat=repeat))
+            in_channels = out_channels
+        self.features.add_module("final_block", conv1d1x1_block(
+            in_channels=in_channels,
+            out_channels=final_block_channels,
+            dropout_rate=0.4))
+        in_channels = final_block_channels
 
         self.output = nn.Conv1d(
             in_channels=in_channels,
@@ -279,13 +239,12 @@ class Jasper(nn.Module):
     def _init_params(self):
         for name, module in self.named_modules():
             if isinstance(module, nn.Conv2d):
-                init.kaiming_uniform_(module.weight)
+                nn.init.kaiming_uniform_(module.weight)
                 if module.bias is not None:
-                    init.constant_(module.bias, 0)
+                    nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
         x = self.features(x)
-        x = x.view(x.size(0), -1)
         x = self.output(x)
         return x
 
@@ -310,18 +269,21 @@ def get_jasper(version,
         Location for keeping the model parameters.
     """
     if version == "3x5":
-        layers = [1, 1, 1, 1]
+        channels = [256, 256, 512]
+        dropout_rates = [0.2, 0.2, 0.2]
+        repeat = 5
     else:
         raise ValueError("Unsupported Jasper version: {}".format(version))
 
     init_block_channels = 256
-    channels_per_layers = [64, 128, 256, 512]
-
-    channels = [[ci] * li for (ci, li) in zip(channels_per_layers, layers)]
+    final_block_channels = 512
 
     net = Jasper(
         channels=channels,
         init_block_channels=init_block_channels,
+        final_block_channels=final_block_channels,
+        dropout_rates=dropout_rates,
+        repeat=repeat,
         **kwargs)
 
     if pretrained:
@@ -364,8 +326,8 @@ def _test():
     import torch
 
     pretrained = False
-    num_classes = 11
     audio_features = 120
+    num_classes = 11
 
     models = [
         jasper3x5,
@@ -373,13 +335,16 @@ def _test():
 
     for model in models:
 
-        net = model(pretrained=pretrained)
+        net = model(
+            in_channels=audio_features,
+            num_classes=num_classes,
+            pretrained=pretrained)
 
         # net.train()
         net.eval()
         weight_count = _calc_width(net)
         print("m={}, {}".format(model.__name__, weight_count))
-        assert (model != jasper3x5 or weight_count == 5418792)
+        assert (model != jasper3x5 or weight_count == 21066763)
 
         batch = 1
         seq_len = np.random.randint(60, 150)

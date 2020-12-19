@@ -130,7 +130,7 @@ Some remarks:
 | BN-VGG-16b | 26.89 | 8.62 | 138,365,992 | 15,507.20M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/bn_vgg16b-0862-137178f7.tf2.h5.log)) |
 | BN-VGG-19b | 25.64 | 8.17 | 143,678,248 | 19,672.26M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/bn_vgg19b-0817-cd68a741.tf2.h5.log)) |
 | BN-Inception | 26.62 | 8.65 | 11,295,240 | 2,048.06M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.423/bninception-0865-4cab3cce.tf2.h5.log)) |
-| ResNet-10 | 34.44 | 13.63 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/resnet10-1363-3c5dc3bb.tf2.h5.log)) |
+| ResNet-10 | 32.56 | 12.56 | 5,418,792 | 894.04M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/resnet10-1256-b113c5e6.tf2.h5.log)) |
 | ResNet-12 | 33.43 | 13.01 | 5,492,776 | 1,126.25M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet12-1301-8bc41d1b.tf2.h5.log)) |
 | ResNet-14 | 32.21 | 12.24 | 5,788,200 | 1,357.94M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/resnet14-1224-7573d988.tf2.h5.log)) |
 | ResNet-BC-14b | 29.19 | 10.37 | 10,064,936 | 1,479.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/resnetbc14b-1037-3b92ac6b.tf2.h5.log)) |
@@ -234,8 +234,8 @@ Some remarks:
 | RegNetX-32GF | 19.59 | 4.85 | 107,811,560 | 31,790.24M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnetx320-0485-c11d938f.tf2.h5.log)) |
 | RegNetY-200MF | 28.49 | 9.53 | 3,162,996 | 203.99M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.476/regnety002-0953-8935adba.tf2.h5.log)) |
 | RegNetY-400MF | 24.82 | 7.50 | 4,344,144 | 410.35M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/regnety004-0750-65a10212.tf2.h5.log)) |
-| RegNetY-600MF | 24.45 | 7.30 | 6,055,160 | 610.37M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety006-0730-6e77c32f.tf2.h5.log)) |
-| RegNetY-800MF | 23.68 | 6.87 | 6,263,168 | 808.62M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety008-0687-8c8c0a32.tf2.h5.log)) |
+| RegNetY-600MF | 23.58 | 7.00 | 6,055,160 | 610.37M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety006-0700-af7dca34.tf2.h5.log)) |
+| RegNetY-800MF | 22.53 | 6.46 | 6,263,168 | 808.62M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/regnety008-0646-03922980.tf2.h5.log)) |
 | RegNetY-1.6GF | 21.96 | 6.15 | 11,202,430 | 1,629.48M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety016-0615-20efa94c.tf2.h5.log)) |
 | RegNetY-3.2GF | 18.31 | 4.11 | 19,436,338 | 3,199.15M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety032-0411-7fde6bb0.tf2.h5.log)) |
 | RegNetY-4.0GF | 20.64 | 5.33 | 20,646,656 | 3,999.16M | From [rwightman/pyt...models] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.473/regnety040-0533-813e02c5.tf2.h5.log)) |
@@ -350,10 +350,10 @@ Some remarks:
 | MobileNetV2 x0.5 | 35.62 | 14.46 | 1,964,736 | 100.13M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_wd2-1446-b0c9a98b.tf2.h5.log)) |
 | MobileNetV2 x0.75 | 29.75 | 10.44 | 2,627,592 | 198.50M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w3d4-1044-e122c73e.tf2.h5.log)) |
 | MobileNetV2 x1.0 | 26.80 | 8.63 | 3,504,960 | 329.36M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/mobilenetv2_w1-0863-b32cede3.tf2.h5.log)) |
-| MobileNetV2b x0.25 | 46.73 | 23.48 | 1,516,312 | 33.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/mobilenetv2b_wd4-2348-06a2a56a.tf2.h5.log)) |
+| MobileNetV2b x0.25 | 46.77 | 23.41 | 1,516,312 | 33.18M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_wd4-2341-059d9244.tf2.h5.log)) |
 | MobileNetV2b x0.5 | 35.24 | 14.22 | 1,964,448 | 96.42M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.481/mobilenetv2b_wd2-1422-33657663.tf2.h5.log)) |
-| MobileNetV2b x0.75 | 30.63 | 11.52 | 2,626,968 | 190.52M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_w3d4-1152-fa93741a.tf2.h5.log)) |
-| MobileNetV2b x1.0 | 27.94 | 943 | 3,503,872 | 315.51M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.453/mobilenetv2b_w1-0943-97f1b676.tf2.h5.log)) |
+| MobileNetV2b x0.75 | 30.14 | 10.66 | 2,626,968 | 190.52M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w3d4-1066-bab6a262.tf2.h5.log)) |
+| MobileNetV2b x1.0 | 27.16 | 8.91 | 3,503,872 | 315.51M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.483/mobilenetv2b_w1-0891-eabc2c72.tf2.h5.log)) |
 | MobileNetV3 L/224/1.0 | 24.65 | 7.69 | 5,481,752 | 226.80M | From [dmlc/gluon-cv] ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.411/mobilenetv3_large_w1-0769-f66596ae.tf2.h5.log)) |
 | IGCV3 x0.25 | 53.38 | 28.28 | 1,534,020 | 41.29M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd4-2828-309359dc.tf2.h5.log)) |
 | IGCV3 x0.5 | 39.36 | 17.01 | 1,985,528 | 111.12M | Converted from GL model ([log](https://github.com/osmr/imgclsmob/releases/download/v0.0.422/igcv3_wd2-1701-b952333a.tf2.h5.log)) |

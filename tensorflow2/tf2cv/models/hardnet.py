@@ -368,7 +368,7 @@ class HarDNet(tf.keras.Model):
         self.data_format = data_format
         activation = "relu6"
 
-        self.features = tf.keras.Sequential(name="features")
+        self.features = SimpleSequential(name="features")
         self.features.add(HarDInitBlock(
             in_channels=in_channels,
             out_channels=init_block_channels,
@@ -377,7 +377,7 @@ class HarDNet(tf.keras.Model):
             data_format=data_format,
             name="init_block"))
         for i, (in_channels_list_i, out_channels_list_i) in enumerate(zip(unit_in_channels, unit_out_channels)):
-            stage = tf.keras.Sequential(name="stage{}".format(i + 1))
+            stage = SimpleSequential(name="stage{}".format(i + 1))
             for j, (in_channels_list_ij, out_channels_list_ij) in enumerate(zip(in_channels_list_i,
                                                                                 out_channels_list_i)):
                 use_dropout = ((j == len(in_channels_list_i) - 1) and (i == len(unit_in_channels) - 1) and
@@ -401,7 +401,7 @@ class HarDNet(tf.keras.Model):
             data_format=data_format,
             name="final_pool"))
 
-        self.output1 = tf.keras.Sequential(name="output1")
+        self.output1 = SimpleSequential(name="output1")
         self.output1.add(nn.Dropout(
             rate=output_dropout_rate,
             name="dropout"))

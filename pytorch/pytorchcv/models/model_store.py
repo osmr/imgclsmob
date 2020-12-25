@@ -12,7 +12,7 @@ import hashlib
 _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem) for
                name, error, checksum, repo_release_tag, caption, paper, ds, img_size, scale, batch, rem in [
     ('alexnet', '1664', '2768cdb312d584e33e93f31b0c569589bb289749', 'v0.0.481', 'AlexNet', '1404.5997', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('alexnetb', '1900', '55176c6ad29c18243f4fdd0764840018a4ed1ca4', 'v0.0.384', 'AlexNet-b', '1404.5997', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('alexnetb', '1747', 'ac887bf7eada4179857d243584ac30b4d74a6493', 'v0.0.485', 'AlexNet-b', '1404.5997', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('zfnet', '1727', 'd010ddca1eb32a50a8cceb475c792f53e769b631', 'v0.0.395', 'ZFNet', '1311.2901', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('zfnetb', '1490', 'f6bec24eba037c8e4956704ed5bafaed29966601', 'v0.0.400', 'ZFNet-b', '1311.2901', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('vgg11', '1036', '71e85f6ef76f56e3e89d597d2fc461496ed281e9', 'v0.0.381', 'VGG-11', '1409.1556', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -29,7 +29,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('bn_vgg19b', '0840', 'b6919f7f74b3174a86818062b2d1d4cf5a110b8b', 'v0.0.110', 'BN-VGG-19b', '1409.1556', 'in1k', 224, 0.875, 200, '[dmlc/gluon-cv]'),  # noqa
     ('bninception', '0774', 'd79ba5f573ba2da5fea5e4c9a7f67ddd526e234b', 'v0.0.405', 'BN-Inception', '1502.03167', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet10', '1293', 'cedc302c71cfa87c1fb2c52a9c156522187fd929', 'v0.0.483', 'ResNet-10', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
-    ('resnet12', '1328', 'd7d2f4d6c7fcf3aff0458533ae5204b7f0eee2d7', 'v0.0.253', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
+    ('resnet12', '1223', '84a43cf672c708a016dd1142ca1a23c278931532', 'v0.0.485', 'ResNet-12', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet14', '1246', 'd5b55c113168c02f1b39b65f8908b0db467a2d74', 'v0.0.256', 'ResNet-14', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnetbc14b', '1074', '14b1fd95d8b7964c0e7c6eba22f6f58db03d3df0', 'v0.0.481', 'ResNet-BC-14b', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('resnet16', '1118', 'd54bc41afa244476ca28380111f66d188905ecbc', 'v0.0.259', 'ResNet-16', '1512.03385', 'in1k', 224, 0.875, 200, ''),  # noqa
@@ -200,7 +200,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('selecsls42b', '0659', '6933727857ee697e9205241fb2d2a134770b7924', 'v0.0.430', 'SelecSLS-42b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60', '0612', '5261403fce27354305ea1c1d0a7526bdb7cfb6c9', 'v0.0.430', 'SelecSLS-60', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('selecsls60b', '0584', '470ace6b9b8db32b84924825908b426a9e38dd09', 'v0.0.430', 'SelecSLS-60b', '1907.00837', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('hardnet39ds', '0957', '9479e9ad0de538e80f7b2b73e5f19795994addce', 'v0.0.435', 'HarDNet-39DS', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
+    ('hardnet39ds', '0881', 'ea47fc939a130a70c5fa3326c3af6ba049a99f92', 'v0.0.485', 'HarDNet-39DS', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
     ('hardnet68ds', '0813', '7187522dd301ce82b5272df29ffb3b37473e122c', 'v0.0.435', 'HarDNet-68DS', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
     ('hardnet68', '0699', '2e207f79a1995f5f30d5b9fca3391bb8e7b8594f', 'v0.0.435', 'HarDNet-68', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
     ('hardnet85', '0611', 'ae85d8af40610e08765f1bfc25b8414ac70d7451', 'v0.0.435', 'HarDNet-85', '1909.00948', 'in1k', 224, 0.875, 200, '[PingoLH/Pytorch-HarDNet]'),  # noqa
@@ -268,7 +268,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('igcv3_w1', '0920', '12385791681f09adb3a08926c95471f332f538b6', 'v0.0.243', 'IGCV3 x1.0', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mnasnet_b1', '0785', '188ea3e90d657703130c86ca19df474baa2cf3d0', 'v0.0.419', 'MnasNet-B1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mnasnet_a1', '0744', 'e415e240fbceef353a0bf356f50e401a61606190', 'v0.0.419', 'MnasNet-A1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('darts', '0874', '74f0c7b690cf8bef9b54cc5afc2cb0f2a2a83630', 'v0.0.118', 'DARTS', '1806.09055', 'in1k', 224, 0.875, 200, '[quark0/darts]'),  # noqa
+    ('darts', '0874', 'fc3171c5b89b270fc7673dbbb5047f5879d7e774', 'v0.0.485', 'DARTS', '1806.09055', 'in1k', 224, 0.875, 200, '[quark0/darts]'),  # noqa
     ('proxylessnas_cpu', '0761', 'fe9572b11899395acbeef9374827dcc04e103ce3', 'v0.0.304', 'ProxylessNAS CPU', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa
     ('proxylessnas_gpu', '0745', 'acca5941c454d896410060434b8f983d2db80727', 'v0.0.333', 'ProxylessNAS GPU', '1812.00332', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('proxylessnas_mobile', '0780', '639a90c27de088402db76b09e410326795b6fbdd', 'v0.0.304', 'ProxylessNAS Mobile', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa

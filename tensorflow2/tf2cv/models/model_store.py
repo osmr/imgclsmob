@@ -12,7 +12,7 @@ import hashlib
 _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
                name, error, checksum, repo_release_tag, ds, scale in [
     ('alexnet', '1609', '8ae4618efdb64d4b2b74fc4346ff917b3d51e3b2', 'v0.0.481', 'in1k', 0.875),
-    ('alexnetb', '1859', '9e390537e070ee42c5deeb6c456f81c991efbb49', 'v0.0.422', 'in1k', 0.875),
+    ('alexnetb', '1706', 'df9cb6fd363e35b987a652a7ba706b6118eefff3', 'v0.0.485', 'in1k', 0.875),
     ('zfnet', '1717', '9500db3008e9ca8bc8f8de8101ec760e5ac8c05a', 'v0.0.422', 'in1k', 0.875),
     ('zfnetb', '1480', '47533f6a367312c8b2f56202aeae0be366013116', 'v0.0.422', 'in1k', 0.875),
     ('vgg11', '1017', 'c20556f4179e9311f28baa310702b6ea9265fee8', 'v0.0.422', 'in1k', 0.875),
@@ -29,7 +29,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('bn_vgg19b', '0817', 'cd68a741183cbbab52562c4b7330d721e8ffa739', 'v0.0.422', 'in1k', 0.875),
     ('bninception', '0865', '4cab3cce0eb1b79b872b189f5b0d9e4bb20f5ff4', 'v0.0.423', 'in1k', 0.875),
     ('resnet10', '1256', 'b113c5e6f53107a7aed7912cc69e8bcf99d962e3', 'v0.0.483', 'in1k', 0.875),
-    ('resnet12', '1301', '8bc41d1b1da87463857bb5ca03fe252ef03116ad', 'v0.0.422', 'in1k', 0.875),
+    ('resnet12', '1201', 'b8f1c73d3314b646a6ee625f181b48ed1705d140', 'v0.0.485', 'in1k', 0.875),
     ('resnet14', '1224', '7573d98872e622ef74e036c8a436a39ab75e9378', 'v0.0.422', 'in1k', 0.875),
     ('resnetbc14b', '1037', '3b92ac6b051a55da27e68b4120793cf94147c253', 'v0.0.481', 'in1k', 0.875),
     ('resnet16', '1088', '14ce0d64680c3fe52f43b407a00d1a23b6cfd81c', 'v0.0.422', 'in1k', 0.875),
@@ -191,7 +191,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, ds, scale) for
     ('selecsls42b', '0676', '0d785bec0c31aee57e1d267900ae1a942a665fcb', 'v0.0.430', 'in1k', 0.875),
     ('selecsls60', '0630', 'a799a0e5ddcc3991808bd8d98a83a3e717ee87e4', 'v0.0.430', 'in1k', 0.875),
     ('selecsls60b', '0604', 'bc9c43191043382b38e3be5893d1d8316ca401e9', 'v0.0.430', 'in1k', 0.875),
-    ('hardnet39ds', '1003', '4971cd5a76946293a137d78032ee024f0258c979', 'v0.0.435', 'in1k', 0.875),
+    ('hardnet39ds', '0871', '0bd9fa5e72e0a80229534c195f160f5d6e603763', 'v0.0.485', 'in1k', 0.875),
     ('hardnet68ds', '0845', 'dd35f3f91bfe55c354d4aac2b5830c3a744741ed', 'v0.0.435', 'in1k', 0.875),
     ('hardnet68', '0740', '9ea05e3973dddb52b970872fc3ed76fa32d10731', 'v0.0.435', 'in1k', 0.875),
     ('hardnet85', '0644', '7892e2215c2d1c32996be09a724c8125c8c49572', 'v0.0.435', 'in1k', 0.875),

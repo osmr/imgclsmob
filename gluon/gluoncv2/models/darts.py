@@ -511,6 +511,8 @@ class DartsUnit(HybridBlock):
         List of genotype elements (operations and linked indices).
     reduction : bool
         Whether use reduction.
+    prev_reduction : bool
+        Whether use previous reduction.
     """
     def __init__(self,
                  in_channels,

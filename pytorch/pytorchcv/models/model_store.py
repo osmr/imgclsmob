@@ -268,7 +268,7 @@ _model_sha1 = {name: (error, checksum, repo_release_tag, caption, paper, ds, img
     ('igcv3_w1', '0920', '12385791681f09adb3a08926c95471f332f538b6', 'v0.0.243', 'IGCV3 x1.0', '1806.00178', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('mnasnet_b1', '0785', '188ea3e90d657703130c86ca19df474baa2cf3d0', 'v0.0.419', 'MnasNet-B1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
     ('mnasnet_a1', '0744', 'e415e240fbceef353a0bf356f50e401a61606190', 'v0.0.419', 'MnasNet-A1', '1807.11626', 'in1k', 224, 0.875, 200, '[rwightman/pyt...models]'),  # noqa
-    ('darts', '0874', 'fc3171c5b89b270fc7673dbbb5047f5879d7e774', 'v0.0.485', 'DARTS', '1806.09055', 'in1k', 224, 0.875, 200, '[quark0/darts]'),  # noqa
+    ('darts', '0775', 'fc3171c5b89b270fc7673dbbb5047f5879d7e774', 'v0.0.485', 'DARTS', '1806.09055', 'in1k', 224, 0.875, 200, '[quark0/darts]'),  # noqa
     ('proxylessnas_cpu', '0761', 'fe9572b11899395acbeef9374827dcc04e103ce3', 'v0.0.304', 'ProxylessNAS CPU', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa
     ('proxylessnas_gpu', '0745', 'acca5941c454d896410060434b8f983d2db80727', 'v0.0.333', 'ProxylessNAS GPU', '1812.00332', 'in1k', 224, 0.875, 200, ''),  # noqa
     ('proxylessnas_mobile', '0780', '639a90c27de088402db76b09e410326795b6fbdd', 'v0.0.304', 'ProxylessNAS Mobile', '1812.00332', 'in1k', 224, 0.875, 200, '[MIT-HAN-LAB/ProxylessNAS]'),  # noqa

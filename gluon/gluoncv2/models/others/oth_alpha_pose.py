@@ -243,7 +243,7 @@ class Bottleneck(HybridBlock):
 
 class FastSEResNet(HybridBlock):
     """ FastSEResNet """
-    try_load_parameters = _try_load_Parameters:
+    try_load_parameters = _try_load_parameters
 
     def __init__(self, architecture, norm_layer=nn.BatchNorm, **kwargs):
         super(FastSEResNet, self).__init__()
